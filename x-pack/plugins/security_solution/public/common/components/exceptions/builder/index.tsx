@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { ExceptionListItemComponent } from './exception_item';
-import { useFetchIndexPatterns } from '../../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
+import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import {
   ExceptionListItemSchema,
   NamespaceType,
@@ -16,12 +16,15 @@ import {
   OperatorTypeEnum,
   OperatorEnum,
   CreateExceptionListItemSchema,
+  ExceptionListType,
 } from '../../../../../public/lists_plugin_deps';
 import { AndOrBadge } from '../../and_or_badge';
 import { BuilderButtonOptions } from './builder_button_options';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { Loader } from '../../loader';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import exceptionableFields from '../exceptionable_fields.json';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -43,8 +46,8 @@ interface OnChangeProps {
 }
 
 interface ExceptionBuilderProps {
-  exceptionListItems: ExceptionListItemSchema[];
-  listType: 'detection' | 'endpoint';
+  exceptionListItems: ExceptionsBuilderExceptionItem[];
+  listType: ExceptionListType;
   listId: string;
   listNamespaceType: NamespaceType;
   ruleName: string;
@@ -76,14 +79,20 @@ export const ExceptionBuilder = ({
     indexPatternConfig ?? []
   );
 
+  const handleCheckAndLogic = (items: ExceptionsBuilderExceptionItem[]): void => {
+    setAndLogicIncluded((includesAnd: boolean): boolean => {
+      if (includesAnd) {
+        return true;
+      } else {
+        return items.filter(({ entries }) => entries.length > 1).length > 0;
+      }
+    });
+  };
+
   // Bubble up changes to parent
   useEffect(() => {
     onChange({ exceptionItems: filterExceptionItems(exceptions), exceptionsToDelete });
   }, [onChange, exceptionsToDelete, exceptions]);
-
-  const checkAndLogic = (items: ExceptionsBuilderExceptionItem[]): void => {
-    setAndLogicIncluded(items.filter(({ entries }) => entries.length > 1).length > 0);
-  };
 
   const handleDeleteExceptionItem = (
     item: ExceptionsBuilderExceptionItem,
@@ -99,7 +108,7 @@ export const ExceptionBuilder = ({
           ...existingExceptions.slice(0, itemIndex),
           ...existingExceptions.slice(itemIndex + 1),
         ];
-        checkAndLogic(updatedExceptions);
+        handleCheckAndLogic(updatedExceptions);
 
         return updatedExceptions;
       });
@@ -117,7 +126,7 @@ export const ExceptionBuilder = ({
       ...exceptions.slice(index + 1),
     ];
 
-    checkAndLogic(updatedExceptions);
+    handleCheckAndLogic(updatedExceptions);
     setExceptions(updatedExceptions);
   };
 
@@ -165,6 +174,17 @@ export const ExceptionBuilder = ({
     );
   }, [exceptions]);
 
+  // Filters index pattern fields by exceptionable fields if list type is endpoint
+  const filterIndexPatterns = useCallback(() => {
+    if (listType === 'endpoint') {
+      return {
+        ...indexPatterns,
+        fields: indexPatterns.fields.filter(({ name }) => exceptionableFields.includes(name)),
+      };
+    }
+    return indexPatterns;
+  }, [indexPatterns, listType]);
+
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
   // on the index, as a result, created a temporary id when new exception items are first
@@ -209,10 +229,11 @@ export const ExceptionBuilder = ({
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
-                indexPattern={indexPatterns}
+                indexPattern={filterIndexPatterns()}
                 isLoading={indexPatternLoading}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}
+                onCheckAndLogic={handleCheckAndLogic}
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onExceptionItemChange={handleExceptionItemChange}
               />

@@ -7,7 +7,12 @@
 import _ from 'lodash';
 import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
-import { getDefaultProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
+import {
+  getDefaultProperties,
+  getDefaultStaticProperties,
+  LINE_STYLES,
+  POLYGON_STYLES,
+} from './vector_style_defaults';
 import { AbstractStyle } from '../style';
 import {
   GEO_JSON_TYPE,
@@ -191,7 +196,7 @@ export class VectorStyle extends AbstractStyle {
    * This method does not update its descriptor. It just returns a new descriptor that the caller
    * can then use to update store state via dispatch.
    */
-  getDescriptorWithMissingStylePropsRemoved(nextFields) {
+  getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors) {
     const originalProperties = this.getRawProperties();
     const updatedProperties = {};
 
@@ -201,6 +206,13 @@ export class VectorStyle extends AbstractStyle {
     });
 
     dynamicProperties.forEach((key) => {
+      // Convert dynamic styling to static stying when there are no nextFields
+      if (nextFields.length === 0) {
+        const staticProperties = getDefaultStaticProperties(mapColors);
+        updatedProperties[key] = staticProperties[key];
+        return;
+      }
+
       const dynamicProperty = originalProperties[key];
       const fieldName =
         dynamicProperty && dynamicProperty.options.field && dynamicProperty.options.field.name;

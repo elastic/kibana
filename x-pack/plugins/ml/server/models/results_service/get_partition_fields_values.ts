@@ -5,13 +5,11 @@
  */
 
 import Boom from 'boom';
+import { ILegacyScopedClusterClient } from 'kibana/server';
+import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
+import { PartitionFieldsType } from '../../../common/types/anomalies';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import { callWithRequestType } from '../../../common/types/kibana';
 import { CriteriaField } from './results_service';
-
-const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
-
-type PartitionFieldsType = typeof PARTITION_FIELDS[number];
 
 type SearchTerm =
   | {
@@ -76,7 +74,10 @@ function getFieldObject(fieldType: PartitionFieldsType, aggs: any) {
     : {};
 }
 
-export const getPartitionFieldsValuesFactory = (callWithRequest: callWithRequestType) =>
+export const getPartitionFieldsValuesFactory = ({
+  callAsCurrentUser,
+  callAsInternalUser,
+}: ILegacyScopedClusterClient) =>
   /**
    * Gets the record of partition fields with possible values that fit the provided queries.
    * @param jobId - Job ID
@@ -92,7 +93,7 @@ export const getPartitionFieldsValuesFactory = (callWithRequest: callWithRequest
     earliestMs: number,
     latestMs: number
   ) {
-    const jobsResponse = await callWithRequest('ml.jobs', { jobId: [jobId] });
+    const jobsResponse = await callAsInternalUser('ml.jobs', { jobId: [jobId] });
     if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
     }
@@ -101,7 +102,7 @@ export const getPartitionFieldsValuesFactory = (callWithRequest: callWithRequest
 
     const isModelPlotEnabled = job?.model_plot_config?.enabled;
 
-    const resp = await callWithRequest('search', {
+    const resp = await callAsCurrentUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Check } from '../../../../common/runtime_types';
+import { Ping } from '../../../../common/runtime_types';
 
 /**
  * Builds URLs to the designated features by extracting values from the provided
@@ -15,12 +15,12 @@ import { Check } from '../../../../common/runtime_types';
  * @param getHref a function that returns the full URL
  */
 export const buildHref = (
-  checks: Check[],
+  summaryPings: Ping[],
   path: string,
   getHref: (value: string | string[] | undefined) => string | undefined
 ): string | undefined => {
-  const queryValue = checks
-    .map((check) => check?.path)
+  const queryValue = summaryPings
+    .map((ping) => ping?.path)
     .filter((value: string | undefined) => value !== undefined);
   if (queryValue.length === 0) {
     return getHref(undefined);

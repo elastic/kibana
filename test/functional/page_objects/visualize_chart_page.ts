@@ -302,6 +302,20 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       return element.getVisibleText();
     }
 
+    public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
+      const tableVis = await testSubjects.find('tableVis');
+      const $ = await tableVis.parseDomContent();
+      const headers = $('span[ng-bind="::col.title"]')
+        .toArray()
+        .map((header: any) => $(header).text());
+      const fieldColumnIndex = headers.indexOf(fieldName);
+      return await find.byCssSelector(
+        `[data-test-subj="paginated-table-body"] tr:nth-of-type(${rowIndex}) td:nth-of-type(${
+          fieldColumnIndex + 1
+        }) a`
+      );
+    }
+
     /**
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
      * @deprecated Use getTableVisContent instead.

@@ -14,11 +14,12 @@ import { alertsDefaultModel } from './default_headers';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
 
 export interface OwnProps {
-  end: number;
+  end: string;
   id: string;
-  start: number;
+  start: string;
 }
 
 const defaultAlertsFilters: Filter[] = [
@@ -56,8 +57,8 @@ const defaultAlertsFilters: Filter[] = [
 
 interface Props {
   timelineId: TimelineIdLiteral;
-  endDate: number;
-  startDate: number;
+  endDate: string;
+  startDate: string;
   pageFilters?: Filter[];
 }
 
@@ -69,20 +70,19 @@ const AlertsTableComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
-  const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
+  const { filterManager } = useKibana().services.data.query;
+  const { initializeTimeline } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
       id: timelineId,
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
+      filterManager,
       defaultModel: alertsDefaultModel,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
       title: i18n.ALERTS_TABLE_TITLE,
       unit: i18n.UNIT,
-    });
-    setTimelineRowActions({
-      id: timelineId,
-      timelineRowActions: [getInvestigateInResolverAction({ dispatch, timelineId })],
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

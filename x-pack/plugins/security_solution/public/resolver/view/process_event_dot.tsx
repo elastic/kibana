@@ -8,11 +8,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-// eslint-disable-next-line import/no-nodejs-modules
-import querystring from 'querystring';
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
@@ -22,173 +18,7 @@ import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as selectors from '../store/selectors';
-import { CrumbInfo } from './panels/panel_content_utilities';
-
-/**
- * A record of all known event types (in schema format) to translations
- */
-export const displayNameRecord = {
-  application: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.applicationEventTypeDisplayName',
-    {
-      defaultMessage: 'Application',
-    }
-  ),
-  apm: i18n.translate('xpack.securitySolution.endpoint.resolver.apmEventTypeDisplayName', {
-    defaultMessage: 'APM',
-  }),
-  audit: i18n.translate('xpack.securitySolution.endpoint.resolver.auditEventTypeDisplayName', {
-    defaultMessage: 'Audit',
-  }),
-  authentication: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.authenticationEventTypeDisplayName',
-    {
-      defaultMessage: 'Authentication',
-    }
-  ),
-  certificate: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.certificateEventTypeDisplayName',
-    {
-      defaultMessage: 'Certificate',
-    }
-  ),
-  cloud: i18n.translate('xpack.securitySolution.endpoint.resolver.cloudEventTypeDisplayName', {
-    defaultMessage: 'Cloud',
-  }),
-  database: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.databaseEventTypeDisplayName',
-    {
-      defaultMessage: 'Database',
-    }
-  ),
-  driver: i18n.translate('xpack.securitySolution.endpoint.resolver.driverEventTypeDisplayName', {
-    defaultMessage: 'Driver',
-  }),
-  email: i18n.translate('xpack.securitySolution.endpoint.resolver.emailEventTypeDisplayName', {
-    defaultMessage: 'Email',
-  }),
-  file: i18n.translate('xpack.securitySolution.endpoint.resolver.fileEventTypeDisplayName', {
-    defaultMessage: 'File',
-  }),
-  host: i18n.translate('xpack.securitySolution.endpoint.resolver.hostEventTypeDisplayName', {
-    defaultMessage: 'Host',
-  }),
-  iam: i18n.translate('xpack.securitySolution.endpoint.resolver.iamEventTypeDisplayName', {
-    defaultMessage: 'IAM',
-  }),
-  iam_group: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.iam_groupEventTypeDisplayName',
-    {
-      defaultMessage: 'IAM Group',
-    }
-  ),
-  intrusion_detection: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.intrusion_detectionEventTypeDisplayName',
-    {
-      defaultMessage: 'Intrusion Detection',
-    }
-  ),
-  malware: i18n.translate('xpack.securitySolution.endpoint.resolver.malwareEventTypeDisplayName', {
-    defaultMessage: 'Malware',
-  }),
-  network_flow: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.network_flowEventTypeDisplayName',
-    {
-      defaultMessage: 'Network Flow',
-    }
-  ),
-  network: i18n.translate('xpack.securitySolution.endpoint.resolver.networkEventTypeDisplayName', {
-    defaultMessage: 'Network',
-  }),
-  package: i18n.translate('xpack.securitySolution.endpoint.resolver.packageEventTypeDisplayName', {
-    defaultMessage: 'Package',
-  }),
-  process: i18n.translate('xpack.securitySolution.endpoint.resolver.processEventTypeDisplayName', {
-    defaultMessage: 'Process',
-  }),
-  registry: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.registryEventTypeDisplayName',
-    {
-      defaultMessage: 'Registry',
-    }
-  ),
-  session: i18n.translate('xpack.securitySolution.endpoint.resolver.sessionEventTypeDisplayName', {
-    defaultMessage: 'Session',
-  }),
-  service: i18n.translate('xpack.securitySolution.endpoint.resolver.serviceEventTypeDisplayName', {
-    defaultMessage: 'Service',
-  }),
-  socket: i18n.translate('xpack.securitySolution.endpoint.resolver.socketEventTypeDisplayName', {
-    defaultMessage: 'Socket',
-  }),
-  vulnerability: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.vulnerabilityEventTypeDisplayName',
-    {
-      defaultMessage: 'Vulnerability',
-    }
-  ),
-  web: i18n.translate('xpack.securitySolution.endpoint.resolver.webEventTypeDisplayName', {
-    defaultMessage: 'Web',
-  }),
-  alert: i18n.translate('xpack.securitySolution.endpoint.resolver.alertEventTypeDisplayName', {
-    defaultMessage: 'Alert',
-  }),
-  security: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.securityEventTypeDisplayName',
-    {
-      defaultMessage: 'Security',
-    }
-  ),
-  dns: i18n.translate('xpack.securitySolution.endpoint.resolver.dnsEventTypeDisplayName', {
-    defaultMessage: 'DNS',
-  }),
-  clr: i18n.translate('xpack.securitySolution.endpoint.resolver.clrEventTypeDisplayName', {
-    defaultMessage: 'CLR',
-  }),
-  image_load: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.image_loadEventTypeDisplayName',
-    {
-      defaultMessage: 'Image Load',
-    }
-  ),
-  powershell: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.powershellEventTypeDisplayName',
-    {
-      defaultMessage: 'Powershell',
-    }
-  ),
-  wmi: i18n.translate('xpack.securitySolution.endpoint.resolver.wmiEventTypeDisplayName', {
-    defaultMessage: 'WMI',
-  }),
-  api: i18n.translate('xpack.securitySolution.endpoint.resolver.apiEventTypeDisplayName', {
-    defaultMessage: 'API',
-  }),
-  user: i18n.translate('xpack.securitySolution.endpoint.resolver.userEventTypeDisplayName', {
-    defaultMessage: 'User',
-  }),
-} as const;
-
-const unknownEventTypeMessage = i18n.translate(
-  'xpack.securitySolution.endpoint.resolver.userEventTypeDisplayUnknown',
-  {
-    defaultMessage: 'Unknown',
-  }
-);
-
-type EventDisplayName = typeof displayNameRecord[keyof typeof displayNameRecord] &
-  typeof unknownEventTypeMessage;
-
-/**
- * Take a `schemaName` and return a translation.
- */
-const schemaNameTranslation: (
-  schemaName: string
-) => EventDisplayName = function nameInSchemaToDisplayName(schemaName) {
-  if (schemaName in displayNameRecord) {
-    return displayNameRecord[schemaName as keyof typeof displayNameRecord];
-  }
-  return unknownEventTypeMessage;
-};
+import { useResolverQueryParams } from './use_resolver_query_params';
 
 interface StyledActionsContainer {
   readonly color: string;
@@ -403,35 +233,7 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, selfId]);
 
-    const history = useHistory();
-    const urlSearch = history.location.search;
-
-    /**
-     * This updates the breadcrumb nav, the table view
-     */
-    const pushToQueryParams = useCallback(
-      (newCrumbs: CrumbInfo) => {
-        // Construct a new set of params from the current set (minus empty params)
-        // by assigning the new set of params provided in `newCrumbs`
-        const crumbsToPass = {
-          ...querystring.parse(urlSearch.slice(1)),
-          ...newCrumbs,
-        };
-
-        // If either was passed in as empty, remove it from the record
-        if (crumbsToPass.crumbId === '') {
-          delete crumbsToPass.crumbId;
-        }
-        if (crumbsToPass.crumbEvent === '') {
-          delete crumbsToPass.crumbEvent;
-        }
-
-        const relativeURL = { search: querystring.stringify(crumbsToPass) };
-
-        return history.replace(relativeURL);
-      },
-      [history, urlSearch]
-    );
+    const { pushToQueryParams } = useResolverQueryParams();
 
     const handleClick = useCallback(() => {
       if (animationTarget.current !== null) {
@@ -468,7 +270,7 @@ const UnstyledProcessEventDot = React.memo(
       )) {
         relatedStatsList.push({
           prefix: <EuiI18nNumber value={total || 0} />,
-          optionTitle: schemaNameTranslation(category),
+          optionTitle: category,
           action: () => {
             dispatch({
               type: 'userSelectedRelatedEventCategory',

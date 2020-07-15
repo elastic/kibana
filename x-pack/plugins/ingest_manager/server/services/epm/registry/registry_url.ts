@@ -8,7 +8,7 @@ import { appContextService, licenseService } from '../../';
 
 export const getRegistryUrl = (): string => {
   const license = licenseService.getLicenseInformation();
-  const customUrl = appContextService.getConfig()?.epm.registryUrl;
+  const customUrl = appContextService.getConfig()?.registryUrl;
 
   if (
     customUrl &&
@@ -18,6 +18,10 @@ export const getRegistryUrl = (): string => {
     license.isActive
   ) {
     return customUrl;
+  }
+
+  if (customUrl) {
+    appContextService.getLogger().warn('Gold license is required to use a custom registry url.');
   }
 
   return DEFAULT_REGISTRY_URL;

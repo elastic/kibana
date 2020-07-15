@@ -10,11 +10,11 @@ import { generatePath } from 'react-router-dom';
 import querystring from 'querystring';
 
 import {
-  MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+  MANAGEMENT_ROUTING_HOSTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
 } from './constants';
-import { ManagementSubTab } from '../types';
+import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { HostIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 
@@ -32,11 +32,11 @@ const querystringStringify: <ExpectedType extends object, ArgType>(
 ) => string = querystring.stringify;
 
 /** Make `selected_host` required */
-type EndpointDetailsUrlProps = Omit<HostIndexUIQueryParams, 'selected_host'> &
+type HostDetailsUrlProps = Omit<HostIndexUIQueryParams, 'selected_host'> &
   Required<Pick<HostIndexUIQueryParams, 'selected_host'>>;
 
-export const getEndpointListPath = (
-  props: { name: 'default' | 'endpointList' } & HostIndexUIQueryParams,
+export const getHostListPath = (
+  props: { name: 'default' | 'hostList' } & HostIndexUIQueryParams,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
@@ -45,39 +45,37 @@ export const getEndpointListPath = (
   );
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
-  if (name === 'endpointList') {
-    return `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
-      tabName: ManagementSubTab.endpoints,
+  if (name === 'hostList') {
+    return `${generatePath(MANAGEMENT_ROUTING_HOSTS_PATH, {
+      tabName: AdministrationSubTab.hosts,
     })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
   }
   return `${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
 };
 
-export const getEndpointDetailsPath = (
-  props: { name: 'endpointDetails' | 'endpointPolicyResponse' } & EndpointDetailsUrlProps,
+export const getHostDetailsPath = (
+  props: { name: 'hostDetails' | 'hostPolicyResponse' } & HostDetailsUrlProps,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
-  queryParams.show = (props.name === 'endpointPolicyResponse'
+  queryParams.show = (props.name === 'hostPolicyResponse'
     ? 'policy_response'
     : '') as HostIndexUIQueryParams['show'];
-  const urlQueryParams = querystringStringify<EndpointDetailsUrlProps, typeof queryParams>(
-    queryParams
-  );
+  const urlQueryParams = querystringStringify<HostDetailsUrlProps, typeof queryParams>(queryParams);
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
-  return `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
-    tabName: ManagementSubTab.endpoints,
+  return `${generatePath(MANAGEMENT_ROUTING_HOSTS_PATH, {
+    tabName: AdministrationSubTab.hosts,
   })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
 };
 
 export const getPoliciesPath = (search?: string) =>
   `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
-    tabName: ManagementSubTab.policies,
+    tabName: AdministrationSubTab.policies,
   })}${appendSearch(search)}`;
 
 export const getPolicyDetailPath = (policyId: string, search?: string) =>
   `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
-    tabName: ManagementSubTab.policies,
+    tabName: AdministrationSubTab.policies,
     policyId,
   })}${appendSearch(search)}`;

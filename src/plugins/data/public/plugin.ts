@@ -111,7 +111,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
   public setup(
     core: CoreSetup,
-    { expressions, uiActions }: DataSetupDependencies
+    { expressions, uiActions, usageCollection }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
@@ -152,6 +152,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
       autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core, {
         expressions,
+        usageCollection,
         getInternalStartServices,
         packageInfo: this.packageInfo,
       }),
@@ -188,7 +189,11 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     });
     setIndexPatterns(indexPatterns);
 
-    const query = this.queryService.start(savedObjects);
+    const query = this.queryService.start({
+      storage: this.storage,
+      savedObjectsClient: savedObjects.client,
+      uiSettings,
+    });
     setQueryService(query);
 
     const search = this.searchService.start(core, { indexPatterns });

@@ -26,8 +26,8 @@ jest.mock('../../../common/containers/matrix_histogram', () => {
 });
 
 const theme = () => ({ eui: { ...euiDarkVars, euiSizeL: '24px' }, darkMode: true });
-const from = new Date('2020-03-31T06:00:00.000Z').valueOf();
-const to = new Date('2019-03-31T06:00:00.000Z').valueOf();
+const from = '2020-03-31T06:00:00.000Z';
+const to = '2019-03-31T06:00:00.000Z';
 
 describe('Alerts by category', () => {
   let wrapper: ReactWrapper;
@@ -62,7 +62,7 @@ describe('Alerts by category', () => {
 
     test('it renders the expected title', () => {
       expect(wrapper.find('[data-test-subj="header-section-title"]').text()).toEqual(
-        'External alert count'
+        'External alert trend'
       );
     });
 

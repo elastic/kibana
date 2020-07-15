@@ -4,90 +4,218 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraClientCoreSetup } from '../types';
-import { LogsFetchDataResponse } from '../../../observability/public';
+import { encode } from 'rison-node';
+import { SearchResponse } from 'src/plugins/data/public';
+import {
+  FetchData,
+  FetchDataParams,
+  HasData,
+  LogsFetchDataResponse,
+} from '../../../observability/public';
+import { DEFAULT_SOURCE_ID } from '../../common/constants';
+import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
+import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
+import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
 
-export function getLogsHasDataFetcher(getStartServices: InfraClientCoreSetup['getStartServices']) {
+interface StatsAggregation {
+  buckets: Array<{ key: string; doc_count: number }>;
+}
+
+interface SeriesAggregation {
+  buckets: Array<{
+    key_as_string: string;
+    key: number;
+    doc_count: number;
+    dataset: StatsAggregation;
+  }>;
+}
+
+interface LogParams {
+  index: string;
+  timestampField: string;
+}
+
+type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
+
+export function getLogsHasDataFetcher(
+  getStartServices: InfraClientCoreSetup['getStartServices']
+): HasData {
   return async () => {
-    // if you need the data plugin, this is how you get it
-    // const [, startPlugins] = await getStartServices();
-    // const { data } = startPlugins;
-
-    // if you need a core dep, we need to pass in more than just getStartServices
-
-    // perform query
-    return true;
+    const [core] = await getStartServices();
+    const sourceStatus = await callFetchLogSourceStatusAPI(DEFAULT_SOURCE_ID, core.http.fetch);
+    return sourceStatus.data.logIndicesExist;
   };
 }
 
 export function getLogsOverviewDataFetcher(
   getStartServices: InfraClientCoreSetup['getStartServices']
-) {
-  return async (): Promise<LogsFetchDataResponse> => {
-    // if you need the data plugin, this is how you get it
-    // const [, startPlugins] = await getStartServices();
-    // const { data } = startPlugins;
+): FetchData<LogsFetchDataResponse> {
+  return async (params) => {
+    const [core, startPlugins] = await getStartServices();
+    const { data } = startPlugins;
 
-    // if you need a core dep, we need to pass in more than just getStartServices
+    const sourceConfiguration = await callFetchLogSourceConfigurationAPI(
+      DEFAULT_SOURCE_ID,
+      core.http.fetch
+    );
 
-    // perform query
+    const { stats, series } = await fetchLogsOverview(
+      {
+        index: sourceConfiguration.data.configuration.logAlias,
+        timestampField: sourceConfiguration.data.configuration.fields.timestamp,
+      },
+      params,
+      data
+    );
+
+    const timeSpanInMinutes = (params.absoluteTime.end - params.absoluteTime.start) / (1000 * 60);
+
     return {
-      title: 'Log rate',
-      appLink: 'TBD', // TODO: what format should this be in, relative I assume?
-      stats: {
-        nginx: {
-          type: 'number',
-          label: 'nginx',
-          value: 345341,
-        },
-        'elasticsearch.audit': {
-          type: 'number',
-          label: 'elasticsearch.audit',
-          value: 164929,
-        },
-        'haproxy.log': {
-          type: 'number',
-          label: 'haproxy.log',
-          value: 51101,
-        },
-      },
-      // Note: My understanding is that these series coordinates will be
-      // combined into objects that look like:
-      // { x: timestamp, y: value, g: label (e.g. nginx) }
-      // so they fit the stacked bar chart API
-      // https://elastic.github.io/elastic-charts/?path=/story/bar-chart--stacked-with-axis-and-legend
-      series: {
-        nginx: {
-          label: 'nginx',
-          coordinates: [
-            { x: 1593000000000, y: 10014 },
-            { x: 1593000900000, y: 12827 },
-            { x: 1593001800000, y: 2946 },
-            { x: 1593002700000, y: 14298 },
-            { x: 1593003600000, y: 4096 },
-          ],
-        },
-        'elasticsearch.audit': {
-          label: 'elasticsearch.audit',
-          coordinates: [
-            { x: 1593000000000, y: 5676 },
-            { x: 1593000900000, y: 6783 },
-            { x: 1593001800000, y: 2394 },
-            { x: 1593002700000, y: 4554 },
-            { x: 1593003600000, y: 5659 },
-          ],
-        },
-        'haproxy.log': {
-          label: 'haproxy.log',
-          coordinates: [
-            { x: 1593000000000, y: 9085 },
-            { x: 1593000900000, y: 9002 },
-            { x: 1593001800000, y: 3940 },
-            { x: 1593002700000, y: 5451 },
-            { x: 1593003600000, y: 9133 },
-          ],
-        },
-      },
+      appLink: `/app/logs/stream?logPosition=(end:${encode(params.relativeTime.end)},start:${encode(
+        params.relativeTime.start
+      )})`,
+      stats: normalizeStats(stats, timeSpanInMinutes),
+      series: normalizeSeries(series),
     };
   };
+}
+
+async function fetchLogsOverview(
+  logParams: LogParams,
+  params: FetchDataParams,
+  dataPlugin: InfraClientStartDeps['data']
+): Promise<StatsAndSeries> {
+  return new Promise((resolve, reject) => {
+    let esResponse: SearchResponse = {};
+
+    dataPlugin.search
+      .search({
+        params: {
+          index: logParams.index,
+          body: {
+            size: 0,
+            query: buildLogOverviewQuery(logParams, params),
+            aggs: buildLogOverviewAggregations(logParams, params),
+          },
+        },
+      })
+      .subscribe(
+        (response) => (esResponse = response.rawResponse),
+        (error) => reject(error),
+        () => {
+          if (esResponse.aggregations) {
+            resolve(processLogsOverviewAggregations(esResponse.aggregations));
+          } else {
+            resolve({ stats: {}, series: {} });
+          }
+        }
+      );
+  });
+}
+
+function buildLogOverviewQuery(logParams: LogParams, params: FetchDataParams) {
+  return {
+    range: {
+      [logParams.timestampField]: {
+        gt: new Date(params.absoluteTime.start).toISOString(),
+        lte: new Date(params.absoluteTime.end).toISOString(),
+        format: 'strict_date_optional_time',
+      },
+    },
+  };
+}
+
+function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataParams) {
+  return {
+    stats: {
+      terms: {
+        field: 'event.dataset',
+        size: 4,
+      },
+    },
+    series: {
+      date_histogram: {
+        field: logParams.timestampField,
+        fixed_interval: params.bucketSize,
+      },
+      aggs: {
+        dataset: {
+          terms: {
+            field: 'event.dataset',
+            size: 4,
+          },
+        },
+      },
+    },
+  };
+}
+
+function processLogsOverviewAggregations(aggregations: {
+  stats: StatsAggregation;
+  series: SeriesAggregation;
+}): StatsAndSeries {
+  const processedStats = aggregations.stats.buckets.reduce<StatsAndSeries['stats']>(
+    (result, bucket) => {
+      result[bucket.key] = {
+        type: 'number',
+        label: bucket.key,
+        value: bucket.doc_count,
+      };
+
+      return result;
+    },
+    {}
+  );
+
+  const processedSeries = aggregations.series.buckets.reduce<StatsAndSeries['series']>(
+    (result, bucket) => {
+      const x = bucket.key; // the timestamp of the bucket
+      bucket.dataset.buckets.forEach((b) => {
+        const label = b.key;
+        result[label] = result[label] || { label, coordinates: [] };
+        result[label].coordinates.push({ x, y: b.doc_count });
+      });
+
+      return result;
+    },
+    {}
+  );
+
+  return {
+    stats: processedStats,
+    series: processedSeries,
+  };
+}
+
+function normalizeStats(
+  stats: LogsFetchDataResponse['stats'],
+  timeSpanInMinutes: number
+): LogsFetchDataResponse['stats'] {
+  return Object.keys(stats).reduce<LogsFetchDataResponse['stats']>((normalized, key) => {
+    normalized[key] = {
+      ...stats[key],
+      value: stats[key].value / timeSpanInMinutes,
+    };
+    return normalized;
+  }, {});
+}
+
+function normalizeSeries(series: LogsFetchDataResponse['series']): LogsFetchDataResponse['series'] {
+  const seriesKeys = Object.keys(series);
+  const timestamps = seriesKeys.flatMap((key) => series[key].coordinates.map((c) => c.x));
+  const [first, second] = [...new Set(timestamps)].sort();
+  const timeSpanInMinutes = (second - first) / (1000 * 60);
+
+  return seriesKeys.reduce<LogsFetchDataResponse['series']>((normalized, key) => {
+    normalized[key] = {
+      ...series[key],
+      coordinates: series[key].coordinates.map((c) => {
+        if (c.y) {
+          return { ...c, y: c.y / timeSpanInMinutes };
+        }
+        return c;
+      }),
+    };
+    return normalized;
+  }, {});
 }

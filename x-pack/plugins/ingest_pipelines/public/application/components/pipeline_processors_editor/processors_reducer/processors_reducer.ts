@@ -38,6 +38,12 @@ export type Action =
       payload: {
         source: ProcessorSelector;
       };
+    }
+  | {
+      type: 'loadProcessors';
+      payload: {
+        newState: DeserializeResult;
+      };
     };
 
 export type ProcessorsDispatch = Dispatch<Action>;
@@ -122,6 +128,14 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     const copy = duplicateProcessor(sourceProcessor);
     sourceProcessorsArray.splice(sourceIdx + 1, 0, copy);
     return setValue(sourceProcessorsArraySelector, state, sourceProcessorsArray);
+  }
+
+  if (action.type === 'loadProcessors') {
+    return {
+      ...action.payload.newState,
+      onFailure: action.payload.newState.onFailure ?? [],
+      isRoot: true,
+    };
   }
 
   return state;

@@ -25,6 +25,23 @@ interface IntegrationGroupProps {
   summary: MonitorSummary;
 }
 
+export const extractSummaryValues = (summary: Pick<MonitorSummary, 'state'>) => {
+  const domain = summary.state.url?.domain ?? '';
+
+  const firstCheck = summary.state.summaryPings?.[0];
+
+  const podUid = firstCheck?.kubernetes?.pod?.uid ?? undefined;
+  const containerId = firstCheck?.container?.id ?? undefined;
+  const ip = firstCheck?.monitor.ip ?? undefined;
+
+  return {
+    domain,
+    podUid,
+    containerId,
+    ip,
+  };
+};
+
 export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
   const {
     basePath,
@@ -35,13 +52,7 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
 
-  const domain = summary?.state?.url?.domain ?? '';
-
-  const firstCheck = summary?.state?.checks?.[0];
-
-  const podUid = firstCheck?.kubernetes?.pod?.uid;
-  const containerId = firstCheck?.container?.id;
-  const ip = firstCheck?.monitor?.ip;
+  const { domain, podUid, containerId, ip } = extractSummaryValues(summary);
 
   return isApmAvailable || isInfraAvailable || isLogsAvailable ? (
     <EuiFlexGroup direction="column">
@@ -99,7 +110,7 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
                 {
                   defaultMessage: 'Check Infrastructure UI for the IP "{ip}"',
                   values: {
-                    ip,
+                    ip: Array.isArray(ip) ? ip[0] : ip,
                   },
                 }
               )}
@@ -186,7 +197,12 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
               )}
               tooltipContent={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.ip.tooltip',
-                { defaultMessage: 'Check Logging UI for the IP "{ip}"', values: { ip } }
+                {
+                  defaultMessage: 'Check Logging UI for the IP "{ip}"',
+                  values: {
+                    ip: Array.isArray(ip) ? ip[0] : ip,
+                  },
+                }
               )}
             />
           </EuiFlexItem>

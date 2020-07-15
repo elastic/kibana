@@ -9,5 +9,5 @@ The subscriptions from scheduling the automatic timeout for each request.
 <b>Signature:</b>
 
 ```typescript
-protected timeoutSubscriptions: Set<Subscription>;
+protected timeoutSubscriptions: Subscription;
 ```
