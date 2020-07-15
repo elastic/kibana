@@ -202,9 +202,9 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
         eventCategory: `${eventType}`,
         eventType: `${event.ecsEventType(resolverEvent)}`,
         name: event.descriptiveName(resolverEvent),
-        entityId,
+        entityId: String(entityId),
         setQueryParams: () => {
-          pushToQueryParams({ crumbId: entityId, crumbEvent: processEntityId });
+          pushToQueryParams({ crumbId: String(entityId), crumbEvent: processEntityId });
         },
       };
     });
