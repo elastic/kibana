@@ -21,9 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   let apiKey: { id: string; api_key: string };
   let kibanaVersion: string;
 
-  // Temporarily skipped to promote snapshot
-  // Re-enabled in https://github.com/elastic/kibana/pull/71727
-  describe.skip('fleet_agents_enroll', () => {
+  describe('fleet_agents_enroll', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
