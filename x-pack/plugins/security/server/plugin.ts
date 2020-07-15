@@ -20,6 +20,7 @@ import {
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { AuthorizationService, AuthorizationServiceSetup } from './authorization';
@@ -69,11 +70,13 @@ export interface SecurityPluginSetup {
 export interface PluginSetupDependencies {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface PluginStartDependencies {
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 /**
@@ -117,7 +120,7 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup<PluginStartDependencies>,
-    { features, licensing }: PluginSetupDependencies
+    { features, licensing, taskManager }: PluginSetupDependencies
   ) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -152,6 +155,8 @@ export class Plugin {
       config,
       clusterClient,
       http: core.http,
+      kibanaIndexName: legacyConfig.kibana.index,
+      taskManager,
     });
 
     const authc = await setupAuthentication({
@@ -235,7 +240,7 @@ export class Plugin {
     });
   }
 
-  public start(core: CoreStart, { features, licensing }: PluginStartDependencies) {
+  public start(core: CoreStart, { features, licensing, taskManager }: PluginStartDependencies) {
     this.logger.debug('Starting plugin');
 
     this.featureUsageServiceStart = this.featureUsageService.start({
@@ -244,7 +249,7 @@ export class Plugin {
 
     const { clusterClient, watchOnlineStatus$ } = this.elasticsearchService.start();
 
-    this.sessionManagementService.start({ online$: watchOnlineStatus$() });
+    this.sessionManagementService.start({ online$: watchOnlineStatus$(), taskManager });
     this.authorizationService.start({ features, clusterClient, online$: watchOnlineStatus$() });
   }
 

@@ -5,3 +5,5 @@
  */
 
 export { sessionMock } from './session.mock';
+export { sessionCookieMock } from './session_cookie.mock';
+export { sessionIndexMock } from './session_index.mock';

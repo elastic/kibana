@@ -218,10 +218,7 @@ describe('Authenticator', () => {
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockOptions.session.get.mockResolvedValue(null);
-      mockSessVal = sessionMock.createSessionValue({
-        state: { authorization: 'Basic xxx' },
-        path: mockOptions.basePath.serverBasePath,
-      });
+      mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
     });
@@ -470,6 +467,37 @@ describe('Authenticator', () => {
           mockSAMLAuthenticationProvider1.login.mock.invocationCallOrder[0]
         );
       });
+    });
+
+    it('clears session if it belongs to a not configured provider or with the name that is registered but has different type.', async () => {
+      const user = mockAuthenticatedUser();
+      const credentials = { username: 'user', password: 'password' };
+      const request = httpServerMock.createKibanaRequest();
+
+      // Re-configure authenticator with `token` provider that uses the name of `basic`.
+      const loginMock = jest.fn().mockResolvedValue(AuthenticationResult.succeeded(user));
+      jest.requireMock('./providers/token').TokenAuthenticationProvider.mockImplementation(() => ({
+        type: 'token',
+        login: loginMock,
+        getHTTPAuthenticationScheme: jest.fn(),
+      }));
+      mockOptions = getMockOptions({ providers: { token: { basic1: { order: 0 } } } });
+      authenticator = new Authenticator(mockOptions);
+
+      mockBasicAuthenticationProvider.login.mockResolvedValue(AuthenticationResult.succeeded(user));
+      mockOptions.session.get.mockResolvedValue(mockSessVal);
+
+      await expect(
+        authenticator.login(request, { provider: { name: 'basic1' }, value: credentials })
+      ).resolves.toEqual(AuthenticationResult.succeeded(user));
+
+      expect(loginMock).toHaveBeenCalledWith(request, credentials, null);
+
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
     });
 
     it('clears session if provider asked to do so in `succeeded` result.', async () => {
@@ -971,10 +999,7 @@ describe('Authenticator', () => {
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockOptions.session.get.mockResolvedValue(null);
-      mockSessVal = sessionMock.createSessionValue({
-        state: { authorization: 'Basic xxx' },
-        path: mockOptions.basePath.serverBasePath,
-      });
+      mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
     });
@@ -1667,10 +1692,7 @@ describe('Authenticator', () => {
     let mockSessVal: SessionValue;
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
-      mockSessVal = sessionMock.createSessionValue({
-        state: { authorization: 'Basic xxx' },
-        path: mockOptions.basePath.serverBasePath,
-      });
+      mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
     });
@@ -1763,10 +1785,7 @@ describe('Authenticator', () => {
     let mockSessionValue: SessionValue;
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
-      mockSessionValue = sessionMock.createSessionValue({
-        state: { authorization: 'Basic xxx' },
-        path: mockOptions.basePath.serverBasePath,
-      });
+      mockSessionValue = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
       mockOptions.session.get.mockResolvedValue(mockSessionValue);
       mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
       mockOptions.license.getFeatures.mockReturnValue({

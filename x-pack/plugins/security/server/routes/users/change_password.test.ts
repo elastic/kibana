@@ -53,7 +53,7 @@ describe('Change password', () => {
 
     authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser(mockAuthenticatedUser()));
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
-    session.get.mockResolvedValue(sessionMock.createSessionValue());
+    session.get.mockResolvedValue(sessionMock.createValue());
 
     mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockClusterClient = routeParamsMock.clusterClient;
@@ -199,7 +199,7 @@ describe('Change password', () => {
       authc.getCurrentUser.mockReturnValue(mockUser);
       authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockUser));
       session.get.mockResolvedValue(
-        sessionMock.createSessionValue({ provider: { type: 'token', name: 'token1' } })
+        sessionMock.createValue({ provider: { type: 'token', name: 'token1' } })
       );
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);

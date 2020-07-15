@@ -50,6 +50,7 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "secureCookies": false,
         "session": Object {
+          "cleanupInterval": "PT1H",
           "idleTimeout": null,
           "lifespan": null,
         },
@@ -95,6 +96,7 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "secureCookies": false,
         "session": Object {
+          "cleanupInterval": "PT1H",
           "idleTimeout": null,
           "lifespan": null,
         },
@@ -139,6 +141,7 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "secureCookies": false,
         "session": Object {
+          "cleanupInterval": "PT1H",
           "idleTimeout": null,
           "lifespan": null,
         },
@@ -358,10 +361,10 @@ describe('config schema', () => {
             authc: { providers: { basic: { basic1: { enabled: true } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.basic.basic1.order]: expected value of type [number] but got [undefined]"
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.basic.basic1.order]: expected value of type [number] but got [undefined]"
+        `);
       });
 
       it('cannot be hidden from selector', () => {
@@ -372,10 +375,10 @@ describe('config schema', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.basic.basic1.showInSelector]: \`basic\` provider only supports \`true\` in \`showInSelector\`."
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.basic.basic1.showInSelector]: \`basic\` provider only supports \`true\` in \`showInSelector\`."
+        `);
       });
 
       it('can have only provider of this type', () => {
@@ -384,10 +387,10 @@ describe('config schema', () => {
             authc: { providers: { basic: { basic1: { order: 0 }, basic2: { order: 1 } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.basic]: Only one \\"basic\\" provider can be configured."
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.basic]: Only one \\"basic\\" provider can be configured."
+        `);
       });
 
       it('can be successfully validated', () => {
@@ -418,10 +421,10 @@ describe('config schema', () => {
             authc: { providers: { token: { token1: { enabled: true } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.token.token1.order]: expected value of type [number] but got [undefined]"
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.token.token1.order]: expected value of type [number] but got [undefined]"
+        `);
       });
 
       it('cannot be hidden from selector', () => {
@@ -432,10 +435,10 @@ describe('config schema', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.token.token1.showInSelector]: \`token\` provider only supports \`true\` in \`showInSelector\`."
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.token.token1.showInSelector]: \`token\` provider only supports \`true\` in \`showInSelector\`."
+        `);
       });
 
       it('can have only provider of this type', () => {
@@ -444,10 +447,10 @@ describe('config schema', () => {
             authc: { providers: { token: { token1: { order: 0 }, token2: { order: 1 } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.token]: Only one \\"token\\" provider can be configured."
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.token]: Only one \\"token\\" provider can be configured."
+        `);
       });
 
       it('can be successfully validated', () => {
@@ -478,10 +481,10 @@ describe('config schema', () => {
             authc: { providers: { pki: { pki1: { enabled: true } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.pki.pki1.order]: expected value of type [number] but got [undefined]"
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.pki.pki1.order]: expected value of type [number] but got [undefined]"
+        `);
       });
 
       it('can have only provider of this type', () => {
@@ -490,10 +493,10 @@ describe('config schema', () => {
             authc: { providers: { pki: { pki1: { order: 0 }, pki2: { order: 1 } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.pki]: Only one \\"pki\\" provider can be configured."
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.pki]: Only one \\"pki\\" provider can be configured."
+        `);
       });
 
       it('can be successfully validated', () => {
@@ -522,10 +525,10 @@ describe('config schema', () => {
             authc: { providers: { kerberos: { kerberos1: { enabled: true } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.kerberos.kerberos1.order]: expected value of type [number] but got [undefined]"
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.kerberos.kerberos1.order]: expected value of type [number] but got [undefined]"
+        `);
       });
 
       it('can have only provider of this type', () => {
@@ -536,10 +539,10 @@ describe('config schema', () => {
             },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.kerberos]: Only one \\"kerberos\\" provider can be configured."
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.kerberos]: Only one \\"kerberos\\" provider can be configured."
+        `);
       });
 
       it('can be successfully validated', () => {
@@ -568,10 +571,10 @@ describe('config schema', () => {
             authc: { providers: { oidc: { oidc1: { enabled: true } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.oidc.oidc1.order]: expected value of type [number] but got [undefined]"
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.oidc.oidc1.order]: expected value of type [number] but got [undefined]"
+        `);
       });
 
       it('requires `realm`', () => {
@@ -580,10 +583,10 @@ describe('config schema', () => {
             authc: { providers: { oidc: { oidc1: { order: 0 } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.oidc.oidc1.realm]: expected value of type [string] but got [undefined]"
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.oidc.oidc1.realm]: expected value of type [string] but got [undefined]"
+        `);
       });
 
       it('can be successfully validated', () => {
@@ -623,10 +626,10 @@ describe('config schema', () => {
             authc: { providers: { saml: { saml1: { enabled: true } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.saml.saml1.order]: expected value of type [number] but got [undefined]"
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.saml.saml1.order]: expected value of type [number] but got [undefined]"
+        `);
       });
 
       it('requires `realm`', () => {
@@ -635,10 +638,10 @@ describe('config schema', () => {
             authc: { providers: { saml: { saml1: { order: 0 } } } },
           })
         ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.saml.saml1.realm]: expected value of type [string] but got [undefined]"
-`);
+          "[authc.providers]: types that failed validation:
+          - [authc.providers.0]: expected value of type [array] but got [Object]
+          - [authc.providers.1.saml.saml1.realm]: expected value of type [string] but got [undefined]"
+        `);
       });
 
       it('can be successfully validated', () => {
@@ -701,10 +704,10 @@ describe('config schema', () => {
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1]: Found multiple providers configured with the same name \\"provider1\\": [xpack.security.authc.providers.basic.provider1, xpack.security.authc.providers.saml.provider1]"
-`);
+        "[authc.providers]: types that failed validation:
+        - [authc.providers.0]: expected value of type [array] but got [Object]
+        - [authc.providers.1]: Found multiple providers configured with the same name \\"provider1\\": [xpack.security.authc.providers.basic.provider1, xpack.security.authc.providers.saml.provider1]"
+      `);
     });
 
     it('`order` should be unique across all provider types', () => {
@@ -721,10 +724,10 @@ describe('config schema', () => {
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1]: Found multiple providers configured with the same order \\"0\\": [xpack.security.authc.providers.basic.provider1, xpack.security.authc.providers.saml.provider2]"
-`);
+        "[authc.providers]: types that failed validation:
+        - [authc.providers.0]: expected value of type [array] but got [Object]
+        - [authc.providers.1]: Found multiple providers configured with the same order \\"0\\": [xpack.security.authc.providers.basic.provider1, xpack.security.authc.providers.saml.provider2]"
+      `);
     });
 
     it('can be successfully validated with multiple providers ignoring uniqueness violations in disabled ones', () => {
@@ -784,6 +787,16 @@ describe('config schema', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('session', () => {
+    it('should throw error if xpack.security.session.cleanupInterval is less than 1 minute', () => {
+      expect(() =>
+        ConfigSchema.validate({ session: { cleanupInterval: '59s' } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[session.cleanupInterval]: the value must be greater or equal to 1 minute."`
+      );
     });
   });
 });

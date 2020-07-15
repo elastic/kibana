@@ -149,6 +149,14 @@ export const ConfigSchema = schema.object({
   session: schema.object({
     idleTimeout: schema.nullable(schema.duration()),
     lifespan: schema.nullable(schema.duration()),
+    cleanupInterval: schema.duration({
+      defaultValue: '1h',
+      validate(value) {
+        if (value.asSeconds() < 60) {
+          return 'the value must be greater or equal to 1 minute.';
+        }
+      },
+    }),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
   sameSiteCookies: schema.maybe(

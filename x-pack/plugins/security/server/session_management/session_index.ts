@@ -9,10 +9,10 @@ import { AuthenticationProvider } from '../../common/types';
 import { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
-  clusterClient: ILegacyClusterClient;
-  serverBasePath: string;
-  config: Pick<ConfigType, 'session'>;
-  logger: Logger;
+  readonly clusterClient: ILegacyClusterClient;
+  readonly tenant: string;
+  readonly config: Pick<ConfigType, 'session'>;
+  readonly logger: Logger;
 }
 
 /**
@@ -23,17 +23,17 @@ const SESSION_INDEX_TEMPLATE_VERSION = 1;
 /**
  * Alias of the Elasticsearch index that is used to store user session information.
  */
-const SESSION_INDEX_ALIAS = '.kibana_security_session';
+export const SESSION_INDEX_ALIAS = '.kibana_security_session';
 
 /**
  * Name of the Elasticsearch index that is used to store user session information.
  */
-const SESSION_INDEX_NAME = `${SESSION_INDEX_ALIAS}_${SESSION_INDEX_TEMPLATE_VERSION}`;
+export const SESSION_INDEX_NAME = `${SESSION_INDEX_ALIAS}_${SESSION_INDEX_TEMPLATE_VERSION}`;
 
 /**
  * Index template that is used for the current version of the session index.
  */
-const SESSION_INDEX_TEMPLATE = {
+export const SESSION_INDEX_TEMPLATE = {
   name: `${SESSION_INDEX_ALIAS}_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`,
   version: SESSION_INDEX_TEMPLATE_VERSION,
   template: {
@@ -52,9 +52,9 @@ const SESSION_INDEX_TEMPLATE = {
     mappings: {
       dynamic: 'strict',
       properties: {
-        username_hash: { type: 'keyword' },
+        usernameHash: { type: 'keyword' },
         provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
-        path: { type: 'keyword' },
+        tenant: { type: 'keyword' },
         idleTimeoutExpiration: { type: 'date' },
         lifespanExpiration: { type: 'date' },
         accessAgreementAcknowledged: { type: 'boolean' },
@@ -75,10 +75,15 @@ export interface SessionIndexValue {
   sid: string;
 
   /**
+   * Name of the current Kibana tenant.
+   */
+  tenant: string;
+
+  /**
    * Hash of the username. It's defined only if session is authenticated, otherwise session
    * is considered unauthenticated (e.g. intermediate session used during SSO handshake).
    */
-  username_hash?: string;
+  usernameHash?: string;
 
   /**
    * Name and type of the provider this session belongs to.
@@ -96,11 +101,6 @@ export interface SessionIndexValue {
    * time can be extended indefinitely.
    */
   lifespanExpiration: number | null;
-
-  /**
-   * Kibana server base path the session was created for.
-   */
-  path: string;
 
   /**
    * Indicates whether user acknowledged access agreement or not.
@@ -136,15 +136,9 @@ interface SessionIndexValueMetadata {
 export class SessionIndex {
   /**
    * Timeout after which session with the expired idle timeout _may_ be removed from the index
-   * during regular cleanup routine. It's intentionally larger than `idleIndexUpdateTimeout`
-   * configured in `Session` to be sure that the session value may be safely cleaned up.
+   * during regular cleanup routine.
    */
-  readonly #idleIndexCleanupTimeout: number | null;
-
-  /**
-   * Options used to create Session index.
-   */
-  readonly #options: Readonly<SessionIndexOptions>;
+  private readonly idleIndexCleanupTimeout: number | null;
 
   /**
    * Promise that tracks session index initialization process. We'll need to get rid of this as soon
@@ -153,10 +147,12 @@ export class SessionIndex {
    */
   private indexInitialization?: Promise<void>;
 
-  constructor(options: Readonly<SessionIndexOptions>) {
-    this.#options = options;
-    this.#idleIndexCleanupTimeout = this.#options.config.session.idleTimeout
-      ? this.#options.config.session.idleTimeout.asMilliseconds() * 3
+  constructor(private readonly options: Readonly<SessionIndexOptions>) {
+    // This timeout is intentionally larger than the `idleIndexUpdateTimeout` (idleTimeout * 2)
+    // configured in `Session` to be sure that the session value is definitely expired and may be
+    // safely cleaned up.
+    this.idleIndexCleanupTimeout = this.options.config.session.idleTimeout
+      ? this.options.config.session.idleTimeout.asMilliseconds() * 3
       : null;
   }
 
@@ -167,7 +163,7 @@ export class SessionIndex {
    */
   async get(sid: string) {
     try {
-      const response = await this.#options.clusterClient.callAsInternalUser('get', {
+      const response = await this.options.clusterClient.callAsInternalUser('get', {
         id: sid,
         ignore: [404],
         index: SESSION_INDEX_ALIAS,
@@ -176,17 +172,17 @@ export class SessionIndex {
       const docNotFound = response.found === false;
       const indexNotFound = response.status === 404;
       if (docNotFound || indexNotFound) {
-        this.#options.logger.debug('Cannot find session value with the specified ID.');
+        this.options.logger.debug('Cannot find session value with the specified ID.');
         return null;
       }
 
       return {
-        sid,
         ...response._source,
+        sid,
         metadata: { primaryTerm: response._primary_term, sequenceNumber: response._seq_no },
       } as Readonly<SessionIndexValue>;
     } catch (err) {
-      this.#options.logger.error(`Failed to retrieve session value: ${err.message}`);
+      this.options.logger.error(`Failed to retrieve session value: ${err.message}`);
       throw err;
     }
   }
@@ -195,9 +191,9 @@ export class SessionIndex {
    * Creates a new document for the specified session value.
    * @param sessionValue Session index value.
    */
-  async create(sessionValue: Readonly<Omit<SessionIndexValue, 'metadata'>>) {
+  async create(sessionValue: Readonly<Omit<SessionIndexValue, 'tenant' | 'metadata'>>) {
     if (this.indexInitialization) {
-      this.#options.logger.warn(
+      this.options.logger.warn(
         'Attempted to create a new session while session index is initializing.'
       );
       await this.indexInitialization;
@@ -208,20 +204,24 @@ export class SessionIndex {
       const {
         _primary_term: primaryTerm,
         _seq_no: sequenceNumber,
-      } = await this.#options.clusterClient.callAsInternalUser('create', {
+      } = await this.options.clusterClient.callAsInternalUser('create', {
         id: sid,
         // We cannot control whether index is created automatically during this operation or not.
         // But we can reduce probability of getting into a weird state when session is being created
         // while session index is missing for some reason. This way we'll recreate index with a
         // proper name and alias. But this will only work if we still have a proper index template.
         index: SESSION_INDEX_NAME,
-        body: sessionValueToStore,
+        body: { ...sessionValueToStore, tenant: this.options.tenant },
         refresh: 'wait_for',
       });
 
-      return { ...sessionValue, metadata: { primaryTerm, sequenceNumber } } as SessionIndexValue;
+      return {
+        ...sessionValue,
+        tenant: this.options.tenant,
+        metadata: { primaryTerm, sequenceNumber },
+      } as SessionIndexValue;
     } catch (err) {
-      this.#options.logger.error(`Failed to create session value: ${err.message}`);
+      this.options.logger.error(`Failed to create session value: ${err.message}`);
       throw err;
     }
   }
@@ -233,10 +233,10 @@ export class SessionIndex {
   async update(sessionValue: Readonly<SessionIndexValue>) {
     const { sid, metadata, ...sessionValueToStore } = sessionValue;
     try {
-      const response = await this.#options.clusterClient.callAsInternalUser('index', {
+      const response = await this.options.clusterClient.callAsInternalUser('index', {
         id: sid,
         index: SESSION_INDEX_ALIAS,
-        body: sessionValueToStore,
+        body: { ...sessionValueToStore, tenant: this.options.tenant },
         ifSeqNo: metadata.sequenceNumber,
         ifPrimaryTerm: metadata.primaryTerm,
         refresh: 'wait_for',
@@ -248,66 +248,39 @@ export class SessionIndex {
       // return latest copy of the session value instead or `null` if doesn't exist anymore.
       const sessionIndexValueUpdateConflict = response.status === 409;
       if (sessionIndexValueUpdateConflict) {
-        this.#options.logger.debug(
-          'Cannot update session value due to conflict, session either do not exist or was already updated.'
+        this.options.logger.debug(
+          'Cannot update session value due to conflict, session either does not exist or was already updated.'
         );
         return await this.get(sid);
       }
 
       return {
         ...sessionValue,
+        tenant: this.options.tenant,
         metadata: { primaryTerm: response._primary_term, sequenceNumber: response._seq_no },
       } as SessionIndexValue;
     } catch (err) {
-      this.#options.logger.error(`Failed to update session value: ${err.message}`);
+      this.options.logger.error(`Failed to update session value: ${err.message}`);
       throw err;
     }
   }
 
   /**
-   * Clears session value with the specified ID. May trigger a removal of other outdated session
-   * values.
+   * Clears session value with the specified ID.
    * @param sid Session ID to clear.
    */
   async clear(sid: string) {
     try {
-      const now = Date.now();
-
-      // Always try to delete session with the specified ID and with expired lifespan (even if it's
-      // not configured right now).
-      // QUESTION: CAN WE SAY THAT ALL TENANTS SHOULD HAVE THE SAME SESSION TIMEOUTS?
-      const deleteQueries: object[] = [
-        { term: { _id: sid } },
-        { range: { lifespanExpiration: { lte: now } } },
-        // { bool: { must_not: { term: { path: this.#options.serverBasePath } } } },
-      ];
-
-      // If lifespan is configured we should remove sessions that were created without it if any.
-      if (this.#options.config.session.lifespan) {
-        deleteQueries.push({ bool: { must_not: { exists: { field: 'lifespanExpiration' } } } });
-      }
-
-      // If idle timeout is configured we should delete all sessions without specified idle timeout
-      // or if that session hasn't been updated for a while meaning that session is expired.
-      if (this.#idleIndexCleanupTimeout) {
-        deleteQueries.push(
-          { range: { idleTimeoutExpiration: { lte: now - this.#idleIndexCleanupTimeout } } },
-          { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } }
-        );
-      } else {
-        // Otherwise just delete all expired sessions that were previously created with the idle
-        // timeout if any.
-        deleteQueries.push({ range: { idleTimeoutExpiration: { lte: now } } });
-      }
-
-      await this.#options.clusterClient.callAsInternalUser('deleteByQuery', {
+      // We don't specify primary term and sequence number as delete should always take precedence
+      // over any updates that could happen in the meantime.
+      await this.options.clusterClient.callAsInternalUser('delete', {
+        id: sid,
         index: SESSION_INDEX_ALIAS,
         refresh: 'wait_for',
-        ignore: [409, 404],
-        body: { conflicts: 'proceed', query: { bool: { should: deleteQueries } } },
+        ignore: [404],
       });
     } catch (err) {
-      this.#options.logger.error(`Failed to clear session value: ${err.message}`);
+      this.options.logger.error(`Failed to clear session value: ${err.message}`);
       throw err;
     }
   }
@@ -320,16 +293,16 @@ export class SessionIndex {
       return await this.indexInitialization;
     }
 
-    this.indexInitialization = new Promise(async (resolve) => {
+    return (this.indexInitialization = new Promise(async (resolve) => {
       // Check if required index template exists.
       let indexTemplateExists = false;
       try {
-        indexTemplateExists = await this.#options.clusterClient.callAsInternalUser(
+        indexTemplateExists = await this.options.clusterClient.callAsInternalUser(
           'indices.existsTemplate',
           { name: SESSION_INDEX_TEMPLATE.name }
         );
       } catch (err) {
-        this.#options.logger.error(
+        this.options.logger.error(
           `Failed to check if session index template exists: ${err.message}`
         );
         throw err;
@@ -337,16 +310,16 @@ export class SessionIndex {
 
       // Create index template if it doesn't exist.
       if (indexTemplateExists) {
-        this.#options.logger.debug('Session index template already exists.');
+        this.options.logger.debug('Session index template already exists.');
       } else {
         try {
-          await this.#options.clusterClient.callAsInternalUser('indices.putTemplate', {
+          await this.options.clusterClient.callAsInternalUser('indices.putTemplate', {
             name: SESSION_INDEX_TEMPLATE.name,
             body: SESSION_INDEX_TEMPLATE.template,
           });
-          this.#options.logger.debug('Successfully created session index template.');
+          this.options.logger.debug('Successfully created session index template.');
         } catch (err) {
-          this.#options.logger.error(`Failed to create session index template: ${err.message}`);
+          this.options.logger.error(`Failed to create session index template: ${err.message}`);
           throw err;
         }
       }
@@ -355,32 +328,91 @@ export class SessionIndex {
       // always enabled, so we create session index explicitly.
       let indexExists = false;
       try {
-        indexExists = await this.#options.clusterClient.callAsInternalUser('indices.exists', {
+        indexExists = await this.options.clusterClient.callAsInternalUser('indices.exists', {
           index: SESSION_INDEX_NAME,
         });
       } catch (err) {
-        this.#options.logger.error(`Failed to check if session index exists: ${err.message}`);
+        this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
         throw err;
       }
 
       // Create index if it doesn't exist.
       if (indexExists) {
-        this.#options.logger.debug('Session index already exists.');
+        this.options.logger.debug('Session index already exists.');
       } else {
         try {
-          await this.#options.clusterClient.callAsInternalUser('indices.create', {
+          await this.options.clusterClient.callAsInternalUser('indices.create', {
             index: SESSION_INDEX_NAME,
           });
-          this.#options.logger.debug('Successfully created session index.');
+          this.options.logger.debug('Successfully created session index.');
         } catch (err) {
-          this.#options.logger.error(`Failed to create session index: ${err.message}`);
-          throw err;
+          // There can be a race condition if index is created by another Kibana instance.
+          if (err?.body?.error?.type === 'resource_already_exists_exception') {
+            this.options.logger.debug('Session index already exists.');
+          } else {
+            this.options.logger.error(`Failed to create session index: ${err.message}`);
+            throw err;
+          }
         }
       }
 
       // Notify any consumers that are awaiting on this promise and immediately reset it.
       resolve();
       this.indexInitialization = undefined;
-    });
+    }));
+  }
+
+  /**
+   * Trigger a removal of any outdated session values.
+   */
+  async cleanUp() {
+    const now = Date.now();
+
+    // Always try to delete sessions with expired lifespan (even if it's not configured right now).
+    const deleteQueries: object[] = [{ range: { lifespanExpiration: { lte: now } } }];
+
+    // If lifespan is configured we should remove sessions that were created without it if any.
+    if (this.options.config.session.lifespan) {
+      deleteQueries.push({ bool: { must_not: { exists: { field: 'lifespanExpiration' } } } });
+    }
+
+    // If idle timeout is configured we should delete all sessions without specified idle timeout
+    // or if that session hasn't been updated for a while meaning that session is expired.
+    if (this.idleIndexCleanupTimeout) {
+      deleteQueries.push(
+        { range: { idleTimeoutExpiration: { lte: now - this.idleIndexCleanupTimeout } } },
+        { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } }
+      );
+    } else {
+      // Otherwise just delete all expired sessions that were previously created with the idle
+      // timeout if any.
+      deleteQueries.push({ range: { idleTimeoutExpiration: { lte: now } } });
+    }
+
+    try {
+      const response = await this.options.clusterClient.callAsInternalUser('deleteByQuery', {
+        index: SESSION_INDEX_ALIAS,
+        refresh: 'wait_for',
+        ignore: [409, 404],
+        body: {
+          query: {
+            bool: {
+              filter: { term: { tenant: this.options.tenant } },
+              should: deleteQueries,
+              minimum_should_match: 1,
+            },
+          },
+        },
+      });
+
+      if (typeof response.deleted === 'number') {
+        this.options.logger.debug(
+          `Cleaned up ${response.deleted} invalid or expired session values.`
+        );
+      }
+    } catch (err) {
+      this.options.logger.error(`Failed to clean up sessions: ${err.message}`);
+      throw err;
+    }
   }
 }

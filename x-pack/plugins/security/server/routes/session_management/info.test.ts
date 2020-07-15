@@ -64,10 +64,7 @@ describe('Info session routes', () => {
 
     it('returns session info.', async () => {
       session.get.mockResolvedValue(
-        sessionMock.createSessionValue({
-          idleTimeoutExpiration: 100,
-          lifespanExpiration: 200,
-        })
+        sessionMock.createValue({ idleTimeoutExpiration: 100, lifespanExpiration: 200 })
       );
 
       const dateSpy = jest.spyOn(Date, 'now');

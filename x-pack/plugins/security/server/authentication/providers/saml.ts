@@ -451,7 +451,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.failed(err);
     }
 
-    this.logger.debug('Login initiated by Identity Provider is successfully completed.');
+    this.logger.debug('IdP initiated login completed successfully.');
     return payloadAuthenticationResult;
   }
 

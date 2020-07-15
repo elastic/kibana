@@ -47,11 +47,6 @@ export interface SessionValue {
   lifespanExpiration: number | null;
 
   /**
-   * Kibana server base path the session was created for.
-   */
-  path: string;
-
-  /**
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
    * entirely determined by the authentication provider that owns the current session.
    */
@@ -69,14 +64,13 @@ export interface SessionValue {
 }
 
 export interface SessionOptions {
-  serverBasePath: string;
-  logger: Logger;
-  sessionIndex: SessionIndex;
-  sessionCookie: SessionCookie;
-  config: Pick<ConfigType, 'encryptionKey' | 'session'>;
+  readonly logger: Logger;
+  readonly sessionIndex: PublicMethodsOf<SessionIndex>;
+  readonly sessionCookie: PublicMethodsOf<SessionCookie>;
+  readonly config: Pick<ConfigType, 'encryptionKey' | 'session'>;
 }
 
-interface SessionValueContentToEncrypt {
+export interface SessionValueContentToEncrypt {
   username?: string;
   state: unknown;
 }
@@ -85,41 +79,37 @@ export class Session {
   /**
    * Session timeout in ms. If `null` session will stay active until the browser is closed.
    */
-  readonly #idleTimeout: Duration | null;
+  private readonly idleTimeout: Duration | null;
 
   /**
-   * Timeout after which idle timeout property is updated in the index. It's two times longer than
-   * configured idle timeout since index updates are costly and we want to minimize them.
+   * Timeout after which idle timeout property is updated in the index.
    */
-  readonly #idleIndexUpdateTimeout: number | null;
+  private readonly idleIndexUpdateTimeout: number | null;
 
   /**
    * Session max lifespan in ms. If `null` session may live indefinitely.
    */
-  readonly #lifespan: Duration | null;
+  private readonly lifespan: Duration | null;
 
   /**
    * Used to encrypt and decrypt portion of the session value using configured encryption key.
    */
-  readonly #crypto: Crypto;
+  private readonly crypto: Crypto;
 
   /**
    * Promise-based version of the NodeJS native `randomBytes`.
    */
-  readonly #randomBytes = promisify(randomBytes);
+  private readonly randomBytes = promisify(randomBytes);
 
-  /**
-   * Options used to create Session.
-   */
-  readonly #options: Readonly<SessionOptions>;
+  constructor(private readonly options: Readonly<SessionOptions>) {
+    this.crypto = nodeCrypto({ encryptionKey: this.options.config.encryptionKey });
+    this.idleTimeout = this.options.config.session.idleTimeout;
+    this.lifespan = this.options.config.session.lifespan;
 
-  constructor(options: Readonly<SessionOptions>) {
-    this.#options = options;
-    this.#crypto = nodeCrypto({ encryptionKey: this.#options.config.encryptionKey });
-    this.#idleTimeout = this.#options.config.session.idleTimeout;
-    this.#lifespan = this.#options.config.session.lifespan;
-    this.#idleIndexUpdateTimeout = this.#options.config.session.idleTimeout
-      ? this.#options.config.session.idleTimeout.asMilliseconds() * 2
+    // The timeout after which we update index is two times longer than configured idle timeout
+    // since index updates are costly and we want to minimize them.
+    this.idleIndexUpdateTimeout = this.options.config.session.idleTimeout
+      ? this.options.config.session.idleTimeout.asMilliseconds() * 2
       : null;
   }
 
@@ -129,7 +119,7 @@ export class Session {
    * @param request Request instance to get session value for.
    */
   async get(request: KibanaRequest) {
-    const sessionCookieValue = await this.#options.sessionCookie.get(request);
+    const sessionCookieValue = await this.options.sessionCookie.get(request);
     if (!sessionCookieValue) {
       return null;
     }
@@ -140,31 +130,36 @@ export class Session {
         sessionCookieValue.idleTimeoutExpiration < now) ||
       (sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < now)
     ) {
-      this.#options.logger.debug('Session has expired and will be invalidated.');
+      this.options.logger.debug('Session has expired and will be invalidated.');
       await this.clear(request);
       return null;
     }
 
-    const sessionIndexValue = await this.#options.sessionIndex.get(sessionCookieValue.sid);
+    const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);
     if (!sessionIndexValue) {
-      this.#options.logger.debug(
+      this.options.logger.debug(
         'Session value is not available in the index, session cookie will be invalidated.'
       );
+      await this.options.sessionCookie.clear(request);
+      return null;
+    }
+
+    let decryptedContent: SessionValueContentToEncrypt;
+    try {
+      decryptedContent = JSON.parse(
+        (await this.crypto.decrypt(sessionIndexValue.content, sessionCookieValue.aad)) as string
+      );
+    } catch (err) {
+      this.options.logger.warn('Unable to decrypt session content, session will be invalidated.');
       await this.clear(request);
       return null;
     }
 
-    try {
-      return {
-        ...(await this.decryptSessionValue(sessionIndexValue, sessionCookieValue.aad)),
-        // Unlike session index, session cookie contains the most up to date idle timeout expiration.
-        idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
-      };
-    } catch (err) {
-      this.#options.logger.warn('Unable to decrypt session content, session will be invalidated.');
-      await this.clear(request);
-      return null;
-    }
+    return {
+      ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
+      // Unlike session index, session cookie contains the most up to date idle timeout expiration.
+      idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
+    };
   }
 
   /**
@@ -175,35 +170,32 @@ export class Session {
   async create(
     request: KibanaRequest,
     sessionValue: Readonly<
-      Omit<
-        SessionValue,
-        'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'path' | 'metadata'
-      >
+      Omit<SessionValue, 'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'metadata'>
     >
   ) {
-    // Do we want to partition these calls or merge in a single 512 call instead? Technically 512
-    // will be faster, and we'll occupy just one thread.
     const [sid, aad] = await Promise.all([
-      this.#randomBytes(256).then((sidBuffer) => sidBuffer.toString('base64')),
-      this.#randomBytes(256).then((aadBuffer) => aadBuffer.toString('base64')),
+      this.randomBytes(256).then((sidBuffer) => sidBuffer.toString('base64')),
+      this.randomBytes(256).then((aadBuffer) => aadBuffer.toString('base64')),
     ]);
 
     const sessionExpirationInfo = this.calculateExpiry();
-    const path = this.#options.serverBasePath;
-    const createdSessionValue = { ...sessionValue, ...sessionExpirationInfo, sid, path };
+    const { username, state, ...publicSessionValue } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
-    const sessionIndexValue = await this.#options.sessionIndex.create(
-      await this.encryptSessionValue(createdSessionValue, aad)
-    );
-    await this.#options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad, path });
+    const sessionIndexValue = await this.options.sessionIndex.create({
+      ...publicSessionValue,
+      ...sessionExpirationInfo,
+      sid,
+      usernameHash: username && createHash('sha3-256').update(username).digest('hex'),
+      content: await this.crypto.encrypt(JSON.stringify({ username, state }), aad),
+    });
 
-    this.#options.logger.debug('Successfully created new session.');
+    await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
 
-    return { ...createdSessionValue, metadata: { index: sessionIndexValue } } as Readonly<
-      SessionValue
-    >;
+    this.options.logger.debug('Successfully created new session.');
+
+    return Session.sessionIndexValueToSessionValue(sessionIndexValue, { username, state });
   }
 
   /**
@@ -212,44 +204,44 @@ export class Session {
    * @param sessionValue Session value parameters.
    */
   async update(request: KibanaRequest, sessionValue: Readonly<SessionValue>) {
-    const sessionCookieValue = await this.#options.sessionCookie.get(request);
+    const sessionCookieValue = await this.options.sessionCookie.get(request);
     if (!sessionCookieValue) {
-      throw new Error('Session cannot be update since it doesnt exist.');
+      this.options.logger.warn('Session cannot be updated since it does not exist.');
+      return null;
     }
 
     const sessionExpirationInfo = this.calculateExpiry(sessionCookieValue.lifespanExpiration);
-    const { metadata, ...sessionValueToUpdate } = sessionValue;
-    const updatedSessionValue = {
-      ...sessionValueToUpdate,
-      ...sessionExpirationInfo,
-      path: this.#options.serverBasePath,
-    };
+    const { username, state, metadata, ...publicSessionInfo } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
-    const sessionIndexValue = await this.#options.sessionIndex.update({
+    const sessionIndexValue = await this.options.sessionIndex.update({
       ...sessionValue.metadata.index,
-      ...(await this.encryptSessionValue(updatedSessionValue, sessionCookieValue.aad)),
+      ...publicSessionInfo,
+      ...sessionExpirationInfo,
+      usernameHash: username && createHash('sha3-256').update(username).digest('hex'),
+      content: await this.crypto.encrypt(
+        JSON.stringify({ username, state }),
+        sessionCookieValue.aad
+      ),
     });
 
     // Session may be already invalidated by another concurrent request, in this case we should
     // clear cookie for the request as well.
     if (sessionIndexValue === null) {
-      this.#options.logger.warn('Session cannot be updated as it has been invalidated already.');
-      await this.#options.sessionCookie.clear(request);
+      this.options.logger.warn('Session cannot be updated as it has been invalidated already.');
+      await this.options.sessionCookie.clear(request);
       return null;
     }
 
-    await this.#options.sessionCookie.set(request, {
+    await this.options.sessionCookie.set(request, {
       ...sessionCookieValue,
       ...sessionExpirationInfo,
     });
 
-    this.#options.logger.debug('Successfully updated existing session.');
+    this.options.logger.debug('Successfully updated existing session.');
 
-    return { ...updatedSessionValue, metadata: { index: sessionIndexValue } } as Readonly<
-      SessionValue
-    >;
+    return Session.sessionIndexValueToSessionValue(sessionIndexValue, { username, state });
   }
 
   /**
@@ -258,9 +250,10 @@ export class Session {
    * @param sessionValue Session value parameters.
    */
   async extend(request: KibanaRequest, sessionValue: Readonly<SessionValue>) {
-    const sessionCookieValue = await this.#options.sessionCookie.get(request);
+    const sessionCookieValue = await this.options.sessionCookie.get(request);
     if (!sessionCookieValue) {
-      throw new Error('Session cannot be extended since it doesnt exist.');
+      this.options.logger.warn('Session cannot be extended since it does not exist.');
+      return null;
     }
 
     // We calculate actual expiration values based on the information extracted from the portion of
@@ -284,7 +277,7 @@ export class Session {
     ) {
       // 1. If idle timeout wasn't configured when session was initially created and is configured
       // now or vice versa.
-      this.#options.logger.debug(
+      this.options.logger.debug(
         'Session idle timeout configuration has changed, session index will be updated.'
       );
       updateSessionIndex = true;
@@ -296,17 +289,17 @@ export class Session {
     ) {
       // 2. If lifespan wasn't configured when session was initially created and is configured now
       // or vice versa.
-      this.#options.logger.debug(
+      this.options.logger.debug(
         'Session lifespan configuration has changed, session index will be updated.'
       );
       updateSessionIndex = true;
     } else if (
-      this.#idleIndexUpdateTimeout !== null &&
-      this.#idleIndexUpdateTimeout <
+      this.idleIndexUpdateTimeout !== null &&
+      this.idleIndexUpdateTimeout <
         sessionExpirationInfo.idleTimeoutExpiration! - sessionValue.idleTimeoutExpiration!
     ) {
       // 3. If idle timeout was updated a while ago.
-      this.#options.logger.debug(
+      this.options.logger.debug(
         'Session idle timeout stored in the index is too old and will be updated.'
       );
       updateSessionIndex = true;
@@ -315,7 +308,7 @@ export class Session {
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
     if (updateSessionIndex) {
-      const sessionIndexValue = await this.#options.sessionIndex.update({
+      const sessionIndexValue = await this.options.sessionIndex.update({
         ...sessionValue.metadata.index,
         ...sessionExpirationInfo,
       });
@@ -323,20 +316,20 @@ export class Session {
       // Session may be already invalidated by another concurrent request, in this case we should
       // clear cookie for the request as well.
       if (sessionIndexValue === null) {
-        this.#options.logger.warn('Session cannot be extended as it has been invalidated already.');
-        await this.#options.sessionCookie.clear(request);
+        this.options.logger.warn('Session cannot be extended as it has been invalidated already.');
+        await this.options.sessionCookie.clear(request);
         return null;
       }
 
       sessionValue.metadata.index = sessionIndexValue;
     }
 
-    await this.#options.sessionCookie.set(request, {
+    await this.options.sessionCookie.set(request, {
       ...sessionCookieValue,
       ...sessionExpirationInfo,
     });
 
-    this.#options.logger.debug('Successfully extended existing session.');
+    this.options.logger.debug('Successfully extended existing session.');
 
     return { ...sessionValue, ...sessionExpirationInfo } as Readonly<SessionValue>;
   }
@@ -346,69 +339,17 @@ export class Session {
    * @param request Request instance to clear session value for.
    */
   async clear(request: KibanaRequest) {
-    const sessionCookieValue = await this.#options.sessionCookie.get(request);
+    const sessionCookieValue = await this.options.sessionCookie.get(request);
     if (!sessionCookieValue) {
-      return null;
+      return;
     }
 
     await Promise.all([
-      this.#options.sessionCookie.clear(request),
-      this.#options.sessionIndex.clear(sessionCookieValue.sid),
+      this.options.sessionCookie.clear(request),
+      this.options.sessionIndex.clear(sessionCookieValue.sid),
     ]);
 
-    this.#options.logger.debug('Successfully invalidated existing session.');
-  }
-
-  /**
-   * Encrypts session value content and converts to a value stored in the session index.
-   * @param sessionValue Session value.
-   * @param aad Additional authenticated data (AAD) used for encryption.
-   */
-  private async encryptSessionValue(
-    sessionValue: Readonly<Omit<SessionValue, 'metadata'>>,
-    aad: string
-  ) {
-    // Extract values that shouldn't be directly included into session index value.
-    const { username, state, ...sessionIndexValue } = sessionValue;
-
-    try {
-      const encryptedContent = await this.#crypto.encrypt(
-        JSON.stringify({ username, state } as SessionValueContentToEncrypt),
-        aad
-      );
-      return {
-        ...sessionIndexValue,
-        username_hash: username && createHash('sha3-256').update(username).digest('hex'),
-        content: encryptedContent,
-      };
-    } catch (err) {
-      this.#options.logger.error(`Failed to encrypt session value: ${err.message}`);
-      throw err;
-    }
-  }
-
-  /**
-   * Decrypts session value content from the value stored in the session index.
-   * @param sessionIndexValue Session value retrieved from the session index.
-   * @param aad Additional authenticated data (AAD) used for decryption.
-   */
-  private async decryptSessionValue(sessionIndexValue: Readonly<SessionIndexValue>, aad: string) {
-    // Extract values that are specific to session index value.
-    const { username_hash, content, ...sessionValue } = sessionIndexValue;
-
-    try {
-      const decryptedContent = JSON.parse(
-        (await this.#crypto.decrypt(content, aad)) as string
-      ) as SessionValueContentToEncrypt;
-      return {
-        ...sessionValue,
-        ...decryptedContent,
-        metadata: { index: sessionIndexValue },
-      } as Readonly<SessionValue>;
-    } catch (err) {
-      this.#options.logger.error(`Failed to decrypt session value: ${err.message}`);
-      throw err;
-    }
+    this.options.logger.debug('Successfully invalidated existing session.');
   }
 
   private calculateExpiry(
@@ -420,11 +361,25 @@ export class Session {
     // note, if the server had a `lifespan` set and then removes it, remove `lifespanExpiration` on renewed sessions
     // also, if the server did not have a `lifespan` set and then adds it, add `lifespanExpiration` on renewed sessions
     const lifespanExpiration =
-      currentLifespanExpiration && this.#lifespan
+      currentLifespanExpiration && this.lifespan
         ? currentLifespanExpiration
-        : this.#lifespan && now + this.#lifespan.asMilliseconds();
-    const idleTimeoutExpiration = this.#idleTimeout && now + this.#idleTimeout.asMilliseconds();
+        : this.lifespan && now + this.lifespan.asMilliseconds();
+    const idleTimeoutExpiration = this.idleTimeout && now + this.idleTimeout.asMilliseconds();
 
     return { idleTimeoutExpiration, lifespanExpiration };
+  }
+
+  /**
+   * Converts value retrieved from the index to the value returned to the API consumers.
+   * @param sessionIndexValue The value returned from the index.
+   * @param decryptedContent Decrypted session value content.
+   */
+  private static sessionIndexValueToSessionValue(
+    sessionIndexValue: Readonly<SessionIndexValue>,
+    { username, state }: SessionValueContentToEncrypt
+  ): Readonly<SessionValue> {
+    // Extract values that are specific to session index value.
+    const { usernameHash, content, tenant, ...publicSessionValue } = sessionIndexValue;
+    return { ...publicSessionValue, username, state, metadata: { index: sessionIndexValue } };
   }
 }

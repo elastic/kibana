@@ -13,7 +13,7 @@ import {
   sessionStorageMock,
   httpServerMock,
 } from '../../../../../src/core/server/mocks';
-import { sessionMock } from './session.mock';
+import { sessionCookieMock } from './session_cookie.mock';
 
 describe('Session cookie', () => {
   let sessionCookieOptions: SessionCookieOptions;
@@ -62,27 +62,25 @@ describe('Session cookie', () => {
       ] = (sessionCookieOptions.createCookieSessionStorageFactory as jest.Mock).mock.calls;
 
       expect(
-        validate(
-          sessionMock.createSessionCookieValue({ path: sessionCookieOptions.serverBasePath })
-        )
+        validate(sessionCookieMock.createValue({ path: sessionCookieOptions.serverBasePath }))
       ).toEqual({ isValid: true });
 
       expect(
         validate([
-          sessionMock.createSessionCookieValue({ path: sessionCookieOptions.serverBasePath }),
-          sessionMock.createSessionCookieValue({ path: sessionCookieOptions.serverBasePath }),
+          sessionCookieMock.createValue({ path: sessionCookieOptions.serverBasePath }),
+          sessionCookieMock.createValue({ path: sessionCookieOptions.serverBasePath }),
         ])
       ).toEqual({ isValid: true });
 
-      expect(validate(sessionMock.createSessionCookieValue({ path: '/some-old-path' }))).toEqual({
+      expect(validate(sessionCookieMock.createValue({ path: '/some-old-path' }))).toEqual({
         isValid: false,
         path: '/some-old-path',
       });
 
       expect(
         validate([
-          sessionMock.createSessionCookieValue({ path: sessionCookieOptions.serverBasePath }),
-          sessionMock.createSessionCookieValue({ path: '/some-old-path' }),
+          sessionCookieMock.createValue({ path: sessionCookieOptions.serverBasePath }),
+          sessionCookieMock.createValue({ path: '/some-old-path' }),
         ])
       ).toEqual({ isValid: false, path: '/some-old-path' });
     });
@@ -100,7 +98,7 @@ describe('Session cookie', () => {
     });
 
     it('returns value if session is in compatible format', async () => {
-      const sessionValue = sessionMock.createSessionCookieValue();
+      const sessionValue = sessionCookieMock.createValue();
       mockSessionStorage.get.mockResolvedValue(sessionValue);
 
       const request = httpServerMock.createKibanaRequest();
@@ -111,7 +109,7 @@ describe('Session cookie', () => {
     });
 
     it('returns `null` and clears session value if it is in incompatible format', async () => {
-      const invalidValue = sessionMock.createSessionCookieValue();
+      const invalidValue = sessionCookieMock.createValue();
       delete invalidValue.sid;
 
       mockSessionStorage.get.mockResolvedValue(invalidValue);
@@ -126,14 +124,17 @@ describe('Session cookie', () => {
 
   describe('#set', () => {
     it('properly sets value in the session storage', async () => {
-      const sessionValue = sessionMock.createSessionCookieValue();
+      const sessionValue = sessionCookieMock.createValue();
 
       const request = httpServerMock.createKibanaRequest();
       await sessionCookie.set(request, sessionValue);
 
       expect(mockSessionStorageFactory.asScoped).toHaveBeenCalledWith(request);
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
-      expect(mockSessionStorage.set).toHaveBeenCalledWith(sessionValue);
+      expect(mockSessionStorage.set).toHaveBeenCalledWith({
+        ...sessionValue,
+        path: '/mock-base-path',
+      });
     });
   });
 

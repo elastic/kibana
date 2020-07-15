@@ -57,12 +57,19 @@ export class SessionCookie {
   /**
    * Promise containing initialized cookie session storage factory.
    */
-  readonly #cookieSessionValueStorage: Promise<SessionStorageFactory<Readonly<SessionCookieValue>>>;
+  private readonly cookieSessionValueStorage: Promise<
+    SessionStorageFactory<Readonly<SessionCookieValue>>
+  >;
 
   /**
    * Session cookie logger.
    */
-  readonly #logger: Logger;
+  private readonly logger: Logger;
+
+  /**
+   * Base path of the Kibana server instance.
+   */
+  private readonly serverBasePath: string;
 
   constructor({
     config,
@@ -70,8 +77,10 @@ export class SessionCookie {
     logger,
     serverBasePath,
   }: Readonly<SessionCookieOptions>) {
-    this.#logger = logger;
-    this.#cookieSessionValueStorage = createCookieSessionStorageFactory({
+    this.logger = logger;
+    this.serverBasePath = serverBasePath;
+
+    this.cookieSessionValueStorage = createCookieSessionStorageFactory({
       encryptionKey: config.encryptionKey,
       isSecure: config.secureCookies,
       name: config.cookieName,
@@ -84,7 +93,7 @@ export class SessionCookie {
         ).find((sess) => sess.path !== undefined && sess.path !== serverBasePath);
 
         if (invalidSessionValue) {
-          this.#logger.debug(`Outdated session value with path "${invalidSessionValue.path}"`);
+          this.logger.debug(`Outdated session value with path "${invalidSessionValue.path}"`);
           return { isValid: false, path: invalidSessionValue.path };
         }
 
@@ -98,7 +107,7 @@ export class SessionCookie {
    * @param request Request instance to get session value for.
    */
   async get(request: KibanaRequest) {
-    const sessionStorage = (await this.#cookieSessionValueStorage).asScoped(request);
+    const sessionStorage = (await this.cookieSessionValueStorage).asScoped(request);
     const sessionValue = await sessionStorage.get();
 
     // If we detect that cookie session value is in incompatible format, then we should clear such
@@ -116,8 +125,10 @@ export class SessionCookie {
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
    */
-  async set(request: KibanaRequest, sessionValue: Readonly<SessionCookieValue>) {
-    (await this.#cookieSessionValueStorage).asScoped(request).set(sessionValue);
+  async set(request: KibanaRequest, sessionValue: Readonly<Omit<SessionCookieValue, 'path'>>) {
+    (await this.cookieSessionValueStorage)
+      .asScoped(request)
+      .set({ ...sessionValue, path: this.serverBasePath });
   }
 
   /**
@@ -125,7 +136,7 @@ export class SessionCookie {
    * @param request Request instance to clear session value for.
    */
   async clear(request: KibanaRequest) {
-    (await this.#cookieSessionValueStorage).asScoped(request).clear();
+    (await this.cookieSessionValueStorage).asScoped(request).clear();
   }
 
   /**

@@ -160,9 +160,7 @@ describe('Access agreement view routes', () => {
       ];
 
       for (const [sessionProvider, expectedAccessAgreement] of cases) {
-        session.get.mockResolvedValue(
-          sessionMock.createSessionValue({ provider: sessionProvider })
-        );
+        session.get.mockResolvedValue(sessionMock.createValue({ provider: sessionProvider }));
 
         await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
           options: { body: { accessAgreement: expectedAccessAgreement } },
