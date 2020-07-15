@@ -29,12 +29,6 @@ exports[`EventDetails rendering should match snapshot 1`] = `
       ownFocus={false}
       panelPaddingSize="m"
       repositionOnScroll={true}
-      style={
-        Object {
-          "position": "fixed",
-          "zIndex": 10,
-        }
-      }
     />
   </styled.div>
   <EuiTabbedContent
