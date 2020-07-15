@@ -256,10 +256,10 @@ export function systemRoutes(
         };
 
         const fieldsResult = await context.ml!.mlClient.callAsCurrentUser('fieldCaps', options);
-        const result = { indexExists: false };
+        const result = { exists: false };
 
         if (Array.isArray(fieldsResult.indices) && fieldsResult.indices.length !== 0) {
-          result.indexExists = true;
+          result.exists = true;
         }
 
         return response.ok({
