@@ -108,7 +108,6 @@ export const SearchExamplesApp = ({
       strategy,
     });
     search$.subscribe((response) => {
-      // Need to add is running and is partial to oss
       if (!response.isPartial && !response.isRunning) {
         setResult(response);
         notifications.toasts.addSuccess(
