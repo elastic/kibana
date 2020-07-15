@@ -69,6 +69,7 @@
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.esaggsexpressionfunctiondefinition.md) |  |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-server.fieldformatsgetconfigfn.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |

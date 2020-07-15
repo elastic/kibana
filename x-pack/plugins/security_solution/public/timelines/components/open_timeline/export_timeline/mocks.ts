@@ -79,7 +79,7 @@ export const mockSelectedTimeline = [
       },
     },
     title: 'duplicate timeline',
-    dateRange: { start: 1582538951145, end: 1582625351145 },
+    dateRange: { start: '2020-02-24T10:09:11.145Z', end: '2020-02-25T10:09:11.145Z' },
     savedQueryId: null,
     sort: { columnId: '@timestamp', sortDirection: 'desc' },
     created: 1583866966262,

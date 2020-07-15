@@ -50,6 +50,7 @@ export const findThresholdSignals = async ({
   return singleSearchAfter({
     aggregations,
     searchAfterSortId: undefined,
+    timestampOverride: undefined,
     index: inputIndexPattern,
     from,
     to,

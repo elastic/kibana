@@ -107,7 +107,8 @@
     "clusterMeta": {
       "enabled": false,
       "message": "Cluster [clustertwo] license type [basic] does not support Cluster Alerts"
-    }
+    },
+    "list": {}
   },
   "isPrimary": false,
   "status": "green",
@@ -219,10 +220,7 @@
     "alertsMeta": {
       "enabled": true
     },
-    "count": 1,
-    "low": 0,
-    "medium": 1,
-    "high": 0
+    "list": {}
   },
   "isPrimary": false,
   "status": "yellow",
@@ -333,7 +331,8 @@
   "alerts": {
     "alertsMeta": {
       "enabled": true
-    }
+    },
+    "list": {}
   },
   "isPrimary": false,
   "status": "green",

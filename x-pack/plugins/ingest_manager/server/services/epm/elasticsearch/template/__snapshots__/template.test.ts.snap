@@ -91,9 +91,7 @@ exports[`tests loading base.yml: base.yml 1`] = `
     },
     "aliases": {}
   },
-  "data_stream": {
-    "timestamp_field": "@timestamp"
-  },
+  "data_stream": {},
   "composed_of": [],
   "_meta": {
     "package": {
@@ -196,9 +194,7 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     },
     "aliases": {}
   },
-  "data_stream": {
-    "timestamp_field": "@timestamp"
-  },
+  "data_stream": {},
   "composed_of": [],
   "_meta": {
     "package": {
@@ -1685,9 +1681,7 @@ exports[`tests loading system.yml: system.yml 1`] = `
     },
     "aliases": {}
   },
-  "data_stream": {
-    "timestamp_field": "@timestamp"
-  },
+  "data_stream": {},
   "composed_of": [],
   "_meta": {
     "package": {

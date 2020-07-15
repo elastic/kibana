@@ -83,10 +83,12 @@ describe('rule helpers', () => {
           title: 'Titled timeline',
         },
       };
-      const aboutRuleStepData = {
+
+      const aboutRuleStepData: AboutStepRule = {
         author: [],
         description: '24/7',
         falsePositives: ['test'],
+        isAssociatedToEndpointList: false,
         isBuildingBlock: false,
         isNew: false,
         license: 'Elastic License',

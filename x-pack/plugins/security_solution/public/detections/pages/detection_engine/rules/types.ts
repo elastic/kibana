@@ -20,6 +20,7 @@ import {
   SeverityMapping,
   TimestampOverride,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { List } from '../../../../../common/detection_engine/schemas/types';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -65,6 +66,7 @@ export interface AboutStepRule extends StepRuleData {
   author: string[];
   name: string;
   description: string;
+  isAssociatedToEndpointList: boolean;
   isBuildingBlock: boolean;
   severity: AboutStepSeverity;
   riskScore: AboutStepRiskScore;
@@ -136,6 +138,7 @@ export interface DefineStepRuleJson {
 export interface AboutStepRuleJson {
   author: Author;
   building_block_type?: BuildingBlockType;
+  exceptions_list?: List[];
   name: string;
   description: string;
   license: License;
@@ -145,10 +148,10 @@ export interface AboutStepRuleJson {
   risk_score_mapping: RiskScoreMapping;
   references: string[];
   false_positives: string[];
-  rule_name_override: RuleNameOverride;
+  rule_name_override?: RuleNameOverride;
   tags: string[];
   threat: IMitreEnterpriseAttack[];
-  timestamp_override: TimestampOverride;
+  timestamp_override?: TimestampOverride;
   note?: string;
 }
 

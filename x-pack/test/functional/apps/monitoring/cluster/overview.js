@@ -10,7 +10,8 @@ import { getLifecycleMethods } from '../_get_lifecycle_methods';
 export default function ({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
 
-  describe('Cluster overview', () => {
+  // https://github.com/elastic/kibana/issues/71796
+  describe.skip('Cluster overview', () => {
     describe('for Green cluster with Gold license', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
@@ -23,10 +24,6 @@ export default function ({ getService, getPageObjects }) {
 
       after(async () => {
         await tearDown();
-      });
-
-      it('shows alerts panel, because there are resolved alerts in the time range', async () => {
-        expect(await overview.doesClusterAlertsExist()).to.be(true);
       });
 
       it('elasticsearch panel has no ML line, because license is Gold', async () => {
@@ -78,10 +75,6 @@ export default function ({ getService, getPageObjects }) {
 
       after(async () => {
         await tearDown();
-      });
-
-      it('shows alerts panel, because cluster status is Yellow', async () => {
-        expect(await overview.doesClusterAlertsExist()).to.be(true);
       });
 
       it('elasticsearch panel has ML, because license is Platinum', async () => {
