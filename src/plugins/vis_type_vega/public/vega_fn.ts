@@ -29,6 +29,7 @@ import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
 import { VegaInspectorAdapters } from './vega_inspector/index';
 import { TimeRange, Query } from '../../data/public';
+import { VegaParser } from './data_model/vega_parser';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<RenderValue>>;
@@ -40,7 +41,7 @@ interface Arguments {
 export type VisParams = Required<Arguments>;
 
 interface RenderValue {
-  visData: Input;
+  visData: VegaParser;
   visType: 'vega';
   visConfig: VisParams;
 }

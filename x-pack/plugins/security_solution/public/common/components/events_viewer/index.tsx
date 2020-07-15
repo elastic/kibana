@@ -28,6 +28,7 @@ export interface OwnProps {
   defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
   end: string;
+  height?: number;
   id: string;
   start: string;
   headerFilterGroup?: React.ReactNode;
@@ -48,6 +49,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
+  height,
   id,
   isLive,
   itemsPerPage,
@@ -128,6 +130,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         isLoadingIndexPattern={isLoadingIndexPattern}
         filters={globalFilters}
         headerFilterGroup={headerFilterGroup}
+        height={height}
         indexPattern={indexPatterns}
         isLive={isLive}
         itemsPerPage={itemsPerPage!}
@@ -203,6 +206,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
+    // eslint-disable-next-line complexity
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
       deepEqual(prevProps.columns, nextProps.columns) &&
@@ -212,6 +216,7 @@ export const StatefulEventsViewer = connector(
       prevProps.deletedEventIds === nextProps.deletedEventIds &&
       prevProps.end === nextProps.end &&
       deepEqual(prevProps.filters, nextProps.filters) &&
+      prevProps.height === nextProps.height &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&

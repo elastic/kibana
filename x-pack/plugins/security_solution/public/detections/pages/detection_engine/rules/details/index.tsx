@@ -15,13 +15,17 @@ import {
   EuiTab,
   EuiTabs,
   EuiToolTip,
+  EuiWindowEvent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { noop } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
+import { useWindowSize } from 'react-use';
 
+import { globalHeaderHeightPx } from '../../../../../app/home';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -62,6 +66,7 @@ import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
+import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../../../common/components/events_viewer/events_viewer';
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { State } from '../../../../../common/store';
 import { InputsRange } from '../../../../../common/store/inputs/model';
@@ -76,7 +81,15 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
+import { FILTERS_GLOBAL_HEIGHT } from '../../../../../../common/constants';
+import { useFullScreen } from '../../../../../common/containers/use_full_screen';
+import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../lists_plugin_deps';
+import {
+  getEventsViewerBodyHeight,
+  MIN_EVENTS_VIEWER_BODY_HEIGHT,
+} from '../../../../../timelines/components/timeline/body/helpers';
+import { footerHeight } from '../../../../../timelines/components/timeline/footer';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -141,6 +154,8 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { height: windowHeight } = useWindowSize();
+  const { globalFullScreen } = useFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions =
@@ -329,140 +344,156 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       {indicesExist ? (
         <StickyContainer>
+          <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage>
-            <DetectionEngineHeaderPage
-              backOptions={{
-                href: getRulesUrl(),
-                text: i18n.BACK_TO_RULES,
-                pageId: SecurityPageName.detections,
-              }}
-              border
-              subtitle={subTitle}
-              subtitle2={[
-                ...(lastAlerts != null
-                  ? [
-                      <>
-                        {detectionI18n.LAST_ALERT}
-                        {': '}
-                        {lastAlerts}
-                      </>,
-                    ]
-                  : []),
-                <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
-              ]}
-              title={title}
-            >
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    position="top"
-                    content={
-                      rule?.type === 'machine_learning' && !hasMlPermissions
-                        ? detectionI18n.ML_RULES_DISABLED_MESSAGE
-                        : undefined
-                    }
-                  >
-                    <RuleSwitch
-                      id={rule?.id ?? '-1'}
-                      isDisabled={
-                        userHasNoPermissions(canUserCRUD) || (!hasMlPermissions && !rule?.enabled)
+          <WrapperPage noPadding={globalFullScreen}>
+            <Display show={!globalFullScreen}>
+              <DetectionEngineHeaderPage
+                backOptions={{
+                  href: getRulesUrl(),
+                  text: i18n.BACK_TO_RULES,
+                  pageId: SecurityPageName.detections,
+                }}
+                border
+                subtitle={subTitle}
+                subtitle2={[
+                  ...(lastAlerts != null
+                    ? [
+                        <>
+                          {detectionI18n.LAST_ALERT}
+                          {': '}
+                          {lastAlerts}
+                        </>,
+                      ]
+                    : []),
+                  <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
+                ]}
+                title={title}
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      position="top"
+                      content={
+                        rule?.type === 'machine_learning' && !hasMlPermissions
+                          ? detectionI18n.ML_RULES_DISABLED_MESSAGE
+                          : undefined
                       }
-                      enabled={rule?.enabled ?? false}
-                      optionLabel={i18n.ACTIVATE_RULE}
-                      onChange={handleOnChangeEnabledRule}
-                    />
-                  </EuiToolTip>
+                    >
+                      <RuleSwitch
+                        id={rule?.id ?? '-1'}
+                        isDisabled={
+                          userHasNoPermissions(canUserCRUD) || (!hasMlPermissions && !rule?.enabled)
+                        }
+                        enabled={rule?.enabled ?? false}
+                        optionLabel={i18n.ACTIVATE_RULE}
+                        onChange={handleOnChangeEnabledRule}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <LinkButton
+                          onClick={goToEditRule}
+                          iconType="controlsHorizontal"
+                          isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
+                          href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
+                        >
+                          {ruleI18n.EDIT_RULE_SETTINGS}
+                        </LinkButton>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <RuleActionsOverflow
+                          rule={rule}
+                          userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </DetectionEngineHeaderPage>
+              {ruleError}
+              <EuiSpacer />
+              <EuiFlexGroup>
+                <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
+                  <StepAboutRuleToggleDetails
+                    loading={isLoading}
+                    stepData={aboutRuleData}
+                    stepDataDetails={modifiedAboutRuleDetailsData}
+                  />
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <LinkButton
-                        onClick={goToEditRule}
-                        iconType="controlsHorizontal"
-                        isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
-                        href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
-                      >
-                        {ruleI18n.EDIT_RULE_SETTINGS}
-                      </LinkButton>
+                <EuiFlexItem grow={1}>
+                  <EuiFlexGroup direction="column">
+                    <EuiFlexItem component="section" grow={1}>
+                      <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                        {defineRuleData != null && (
+                          <StepDefineRule
+                            descriptionColumns="singleSplit"
+                            isReadOnlyView={true}
+                            isLoading={false}
+                            defaultValues={defineRuleData}
+                          />
+                        )}
+                      </StepPanel>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <RuleActionsOverflow
-                        rule={rule}
-                        userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
-                      />
+                    <EuiSpacer />
+                    <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
+                      <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                        {scheduleRuleData != null && (
+                          <StepScheduleRule
+                            descriptionColumns="singleSplit"
+                            isReadOnlyView={true}
+                            isLoading={false}
+                            defaultValues={scheduleRuleData}
+                          />
+                        )}
+                      </StepPanel>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </DetectionEngineHeaderPage>
-            {ruleError}
-            <EuiSpacer />
-            <EuiFlexGroup>
-              <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
-                <StepAboutRuleToggleDetails
-                  loading={isLoading}
-                  stepData={aboutRuleData}
-                  stepDataDetails={modifiedAboutRuleDetailsData}
-                />
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={1}>
-                <EuiFlexGroup direction="column">
-                  <EuiFlexItem component="section" grow={1}>
-                    <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                      {defineRuleData != null && (
-                        <StepDefineRule
-                          descriptionColumns="singleSplit"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={defineRuleData}
-                        />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
-                  <EuiSpacer />
-                  <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
-                    <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                      {scheduleRuleData != null && (
-                        <StepScheduleRule
-                          descriptionColumns="singleSplit"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={scheduleRuleData}
-                        />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            {tabs}
-            <EuiSpacer />
+              <EuiSpacer />
+              {tabs}
+              <EuiSpacer />
+            </Display>
             {ruleDetailTab === RuleDetailTabs.alerts && (
               <>
-                <AlertsHistogramPanel
-                  deleteQuery={deleteQuery}
-                  filters={alertMergedFilters}
-                  query={query}
-                  from={from}
-                  signalIndexName={signalIndexName}
-                  setQuery={setQuery}
-                  stackByOptions={alertsHistogramOptions}
-                  to={to}
-                  updateDateRange={updateDateRangeCallback}
-                />
-                <EuiSpacer />
+                <Display show={!globalFullScreen}>
+                  <AlertsHistogramPanel
+                    deleteQuery={deleteQuery}
+                    filters={alertMergedFilters}
+                    query={query}
+                    from={from}
+                    signalIndexName={signalIndexName}
+                    setQuery={setQuery}
+                    stackByOptions={alertsHistogramOptions}
+                    to={to}
+                    updateDateRange={updateDateRangeCallback}
+                  />
+                  <EuiSpacer />
+                </Display>
                 {ruleId != null && (
                   <AlertsTable
                     timelineId={TimelineId.detectionsRulesDetailsPage}
                     canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
+                    eventsViewerBodyHeight={
+                      globalFullScreen
+                        ? getEventsViewerBodyHeight({
+                            footerHeight,
+                            headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
+                            kibanaChromeHeight: globalHeaderHeightPx,
+                            otherContentHeight: FILTERS_GLOBAL_HEIGHT,
+                            windowHeight,
+                          })
+                        : MIN_EVENTS_VIEWER_BODY_HEIGHT
+                    }
                     hasIndexWrite={hasIndexWrite ?? false}
                     from={from}
                     loading={loading}

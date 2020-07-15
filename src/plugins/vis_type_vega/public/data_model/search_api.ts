@@ -49,7 +49,7 @@ export class SearchAPI {
 
     return combineLatest(
       searchRequests.map((request, index) => {
-        const requestId = index.toString();
+        const requestId: number = index;
         const params = getSearchParamsFromRequest(request, {
           uiSettings: this.dependencies.uiSettings,
           injectedMetadata: this.dependencies.injectedMetadata,

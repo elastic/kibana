@@ -36,14 +36,14 @@ export interface Connection {
   destination: ConnectionNode;
 }
 
-export interface ServiceNodeMetrics {
+export interface ServiceNodeStats {
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
   transactionStats: {
     avgTransactionDuration: number | null;
     avgRequestsPerMinute: number | null;
   };
-  avgErrorsPerMinute: number | null;
+  avgErrorRate: number | null;
 }
 
 export function isValidPlatinumLicense(license: ILicense) {
