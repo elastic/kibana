@@ -6,7 +6,7 @@
 ++++
 
 Dashboard panels have an *Explore underlying data* action that navigates you to *Discover*,
-where you can narrow your documents to the ones likely used in the visualization.
+where you can narrow your documents to the ones you'll most likely use in a  visualization.
 This action is available for visualizations backed by a single index pattern.
 
 You can access *Explore underlying data* in two ways: from the panel context
