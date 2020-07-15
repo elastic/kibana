@@ -98,8 +98,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('dashboard embeddable rendering', function describeIndexTests() {
+  describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
