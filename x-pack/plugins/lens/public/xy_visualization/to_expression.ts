@@ -116,7 +116,7 @@ export const buildExpression = (
         type: 'function',
         function: 'lens_xy_chart',
         arguments: {
-          xTitle: [xTitle],
+          xTitle: [state.xTitle || xTitle],
           yTitle: [yTitle],
           legend: [
             {
@@ -134,6 +134,9 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
+          hideXAxisTitle: [state.hideXAxisTitle || false],
+          showXAxisGridlines: [state.showXAxisGridlines || false],
+          hideXAxisTickLabels: [state.hideXAxisTickLabels || false],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 

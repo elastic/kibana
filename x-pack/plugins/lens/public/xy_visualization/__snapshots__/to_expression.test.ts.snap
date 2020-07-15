@@ -8,6 +8,12 @@ Object {
         "fittingFunction": Array [
           "Carry",
         ],
+        "hideXAxisTickLabels": Array [
+          false,
+        ],
+        "hideXAxisTitle": Array [
+          false,
+        ],
         "layers": Array [
           Object {
             "chain": Array [
@@ -71,6 +77,9 @@ Object {
             ],
             "type": "expression",
           },
+        ],
+        "showXAxisGridlines": Array [
+          true,
         ],
         "xTitle": Array [
           "col_a",

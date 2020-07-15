@@ -332,6 +332,9 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       fittingFunction: 'None',
+      hideXAxisTitle: false,
+      showXAxisGridlines: false,
+      hideXAxisTickLabels: false,
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -370,6 +373,9 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      hideXAxisTitle: false,
+      showXAxisGridlines: false,
+      hideXAxisTickLabels: false,
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -479,6 +485,9 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      hideXAxisTitle: false,
+      showXAxisGridlines: false,
+      hideXAxisTickLabels: false,
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -518,6 +527,9 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      hideXAxisTitle: false,
+      showXAxisGridlines: false,
+      hideXAxisTickLabels: false,
       layers: [
         {
           accessors: ['price'],
@@ -558,6 +570,9 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      hideXAxisTitle: false,
+      showXAxisGridlines: false,
+      hideXAxisTickLabels: false,
       layers: [
         {
           accessors: ['price', 'quantity'],

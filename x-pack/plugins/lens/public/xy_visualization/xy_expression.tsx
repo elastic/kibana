@@ -102,6 +102,18 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    hideXAxisTitle: {
+      types: ['boolean'],
+      help: 'Hide X axis title',
+    },
+    showXAxisGridlines: {
+      types: ['boolean'],
+      help: 'Show X axis gridlines',
+    },
+    hideXAxisTickLabels: {
+      types: ['boolean'],
+      help: 'Hide X axis tick labels',
+    },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       types: ['lens_xy_layer'] as any,
@@ -199,7 +211,14 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction } = args;
+  const {
+    legend,
+    layers,
+    fittingFunction,
+    hideXAxisTitle,
+    showXAxisGridlines,
+    hideXAxisTickLabels,
+  } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -237,7 +256,7 @@ export function XYChart({
     shouldRotate
   );
 
-  const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
+  const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
 
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
@@ -373,10 +392,12 @@ export function XYChart({
       <Axis
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
-        title={xTitle}
-        showGridLines={false}
+        title={!hideXAxisTitle ? xTitle : undefined}
+        showGridLines={showXAxisGridlines}
+        gridLineStyle={{ strokeWidth: 2 }}
         hide={filteredLayers[0].hide}
-        tickFormat={(d) => xAxisFormatter.convert(d)}
+        // @ts-ignore
+        tickFormat={!hideXAxisTickLabels ? (d) => xAxisFormatter.convert(d) : () => {}}
       />
 
       {yAxesConfiguration.map((axis, index) => (

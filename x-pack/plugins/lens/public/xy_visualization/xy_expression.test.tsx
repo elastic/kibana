@@ -1365,6 +1365,35 @@ describe('xy_expression', () => {
       expect(convertSpy).toHaveBeenCalledWith('I');
     });
 
+    test('it should not pass the formatter function to the axis if the hideXAxisTickLabels switch is on', () => {
+      const { data, args } = sampleArgs();
+
+      args.hideXAxisTickLabels = true;
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const tickFormatter = instance.find(Axis).first().prop('tickFormat');
+
+      if (!tickFormatter) {
+        throw new Error('tickFormatter prop not found');
+      }
+
+      tickFormatter('I');
+
+      expect(convertSpy).toHaveBeenCalledTimes(0);
+    });
+
     test('it should remove invalid rows', () => {
       const data: LensMultiTable = {
         type: 'lens_multitable',
@@ -1615,6 +1644,69 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.None });
+    });
+
+    test('it should apply the xTitle if is specified', () => {
+      const { data, args } = sampleArgs();
+
+      args.xTitle = 'My custom x-axis title';
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Axis).at(0).prop('title')).toEqual('My custom x-axis title');
+    });
+
+    test('it should hide the X axis title if the corresponding switch is on', () => {
+      const { data, args } = sampleArgs();
+
+      args.hideXAxisTitle = true;
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Axis).at(0).prop('title')).toEqual(undefined);
+    });
+
+    test('it should show the X axis gridlines if the corresponding switch is on', () => {
+      const { data, args } = sampleArgs();
+
+      args.showXAxisGridlines = true;
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Axis).at(0).prop('showGridLines')).toBeTruthy();
     });
   });
 });

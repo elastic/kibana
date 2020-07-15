@@ -41,6 +41,7 @@ describe('#toExpression', () => {
           legend: { position: Position.Bottom, isVisible: true },
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
+          showXAxisGridlines: true,
           layers: [
             {
               layerId: 'first',
@@ -75,6 +76,28 @@ describe('#toExpression', () => {
         frame
       ) as Ast).chain[0].arguments.fittingFunction[0]
     ).toEqual('None');
+  });
+
+  it('should default the hideXAxisTitle, showXAxisGridlines and hideXAxisTickLabels to false', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame
+    ) as Ast;
+    expect(expression.chain[0].arguments.hideXAxisTitle[0]).toBeFalsy();
+    expect(expression.chain[0].arguments.showXAxisGridlines[0]).toBeFalsy();
+    expect(expression.chain[0].arguments.hideXAxisTickLabels[0]).toBeFalsy();
   });
 
   it('should not generate an expression when missing x', () => {

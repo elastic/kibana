@@ -227,6 +227,9 @@ export interface XYArgs {
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
   fittingFunction?: FittingFunction;
+  hideXAxisTitle?: boolean;
+  showXAxisGridlines?: boolean;
+  hideXAxisTickLabels?: boolean;
 }
 
 // Persisted parts of the state
@@ -235,6 +238,10 @@ export interface XYState {
   legend: LegendConfig;
   fittingFunction?: FittingFunction;
   layers: LayerConfig[];
+  xTitle?: string;
+  hideXAxisTitle?: boolean;
+  showXAxisGridlines?: boolean;
+  hideXAxisTickLabels?: boolean;
 }
 
 export type State = XYState;

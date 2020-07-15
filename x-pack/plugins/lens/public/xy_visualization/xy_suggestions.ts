@@ -403,6 +403,10 @@ function buildSuggestion({
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     fittingFunction: currentState?.fittingFunction || 'None',
+    xTitle: currentState?.xTitle,
+    hideXAxisTitle: currentState?.hideXAxisTitle || false,
+    showXAxisGridlines: currentState?.showXAxisGridlines || false,
+    hideXAxisTickLabels: currentState?.hideXAxisTickLabels || false,
     preferredSeriesType: seriesType,
     layers: [...keptLayers, newLayer],
   };

@@ -127,5 +127,51 @@ describe('XY Config panels', () => {
 
       expect(component.find(EuiSuperSelect).prop('disabled')).toEqual(true);
     });
+
+    it('should show the hideXAxisTitle, hideXAxisTickLabels and showXAxisGridlines Switches on', () => {
+      const state = testState();
+
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            hideXAxisTitle: true,
+            hideXAxisTickLabels: true,
+            showXAxisGridlines: true,
+          }}
+        />
+      );
+
+      expect(
+        component.find('[data-test-subj="lnsHideXAxisTitleSwitch"]').prop('checked')
+      ).toBeTruthy();
+      expect(
+        component.find('[data-test-subj="lnsHideXAxisTickLabelsSwitch"]').prop('checked')
+      ).toBeTruthy();
+      expect(
+        component.find('[data-test-subj="lnsShowXAxisGridLinesSwitch"]').prop('checked')
+      ).toBeTruthy();
+    });
+
+    it('should show the value of the X axis title on the corresponding input text', () => {
+      const state = testState();
+
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            xTitle: 'My custom X axis title',
+          }}
+        />
+      );
+
+      expect(component.find('[data-test-subj="lnsXAxisTitle"]').prop('value')).toBe(
+        'My custom X axis title'
+      );
+    });
   });
 });
