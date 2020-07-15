@@ -32,7 +32,11 @@ import 'angular-sanitize';
 import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
-import { getBaseMapsVis, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
+import {
+  getBaseMapsVis,
+  IServiceSettings,
+  MapsLegacyPluginSetup,
+} from '../../../../plugins/maps_legacy/public';
 
 /** @private */
 interface TileMapVisualizationDependencies {
@@ -40,6 +44,7 @@ interface TileMapVisualizationDependencies {
   getZoomPrecision: any;
   getPrecision: any;
   BaseMapsVisualization: any;
+  serviceSettings: IServiceSettings;
 }
 
 /** @internal */
@@ -61,12 +66,13 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
     core: CoreSetup,
     { expressions, visualizations, mapsLegacy }: TileMapPluginSetupDependencies
   ) {
-    const { getZoomPrecision, getPrecision } = mapsLegacy;
+    const { getZoomPrecision, getPrecision, serviceSettings } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       getZoomPrecision,
       getPrecision,
       BaseMapsVisualization: getBaseMapsVis(core, mapsLegacy.serviceSettings),
       uiSettings: core.uiSettings,
+      serviceSettings,
     };
 
     expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
