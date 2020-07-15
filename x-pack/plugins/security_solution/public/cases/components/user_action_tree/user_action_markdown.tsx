@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/e
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
-import { useDispatch } from 'react-redux';
 import * as i18n from '../case_view/translations';
 import { Markdown } from '../../../common/components/markdown';
 import { Form, useForm, UseField } from '../../../shared_imports';
@@ -16,13 +15,7 @@ import { schema, Content } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { MarkdownEditorForm } from '../../../common/components//markdown_editor/form';
-import {
-  dispatchUpdateTimeline,
-  queryTimelineById,
-} from '../../../timelines/components/open_timeline/helpers';
-
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
-import { useApolloClient } from '../../../common/utils/apollo_context';
+import { useTimelineClick } from '../utils/use_timeline_click';
 
 const ContentWrapper = styled.div`
   ${({ theme }) => css`
@@ -44,8 +37,6 @@ export const UserActionMarkdown = ({
   onChangeEditable,
   onSaveContent,
 }: UserActionMarkdownProps) => {
-  const dispatch = useDispatch();
-  const apolloClient = useApolloClient();
   const { form } = useForm<Content>({
     defaultValue: { content },
     options: { stripEmptyFields: false },
@@ -59,24 +50,7 @@ export const UserActionMarkdown = ({
     onChangeEditable(id);
   }, [id, onChangeEditable]);
 
-  const handleTimelineClick = useCallback(
-    (timelineId: string) => {
-      queryTimelineById({
-        apolloClient,
-        timelineId,
-        updateIsLoading: ({
-          id: currentTimelineId,
-          isLoading,
-        }: {
-          id: string;
-          isLoading: boolean;
-        }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
-        updateTimeline: dispatchUpdateTimeline(dispatch),
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [apolloClient]
-  );
+  const handleTimelineClick = useTimelineClick();
 
   const handleSaveAction = useCallback(async () => {
     const { isValid, data } = await form.submit();

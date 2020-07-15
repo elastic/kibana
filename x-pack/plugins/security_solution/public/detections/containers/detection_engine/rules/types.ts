@@ -276,4 +276,7 @@ export interface PrePackagedRulesStatusResponse {
   rules_installed: number;
   rules_not_installed: number;
   rules_not_updated: number;
+  timelines_installed: number;
+  timelines_not_installed: number;
+  timelines_not_updated: number;
 }

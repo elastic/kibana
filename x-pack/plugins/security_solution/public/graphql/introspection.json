@@ -10875,21 +10875,13 @@
           {
             "name": "pageIndex",
             "description": "",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "pageSize",
             "description": "",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "defaultValue": null
           }
         ],
