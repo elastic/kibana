@@ -53,7 +53,7 @@ describe('Matrix Histogram Component', () => {
   const mockMatrixOverTimeHistogramProps = {
     defaultIndex: ['defaultIndex'],
     defaultStackByOption: { text: 'text', value: 'value' },
-    endDate: new Date('2019-07-18T20:00:00.000Z').valueOf(),
+    endDate: '2019-07-18T20:00:00.000Z',
     errorMessage: 'error',
     histogramType: HistogramType.alerts,
     id: 'mockId',
@@ -64,7 +64,7 @@ describe('Matrix Histogram Component', () => {
     sourceId: 'default',
     stackByField: 'mockStackByField',
     stackByOptions: [{ text: 'text', value: 'value' }],
-    startDate: new Date('2019-07-18T19:00: 00.000Z').valueOf(),
+    startDate: '2019-07-18T19:00: 00.000Z',
     subtitle: 'mockSubtitle',
     totalCount: -1,
     title: 'mockTitle',

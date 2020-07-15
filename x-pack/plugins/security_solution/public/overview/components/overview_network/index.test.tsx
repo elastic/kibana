@@ -43,8 +43,8 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-const startDate = 1579553397080;
-const endDate = 1579639797080;
+const startDate = '2020-01-20T20:49:57.080Z';
+const endDate = '2020-01-21T20:49:57.080Z';
 
 interface MockedProvidedQuery {
   request: {

@@ -26,7 +26,7 @@ export const findExceptionListItemSchema = t.intersection([
   ),
   t.exact(
     t.partial({
-      filter: EmptyStringArray, // defaults to undefined if not set during decode
+      filter: EmptyStringArray, // defaults to an empty array [] if not set during decode
       namespace_type: DefaultNamespaceArray, // defaults to ['single'] if not set during decode
       page: StringToPositiveNumber, // defaults to undefined if not set during decode
       per_page: StringToPositiveNumber, // defaults to undefined if not set during decode

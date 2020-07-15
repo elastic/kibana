@@ -19,6 +19,8 @@ function formatCluster(cluster) {
   return cluster;
 }
 
+let once = false;
+
 export function monitoringClustersProvider($injector) {
   return (clusterUuid, ccs, codePaths) => {
     const { min, max } = Legacy.shims.timefilter.getBounds();
@@ -30,23 +32,52 @@ export function monitoringClustersProvider($injector) {
     }
 
     const $http = $injector.get('$http');
-    return $http
-      .post(url, {
-        ccs,
-        timeRange: {
-          min: min.toISOString(),
-          max: max.toISOString(),
-        },
-        codePaths,
-      })
-      .then((response) => response.data)
-      .then((data) => {
-        return formatClusters(data); // return set of clusters
-      })
-      .catch((err) => {
+
+    function getClusters() {
+      return $http
+        .post(url, {
+          ccs,
+          timeRange: {
+            min: min.toISOString(),
+            max: max.toISOString(),
+          },
+          codePaths,
+        })
+        .then((response) => response.data)
+        .then((data) => {
+          return formatClusters(data); // return set of clusters
+        })
+        .catch((err) => {
+          const Private = $injector.get('Private');
+          const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+          return ajaxErrorHandlers(err);
+        });
+    }
+
+    function ensureAlertsEnabled() {
+      return $http.post('../api/monitoring/v1/alerts/enable', {}).catch((err) => {
         const Private = $injector.get('Private');
         const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
         return ajaxErrorHandlers(err);
       });
+    }
+
+    if (!once) {
+      return getClusters().then((clusters) => {
+        if (clusters.length) {
+          return ensureAlertsEnabled()
+            .then(() => {
+              once = true;
+              return clusters;
+            })
+            .catch(() => {
+              // Intentionally swallow the error as this will retry the next page load
+              return clusters;
+            });
+        }
+        return clusters;
+      });
+    }
+    return getClusters();
   };
 }
