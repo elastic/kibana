@@ -12,7 +12,7 @@ def loadWithVault(ingestionPipelineName, title) {
   withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-        loadIngestionPipeline()
+        loadIngestionPipeline(ingestionPipelineName, title)
       }
     }
   }
