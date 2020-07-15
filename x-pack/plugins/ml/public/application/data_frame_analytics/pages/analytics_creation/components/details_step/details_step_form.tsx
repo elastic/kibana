@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useRef } from 'react';
+import React, { FC, Fragment, useRef, useEffect } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -21,6 +22,7 @@ import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/us
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
+import { ml } from '../../../../../services/ml_api_service';
 
 export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
@@ -58,6 +60,23 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     destinationIndexNameEmpty === true ||
     destinationIndexNameValid === false ||
     (destinationIndexPatternTitleExists === true && createIndexPattern === true);
+
+  const debouncedIndexCheck = debounce(async () => {
+    const { indexExists } = await ml.checkIndexExists({ index: destinationIndex });
+    setFormState({ destinationIndexNameExists: indexExists ?? false });
+  }, 400);
+
+  useEffect(() => {
+    if (destinationIndexNameValid === true) {
+      debouncedIndexCheck();
+    } else if (destinationIndex.trim() === '' && destinationIndexNameExists === true) {
+      setFormState({ destinationIndexNameExists: false });
+    }
+
+    return () => {
+      debouncedIndexCheck.cancel();
+    };
+  }, [destinationIndex]);
 
   return (
     <Fragment>
