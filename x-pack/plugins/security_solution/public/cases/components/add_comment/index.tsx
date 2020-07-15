@@ -8,7 +8,6 @@ import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { useDispatch } from 'react-redux';
 import { CommentRequest } from '../../../../../case/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
@@ -19,12 +18,7 @@ import { Form, useForm, UseField } from '../../../shared_imports';
 
 import * as i18n from './translations';
 import { schema } from './schema';
-import {
-  dispatchUpdateTimeline,
-  queryTimelineById,
-} from '../../../timelines/components/open_timeline/helpers';
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
-import { useApolloClient } from '../../../common/utils/apollo_context';
+import { useTimelineClick } from '../utils/use_timeline_click';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -54,8 +48,6 @@ export const AddComment = React.memo<AddCommentProps>(
       schema,
     });
     const { getFormData, setFieldValue, reset, submit } = form;
-    const dispatch = useDispatch();
-    const apolloClient = useApolloClient();
     const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
       form,
       'comment'
@@ -68,27 +60,7 @@ export const AddComment = React.memo<AddCommentProps>(
       }
     }, [getFormData, insertQuote, setFieldValue]);
 
-    const handleTimelineClick = useCallback(
-      (timelineId: string) => {
-        queryTimelineById({
-          apolloClient,
-          timelineId,
-          updateIsLoading: ({
-            id: currentTimelineId,
-            isLoading: isLoadingTimeline,
-          }: {
-            id: string;
-            isLoading: boolean;
-          }) =>
-            dispatch(
-              dispatchUpdateIsLoading({ id: currentTimelineId, isLoading: isLoadingTimeline })
-            ),
-          updateTimeline: dispatchUpdateTimeline(dispatch),
-        });
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [apolloClient]
-    );
+    const handleTimelineClick = useTimelineClick();
 
     const onSubmit = useCallback(async () => {
       const { isValid, data } = await submit();
