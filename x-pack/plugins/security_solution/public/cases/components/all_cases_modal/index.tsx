@@ -19,7 +19,7 @@ import * as i18n from './translations';
 interface AllCasesModalProps {
   onCloseCaseModal: () => void;
   showCaseModal: boolean;
-  onRowClick: (id: string) => void;
+  onRowClick: (id?: string) => void;
 }
 
 export const AllCasesModalComponent = ({
