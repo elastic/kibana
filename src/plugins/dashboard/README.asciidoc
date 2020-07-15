@@ -1,8 +1,12 @@
 ifdef::env-github[]
 :es:              Elasticsearch
 :kib:             Kibana
-include::../../../src/plugins/embeddable/README.asciidoc[]
-include::../../../examples/README.asciidoc[]
+:branch:          master
+:kibana-ref:      https://www.elastic.co/guide/en/kibana/{branch}
+endif::[]
+
+ifdef::env-github[]
+NOTE: Links will only work when {kibana-ref}/kibana-dashboard.html[this page] is viewed in our {kibana-ref}/development.html[developer guide].
 endif::[]
 
 [[kibana-dashboard]]

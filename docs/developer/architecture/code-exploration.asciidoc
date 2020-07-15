@@ -54,7 +54,6 @@ WARNING: Missing README.
 
 
 - <<kibana-dashboard>>
-include::{kibana-root}/src/plugins/dashboard/README.asciidoc[]
 
 Dashboard is an application inside Kibana that allows users to create and view custom dashboards.
 
@@ -73,13 +72,11 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 - <<kibana-discover>>
-include::{kibana-root}/src/plugins/discover/README.asciidoc[]
 
 Discover is an application inside {kib} that allows users to view, search and explore raw documents.
 
 
 - <<embeddable-plugin>>
-include::{kibana-root}/src/plugins/embeddable/README.asciidoc[]
 
 Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable containers.
 
@@ -279,6 +276,12 @@ WARNING: Missing README.
 
 WARNING: Missing README.
 
+
+include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset+1]
+
+include::{kibana-root}/src/plugins/discover/README.asciidoc[leveloffset+1]
+
+include::{kibana-root}/src/plugins/embeddable/README.asciidoc[leveloffset+1]
 
 [discrete]
 ===== x-pack/plugins

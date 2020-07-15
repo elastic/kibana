@@ -20,12 +20,13 @@
 import { Plugins } from './discover_plugins';
 
 function* printPlugins(plugins: Plugins) {
+  const asciidocIncludes: string[] = [];
   for (const plugin of plugins) {
     const path = plugin.relativeReadmePath || plugin.relativeDir;
     yield '';
     if (plugin.readmeAsciidocLink) {
       yield `- <<${plugin.readmeAsciidocLink}>>`;
-      yield `include::{kibana-root}/${path}[]`;
+      asciidocIncludes.push(`include::{kibana-root}/${path}[leveloffset+1]`);
     } else {
       yield `- {kib-repo}blob/{branch}/${path}[${plugin.id}]`;
     }
@@ -35,6 +36,11 @@ function* printPlugins(plugins: Plugins) {
       yield plugin.readmeSnippet || 'WARNING: Missing README.';
       yield '';
     }
+  }
+
+  for (const asciidocInclude of asciidocIncludes) {
+    yield '';
+    yield asciidocInclude;
   }
 }
 
