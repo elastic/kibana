@@ -33,9 +33,7 @@ export default function ({ getService, getPageObjects }) {
                 },
               },
             },
-            data_stream: {
-              timestamp_field: '@timestamp',
-            },
+            data_stream: {},
           },
         });
 
