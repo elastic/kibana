@@ -489,6 +489,8 @@ export class VegaParser {
   async _resolveDataUrls() {
     const pending = {};
 
+    this.searchAPI.resetSearchStats();
+
     this._findObjectDataUrls(this.spec, (obj) => {
       const url = obj.url;
       delete obj.url;

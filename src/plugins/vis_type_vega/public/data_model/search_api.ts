@@ -47,10 +47,6 @@ export class SearchAPI {
     const { search } = this.dependencies.search;
     const requestResponders: any = {};
 
-    if (this.inspectorAdapters) {
-      this.inspectorAdapters.requests.reset();
-    }
-
     return combineLatest(
       searchRequests.map((request, index) => {
         const requestId = index.toString();
@@ -76,6 +72,12 @@ export class SearchAPI {
         );
       })
     );
+  }
+
+  public resetSearchStats() {
+    if (this.inspectorAdapters) {
+      this.inspectorAdapters.requests.reset();
+    }
   }
 
   private inspectSearchResult(response: IEsSearchResponse, requestResponder: RequestResponder) {

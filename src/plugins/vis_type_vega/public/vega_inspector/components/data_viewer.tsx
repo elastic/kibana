@@ -64,7 +64,13 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" className="insVegaView" wrap={false}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      className="insVegaView"
+      wrap={false}
+      responsive={false}
+    >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
         <EuiComboBox
