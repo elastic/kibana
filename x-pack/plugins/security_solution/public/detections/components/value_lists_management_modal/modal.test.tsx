@@ -11,8 +11,7 @@ import { TestProviders } from '../../../common/mock';
 import { ValueListsModal } from './modal';
 import { waitForUpdates } from '../../../common/utils/test_utils';
 
-// TODO: These are occasionally timing out
-describe.skip('ValueListsModal', () => {
+describe('ValueListsModal', () => {
   it('renders nothing if showModal is false', () => {
     const container = mount(
       <TestProviders>
