@@ -9,6 +9,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
+import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
   getDetectionEngineUrl,
   getCreateRuleUrl,
@@ -21,8 +22,14 @@ import { useUserInfo } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
 import { ReadOnlyCallOut } from '../../../components/rules/read_only_callout';
+import { ValueListsModal } from '../../../components/value_lists_management_modal';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
-import { getPrePackagedRuleStatus, redirectToDetections, userHasNoPermissions } from './helpers';
+import {
+  getPrePackagedRuleStatus,
+  getPrePackagedTimelineStatus,
+  redirectToDetections,
+  userHasNoPermissions,
+} from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
@@ -33,15 +40,23 @@ type Func = (refreshPrePackagedRule?: boolean) => void;
 const RulesPageComponent: React.FC = () => {
   const history = useHistory();
   const [showImportModal, setShowImportModal] = useState(false);
+  const [isValueListsModalShown, setIsValueListsModalShown] = useState(false);
+  const showValueListsModal = useCallback(() => setIsValueListsModalShown(true), []);
+  const hideValueListsModal = useCallback(() => setIsValueListsModalShown(false), []);
   const refreshRulesData = useRef<null | Func>(null);
   const {
-    loading,
+    loading: userInfoLoading,
     isSignalIndexExists,
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
     hasIndexWrite,
   } = useUserInfo();
+  const {
+    loading: listsConfigLoading,
+    needsConfiguration: needsListsConfiguration,
+  } = useListsConfig();
+  const loading = userInfoLoading || listsConfigLoading;
   const {
     createPrePackagedRules,
     loading: prePackagedRuleLoading,
@@ -51,6 +66,9 @@ const RulesPageComponent: React.FC = () => {
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
+    timelinesInstalled,
+    timelinesNotInstalled,
+    timelinesNotUpdated,
   } = usePrePackagedRules({
     canUserCRUD,
     hasIndexWrite,
@@ -62,6 +80,12 @@ const RulesPageComponent: React.FC = () => {
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated
+  );
+
+  const prePackagedTimelineStatus = getPrePackagedTimelineStatus(
+    timelinesInstalled,
+    timelinesNotInstalled,
+    timelinesNotUpdated
   );
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
@@ -88,6 +112,18 @@ const RulesPageComponent: React.FC = () => {
     refreshRulesData.current = refreshRule;
   }, []);
 
+  const getMissingRulesOrTimelinesButtonTitle = useCallback(
+    (missingRules: number, missingTimelines: number) => {
+      if (missingRules > 0 && missingTimelines === 0)
+        return i18n.RELOAD_MISSING_PREPACKAGED_RULES(missingRules);
+      else if (missingRules === 0 && missingTimelines > 0)
+        return i18n.RELOAD_MISSING_PREPACKAGED_TIMELINES(missingTimelines);
+      else if (missingRules > 0 && missingTimelines > 0)
+        return i18n.RELOAD_MISSING_PREPACKAGED_RULES_AND_TIMELINES(missingRules, missingTimelines);
+    },
+    []
+  );
+
   const goToNewRule = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -96,7 +132,14 @@ const RulesPageComponent: React.FC = () => {
     [history]
   );
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+  if (
+    redirectToDetections(
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      needsListsConfiguration
+    )
+  ) {
     history.replace(getDetectionEngineUrl());
     return null;
   }
@@ -104,6 +147,7 @@ const RulesPageComponent: React.FC = () => {
   return (
     <>
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <ValueListsModal showModal={isValueListsModalShown} onClose={hideValueListsModal} />
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
         closeModal={() => setShowImportModal(false)}
@@ -129,7 +173,8 @@ const RulesPageComponent: React.FC = () => {
           title={i18n.PAGE_TITLE}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-            {prePackagedRuleStatus === 'ruleNotInstalled' && (
+            {(prePackagedRuleStatus === 'ruleNotInstalled' ||
+              prePackagedTimelineStatus === 'timelinesNotInstalled') && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   iconType="indexOpen"
@@ -141,7 +186,8 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButton>
               </EuiFlexItem>
             )}
-            {prePackagedRuleStatus === 'someRuleUninstall' && (
+            {(prePackagedRuleStatus === 'someRuleUninstall' ||
+              prePackagedTimelineStatus === 'someTimelineUninstall') && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="reloadPrebuiltRulesBtn"
@@ -150,10 +196,22 @@ const RulesPageComponent: React.FC = () => {
                   isDisabled={userHasNoPermissions(canUserCRUD) || loading}
                   onClick={handleCreatePrePackagedRules}
                 >
-                  {i18n.RELOAD_MISSING_PREPACKAGED_RULES(rulesNotInstalled ?? 0)}
+                  {getMissingRulesOrTimelinesButtonTitle(
+                    rulesNotInstalled ?? 0,
+                    timelinesNotInstalled ?? 0
+                  )}
                 </EuiButton>
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="importAction"
+                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                onClick={showValueListsModal}
+              >
+                {i18n.UPLOAD_VALUE_LISTS}
+              </EuiButton>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="importAction"
@@ -179,10 +237,12 @@ const RulesPageComponent: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </DetectionEngineHeaderPage>
-        {prePackagedRuleStatus === 'ruleNeedUpdate' && (
+        {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
+          prePackagedTimelineStatus === 'timelineNeedUpdate') && (
           <UpdatePrePackagedRulesCallOut
             loading={loadingCreatePrePackagedRules}
             numberOfUpdatedRules={rulesNotUpdated ?? 0}
+            numberOfUpdatedTimelines={timelinesNotUpdated ?? 0}
             updateRules={handleCreatePrePackagedRules}
           />
         )}

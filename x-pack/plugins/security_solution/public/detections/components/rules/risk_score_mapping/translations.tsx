@@ -9,6 +9,13 @@ import { i18n } from '@kbn/i18n';
 export const RISK_SCORE = i18n.translate(
   'xpack.securitySolution.alerts.riskScoreMapping.riskScoreTitle',
   {
+    defaultMessage: 'Risk score',
+  }
+);
+
+export const DEFAULT_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.alerts.riskScoreMapping.defaultRiskScoreTitle',
+  {
     defaultMessage: 'Default risk score',
   }
 );
