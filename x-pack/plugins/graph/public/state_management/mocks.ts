@@ -46,7 +46,7 @@ export function createMockGraphStore({
     nodes: [],
     edges: [],
     options: {},
-    blacklistedNodes: [],
+    blocklistedNodes: [],
   } as unknown) as Workspace;
 
   const savedWorkspace = ({

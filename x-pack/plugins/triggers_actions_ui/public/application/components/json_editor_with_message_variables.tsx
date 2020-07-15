@@ -19,6 +19,7 @@ interface Props {
   errors?: string[];
   areaLabel?: string;
   onDocumentsChange: (data: string) => void;
+  helpText?: JSX.Element;
 }
 
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
@@ -29,6 +30,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   errors,
   areaLabel,
   onDocumentsChange,
+  helpText,
 }) => {
   const [cursorPosition, setCursorPosition] = useState<any>(null);
 
@@ -66,6 +68,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           paramsProperty={paramsProperty}
         />
       }
+      helpText={helpText}
     >
       <EuiCodeEditor
         mode={xJsonMode}

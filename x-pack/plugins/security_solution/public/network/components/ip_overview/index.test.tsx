@@ -9,6 +9,7 @@ import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowTarget } from '../../../graphql/types';
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -51,14 +52,14 @@ describe('IP Overview Component', () => {
     const mockProps = {
       anomaliesData: mockAnomalies,
       data: mockData.IpOverview,
-      endDate: new Date('2019-06-18T06:00:00.000Z').valueOf(),
+      endDate: '2019-06-18T06:00:00.000Z',
       flowTarget: FlowTarget.source,
       loading: false,
       id: 'ipOverview',
       ip: '10.10.10.10',
       isLoadingAnomaliesData: false,
       narrowDateRange: (jest.fn() as unknown) as NarrowDateRange,
-      startDate: new Date('2019-06-15T06:00:00.000Z').valueOf(),
+      startDate: '2019-06-15T06:00:00.000Z',
       type: networkModel.NetworkType.details,
       updateFlowTargetAction: (jest.fn() as unknown) as ActionCreator<{
         flowTarget: FlowTarget;

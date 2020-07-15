@@ -63,7 +63,7 @@ export interface SavedObjectStatusMeta {
  *
  * @public
  */
-export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsFindOptions {
   type: string | string[];
   page?: number;
   perPage?: number;
@@ -82,6 +82,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string;
+  namespaces?: string[];
   /** An optional ES preference value to be used for the query **/
   preference?: string;
 }
