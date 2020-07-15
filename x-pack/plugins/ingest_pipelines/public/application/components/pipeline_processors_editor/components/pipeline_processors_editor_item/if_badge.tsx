@@ -9,6 +9,7 @@ import React, { FunctionComponent, useState } from 'react';
 import {
   EuiNotificationBadge,
   EuiCode,
+  EuiCodeBlock,
   EuiPopover,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -31,8 +32,8 @@ const i18nTexts = {
 };
 
 export const IfBadge: FunctionComponent<Props> = ({ onClick, isDisabled, ifCode }) => {
-  const classes = classNames('pipelineProcessorsEditor__item__ifBadge', {
-    'pipelineProcessorsEditor__item__ifBadge--disabled': isDisabled,
+  const labelClasses = classNames('pipelineProcessorsEditor__item__ifBadge__label', {
+    'pipelineProcessorsEditor__item__ifBadge__label--disabled': isDisabled,
   });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -47,26 +48,30 @@ export const IfBadge: FunctionComponent<Props> = ({ onClick, isDisabled, ifCode 
       button={
         <EuiNotificationBadge
           data-test-subj="ifBadge"
-          className={classes}
+          className="pipelineProcessorsEditor__item__ifBadge"
           size="s"
           color="subdued"
           onClick={isDisabled ? undefined : () => setIsPopoverOpen((prev) => !prev)}
         >
-          {i18nTexts.badgeBody}
+          <EuiCode className={labelClasses} transparentBackground>
+            {i18nTexts.badgeBody}
+          </EuiCode>
         </EuiNotificationBadge>
       }
     >
-      <EuiFlexGroup responsive={false} gutterSize="none">
+      <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon aria-label={i18nTexts.buttonLabel} iconType="copy" onClick={onClick} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiCode
+          <EuiCodeBlock
+            fontSize="m"
+            paddingSize="s"
             transparentBackground
             className="pipelineProcessorsEditor__item__ifBadge__codeSnippet"
           >
             {ifCode}
-          </EuiCode>
+          </EuiCodeBlock>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon aria-label={i18nTexts.buttonLabel} iconType="copy" onClick={onClick} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopover>

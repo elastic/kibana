@@ -25,12 +25,16 @@
   &__ifBadge {
     cursor: pointer;
 
-    &--disabled {
-      color: $euiButtonColorDisabledText;
-    }
-
     &__codeSnippet {
       max-width: 400px;
+    }
+
+    &__label {
+      &--disabled {
+        color: $euiButtonColorDisabledText !important;
+      }
+
+      padding: 0 !important;
     }
   }
 
