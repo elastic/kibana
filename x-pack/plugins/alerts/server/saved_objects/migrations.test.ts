@@ -56,9 +56,9 @@ describe('7.10.0', () => {
   });
 
   test('changes nothing on alerts by other plugins', () => {
-    const migration790 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const alert = getMockData({});
-    expect(migration790(alert, { log })).toMatchObject(alert);
+    expect(migration710(alert, { log })).toMatchObject(alert);
 
     expect(encryptedSavedObjectsSetup.createMigration).toHaveBeenCalledWith(
       expect.any(Function),
@@ -67,11 +67,11 @@ describe('7.10.0', () => {
   });
 
   test('migrates the consumer for metrics', () => {
-    const migration790 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
     const alert = getMockData({
       consumer: 'metrics',
     });
-    expect(migration790(alert, { log })).toMatchObject({
+    expect(migration710(alert, { log })).toMatchObject({
       ...alert,
       attributes: {
         ...alert.attributes,
