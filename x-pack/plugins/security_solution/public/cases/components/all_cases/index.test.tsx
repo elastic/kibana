@@ -31,14 +31,6 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-  return {
-    ...originalModule,
-    useHistory: jest.fn(),
-  };
-});
-
 jest.mock('../../../common/components/link_to');
 
 describe('AllCases', () => {

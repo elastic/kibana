@@ -21,12 +21,12 @@ import { SecurityPageName } from '../../../app/types';
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
 import { AllCasesModal } from '../../../cases/components/all_cases_modal';
 import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
-import { getCaseDetailsUrl } from '../../../common/components/link_to';
 import { APP_ID, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import { useFullScreen } from '../../../common/containers/use_full_screen';
+import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../common/components/link_to';
 import { useKibana } from '../../../common/lib/kibana';
 import { State } from '../../../common/store';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { TimelineModel } from '../../store/timeline/model';
@@ -60,6 +60,7 @@ interface OwnProps {
   bodyHeight?: number;
   graphEventId?: string;
   timelineId: string;
+  timelineType: TimelineType;
 }
 
 const Navigation = ({
@@ -108,6 +109,7 @@ const GraphOverlayComponent = ({
   status,
   timelineId,
   title,
+  timelineType,
 }: OwnProps & PropsFromRedux) => {
   const dispatch = useDispatch();
   const { navigateToApp } = useKibana().services.application;
@@ -121,20 +123,20 @@ const GraphOverlayComponent = ({
     timelineSelectors.selectTimeline(state, timelineId)
   );
   const onRowClick = useCallback(
-    (id: string) => {
+    (id?: string) => {
       onCloseCaseModal();
 
-      dispatch(
-        setInsertTimeline({
-          graphEventId,
-          timelineId,
-          timelineSavedObjectId: currentTimeline.savedObjectId,
-          timelineTitle: title.length > 0 ? title : UNTITLED_TIMELINE,
-        })
-      );
-
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCaseDetailsUrl({ id }),
+        path: id != null ? getCaseDetailsUrl({ id }) : getCreateCaseUrl(),
+      }).then(() => {
+        dispatch(
+          setInsertTimeline({
+            graphEventId,
+            timelineId,
+            timelineSavedObjectId: currentTimeline.savedObjectId,
+            timelineTitle: title.length > 0 ? title : UNTITLED_TIMELINE,
+          })
+        );
       });
     },
     [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]
@@ -177,7 +179,7 @@ const GraphOverlayComponent = ({
             toggleFullScreen={toggleFullScreen}
           />
         </EuiFlexItem>
-        {timelineId === TimelineId.active && (
+        {timelineId === TimelineId.active && timelineType === TimelineType.default && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
