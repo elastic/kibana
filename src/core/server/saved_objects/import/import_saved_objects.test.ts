@@ -56,7 +56,7 @@ describe('#importSavedObjectsFromStream', () => {
       collectedObjects: [],
       importIdMap: new Map(),
     });
-    getMockFn(regenerateIds).mockReturnValue({ importIdMap: new Map() });
+    getMockFn(regenerateIds).mockReturnValue(new Map());
     getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects: [] });
     getMockFn(checkConflicts).mockResolvedValue({
       errors: [],
@@ -270,7 +270,7 @@ describe('#importSavedObjectsFromStream', () => {
         getMockFn(validateReferences).mockResolvedValue({ errors: [errors[1]], filteredObjects });
         // this importIdMap is not composed with the one obtained from `collectSavedObjects`
         const importIdMap = new Map().set(`id1`, { id: `newId1` });
-        getMockFn(regenerateIds).mockReturnValue({ importIdMap });
+        getMockFn(regenerateIds).mockReturnValue(importIdMap);
 
         await importSavedObjectsFromStream(options);
         const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };

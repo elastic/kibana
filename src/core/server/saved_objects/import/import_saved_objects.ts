@@ -67,8 +67,7 @@ export async function importSavedObjectsFromStream({
 
   let objectsToCreate = validateReferencesResult.filteredObjects;
   if (createNewCopies) {
-    const regenerateIdsResult = regenerateIds(collectSavedObjectsResult.collectedObjects);
-    importIdMap = regenerateIdsResult.importIdMap;
+    importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsOptions = {

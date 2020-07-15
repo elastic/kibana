@@ -102,8 +102,7 @@ export async function resolveSavedObjectsImportErrors({
   if (createNewCopies) {
     // In case any missing reference errors were resolved, ensure that we regenerate those object IDs as well
     // This is because a retry to resolve a missing reference error may not necessarily specify a destinationId
-    const regenerateIdsResult = regenerateIds(objectsToResolve);
-    importIdMap = regenerateIdsResult.importIdMap;
+    importIdMap = regenerateIds(objectsToResolve);
   }
 
   // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces

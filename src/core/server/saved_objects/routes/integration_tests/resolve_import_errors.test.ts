@@ -129,7 +129,7 @@ describe(`POST ${URL}`, () => {
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
       [expect.objectContaining({ migrationVersion: {} })],
-      expect.anything() // options
+      expect.any(Object) // options
     );
   });
 
@@ -240,7 +240,7 @@ describe(`POST ${URL}`, () => {
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
       [{ fields: ['id'], id: 'existing', type: 'index-pattern' }],
-      expect.anything() // options
+      expect.any(Object) // options
     );
   });
 
@@ -299,7 +299,7 @@ describe(`POST ${URL}`, () => {
             originId: undefined,
           }),
         ],
-        expect.anything() // options
+        expect.any(Object) // options
       );
     });
   });

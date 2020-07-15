@@ -26,7 +26,7 @@ import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
-import { SavedObjectsErrorHelpers } from './errors';
+import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { KibanaMigrator } from '../../migrations';
 import {
@@ -296,7 +296,7 @@ export class SavedObjectsRepository {
           error: {
             id: object.id,
             type: object.type,
-            error: SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type).output.payload,
+            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type)),
           },
         };
       }
@@ -355,7 +355,7 @@ export class SavedObjectsRepository {
               id,
               type,
               error: {
-                ...SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
+                ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
                 metadata: { isNotOverwritable: true },
               },
             },
@@ -462,7 +462,7 @@ export class SavedObjectsRepository {
           error: {
             id,
             type,
-            error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload,
+            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
           },
         };
       }
@@ -503,7 +503,7 @@ export class SavedObjectsRepository {
           id,
           type,
           error: {
-            ...SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
+            ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
             ...(!this.rawDocExistsInNamespace(doc, namespace) && {
               metadata: { isNotOverwritable: true },
             }),
@@ -804,7 +804,7 @@ export class SavedObjectsRepository {
           error: {
             id,
             type,
-            error: SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload,
+            error: errorContent(SavedObjectsErrorHelpers.createUnsupportedTypeError(type)),
           },
         };
       }
@@ -849,7 +849,7 @@ export class SavedObjectsRepository {
           return ({
             id,
             type,
-            error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
           } as any) as SavedObject<T>;
         }
 
@@ -1178,7 +1178,7 @@ export class SavedObjectsRepository {
           error: {
             id,
             type,
-            error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
           },
         };
       }
@@ -1243,7 +1243,7 @@ export class SavedObjectsRepository {
               error: {
                 id,
                 type,
-                error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload,
+                error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
               },
             };
           }
@@ -1557,9 +1557,9 @@ export class SavedObjectsRepository {
 function getBulkOperationError(error: { type: string; reason?: string }, type: string, id: string) {
   switch (error.type) {
     case 'version_conflict_engine_exception':
-      return SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
+      return errorContent(SavedObjectsErrorHelpers.createConflictError(type, id));
     case 'document_missing_exception':
-      return SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload;
+      return errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
     default:
       return {
         message: error.reason || JSON.stringify(error),
@@ -1610,5 +1610,10 @@ function getSavedObjectNamespaces(
   }
   return [getNamespaceString(namespace)];
 }
+
+/**
+ * Extracts the contents of a decorated error to return the attributes for bulk operations.
+ */
+const errorContent = (error: DecoratedError) => error.output.payload;
 
 const unique = (array: string[]) => [...new Set(array)];

@@ -65,7 +65,7 @@ describe('#importSavedObjectsFromStream', () => {
       collectedObjects: [],
       importIdMap: new Map(),
     });
-    getMockFn(regenerateIds).mockReturnValue({ importIdMap: new Map() });
+    getMockFn(regenerateIds).mockReturnValue(new Map());
     getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects: [] });
     getMockFn(checkConflicts).mockResolvedValue({
       errors: [],
@@ -336,13 +336,13 @@ describe('#importSavedObjectsFromStream', () => {
           errors: [errors[1]],
           filteredObjects: [], // doesn't matter
         });
-        getMockFn(regenerateIds).mockReturnValue({
-          importIdMap: new Map([
+        getMockFn(regenerateIds).mockReturnValue(
+          new Map([
             ['foo', { id: 'randomId1' }],
             ['bar', { id: 'randomId2' }],
             ['baz', { id: 'randomId3' }],
-          ]),
-        });
+          ])
+        );
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [errors[2]],
           filteredObjects: [],

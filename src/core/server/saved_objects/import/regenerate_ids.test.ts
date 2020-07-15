@@ -26,27 +26,28 @@ describe('#regenerateIds', () => {
     { type: 'foo', id: '1' },
     { type: 'bar', id: '2' },
     { type: 'baz', id: '3' },
-  ] as any) as Array<SavedObject<{ title?: string }>>;
+  ] as any) as SavedObject[];
 
   test('returns expected values', () => {
+    mockUuidv4
+      .mockReturnValueOnce('uuidv4 #1')
+      .mockReturnValueOnce('uuidv4 #2')
+      .mockReturnValueOnce('uuidv4 #3');
     expect(regenerateIds(objects)).toMatchInlineSnapshot(`
-      Object {
-        "importIdMap": Map {
-          "foo:1" => Object {
-            "id": "uuidv4",
-            "omitOriginId": true,
-          },
-          "bar:2" => Object {
-            "id": "uuidv4",
-            "omitOriginId": true,
-          },
-          "baz:3" => Object {
-            "id": "uuidv4",
-            "omitOriginId": true,
-          },
+      Map {
+        "foo:1" => Object {
+          "id": "uuidv4 #1",
+          "omitOriginId": true,
+        },
+        "bar:2" => Object {
+          "id": "uuidv4 #2",
+          "omitOriginId": true,
+        },
+        "baz:3" => Object {
+          "id": "uuidv4 #3",
+          "omitOriginId": true,
         },
       }
     `);
-    expect(mockUuidv4).toHaveBeenCalledTimes(3);
   });
 });
