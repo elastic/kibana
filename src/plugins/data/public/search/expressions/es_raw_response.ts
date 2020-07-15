@@ -21,9 +21,9 @@ import { SearchResponse } from 'elasticsearch';
 
 const name = 'es_raw_response';
 
-export interface EsRawResponse {
+export interface EsRawResponse<T = unknown> {
   type: typeof name;
-  body: SearchResponse<unknown>;
+  body: SearchResponse<T>;
 }
 
 function flatten(obj: any, keyPrefix = '') {
@@ -54,11 +54,19 @@ function flatten(obj: any, keyPrefix = '') {
   }
 }
 
+const parseRawDocs = (hits: SearchResponse['hits']) => {
+  return hits.hits.map((hit) => hit.fields).filter((hit) => hit);
+};
+
+const convertResult = (body: SearchResponse) => {
+  return body.hits.hits.length ? parseRawDocs(body.hits) : flatten(body.aggregations);
+};
+
 export const esRawResponse = {
   name,
   to: {
     datatable: (context: EsRawResponse) => {
-      const rows = flatten(context.body.aggregations);
+      const rows = convertResult(context.body);
       const columns = Object.keys(rows[0]).map((key) => ({
         id: key,
         name: key,
@@ -72,7 +80,7 @@ export const esRawResponse = {
       };
     },
     kibana_datatable: (context: EsRawResponse) => {
-      const rows = flatten(context.body);
+      const rows = convertResult(context.body);
       const columns = Object.keys(rows[0]).map((key) => ({
         id: key,
         name: key,

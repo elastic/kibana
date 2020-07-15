@@ -52,7 +52,7 @@ export const esdsl = (): ExpressionFunctionDefinition<typeof name, Input, Argume
       help: i18n.translate('data.search.es_search.esdsl.q.help', {
         defaultMessage: 'Query DSL',
       }),
-      default: '"{ "body": {} }"',
+      default: `"{}"`,
     },
   },
   async fn(input, args, { inspectorAdapters, abortSignal }) {
