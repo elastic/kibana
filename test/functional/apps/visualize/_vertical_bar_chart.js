@@ -71,6 +71,12 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Range');
         await PageObjects.visEditor.selectField('@timestamp');
+        await PageObjects.visEditor.clickGo();
+
+        await PageObjects.visEditor.clickGo();
+        const bottomLabels = await PageObjects.visChart.getXAxisLabels();
+        expect(bottomLabels.length).to.be(1);
+
         await PageObjects.visEditor.clickMetricsAndAxes();
         await PageObjects.visEditor.selectXAxisPosition('left');
         await PageObjects.visEditor.clickGo();
