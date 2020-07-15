@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniquePidForProcess, uniqueParentPidForProcess, datetime } from '../process_event';
+import { uniquePidForProcess, uniqueParentPidForProcess, orderByTime } from '../process_event';
 import { IndexedProcessTree } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import { levelOrder as baseLevelOrder } from '../../lib/tree_sequencers';
@@ -38,18 +38,7 @@ export function factory(
 
   // sort the children of each node
   for (const siblings of idToChildren.values()) {
-    siblings.sort(function (firstEvent, secondEvent) {
-      const first: number = datetime(firstEvent);
-      const second: number = datetime(secondEvent);
-
-      // if either value is NaN, compare them differently
-      if (isNaN(first)) {
-        // treat NaN as 1 and other values as 0, causing NaNs to have the highest value
-        return 1 - (isNaN(second) ? 1 : 0);
-      } else {
-        return first - second;
-      }
-    });
+    siblings.sort(orderByTime);
   }
 
   return {
