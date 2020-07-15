@@ -62,7 +62,7 @@ export const ConnectorEditFlyout = ({
 
   const closeFlyout = useCallback(() => {
     setEditFlyoutVisibility(false);
-    setConnector('connector', initialConnector);
+    setConnector('connector', { ...initialConnector, secrets: {} });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setEditFlyoutVisibility]);
 

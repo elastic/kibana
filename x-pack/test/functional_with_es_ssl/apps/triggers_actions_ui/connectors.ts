@@ -105,10 +105,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('nameInput', 'some test name to cancel');
       await testSubjects.click('cancelSaveEditedConnectorButton');
 
+      await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedConnectorButton"]');
+
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
       const nameInputAfterCancel = await testSubjects.find('nameInput');
       const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
       expect(textAfterCancel).to.eql(connectorName);
+      await testSubjects.click('euiFlyoutCloseButton');
     });
 
     it('should delete a connector', async () => {
