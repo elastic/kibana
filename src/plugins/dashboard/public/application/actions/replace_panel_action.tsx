@@ -21,7 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import { IEmbeddable, ViewMode, EmbeddableStart } from '../../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import {
+  ActionByType,
+  ActionExecutionContext,
+  IncompatibleActionError,
+} from '../../ui_actions_plugin';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 
 export const ACTION_REPLACE_PANEL = 'replacePanel';
@@ -62,7 +66,7 @@ export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PA
     return 'kqlOperand';
   }
 
-  public async isCompatible({ embeddable }: ReplacePanelActionContext) {
+  public async isCompatible({ embeddable }: ActionExecutionContext<ReplacePanelActionContext>) {
     if (embeddable.getInput().viewMode) {
       if (embeddable.getInput().viewMode === ViewMode.VIEW) {
         return false;
@@ -72,7 +76,7 @@ export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PA
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));
   }
 
-  public async execute({ embeddable }: ReplacePanelActionContext) {
+  public async execute({ embeddable }: ActionExecutionContext<ReplacePanelActionContext>) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }

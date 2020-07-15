@@ -21,7 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
 import uuid from 'uuid';
 import _ from 'lodash';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import {
+  ActionByType,
+  ActionExecutionContext,
+  IncompatibleActionError,
+} from '../../ui_actions_plugin';
 import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
 import { SavedObject } from '../../../../saved_objects/public';
 import { PanelNotFoundError, EmbeddableInput } from '../../../../embeddable/public';
@@ -60,7 +64,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
     return 'copy';
   }
 
-  public async isCompatible({ embeddable }: ClonePanelActionContext) {
+  public async isCompatible({ embeddable }: ActionExecutionContext<ClonePanelActionContext>) {
     return Boolean(
       embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
@@ -69,7 +73,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
     );
   }
 
-  public async execute({ embeddable }: ClonePanelActionContext) {
+  public async execute({ embeddable }: ActionExecutionContext<ClonePanelActionContext>) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }

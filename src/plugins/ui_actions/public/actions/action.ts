@@ -28,19 +28,18 @@ export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T],
  * During action execution we can provide additional information,
  * for example, trigger, that caused the action execution
  */
-export interface ExecutionMeta {
+export interface ActionExecutionMeta {
   /**
    * Trigger that executed the action
-   * Optional, since action could be run without a trigger
+   * Since action could be trigger witout
    */
   trigger?: Trigger;
 }
 
-export interface Action<
-  Context extends BaseContext = {},
-  T = ActionType,
-  ExecutionContext extends Context & ExecutionMeta = Context & ExecutionMeta
-> extends Partial<Presentable<Context>> {
+export type ActionExecutionContext<Context extends BaseContext = {}> = Context & ActionExecutionMeta;
+
+export interface Action<Context extends BaseContext = {}, T = ActionType>
+  extends Partial<Presentable<Context>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
@@ -78,28 +77,26 @@ export interface Action<
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: ExecutionContext): Promise<boolean>;
+  isCompatible(context: ActionExecutionContext<Context>): Promise<boolean>;
 
   /**
    * Executes the action.
    */
-  execute(context: ExecutionContext): Promise<void>;
+  execute(context: ActionExecutionContext<Context>): Promise<void>;
 
   /**
    * This method should return a link if this item can be clicked on. The link
    * is used to navigate user if user middle-clicks it or Ctrl + clicks or
    * right-clicks and selects "Open in new tab".
    */
-  getHref?(context: ExecutionContext): Promise<string | undefined>;
+  getHref?(context: ActionExecutionContext<Context>): Promise<string | undefined>;
 }
 
 /**
  * A convenience interface used to register an action.
  */
-export interface ActionDefinition<
-  Context extends BaseContext = {},
-  ExecutionContext extends Context & ExecutionMeta = Context & ExecutionMeta
-> extends Partial<Presentable<Context>> {
+export interface ActionDefinition<Context extends BaseContext = {}>
+  extends Partial<Presentable<Context>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */
@@ -114,19 +111,19 @@ export interface ActionDefinition<
    * Returns a promise that resolves to true if this item is compatible given
    * the context and should be displayed to user, otherwise resolves to false.
    */
-  isCompatible?(context: ExecutionContext): Promise<boolean>;
+  isCompatible?(context: ActionExecutionContext<Context>): Promise<boolean>;
 
   /**
    * Executes the action.
    */
-  execute(context: ExecutionContext): Promise<void>;
+  execute(context: ActionExecutionContext<Context>): Promise<void>;
 
   /**
    * This method should return a link if this item can be clicked on. The link
    * is used to navigate user if user middle-clicks it or Ctrl + clicks or
    * right-clicks and selects "Open in new tab".
    */
-  getHref?(context: ExecutionContext): Promise<string | undefined>;
+  getHref?(context: ActionExecutionContext<Context>): Promise<string | undefined>;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;
