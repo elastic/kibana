@@ -13,39 +13,44 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
-import { ServiceNodeMetrics } from '../../../../../common/service_map';
+import { ServiceNodeStats } from '../../../../../common/service_map';
+import { ServiceStatsList } from './ServiceStatsList';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { ServiceMetricList } from './ServiceMetricList';
 import { AnomalyDetection } from './AnomalyDetection';
 import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 
-interface ServiceMetricFetcherProps {
+interface ServiceStatsFetcherProps {
+  environment?: string;
   serviceName: string;
   serviceAnomalyStats: ServiceAnomalyStats | undefined;
 }
 
-export function ServiceMetricFetcher({
+export function ServiceStatsFetcher({
   serviceName,
   serviceAnomalyStats,
-}: ServiceMetricFetcherProps) {
+}: ServiceStatsFetcherProps) {
   const {
-    urlParams: { start, end, environment },
+    urlParams: { start, end },
+    uiFilters,
   } = useUrlParams();
 
   const {
-    data = { transactionStats: {} } as ServiceNodeMetrics,
+    data = { transactionStats: {} } as ServiceNodeStats,
     status,
   } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/service-map/service/{serviceName}',
-          params: { path: { serviceName }, query: { start, end, environment } },
+          params: {
+            path: { serviceName },
+            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+          },
         });
       }
     },
-    [serviceName, start, end, environment],
+    [serviceName, start, end, uiFilters],
     {
       preservePreviousData: false,
     }
@@ -60,20 +65,20 @@ export function ServiceMetricFetcher({
 
   const {
     avgCpuUsage,
-    avgErrorsPerMinute,
+    avgErrorRate,
     avgMemoryUsage,
     transactionStats: { avgRequestsPerMinute, avgTransactionDuration },
   } = data;
 
   const hasServiceData = [
     avgCpuUsage,
-    avgErrorsPerMinute,
+    avgErrorRate,
     avgMemoryUsage,
     avgRequestsPerMinute,
     avgTransactionDuration,
   ].some((stat) => isNumber(stat));
 
-  if (environment && !hasServiceData) {
+  if (!hasServiceData) {
     return (
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.serviceMap.popoverMetrics.noDataText', {
@@ -93,7 +98,7 @@ export function ServiceMetricFetcher({
           <EuiHorizontalRule margin="xs" />
         </>
       )}
-      <ServiceMetricList {...data} />
+      <ServiceStatsList {...data} />
     </>
   );
 }
