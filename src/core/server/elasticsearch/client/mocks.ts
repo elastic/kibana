@@ -28,7 +28,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     node: 'http://localhost',
   }) as any;
 
-  const blackListedProps = [
+  const omittedProps = [
     '_events',
     '_eventsCount',
     '_maxListeners',
@@ -39,9 +39,9 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     'helpers',
   ];
 
-  const mockify = (obj: Record<string, any>, blacklist: string[] = []) => {
+  const mockify = (obj: Record<string, any>, omitted: string[] = []) => {
     Object.keys(obj)
-      .filter((key) => !blacklist.includes(key))
+      .filter((key) => !omitted.includes(key))
       .forEach((key) => {
         const propType = typeof obj[key];
         if (propType === 'function') {
@@ -52,7 +52,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
       });
   };
 
-  mockify(client, blackListedProps);
+  mockify(client, omittedProps);
 
   client.transport = {
     request: jest.fn(),

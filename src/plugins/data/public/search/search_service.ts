@@ -37,9 +37,12 @@ import {
   getCalculateAutoTimeExpression,
 } from './aggs';
 import { ISearchGeneric } from './types';
+import { SearchUsageCollector, createUsageCollector } from './collectors';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
+  usageCollection?: UsageCollectionSetup;
   getInternalStartServices: GetInternalStartServicesFn;
   packageInfo: PackageInfo;
 }
@@ -52,6 +55,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private esClient?: LegacyApiCaller;
   private readonly aggTypesRegistry = new AggTypesRegistry();
   private searchInterceptor!: SearchInterceptor;
+  private usageCollector?: SearchUsageCollector;
 
   /**
    * getForceNow uses window.location, so we must have a separate implementation
@@ -62,8 +66,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup,
-    { expressions, packageInfo, getInternalStartServices }: SearchServiceSetupDependencies
+    {
+      expressions,
+      usageCollection,
+      packageInfo,
+      getInternalStartServices,
+    }: SearchServiceSetupDependencies
   ): ISearchSetup {
+    this.usageCollector = createUsageCollector(core, usageCollection);
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
 
     const aggTypesSetup = this.aggTypesRegistry.setup();
@@ -102,6 +112,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         application: core.application,
         http: core.http,
         uiSettings: core.uiSettings,
+        usageCollector: this.usageCollector!,
       },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
@@ -134,6 +145,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         types: aggTypesStart,
       },
       search,
+      usageCollector: this.usageCollector!,
       searchSource: {
         create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
         createEmpty: () => {

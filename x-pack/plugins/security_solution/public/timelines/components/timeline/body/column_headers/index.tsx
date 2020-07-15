@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCheckbox } from '@elastic/eui';
+import { EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
@@ -18,6 +18,10 @@ import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
+import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
+import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
+import { useFullScreen } from '../../../../../common/containers/use_full_screen';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import {
   OnColumnRemoved,
   OnColumnResized,
@@ -41,6 +45,8 @@ import {
 import { Sort } from '../sort';
 import { EventsSelect } from './events_select';
 import { ColumnHeader } from './column_header';
+
+import * as i18n from './translations';
 
 interface Props {
   actionsColumnWidth: number;
@@ -81,6 +87,18 @@ export const DraggableContainer = React.memo<DraggableContainerProps>(
 
 DraggableContainer.displayName = 'DraggableContainer';
 
+export const isFullScreen = ({
+  globalFullScreen,
+  timelineId,
+  timelineFullScreen,
+}: {
+  globalFullScreen: boolean;
+  timelineId: string;
+  timelineFullScreen: boolean;
+}) =>
+  (timelineId === TimelineId.active && timelineFullScreen) ||
+  (timelineId !== TimelineId.active && globalFullScreen);
+
 /** Renders the timeline header columns */
 export const ColumnHeadersComponent = ({
   actionsColumnWidth,
@@ -101,6 +119,26 @@ export const ColumnHeadersComponent = ({
   toggleColumn,
 }: Props) => {
   const [draggingIndex, setDraggingIndex] = useState(null);
+  const {
+    timelineFullScreen,
+    setTimelineFullScreen,
+    globalFullScreen,
+    setGlobalFullScreen,
+  } = useFullScreen();
+
+  const toggleFullScreen = useCallback(() => {
+    if (timelineId === TimelineId.active) {
+      setTimelineFullScreen(!timelineFullScreen);
+    } else {
+      setGlobalFullScreen(!globalFullScreen);
+    }
+  }, [
+    timelineId,
+    setTimelineFullScreen,
+    timelineFullScreen,
+    setGlobalFullScreen,
+    globalFullScreen,
+  ]);
 
   const handleSelectAllChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,6 +203,11 @@ export const ColumnHeadersComponent = ({
     ]
   );
 
+  const fullScreen = useMemo(
+    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
+    [globalFullScreen, timelineId, timelineFullScreen]
+  );
+
   return (
     <EventsThead data-test-subj="column-headers">
       <EventsTrHeader>
@@ -204,6 +247,25 @@ export const ColumnHeadersComponent = ({
               data-test-subj="row-renderers-browser"
               timelineId={timelineId}
             />
+          </EventsTh>
+
+          <EventsTh>
+            <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+              <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
+                <EuiButtonIcon
+                  aria-label={
+                    isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
+                      ? EXIT_FULL_SCREEN
+                      : i18n.FULL_SCREEN
+                  }
+                  className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
+                  color={fullScreen ? 'ghost' : 'primary'}
+                  data-test-subj="full-screen"
+                  iconType="fullScreen"
+                  onClick={toggleFullScreen}
+                />
+              </EuiToolTip>
+            </EventsThContent>
           </EventsTh>
 
           {showEventsSelect && (
