@@ -87,13 +87,7 @@ export function getAlertType(service: Service): AlertType {
     (propKey: string) => {
       return {
         name: propKey,
-        description: i18n.translate(
-          'xpack.alertingBuiltins.indexThreshold.actionVariableContextDateLabel',
-          {
-            defaultMessage: '{propKey}',
-            values: { propKey },
-          }
-        ),
+        description: propKey,
       };
     }
   );
