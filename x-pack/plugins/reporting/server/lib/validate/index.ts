@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { ReportingConfig } from '../../';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
-import { LevelLogger } from '../../lib';
+import { LevelLogger } from '../';
 import { validateBrowser } from './validate_browser';
 import { validateMaxContentLength } from './validate_max_content_length';
 

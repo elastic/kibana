@@ -41,7 +41,7 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
   (Optional, array|string) The fields to perform the `simple_query_string` parsed query against.
 
 `fields`::
-  (Optional, array|string) The fields to return in the response.
+  (Optional, array|string) The fields to return in the `attributes` key of the response.
 
 `sort_field`::
   (Optional, string) The field that sorts the response.
@@ -69,7 +69,7 @@ Find index patterns with titles that start with `my`:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET "localhost:5601/api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*"
+$ curl -X GET api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*
 --------------------------------------------------
 // KIBANA
 
@@ -97,6 +97,6 @@ query parameter for each value:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET "localhost:5601/api/saved_objects/_find?fields=id&fields=title"
+$ curl -X GET api/saved_objects/_find?fields=id&fields=title
 --------------------------------------------------
 // KIBANA
