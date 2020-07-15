@@ -50,7 +50,7 @@ export const createEndpointList = async ({
         updated_by: user,
       },
       {
-        // We intentionally hard coding the id so that there can only be one exception list within the  space
+        // We intentionally hard coding the id so that there can only be one exception list within the space
         id: ENDPOINT_LIST_ID,
       }
     );
