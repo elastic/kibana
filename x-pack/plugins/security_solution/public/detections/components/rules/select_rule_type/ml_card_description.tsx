@@ -5,7 +5,8 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import styled from 'styled-components';
 import React from 'react';
 
 import { ML_TYPE_DESCRIPTION } from './translations';
@@ -15,11 +16,15 @@ interface MlCardDescriptionProps {
   hasValidLicense?: boolean;
 }
 
+const SmallText = styled.span`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+`;
+
 const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
   subscriptionUrl,
   hasValidLicense = false,
 }) => (
-  <EuiText size="s">
+  <SmallText>
     {hasValidLicense ? (
       ML_TYPE_DESCRIPTION
     ) : (
@@ -38,7 +43,7 @@ const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
         }}
       />
     )}
-  </EuiText>
+  </SmallText>
 );
 
 MlCardDescriptionComponent.displayName = 'MlCardDescriptionComponent';

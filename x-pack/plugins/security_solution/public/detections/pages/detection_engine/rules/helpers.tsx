@@ -5,7 +5,6 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { get } from 'lodash/fp';
 import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
@@ -15,7 +14,6 @@ import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
-import { FormData, FormHook, FormSchema } from '../../../../shared_imports';
 import {
   AboutStepRule,
   AboutStepRuleDetails,
@@ -122,6 +120,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   const {
     author,
     building_block_type: buildingBlockType,
+    exceptions_list: exceptionsList,
     license,
     risk_score_mapping: riskScoreMapping,
     rule_name_override: ruleNameOverride,
@@ -138,6 +137,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   return {
     isNew: false,
     author,
+    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === 'endpoint_list') ?? false,
     isBuildingBlock: buildingBlockType !== undefined,
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',
@@ -271,17 +271,6 @@ export const getPrePackagedTimelineStatus = (
   }
   return 'unknown';
 };
-export const setFieldValue = (
-  form: FormHook<FormData>,
-  schema: FormSchema<FormData>,
-  defaultValues: unknown
-) =>
-  Object.keys(schema).forEach((key) => {
-    const val = get(key, defaultValues);
-    if (val != null) {
-      form.setFieldValue(key, val);
-    }
-  });
 
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
