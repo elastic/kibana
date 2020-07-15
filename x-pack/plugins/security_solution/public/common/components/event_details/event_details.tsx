@@ -62,8 +62,6 @@ const Details = styled.div`
 
 Details.displayName = 'Details';
 
-const popoverStyle: React.CSSProperties = { position: 'fixed', zIndex: 10 };
-
 export const EventDetails = React.memo<Props>(
   ({
     browserFields,

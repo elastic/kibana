@@ -80,7 +80,7 @@ export const createStore = (
     )
   );
 
-  // @ts-expect-error
+  // @ts-ignore
   epicMiddleware.run(createRootEpic<State>()); // TODO: the addition of fullScreen should not cause this error
 
   return store;
