@@ -69,7 +69,8 @@
  *    `appSearchSource`.
  */
 
-import { uniqueId, uniq, extend, pick, difference, omit, set, keys, isFunction } from 'lodash';
+import { setWith } from '@elastic/safer-lodash-set';
+import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
@@ -439,7 +440,9 @@ export class SearchSource {
       // request the remaining fields from both stored_fields and _source
       const remainingFields = difference(fields, keys(body.script_fields));
       body.stored_fields = remainingFields;
-      set(body, '_source.includes', remainingFields);
+      setWith(body, '_source.includes', remainingFields, (nsValue) =>
+        isObject(nsValue) ? {} : nsValue
+      );
     }
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
@@ -460,7 +463,7 @@ export class SearchSource {
     ]);
     let serializedSearchSourceFields: SearchSourceFields = {
       ...searchSourceFields,
-      index: searchSourceFields.index ? searchSourceFields.index.id : undefined,
+      index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
     };
     if (originalFilters) {
       const filters = this.getFilters(originalFilters);

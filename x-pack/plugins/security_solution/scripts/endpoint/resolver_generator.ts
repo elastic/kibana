@@ -11,6 +11,7 @@ import fetch from 'node-fetch';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
+import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
 
 main();
 
@@ -122,6 +123,12 @@ async function main() {
       type: 'number',
       default: 3,
     },
+    ancestryArraySize: {
+      alias: 'ancSize',
+      describe: 'the upper bound size of the ancestry array, 0 will mark the field as undefined',
+      type: 'number',
+      default: ANCESTRY_LIMIT,
+    },
     generations: {
       alias: 'gen',
       describe: 'number of child generations to create',
@@ -229,6 +236,7 @@ async function main() {
       percentWithRelated: argv.percentWithRelated,
       percentTerminated: argv.percentTerminated,
       alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
+      ancestryArraySize: argv.ancestryArraySize,
     }
   );
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);

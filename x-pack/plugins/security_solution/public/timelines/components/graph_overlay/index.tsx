@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { SecurityPageName } from '../../../app/types';
 import { AllCasesModal } from '../../../cases/components/all_cases_modal';
-import { getCaseDetailsUrl } from '../../../common/components/link_to';
+import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../common/components/link_to';
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { State } from '../../../common/store';
@@ -28,10 +28,13 @@ import {
 import { Resolver } from '../../../resolver/view';
 
 import * as i18n from './translations';
+import { TimelineType } from '../../../../common/types/timeline';
 
 const OverlayContainer = styled.div<{ bodyHeight?: number }>`
   height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
   width: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const StyledResolver = styled(Resolver)`
@@ -42,6 +45,7 @@ interface OwnProps {
   bodyHeight?: number;
   graphEventId?: string;
   timelineId: string;
+  timelineType: TimelineType;
 }
 
 const GraphOverlayComponent = ({
@@ -50,6 +54,7 @@ const GraphOverlayComponent = ({
   status,
   timelineId,
   title,
+  timelineType,
 }: OwnProps & PropsFromRedux) => {
   const dispatch = useDispatch();
   const { navigateToApp } = useKibana().services.application;
@@ -63,20 +68,20 @@ const GraphOverlayComponent = ({
     timelineSelectors.selectTimeline(state, timelineId)
   );
   const onRowClick = useCallback(
-    (id: string) => {
+    (id?: string) => {
       onCloseCaseModal();
 
-      dispatch(
-        setInsertTimeline({
-          graphEventId,
-          timelineId,
-          timelineSavedObjectId: currentTimeline.savedObjectId,
-          timelineTitle: title.length > 0 ? title : UNTITLED_TIMELINE,
-        })
-      );
-
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCaseDetailsUrl({ id }),
+        path: id != null ? getCaseDetailsUrl({ id }) : getCreateCaseUrl(),
+      }).then(() => {
+        dispatch(
+          setInsertTimeline({
+            graphEventId,
+            timelineId,
+            timelineSavedObjectId: currentTimeline.savedObjectId,
+            timelineTitle: title.length > 0 ? title : UNTITLED_TIMELINE,
+          })
+        );
       });
     },
     [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]
@@ -91,32 +96,37 @@ const GraphOverlayComponent = ({
             {i18n.BACK_TO_EVENTS}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <NewCase
-                compact={true}
-                graphEventId={graphEventId}
-                onClosePopover={noop}
-                timelineId={timelineId}
-                timelineTitle={title}
-                timelineStatus={status}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ExistingCase
-                compact={true}
-                onClosePopover={noop}
-                onOpenCaseModal={onOpenCaseModal}
-                timelineStatus={status}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {timelineType === TimelineType.default && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <NewCase
+                  compact={true}
+                  graphEventId={graphEventId}
+                  onClosePopover={noop}
+                  timelineId={timelineId}
+                  timelineTitle={title}
+                  timelineStatus={status}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ExistingCase
+                  compact={true}
+                  onClosePopover={noop}
+                  onOpenCaseModal={onOpenCaseModal}
+                  timelineStatus={status}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="none" />
-      <StyledResolver databaseDocumentID={graphEventId} />
+      <StyledResolver
+        databaseDocumentID={graphEventId}
+        resolverComponentInstanceID={currentTimeline.id}
+      />
       <AllCasesModal
         onCloseCaseModal={onCloseCaseModal}
         showCaseModal={showCaseModal}

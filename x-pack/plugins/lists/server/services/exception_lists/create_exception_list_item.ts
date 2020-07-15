@@ -12,8 +12,8 @@ import {
   Description,
   EntriesArray,
   ExceptionListItemSchema,
+  ExceptionListItemType,
   ExceptionListSoSchema,
-  ExceptionListType,
   ItemId,
   ListId,
   MetaOrUndefined,
@@ -43,7 +43,7 @@ interface CreateExceptionListItemOptions {
   user: string;
   tags: Tags;
   tieBreaker?: string;
-  type: ExceptionListType;
+  type: ExceptionListItemType;
 }
 
 export const createExceptionListItem = async ({
@@ -82,5 +82,5 @@ export const createExceptionListItem = async ({
     type,
     updated_by: user,
   });
-  return transformSavedObjectToExceptionListItem({ namespaceType, savedObject });
+  return transformSavedObjectToExceptionListItem({ savedObject });
 };

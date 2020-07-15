@@ -98,7 +98,7 @@ const breadcrumbGetters: {
     },
     { text: configName },
   ],
-  add_datasource_from_configuration: ({ configName, configId }) => [
+  add_integration_from_configuration: ({ configName, configId }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.configurations(),
@@ -111,12 +111,12 @@ const breadcrumbGetters: {
       text: configName,
     },
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.addDatasourcePageTitle', {
-        defaultMessage: 'Add data source',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.addPackageConfigPageTitle', {
+        defaultMessage: 'Add integration',
       }),
     },
   ],
-  add_datasource_from_integration: ({ pkgTitle, pkgkey }) => [
+  add_integration_to_configuration: ({ pkgTitle, pkgkey }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.integrations(),
@@ -129,12 +129,12 @@ const breadcrumbGetters: {
       text: pkgTitle,
     },
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.addDatasourcePageTitle', {
-        defaultMessage: 'Add data source',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.addPackageConfigPageTitle', {
+        defaultMessage: 'Add integration',
       }),
     },
   ],
-  edit_datasource: ({ configName, configId }) => [
+  edit_integration: ({ configName, configId }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.configurations(),
@@ -147,8 +147,8 @@ const breadcrumbGetters: {
       text: configName,
     },
     {
-      text: i18n.translate('xpack.ingestManager.breadcrumbs.editDatasourcePageTitle', {
-        defaultMessage: 'Edit data source',
+      text: i18n.translate('xpack.ingestManager.breadcrumbs.editPackageConfigPageTitle', {
+        defaultMessage: 'Edit integration',
       }),
     },
   ],
@@ -207,7 +207,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.ingestManager.breadcrumbs.datastreamsPageTitle', {
-        defaultMessage: 'Data streams',
+        defaultMessage: 'Datasets',
       }),
     },
   ],

@@ -14,9 +14,19 @@ export function resultsServiceProvider(
     earliestMs: number,
     latestMs: number,
     interval: string | number,
-    maxResults: number
+    perPage?: number,
+    fromPage?: number
   ): Promise<any>;
-  getTopInfluencers(): Promise<any>;
+  getTopInfluencers(
+    selectedJobIds: string[],
+    earliestMs: number,
+    latestMs: number,
+    maxFieldValues: number,
+    perPage?: number,
+    fromPage?: number,
+    influencers?: any[],
+    influencersFilterQuery?: any
+  ): Promise<any>;
   getTopInfluencerValues(): Promise<any>;
   getOverallBucketScores(
     jobIds: any,
@@ -33,6 +43,8 @@ export function resultsServiceProvider(
     latestMs: number,
     interval: string,
     maxResults: number,
+    perPage: number,
+    fromPage: number,
     influencersFilterQuery: any
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;

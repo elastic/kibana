@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useAsyncTask } from '../../common/hooks/use_async_task';
-import { FindListsParams } from '../types';
+import { withOptionalSignal } from '../../common/with_optional_signal';
+import { useAsync } from '../../common/hooks/use_async';
 import { findLists } from '../api';
 
-export type FindListsTaskArgs = Omit<FindListsParams, 'signal'>;
-
-const findListsTask = (
-  { signal }: AbortController,
-  args: FindListsTaskArgs
-): ReturnType<typeof findLists> => findLists({ signal, ...args });
+const findListsWithOptionalSignal = withOptionalSignal(findLists);
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const useFindLists = () => useAsyncTask(findListsTask);
+export const useFindLists = () => useAsync(findListsWithOptionalSignal);

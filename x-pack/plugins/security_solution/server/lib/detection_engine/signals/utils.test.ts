@@ -9,10 +9,11 @@ import sinon from 'sinon';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
-import { EntriesArray } from '../../../../common/detection_engine/lists_common_deps';
+import { EntriesArray } from '../../../../common/shared_imports';
 import { buildRuleMessageFactory } from './rule_messages';
-
-import * as featureFlags from '../feature_flags';
+import { ExceptionListClient } from '../../../../../lists/server';
+import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 import {
   generateId,
@@ -20,10 +21,12 @@ import {
   parseScheduleDates,
   getDriftTolerance,
   getGapBetweenRuns,
+  getGapMaxCatchupRatio,
   errorAggregator,
   getListsClient,
   hasLargeValueList,
   getSignalTimeTuples,
+  getExceptions,
 } from './utils';
 import { BulkResponseErrorAggregation } from './types';
 import {
@@ -54,6 +57,9 @@ describe('utils', () => {
 
   afterEach(() => {
     clock.restore();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('generateId', () => {
@@ -553,13 +559,7 @@ describe('utils', () => {
       alertServices = alertsMock.createAlertServices();
     });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
     test('it successfully returns list and exceptions list client', async () => {
-      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(true);
-
       const { listClient, exceptionsClient } = await getListsClient({
         services: alertServices,
         savedObjectClient: alertServices.savedObjectsClient,
@@ -572,23 +572,7 @@ describe('utils', () => {
       expect(exceptionsClient).toBeDefined();
     });
 
-    test('it returns list and exceptions client of "undefined" if lists feature flag is off', async () => {
-      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(false);
-
-      const listsClient = await getListsClient({
-        services: alertServices,
-        savedObjectClient: alertServices.savedObjectsClient,
-        updatedByUser: 'some_user',
-        spaceId: '',
-        lists: listMock.createSetup(),
-      });
-
-      expect(listsClient).toEqual({ listClient: undefined, exceptionsClient: undefined });
-    });
-
     test('it throws if "lists" is undefined', async () => {
-      jest.spyOn(featureFlags, 'hasListsFeature').mockReturnValue(true);
-
       await expect(() =>
         getListsClient({
           services: alertServices,
@@ -730,6 +714,153 @@ describe('utils', () => {
       expect(someTuples.length).toEqual(1);
       const someTuple = someTuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
+    });
+  });
+
+  describe('getMaxCatchupRatio', () => {
+    test('should return null if rule has never run before', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: null,
+        interval: '30s',
+        ruleParamsFrom: 'now-30s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
+    });
+
+    test('should should have non-null values when gap is present', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(65, 's').toDate(),
+        interval: '50s',
+        ruleParamsFrom: 'now-55s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toEqual(0.2);
+      expect(ratio).toEqual(0.2);
+      expect(gapDiffInUnits).toEqual(10);
+    });
+
+    // when a rule runs sooner than expected we don't
+    // consider that a gap as that is a very rare circumstance
+    test('should return null when given a negative gap (rule ran sooner than expected)', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(-15, 's').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
+    });
+  });
+
+  describe('#getExceptions', () => {
+    test('it successfully returns array of exception list items', async () => {
+      const client = listMock.getExceptionListClient();
+      const exceptions = await getExceptions({
+        client,
+        lists: getListArrayMock(),
+      });
+
+      expect(client.getExceptionList).toHaveBeenNthCalledWith(1, {
+        id: 'some_uuid',
+        listId: undefined,
+        namespaceType: 'single',
+      });
+      expect(client.getExceptionList).toHaveBeenNthCalledWith(2, {
+        id: 'some_uuid',
+        listId: undefined,
+        namespaceType: 'agnostic',
+      });
+      expect(exceptions).toEqual([
+        getExceptionListItemSchemaMock(),
+        getExceptionListItemSchemaMock(),
+      ]);
+    });
+
+    test('it throws if "client" is undefined', async () => {
+      await expect(() =>
+        getExceptions({
+          client: undefined,
+          lists: getListArrayMock(),
+        })
+      ).rejects.toThrowError('lists plugin unavailable during rule execution');
+    });
+
+    test('it returns empty array if no "lists" is undefined', async () => {
+      const exceptions = await getExceptions({
+        client: listMock.getExceptionListClient(),
+        lists: undefined,
+      });
+
+      expect(exceptions).toEqual([]);
+    });
+
+    test('it throws if "getExceptionListClient" fails', async () => {
+      const err = new Error('error fetching list');
+      listMock.getExceptionListClient = () =>
+        (({
+          getExceptionList: jest.fn().mockRejectedValue(err),
+        } as unknown) as ExceptionListClient);
+
+      await expect(() =>
+        getExceptions({
+          client: listMock.getExceptionListClient(),
+          lists: getListArrayMock(),
+        })
+      ).rejects.toThrowError('unable to fetch exception list items');
+    });
+
+    test('it throws if "findExceptionListItem" fails', async () => {
+      const err = new Error('error fetching list');
+      listMock.getExceptionListClient = () =>
+        (({
+          findExceptionListItem: jest.fn().mockRejectedValue(err),
+        } as unknown) as ExceptionListClient);
+
+      await expect(() =>
+        getExceptions({
+          client: listMock.getExceptionListClient(),
+          lists: getListArrayMock(),
+        })
+      ).rejects.toThrowError('unable to fetch exception list items');
+    });
+
+    test('it returns empty array if "getExceptionList" returns null', async () => {
+      listMock.getExceptionListClient = () =>
+        (({
+          getExceptionList: jest.fn().mockResolvedValue(null),
+        } as unknown) as ExceptionListClient);
+
+      const exceptions = await getExceptions({
+        client: listMock.getExceptionListClient(),
+        lists: undefined,
+      });
+
+      expect(exceptions).toEqual([]);
+    });
+
+    test('it returns empty array if "findExceptionListItem" returns null', async () => {
+      listMock.getExceptionListClient = () =>
+        (({
+          findExceptionListItem: jest.fn().mockResolvedValue(null),
+        } as unknown) as ExceptionListClient);
+
+      const exceptions = await getExceptions({
+        client: listMock.getExceptionListClient(),
+        lists: undefined,
+      });
+
+      expect(exceptions).toEqual([]);
     });
   });
 });

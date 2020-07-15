@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padLeft, difference, chunk } from 'lodash';
+import { padStart, difference, chunk } from 'lodash';
 import { Alert, AlertTaskState, RawAlertInstance, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
@@ -103,7 +103,7 @@ export const alertInstancesTableColumns = (
 
 function durationAsString(duration: Duration): string {
   return [duration.hours(), duration.minutes(), duration.seconds()]
-    .map((value) => padLeft(`${value}`, 2, '0'))
+    .map((value) => padStart(`${value}`, 2, '0'))
     .join(':');
 }
 

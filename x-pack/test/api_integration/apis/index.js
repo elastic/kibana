@@ -31,5 +31,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./transform'));
     loadTestFile(require.resolve('./endpoint'));
     loadTestFile(require.resolve('./ingest_manager'));
+    loadTestFile(require.resolve('./lists'));
   });
 }

@@ -20,15 +20,13 @@ export const config = {
     fleet: true,
   },
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    epm: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-      registryUrl: schema.maybe(schema.uri()),
-    }),
+    enabled: schema.boolean({ defaultValue: true }),
+    registryUrl: schema.maybe(schema.uri()),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
       pollingRequestTimeout: schema.number({ defaultValue: 60000 }),
+      maxConcurrentConnections: schema.number({ defaultValue: 0 }),
       kibana: schema.object({
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
@@ -37,13 +35,15 @@ export const config = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
+      agentConfigRollupRateLimitIntervalMs: schema.number({ defaultValue: 5000 }),
+      agentConfigRollupRateLimitRequestPerInterval: schema.number({ defaultValue: 50 }),
     }),
   }),
 };
 
 export type IngestManagerConfigType = TypeOf<typeof config.schema>;
 
-export { DatasourceServiceInterface } from './services/datasource';
+export { PackageConfigServiceInterface } from './services/package_config';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);

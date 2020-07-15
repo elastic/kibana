@@ -17,27 +17,28 @@
  * under the License.
  */
 
-import { Plugin, PluginInitializerContext, CoreSetup } from '../../../../core/server';
 import {
-  ISearchSetup,
-  ISearchStart,
-  TSearchStrategiesMap,
-  TRegisterSearchStrategy,
-  TGetSearchStrategy,
-} from './types';
+  Plugin,
+  PluginInitializerContext,
+  CoreSetup,
+  RequestHandlerContext,
+} from '../../../../core/server';
+import { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
 import { registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
-import { searchSavedObjectType } from '../saved_objects';
 import { DataPluginStart } from '../plugin';
+import { IEsSearchRequest } from '../../common';
+
+interface StrategyMap {
+  [name: string]: ISearchStrategy;
+}
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
-  private searchStrategies: TSearchStrategiesMap = {};
+  private searchStrategies: StrategyMap = {};
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<object, DataPluginStart>): ISearchSetup {
-    core.savedObjects.registerType(searchSavedObjectType);
-
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
       esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
@@ -48,17 +49,28 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return { registerSearchStrategy: this.registerSearchStrategy };
   }
 
+  private search(context: RequestHandlerContext, searchRequest: IEsSearchRequest, options: any) {
+    return this.getSearchStrategy(options.strategy || ES_SEARCH_STRATEGY).search(
+      context,
+      searchRequest,
+      { signal: options.signal }
+    );
+  }
+
   public start(): ISearchStart {
-    return { getSearchStrategy: this.getSearchStrategy };
+    return {
+      getSearchStrategy: this.getSearchStrategy,
+      search: this.search,
+    };
   }
 
   public stop() {}
 
-  private registerSearchStrategy: TRegisterSearchStrategy = (name, strategy) => {
+  private registerSearchStrategy = (name: string, strategy: ISearchStrategy) => {
     this.searchStrategies[name] = strategy;
   };
 
-  private getSearchStrategy: TGetSearchStrategy = (name) => {
+  private getSearchStrategy = (name: string): ISearchStrategy => {
     const strategy = this.searchStrategies[name];
     if (!strategy) {
       throw new Error(`Search strategy ${name} not found`);

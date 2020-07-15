@@ -5,6 +5,6 @@
  */
 export * from './agent_config';
 export * from './agent';
-export * from './datasource';
+export * from './package_config';
 export * from './output';
 export * from './enrollment_api_key';

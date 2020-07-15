@@ -13,12 +13,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
-import { registerDatasource } from './applications/ingest_manager/sections/agent_config/create_datasource_page/components/custom_configure_datasource';
+import { setHttpClient } from './applications/ingest_manager/hooks';
+import {
+  TutorialDirectoryNotice,
+  TutorialDirectoryHeaderLink,
+  TutorialModuleNotice,
+} from './applications/ingest_manager/components/home_integration';
+import { registerPackageConfigComponent } from './applications/ingest_manager/sections/agent_config/create_package_config_page/components/custom_package_config';
 
 export { IngestManagerConfigType } from '../common/types';
 
@@ -31,13 +38,14 @@ export interface IngestManagerSetup {}
  * Describes public IngestManager plugin contract returned at the `start` stage.
  */
 export interface IngestManagerStart {
-  registerDatasource: typeof registerDatasource;
-  success: Promise<true>;
+  registerPackageConfigComponent: typeof registerPackageConfigComponent;
+  isInitialized: () => Promise<true>;
 }
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export interface IngestManagerStartDeps {
@@ -55,6 +63,10 @@ export class IngestManagerPlugin
 
   public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     const config = this.config;
+
+    // Set up http client
+    setHttpClient(core.http);
+
     // Register main Ingest Manager app
     core.application.register({
       id: PLUGIN_ID,
@@ -77,32 +89,44 @@ export class IngestManagerPlugin
       },
     });
 
+    // Register components for home/add data integration
+    if (deps.home) {
+      deps.home.tutorials.registerDirectoryNotice(PLUGIN_ID, TutorialDirectoryNotice);
+      deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
+      deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
+    }
+
     return {};
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
-    let successPromise: IngestManagerStart['success'];
-    try {
-      const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
-        appRoutesService.getCheckPermissionsPath()
-      );
-
-      if (permissionsResponse?.success) {
-        successPromise = core.http
-          .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
-          .then(({ isInitialized }) =>
-            isInitialized ? Promise.resolve(true) : Promise.reject(new Error('Unknown setup error'))
-          );
-      } else {
-        throw new Error(permissionsResponse?.error || 'Unknown permissions error');
-      }
-    } catch (error) {
-      successPromise = Promise.reject(error);
-    }
+    let successPromise: ReturnType<IngestManagerStart['isInitialized']>;
 
     return {
-      success: successPromise,
-      registerDatasource,
+      isInitialized: () => {
+        if (!successPromise) {
+          successPromise = Promise.resolve().then(async () => {
+            const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
+              appRoutesService.getCheckPermissionsPath()
+            );
+
+            if (permissionsResponse?.success) {
+              return core.http
+                .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
+                .then(({ isInitialized }) =>
+                  isInitialized
+                    ? Promise.resolve(true)
+                    : Promise.reject(new Error('Unknown setup error'))
+                );
+            } else {
+              throw new Error(permissionsResponse?.error || 'Unknown permissions error');
+            }
+          });
+        }
+
+        return successPromise;
+      },
+      registerPackageConfigComponent,
     };
   }
 

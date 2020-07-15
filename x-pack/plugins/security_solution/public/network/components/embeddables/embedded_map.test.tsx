@@ -9,7 +9,6 @@ import React from 'react';
 
 import { useIndexPatterns } from '../../../common/hooks/use_index_patterns';
 import { EmbeddedMapComponent } from './embedded_map';
-import { SetQuery } from './types';
 
 const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
 jest.mock('../../../common/hooks/use_index_patterns');
@@ -18,7 +17,7 @@ mockUseIndexPatterns.mockImplementation(() => [true, []]);
 jest.mock('../../../common/lib/kibana');
 
 describe('EmbeddedMapComponent', () => {
-  let setQuery: SetQuery;
+  let setQuery: jest.Mock;
 
   beforeEach(() => {
     setQuery = jest.fn();
@@ -27,11 +26,11 @@ describe('EmbeddedMapComponent', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <EmbeddedMapComponent
-        endDate={new Date('2019-08-28T05:50:57.877Z').getTime()}
+        endDate="2019-08-28T05:50:57.877Z"
         filters={[]}
         query={{ query: '', language: 'kuery' }}
         setQuery={setQuery}
-        startDate={new Date('2019-08-28T05:50:47.877Z').getTime()}
+        startDate="2019-08-28T05:50:47.877Z"
       />
     );
     expect(wrapper).toMatchSnapshot();

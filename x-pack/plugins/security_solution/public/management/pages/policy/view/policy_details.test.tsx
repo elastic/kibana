@@ -27,7 +27,7 @@ describe('Policy Details', () => {
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let http: typeof coreStart.http;
   let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
-  let policyDatasource: ReturnType<typeof generator.generatePolicyDatasource>;
+  let policyPackageConfig: ReturnType<typeof generator.generatePolicyPackageConfig>;
   let policyView: ReturnType<typeof render>;
 
   beforeEach(() => {
@@ -77,17 +77,17 @@ describe('Policy Details', () => {
     let asyncActions: Promise<unknown> = Promise.resolve();
 
     beforeEach(() => {
-      policyDatasource = generator.generatePolicyDatasource();
-      policyDatasource.id = '1';
+      policyPackageConfig = generator.generatePolicyPackageConfig();
+      policyPackageConfig.id = '1';
 
       http.get.mockImplementation((...args) => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/ingest_manager/datasources/1') {
+          if (path === '/api/ingest_manager/package_configs/1') {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
-              item: policyDatasource,
+              item: policyPackageConfig,
               success: true,
             });
           }
@@ -132,7 +132,7 @@ describe('Policy Details', () => {
 
       const pageTitle = pageHeaderLeft.find('[data-test-subj="pageViewHeaderLeftTitle"]');
       expect(pageTitle).toHaveLength(1);
-      expect(pageTitle.text()).toEqual(policyDatasource.name);
+      expect(pageTitle.text()).toEqual(policyPackageConfig.name);
     });
     it('should navigate to list if back to link is clicked', async () => {
       policyView.update();
@@ -170,7 +170,11 @@ describe('Policy Details', () => {
       );
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       cancelbutton.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual(policyListPathUrl);
+      const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
+      expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
+        'securitySolution:administration',
+        { path: policyListPathUrl },
+      ]);
     });
     it('should display save button', async () => {
       await asyncActions;
@@ -202,9 +206,9 @@ describe('Policy Details', () => {
           asyncActions = asyncActions.then(async () => sleep());
           const [path] = args;
           if (typeof path === 'string') {
-            if (path === '/api/ingest_manager/datasources/1') {
+            if (path === '/api/ingest_manager/package_configs/1') {
               return Promise.resolve({
-                item: policyDatasource,
+                item: policyPackageConfig,
                 success: true,
               });
             }
@@ -247,7 +251,7 @@ describe('Policy Details', () => {
 
         // API should be called
         await asyncActions;
-        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/datasources/1`);
+        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/package_configs/1`);
         policyView.update();
 
         // Toast notification should be shown
@@ -259,7 +263,7 @@ describe('Policy Details', () => {
         });
       });
       it('should show an error notification toast if update fails', async () => {
-        policyDatasource.id = 'invalid';
+        policyPackageConfig.id = 'invalid';
         modalConfirmButton.simulate('click');
 
         await asyncActions;

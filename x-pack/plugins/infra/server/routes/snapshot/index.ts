@@ -35,7 +35,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           nodeType,
           groupBy,
           sourceId,
-          metric,
+          metrics,
           timerange,
           accountId,
           region,
@@ -56,7 +56,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           nodeType,
           groupBy,
           sourceConfiguration: source.configuration,
-          metric,
+          metrics,
           timerange,
           includeTimeseries,
         };

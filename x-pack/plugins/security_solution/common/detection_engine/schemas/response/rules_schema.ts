@@ -44,6 +44,7 @@ import {
   timeline_title,
   type,
   threat,
+  threshold,
   throttle,
   job_status,
   status_date,
@@ -55,8 +56,17 @@ import {
   filters,
   meta,
   note,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
 } from '../common/schemas';
 import { DefaultListArray } from '../types/lists_default_array';
+import {
+  DefaultStringArray,
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
+} from '../types';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -64,6 +74,7 @@ import { DefaultListArray } from '../types/lists_default_array';
  * output schema.
  */
 export const requiredRulesSchema = t.type({
+  author: DefaultStringArray,
   description,
   enabled,
   false_positives,
@@ -75,9 +86,11 @@ export const requiredRulesSchema = t.type({
   output_index,
   max_signals,
   risk_score,
+  risk_score_mapping: DefaultRiskScoreMappingArray,
   name,
   references,
   severity,
+  severity_mapping: DefaultSeverityMappingArray,
   updated_by,
   tags,
   to,
@@ -111,6 +124,9 @@ export const dependentRulesSchema = t.partial({
   // ML fields
   anomaly_threshold,
   machine_learning_job_id,
+
+  // Threshold fields
+  threshold,
 });
 
 /**
@@ -120,9 +136,13 @@ export const dependentRulesSchema = t.partial({
  */
 export const partialRulesSchema = t.partial({
   actions,
+  building_block_type,
+  license,
   throttle,
+  rule_name_override,
   status: job_status,
   status_date,
+  timestamp_override,
   last_success_at,
   last_success_message,
   last_failure_at,
@@ -186,7 +206,7 @@ export const addTimelineTitle = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mi
 };
 
 export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
-  if (typeAndTimelineOnly.type === 'query' || typeAndTimelineOnly.type === 'saved_query') {
+  if (['query', 'saved_query', 'threshold'].includes(typeAndTimelineOnly.type)) {
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
@@ -209,6 +229,17 @@ export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[]
   }
 };
 
+export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (typeAndTimelineOnly.type === 'threshold') {
+    return [
+      t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),
+      t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+    ];
+  } else {
+    return [];
+  }
+};
+
 export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed => {
   const dependents: t.Mixed[] = [
     t.exact(requiredRulesSchema),
@@ -217,6 +248,7 @@ export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed
     ...addTimelineTitle(typeAndTimelineOnly),
     ...addQueryFields(typeAndTimelineOnly),
     ...addMlFields(typeAndTimelineOnly),
+    ...addThresholdFields(typeAndTimelineOnly),
   ];
 
   if (dependents.length > 1) {

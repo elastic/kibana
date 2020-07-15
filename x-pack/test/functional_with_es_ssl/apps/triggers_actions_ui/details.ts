@@ -19,7 +19,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const find = getService('find');
 
-  describe('Alert Details', function () {
+  // Failing ES Promotion: https://github.com/elastic/kibana/issues/71559
+  describe.skip('Alert Details', function () {
     describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
@@ -375,7 +376,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
 
-        const dateOnAllInstancesFromApiResponse = mapValues<Record<string, number>>(
+        const dateOnAllInstancesFromApiResponse = mapValues(
           alertInstances,
           ({
             meta: {

@@ -13,7 +13,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import {
   useSignalIndex,
   ReturnSignalIndex,
-} from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
+} from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { mocksSource } from '../../../common/containers/source/mock';
 import { wait } from '../../../common/lib/helpers';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
@@ -35,12 +35,14 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 const mockUseSignalIndex: jest.Mock = useSignalIndex as jest.Mock<ReturnSignalIndex>;
-jest.mock('../../../alerts/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
@@ -56,8 +58,8 @@ describe('StatefulTimeline', () => {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
-  const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
-  const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
+  const startDate = '2018-03-23T18:49:23.132Z';
+  const endDate = '2018-03-24T03:33:52.253Z';
 
   const mocks = [
     { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
@@ -76,6 +78,7 @@ describe('StatefulTimeline', () => {
       graphEventId: undefined,
       id: 'foo',
       isLive: false,
+      isSaving: false,
       isTimelineExists: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
@@ -95,6 +98,7 @@ describe('StatefulTimeline', () => {
       updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
       updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
       updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+      updateDataProviderType: timelineActions.updateDataProviderType,
       updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
       updateItemsPerPage: timelineActions.updateItemsPerPage,
       updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,

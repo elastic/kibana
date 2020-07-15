@@ -13,8 +13,8 @@ import { outputService } from './output';
 import { ensureInstalledDefaultPackages } from './epm/packages/install';
 import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
 import {
-  packageToConfigDatasource,
-  Datasource,
+  packageToPackageConfig,
+  PackageConfig,
   AgentConfig,
   Installation,
   Output,
@@ -22,7 +22,7 @@ import {
   decodeCloudId,
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
-import { datasourceService } from './datasource';
+import { packageConfigService } from './package_config';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { appContextService } from './app_context';
@@ -69,7 +69,7 @@ export async function setupIngestManager(
           const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
           const defaultUrl = url.format({
             protocol: serverInfo.protocol,
-            hostname: serverInfo.host,
+            hostname: serverInfo.hostname,
             port: serverInfo.port,
             pathname: basePath.serverBasePath,
           });
@@ -86,13 +86,13 @@ export async function setupIngestManager(
     ]);
 
     // ensure default packages are added to the default conifg
-    const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
-    if (!configWithDatasource) {
+    const configWithPackageConfigs = await agentConfigService.get(soClient, config.id, true);
+    if (!configWithPackageConfigs) {
       throw new Error('Config not found');
     }
     if (
-      configWithDatasource.datasources.length &&
-      typeof configWithDatasource.datasources[0] === 'string'
+      configWithPackageConfigs.package_configs.length &&
+      typeof configWithPackageConfigs.package_configs[0] === 'string'
     ) {
       throw new Error('Config not found');
     }
@@ -104,11 +104,20 @@ export async function setupIngestManager(
         continue;
       }
 
-      const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
-        return typeof d !== 'string' && d.package?.name === installedPackage.name;
-      });
+      const isInstalled = configWithPackageConfigs.package_configs.some(
+        (d: PackageConfig | string) => {
+          return typeof d !== 'string' && d.package?.name === installedPackage.name;
+        }
+      );
+
       if (!isInstalled) {
-        await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
+        await addPackageToConfig(
+          soClient,
+          callCluster,
+          installedPackage,
+          configWithPackageConfigs,
+          defaultOutput
+        );
       }
     }
 
@@ -171,11 +180,18 @@ export async function setupFleet(
     fleet_enroll_password: password,
   });
 
-  // Generate default enrollment key
-  await generateEnrollmentAPIKey(soClient, {
-    name: 'Default',
-    configId: await agentConfigService.getDefaultAgentConfigId(soClient),
+  const { items: agentConfigs } = await agentConfigService.list(soClient, {
+    perPage: 10000,
   });
+
+  await Promise.all(
+    agentConfigs.map((agentConfig) => {
+      return generateEnrollmentAPIKey(soClient, {
+        name: `Default`,
+        configId: agentConfig.id,
+      });
+    })
+  );
 }
 
 function generateRandomPassword() {
@@ -184,6 +200,7 @@ function generateRandomPassword() {
 
 async function addPackageToConfig(
   soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
   config: AgentConfig,
   defaultOutput: Output
@@ -194,17 +211,12 @@ async function addPackageToConfig(
     pkgVersion: packageToInstall.version,
   });
 
-  const newDatasource = packageToConfigDatasource(
+  const newPackageConfig = packageToPackageConfig(
     packageInfo,
     config.id,
     defaultOutput.id,
-    undefined,
     config.namespace
   );
-  newDatasource.inputs = await datasourceService.assignPackageStream(
-    packageInfo,
-    newDatasource.inputs
-  );
 
-  await datasourceService.create(soClient, newDatasource);
+  await packageConfigService.create(soClient, callCluster, newPackageConfig);
 }

@@ -17,6 +17,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
@@ -230,6 +231,7 @@ describe('IndexPattern Data Panel', () => {
         fromDate: 'now-7d',
         toDate: 'now',
       },
+      charts: chartPluginMock.createSetupContract(),
       query: { query: '', language: 'lucene' },
       filters: [],
       showNoDataPopover: jest.fn(),
@@ -322,8 +324,11 @@ describe('IndexPattern Data Panel', () => {
       };
     }
 
-    async function testExistenceLoading(stateChanges?: unknown, propChanges?: unknown) {
-      const props = testProps();
+    async function testExistenceLoading(
+      stateChanges?: unknown,
+      propChanges?: unknown,
+      props = testProps()
+    ) {
       const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
 
       await act(async () => {
@@ -533,6 +538,25 @@ describe('IndexPattern Data Panel', () => {
 
       expect(core.http.post).toHaveBeenCalledTimes(2);
       expect(overlapCount).toEqual(0);
+    });
+
+    it("should default to empty dsl if query can't be parsed", async () => {
+      const props = {
+        ...testProps(),
+        query: {
+          language: 'kuery',
+          query: '@timestamp : NOT *',
+        },
+      };
+      await testExistenceLoading(undefined, undefined, props);
+
+      expect((props.core.http.post as jest.Mock).mock.calls[0][1].body).toContain(
+        JSON.stringify({
+          must_not: {
+            match_all: {},
+          },
+        })
+      );
     });
   });
 

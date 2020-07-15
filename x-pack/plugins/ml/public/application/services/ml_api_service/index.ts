@@ -12,7 +12,7 @@ import { annotations } from './annotations';
 import { dataFrameAnalytics } from './data_frame_analytics';
 import { filters } from './filters';
 import { resultsApiProvider } from './results';
-import { jobs } from './jobs';
+import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
@@ -27,7 +27,10 @@ import {
   ModelSnapshot,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import { FieldRequestConfig } from '../../datavisualizer/index_based/common';
+import {
+  FieldHistogramRequestConfig,
+  FieldRequestConfig,
+} from '../../datavisualizer/index_based/common';
 import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 
@@ -494,6 +497,30 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
+    getVisualizerFieldHistograms({
+      indexPatternTitle,
+      query,
+      fields,
+      samplerShardSize,
+    }: {
+      indexPatternTitle: string;
+      query: any;
+      fields: FieldHistogramRequestConfig[];
+      samplerShardSize?: number;
+    }) {
+      const body = JSON.stringify({
+        query,
+        fields,
+        samplerShardSize,
+      });
+
+      return httpService.http<any>({
+        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
+        method: 'POST',
+        body,
+      });
+    },
+
     getVisualizerOverallStats({
       indexPatternTitle,
       query,
@@ -726,7 +753,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     dataFrameAnalytics,
     filters,
     results: resultsApiProvider(httpService),
-    jobs,
+    jobs: jobsApiProvider(httpService),
     fileDatavisualizer,
   };
 }
