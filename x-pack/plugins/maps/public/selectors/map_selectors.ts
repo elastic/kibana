@@ -340,8 +340,9 @@ export const isLoadingPreviewLayers = createSelector(getLayerList, (layerList) =
   });
 });
 
-export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
-  layerList
+let mapColorsArr = [];
+export const getMapColors = createSelector(getLayerListRaw, (layerList) => {
+  const newColorsArr = layerList
     .filter((layerDescriptor) => {
       return !layerDescriptor.__isPreviewLayer;
     })
@@ -352,8 +353,12 @@ export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
       );
       if (color) accu.push(color);
       return accu;
-    }, [])
-);
+    }, []);
+  if (!_.isEqual(mapColorsArr, newColorsArr)) {
+    mapColorsArr = newColorsArr;
+  }
+  return mapColorsArr;
+});
 
 export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, (selectedLayer) => {
   if (!selectedLayer || !('getJoins' in selectedLayer)) {
