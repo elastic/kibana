@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { ReactWrapper } from '@elastic/eui/node_modules/@types/enzyme';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../graphql/types';
 import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';
@@ -18,7 +19,7 @@ import { Sort } from './sort';
 import { wait } from '../../../../common/lib/helpers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
-import { ReactWrapper } from '@elastic/eui/node_modules/@types/enzyme';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
@@ -83,6 +84,7 @@ describe('Body', () => {
     show: true,
     sort: mockSort,
     showCheckboxes: false,
+    timelineType: TimelineType.default,
     toggleColumn: jest.fn(),
     updateNote: jest.fn(),
   };

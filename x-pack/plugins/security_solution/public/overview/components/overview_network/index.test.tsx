@@ -8,6 +8,7 @@ import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,

@@ -165,6 +165,7 @@ describe('StepAboutRuleComponent', () => {
     await wait();
     const expected: Omit<AboutStepRule, 'isNew'> = {
       author: [],
+      isAssociatedToEndpointList: false,
       isBuildingBlock: false,
       license: '',
       ruleNameOverride: '',
@@ -223,6 +224,7 @@ describe('StepAboutRuleComponent', () => {
     await wait();
     const expected: Omit<AboutStepRule, 'isNew'> = {
       author: [],
+      isAssociatedToEndpointList: false,
       isBuildingBlock: false,
       license: '',
       ruleNameOverride: '',

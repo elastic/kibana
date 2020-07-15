@@ -7,6 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import '../../../common/mock/match_media';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { CaseComponent, CaseProps, CaseView } from '.';
 import { basicCase, basicCaseClosed, caseUserActions } from '../../containers/mock';

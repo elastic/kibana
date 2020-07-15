@@ -52,7 +52,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     output: {
       path: bundle.outputDir,
-      filename: `[name].${bundle.type}.js`,
+      filename: `${bundle.id}.${bundle.type}.js`,
+      chunkFilename: `${bundle.id}.chunk.[id].js`,
       devtoolModuleFilenameTemplate: (info) =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
