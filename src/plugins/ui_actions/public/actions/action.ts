@@ -36,7 +36,8 @@ export interface ActionExecutionMeta {
   trigger?: Trigger;
 }
 
-export type ActionExecutionContext<Context extends BaseContext = {}> = Context & ActionExecutionMeta;
+export type ActionExecutionContext<Context extends BaseContext = {}> = Context &
+  ActionExecutionMeta;
 
 export interface Action<Context extends BaseContext = {}, T = ActionType>
   extends Partial<Presentable<Context>> {
