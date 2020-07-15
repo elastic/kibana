@@ -8,7 +8,7 @@ import React, { Component, Fragment, FC, ReactNode } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { cloneDeep } from 'lodash';
-
+import { debounce } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -177,6 +177,8 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     return errors;
   };
 
+  public debouncedValidateAnnotationText = debounce(this.validateAnnotationText, 300);
+
   public saveOrUpdateAnnotation = () => {
     const { annotation: originalAnnotation, chartDetails, detectorIndex } = this.props;
     if (originalAnnotation === null) {
@@ -273,8 +275,8 @@ class AnnotationFlyoutUI extends Component<CommonProps & Props> {
 
     // Check the length of the text is within the max length limit,
     // and warn if the length is approaching the limit.
-    const validationErrors = this.validateAnnotationText();
-    const isInvalid = validationErrors.length > 0;
+    const validationErrors = this.debouncedValidateAnnotationText();
+    const isInvalid = (validationErrors && validationErrors.length > 0) || false;
     const lengthRatioToShowWarning = 0.95;
     let helpText = null;
     if (
