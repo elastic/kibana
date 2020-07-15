@@ -26,6 +26,14 @@ export const ADD_FALSE_POSITIVE = i18n.translate(
     defaultMessage: 'Add false positive example',
   }
 );
+
+export const GLOBAL_ENDPOINT_EXCEPTION_LIST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.endpointExceptionListLabel',
+  {
+    defaultMessage: 'Global endpoint exception list',
+  }
+);
+
 export const BUILDING_BLOCK = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.buildingBlockLabel',
   {

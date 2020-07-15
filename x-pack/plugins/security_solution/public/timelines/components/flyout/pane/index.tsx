@@ -31,6 +31,7 @@ const EuiFlyoutContainer = styled.div`
     z-index: 4001;
     min-width: 150px;
     width: auto;
+    animation: none;
   }
 `;
 
