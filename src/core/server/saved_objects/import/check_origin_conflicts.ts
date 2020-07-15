@@ -27,7 +27,8 @@ import {
 } from '../types';
 import { ISavedObjectTypeRegistry } from '..';
 
-interface CheckOriginConflictsOptions {
+interface CheckOriginConflictsParams {
+  objects: Array<SavedObject<{ title?: string }>>;
   savedObjectsClient: SavedObjectsClientContract;
   typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
@@ -35,7 +36,12 @@ interface CheckOriginConflictsOptions {
   importIdMap: Map<string, unknown>;
 }
 
-interface GetImportIdMapForRetriesOptions {
+type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects'> & {
+  object: SavedObject<{ title?: string }>;
+};
+
+interface GetImportIdMapForRetriesParams {
+  objects: SavedObject[];
   retries: SavedObjectsImportRetry[];
   createNewCopies: boolean;
 }
@@ -85,10 +91,9 @@ const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
  *    `checkConflicts` submodule, which is called before this.
  */
 const checkOriginConflict = async (
-  object: SavedObject<{ title?: string }>,
-  options: CheckOriginConflictsOptions
+  params: CheckOriginConflictParams
 ): Promise<Either<{ title?: string }>> => {
-  const { savedObjectsClient, typeRegistry, namespace, importIdMap } = options;
+  const { object, savedObjectsClient, typeRegistry, namespace, importIdMap } = params;
   const importIds = new Set(importIdMap.keys());
   const { type, originId } = object;
 
@@ -140,13 +145,10 @@ const checkOriginConflict = async (
  *        will allow `createSavedObjects` to modify the ID before creating the object (thus ensuring a conflict during).
  *     B. Otherwise, this is an "ambiguous conflict" result; return an error.
  */
-export async function checkOriginConflicts(
-  objects: Array<SavedObject<{ title?: string }>>,
-  options: CheckOriginConflictsOptions
-) {
+export async function checkOriginConflicts({ objects, ...params }: CheckOriginConflictsParams) {
   // Check each object for possible destination conflicts, ensuring we don't too many concurrent searches running.
   const mapper = async (object: SavedObject<{ title?: string }>) =>
-    checkOriginConflict(object, options);
+    checkOriginConflict({ object, ...params });
   const checkOriginConflictResults = await pMap(objects, mapper, {
     concurrency: MAX_CONCURRENT_SEARCHES,
   });
@@ -176,7 +178,7 @@ export async function checkOriginConflicts(
     const { type, id, attributes } = object;
     if (sources.length === 1 && destinations.length === 1) {
       // This is a simple "inexact match" result -- a single import object has a single destination conflict.
-      if (options.ignoreRegularConflicts) {
+      if (params.ignoreRegularConflicts) {
         importIdMap.set(`${type}:${id}`, { id: destinations[0].id });
         filteredObjects.push(object);
       } else {
@@ -224,11 +226,8 @@ export async function checkOriginConflicts(
 /**
  * Assume that all objects exist in the `retries` map (due to filtering at the beginning of `resolveSavedObjectsImportErrors`).
  */
-export function getImportIdMapForRetries(
-  objects: Array<SavedObject<{ title?: string }>>,
-  options: GetImportIdMapForRetriesOptions
-) {
-  const { retries, createNewCopies } = options;
+export function getImportIdMapForRetries(params: GetImportIdMapForRetriesParams) {
+  const { objects, retries, createNewCopies } = params;
 
   const retryMap = retries.reduce(
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),

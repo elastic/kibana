@@ -156,12 +156,13 @@ describe('#importSavedObjectsFromStream', () => {
         getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
 
         await importSavedObjectsFromStream(options);
-        const checkConflictsOptions = {
+        const checkConflictsParams = {
+          objects: filteredObjects,
           savedObjectsClient,
           namespace,
           ignoreRegularConflicts: overwrite,
         };
-        expect(checkConflicts).toHaveBeenCalledWith(filteredObjects, checkConflictsOptions);
+        expect(checkConflicts).toHaveBeenCalledWith(checkConflictsParams);
       });
 
       test('checks origin conflicts', async () => {
@@ -175,17 +176,15 @@ describe('#importSavedObjectsFromStream', () => {
         });
 
         await importSavedObjectsFromStream(options);
-        const checkOriginConflictsOptions = {
+        const checkOriginConflictsParams = {
+          objects: filteredObjects,
           savedObjectsClient,
           typeRegistry,
           namespace,
           ignoreRegularConflicts: overwrite,
           importIdMap,
         };
-        expect(checkOriginConflicts).toHaveBeenCalledWith(
-          filteredObjects,
-          checkOriginConflictsOptions
-        );
+        expect(checkOriginConflicts).toHaveBeenCalledWith(checkOriginConflictsParams);
       });
 
       test('creates saved objects', async () => {
@@ -222,12 +221,15 @@ describe('#importSavedObjectsFromStream', () => {
           ['bar', { id: 'newId1' }],
           ['baz', { id: 'newId2' }],
         ]);
-        const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
-        expect(createSavedObjects).toHaveBeenCalledWith(
-          filteredObjects,
-          errors,
-          createSavedObjectsOptions
-        );
+        const createSavedObjectsParams = {
+          objects: filteredObjects,
+          accumulatedErrors: errors,
+          savedObjectsClient,
+          importIdMap,
+          overwrite,
+          namespace,
+        };
+        expect(createSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
       });
     });
 
@@ -273,12 +275,15 @@ describe('#importSavedObjectsFromStream', () => {
         getMockFn(regenerateIds).mockReturnValue(importIdMap);
 
         await importSavedObjectsFromStream(options);
-        const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
-        expect(createSavedObjects).toHaveBeenCalledWith(
-          filteredObjects,
-          errors,
-          createSavedObjectsOptions
-        );
+        const createSavedObjectsParams = {
+          objects: filteredObjects,
+          accumulatedErrors: errors,
+          savedObjectsClient,
+          importIdMap,
+          overwrite,
+          namespace,
+        };
+        expect(createSavedObjects).toHaveBeenCalledWith(createSavedObjectsParams);
       });
     });
   });

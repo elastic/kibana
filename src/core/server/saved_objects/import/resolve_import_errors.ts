@@ -106,35 +106,40 @@ export async function resolveSavedObjectsImportErrors({
   }
 
   // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
-  const checkConflictsOptions = {
+  const checkConflictsParams = {
+    objects: validateReferencesResult.filteredObjects,
     savedObjectsClient,
     namespace,
     ignoreRegularConflicts: true,
     createNewCopies,
   };
-  const checkConflictsResult = await checkConflicts(
-    validateReferencesResult.filteredObjects,
-    checkConflictsOptions
-  );
+  const checkConflictsResult = await checkConflicts(checkConflictsParams);
   errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
   importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
-  const importIdMapForRetries = getImportIdMapForRetries(checkConflictsResult.filteredObjects, {
+  const getImportIdMapForRetriesParams = {
+    objects: checkConflictsResult.filteredObjects,
     retries,
     createNewCopies,
-  });
+  };
+  const importIdMapForRetries = getImportIdMapForRetries(getImportIdMapForRetriesParams);
   importIdMap = new Map([...importIdMap, ...importIdMapForRetries]);
 
   // Bulk create in two batches, overwrites and non-overwrites
   let successResults: Array<{ type: string; id: string; destinationId?: string }> = [];
   const accumulatedErrors = [...errorAccumulator];
   const bulkCreateObjects = async (objects: Array<SavedObject<unknown>>, overwrite?: boolean) => {
-    const options = { savedObjectsClient, importIdMap, namespace, overwrite };
-    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
+    const createSavedObjectsParams = {
       objects,
       accumulatedErrors,
-      options
+      savedObjectsClient,
+      importIdMap,
+      namespace,
+      overwrite,
+    };
+    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
+      createSavedObjectsParams
     );
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;

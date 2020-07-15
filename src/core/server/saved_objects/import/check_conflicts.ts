@@ -25,7 +25,8 @@ import {
   SavedObjectError,
 } from '../types';
 
-interface CheckConflictsOptions {
+interface CheckConflictsParams {
+  objects: Array<SavedObject<{ title?: string }>>;
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
   ignoreRegularConflicts?: boolean;
@@ -35,10 +36,13 @@ interface CheckConflictsOptions {
 const isUnresolvableConflict = (error: SavedObjectError) =>
   error.statusCode === 409 && error.metadata?.isNotOverwritable;
 
-export async function checkConflicts(
-  objects: Array<SavedObject<{ title?: string }>>,
-  options: CheckConflictsOptions
-) {
+export async function checkConflicts({
+  objects,
+  savedObjectsClient,
+  namespace,
+  ignoreRegularConflicts,
+  createNewCopies,
+}: CheckConflictsParams) {
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const errors: SavedObjectsImportError[] = [];
   const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
@@ -48,7 +52,6 @@ export async function checkConflicts(
     return { filteredObjects, errors, importIdMap };
   }
 
-  const { savedObjectsClient, namespace, ignoreRegularConflicts, createNewCopies } = options;
   const checkConflictsResult = await savedObjectsClient.checkConflicts(objects, { namespace });
   const errorMap = checkConflictsResult.errors.reduce(
     (acc, { type, id, error }) => acc.set(`${type}:${id}`, error),

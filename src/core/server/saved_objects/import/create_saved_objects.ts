@@ -21,7 +21,9 @@ import { SavedObject, SavedObjectsClientContract, SavedObjectsImportError } from
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from './types';
 
-interface CreateSavedObjectsOptions {
+interface CreateSavedObjectsParams<T> {
+  objects: Array<SavedObject<T>>;
+  accumulatedErrors: SavedObjectsImportError[];
   savedObjectsClient: SavedObjectsClientContract;
   importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
   namespace?: string;
@@ -36,17 +38,18 @@ interface CreateSavedObjectsResult<T> {
  * This function abstracts the bulk creation of import objects. The main reason for this is that the import ID map should dictate the IDs of
  * the objects we create, and the create results should be mapped to the original IDs that consumers will be able to understand.
  */
-export const createSavedObjects = async <T>(
-  objects: Array<SavedObject<T>>,
-  accumulatedErrors: SavedObjectsImportError[],
-  options: CreateSavedObjectsOptions
-): Promise<CreateSavedObjectsResult<T>> => {
+export const createSavedObjects = async <T>({
+  objects,
+  accumulatedErrors,
+  savedObjectsClient,
+  importIdMap,
+  namespace,
+  overwrite,
+}: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // exit early if there are no objects to create
   if (objects.length === 0) {
     return { createdObjects: [], errors: [] };
   }
-
-  const { savedObjectsClient, importIdMap, namespace, overwrite } = options;
 
   // generate a map of the raw object IDs
   const objectIdMap = objects.reduce(

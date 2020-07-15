@@ -23,7 +23,7 @@ import { SavedObjectsClientContract, SavedObject, SavedObjectsImportError } from
 import { SavedObjectsErrorHelpers } from '..';
 import { extractErrors } from './extract_errors';
 
-type CreateSavedObjectsOptions = Parameters<typeof createSavedObjects>[2];
+type CreateSavedObjectsParams = Parameters<typeof createSavedObjects>[0];
 
 /**
  * Function to create a realistic-looking import object given a type, ID, and optional originId
@@ -77,20 +77,19 @@ describe('#createSavedObjects', () => {
    * Creates an options object to be used as an argument for createSavedObjects
    * Includes mock savedObjectsClient
    */
-  const setupOptions = (
-    options: {
-      namespace?: string;
-      overwrite?: boolean;
-    } = {}
-  ): CreateSavedObjectsOptions => {
-    const { namespace, overwrite } = options;
+  const setupParams = (partial: {
+    objects: SavedObject[];
+    accumulatedErrors?: SavedObjectsImportError[];
+    namespace?: string;
+    overwrite?: boolean;
+  }): CreateSavedObjectsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     bulkCreate = savedObjectsClient.bulkCreate;
-    return { savedObjectsClient, importIdMap, namespace, overwrite };
+    return { accumulatedErrors: [], ...partial, savedObjectsClient, importIdMap };
   };
 
   const getExpectedBulkCreateArgsObjects = (objects: SavedObject[], retry?: boolean) =>
-    objects.map(({ type, id, attributes, references, originId }) => ({
+    objects.map(({ type, id, attributes, originId }) => ({
       type,
       id: retry ? `new-id-for-${id}` : id, // if this was a retry, we regenerated the id -- this is mocked below
       attributes,
@@ -109,7 +108,7 @@ describe('#createSavedObjects', () => {
       const expectedOptions = expect.any(Object);
       expect(bulkCreate).toHaveBeenNthCalledWith(n, expectedObjects, expectedOptions);
     },
-    options: (n: number, options: CreateSavedObjectsOptions) => {
+    options: (n: number, options: CreateSavedObjectsParams) => {
       const expectedObjects = expect.any(Array);
       const expectedOptions = { namespace: options.namespace, overwrite: options.overwrite };
       expect(bulkCreate).toHaveBeenNthCalledWith(n, expectedObjects, expectedOptions);
@@ -119,7 +118,7 @@ describe('#createSavedObjects', () => {
   const getResultMock = {
     success: (
       { type, id, attributes, references, originId }: SavedObject,
-      { namespace }: CreateSavedObjectsOptions
+      { namespace }: CreateSavedObjectsParams
     ): SavedObject => ({
       type,
       id,
@@ -159,16 +158,16 @@ describe('#createSavedObjects', () => {
   };
 
   test('exits early if there are no objects to create', async () => {
-    const options = setupOptions();
+    const options = setupParams({ objects: [] });
 
-    const createSavedObjectsResult = await createSavedObjects([], [], options);
+    const createSavedObjectsResult = await createSavedObjects(options);
     expect(bulkCreate).not.toHaveBeenCalled();
     expect(createSavedObjectsResult).toEqual({ createdObjects: [], errors: [] });
   });
 
   const objs = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12, obj13];
 
-  const setupMockResults = (options: CreateSavedObjectsOptions) => {
+  const setupMockResults = (options: CreateSavedObjectsParams) => {
     bulkCreate.mockResolvedValue({
       saved_objects: [
         getResultMock.success(obj1, options),
@@ -205,32 +204,32 @@ describe('#createSavedObjects', () => {
 
     test('does not call bulkCreate when resolvable errors are present', async () => {
       for (const error of resolvableErrors) {
-        const options = setupOptions();
-        await createSavedObjects(objs, [error], options);
+        const options = setupParams({ objects: objs, accumulatedErrors: [error] });
+        await createSavedObjects(options);
         expect(bulkCreate).not.toHaveBeenCalled();
       }
     });
 
     test('calls bulkCreate when unresolvable errors or no errors are present', async () => {
       for (const error of unresolvableErrors) {
-        const options = setupOptions();
+        const options = setupParams({ objects: objs, accumulatedErrors: [error] });
         setupMockResults(options);
-        await createSavedObjects(objs, [error], options);
+        await createSavedObjects(options);
         expect(bulkCreate).toHaveBeenCalledTimes(1);
         bulkCreate.mockClear();
       }
-      const options = setupOptions();
+      const options = setupParams({ objects: objs });
       setupMockResults(options);
-      await createSavedObjects(objs, [], options);
+      await createSavedObjects(options);
       expect(bulkCreate).toHaveBeenCalledTimes(1);
     });
   });
 
   const testBulkCreateObjects = async (namespace?: string) => {
-    const options = setupOptions({ namespace });
+    const options = setupParams({ objects: objs, namespace });
     setupMockResults(options);
 
-    await createSavedObjects(objs, [], options);
+    await createSavedObjects(options);
     expect(bulkCreate).toHaveBeenCalledTimes(1);
     // these three objects are transformed before being created, because they are included in the `importIdMap`
     const x3 = { ...obj3, id: importId3, originId: undefined }; // this import object already has an originId, but the entry has omitOriginId=true
@@ -241,18 +240,18 @@ describe('#createSavedObjects', () => {
   };
   const testBulkCreateOptions = async (namespace?: string) => {
     const overwrite = (Symbol() as unknown) as boolean;
-    const options = setupOptions({ namespace, overwrite });
+    const options = setupParams({ objects: objs, namespace, overwrite });
     setupMockResults(options);
 
-    await createSavedObjects(objs, [], options);
+    await createSavedObjects(options);
     expect(bulkCreate).toHaveBeenCalledTimes(1);
     expectBulkCreateArgs.options(1, options);
   };
   const testReturnValue = async (namespace?: string) => {
-    const options = setupOptions({ namespace });
+    const options = setupParams({ objects: objs, namespace });
     setupMockResults(options);
 
-    const results = await createSavedObjects(objs, [], options);
+    const results = await createSavedObjects(options);
     const resultSavedObjects = (await bulkCreate.mock.results[0].value).saved_objects;
     const [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13] = resultSavedObjects;
     // these three results are transformed before being returned, because the bulkCreate attempt used different IDs for them

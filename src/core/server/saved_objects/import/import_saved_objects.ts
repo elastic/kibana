@@ -70,42 +70,41 @@ export async function importSavedObjectsFromStream({
     importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
-    const checkConflictsOptions = {
+    const checkConflictsParams = {
+      objects: validateReferencesResult.filteredObjects,
       savedObjectsClient,
       namespace,
       ignoreRegularConflicts: overwrite,
     };
-    const checkConflictsResult = await checkConflicts(
-      validateReferencesResult.filteredObjects,
-      checkConflictsOptions
-    );
+    const checkConflictsResult = await checkConflicts(checkConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
 
     // Check multi-namespace object types for origin conflicts in this namespace
-    const checkOriginConflictsOptions = {
+    const checkOriginConflictsParams = {
+      objects: checkConflictsResult.filteredObjects,
       savedObjectsClient,
       typeRegistry,
       namespace,
       ignoreRegularConflicts: overwrite,
       importIdMap,
     };
-    const checkOriginConflictsResult = await checkOriginConflicts(
-      checkConflictsResult.filteredObjects,
-      checkOriginConflictsOptions
-    );
+    const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
     objectsToCreate = checkOriginConflictsResult.filteredObjects;
   }
 
   // Create objects in bulk
-  const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
-  const createSavedObjectsResult = await createSavedObjects(
-    objectsToCreate,
-    errorAccumulator,
-    createSavedObjectsOptions
-  );
+  const createSavedObjectsParams = {
+    objects: objectsToCreate,
+    accumulatedErrors: errorAccumulator,
+    savedObjectsClient,
+    importIdMap,
+    overwrite,
+    namespace,
+  };
+  const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
 
   const successResults = createSavedObjectsResult.createdObjects.map(

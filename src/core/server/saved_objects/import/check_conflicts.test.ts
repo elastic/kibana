@@ -25,7 +25,7 @@ import { SavedObjectsErrorHelpers } from '..';
 import { checkConflicts } from './check_conflicts';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
-type CheckConflictsOptions = Parameters<typeof checkConflicts>[1];
+type CheckConflictsParams = Parameters<typeof checkConflicts>[0];
 
 /**
  * Function to create a realistic-looking import object given a type and ID
@@ -69,22 +69,16 @@ describe('#checkConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let socCheckConflicts: typeof savedObjectsClient['checkConflicts'];
 
-  /**
-   * Creates an options object to be used as an argument for createSavedObjects
-   * Includes mock savedObjectsClient
-   */
-  const setupOptions = (
-    options: {
-      namespace?: string;
-      ignoreRegularConflicts?: boolean;
-      createNewCopies?: boolean;
-    } = {}
-  ): CheckConflictsOptions => {
-    const { namespace, ignoreRegularConflicts, createNewCopies } = options;
+  const setupParams = (partial: {
+    objects: SavedObjectType[];
+    namespace?: string;
+    ignoreRegularConflicts?: boolean;
+    createNewCopies?: boolean;
+  }): CheckConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
     socCheckConflicts = savedObjectsClient.checkConflicts;
     socCheckConflicts.mockResolvedValue({ errors: [] }); // by default, mock to empty results
-    return { savedObjectsClient, namespace, ignoreRegularConflicts, createNewCopies };
+    return { ...partial, savedObjectsClient };
   };
 
   beforeEach(() => {
@@ -94,9 +88,9 @@ describe('#checkConflicts', () => {
 
   it('exits early if there are no objects to check', async () => {
     const namespace = 'foo-namespace';
-    const options = setupOptions({ namespace });
+    const params = setupParams({ objects: [], namespace });
 
-    const checkConflictsResult = await checkConflicts([], options);
+    const checkConflictsResult = await checkConflicts(params);
     expect(socCheckConflicts).not.toHaveBeenCalled();
     expect(checkConflictsResult).toEqual({
       filteredObjects: [],
@@ -107,19 +101,19 @@ describe('#checkConflicts', () => {
 
   it('calls checkConflicts with expected inputs', async () => {
     const namespace = 'foo-namespace';
-    const options = setupOptions({ namespace });
+    const params = setupParams({ objects, namespace });
 
-    await checkConflicts(objects, options);
+    await checkConflicts(params);
     expect(socCheckConflicts).toHaveBeenCalledTimes(1);
     expect(socCheckConflicts).toHaveBeenCalledWith(objects, { namespace });
   });
 
   it('returns expected result', async () => {
     const namespace = 'foo-namespace';
-    const options = setupOptions({ namespace });
+    const params = setupParams({ objects, namespace });
     socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
 
-    const checkConflictsResult = await checkConflicts(objects, options);
+    const checkConflictsResult = await checkConflicts(params);
     expect(checkConflictsResult).toEqual({
       filteredObjects: [obj1, obj3],
       errors: [
@@ -136,10 +130,10 @@ describe('#checkConflicts', () => {
 
   it('does not return errors for regular conflicts when ignoreRegularConflicts=true', async () => {
     const namespace = 'foo-namespace';
-    const options = setupOptions({ namespace, ignoreRegularConflicts: true });
+    const params = setupParams({ objects, namespace, ignoreRegularConflicts: true });
     socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
 
-    const checkConflictsResult = await checkConflicts(objects, options);
+    const checkConflictsResult = await checkConflicts(params);
     expect(checkConflictsResult).toEqual(
       expect.objectContaining({
         filteredObjects: [obj1, obj2, obj3],
@@ -156,10 +150,10 @@ describe('#checkConflicts', () => {
 
   it('adds `omitOriginId` field to `importIdMap` entries when createNewCopies=true', async () => {
     const namespace = 'foo-namespace';
-    const options = setupOptions({ namespace, createNewCopies: true });
+    const params = setupParams({ objects, namespace, createNewCopies: true });
     socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
 
-    const checkConflictsResult = await checkConflicts(objects, options);
+    const checkConflictsResult = await checkConflicts(params);
     expect(checkConflictsResult).toEqual(
       expect.objectContaining({
         importIdMap: new Map([
