@@ -122,7 +122,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       if (pkg !== '' && pkgSavedObject.length > 0 && !packageMetadata[pkg]) {
         // then pick the dashboards from the package saved object
         const dashboards =
-          pkgSavedObject[0].attributes?.installed?.filter(
+          pkgSavedObject[0].attributes?.installed_kibana?.filter(
             (o) => o.type === KibanaAssetType.dashboard
           ) || [];
         // and then pick the human-readable titles from the dashboard saved objects

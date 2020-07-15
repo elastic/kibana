@@ -52,7 +52,8 @@ jest.mock('./lib/vega', () => ({
   vegaLite: jest.requireActual('vega-lite'),
 }));
 
-describe('VegaVisualizations', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/71713
+describe.skip('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
   let vis;
