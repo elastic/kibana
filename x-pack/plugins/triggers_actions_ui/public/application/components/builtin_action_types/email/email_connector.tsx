@@ -14,12 +14,14 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 
 export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EmailActionConnector
->> = ({ action, editActionConfig, editActionSecrets, errors }) => {
+>> = ({ action, editActionConfig, editActionSecrets, errors, docLinks }) => {
   const { from, host, port, secure } = action.config;
   const { user, password } = action.secrets;
 
@@ -38,6 +40,17 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                 defaultMessage: 'Sender',
               }
             )}
+            helpText={
+              <EuiLink
+                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/email-action-type.html#configuring-email`}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
+                  defaultMessage="Configuring email accounts."
+                />
+              </EuiLink>
+            }
           >
             <EuiFieldText
               fullWidth

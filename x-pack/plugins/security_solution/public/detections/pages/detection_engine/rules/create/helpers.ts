@@ -51,19 +51,29 @@ export interface RuleFields {
   queryBar: unknown;
   index: unknown;
   ruleType: unknown;
+  threshold?: unknown;
 }
-type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
+type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
+type ThresholdRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
 type MlRuleFields<T> = Omit<T, 'queryBar' | 'index'>;
 
-const isMlFields = <T>(fields: QueryRuleFields<T> | MlRuleFields<T>): fields is MlRuleFields<T> =>
-  has('anomalyThreshold', fields);
+const isMlFields = <T>(
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
+
+const isThresholdFields = <T>(
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
   if (isMlRule(type)) {
     const { index, queryBar, ...mlRuleFields } = fields;
     return mlRuleFields;
+  } else if (type === 'threshold') {
+    const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
+    return thresholdRuleFields;
   } else {
-    const { anomalyThreshold, machineLearningJobId, ...queryRuleFields } = fields;
+    const { anomalyThreshold, machineLearningJobId, threshold, ...queryRuleFields } = fields;
     return queryRuleFields;
   }
 };
@@ -84,6 +94,20 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
     ? {
         anomaly_threshold: ruleFields.anomalyThreshold,
         machine_learning_job_id: ruleFields.machineLearningJobId,
+      }
+    : isThresholdFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id,
+        ...(ruleType === 'threshold' && {
+          threshold: {
+            field: ruleFields.threshold?.field[0] ?? '',
+            value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
+          },
+        }),
       }
     : {
         index: ruleFields.index,
@@ -129,6 +153,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
     riskScore,
     severity,
     threat,
+    isAssociatedToEndpointList,
     isBuildingBlock,
     isNew,
     note,
@@ -139,11 +164,18 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
     ...(isBuildingBlock ? { building_block_type: 'default' } : {}),
+    ...(isAssociatedToEndpointList
+      ? {
+          exceptions_list: [
+            { id: 'endpoint_list', namespace_type: 'agnostic', type: 'endpoint' },
+          ] as AboutStepRuleJson['exceptions_list'],
+        }
+      : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.mapping,
-    rule_name_override: ruleNameOverride,
+    rule_name_override: ruleNameOverride !== '' ? ruleNameOverride : undefined,
     severity: severity.value,
     severity_mapping: severity.mapping,
     threat: threat
@@ -156,7 +188,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
           return { id, name, reference };
         }),
       })),
-    timestamp_override: timestampOverride,
+    timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,
   };

@@ -103,7 +103,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return true;
   }
 
-  isJoinable() {
+  showJoinEditor() {
     return false;
   }
 
@@ -161,6 +161,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
                   bounds: makeESBbox(bufferedExtent),
                   field: this._descriptor.geoField,
                   precision,
+                  size: DEFAULT_MAX_BUCKETS_LIMIT,
                 },
               },
             },
@@ -245,6 +246,8 @@ export class ESGeoGridSource extends AbstractESAggSource {
           bounds: makeESBbox(bufferedExtent),
           field: this._descriptor.geoField,
           precision,
+          size: DEFAULT_MAX_BUCKETS_LIMIT,
+          shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
         },
         aggs: {
           gridCentroid: {
@@ -307,7 +310,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
       },
       meta: {
         areResultsTrimmed: false,
-        sourceType: SOURCE_TYPES.ES_GEO_GRID,
       },
     };
   }

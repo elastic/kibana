@@ -24,7 +24,7 @@ export const mockGetHostsOptions: HostsRequestOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
+  timerange: { interval: '12h', to: '2019-04-09T15:37:54.610Z', from: '2019-04-08T15:37:54.610Z' },
   sort: { field: HostsFields.lastSeen, direction: Direction.asc },
   pagination: {
     activePage: 0,
@@ -295,7 +295,7 @@ export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
+  timerange: { interval: '12h', to: '2019-04-09T15:37:54.610Z', from: '2019-04-08T15:37:54.610Z' },
   defaultIndex: DEFAULT_INDEX_PATTERN,
   fields: [
     '_id',
@@ -497,6 +497,11 @@ export const mockGetHostOverviewResult = {
     provider: ['gce'],
     region: ['us-east-1'],
   },
+  endpoint: {
+    endpointPolicy: 'demo',
+    policyStatus: 'success',
+    sensorVersion: '7.9.0-SNAPSHOT',
+  },
 };
 
 export const mockGetHostLastFirstSeenOptions: HostLastFirstSeenRequestOptions = {
@@ -563,4 +568,65 @@ export const mockGetHostLastFirstSeenResult = {
   },
   firstSeen: '2019-02-22T03:41:32.826Z',
   lastSeen: '2019-04-09T16:18:12.178Z',
+};
+
+export const mockEndpointMetadata = {
+  metadata: {
+    '@timestamp': '2020-07-13T01:08:37.68896700Z',
+    Endpoint: {
+      policy: {
+        applied: { id: '3de86380-aa5a-11ea-b969-0bee1b260ab8', name: 'demo', status: 'success' },
+      },
+      status: 'enrolled',
+    },
+    agent: {
+      build: {
+        original:
+          'version: 7.9.0-SNAPSHOT, compiled: Thu Jul 09 07:56:12 2020, branch: 7.x, commit: 713a1071de475f15b3a1f0944d3602ed532597a5',
+      },
+      id: 'c29e0de1-7476-480b-b242-38f0394bf6a1',
+      type: 'endpoint',
+      version: '7.9.0-SNAPSHOT',
+    },
+    dataset: { name: 'endpoint.metadata', namespace: 'default', type: 'metrics' },
+    ecs: { version: '1.5.0' },
+    elastic: { agent: { id: '' } },
+    event: {
+      action: 'endpoint_metadata',
+      category: ['host'],
+      created: '2020-07-13T01:08:37.68896700Z',
+      dataset: 'endpoint.metadata',
+      id: 'Lkio+AHbZGSPFb7q++++++2E',
+      kind: 'metric',
+      module: 'endpoint',
+      sequence: 146,
+      type: ['info'],
+    },
+    host: {
+      architecture: 'x86_64',
+      hostname: 'DESKTOP-4I1B23J',
+      id: 'a4148b63-1758-ab1f-a6d3-f95075cb1a9c',
+      ip: [
+        '172.16.166.129',
+        'fe80::c07e:eee9:3e8d:ea6d',
+        '169.254.205.96',
+        'fe80::1027:b13d:a4a7:cd60',
+        '127.0.0.1',
+        '::1',
+      ],
+      mac: ['00:0c:29:89:ff:73', '3c:22:fb:3c:93:4c'],
+      name: 'DESKTOP-4I1B23J',
+      os: {
+        Ext: { variant: 'Windows 10 Pro' },
+        family: 'windows',
+        full: 'Windows 10 Pro 2004 (10.0.19041.329)',
+        kernel: '2004 (10.0.19041.329)',
+        name: 'Windows',
+        platform: 'windows',
+        version: '2004 (10.0.19041.329)',
+      },
+    },
+    message: 'Endpoint metadata',
+  },
+  host_status: 'error',
 };

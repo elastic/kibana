@@ -10,6 +10,7 @@ import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FormData, FormHook } from '../../../../shared_imports';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
+import { FieldValueThreshold } from '../../../components/rules/threshold_input';
 import {
   Author,
   BuildingBlockType,
@@ -19,6 +20,7 @@ import {
   SeverityMapping,
   TimestampOverride,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { List } from '../../../../../common/detection_engine/schemas/types';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -64,6 +66,7 @@ export interface AboutStepRule extends StepRuleData {
   author: string[];
   name: string;
   description: string;
+  isAssociatedToEndpointList: boolean;
   isBuildingBlock: boolean;
   severity: AboutStepSeverity;
   riskScore: AboutStepRiskScore;
@@ -99,6 +102,7 @@ export interface DefineStepRule extends StepRuleData {
   queryBar: FieldValueQueryBar;
   ruleType: RuleType;
   timeline: FieldValueTimeline;
+  threshold: FieldValueThreshold;
 }
 
 export interface ScheduleStepRule extends StepRuleData {
@@ -122,6 +126,10 @@ export interface DefineStepRuleJson {
   saved_id?: string;
   query?: string;
   language?: string;
+  threshold?: {
+    field: string;
+    value: number;
+  };
   timeline_id?: string;
   timeline_title?: string;
   type: RuleType;
@@ -130,6 +138,7 @@ export interface DefineStepRuleJson {
 export interface AboutStepRuleJson {
   author: Author;
   building_block_type?: BuildingBlockType;
+  exceptions_list?: List[];
   name: string;
   description: string;
   license: License;
@@ -139,10 +148,10 @@ export interface AboutStepRuleJson {
   risk_score_mapping: RiskScoreMapping;
   references: string[];
   false_positives: string[];
-  rule_name_override: RuleNameOverride;
+  rule_name_override?: RuleNameOverride;
   tags: string[];
   threat: IMitreEnterpriseAttack[];
-  timestamp_override: TimestampOverride;
+  timestamp_override?: TimestampOverride;
   note?: string;
 }
 

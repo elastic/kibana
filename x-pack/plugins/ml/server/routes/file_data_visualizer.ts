@@ -29,7 +29,7 @@ import {
 } from './schemas/file_data_visualizer_schema';
 
 function analyzeFiles(context: RequestHandlerContext, data: InputData, overrides: InputOverrides) {
-  const { analyzeFile } = fileDataVisualizerProvider(context.ml!.mlClient.callAsCurrentUser);
+  const { analyzeFile } = fileDataVisualizerProvider(context.ml!.mlClient);
   return analyzeFile(data, overrides);
 }
 
@@ -42,7 +42,7 @@ function importData(
   ingestPipeline: IngestPipelineWrapper,
   data: InputData
 ) {
-  const { importData: importDataFunc } = importDataProvider(context.ml!.mlClient.callAsCurrentUser);
+  const { importData: importDataFunc } = importDataProvider(context.ml!.mlClient);
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 

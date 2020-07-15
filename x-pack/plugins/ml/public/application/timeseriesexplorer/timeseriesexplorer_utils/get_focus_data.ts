@@ -24,6 +24,7 @@ import {
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
 import { Annotation } from '../../../../common/types/annotations';
+import { ANNOTATION_EVENT_USER } from '../../../../common/constants/annotations';
 
 export interface Interval {
   asMilliseconds: () => number;
@@ -37,6 +38,7 @@ export interface FocusData {
   showForecastCheckbox?: any;
   focusAnnotationData?: any;
   focusForecastData?: any;
+  focusAggregations?: any;
 }
 
 export function getFocusData(
@@ -84,11 +86,23 @@ export function getFocusData(
         earliestMs: searchBounds.min.valueOf(),
         latestMs: searchBounds.max.valueOf(),
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+        fields: [
+          {
+            field: 'event',
+            missing: ANNOTATION_EVENT_USER,
+          },
+        ],
+        detectorIndex,
+        entities: nonBlankEntities,
       })
       .pipe(
         catchError(() => {
           // silent fail
-          return of({ annotations: {} as Record<string, Annotation[]> });
+          return of({
+            annotations: {} as Record<string, Annotation[]>,
+            aggregations: {},
+            success: false,
+          });
         })
       ),
     // Plus query for forecast data if there is a forecastId stored in the appState.
@@ -146,13 +160,14 @@ export function getFocusData(
             d.key = String.fromCharCode(65 + i);
             return d;
           });
+
+        refreshFocusData.focusAggregations = annotations.aggregations;
       }
 
       if (forecastData) {
         refreshFocusData.focusForecastData = processForecastResults(forecastData.results);
         refreshFocusData.showForecastCheckbox = refreshFocusData.focusForecastData.length > 0;
       }
-
       return refreshFocusData;
     })
   );

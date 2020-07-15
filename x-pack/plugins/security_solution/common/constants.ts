@@ -32,6 +32,8 @@ export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
+export const FILTERS_GLOBAL_HEIGHT = 109; // px
+export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
 
@@ -42,7 +44,7 @@ export enum SecurityPageName {
   network = 'network',
   timelines = 'timelines',
   case = 'case',
-  management = 'management',
+  administration = 'administration',
 }
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
@@ -59,9 +61,9 @@ export const DEFAULT_INDEX_PATTERN = [
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
+  'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
-  'logs-*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
@@ -117,6 +119,7 @@ export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
+export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -164,13 +167,6 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
-
-/**
- * CreateTemplateTimelineBtn
- * https://github.com/elastic/kibana/pull/66613
- * Remove the comment here to enable template timeline
- */
-export const disableTemplate = false;
 
 /*
  * This should be set to true after https://github.com/elastic/kibana/pull/67496 is merged

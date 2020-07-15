@@ -6,7 +6,7 @@
 
 import React, { useMemo, useRef } from 'react';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
@@ -26,13 +26,12 @@ import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
 import { Events } from './events';
-import { showGraphView } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
-import { useManageTimeline } from '../../manage_timeline';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
+import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -40,6 +39,7 @@ export interface BodyProps {
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
+  docValueFields: DocValueFields[];
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
   height?: number;
@@ -63,9 +63,15 @@ export interface BodyProps {
   show: boolean;
   showCheckboxes: boolean;
   sort: Sort;
+  timelineType: TimelineType;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
+
+export const hasAdditonalActions = (id: string): boolean =>
+  id === TimelineId.detectionsPage || id === TimelineId.detectionsRulesDetailsPage;
+
+const EXTRA_WIDTH = 4; // px
 
 /** Renders the timeline body */
 export const Body = React.memo<BodyProps>(
@@ -75,6 +81,7 @@ export const Body = React.memo<BodyProps>(
     columnHeaders,
     columnRenderers,
     data,
+    docValueFields,
     eventIdToNoteIds,
     getNotesByIds,
     graphEventId,
@@ -99,31 +106,18 @@ export const Body = React.memo<BodyProps>(
     showCheckboxes,
     sort,
     toggleColumn,
+    timelineType,
     updateNote,
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
-    const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(
-      () => (data.length > 0 ? getManageTimelineById(id).timelineRowActions(data[0].ecs) : []),
-      [data, getManageTimelineById, id]
-    );
-
-    const additionalActionWidth = useMemo(() => {
-      let hasContextMenu = false;
-      return (
-        timelineActions.reduce((acc, v) => {
-          if (v.displayType === 'icon') {
-            return acc + (v.width ?? 0);
-          }
-          const addWidth = hasContextMenu ? 0 : DEFAULT_ICON_BUTTON_WIDTH;
-          hasContextMenu = true;
-          return acc + addWidth;
-        }, 0) ?? 0
-      );
-    }, [timelineActions]);
     const actionsColumnWidth = useMemo(
-      () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),
-      [isEventViewer, showCheckboxes, additionalActionWidth]
+      () =>
+        getActionsColumnWidth(
+          isEventViewer,
+          showCheckboxes,
+          hasAdditonalActions(id) ? DEFAULT_ICON_BUTTON_WIDTH + EXTRA_WIDTH : 0
+        ),
+      [isEventViewer, showCheckboxes, id]
     );
 
     const columnWidths = useMemo(
@@ -134,15 +128,20 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        {showGraphView(graphEventId) && (
-          <GraphOverlay bodyHeight={height} graphEventId={graphEventId} timelineId={id} />
+        {graphEventId && (
+          <GraphOverlay
+            bodyHeight={height}
+            graphEventId={graphEventId}
+            timelineId={id}
+            timelineType={timelineType}
+          />
         )}
         <TimelineBody
           data-test-subj="timeline-body"
           data-timeline-id={id}
           bodyHeight={height}
           ref={containerElementRef}
-          visible={show && !showGraphView(graphEventId)}
+          visible={show && !graphEventId}
         >
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
@@ -172,6 +171,7 @@ export const Body = React.memo<BodyProps>(
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
               data={data}
+              docValueFields={docValueFields}
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={id}
