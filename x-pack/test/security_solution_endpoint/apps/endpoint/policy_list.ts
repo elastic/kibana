@@ -19,7 +19,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const RELATIVE_DATE_FORMAT = /\d (?:seconds|minutes) ago/i;
 
-  describe('When on the Endpoint Policy List', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/71951
+  describe.skip('When on the Endpoint Policy List', function () {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.policy.navigateToPolicyList();
