@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
   SavedObjectsClient,
 } from '../../../../src/core/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
@@ -46,17 +47,20 @@ import { ArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
+import { initUsageCollectors } from './usage';
+import { AppRequestContext } from './types';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   licensing: LicensingPluginSetup;
+  lists?: ListPluginSetup;
+  ml?: MlSetup;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
-  ml?: MlSetup;
-  lists?: ListPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface StartPlugins {
@@ -77,7 +81,7 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,
-  `${APP_ID}:${SecurityPageName.management}`,
+  `${APP_ID}:${SecurityPageName.administration}`,
 ];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -106,9 +110,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('plugin setup');
 
     const config = await this.config$.pipe(first()).toPromise();
+    const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
+    initUsageCollectors({
+      core,
+      kibanaIndex: globalConfig.kibana.index,
+      ml: plugins.ml,
+      usageCollection: plugins.usageCollection,
+    });
 
     const endpointContext: EndpointAppContext = {
       logFactory: this.context.logger,
@@ -117,9 +128,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
-      getAppClient: () => this.appClientFactory.create(request),
-    }));
+    core.http.registerRouteHandlerContext(
+      APP_ID,
+      (context, request, response): AppRequestContext => ({
+        getAppClient: () => this.appClientFactory.create(request),
+      })
+    );
 
     this.appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
@@ -134,7 +148,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml
     );
-
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
@@ -239,7 +252,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    const libs = compose(core, plugins, this.context.env.mode.prod);
+    const libs = compose(core, plugins, this.context.env.mode.prod, endpointContext);
     initServer(libs);
 
     return {};
