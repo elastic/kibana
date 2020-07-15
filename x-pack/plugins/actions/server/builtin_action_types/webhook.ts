@@ -17,7 +17,7 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
 
 // config definition
-enum WebhookMethods {
+export enum WebhookMethods {
   POST = 'post',
   PUT = 'put',
 }
