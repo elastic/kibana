@@ -20,7 +20,6 @@
 import React, { useCallback } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import compactStringify from 'json-stringify-pretty-compact';
-// @ts-ignore
 import hjson from 'hjson';
 import 'brace/mode/hjson';
 import { i18n } from '@kbn/i18n';
@@ -45,7 +44,11 @@ const hjsonStringifyOptions = {
   keepWsc: true,
 };
 
-function format(value: string, stringify: typeof compactStringify, options?: any) {
+function format(
+  value: string,
+  stringify: typeof hjson.stringify | typeof compactStringify,
+  options?: any
+) {
   try {
     const spec = hjson.parse(value, { legacyRoot: false, keepWsc: true });
     return stringify(spec, options);

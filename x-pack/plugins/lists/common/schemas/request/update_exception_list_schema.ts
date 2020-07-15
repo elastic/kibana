@@ -9,7 +9,6 @@
 import * as t from 'io-ts';
 
 import {
-  NamespaceType,
   Tags,
   _Tags,
   _tags,
@@ -21,6 +20,7 @@ import {
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
+import { NamespaceType } from '../types';
 
 export const updateExceptionListSchema = t.intersection([
   t.exact(

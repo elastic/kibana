@@ -11,6 +11,7 @@ import {
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
+  TIMELINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 
@@ -18,6 +19,7 @@ import { requestMock } from '../../../detection_engine/routes/__mocks__';
 
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
+import { GetTimelineByIdSchemaQuery } from '../schemas/get_timeline_by_id_schema';
 
 const readable = new stream.Readable();
 export const getExportTimelinesRequest = () =>
@@ -63,7 +65,7 @@ export const inputTimeline: SavedTimeline = {
   timelineType: TimelineType.default,
   templateTimelineId: null,
   templateTimelineVersion: 1,
-  dateRange: { start: 1585227005527, end: 1585313405527 },
+  dateRange: { start: '2020-03-26T12:50:05.527Z', end: '2020-03-27T12:50:05.527Z' },
   savedQueryId: null,
   sort: { columnId: '@timestamp', sortDirection: 'desc' },
 };
@@ -173,6 +175,19 @@ export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
     },
   });
 
+export const getTimelineByIdRequest = (query: GetTimelineByIdSchemaQuery) =>
+  requestMock.create({
+    method: 'get',
+    path: TIMELINE_URL,
+    query,
+  });
+
+export const installPrepackedTimelinesRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: TIMELINE_PREPACKAGED_URL,
+  });
+
 export const mockTimelinesSavedObjects = () => ({
   saved_objects: [
     {
@@ -266,7 +281,7 @@ export const mockTimelines = () => ({
         },
       },
       title: 'test no.2',
-      dateRange: { start: 1582538951145, end: 1582625351145 },
+      dateRange: { start: '2020-02-24T10:09:11.145Z', end: '2020-02-25T10:09:11.145Z' },
       savedQueryId: null,
       sort: { columnId: '@timestamp', sortDirection: 'desc' },
       created: 1582625382448,
@@ -348,7 +363,7 @@ export const mockTimelines = () => ({
         },
       },
       title: 'test no.3',
-      dateRange: { start: 1582538951145, end: 1582625351145 },
+      dateRange: { start: '2020-02-24T10:09:11.145Z', end: '2020-02-25T10:09:11.145Z' },
       savedQueryId: null,
       sort: { columnId: '@timestamp', sortDirection: 'desc' },
       created: 1582642817439,

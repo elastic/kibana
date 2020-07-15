@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, useMemo, useContext, useLayoutEffect, useState } from 'react';
+import React, { memo, useMemo, useContext, useLayoutEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
-// eslint-disable-next-line import/no-nodejs-modules
-import querystring from 'querystring';
 import { EuiPanel } from '@elastic/eui';
-import { displayNameRecord } from './process_event_dot';
 import * as selectors from '../store/selectors';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as event from '../../../common/endpoint/models/event';
@@ -21,7 +17,7 @@ import { EventCountsForProcess } from './panels/panel_content_related_counts';
 import { ProcessDetails } from './panels/panel_content_process_detail';
 import { ProcessListWithCounts } from './panels/panel_content_process_list';
 import { RelatedEventDetail } from './panels/panel_content_related_detail';
-import { CrumbInfo } from './panels/panel_content_utilities';
+import { useResolverQueryParams } from './use_resolver_query_params';
 
 /**
  * The team decided to use this table to determine which breadcrumbs/view to display:
@@ -39,14 +35,11 @@ import { CrumbInfo } from './panels/panel_content_utilities';
  * @returns {JSX.Element} The "right" table content to show based on the query params as described above
  */
 const PanelContent = memo(function PanelContent() {
-  const history = useHistory();
-  const urlSearch = useLocation().search;
   const dispatch = useResolverDispatch();
 
   const { timestamp } = useContext(SideEffectContext);
-  const queryParams: CrumbInfo = useMemo(() => {
-    return { crumbId: '', crumbEvent: '', ...querystring.parse(urlSearch.slice(1)) };
-  }, [urlSearch]);
+
+  const { pushToQueryParams, queryParams } = useResolverQueryParams();
 
   const graphableProcesses = useSelector(selectors.graphableProcesses);
   const graphableProcessEntityIds = useMemo(() => {
@@ -104,35 +97,6 @@ const PanelContent = memo(function PanelContent() {
     }
   }, [dispatch, uiSelectedEvent, paramsSelectedEvent, lastUpdatedProcess, timestamp]);
 
-  /**
-   * This updates the breadcrumb nav and the panel view. It's supplied to each
-   * panel content view to allow them to dispatch transitions to each other.
-   */
-  const pushToQueryParams = useCallback(
-    (newCrumbs: CrumbInfo) => {
-      // Construct a new set of params from the current set (minus empty params)
-      // by assigning the new set of params provided in `newCrumbs`
-      const crumbsToPass = {
-        ...querystring.parse(urlSearch.slice(1)),
-        ...newCrumbs,
-      };
-
-      // If either was passed in as empty, remove it from the record
-      if (crumbsToPass.crumbId === '') {
-        delete crumbsToPass.crumbId;
-      }
-      if (crumbsToPass.crumbEvent === '') {
-        delete crumbsToPass.crumbEvent;
-      }
-
-      const relativeURL = { search: querystring.stringify(crumbsToPass) };
-      // We probably don't want to nuke the user's history with a huge
-      // trail of these, thus `.replace` instead of `.push`
-      return history.replace(relativeURL);
-    },
-    [history, urlSearch]
-  );
-
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
   const relatedStatsForIdFromParams: ResolverNodeStats | undefined =
@@ -179,7 +143,7 @@ const PanelContent = memo(function PanelContent() {
        * | relateds list 1 type   | entity_id of process       | valid related event type |
        */
 
-      if (crumbEvent in displayNameRecord && uiSelectedEvent) {
+      if (crumbEvent && crumbEvent.length && uiSelectedEvent) {
         return 'processEventListNarrowedByType';
       }
     }
