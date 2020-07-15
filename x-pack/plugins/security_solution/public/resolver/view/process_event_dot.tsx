@@ -112,8 +112,9 @@ const UnstyledProcessEventDot = React.memo(
      */
     timeAtRender: number;
   }) => {
+    const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
     // This should be unique to each instance of Resolver
-    const htmlIDPrefix = 'resolver';
+    const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
 
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -129,7 +130,9 @@ const UnstyledProcessEventDot = React.memo(
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
-    const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), []);
+    const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), [
+      htmlIDPrefix,
+    ]);
 
     const ariaLevel: number | null = useSelector(selectors.ariaLevel)(nodeID);
 
