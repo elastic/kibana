@@ -19,13 +19,15 @@
 
 import $ from 'jquery';
 import { i18n } from '@kbn/i18n';
+import { UrlObject } from './types';
 
 /**
  * This class processes all Vega spec customizations,
  * converting url object parameters into query results.
  */
 export class UrlParser {
-  constructor(onWarning) {
+  _onWarning: (...args: string[]) => void;
+  constructor(onWarning: (...args: string[]) => void) {
     this._onWarning = onWarning;
   }
 
@@ -33,7 +35,7 @@ export class UrlParser {
   /**
    * Update request object
    */
-  parseUrl(obj, urlObj) {
+  parseUrl(obj: UrlObject, urlObj: UrlObject) {
     let url = urlObj.url;
     if (!url) {
       throw new Error(
