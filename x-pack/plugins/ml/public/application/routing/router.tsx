@@ -5,10 +5,10 @@
  */
 
 import React, { FC } from 'react';
-import { HashRouter, Route, RouteProps } from 'react-router-dom';
+import { useHistory, useLocation, Router, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
-import { IUiSettingsClient, ChromeStart } from 'kibana/public';
+import { AppMountParameters, IUiSettingsClient, ChromeStart } from 'kibana/public';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { MlContext, MlContextValue } from '../contexts/ml';
@@ -44,11 +44,27 @@ export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children 
   );
 };
 
-export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
+const LegacyRedirect: FC = () => {
+  const history = useHistory();
+  const location = useLocation();
+
+  if (location.hash.startsWith('#/')) {
+    const newHash = location.hash.replace('#', '');
+    history.push(newHash);
+  }
+
+  return null;
+};
+
+export const MlRouter: FC<{
+  history: AppMountParameters['history'];
+  pageDeps: PageDependencies;
+}> = ({ history, pageDeps }) => {
   const setBreadcrumbs = pageDeps.setBreadcrumbs;
 
   return (
-    <HashRouter>
+    <Router history={history}>
+      <LegacyRedirect />
       <UrlStateProvider>
         <div className="ml-app">
           {Object.entries(routes).map(([name, route]) => (
@@ -66,6 +82,6 @@ export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
           ))}
         </div>
       </UrlStateProvider>
-    </HashRouter>
+    </Router>
   );
 };

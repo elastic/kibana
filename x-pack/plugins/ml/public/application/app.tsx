@@ -25,6 +25,7 @@ export type MlDependencies = Omit<MlSetupDependencies, 'share'> & MlStartDepende
 interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
+  appMountParams: AppMountParameters;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -46,7 +47,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps }) => {
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const pageDeps = {
     indexPatterns: deps.data.indexPatterns,
     config: coreStart.uiSettings!,
@@ -69,7 +70,7 @@ const App: FC<AppProps> = ({ coreStart, deps }) => {
       <KibanaContextProvider
         services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
       >
-        <MlRouter pageDeps={pageDeps} />
+        <MlRouter pageDeps={pageDeps} history={appMountParams.history} />
       </KibanaContextProvider>
     </I18nContext>
   );
@@ -104,7 +105,11 @@ export const renderApp = (
   appMountParams.onAppLeave((actions) => actions.default());
 
   const mlLicense = setLicenseCache(deps.licensing, [
-    () => ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element),
+    () =>
+      ReactDOM.render(
+        <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+        appMountParams.element
+      ),
   ]);
 
   return () => {
