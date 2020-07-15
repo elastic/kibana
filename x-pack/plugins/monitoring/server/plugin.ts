@@ -33,6 +33,7 @@ import { requireUIRoutes } from './routes';
 import { initBulkUploader } from './kibana_monitoring';
 // @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
+import { AlertingSecurity } from './lib/elasticsearch/verify_alerting_security';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { registerMonitoringCollection } from './telemetry_collection';
@@ -79,6 +80,7 @@ export class Plugin {
   }
 
   async setup(core: CoreSetup, plugins: PluginsSetup) {
+    AlertingSecurity.init(plugins.encryptedSavedObjects);
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config
         .create<TypeOf<typeof configSchema>>()

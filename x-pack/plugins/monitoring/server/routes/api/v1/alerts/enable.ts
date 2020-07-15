@@ -10,23 +10,33 @@ import { AlertsFactory } from '../../../../alerts';
 import { RouteDependencies } from '../../../../types';
 import { ALERT_ACTION_TYPE_LOG } from '../../../../../common/constants';
 import { ActionResult } from '../../../../../../actions/common';
-// import { fetchDefaultEmailAddress } from '../../../../lib/alerts/fetch_default_email_address';
+import { AlertingSecurity } from '../../../../lib/elasticsearch/verify_alerting_security';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 
-export function enableAlertsRoute(server: any, npRoute: RouteDependencies) {
+export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alerts/enable',
       options: { tags: ['access:monitoring'] },
       validate: false,
     },
-    async (context, request, response) => {
+    async (context, _request, response) => {
       try {
+        const {
+          isSufficientlySecure,
+          hasPermanentEncryptionKey,
+        } = await AlertingSecurity.getSecurityHealth(context);
         const alertsClient = context.alerting?.getAlertsClient();
         const actionsClient = context.actions?.getActionsClient();
         const types = context.actions?.listTypes();
-        if (!alertsClient || !actionsClient || !types) {
+        if (
+          !alertsClient ||
+          !actionsClient ||
+          !types ||
+          !isSufficientlySecure ||
+          !hasPermanentEncryptionKey
+        ) {
           return response.notFound();
         }
 

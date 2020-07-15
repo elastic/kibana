@@ -16,6 +16,7 @@ import {
 import { InfraPluginSetup } from '../../infra/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
+import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -36,6 +37,7 @@ export interface LegacyAPI {
 }
 
 export interface PluginsSetup {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;

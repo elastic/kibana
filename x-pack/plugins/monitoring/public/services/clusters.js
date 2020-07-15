@@ -55,10 +55,10 @@ export function monitoringClustersProvider($injector) {
     }
 
     function ensureAlertsEnabled() {
-      return $http.post('../api/monitoring/v1/alerts/enable', {}).catch((err) => {
-        const Private = $injector.get('Private');
-        const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
-        return ajaxErrorHandlers(err);
+      return $http.post('../api/monitoring/v1/alerts/enable', {}).catch(() => {
+        /**
+         * Ignoring for now, but should really indicate what is the cause
+         */
       });
     }
 
