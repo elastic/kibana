@@ -19,33 +19,13 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { pretty } from '../utils';
 import { fromNullable } from '../either';
-import { default as jsonDef } from './ingestion_pipeline.json';
 
 const ROOT = resolve(__dirname, '../../../../..');
 const resolveFromRoot = resolve.bind(null, ROOT);
-const scriptPath = resolveFromRoot(
-  'src/dev/code_coverage/ingest_coverage/team_assignment/ingestion_pipeline.painless.java'
-);
+const path = `
+src/dev/code_coverage/ingest_coverage/team_assignment/ingestion_pipeline_painless.json`;
+const resolved = resolveFromRoot(path.trimStart());
 const getContents = (scriptPath) => readFileSync(scriptPath, 'utf8');
-const prettyJsonAndScriptContents = jsonAndScript(pretty)(jsonDef);
 
-export const prokTeamAssignment = () =>
-  fromNullable(scriptPath)
-    .map(getContents)
-    .map(prettyJsonAndScriptContents)
-    .map(transform);
-
-function jsonAndScript(formatter) {
-  return (jsonDef) => (scriptContents) => [formatter(jsonDef.team_assignment), scriptContents];
-}
-
-const sourceStanzaRe = /("source"\s*:\s*)("")/;
-
-const formatted = (contents) => `$1"""
-${contents}"""`;
-
-function transform([jsonStructure, scriptContents]) {
-  return jsonStructure.replace(sourceStanzaRe, formatted(scriptContents));
-}
+export const fetch = () => fromNullable(resolved).map(getContents);

@@ -29,7 +29,8 @@ const client = new Client({ node });
 export const update = (id) => (log) => async (body) => {
   try {
     await client.ingest.putPipeline({ id, body });
-    log.verbose(body);
+    log.verbose(id);
+    log.verbose(`${body.slice(0, 300)}...`);
   } catch (e) {
     throw createFailError(`${pretty(e.meta)}`);
   }
