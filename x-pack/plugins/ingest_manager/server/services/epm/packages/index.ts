@@ -23,7 +23,7 @@ export {
   SearchParams,
 } from './get';
 
-export { installKibanaAssets, installPackage, ensureInstalledPackage } from './install';
+export { installPackage, ensureInstalledPackage } from './install';
 export { removeInstallation } from './remove';
 
 type RequiredPackage = 'system' | 'endpoint';
