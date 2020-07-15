@@ -54,11 +54,11 @@ function flatten(obj: any, keyPrefix = '') {
   }
 }
 
-const parseRawDocs = (hits: SearchResponse['hits']) => {
+const parseRawDocs = (hits: SearchResponse<unknown>['hits']) => {
   return hits.hits.map((hit) => hit.fields).filter((hit) => hit);
 };
 
-const convertResult = (body: SearchResponse) => {
+const convertResult = (body: SearchResponse<unknown>) => {
   return body.hits.hits.length ? parseRawDocs(body.hits) : flatten(body.aggregations);
 };
 

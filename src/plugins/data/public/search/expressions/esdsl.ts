@@ -25,7 +25,7 @@ import {
 
 import { getSearchService, getUiSettings } from '../../services';
 import { EsRawResponse } from './es_raw_response';
-import { RequestStatistics } from '../../../../inspector/common/adapters/request/types';
+import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
 import { IEsSearchResponse } from '../../../common/search/es_search';
 import { buildEsQuery, getEsQueryConfig } from '../../../common/es_query/es_query';
 
@@ -82,6 +82,10 @@ export const esdsl = (): ExpressionFunctionDefinition<typeof name, Input, Argume
         dslBody.query.bool.filter = query.bool.filter;
       }
       dslBody.query.bool.filter = dslBody.query.bool.filter.concat(query.bool.filter);
+    }
+
+    if (!inspectorAdapters.requests) {
+      inspectorAdapters.requests = new RequestAdapter();
     }
 
     const request = inspectorAdapters.requests.start(

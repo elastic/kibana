@@ -1,0 +1,79 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`esdsl correctly handles input adds filters 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "match_phrase": Object {
+                  "gender": "male",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "gender": "male",
+                },
+              },
+            ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+      },
+    },
+  },
+  "type": "es_raw_response",
+}
+`;
+
+exports[`esdsl correctly handles input adds query 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "query": Object {
+          "bool": Object {
+            "filter": Array [],
+            "must": Array [
+              Object {
+                "query_string": Object {
+                  "query": "*",
+                  "time_zone": true,
+                },
+              },
+            ],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+      },
+    },
+  },
+  "type": "es_raw_response",
+}
+`;
+
+exports[`esdsl correctly handles input ignores timerange 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "query": Object {
+          "bool": Object {
+            "filter": Array [],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+      },
+    },
+  },
+  "type": "es_raw_response",
+}
+`;
