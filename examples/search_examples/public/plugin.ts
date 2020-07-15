@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import {
   SearchExamplesPluginSetup,

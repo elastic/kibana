@@ -43,8 +43,7 @@ import { PLUGIN_ID, PLUGIN_NAME, IMyStrategyResponse } from '../../common';
 import {
   DataPublicPluginStart,
   IndexPatternSelect,
-  IndexPattern,
-  IEsSearchRequest,
+  IEsSearchResponse,
 } from '../../../../src/plugins/data/public';
 
 interface SearchExamplesAppDeps {
@@ -62,7 +61,7 @@ export const SearchExamplesApp = ({
   navigation,
   data,
 }: SearchExamplesAppDeps) => {
-  const [result, setResult] = useState<string>();
+  const [result, setResult] = useState<IEsSearchResponse | undefined>();
   const [indexPatternId, setIndexPatternId] = useState<string>();
 
   const doAsyncSearch = async (strategy?: string) => {
@@ -83,6 +82,7 @@ export const SearchExamplesApp = ({
     search$.subscribe((response) => {
       // Need to add is running and is partial to oss
       if (!response.isPartial && !response.isRunning) {
+        setResult(response);
         notifications.toasts.addSuccess(
           `Searched ${response.rawResponse.hits.total} documents. Result is ${
             response.rawResponse.aggregations.avg_bytes.value
@@ -144,8 +144,8 @@ export const SearchExamplesApp = ({
                     <p>
                       <FormattedMessage
                         id="searchExamples.timestampText"
-                        defaultMessage="Last timestamp: {time}"
-                        values={{ time: result ? result : 'Unknown' }}
+                        defaultMessage="Last query took: {time}"
+                        values={{ time: result ? result?.rawResponse.took : 'Unknown' }}
                       />
                     </p>
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
