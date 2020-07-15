@@ -21,7 +21,7 @@ import {
 import {
   ExceptionListSchema,
   CreateExceptionListSchema,
-  ENDPOINT_ID,
+  ENDPOINT_LIST_ID,
 } from '../../../../common/shared_imports';
 
 export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSchema | null];
@@ -66,7 +66,7 @@ export const useFetchOrCreateRuleExceptionList = ({
           // Endpoint exception list already exists, fetch it
           newExceptionList = await fetchExceptionListById({
             http,
-            id: ENDPOINT_ID,
+            id: ENDPOINT_LIST_ID,
             namespaceType: 'agnostic',
             signal: abortCtrl.signal,
           });
@@ -154,7 +154,7 @@ export const useFetchOrCreateRuleExceptionList = ({
         let exceptionListToUse: ExceptionListSchema;
         const matchingList = exceptionLists.find((list) => {
           if (exceptionListType === 'endpoint') {
-            return list.type === exceptionListType && list.list_id === ENDPOINT_ID;
+            return list.type === exceptionListType && list.list_id === ENDPOINT_LIST_ID;
           } else {
             return list.type === exceptionListType;
           }

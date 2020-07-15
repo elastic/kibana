@@ -43,4 +43,4 @@ export {
   Type,
 } from './schemas';
 
-export { ENDPOINT_ID } from './constants';
+export { ENDPOINT_LIST_ID } from './constants';

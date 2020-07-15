@@ -41,5 +41,5 @@ export {
   namespaceType,
   ExceptionListType,
   Type,
-  ENDPOINT_ID,
+  ENDPOINT_LIST_ID,
 } from '../../lists/common';
