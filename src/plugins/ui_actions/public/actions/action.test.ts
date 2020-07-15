@@ -19,14 +19,12 @@
 
 import { createAction } from '../../../ui_actions/public';
 import { ActionType } from '../types';
-import { ActionExecutionContext } from './action';
 
 const sayHelloAction = createAction({
   // Casting to ActionType is a hack - in a real situation use
   // declare module and add this id to ActionContextMapping.
   type: 'test' as ActionType,
-  isCompatible: ({ amICompatible }: ActionExecutionContext<{ amICompatible: boolean }>) =>
-    Promise.resolve(amICompatible),
+  isCompatible: ({ amICompatible }: { amICompatible: boolean }) => Promise.resolve(amICompatible),
   execute: () => Promise.resolve(),
 });
 
