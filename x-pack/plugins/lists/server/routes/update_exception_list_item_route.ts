@@ -62,10 +62,17 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           type,
         });
         if (exceptionListItem == null) {
-          return siemResponse.error({
-            body: `list item id: "${id}" not found`,
-            statusCode: 404,
-          });
+          if (id != null) {
+            return siemResponse.error({
+              body: `list item id: "${id}" not found`,
+              statusCode: 404,
+            });
+          } else {
+            return siemResponse.error({
+              body: `list item item_id: "${itemId}" not found`,
+              statusCode: 404,
+            });
+          }
         } else {
           const [validated, errors] = validate(exceptionListItem, exceptionListItemSchema);
           if (errors != null) {

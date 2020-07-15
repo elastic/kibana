@@ -83,7 +83,7 @@ const NO_LEGEND_DATA: LegendItem[] = [];
 export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
   ({
     chartHeight,
-    defaultStackByOption = alertsHistogramOptions[0],
+    defaultStackByOption = alertsHistogramOptions[8], // signal.rule.name
     deleteQuery,
     filters,
     headerChildren,
