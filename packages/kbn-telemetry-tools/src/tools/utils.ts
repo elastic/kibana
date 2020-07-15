@@ -98,7 +98,9 @@ export function getVariableValue(node: ts.Node): string | Record<string, any> {
     return serializeObject(node);
   }
 
-  throw Error(`Unsuppored Node: cannot get value of node (${node.getText()}) of kind ${node.kind}`);
+  throw Error(
+    `Unsupported Node: cannot get value of node (${node.getText()}) of kind ${node.kind}`
+  );
 }
 
 export function serializeObject(node: ts.Node) {
@@ -116,6 +118,30 @@ export function serializeObject(node: ts.Node) {
       value[propertyName] = getVariableValue(property.initializer);
     } else {
       value[propertyName] = getVariableValue(property);
+    }
+  }
+
+  return value;
+}
+
+export function serializeProperties(properties: ts.Symbol[]) {
+  const value: Record<string, any> = {};
+  for (const property of properties) {
+    const propertyName = property.name;
+    const [node] = property.getDeclarations() || [];
+    if (node) {
+      if (ts.isPropertySignature(node) && node.type) {
+        if (ts.isTypeLiteralNode(node.type)) {
+          const symbols = node.type.members.map((m) => (m as any).symbol);
+          value[propertyName] = serializeProperties(symbols);
+        } else {
+          value[propertyName] = node.type.getText();
+        }
+      } else if (ts.isPropertyAssignment(node)) {
+        value[propertyName] = getVariableValue(node.initializer);
+      } else {
+        value[propertyName] = getVariableValue(node);
+      }
     }
   }
 
@@ -169,6 +195,27 @@ export function getPropertyValue(
         const serializedObject = serializeObject(declarationNode.initializer);
         return serializedObject;
       }
+
+      return getVariableValue(declaration);
+    }
+
+    if (ts.isCallLikeExpression(initializer)) {
+      const typeChecker = program.getTypeChecker();
+      const declaration = getIdentifierDeclaration((initializer as ts.CallExpression).expression);
+      const signature = typeChecker.getResolvedSignature(initializer);
+      if (signature) {
+        const returnType = signature.getReturnType();
+        const properties = returnType.getProperties();
+        return serializeProperties(properties);
+      }
+      // const symbol = typeChecker.getSymbolAtLocation((declaration as ts.FunctionDeclaration).name!);
+      // if (symbol) {
+      //   const symbolType = typeChecker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
+      //   const signatures = symbolType.getCallSignatures();
+      //   const returnType = signatures[0].getReturnType();
+      //   const properties = returnType.getProperties();
+      //   return serializeProperties(properties);
+      // }
 
       return getVariableValue(declaration);
     }

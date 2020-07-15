@@ -25,6 +25,7 @@ import { parsedNestedCollector } from './__fixture__/parsed_nested_collector';
 import { parsedExternallyDefinedCollector } from './__fixture__/parsed_externally_defined_collector';
 import { parsedImportedUsageInterface } from './__fixture__/parsed_imported_usage_interface';
 import { parsedImportedSchemaCollector } from './__fixture__/parsed_imported_schema';
+import { parsedCodeGeneratedSchemaCollector } from './__fixture__/parsed_code_generated_schema';
 
 export function loadFixtureProgram(fixtureName: string) {
   const fixturePath = path.resolve(
@@ -90,5 +91,12 @@ describe('parseUsageCollection', () => {
     const { program, sourceFile } = loadFixtureProgram('file_with_no_collector');
     const result = [...parseUsageCollection(sourceFile, program)];
     expect(result).toEqual([]);
+  });
+
+  // eslint-disable-next-line jest/no-focused-tests,ban/ban
+  it.only('parses code-generated schemas', () => {
+    const { program, sourceFile } = loadFixtureProgram('code_generated_schema');
+    const result = [...parseUsageCollection(sourceFile, program)];
+    expect(result).toEqual(parsedCodeGeneratedSchemaCollector);
   });
 });

@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsServiceSetup } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { findAll } from '../find_all';
 import {
   ApplicationUsageTotal,
@@ -53,6 +53,18 @@ interface ApplicationUsageTelemetryReport {
   };
 }
 
+const KNOWN_APPS = ['dashboard'];
+const perAppSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
+  clicks_7_days: { type: 'long' },
+  clicks_30_days: { type: 'long' },
+  clicks_90_days: { type: 'long' },
+  clicks_total: { type: 'long' },
+  minutes_on_screen_7_days: { type: 'float' },
+  minutes_on_screen_30_days: { type: 'float' },
+  minutes_on_screen_90_days: { type: 'float' },
+  minutes_on_screen_total: { type: 'float' },
+};
+
 export function registerApplicationUsageCollector(
   usageCollection: UsageCollectionSetup,
   registerType: SavedObjectsServiceSetup['registerType'],
@@ -63,6 +75,7 @@ export function registerApplicationUsageCollector(
   const collector = usageCollection.makeUsageCollector({
     type: 'application_usage',
     isReady: () => typeof getSavedObjectsClient() !== 'undefined',
+    schema: Object.fromEntries(KNOWN_APPS.map((appId) => [appId, perAppSchema])),
     fetch: async () => {
       const savedObjectsClient = getSavedObjectsClient();
       if (typeof savedObjectsClient === 'undefined') {
