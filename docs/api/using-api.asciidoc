@@ -10,7 +10,24 @@ NOTE: The {kib} Console supports only Elasticsearch APIs. You are unable to inte
 [float]
 [[api-authentication]]
 === Authentication
-{kib} supports token-based authentication with the same username and password that you use to log into the {kib} Console.
+
+The {kib} APIs support key- and token-based authentication. 
+
+[float]
+[[token-api-authentication]]
+==== Token-based authentication
+
+To use token-based authentication, you use the same username and password that you use to log into Elastic.  
+In a given HTTP tool, and when available, you can select to use its 'Basic Authentication' option, 
+which is where the username and password are stored in order to be passed as part of the call. 
+
+[float]
+[[key-authentication]]
+==== Key-based authentication
+
+To use key-based authentication, you create an API key using the Elastic Console, then specify the key in the header of your API calls.
+
+For information about API keys, refer to <<api-keys,API keys>>.
 
 [float]
 [[api-calls]]
