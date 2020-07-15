@@ -78,7 +78,10 @@ const commonUpdateTemplateTimelineCheck = (
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
   if (isHandlingTemplateTimeline) {
-    if (existTimeline != null && timelineType !== existTimeline.timelineType) {
+    if (
+      (existTimeline != null && timelineType !== existTimeline.timelineType) ||
+      (existTemplateTimeline != null && timelineType !== existTemplateTimeline.timelineType)
+    ) {
       return {
         body: NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
         statusCode: 403,
@@ -106,11 +109,7 @@ const commonUpdateTemplateTimelineCheck = (
       };
     }
 
-    if (
-      existTemplateTimeline != null &&
-      existTemplateTimeline.templateTimelineVersion == null &&
-      existTemplateTimeline.version !== version
-    ) {
+    if (existTemplateTimeline != null && existTemplateTimeline.version !== version) {
       // throw error 409 conflict timeline
       return {
         body: NO_MATCH_VERSION_ERROR_MESSAGE,
@@ -231,12 +230,6 @@ export const checkIsUpdateViaImportFailureCases = (
       };
     }
   } else {
-    if (existTemplateTimeline != null && timelineType !== existTemplateTimeline?.timelineType) {
-      return {
-        body: NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
-        statusCode: 403,
-      };
-    }
     const isStatusValid =
       ((existTemplateTimeline?.status == null ||
         existTemplateTimeline?.status === TimelineStatus.active) &&
