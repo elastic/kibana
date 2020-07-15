@@ -28,19 +28,28 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('vertical bar chart', function () {
+    const vizName1 = 'Visualization VerticalBarChart';
+
+    const initBarChart = async () => {
+      log.debug('navigateToApp visualize');
+      await PageObjects.visualize.navigateToNewVisualization();
+      log.debug('clickVerticalBarChart');
+      await PageObjects.visualize.clickVerticalBarChart();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      log.debug('Bucket = X-Axis');
+      await PageObjects.visEditor.clickBucket('X-axis');
+      log.debug('Aggregation = Date Histogram');
+      await PageObjects.visEditor.selectAggregation('Date Histogram');
+      log.debug('Field = @timestamp');
+      await PageObjects.visEditor.selectField('@timestamp');
+      // leaving Interval set to Auto
+      await PageObjects.visEditor.clickGo();
+    };
+
     describe('bar charts x axis tick labels', () => {
       it('should show tick labels also after rotation of the chart', async function () {
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVerticalBarChart();
-        await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.visEditor.clickBucket('X-axis');
-        log.debug('Aggregation = Date Histogram');
-        await PageObjects.visEditor.selectAggregation('Date Histogram');
-        log.debug('Field = @timestamp');
-        await PageObjects.visEditor.selectField('@timestamp');
-        // leaving Interval set to Auto
-        await PageObjects.visEditor.clickGo();
+        await initBarChart();
         const bottomLabels = await PageObjects.visChart.getXAxisLabels();
         log.debug(`${bottomLabels.length} tick labels on bottom x axis`);
 
@@ -62,10 +71,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Range');
         await PageObjects.visEditor.selectField('@timestamp');
-        await PageObjects.visEditor.clickGo();
-        const bottomLabels = await PageObjects.visChart.getXAxisLabels();
-        expect(bottomLabels.length).to.be(1);
-
         await PageObjects.visEditor.clickMetricsAndAxes();
         await PageObjects.visEditor.selectXAxisPosition('left');
         await PageObjects.visEditor.clickGo();
@@ -95,28 +100,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    const vizName1 = 'Visualization VerticalBarChart';
-
-    const initBarChart = async () => {
-      log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
-      log.debug('clickVerticalBarChart');
-      await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      log.debug('Bucket = X-Axis');
-      await PageObjects.visEditor.clickBucket('X-axis');
-      log.debug('Aggregation = Date Histogram');
-      await PageObjects.visEditor.selectAggregation('Date Histogram');
-      log.debug('Field = @timestamp');
-      await PageObjects.visEditor.selectField('@timestamp');
-      // leaving Interval set to Auto
-      await PageObjects.visEditor.clickGo();
-    };
-
-    before(initBarChart);
-
     it('should save and load', async function () {
+      await initBarChart();
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await PageObjects.visualize.loadSavedVisualization(vizName1);
