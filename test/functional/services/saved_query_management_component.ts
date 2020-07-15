@@ -184,10 +184,10 @@ export function SavedQueryManagementComponentProvider({
       const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (!isOpenAlready) return;
 
-      await retry.try(async () => {
-        await testSubjects.click('saved-query-management-popover-button');
-        await testSubjects.missingOrFail('saved-query-management-popover');
-      });
+      await testSubjects.clickUntilMissing(
+        'saved-query-management-popover-button',
+        'saved-query-management-popover'
+      );
     }
 
     async openSaveCurrentQueryModal() {
