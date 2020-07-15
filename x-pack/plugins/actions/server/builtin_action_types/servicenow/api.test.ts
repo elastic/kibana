@@ -71,7 +71,7 @@ describe('api', () => {
       });
 
       test('it calls createIncident correctly', async () => {
-        const params = { ...apiParams, externalId: null, comments: undefined };
+        const params = { ...apiParams, externalId: null, comments: [] };
         await api.pushToService({
           externalService,
           mapping,
