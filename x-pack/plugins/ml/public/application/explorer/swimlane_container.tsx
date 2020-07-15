@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useRef, useState } from 'react';
 import {
   EuiText,
   EuiLoadingChart,
@@ -49,7 +49,7 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
  * @constructor
  */
 export const SwimlaneContainer: FC<
-  Omit<ExplorerSwimlaneProps, 'chartWidth' | 'tooltipService'> & {
+  Omit<ExplorerSwimlaneProps, 'chartWidth' | 'tooltipService' | 'parentRef'> & {
     onResize: (width: number) => void;
     fromPage?: number;
     perPage?: number;
@@ -70,6 +70,7 @@ export const SwimlaneContainer: FC<
   ...props
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
@@ -111,36 +112,40 @@ export const SwimlaneContainer: FC<
             data-test-subj="mlSwimLaneContainer"
           >
             <EuiFlexItem style={{ width: '100%', overflowY: 'auto' }} grow={false}>
-              <EuiText color="subdued" size="s">
-                {showSwimlane && !isLoading && (
-                  <MlTooltipComponent>
-                    {(tooltipService) => (
-                      <ExplorerSwimlane
-                        chartWidth={chartWidth}
-                        tooltipService={tooltipService}
-                        {...props}
+              <div ref={wrapperRef}>
+                <EuiText color="subdued" size="s">
+                  {showSwimlane && !isLoading && (
+                    <MlTooltipComponent>
+                      {(tooltipService) => (
+                        <ExplorerSwimlane
+                          {...props}
+                          chartWidth={chartWidth}
+                          tooltipService={tooltipService}
+                          parentRef={wrapperRef}
+                        />
+                      )}
+                    </MlTooltipComponent>
+                  )}
+                  {isLoading && (
+                    <EuiText textAlign={'center'}>
+                      <EuiLoadingChart
+                        size="xl"
+                        mono={true}
+                        data-test-subj="mlSwimLaneLoadingIndicator"
                       />
-                    )}
-                  </MlTooltipComponent>
-                )}
-                {isLoading && (
-                  <EuiText textAlign={'center'}>
-                    <EuiLoadingChart
-                      size="xl"
-                      mono={true}
-                      data-test-subj="mlSwimLaneLoadingIndicator"
+                    </EuiText>
+                  )}
+                  {!isLoading && !showSwimlane && (
+                    <EuiEmptyPrompt
+                      titleSize="xs"
+                      style={{ padding: 0 }}
+                      title={<h2>{noDataWarning}</h2>}
                     />
-                  </EuiText>
-                )}
-                {!isLoading && !showSwimlane && (
-                  <EuiEmptyPrompt
-                    titleSize="xs"
-                    style={{ padding: 0 }}
-                    title={<h2>{noDataWarning}</h2>}
-                  />
-                )}
-              </EuiText>
+                  )}
+                </EuiText>
+              </div>
             </EuiFlexItem>
+
             {isPaginationVisible && (
               <EuiFlexItem grow={false}>
                 <SwimLanePagination

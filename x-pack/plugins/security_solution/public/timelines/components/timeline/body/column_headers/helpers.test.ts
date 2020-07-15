@@ -9,9 +9,10 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_ACTIONS_COLUMN_WIDTH,
+  EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
   SHOW_CHECK_BOXES_COLUMN_WIDTH,
-  MINIMUM_ACTIONS_COLUMN_WIDTH,
 } from '../constants';
+import '../../../../../common/mock/match_media';
 
 describe('helpers', () => {
   describe('getColumnWidthFromType', () => {
@@ -36,12 +37,12 @@ describe('helpers', () => {
     });
 
     test('returns the events viewer actions column width when isEventViewer is true', () => {
-      expect(getActionsColumnWidth(true)).toEqual(MINIMUM_ACTIONS_COLUMN_WIDTH);
+      expect(getActionsColumnWidth(true)).toEqual(EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH);
     });
 
     test('returns the events viewer actions column width + checkbox width when isEventViewer is true and showCheckboxes is true', () => {
       expect(getActionsColumnWidth(true, true)).toEqual(
-        MINIMUM_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
+        EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
       );
     });
   });

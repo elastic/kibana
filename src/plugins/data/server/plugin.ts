@@ -82,7 +82,7 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     core.uiSettings.register(getUiSettings());
 
     return {
-      search: this.searchService.setup(core),
+      search: this.searchService.setup(core, { usageCollection }),
       fieldFormats: this.fieldFormats.setup(),
     };
   }
