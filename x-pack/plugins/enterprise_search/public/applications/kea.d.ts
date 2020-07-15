@@ -5,7 +5,7 @@
  */
 
 declare module 'kea' {
-  export function useValues(logic: object): object;
+  export function useValues(logic?: object): object;
   export function useActions(logic: object): object;
   export function getContext(): { store: object };
   export function resetContext(context: object): object;

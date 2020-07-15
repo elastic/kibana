@@ -5,11 +5,11 @@
  */
 
 import '../../../__mocks__/react_router_history.mock';
+import './__mocks__/overview_logic.mock';
+import { setMockValues } from './__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
-import { mountWithAsyncContext, mockKibanaContext } from '../../../__mocks__';
 
 import { ErrorState } from '../error_state';
 import { Loading } from '../shared/loading';
@@ -18,11 +18,9 @@ import { ViewContentHeader } from '../shared/view_content_header';
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
 import { RecentActivity } from './recent_activity';
-import { Overview, defaultServerData } from './overview';
+import { Overview } from './overview';
 
 describe('Overview', () => {
-  const mockHttp = mockKibanaContext.http;
-
   describe('non-happy-path states', () => {
     it('isLoading', () => {
       const wrapper = shallow(<Overview />);
@@ -31,12 +29,8 @@ describe('Overview', () => {
     });
 
     it('hasErrorConnecting', async () => {
-      const wrapper = await mountWithAsyncContext(<Overview />, {
-        http: {
-          ...mockHttp,
-          get: () => Promise.reject({ invalidPayload: true }),
-        },
-      });
+      setMockValues({ hasErrorConnecting: true });
+      const wrapper = shallow(<Overview />);
 
       expect(wrapper.find(ErrorState)).toHaveLength(1);
     });
@@ -44,10 +38,8 @@ describe('Overview', () => {
 
   describe('happy-path states', () => {
     it('renders onboarding state', async () => {
-      const mockApi = jest.fn(() => defaultServerData);
-      const wrapper = await mountWithAsyncContext(<Overview />, {
-        http: { ...mockHttp, get: mockApi },
-      });
+      setMockValues({ dataLoading: false });
+      const wrapper = shallow(<Overview />);
 
       expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
       expect(wrapper.find(OnboardingSteps)).toHaveLength(1);
@@ -56,8 +48,7 @@ describe('Overview', () => {
     });
 
     it('renders when onboarding complete', async () => {
-      const obCompleteData = {
-        ...defaultServerData,
+      setMockValues({
         hasUsers: true,
         hasOrgSources: true,
         isOldAccount: true,
@@ -65,11 +56,8 @@ describe('Overview', () => {
           name: 'foo',
           defaultOrgName: 'bar',
         },
-      };
-      const mockApi = jest.fn(() => obCompleteData);
-      const wrapper = await mountWithAsyncContext(<Overview />, {
-        http: { ...mockHttp, get: mockApi },
       });
+      const wrapper = shallow(<Overview />);
 
       expect(wrapper.find(OnboardingSteps)).toHaveLength(0);
     });
