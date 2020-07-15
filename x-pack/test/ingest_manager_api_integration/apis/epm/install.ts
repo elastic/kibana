@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Temporarily skipped to promote snapshot
   // Re-enabled in https://github.com/elastic/kibana/pull/71727
-  describe('installs packages that include settings and mappings overrides', async () => {
+  describe.skip('installs packages that include settings and mappings overrides', async () => {
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests

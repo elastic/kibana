@@ -6,75 +6,68 @@
 
 import { IRouter } from 'kibana/server';
 
-import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
+import { ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/siem_common_deps';
 import {
-  UpdateExceptionListItemSchemaDecoded,
+  CreateEndpointListItemSchemaDecoded,
+  createEndpointListItemSchema,
   exceptionListItemSchema,
-  updateExceptionListItemSchema,
 } from '../../common/schemas';
 
-import { getExceptionListClient } from '.';
+import { getExceptionListClient } from './utils/get_exception_list_client';
 
-export const updateExceptionListItemRoute = (router: IRouter): void => {
-  router.put(
+export const createEndpointListItemRoute = (router: IRouter): void => {
+  router.post(
     {
       options: {
         tags: ['access:lists'],
       },
-      path: EXCEPTION_LIST_ITEM_URL,
+      path: ENDPOINT_LIST_ITEM_URL,
       validate: {
         body: buildRouteValidation<
-          typeof updateExceptionListItemSchema,
-          UpdateExceptionListItemSchemaDecoded
-        >(updateExceptionListItemSchema),
+          typeof createEndpointListItemSchema,
+          CreateEndpointListItemSchemaDecoded
+        >(createEndpointListItemSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
         const {
-          description,
-          id,
           name,
-          meta,
-          type,
           _tags,
+          tags,
+          meta,
           comments,
+          description,
           entries,
           item_id: itemId,
-          namespace_type: namespaceType,
-          tags,
+          type,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
-        const exceptionListItem = await exceptionLists.updateExceptionListItem({
-          _tags,
-          comments,
-          description,
-          entries,
-          id,
+        const exceptionListItem = await exceptionLists.getEndpointListItem({
+          id: undefined,
           itemId,
-          meta,
-          name,
-          namespaceType,
-          tags,
-          type,
         });
-        if (exceptionListItem == null) {
-          if (id != null) {
-            return siemResponse.error({
-              body: `list item id: "${id}" not found`,
-              statusCode: 404,
-            });
-          } else {
-            return siemResponse.error({
-              body: `list item item_id: "${itemId}" not found`,
-              statusCode: 404,
-            });
-          }
+        if (exceptionListItem != null) {
+          return siemResponse.error({
+            body: `exception list item id: "${itemId}" already exists`,
+            statusCode: 409,
+          });
         } else {
-          const [validated, errors] = validate(exceptionListItem, exceptionListItemSchema);
+          const createdList = await exceptionLists.createEndpointListItem({
+            _tags,
+            comments,
+            description,
+            entries,
+            itemId,
+            meta,
+            name,
+            tags,
+            type,
+          });
+          const [validated, errors] = validate(createdList, exceptionListItemSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
