@@ -6,11 +6,7 @@
 
 import { ISavedObjectsRepository } from 'src/core/server';
 import { AgentMetadata } from '../../../../ingest_manager/common/types/models/agent';
-import {
-  getFleetSavedObjectsMetadata,
-  getFleetEventsSavedObjects,
-  FLEET_ENDPOINT_PACKAGE_CONSTANT,
-} from './fleet_saved_objects';
+import { getFleetSavedObjectsMetadata, getLatestFleetEndpointEvent } from './fleet_saved_objects';
 
 export interface AgentOSMetadataTelemetry {
   full_name: string;
@@ -18,21 +14,24 @@ export interface AgentOSMetadataTelemetry {
   version: string;
   count: number;
 }
+export interface PolicyTelemetry {
+  active: number;
+  inactive: number;
+  failure: number;
+}
 
 export interface PoliciesTelemetry {
-  malware: {
-    success: number;
-    warning: number;
-    failure: number;
-  };
+  malware: PolicyTelemetry;
 }
 
 export interface EndpointUsage {
   total_installed: number;
   active_within_last_24_hours: number;
   os: AgentOSMetadataTelemetry[];
-  policies?: PoliciesTelemetry; // TODO: make required when able to enable policy information
+  policies: PoliciesTelemetry;
 }
+
+type EndpointOSNames = 'Linux' | 'Windows' | 'macOs';
 
 export interface AgentLocalMetadata extends AgentMetadata {
   elastic: {
@@ -51,7 +50,8 @@ export interface AgentLocalMetadata extends AgentMetadata {
   };
 }
 
-export type OSTracker = Record<string, AgentOSMetadataTelemetry>;
+type OSTracker = Record<string, AgentOSMetadataTelemetry>;
+type AgentDailyActiveTracker = Map<string, boolean>;
 /**
  * @description returns an empty telemetry object to be incrmented and updated within the `getEndpointTelemetryFromFleet` fn
  */
@@ -59,8 +59,18 @@ export const getDefaultEndpointTelemetry = (): EndpointUsage => ({
   total_installed: 0,
   active_within_last_24_hours: 0,
   os: [],
+  policies: {
+    malware: {
+      active: 0,
+      inactive: 0,
+      failure: 0,
+    },
+  },
 });
 
+/**
+ * @description this fun
+ */
 export const trackEndpointOSTelemetry = (
   os: AgentLocalMetadata['os'],
   osTracker: OSTracker
@@ -83,6 +93,80 @@ export const trackEndpointOSTelemetry = (
 };
 
 /**
+ * @description This iterates over all unique agents that currently track an endpoint package. It takes a list of agents who have checked in in the last 24 hours
+ * and then checks whether those agents have endpoints whose latest status is 'RUNNING' to determine an active_within_last_24_hours. Since the policy information is also tracked in these events
+ * we pull out the status of the current protection (malware) type. This must be done in a compound manner as the desired status is reflected in the config, and the successful application of that policy
+ * is tracked in the policy.applied.response.configurations[protectionsType].status. Using these two we can determine whether the policy is toggled on, off, or failed to turn on.
+ */
+export const addEndpointDailyActivityAndPolicyDetailsToTelemetry = async (
+  agentDailyActiveTracker: AgentDailyActiveTracker,
+  savedObjectsClient: ISavedObjectsRepository,
+  endpointTelemetry: EndpointUsage
+): Promise<EndpointUsage> => {
+  const updatedEndpointTelemetry = { ...endpointTelemetry };
+
+  const policyHostTypeToPolicyType = {
+    Linux: 'linux',
+    macOs: 'mac',
+    Windows: 'windows',
+  };
+  const enabledMalwarePolicyTypes = ['prevent', 'detect'];
+
+  for (const agentId of agentDailyActiveTracker.keys()) {
+    const { saved_objects: agentEvents } = await getLatestFleetEndpointEvent(
+      savedObjectsClient,
+      agentId
+    );
+
+    const latestEndpointEvent = agentEvents[0];
+    if (latestEndpointEvent) {
+      /*
+        We can assume that if the last status of the endpoint is RUNNING and the agent has checked in within the last 24 hours
+        then the endpoint has still been running within the last 24 hours.
+      */
+      const { subtype, payload } = latestEndpointEvent.attributes;
+      const endpointIsActive =
+        subtype === 'RUNNING' && agentDailyActiveTracker.get(agentId) === true;
+
+      if (endpointIsActive) {
+        updatedEndpointTelemetry.active_within_last_24_hours += 1;
+      }
+
+      // The policy details are sent as a string on the 'payload' attribute of the agent event
+      const endpointPolicyDetails = payload ? JSON.parse(payload) : null;
+      if (endpointPolicyDetails) {
+        // We get the setting the user desired to enable (treating prevent and detect as 'active' states) and then see if it succeded or failed.
+        const hostType =
+          policyHostTypeToPolicyType[
+            endpointPolicyDetails['endpoint-security']?.host?.os?.name as EndpointOSNames
+          ];
+        const userDesiredMalwareState =
+          endpointPolicyDetails['endpoint-security'].Endpoint?.configuration?.inputs[0]?.policy[
+            hostType
+          ]?.malware?.mode;
+
+        const isAnActiveMalwareState = enabledMalwarePolicyTypes.includes(userDesiredMalwareState);
+        const malwareStatus =
+          endpointPolicyDetails['endpoint-security'].Endpoint?.policy?.applied?.response
+            ?.configurations?.malware?.status;
+
+        if (isAnActiveMalwareState && malwareStatus !== 'failure') {
+          updatedEndpointTelemetry.policies.malware.active += 1;
+        }
+        if (!isAnActiveMalwareState) {
+          updatedEndpointTelemetry.policies.malware.inactive += 1;
+        }
+        if (isAnActiveMalwareState && malwareStatus === 'failure') {
+          updatedEndpointTelemetry.policies.malware.failure += 1;
+        }
+      }
+    }
+  }
+
+  return updatedEndpointTelemetry;
+};
+
+/**
  * @description This aggregates the telemetry details from the two fleet savedObject sources, `fleet-agents` and `fleet-agent-events` to populate
  * the telemetry details for endpoint. Since we cannot access our own indices due to `kibana_system` not having access, this is the best alternative.
  * Once the data is requested, we iterate over all agents with endpoints registered, and then request the events for each active agent (within last 24 hours)
@@ -100,8 +184,8 @@ export const getEndpointTelemetryFromFleet = async (
 
   // Use unique hosts to prevent any potential duplicates
   const uniqueHostIds: Set<string> = new Set();
-  // Need unique agents to get events data for those that have run in last 24 hours
-  const uniqueAgentIds: Set<string> = new Set();
+  // Need agents to get events data for those that have run in last 24 hours as well as policy details
+  const agentDailyActiveTracker: AgentDailyActiveTracker = new Map();
 
   const aDayAgo = new Date();
   aDayAgo.setDate(aDayAgo.getDate() - 1);
@@ -110,17 +194,15 @@ export const getEndpointTelemetryFromFleet = async (
   const endpointMetadataTelemetry = endpointAgents.reduce(
     (metadataTelemetry, { attributes: metadataAttributes }) => {
       const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
-      // The extended AgentMetadata is just an empty blob, so cast to account for our specific use case
-      const { host, os, elastic } = localMetadata as AgentLocalMetadata;
+      const { host, os, elastic } = localMetadata as AgentLocalMetadata; // AgentMetadata is just an empty blob, casting for our  use case
 
-      if (lastCheckin && new Date(lastCheckin) > aDayAgo) {
-        // Get agents that have checked in within the last 24 hours to later see if their endpoints are running
-        uniqueAgentIds.add(elastic.agent.id);
-      }
       if (host && uniqueHostIds.has(host.id)) {
+        // use hosts since new agents could potentially be re-installed on existing hosts
         return metadataTelemetry;
       } else {
         uniqueHostIds.add(host.id);
+        const isActiveWithinLastDay = !!lastCheckin && new Date(lastCheckin) > aDayAgo;
+        agentDailyActiveTracker.set(elastic.agent.id, isActiveWithinLastDay);
         osTracker = trackEndpointOSTelemetry(os, osTracker);
         return metadataTelemetry;
       }
@@ -128,32 +210,16 @@ export const getEndpointTelemetryFromFleet = async (
     endpointTelemetry
   );
 
-  // All unique agents with an endpoint installed. You can technically install a new agent on a host, so relying on most recently installed.
+  // All unique hosts with an endpoint installed.
   endpointTelemetry.total_installed = uniqueHostIds.size;
-
   // Get the objects to populate our OS Telemetry
   endpointMetadataTelemetry.os = Object.values(osTracker);
+  // Populate endpoint telemetry with the finalized 24 hour count and policy details
+  const finalizedEndpointTelemetryData = await addEndpointDailyActivityAndPolicyDetailsToTelemetry(
+    agentDailyActiveTracker,
+    savedObjectsClient,
+    endpointMetadataTelemetry
+  );
 
-  // Check for agents running in the last 24 hours whose endpoints are still active
-  for (const agentId of uniqueAgentIds) {
-    const { saved_objects: agentEvents } = await getFleetEventsSavedObjects(
-      savedObjectsClient,
-      agentId
-    );
-    const lastEndpointStatus = agentEvents.find((agentEvent) =>
-      agentEvent.attributes.message.includes(FLEET_ENDPOINT_PACKAGE_CONSTANT)
-    );
-
-    /*
-      We can assume that if the last status of the endpoint is RUNNING and the agent has checked in within the last 24 hours
-      then the endpoint has still been running within the last 24 hours. If / when we get the policy response, then we can use that
-      instead
-    */
-    const endpointIsActive = lastEndpointStatus?.attributes.subtype === 'RUNNING';
-    if (endpointIsActive) {
-      endpointMetadataTelemetry.active_within_last_24_hours += 1;
-    }
-  }
-
-  return endpointMetadataTelemetry;
+  return finalizedEndpointTelemetryData;
 };

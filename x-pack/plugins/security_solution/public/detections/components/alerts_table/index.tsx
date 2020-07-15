@@ -61,11 +61,14 @@ interface OwnProps {
   timelineId: TimelineIdLiteral;
   canUserCRUD: boolean;
   defaultFilters?: Filter[];
+  eventsViewerBodyHeight?: number;
   hasIndexWrite: boolean;
-  from: number;
+  from: string;
   loading: boolean;
+  showBuildingBlockAlerts: boolean;
+  onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
   signalsIndex: string;
-  to: number;
+  to: string;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
@@ -84,6 +87,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   clearEventsLoading,
   clearSelected,
   defaultFilters,
+  eventsViewerBodyHeight,
   from,
   globalFilters,
   globalQuery,
@@ -94,6 +98,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   selectedEventIds,
   setEventsDeleted,
   setEventsLoading,
+  showBuildingBlockAlerts,
+  onShowBuildingBlockAlertsChanged,
   signalsIndex,
   to,
   updateTimeline,
@@ -302,6 +308,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           currentFilter={filterGroup}
           selectAll={selectAllCallback}
           selectedEventIds={selectedEventIds}
+          showBuildingBlockAlerts={showBuildingBlockAlerts}
+          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
           showClearSelection={showClearSelectionAction}
           totalCount={totalCount}
           updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
@@ -313,6 +321,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       hasIndexWrite,
       clearSelectionCallback,
       filterGroup,
+      showBuildingBlockAlerts,
+      onShowBuildingBlockAlertsChanged,
       loadingEventIds.length,
       selectAllCallback,
       selectedEventIds,
@@ -366,7 +376,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     }
   }, [defaultFilters, filterGroup]);
   const { filterManager } = useKibana().services.data.query;
-  const { initializeTimeline, setTimelineRowActions } = useManageTimeline();
+  const { initializeTimeline, setTimelineRowActions, setIndexToAdd } = useManageTimeline();
 
   useEffect(() => {
     initializeTimeline({
@@ -375,6 +385,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       filterManager,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       id: timelineId,
+      indexToAdd: defaultIndices,
       loadingText: i18n.LOADING_ALERTS,
       selectAll: canUserCRUD ? selectAll : false,
       timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
@@ -382,6 +393,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   useEffect(() => {
     setTimelineRowActions({
       id: timelineId,
@@ -390,6 +402,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [additionalActions]);
+
+  useEffect(() => {
+    setIndexToAdd({ id: timelineId, indexToAdd: defaultIndices });
+  }, [timelineId, defaultIndices, setIndexToAdd]);
+
   const headerFilterGroup = useMemo(
     () => <AlertsTableFilterGroup onFilterGroupChanged={onFilterGroupChangedCallback} />,
     [onFilterGroupChangedCallback]
@@ -428,6 +445,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         defaultModel={alertsDefaultModel}
         end={to}
         headerFilterGroup={headerFilterGroup}
+        height={eventsViewerBodyHeight}
         id={timelineId}
         start={from}
         utilityBar={utilityBarCallback}
