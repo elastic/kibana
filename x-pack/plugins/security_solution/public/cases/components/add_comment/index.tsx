@@ -53,6 +53,7 @@ export const AddComment = React.memo<AddCommentProps>(
       options: { stripEmptyFields: false },
       schema,
     });
+    const { getFormData, setFieldValue, reset, submit } = form;
     const dispatch = useDispatch();
     const apolloClient = useApolloClient();
     const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
@@ -62,14 +63,10 @@ export const AddComment = React.memo<AddCommentProps>(
 
     useEffect(() => {
       if (insertQuote !== null) {
-        const { comment } = form.getFormData();
-        form.setFieldValue(
-          'comment',
-          `${comment}${comment.length > 0 ? '\n\n' : ''}${insertQuote}`
-        );
+        const { comment } = getFormData();
+        setFieldValue('comment', `${comment}${comment.length > 0 ? '\n\n' : ''}${insertQuote}`);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [insertQuote]);
+    }, [getFormData, insertQuote, setFieldValue]);
 
     const handleTimelineClick = useCallback(
       (timelineId: string) => {
@@ -94,16 +91,16 @@ export const AddComment = React.memo<AddCommentProps>(
     );
 
     const onSubmit = useCallback(async () => {
-      const { isValid, data } = await form.submit();
+      const { isValid, data } = await submit();
       if (isValid) {
         if (onCommentSaving != null) {
           onCommentSaving();
         }
         postComment(data, onCommentPosted);
-        form.reset();
+        reset();
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [form, onCommentPosted, onCommentSaving]);
+    }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);
+
     return (
       <span id="add-comment-permLink">
         {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}

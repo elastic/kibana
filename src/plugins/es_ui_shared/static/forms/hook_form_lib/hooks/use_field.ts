@@ -41,7 +41,7 @@ export const useField = <T>(
     serializer,
     deserializer,
   } = config;
-  const { getFormData, __addField, __removeField, __updateFormDataAt, __validateFields } = form;
+  const { getFormData, __removeField, __updateFormDataAt, __validateFields } = form;
 
   const initialValue = useMemo(() => {
     if (typeof defaultValue === 'function') {

@@ -7,7 +7,6 @@
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 
 import {
   RuleStepProps,
@@ -43,8 +42,8 @@ import { AutocompleteField } from '../autocomplete_field';
 const CommonUseField = getUseField({ component: Field });
 
 interface StepAboutRuleProps extends RuleStepProps {
-  defaultValues?: AboutStepRule | null;
-  defineRuleData?: DefineStepRule | null;
+  defaultValues?: AboutStepRule;
+  defineRuleData?: DefineStepRule;
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -90,17 +89,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setForm,
   setStepData,
 }) => {
-  const [myStepData, setMyStepData] = useState<AboutStepRule>(stepAboutDefaultValue);
+  const initialState = defaultValues ?? stepAboutDefaultValue;
+  const [myStepData, setMyStepData] = useState<AboutStepRule>(initialState);
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
     defineRuleData?.index ?? []
   );
 
   const { form } = useForm({
-    defaultValue: myStepData,
+    defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { submit } = form;
+  const { getFields, submit } = form;
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
@@ -112,19 +112,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       }
     }
   }, [setStepData, submit]);
-
-  useEffect(() => {
-    setMyStepData((prev) => {
-      const { isNew, ...initDefaultValue } = prev;
-      if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
-        return {
-          ...defaultValues,
-          isNew: false,
-        };
-      }
-      return prev;
-    });
-  }, [defaultValues]);
 
   useEffect(() => {
     if (setForm) {
@@ -336,8 +323,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {
               const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-              const severityField = form.getFields().severity;
-              const riskScoreField = form.getFields().riskScore;
+              const severityField = getFields().severity;
+              const riskScoreField = getFields().riskScore;
               if (
                 severityField.value !== severity &&
                 newRiskScore != null &&

@@ -68,6 +68,7 @@ export const Create = React.memo(() => {
     options: { stripEmptyFields: false },
     schema,
   });
+  const { submit } = form;
   const { tags: tagOptions } = useGetTags();
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
@@ -89,13 +90,12 @@ export const Create = React.memo(() => {
   );
 
   const onSubmit = useCallback(async () => {
-    const { isValid, data } = await form.submit();
+    const { isValid, data } = await submit();
     if (isValid) {
       // `postCase`'s type is incorrect, it actually returns a promise
       await postCase(data);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [postCase, submit]);
 
   const handleSetIsCancel = useCallback(() => {
     history.push('/');
