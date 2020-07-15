@@ -17,7 +17,7 @@ import { DETECTIONS_URL } from '../urls/navigation';
 
 const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_export.ndjson';
 
-describe('Export rules', () => {
+describe.skip('Export rules', () => {
   before(() => {
     esArchiverLoad('export_rule');
     cy.server();
