@@ -22,7 +22,7 @@ import { UiComponent } from 'src/plugins/kibana_utils/public';
 /**
  * Represents something that can be displayed to user in UI.
  */
-export interface Presentable<Context extends object = object, Meta extends object = object> {
+export interface Presentable<Context extends object = object> {
   /**
    * ID that uniquely identifies this object.
    */
@@ -38,34 +38,34 @@ export interface Presentable<Context extends object = object, Meta extends objec
    * `UiComponent` to render when displaying this entity as a context menu item.
    * If not provided, `getDisplayName` will be used instead.
    */
-  readonly MenuItem?: UiComponent<{ context: Context; meta?: Meta }>;
+  readonly MenuItem?: UiComponent<{ context: Context }>;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
    */
-  getIconType(context: Context, meta?: Meta): string | undefined;
+  getIconType(context: Context): string | undefined;
 
   /**
    * Returns a title to be displayed to the user.
    */
-  getDisplayName(context: Context, meta?: Meta): string;
+  getDisplayName(context: Context): string;
 
   /**
    * Returns tooltip text which should be displayed when user hovers this object.
    * Should return empty string if tooltip should not be displayed.
    */
-  getDisplayNameTooltip(context: Context, meta?: Meta): string;
+  getDisplayNameTooltip(context: Context): string;
 
   /**
    * This method should return a link if this item can be clicked on. The link
    * is used to navigate user if user middle-clicks it or Ctrl + clicks or
    * right-clicks and selects "Open in new tab".
    */
-  getHref?(context: Context, meta?: Meta): Promise<string | undefined>;
+  getHref?(context: Context): Promise<string | undefined>;
 
   /**
    * Returns a promise that resolves to true if this item is compatible given
    * the context and should be displayed to user, otherwise resolves to false.
    */
-  isCompatible(context: Context, meta?: Meta): Promise<boolean>;
+  isCompatible(context: Context): Promise<boolean>;
 }

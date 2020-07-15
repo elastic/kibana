@@ -55,7 +55,10 @@ export class TriggerInternal<T extends TriggerId> {
     action: Action<TriggerContextMapping[T]>,
     context: TriggerContextMapping[T]
   ) {
-    await action.execute(context, { trigger: this.trigger });
+    await action.execute({
+      ...context,
+      trigger: this.trigger,
+    });
   }
 
   private async executeMultipleActions(

@@ -19,7 +19,7 @@
 
 // @ts-ignore
 import React from 'react';
-import { Action, ActionContext as Context, ActionDefinition, EventMeta } from './action';
+import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionType } from '../types';
@@ -28,7 +28,7 @@ import { ActionType } from '../types';
  * @internal
  */
 export class ActionInternal<A extends ActionDefinition = ActionDefinition>
-  implements Action<Context<A>>, Presentable<Context<A>, EventMeta> {
+  implements Action<Context<A>>, Presentable<Context<A>> {
   constructor(public readonly definition: A) {}
 
   public readonly id: string = this.definition.id;
@@ -37,8 +37,8 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
 
-  public execute(context: Context<A>, meta: EventMeta = {}) {
-    return this.definition.execute(context, meta);
+  public execute(context: Context<A>) {
+    return this.definition.execute(context);
   }
 
   public getIconType(context: Context<A>): string | undefined {
@@ -56,13 +56,13 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
     return this.definition.getDisplayNameTooltip(context);
   }
 
-  public async isCompatible(context: Context<A>, meta: EventMeta = {}): Promise<boolean> {
+  public async isCompatible(context: Context<A>): Promise<boolean> {
     if (!this.definition.isCompatible) return true;
-    return await this.definition.isCompatible(context, meta);
+    return await this.definition.isCompatible(context);
   }
 
-  public async getHref(context: Context<A>, meta: EventMeta = {}): Promise<string | undefined> {
+  public async getHref(context: Context<A>): Promise<string | undefined> {
     if (!this.definition.getHref) return undefined;
-    return await this.definition.getHref(context, meta);
+    return await this.definition.getHref(context);
   }
 }

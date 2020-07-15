@@ -75,7 +75,10 @@ async function buildEuiContextMenuPanelItems<Context extends object>({
 }) {
   const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
   const promises = actions.map(async (action, index) => {
-    const isCompatible = await action.isCompatible(actionContext, { trigger });
+    const isCompatible = await action.isCompatible({
+      ...actionContext,
+      trigger,
+    });
     if (!isCompatible) {
       return;
     }
@@ -125,20 +128,29 @@ async function convertPanelActionToContextMenuItem<Context extends object>({
         !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
       ) {
         event.preventDefault();
-        action.execute(actionContext, { trigger });
+        action.execute({
+          ...actionContext,
+          trigger,
+        });
       } else {
         // let browser handle navigation
       }
     } else {
       // not a link
-      action.execute(actionContext, { trigger });
+      action.execute({
+        ...actionContext,
+        trigger,
+      });
     }
 
     closeMenu();
   };
 
   if (action.getHref) {
-    const href = await action.getHref(actionContext, { trigger });
+    const href = await action.getHref({
+      ...actionContext,
+      trigger,
+    });
     if (href) {
       menuPanelItem.href = href;
     }
