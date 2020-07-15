@@ -8,6 +8,7 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import '../../mock/match_media';
 import { wait } from '../../lib/helpers';
 import { mockIndexPattern, TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -17,6 +18,8 @@ import { StatefulEventsViewer } from '.';
 import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
+
+jest.mock('../../components/url_state/normalize_time_range.ts');
 
 const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
 jest.mock('../../../detections/containers/detection_engine/rules/fetch_index_patterns');
@@ -31,8 +34,8 @@ const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-const from = 1566943856794;
-const to = 1566857456791;
+const from = '2019-08-27T22:10:56.794Z';
+const to = '2019-08-26T22:10:56.791Z';
 
 describe('StatefulEventsViewer', () => {
   const mount = useMountAppended();

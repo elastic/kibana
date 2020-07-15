@@ -17,7 +17,7 @@ import {
 
 const setBreadcrumbs = jest.fn();
 
-function expectBreadcrumbToMatchSnapshot(route: string, params = '') {
+function mountBreadcrumb(route: string, params = '') {
   mount(
     <MockApmPluginContextWrapper
       value={
@@ -39,7 +39,6 @@ function expectBreadcrumbToMatchSnapshot(route: string, params = '') {
     </MockApmPluginContextWrapper>
   );
   expect(setBreadcrumbs).toHaveBeenCalledTimes(1);
-  expect(setBreadcrumbs.mock.calls[0][0]).toMatchSnapshot();
 }
 
 describe('UpdateBreadcrumbs', () => {
@@ -58,36 +57,88 @@ describe('UpdateBreadcrumbs', () => {
   });
 
   it('Homepage', () => {
-    expectBreadcrumbToMatchSnapshot('/');
+    mountBreadcrumb('/');
     expect(window.document.title).toMatchInlineSnapshot(`"APM"`);
   });
 
   it('/services/:serviceName/errors/:groupId', () => {
-    expectBreadcrumbToMatchSnapshot('/services/opbeans-node/errors/myGroupId');
+    mountBreadcrumb(
+      '/services/opbeans-node/errors/myGroupId',
+      'rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0'
+    );
+    const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
+    expect(breadcrumbs).toEqual([
+      {
+        text: 'APM',
+        href:
+          '#/?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+      },
+      {
+        text: 'Services',
+        href:
+          '#/services?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+      },
+      {
+        text: 'opbeans-node',
+        href:
+          '#/services/opbeans-node?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+      },
+      {
+        text: 'Errors',
+        href:
+          '#/services/opbeans-node/errors?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+      },
+      { text: 'myGroupId', href: undefined },
+    ]);
     expect(window.document.title).toMatchInlineSnapshot(
       `"myGroupId | Errors | opbeans-node | Services | APM"`
     );
   });
 
   it('/services/:serviceName/errors', () => {
-    expectBreadcrumbToMatchSnapshot('/services/opbeans-node/errors');
+    mountBreadcrumb('/services/opbeans-node/errors');
+    const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
+    expect(breadcrumbs).toEqual([
+      { text: 'APM', href: '#/?kuery=myKuery' },
+      { text: 'Services', href: '#/services?kuery=myKuery' },
+      { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
+      { text: 'Errors', href: undefined },
+    ]);
     expect(window.document.title).toMatchInlineSnapshot(
       `"Errors | opbeans-node | Services | APM"`
     );
   });
 
   it('/services/:serviceName/transactions', () => {
-    expectBreadcrumbToMatchSnapshot('/services/opbeans-node/transactions');
+    mountBreadcrumb('/services/opbeans-node/transactions');
+    const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
+    expect(breadcrumbs).toEqual([
+      { text: 'APM', href: '#/?kuery=myKuery' },
+      { text: 'Services', href: '#/services?kuery=myKuery' },
+      { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
+      { text: 'Transactions', href: undefined },
+    ]);
     expect(window.document.title).toMatchInlineSnapshot(
       `"Transactions | opbeans-node | Services | APM"`
     );
   });
 
   it('/services/:serviceName/transactions/view?transactionName=my-transaction-name', () => {
-    expectBreadcrumbToMatchSnapshot(
+    mountBreadcrumb(
       '/services/opbeans-node/transactions/view',
       'transactionName=my-transaction-name'
     );
+    const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
+    expect(breadcrumbs).toEqual([
+      { text: 'APM', href: '#/?kuery=myKuery' },
+      { text: 'Services', href: '#/services?kuery=myKuery' },
+      { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
+      {
+        text: 'Transactions',
+        href: '#/services/opbeans-node/transactions?kuery=myKuery',
+      },
+      { text: 'my-transaction-name', href: undefined },
+    ]);
     expect(window.document.title).toMatchInlineSnapshot(
       `"my-transaction-name | Transactions | opbeans-node | Services | APM"`
     );

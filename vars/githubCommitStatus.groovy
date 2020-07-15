@@ -35,7 +35,12 @@ def onFinish() {
 // state: error|failure|pending|success
 def create(sha, state, description, context = 'kibana-ci') {
   withGithubCredentials {
-    return githubApi.post("repos/elastic/kibana/statuses/${sha}", [ state: state, description: description, context: context, target_url: env.BUILD_URL ])
+    return githubApi.post("repos/elastic/kibana/statuses/${sha}", [
+      state: state,
+      description: description,
+      context: context,
+      target_url: env.BUILD_URL
+    ])
   }
 }
 

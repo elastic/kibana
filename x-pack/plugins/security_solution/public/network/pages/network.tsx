@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -23,6 +24,7 @@ import { KpiNetworkComponent } from '..//components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { KpiNetworkQuery } from '../../network/containers/kpi_network';
+import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useWithSource } from '../../common/containers/source';
 import { LastEventIndexKey } from '../../graphql/types';
@@ -31,6 +33,7 @@ import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { State, inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
 import { filterNetworkData } from './navigation/alerts_query_tab_body';
@@ -52,6 +55,7 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
     capabilitiesFetched,
   }) => {
     const { to, from, setQuery, isInitializing } = useGlobalTime();
+    const { globalFullScreen } = useFullScreen();
     const kibana = useKibana();
     const { tabName } = useParams();
 
@@ -68,7 +72,11 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
           return;
         }
         const [min, max] = x;
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        });
       },
       [setAbsoluteRangeDatePicker]
     );
@@ -91,56 +99,61 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
       <>
         {indicesExist ? (
           <StickyContainer>
+            <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
-            <WrapperPage>
-              <HeaderPage
-                border
-                subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
-                title={i18n.PAGE_TITLE}
-              />
+            <WrapperPage noPadding={globalFullScreen}>
+              <Display show={!globalFullScreen}>
+                <HeaderPage
+                  border
+                  subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                  title={i18n.PAGE_TITLE}
+                />
 
-              <EmbeddedMap
-                query={query}
-                filters={filters}
-                startDate={from}
-                endDate={to}
-                setQuery={setQuery}
-              />
+                <EmbeddedMap
+                  query={query}
+                  filters={filters}
+                  startDate={from}
+                  endDate={to}
+                  setQuery={setQuery}
+                />
 
-              <EuiSpacer />
+                <EuiSpacer />
 
-              <KpiNetworkQuery
-                endDate={to}
-                filterQuery={filterQuery}
-                skip={isInitializing}
-                sourceId={sourceId}
-                startDate={from}
-              >
-                {({ kpiNetwork, loading, id, inspect, refetch }) => (
-                  <KpiNetworkComponentManage
-                    id={id}
-                    inspect={inspect}
-                    setQuery={setQuery}
-                    refetch={refetch}
-                    data={kpiNetwork}
-                    loading={loading}
-                    from={from}
-                    to={to}
-                    narrowDateRange={narrowDateRange}
-                  />
-                )}
-              </KpiNetworkQuery>
+                <KpiNetworkQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  skip={isInitializing}
+                  sourceId={sourceId}
+                  startDate={from}
+                >
+                  {({ kpiNetwork, loading, id, inspect, refetch }) => (
+                    <KpiNetworkComponentManage
+                      id={id}
+                      inspect={inspect}
+                      setQuery={setQuery}
+                      refetch={refetch}
+                      data={kpiNetwork}
+                      loading={loading}
+                      from={from}
+                      to={to}
+                      narrowDateRange={narrowDateRange}
+                    />
+                  )}
+                </KpiNetworkQuery>
+              </Display>
 
               {capabilitiesFetched && !isInitializing ? (
                 <>
-                  <EuiSpacer />
+                  <Display show={!globalFullScreen}>
+                    <EuiSpacer />
 
-                  <SiemNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
+                    <SiemNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
 
-                  <EuiSpacer />
+                    <EuiSpacer />
+                  </Display>
 
                   <NetworkRoutes
                     filterQuery={tabsFilterQuery}
@@ -157,8 +170,6 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
               ) : (
                 <NetworkRoutesLoading />
               )}
-
-              <EuiSpacer />
             </WrapperPage>
           </StickyContainer>
         ) : (
