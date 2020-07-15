@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createHash } from 'crypto';
+import { PackageConfigConfigRecordEntry } from '../../../../../ingest_manager/common/types/models/package_config';
 import { validate } from '../../../../common/validate';
 import { InternalArtifactSchema, InternalManifestSchema } from '../../schemas/artifacts';
 import {
@@ -64,6 +66,25 @@ export class Manifest {
       }
     });
     return manifest;
+  }
+
+  public static pkgConfigsAreEqual(
+    leftPkgConfig: PackageConfigConfigRecordEntry,
+    rightPkgConfig: PackageConfigConfigRecordEntry
+  ): boolean {
+    const leftHash = createHash('sha256').update(JSON.stringify(leftPkgConfig)).digest('hex');
+    const rightHash = createHash('sha256').update(JSON.stringify(leftPkgConfig)).digest('hex');
+    return leftHash === rightHash;
+  }
+
+  public getSha256(): string {
+    let sha256 = createHash('sha256');
+    Object.keys(this.entries)
+      .sort()
+      .forEach((docId) => {
+        sha256 = sha256.update(docId);
+      });
+    return sha256.digest('hex');
   }
 
   public getSchemaVersion(): ManifestSchemaVersion {

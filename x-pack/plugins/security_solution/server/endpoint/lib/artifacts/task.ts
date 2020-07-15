@@ -92,33 +92,38 @@ export class ManifestTask {
     let errors: Error[] = [];
     try {
       // get snapshot based on exception-list-agnostic SOs
-      // with diffs from last dispatched manifest
+      // with diffs from last computed manifest
       const snapshot = await manifestManager.getSnapshot();
-      if (snapshot && snapshot.diffs.length > 0) {
-        // create new artifacts
+      if (snapshot) {
+        // create new artifacts, if necessary
         errors = await manifestManager.syncArtifacts(snapshot, 'add');
         if (errors.length) {
           reportErrors(this.logger, errors);
           throw new Error('Error writing new artifacts.');
         }
-        // write to ingest-manager package config
-        errors = await manifestManager.dispatch(snapshot.manifest);
-        if (errors.length) {
-          reportErrors(this.logger, errors);
-          throw new Error('Error dispatching manifest.');
-        }
+
         // commit latest manifest state to user-artifact-manifest SO
         const error = await manifestManager.commit(snapshot.manifest);
         if (error) {
           reportErrors(this.logger, [error]);
           throw new Error('Error committing manifest.');
         }
+
+        // write to ingest-manager package configs, if necessary
+        errors = await manifestManager.dispatch(snapshot.manifest);
+        if (errors.length) {
+          reportErrors(this.logger, errors);
+          throw new Error('Error dispatching manifest.');
+        }
+
         // clean up old artifacts
         errors = await manifestManager.syncArtifacts(snapshot, 'delete');
         if (errors.length) {
           reportErrors(this.logger, errors);
           throw new Error('Error cleaning up outdated artifacts.');
         }
+      } else {
+        throw new Error('Unable to create manifest snapshot.');
       }
     } catch (err) {
       this.logger.error(err);

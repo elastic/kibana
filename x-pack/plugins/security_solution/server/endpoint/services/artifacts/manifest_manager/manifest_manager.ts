@@ -157,14 +157,14 @@ export class ManifestManager {
   }
 
   /**
-   * Returns the last dispatched manifest based on the current state of the
+   * Returns the last computed manifest based on the state of the
    * user-artifact-manifest SO.
    *
    * @param schemaVersion The schema version of the manifest.
    * @returns {Promise<Manifest | null>} The last dispatched manifest, or null if does not exist.
    * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
    */
-  public async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
+  public async getLastComputedManifest(schemaVersion: string): Promise<Manifest | null> {
     try {
       const manifestClient = this.getManifestClient(schemaVersion);
       const manifestSo = await manifestClient.getManifest();
@@ -204,7 +204,7 @@ export class ManifestManager {
       let oldManifest: Manifest | null;
 
       // Get the last-dispatched manifest
-      oldManifest = await this.getLastDispatchedManifest(ManifestConstants.SCHEMA_VERSION);
+      oldManifest = await this.getLastComputedManifest(ManifestConstants.SCHEMA_VERSION);
 
       if (oldManifest === null && opts !== undefined && opts.initialize) {
         oldManifest = new Manifest(
@@ -293,16 +293,23 @@ export class ManifestManager {
           const artifactManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
             value: {},
           };
-          artifactManifest.value = manifest.toEndpointFormat();
-          newPackageConfig.inputs[0].config.artifact_manifest = artifactManifest;
 
-          try {
-            await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
-            this.logger.debug(
-              `Updated package config ${id} with manifest version ${manifest.getVersion()}`
-            );
-          } catch (err) {
-            errors.push(err);
+          const newArtifactManifest = { ...artifactManifest };
+          newArtifactManifest.value = manifest.toEndpointFormat();
+
+          if (!Manifest.pkgConfigsAreEqual(artifactManifest, newArtifactManifest)) {
+            newPackageConfig.inputs[0].config.artifact_manifest = newArtifactManifest;
+
+            try {
+              await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
+              this.logger.debug(
+                `Updated package config ${id} with manifest version ${manifest.getVersion()}`
+              );
+            } catch (err) {
+              errors.push(err);
+            }
+          } else {
+            this.logger.debug(`No change in package config: ${id}`);
           }
         } else {
           errors.push(new Error(`Package config ${id} has no config.`));
