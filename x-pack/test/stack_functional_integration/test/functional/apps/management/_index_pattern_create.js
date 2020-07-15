@@ -14,7 +14,7 @@ export default ({ getService, getPageObjects }) => {
     const browser = getService('browser');
 
     before(async () => {
-      await PageObjects.common.navigateToApp('management', { insertTimestamp: false });
+      await PageObjects.common.navigateToApp('settings', { insertTimestamp: false });
       await browser.setWindowSize(1200, 800);
     });
 
