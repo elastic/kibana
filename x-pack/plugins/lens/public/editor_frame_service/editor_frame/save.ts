@@ -46,7 +46,7 @@ export function getSavedObjectFormat({
   });
 
   return {
-    id: state.persistedId,
+    savedObjectId: state.persistedId,
     title: state.title,
     description: state.description,
     type: 'lens',

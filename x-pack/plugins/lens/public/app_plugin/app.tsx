@@ -227,9 +227,8 @@ export function App({
 
   useEffect(() => {
     if (
-      !embeddableEditorIncomingState?.valueInput &&
       savedObjectId &&
-      (!state.persistedDoc || state.persistedDoc.id !== savedObjectId)
+      (!state.persistedDoc || state.persistedDoc.savedObjectId !== savedObjectId)
     ) {
       setState((s) => ({ ...s, isLoading: true }));
       docStorage
@@ -246,13 +245,9 @@ export function App({
 
           redirectTo();
         });
-    } else if (
-      !!embeddableEditorIncomingState?.valueInput &&
-      embeddableEditorIncomingState?.valueInput !== 'createByValue'
-    ) {
-      const doc = {
+    } else if (!!embeddableEditorIncomingState?.valueInput) {
+      const doc: Document = {
         ...(embeddableEditorIncomingState?.valueInput as LensByValueInput).attributes,
-        id: embeddableEditorIncomingState?.valueInput.id,
       };
       updateDoc(doc);
       redirectTo();
@@ -298,8 +293,7 @@ export function App({
       returnToOrigin: boolean;
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
-    },
-    saveToLibrary: boolean = false
+    }
   ) => {
     if (!lastKnownDoc) {
       return;
@@ -319,17 +313,17 @@ export function App({
         }
       : lastKnownDoc;
 
-    const doc = {
+    const doc: Document = {
       ...lastDocWithoutPinned,
       description: saveProps.newDescription,
-      id: saveProps.newCopyOnSave ? undefined : lastKnownDoc.id,
+      savedObjectId: saveProps.newCopyOnSave ? undefined : lastKnownDoc.savedObjectId,
       title: saveProps.newTitle,
     };
 
-    const newlyCreated = saveProps.newCopyOnSave || !lastKnownDoc?.id || saveToLibrary;
+    const newlyCreated = saveProps.newCopyOnSave || !lastKnownDoc?.savedObjectId;
 
-    if (!!embeddableEditorIncomingState?.valueInput && !saveToLibrary) {
-      redirectTo(doc.id, doc, saveProps.returnToOrigin, newlyCreated);
+    if (!!embeddableEditorIncomingState?.valueInput && !saveProps.newCopyOnSave) {
+      redirectTo(doc.savedObjectId, doc, saveProps.returnToOrigin, newlyCreated);
     } else {
       await checkForDuplicateTitle(
         {
@@ -349,14 +343,11 @@ export function App({
           overlays: core.overlays,
         }
       );
-      if (saveToLibrary && embeddableEditorIncomingState?.valueInput) {
-        delete doc.id;
-      }
       docStorage
         .save(doc)
         .then(({ id }) => {
           // Prevents unnecessary network request and disables save button
-          const newDoc = { ...doc, id };
+          const newDoc: Document = { ...doc, savedObjectId: id };
           setState((s) => ({
             ...s,
             isSaveModalVisible: false,
@@ -405,7 +396,8 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...((!!embeddableEditorIncomingState?.originatingApp && lastKnownDoc?.id) ||
+                ...((!!embeddableEditorIncomingState?.originatingApp &&
+                  lastKnownDoc?.savedObjectId) ||
                 embeddableEditorIncomingState?.valueInput
                   ? [
                       {
@@ -431,7 +423,7 @@ export function App({
                   : []),
                 {
                   label:
-                    lastKnownDoc?.id ||
+                    lastKnownDoc?.savedObjectId ||
                     (embeddableEditorIncomingState?.valueInput &&
                       !!embeddableEditorIncomingState?.originatingApp)
                       ? i18n.translate('xpack.lens.app.saveAs', {
@@ -567,7 +559,9 @@ export function App({
             onSave={(props) => runSave(props, true)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
-              id: embeddableEditorIncomingState?.valueInput ? undefined : lastKnownDoc.id,
+              id: embeddableEditorIncomingState?.valueInput
+                ? undefined
+                : lastKnownDoc.savedObjectId,
               title: lastKnownDoc.title || '',
               description: lastKnownDoc.description || '',
             }}

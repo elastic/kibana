@@ -29,12 +29,13 @@ import {
   EmbeddableOutput,
   IContainer,
   SavedObjectEmbeddableInput,
+  AttributeService,
 } from '../../../../../../src/plugins/embeddable/public';
 import { DOC_TYPE, Document } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { isLensBrushEvent, isLensFilterEvent } from '../../types';
-import { AttributeService } from './attribute_service';
+
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
 import { getEditPath } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
@@ -133,7 +134,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     this.savedVis = {
       ...attributes,
       type: this.type,
-      id: input.id,
+      savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
     this.initializeOutput();
     if (this.domNode) {

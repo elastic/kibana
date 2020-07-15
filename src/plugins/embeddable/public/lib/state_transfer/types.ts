@@ -21,12 +21,14 @@ import { Optional } from '@kbn/utility-types';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 
 /**
- * Represents a state package that contains the last active app id.
+ * A state package that contains information an editor will need to create or edit an embeddable then redirect back.
  * @public
  */
 export interface EmbeddableEditorState {
   originatingApp: string;
-  valueInput?: EmbeddableInput | 'createByValue';
+  embeddableId?: string;
+  valueInput?: EmbeddableInput;
+  byValueMode?: boolean;
 }
 
 export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {
@@ -34,13 +36,13 @@ export function isEmbeddableEditorState(state: unknown): state is EmbeddableEdit
 }
 
 /**
- * Represents a state package that contains all fields necessary to create an embeddable by reference or by value in a container.
+ * A state package that contains all fields necessary to create or update an embeddable by reference or by value in a container.
  * @public
  */
 export interface EmbeddablePackageState {
-  id?: string;
   type: string;
   input: Optional<EmbeddableInput, 'id'> | Optional<SavedObjectEmbeddableInput, 'id'>;
+  embeddableId?: string;
 }
 
 export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {

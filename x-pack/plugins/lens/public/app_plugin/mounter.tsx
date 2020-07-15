@@ -39,9 +39,7 @@ export async function mountApp(
   );
 
   const stateTransfer = embeddable?.getStateTransfer(params.history);
-  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState({
-    keysToRemoveAfterFetch: ['originatingApp'],
-  });
+  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState();
 
   const instance = await createEditorFrame();
 
@@ -54,7 +52,7 @@ export async function mountApp(
   const redirectTo = (
     routeProps: RouteComponentProps<{ id?: string }>,
     savedObjectId?: string,
-    documentByValue?: Document,
+    document?: Document,
     returnToOrigin?: boolean,
     newlyCreated?: boolean
   ) => {
@@ -68,18 +66,10 @@ export async function mountApp(
         stateTransfer.navigateToWithEmbeddablePackage(
           embeddableEditorIncomingState?.originatingApp,
           {
-            state: { type: LENS_EMBEDDABLE_TYPE, input: { savedObjectId } },
-          }
-        );
-      } else if (documentByValue) {
-        const { type, id, ...rest } = documentByValue;
-        stateTransfer.navigateToWithEmbeddablePackage(
-          embeddableEditorIncomingState?.originatingApp,
-          {
             state: {
-              id,
+              embeddableId: embeddableEditorIncomingState.embeddableId,
               type: LENS_EMBEDDABLE_TYPE,
-              input: { attributes: rest },
+              input: { savedObjectId },
             },
           }
         );
@@ -121,6 +111,7 @@ export async function mountApp(
       <HashRouter>
         <Switch>
           <Route exact path="/edit/:id" render={renderEditor} />
+          <Route exact path="/by_value" render={renderEditor} />
           <Route exact path="/" render={renderEditor} />
           <Route path="/" component={NotFound} />
         </Switch>

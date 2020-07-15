@@ -379,7 +379,7 @@ describe('editor_frame state management', () => {
         {
           type: 'VISUALIZATION_LOADED',
           doc: {
-            id: 'b',
+            savedObjectId: 'b',
             expression: '',
             state: {
               datasourceMetaData: { filterableIndexPatterns: [] },

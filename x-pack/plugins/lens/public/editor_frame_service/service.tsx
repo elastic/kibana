@@ -36,7 +36,7 @@ export interface EditorFrameSetupPlugins {
 
 export interface EditorFrameStartPlugins {
   data: DataPublicPluginStart;
-  embeddable?: EmbeddableStart;
+  embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   uiActions?: UiActionsStart;
 }
@@ -76,6 +76,7 @@ export class EditorFrameService {
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
+        embeddable: deps.embeddable,
       };
     };
 

@@ -9,7 +9,7 @@ import { SavedObjectAttributes } from 'kibana/server';
 import { Query, Filter } from '../../../../../src/plugins/data/public';
 
 export interface Document {
-  id?: string;
+  savedObjectId?: string;
   type?: string;
   visualizationType: string | null;
   title: string;
@@ -47,7 +47,7 @@ export interface DocumentSaver {
 }
 
 export interface DocumentLoader {
-  load: (id: string) => Promise<Document>;
+  load: (savedObjectId: string) => Promise<Document>;
 }
 
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
@@ -60,19 +60,19 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   }
 
   async save(vis: Document) {
-    const { id, type, ...rest } = vis;
+    const { savedObjectId, type, ...rest } = vis;
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
     const attributes = (rest as unknown) as SavedObjectAttributes;
-    const result = await (id
-      ? this.client.update(DOC_TYPE, id, attributes)
+    const result = await (savedObjectId
+      ? this.client.update(DOC_TYPE, savedObjectId, attributes)
       : this.client.create(DOC_TYPE, attributes));
 
     return { ...vis, id: result.id };
   }
 
-  async load(id: string): Promise<Document> {
-    const { type, attributes, error } = await this.client.get(DOC_TYPE, id);
+  async load(savedObjectId: string): Promise<Document> {
+    const { type, attributes, error } = await this.client.get(DOC_TYPE, savedObjectId);
 
     if (error) {
       throw error;
@@ -80,7 +80,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
 
     return {
       ...attributes,
-      id,
+      savedObjectId,
       type,
     } as Document;
   }

@@ -463,7 +463,7 @@ describe('Lens App', () => {
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: { id: initialDocId, ...lastKnownDoc } as Document,
+            doc: { savedObjectId: initialDocId, ...lastKnownDoc } as Document,
           })
         );
 

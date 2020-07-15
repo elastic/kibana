@@ -177,7 +177,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         path: params,
         state: {
           originatingApp: this.props.originatingApp,
-          valueInput: this.props.createByValue ? 'createByValue' : undefined,
+          byValueMode: this.props.createByValue,
         },
       });
     } else {

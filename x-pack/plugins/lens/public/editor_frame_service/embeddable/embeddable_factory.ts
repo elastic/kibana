@@ -15,6 +15,8 @@ import { ReactExpressionRendererType } from '../../../../../../src/plugins/expre
 import {
   EmbeddableFactoryDefinition,
   IContainer,
+  AttributeService,
+  EmbeddableStart,
 } from '../../../../../../src/plugins/embeddable/public';
 import {
   Embeddable,
@@ -25,7 +27,6 @@ import {
 } from './embeddable';
 import { DOC_TYPE } from '../../persistence';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { AttributeService } from './attribute_service';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -34,6 +35,7 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
+  embeddable: EmbeddableStart;
   uiActions?: UiActionsStart;
 }
 
@@ -46,12 +48,6 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     type: DOC_TYPE,
     getIconForSavedObject: () => 'lensApp',
   };
-
-  private attributeService?: AttributeService<
-    LensSavedObjectAttributes,
-    LensByValueInput,
-    LensByReferenceInput
-  >;
 
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
@@ -85,10 +81,15 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       uiActions,
       coreHttp,
       indexPatternService,
+      embeddable,
     } = await this.getStartServices();
     return new Embeddable(
       {
-        attributeService: await this.getAttributeService(),
+        attributeService: embeddable.getAttributeService<
+          LensSavedObjectAttributes,
+          LensByValueInput,
+          LensByReferenceInput
+        >(this.type),
         indexPatternService,
         timefilter,
         expressionRenderer,
@@ -99,17 +100,5 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       input,
       parent
     );
-  }
-
-  private async getAttributeService() {
-    const savedObjectsService = (await this.getStartServices()).savedObjectsClient;
-    if (!this.attributeService) {
-      this.attributeService = new AttributeService<
-        LensSavedObjectAttributes,
-        LensByValueInput,
-        LensByReferenceInput
-      >(this.type, savedObjectsService);
-    }
-    return this.attributeService;
   }
 }
