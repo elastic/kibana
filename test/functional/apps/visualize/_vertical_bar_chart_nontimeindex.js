@@ -45,6 +45,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.selectField('@timestamp');
       await PageObjects.visEditor.setInterval('3h', { type: 'custom' });
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+      await PageObjects.visEditor.clickGo();
     };
 
     before(initBarChart);
