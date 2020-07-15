@@ -17,6 +17,11 @@
  * under the License.
  */
 
+import Path from 'path';
+
+import normalizePath from 'normalize-path';
+
+import { REPO_ROOT } from '../repo_root';
 import { Plugins } from './discover_plugins';
 
 function* printPlugins(plugins: Plugins) {
@@ -34,16 +39,22 @@ function* printPlugins(plugins: Plugins) {
 }
 
 export function generatePluginList(ossPlugins: Plugins, xpackPlugins: Plugins) {
-  return `
+  return `////
+
+NOTE:
+  This is an automatically generated file. Please do not edit directly. Instead, run the
+  following from within the kibana repository:
+
+    node scripts/build_plugin_list_docs
+
+  You can update the template within ${normalizePath(
+    Path.relative(REPO_ROOT, Path.resolve(__dirname, __filename))
+  )}
+
+////
+
 [[code-exploration]]
 === Exploring Kibana code
-
-NOTE: This is an automatically generated file. Please do not edit directly. Instead, run:
-[source,bash]
-----
-node scripts/build_plugin_list_docs
-----
-from the Kibana directory. You can update this text inside {kib-repo}blob/{branch}/packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts[{kib-repo}blob/{branch}/packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts].
 
 The goals of our folder heirarchy are:
 
