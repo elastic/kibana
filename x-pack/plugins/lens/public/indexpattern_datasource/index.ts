@@ -35,6 +35,7 @@ export class IndexPatternDatasource {
     { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
   ) {
     expressions.registerFunction(renameColumns);
+    // TODO register client side calculation logic
 
     editorFrame.registerDatasource(
       core.getStartServices().then(([coreStart, { data }]) =>

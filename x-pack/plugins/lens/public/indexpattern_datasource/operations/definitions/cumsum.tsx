@@ -10,21 +10,18 @@ import { FormattedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
 
 const mathLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
-  defaultMessage: 'Math',
+  defaultMessage: 'Cumulative sum',
 });
 
 export type MathIndexPatternColumn = FormattedIndexPatternColumn & {
-  operationType: 'math';
-  params: {
-    tinyMathExpression: string;
-  };
+  operationType: 'cumsum';
 };
 
-export const mathOperation: OperationDefinition<MathIndexPatternColumn> = {
-  type: 'math',
+export const cumsumOperation: OperationDefinition<MathIndexPatternColumn> = {
+  type: 'cumsum',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
-    defaultMessage: 'Math',
+    defaultMessage: 'Cumulative sum',
   }),
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
@@ -47,7 +44,7 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn> = {
       id: columnId,
       label: mathLabel,
       dataType: 'number',
-      operationType: 'math',
+      operationType: 'cumsum',
       suggestedPriority,
       isBucketed: false,
       scale: 'ratio',
@@ -55,12 +52,12 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn> = {
       params:
         previousColumn && previousColumn.dataType === 'number'
           ? previousColumn.params
-          : { tinyMathExpression: '5', format: { id: 'number' } },
+          : { format: { id: 'number' } },
     };
   },
   clientSideExecution(column, table) {
-    // TODO for each row,  execute column.params.tinyMathExpression, pass in all children columns as params A-Z
-    table.columns.push({ id: column.id, name: 'Math' });
+    // TODO for each row, sum up the previous rows.
+    table.columns.push({ id: column.id, name: 'Cumulative sum' });
     table.rows = table.rows.map((row) => ({ ...row, [column.id]: 0 }));
     return table;
   },
@@ -70,6 +67,6 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn> = {
   showInBuilder: true,
   nonLeaveNode: true,
   canAcceptChild(c, otherC) {
-    return !otherC.isBucketed;
+    return !otherC.isBucketed && (!c.children || c.children.length === 0);
   },
 };

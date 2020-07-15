@@ -13,6 +13,7 @@ import { minOperation, averageOperation, sumOperation, maxOperation } from './me
 import { dateHistogramOperation } from './date_histogram';
 import { countOperation } from './count';
 import { mathOperation } from './math';
+import { cumsumOperation } from './cumsum';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
@@ -32,6 +33,7 @@ const internalOperationDefinitions = [
   sumOperation,
   countOperation,
   mathOperation,
+  cumsumOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -91,6 +93,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   clientSideExecution?: (column: C, table: KibanaDatatable) => KibanaDatatable;
   showInBuilder?: boolean;
   nonLeaveNode?: boolean;
+  canAcceptChild?: (column: C, otherColumn: IndexPatternColumn) => boolean;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
