@@ -19,14 +19,28 @@
 
 import { RequestHandlerContext } from '../../../../core/server';
 import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
-import { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from './es_search';
+import { SearchUsage } from './collectors/usage';
+import { IEsSearchRequest, IEsSearchResponse } from './es_search';
+
+export interface ISearchOptions {
+  /**
+   * An `AbortSignal` that allows the caller of `search` to abort a search request.
+   */
+  signal?: AbortSignal;
+  strategy?: string;
+}
 
 export interface ISearchSetup {
   /**
    * Extension point exposed for other plugins to register their own search
    * strategies.
    */
-  registerSearchStrategy: TRegisterSearchStrategy;
+  registerSearchStrategy: (name: string, strategy: ISearchStrategy) => void;
+
+  /**
+   * Used internally for telemetry
+   */
+  usage: SearchUsage;
 }
 
 export interface ISearchStart {
@@ -34,78 +48,23 @@ export interface ISearchStart {
    * Get other registered search strategies. For example, if a new strategy needs to use the
    * already-registered ES search strategy, it can use this function to accomplish that.
    */
-  getSearchStrategy: TGetSearchStrategy;
+  getSearchStrategy: (name: string) => ISearchStrategy;
+  search: (
+    context: RequestHandlerContext,
+    request: IKibanaSearchRequest,
+    options: ISearchOptions
+  ) => Promise<IKibanaSearchResponse>;
 }
-
-export interface ISearchOptions {
-  /**
-   * An `AbortSignal` that allows the caller of `search` to abort a search request.
-   */
-  signal?: AbortSignal;
-}
-
-/**
- * Contains all known strategy type identifiers that will be used to map to
- * request and response shapes. Plugins that wish to add their own custom search
- * strategies should extend this type via:
- *
- * const MY_STRATEGY = 'MY_STRATEGY';
- *
- * declare module 'src/plugins/search/server' {
- *  export interface IRequestTypesMap {
- *    [MY_STRATEGY]: IMySearchRequest;
- *  }
- *
- *  export interface IResponseTypesMap {
- *   [MY_STRATEGY]: IMySearchResponse
- *  }
- * }
- */
-export type TStrategyTypes = typeof ES_SEARCH_STRATEGY | string;
-
-/**
- * The map of search strategy IDs to the corresponding request type definitions.
- */
-export interface IRequestTypesMap {
-  [ES_SEARCH_STRATEGY]: IEsSearchRequest;
-  [key: string]: IKibanaSearchRequest;
-}
-
-/**
- * The map of search strategy IDs to the corresponding response type definitions.
- */
-export interface IResponseTypesMap {
-  [ES_SEARCH_STRATEGY]: IEsSearchResponse;
-  [key: string]: IKibanaSearchResponse;
-}
-
-export type ISearch<T extends TStrategyTypes> = (
-  context: RequestHandlerContext,
-  request: IRequestTypesMap[T],
-  options?: ISearchOptions
-) => Promise<IResponseTypesMap[T]>;
-
-export type ISearchCancel<T extends TStrategyTypes> = (
-  context: RequestHandlerContext,
-  id: string
-) => Promise<void>;
 
 /**
  * Search strategy interface contains a search method that takes in a request and returns a promise
  * that resolves to a response.
  */
-export interface ISearchStrategy<T extends TStrategyTypes> {
-  search: ISearch<T>;
-  cancel?: ISearchCancel<T>;
+export interface ISearchStrategy {
+  search: (
+    context: RequestHandlerContext,
+    request: IEsSearchRequest,
+    options?: ISearchOptions
+  ) => Promise<IEsSearchResponse>;
+  cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
 }
-
-export type TRegisterSearchStrategy = <T extends TStrategyTypes>(
-  name: T,
-  searchStrategy: ISearchStrategy<T>
-) => void;
-
-export type TGetSearchStrategy = <T extends TStrategyTypes>(name: T) => ISearchStrategy<T>;
-
-export type TSearchStrategiesMap = {
-  [K in TStrategyTypes]?: ISearchStrategy<any>;
-};

@@ -92,6 +92,19 @@ export const validateTimelineTitle = (rule: ImportRulesSchema): string[] => {
   return [];
 };
 
+export const validateThreshold = (rule: ImportRulesSchema): string[] => {
+  if (rule.type === 'threshold') {
+    if (!rule.threshold) {
+      return ['when "type" is "threshold", "threshold" is required'];
+    } else if (rule.threshold.value <= 0) {
+      return ['"threshold.value" has to be bigger than 0'];
+    } else {
+      return [];
+    }
+  }
+  return [];
+};
+
 export const importRuleValidateTypeDependents = (schema: ImportRulesSchema): string[] => {
   return [
     ...validateAnomalyThreshold(schema),
@@ -101,5 +114,6 @@ export const importRuleValidateTypeDependents = (schema: ImportRulesSchema): str
     ...validateMachineLearningJobId(schema),
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
+    ...validateThreshold(schema),
   ];
 };

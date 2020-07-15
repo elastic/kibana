@@ -18,8 +18,7 @@ import {
   CATEGORICAL_COLOR_PALETTES,
 } from '../color_palettes';
 import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
-// @ts-ignore
-import { getUiSettings } from '../../../kibana_services';
+import { getIsDarkMode } from '../../../kibana_services';
 
 export const MIN_SIZE = 1;
 export const MAX_SIZE = 64;
@@ -67,7 +66,7 @@ export function getDefaultStaticProperties(
   const nextFillColor = DEFAULT_FILL_COLORS[nextColorIndex];
   const nextLineColor = DEFAULT_LINE_COLORS[nextColorIndex];
 
-  const isDarkMode = getUiSettings().get('theme:darkMode', false);
+  const isDarkMode = getIsDarkMode();
 
   return {
     [VECTOR_STYLES.ICON]: {

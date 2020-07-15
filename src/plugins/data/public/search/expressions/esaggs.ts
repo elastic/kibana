@@ -19,12 +19,8 @@
 
 import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContext,
-  KibanaDatatable,
-  ExpressionFunctionDefinition,
-  KibanaDatatableColumn,
-} from 'src/plugins/expressions/public';
+
+import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
@@ -34,6 +30,7 @@ import { ISearchSource } from '../search_source';
 import { tabifyAggResponse } from '../tabify';
 import {
   calculateBounds,
+  EsaggsExpressionFunctionDefinition,
   Filter,
   getTime,
   IIndexPattern,
@@ -70,18 +67,6 @@ export interface RequestHandlerParams {
 }
 
 const name = 'esaggs';
-
-type Input = KibanaContext | null;
-type Output = Promise<KibanaDatatable>;
-
-interface Arguments {
-  index: string;
-  metricsAtAllLevels: boolean;
-  partialRows: boolean;
-  includeFormatHints: boolean;
-  aggConfigs: string;
-  timeFields?: string[];
-}
 
 const handleCourierRequest = async ({
   searchSource,
@@ -244,7 +229,7 @@ const handleCourierRequest = async ({
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
+export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
   name,
   type: 'kibana_datatable',
   inputTypes: ['kibana_context', 'null'],
