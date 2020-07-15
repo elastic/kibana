@@ -12,7 +12,6 @@ import {
   AppMountParameters,
 } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
-import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
@@ -85,16 +84,10 @@ export class UptimePlugin
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
-        const { getKibanaFrameworkAdapter } = await import(
-          '../lib/adapters/framework/new_platform_adapter'
-        );
 
-        const { element } = params;
+        const { renderApp } = await import('./render_app');
 
-        const libs: UMFrontendLibs = {
-          framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins),
-        };
-        return libs.framework.render(element);
+        return renderApp(coreStart, plugins, corePlugins, params);
       },
     });
   }

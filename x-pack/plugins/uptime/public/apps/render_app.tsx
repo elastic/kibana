@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
-import { getIntegratedAppAvailability } from './capabilities_adapter';
+import { AppMountParameters, CoreStart } from 'kibana/public';
+import { getIntegratedAppAvailability } from '../lib/adapters/framework/capabilities_adapter';
 import {
-  INTEGRATED_SOLUTIONS,
-  PLUGIN,
   DEFAULT_DARK_MODE,
   DEFAULT_TIMEPICKER_QUICK_RANGES,
-} from '../../../../common/constants';
-import { UMFrameworkAdapter } from '../../lib';
-import { ClientPluginsStart, ClientPluginsSetup } from '../../../apps/plugin';
+  INTEGRATED_SOLUTIONS,
+  PLUGIN,
+} from '../../common/constants';
+import { UptimeApp, UptimeAppProps } from '../uptime_app';
+import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
 
-export const getKibanaFrameworkAdapter = (
+export function renderApp(
   core: CoreStart,
   plugins: ClientPluginsSetup,
-  startPlugins: ClientPluginsStart
-): UMFrameworkAdapter => {
+  startPlugins: ClientPluginsStart,
+  { element }: AppMountParameters
+) {
   const {
     application: { capabilities },
     chrome: { setBadge, setHelpExtension },
@@ -40,17 +40,17 @@ export const getKibanaFrameworkAdapter = (
   const canSave = (capabilities.uptime.save ?? false) as boolean;
 
   const props: UptimeAppProps = {
-    basePath: basePath.get(),
+    plugins,
     canSave,
     core,
+    i18n,
+    startPlugins,
+    basePath: basePath.get(),
     darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
-    i18n,
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
-    plugins,
-    startPlugins,
     renderGlobalHelpControls: () =>
       setHelpExtension({
         appName: i18nFormatter.translate('xpack.uptime.header.appName', {
@@ -72,15 +72,9 @@ export const getKibanaFrameworkAdapter = (
     setBreadcrumbs: core.chrome.setBreadcrumbs,
   };
 
-  return {
-    render: async (element: any) => {
-      if (element) {
-        ReactDOM.render(<UptimeApp {...props} />, element);
-      }
+  ReactDOM.render(<UptimeApp {...props} />, element);
 
-      return () => {
-        ReactDOM.unmountComponentAtNode(element);
-      };
-    },
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
   };
-};
+}
