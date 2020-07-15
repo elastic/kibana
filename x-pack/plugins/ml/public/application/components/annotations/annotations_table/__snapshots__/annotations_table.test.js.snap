@@ -11,7 +11,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "name": "Annotation",
           "scope": "row",
           "sortable": true,
-          "width": "50%",
+          "width": "40%",
         },
         Object {
           "dataType": "date",
@@ -40,6 +40,27 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "sortable": true,
         },
         Object {
+          "field": "event",
+          "name": "Event",
+          "sortable": true,
+          "width": "10%",
+        },
+        Object {
+          "field": "partition_field_value",
+          "name": "Partition",
+          "sortable": true,
+        },
+        Object {
+          "field": "over_field_value",
+          "name": "Over",
+          "sortable": true,
+        },
+        Object {
+          "field": "by_field_value",
+          "name": "By",
+          "sortable": true,
+        },
+        Object {
           "actions": Array [
             Object {
               "render": [Function],
@@ -51,6 +72,12 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
           "align": "right",
           "name": "Actions",
           "width": "60px",
+        },
+        Object {
+          "dataType": "boolean",
+          "field": "current_series",
+          "name": "current_series",
+          "width": "0px",
         },
       ]
     }
@@ -82,6 +109,24 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
     }
     responsive={true}
     rowProps={[Function]}
+    search={
+      Object {
+        "box": Object {
+          "incremental": true,
+          "schema": true,
+        },
+        "defaultQuery": "event:(user or delayed_data)",
+        "filters": Array [
+          Object {
+            "field": "event",
+            "multiSelect": "or",
+            "name": "Event",
+            "options": Array [],
+            "type": "field_value_selection",
+          },
+        ],
+      }
+    }
     sorting={
       Object {
         "sort": Object {
