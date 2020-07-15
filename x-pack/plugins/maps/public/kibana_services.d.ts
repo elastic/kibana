@@ -24,6 +24,7 @@ export function getVisualizations(): any;
 export function getDocLinks(): any;
 export function getCoreChrome(): any;
 export function getUiSettings(): any;
+export function getIsDarkMode(): boolean;
 export function getCoreOverlays(): any;
 export function getData(): any;
 export function getUiActions(): any;
@@ -46,7 +47,6 @@ export function getEnabled(): boolean;
 export function getShowMapVisualizationTypes(): boolean;
 export function getShowMapsInspectorAdapter(): boolean;
 export function getPreserveDrawingBuffer(): boolean;
-export function getEnableVectorTiles(): boolean;
 export function getProxyElasticMapsServiceInMaps(): boolean;
 export function getIsGoldPlus(): boolean;
 

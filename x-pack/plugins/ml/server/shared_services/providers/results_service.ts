@@ -25,7 +25,14 @@ export function getResultsServiceProvider({
 }: SharedServicesChecks): ResultsServiceProvider {
   return {
     resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient, request: KibanaRequest) {
-      const hasMlCapabilities = getHasMlCapabilities(request);
+      //  Uptime is using this service in anomaly alert, kibana alerting doesn't provide request object
+      // So we are adding a dummy request for now
+      // TODO: Remove this once kibana alerting provides request object
+      const hasMlCapabilities =
+        request.params !== 'DummyKibanaRequest'
+          ? getHasMlCapabilities(request)
+          : (_caps: string[]) => Promise.resolve();
+
       const { getAnomaliesTableData } = resultsServiceProvider(mlClusterClient);
       return {
         async getAnomaliesTableData(...args) {

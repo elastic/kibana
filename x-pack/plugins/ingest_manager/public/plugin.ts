@@ -39,7 +39,7 @@ export interface IngestManagerSetup {}
  */
 export interface IngestManagerStart {
   registerPackageConfigComponent: typeof registerPackageConfigComponent;
-  success: Promise<true>;
+  isInitialized: () => Promise<true>;
 }
 
 export interface IngestManagerSetupDeps {
@@ -100,27 +100,32 @@ export class IngestManagerPlugin
   }
 
   public async start(core: CoreStart): Promise<IngestManagerStart> {
-    let successPromise: IngestManagerStart['success'];
-    try {
-      const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
-        appRoutesService.getCheckPermissionsPath()
-      );
-
-      if (permissionsResponse?.success) {
-        successPromise = core.http
-          .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
-          .then(({ isInitialized }) =>
-            isInitialized ? Promise.resolve(true) : Promise.reject(new Error('Unknown setup error'))
-          );
-      } else {
-        throw new Error(permissionsResponse?.error || 'Unknown permissions error');
-      }
-    } catch (error) {
-      successPromise = Promise.reject(error);
-    }
+    let successPromise: ReturnType<IngestManagerStart['isInitialized']>;
 
     return {
-      success: successPromise,
+      isInitialized: () => {
+        if (!successPromise) {
+          successPromise = Promise.resolve().then(async () => {
+            const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
+              appRoutesService.getCheckPermissionsPath()
+            );
+
+            if (permissionsResponse?.success) {
+              return core.http
+                .post<PostIngestSetupResponse>(setupRouteService.getSetupPath())
+                .then(({ isInitialized }) =>
+                  isInitialized
+                    ? Promise.resolve(true)
+                    : Promise.reject(new Error('Unknown setup error'))
+                );
+            } else {
+              throw new Error(permissionsResponse?.error || 'Unknown permissions error');
+            }
+          });
+        }
+
+        return successPromise;
+      },
       registerPackageConfigComponent,
     };
   }

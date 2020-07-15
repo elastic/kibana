@@ -26,9 +26,9 @@ export interface TimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
   interval: string;
   /** The end of the timerange */
-  to: number;
+  to: string;
   /** The beginning of the timerange */
-  from: number;
+  from: string;
 }
 
 export interface PaginationInputPaginated {
@@ -40,6 +40,12 @@ export interface PaginationInputPaginated {
   fakePossibleCount: number;
   /** The querySize parameter is the number of items to be returned */
   querySize: number;
+}
+
+export interface DocValueFieldsInput {
+  field: string;
+
+  format: string;
 }
 
 export interface PaginationInput {
@@ -98,9 +104,9 @@ export interface TlsSortField {
 }
 
 export interface PageInfoTimeline {
-  pageIndex: number;
+  pageIndex?: Maybe<number>;
 
-  pageSize: number;
+  pageSize?: Maybe<number>;
 }
 
 export interface SortTimeline {
@@ -262,9 +268,9 @@ export interface KueryFilterQueryInput {
 }
 
 export interface DateRangePickerInput {
-  start?: Maybe<number>;
+  start?: Maybe<ToAny>;
 
-  end?: Maybe<number>;
+  end?: Maybe<ToAny>;
 }
 
 export interface SortTimelineInput {
@@ -301,6 +307,12 @@ export enum LastEventIndexKey {
 export enum HostsFields {
   hostName = 'hostName',
   lastSeen = 'lastSeen',
+}
+
+export enum HostPolicyResponseActionStatus {
+  success = 'success',
+  failure = 'failure',
+  warning = 'warning',
 }
 
 export enum UsersFields {
@@ -1072,6 +1084,8 @@ export interface RuleField {
 
   note?: Maybe<string[] | string>;
 
+  threshold?: Maybe<ToAny>;
+
   exceptions_list?: Maybe<ToAny>;
 }
 
@@ -1442,13 +1456,15 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: Maybe<string>;
 
-  lastSeen?: Maybe<string>;
+  cloud?: Maybe<CloudFields>;
+
+  endpoint?: Maybe<EndpointFields>;
 
   host?: Maybe<HostEcsFields>;
 
-  cloud?: Maybe<CloudFields>;
-
   inspect?: Maybe<Inspect>;
+
+  lastSeen?: Maybe<string>;
 }
 
 export interface CloudFields {
@@ -1467,6 +1483,14 @@ export interface CloudInstance {
 
 export interface CloudMachine {
   type?: Maybe<(Maybe<string>)[]>;
+}
+
+export interface EndpointFields {
+  endpointPolicy?: Maybe<string>;
+
+  sensorVersion?: Maybe<string>;
+
+  policyStatus?: Maybe<HostPolicyResponseActionStatus>;
 }
 
 export interface FirstLastSeenHost {
@@ -2077,9 +2101,9 @@ export interface QueryMatchResult {
 }
 
 export interface DateRangePickerResult {
-  start?: Maybe<number>;
+  start?: Maybe<ToAny>;
 
-  end?: Maybe<number>;
+  end?: Maybe<ToAny>;
 }
 
 export interface FavoriteTimelineResult {
@@ -2316,6 +2340,8 @@ export interface AuthenticationsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
@@ -2329,6 +2355,8 @@ export interface TimelineSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface TimelineDetailsSourceArgs {
   eventId: string;
@@ -2336,6 +2364,8 @@ export interface TimelineDetailsSourceArgs {
   indexName: string;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface LastEventTimeSourceArgs {
   id?: Maybe<string>;
@@ -2345,6 +2375,8 @@ export interface LastEventTimeSourceArgs {
   details: LastTimeDetails;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface HostsSourceArgs {
   id?: Maybe<string>;
@@ -2358,6 +2390,8 @@ export interface HostsSourceArgs {
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface HostOverviewSourceArgs {
   id?: Maybe<string>;
@@ -2374,6 +2408,8 @@ export interface HostFirstLastSeenSourceArgs {
   hostName: string;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface IpOverviewSourceArgs {
   id?: Maybe<string>;
@@ -2383,6 +2419,8 @@ export interface IpOverviewSourceArgs {
   ip: string;
 
   defaultIndex: string[];
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface UsersSourceArgs {
   filterQuery?: Maybe<string>;
@@ -2498,6 +2536,8 @@ export interface NetworkDnsHistogramSourceArgs {
   timerange: TimerangeInput;
 
   stackByField?: Maybe<string>;
+
+  docValueFields: DocValueFieldsInput[];
 }
 export interface NetworkHttpSourceArgs {
   id?: Maybe<string>;
@@ -3036,6 +3076,8 @@ export namespace SourceResolvers {
     filterQuery?: Maybe<string>;
 
     defaultIndex: string[];
+
+    docValueFields: DocValueFieldsInput[];
   }
 
   export type TimelineResolver<
@@ -3055,6 +3097,8 @@ export namespace SourceResolvers {
     filterQuery?: Maybe<string>;
 
     defaultIndex: string[];
+
+    docValueFields: DocValueFieldsInput[];
   }
 
   export type TimelineDetailsResolver<
@@ -3068,6 +3112,8 @@ export namespace SourceResolvers {
     indexName: string;
 
     defaultIndex: string[];
+
+    docValueFields: DocValueFieldsInput[];
   }
 
   export type LastEventTimeResolver<
@@ -3083,6 +3129,8 @@ export namespace SourceResolvers {
     details: LastTimeDetails;
 
     defaultIndex: string[];
+
+    docValueFields: DocValueFieldsInput[];
   }
 
   export type HostsResolver<R = HostsData, Parent = Source, TContext = SiemContext> = Resolver<
@@ -3103,6 +3151,8 @@ export namespace SourceResolvers {
     filterQuery?: Maybe<string>;
 
     defaultIndex: string[];
+
+    docValueFields: DocValueFieldsInput[];
   }
 
   export type HostOverviewResolver<
@@ -3131,6 +3181,8 @@ export namespace SourceResolvers {
     hostName: string;
 
     defaultIndex: string[];
+
+    docValueFields: DocValueFieldsInput[];
   }
 
   export type IpOverviewResolver<
@@ -3146,6 +3198,8 @@ export namespace SourceResolvers {
     ip: string;
 
     defaultIndex: string[];
+
+    docValueFields: DocValueFieldsInput[];
   }
 
   export type UsersResolver<R = UsersData, Parent = Source, TContext = SiemContext> = Resolver<
@@ -3316,6 +3370,8 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     stackByField?: Maybe<string>;
+
+    docValueFields: DocValueFieldsInput[];
   }
 
   export type NetworkHttpResolver<
@@ -4939,6 +4995,8 @@ export namespace RuleFieldResolvers {
 
     note?: NoteResolver<Maybe<string[] | string>, TypeParent, TContext>;
 
+    threshold?: ThresholdResolver<Maybe<ToAny>, TypeParent, TContext>;
+
     exceptions_list?: ExceptionsListResolver<Maybe<ToAny>, TypeParent, TContext>;
   }
 
@@ -5094,6 +5152,11 @@ export namespace RuleFieldResolvers {
   > = Resolver<R, Parent, TContext>;
   export type NoteResolver<
     R = Maybe<string[] | string>,
+    Parent = RuleField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type ThresholdResolver<
+    R = Maybe<ToAny>,
     Parent = RuleField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6316,13 +6379,15 @@ export namespace HostItemResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = HostItem> {
     _id?: _IdResolver<Maybe<string>, TypeParent, TContext>;
 
-    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
+    cloud?: CloudResolver<Maybe<CloudFields>, TypeParent, TContext>;
+
+    endpoint?: EndpointResolver<Maybe<EndpointFields>, TypeParent, TContext>;
 
     host?: HostResolver<Maybe<HostEcsFields>, TypeParent, TContext>;
 
-    cloud?: CloudResolver<Maybe<CloudFields>, TypeParent, TContext>;
-
     inspect?: InspectResolver<Maybe<Inspect>, TypeParent, TContext>;
+
+    lastSeen?: LastSeenResolver<Maybe<string>, TypeParent, TContext>;
   }
 
   export type _IdResolver<R = Maybe<string>, Parent = HostItem, TContext = SiemContext> = Resolver<
@@ -6330,8 +6395,13 @@ export namespace HostItemResolvers {
     Parent,
     TContext
   >;
-  export type LastSeenResolver<
-    R = Maybe<string>,
+  export type CloudResolver<
+    R = Maybe<CloudFields>,
+    Parent = HostItem,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EndpointResolver<
+    R = Maybe<EndpointFields>,
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6340,13 +6410,13 @@ export namespace HostItemResolvers {
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type CloudResolver<
-    R = Maybe<CloudFields>,
+  export type InspectResolver<
+    R = Maybe<Inspect>,
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type InspectResolver<
-    R = Maybe<Inspect>,
+  export type LastSeenResolver<
+    R = Maybe<string>,
     Parent = HostItem,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6405,6 +6475,36 @@ export namespace CloudMachineResolvers {
   export type TypeResolver<
     R = Maybe<(Maybe<string>)[]>,
     Parent = CloudMachine,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace EndpointFieldsResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = EndpointFields> {
+    endpointPolicy?: EndpointPolicyResolver<Maybe<string>, TypeParent, TContext>;
+
+    sensorVersion?: SensorVersionResolver<Maybe<string>, TypeParent, TContext>;
+
+    policyStatus?: PolicyStatusResolver<
+      Maybe<HostPolicyResponseActionStatus>,
+      TypeParent,
+      TContext
+    >;
+  }
+
+  export type EndpointPolicyResolver<
+    R = Maybe<string>,
+    Parent = EndpointFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SensorVersionResolver<
+    R = Maybe<string>,
+    Parent = EndpointFields,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type PolicyStatusResolver<
+    R = Maybe<HostPolicyResponseActionStatus>,
+    Parent = EndpointFields,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -8497,18 +8597,18 @@ export namespace QueryMatchResultResolvers {
 
 export namespace DateRangePickerResultResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = DateRangePickerResult> {
-    start?: StartResolver<Maybe<number>, TypeParent, TContext>;
+    start?: StartResolver<Maybe<ToAny>, TypeParent, TContext>;
 
-    end?: EndResolver<Maybe<number>, TypeParent, TContext>;
+    end?: EndResolver<Maybe<ToAny>, TypeParent, TContext>;
   }
 
   export type StartResolver<
-    R = Maybe<number>,
+    R = Maybe<ToAny>,
     Parent = DateRangePickerResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type EndResolver<
-    R = Maybe<number>,
+    R = Maybe<ToAny>,
     Parent = DateRangePickerResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -9322,6 +9422,7 @@ export type IResolvers<TContext = SiemContext> = {
   CloudFields?: CloudFieldsResolvers.Resolvers<TContext>;
   CloudInstance?: CloudInstanceResolvers.Resolvers<TContext>;
   CloudMachine?: CloudMachineResolvers.Resolvers<TContext>;
+  EndpointFields?: EndpointFieldsResolvers.Resolvers<TContext>;
   FirstLastSeenHost?: FirstLastSeenHostResolvers.Resolvers<TContext>;
   IpOverviewData?: IpOverviewDataResolvers.Resolvers<TContext>;
   Overview?: OverviewResolvers.Resolvers<TContext>;
