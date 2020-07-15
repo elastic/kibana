@@ -90,7 +90,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const type = Symbol();
         const id = Symbol();
         const options = Object.freeze({ foo: 'bar' });
-        // @ts-ignore
+        // @ts-expect-error
         const actualReturnValue = await client.get(type, id, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
@@ -117,7 +117,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         const objects = [{ type: 'foo' }];
         const options = Object.freeze({ foo: 'bar' });
-        // @ts-ignore
+        // @ts-expect-error
         const actualReturnValue = await client.bulkGet(objects, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
@@ -268,7 +268,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const { client } = await createSpacesSavedObjectsClient();
 
         await expect(
-          // @ts-ignore
+          // @ts-expect-error
           client.checkConflicts(null, { namespace: 'bar' })
         ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
       });
@@ -280,7 +280,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         const objects = Symbol();
         const options = Object.freeze({ foo: 'bar' });
-        // @ts-ignore
+        // @ts-expect-error
         const actualReturnValue = await client.checkConflicts(objects, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
@@ -308,7 +308,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const type = Symbol();
         const attributes = Symbol();
         const options = Object.freeze({ foo: 'bar' });
-        // @ts-ignore
+        // @ts-expect-error
         const actualReturnValue = await client.create(type, attributes, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
@@ -335,7 +335,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         const objects = [{ type: 'foo' }];
         const options = Object.freeze({ foo: 'bar' });
-        // @ts-ignore
+        // @ts-expect-error
         const actualReturnValue = await client.bulkCreate(objects, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
@@ -351,7 +351,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const { client } = await createSpacesSavedObjectsClient();
 
         await expect(
-          // @ts-ignore
+          // @ts-expect-error
           client.update(null, null, null, { namespace: 'bar' })
         ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
       });
@@ -365,7 +365,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const id = Symbol();
         const attributes = Symbol();
         const options = Object.freeze({ foo: 'bar' });
-        // @ts-ignore
+        // @ts-expect-error
         const actualReturnValue = await client.update(type, id, attributes, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
@@ -381,7 +381,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const { client } = await createSpacesSavedObjectsClient();
 
         await expect(
-          // @ts-ignore
+          // @ts-expect-error
           client.bulkUpdate(null, { namespace: 'bar' })
         ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
       });
@@ -415,7 +415,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const { client } = await createSpacesSavedObjectsClient();
 
         await expect(
-          // @ts-ignore
+          // @ts-expect-error
           client.delete(null, null, { namespace: 'bar' })
         ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
       });
@@ -428,7 +428,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const type = Symbol();
         const id = Symbol();
         const options = Object.freeze({ foo: 'bar' });
-        // @ts-ignore
+        // @ts-expect-error
         const actualReturnValue = await client.delete(type, id, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
@@ -444,7 +444,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const { client } = await createSpacesSavedObjectsClient();
 
         await expect(
-          // @ts-ignore
+          // @ts-expect-error
           client.addToNamespaces(null, null, null, { namespace: 'bar' })
         ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
       });
@@ -458,7 +458,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const id = Symbol();
         const namespaces = Symbol();
         const options = Object.freeze({ foo: 'bar' });
-        // @ts-ignore
+        // @ts-expect-error
         const actualReturnValue = await client.addToNamespaces(type, id, namespaces, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
@@ -474,7 +474,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const { client } = await createSpacesSavedObjectsClient();
 
         await expect(
-          // @ts-ignore
+          // @ts-expect-error
           client.deleteFromNamespaces(null, null, null, { namespace: 'bar' })
         ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
       });
@@ -488,7 +488,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const id = Symbol();
         const namespaces = Symbol();
         const options = Object.freeze({ foo: 'bar' });
-        // @ts-ignore
+        // @ts-expect-error
         const actualReturnValue = await client.deleteFromNamespaces(type, id, namespaces, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
