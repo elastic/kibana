@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { cloneDeep } from 'lodash/fp';
 
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
