@@ -32,7 +32,10 @@ const getContents = (scriptPath) => readFileSync(scriptPath, 'utf8');
 const prettyJsonAndScriptContents = jsonAndScript(pretty)(jsonDef);
 
 export const prokTeamAssignment = () =>
-  fromNullable(scriptPath).map(getContents).map(prettyJsonAndScriptContents).map(transform);
+  fromNullable(scriptPath)
+    .map(getContents)
+    .map(prettyJsonAndScriptContents)
+    .map(transform);
 
 function jsonAndScript(formatter) {
   return (jsonDef) => (scriptContents) => [formatter(jsonDef.team_assignment), scriptContents];
