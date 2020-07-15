@@ -6,29 +6,29 @@
 
 import { IRouter } from 'kibana/server';
 
-import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
+import { ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/siem_common_deps';
 import {
-  UpdateExceptionListItemSchemaDecoded,
+  UpdateEndpointListItemSchemaDecoded,
   exceptionListItemSchema,
-  updateExceptionListItemSchema,
+  updateEndpointListItemSchema,
 } from '../../common/schemas';
 
 import { getExceptionListClient } from '.';
 
-export const updateExceptionListItemRoute = (router: IRouter): void => {
+export const updateEndpointListItemRoute = (router: IRouter): void => {
   router.put(
     {
       options: {
         tags: ['access:lists'],
       },
-      path: EXCEPTION_LIST_ITEM_URL,
+      path: ENDPOINT_LIST_ITEM_URL,
       validate: {
         body: buildRouteValidation<
-          typeof updateExceptionListItemSchema,
-          UpdateExceptionListItemSchemaDecoded
-        >(updateExceptionListItemSchema),
+          typeof updateEndpointListItemSchema,
+          UpdateEndpointListItemSchemaDecoded
+        >(updateEndpointListItemSchema),
       },
     },
     async (context, request, response) => {
@@ -44,11 +44,10 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           comments,
           entries,
           item_id: itemId,
-          namespace_type: namespaceType,
           tags,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
-        const exceptionListItem = await exceptionLists.updateExceptionListItem({
+        const exceptionListItem = await exceptionLists.updateEndpointListItem({
           _tags,
           comments,
           description,
@@ -57,7 +56,6 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           itemId,
           meta,
           name,
-          namespaceType,
           tags,
           type,
         });
