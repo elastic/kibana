@@ -6,12 +6,17 @@
 
 import { get, getOr, has, head, set } from 'lodash/fp';
 
-import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
+import {
+  FirstLastSeenHost,
+  HostItem,
+  HostsData,
+  HostsEdges,
+  EndpointFields,
+} from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-
 import { buildHostOverviewQuery } from './query.detail_host.dsl';
 import { buildHostsQuery } from './query.hosts.dsl';
 import { buildLastFirstSeenHostQuery } from './query.last_first_seen_host.dsl';
@@ -27,9 +32,14 @@ import {
   HostValue,
 } from './types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import { EndpointAppContext } from '../../endpoint/types';
+import { getHostData } from '../../endpoint/routes/metadata';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  constructor(
+    private readonly framework: FrameworkAdapter,
+    private readonly endpointContext: EndpointAppContext
+  ) {}
 
   public async getHosts(
     request: FrameworkRequest,
@@ -83,8 +93,47 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
+    const formattedHostItem = formatHostItem(options.fields, aggregations);
+    const hostId =
+      formattedHostItem.host && formattedHostItem.host.id
+        ? Array.isArray(formattedHostItem.host.id)
+          ? formattedHostItem.host.id[0]
+          : formattedHostItem.host.id
+        : null;
+    const endpoint: EndpointFields | null = await this.getHostEndpoint(request, hostId);
+    return { inspect, _id: options.hostName, ...formattedHostItem, endpoint };
+  }
 
-    return { inspect, _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
+  public async getHostEndpoint(
+    request: FrameworkRequest,
+    hostId: string | null
+  ): Promise<EndpointFields | null> {
+    const logger = this.endpointContext.logFactory.get('metadata');
+    try {
+      const agentService = this.endpointContext.service.getAgentService();
+      if (agentService === undefined) {
+        throw new Error('agentService not available');
+      }
+      const metadataRequestContext = {
+        agentService,
+        logger,
+        requestHandlerContext: request.context,
+      };
+      const endpointData =
+        hostId != null && metadataRequestContext.agentService != null
+          ? await getHostData(metadataRequestContext, hostId)
+          : null;
+      return endpointData != null && endpointData.metadata
+        ? {
+            endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
+            policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
+            sensorVersion: endpointData.metadata.agent.version,
+          }
+        : null;
+    } catch (err) {
+      logger.warn(JSON.stringify(err, null, 2));
+      return null;
+    }
   }
 
   public async getHostFirstLastSeen(

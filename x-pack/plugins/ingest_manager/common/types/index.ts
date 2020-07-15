@@ -13,6 +13,7 @@ export interface IngestManagerConfigType {
     enabled: boolean;
     tlsCheckDisabled: boolean;
     pollingRequestTimeout: number;
+    maxConcurrentConnections: number;
     kibana: {
       host?: string;
       ca_sha256?: string;

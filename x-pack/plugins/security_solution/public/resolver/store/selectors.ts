@@ -69,6 +69,11 @@ export const databaseDocumentIDToAbort = composeSelectors(
   dataSelectors.databaseDocumentIDToAbort
 );
 
+export const resolverComponentInstanceID = composeSelectors(
+  dataStateSelector,
+  dataSelectors.resolverComponentInstanceID
+);
+
 export const processAdjacencies = composeSelectors(
   dataStateSelector,
   dataSelectors.processAdjacencies
@@ -93,6 +98,15 @@ export const relatedEventsStats = composeSelectors(
 export const relatedEventsByEntityId = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsByEntityId
+);
+
+/**
+ * Returns a function that returns a function (when supplied with an entity id for a node)
+ * that returns related events for a node that match an event.category (when supplied with the category)
+ */
+export const relatedEventsByCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsByCategory
 );
 
 /**

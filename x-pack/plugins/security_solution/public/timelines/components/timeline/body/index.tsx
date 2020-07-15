@@ -6,7 +6,7 @@
 
 import React, { useMemo, useRef } from 'react';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
@@ -26,7 +26,6 @@ import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
 import { Events } from './events';
-import { showGraphView } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
@@ -41,6 +40,7 @@ export interface BodyProps {
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
+  docValueFields: DocValueFields[];
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
   height?: number;
@@ -76,6 +76,7 @@ export const Body = React.memo<BodyProps>(
     columnHeaders,
     columnRenderers,
     data,
+    docValueFields,
     eventIdToNoteIds,
     getNotesByIds,
     graphEventId,
@@ -146,7 +147,7 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        {showGraphView(graphEventId) && (
+        {graphEventId && (
           <GraphOverlay bodyHeight={height} graphEventId={graphEventId} timelineId={id} />
         )}
         <TimelineBody
@@ -154,7 +155,7 @@ export const Body = React.memo<BodyProps>(
           data-timeline-id={id}
           bodyHeight={height}
           ref={containerElementRef}
-          visible={show && !showGraphView(graphEventId)}
+          visible={show && !graphEventId}
         >
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
             <ColumnHeaders
@@ -184,6 +185,7 @@ export const Body = React.memo<BodyProps>(
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
               data={data}
+              docValueFields={docValueFields}
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={id}
