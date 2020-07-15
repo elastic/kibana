@@ -37,7 +37,7 @@ function getPromiseResult(promiseResult: PromiseFulfilledResult<any> | PromiseRe
   return false;
 }
 
-export async function fetchHasData() {
+export async function fetchHasData(): Promise<Record<ObservabilityApp, boolean>> {
   const apps: ObservabilityApp[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics'];
   const promises = apps.map((app) => getDataHandler(app)?.hasData());
   const [apm, uptime, logs, metrics] = await Promise.allSettled(promises).then((results) =>
