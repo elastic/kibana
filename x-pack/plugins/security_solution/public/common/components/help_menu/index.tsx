@@ -14,7 +14,7 @@ export const HelpMenu = React.memo(() => {
   useEffect(() => {
     chrome.setHelpExtension({
       appName: i18n.translate('xpack.securitySolution.chrome.help.appName', {
-        defaultMessage: 'Security Solution',
+        defaultMessage: 'Security',
       }),
       links: [
         {
