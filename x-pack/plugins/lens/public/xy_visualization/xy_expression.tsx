@@ -396,7 +396,7 @@ export function XYChart({
         showGridLines={showXAxisGridlines}
         gridLineStyle={{ strokeWidth: 2 }}
         hide={filteredLayers[0].hide}
-        // @ts-ignore
+        // @ts-ignore, temporary solution for not displaying the ticks
         tickFormat={!hideXAxisTickLabels ? (d) => xAxisFormatter.convert(d) : () => {}}
       />
 

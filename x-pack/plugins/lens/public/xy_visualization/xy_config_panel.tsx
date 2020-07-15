@@ -99,9 +99,9 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const hasNonBarSeries = props.state?.layers.some(
     (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
   );
-  const [xtitle, setXtitle] = useState(props.state?.xTitle || '');
+  const [xtitle, setXtitle] = useState<string>(props.state?.xTitle || '');
 
-  const onXTitleChange = (value: string) => {
+  const onXTitleChange = (value: string): void => {
     setXtitle(value);
     props.setState({ ...props.state, xTitle: value });
   };
