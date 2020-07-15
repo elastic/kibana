@@ -48,6 +48,7 @@
 |  Interface | Description |
 |  --- | --- |
 |  [AggParamOption](./kibana-plugin-plugins-data-public.aggparamoption.md) |  |
+|  [ApplyGlobalFilterActionContext](./kibana-plugin-plugins-data-public.applyglobalfilteractioncontext.md) |  |
 |  [DataPublicPluginSetup](./kibana-plugin-plugins-data-public.datapublicpluginsetup.md) |  |
 |  [DataPublicPluginStart](./kibana-plugin-plugins-data-public.datapublicpluginstart.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-public.esqueryconfig.md) |  |
