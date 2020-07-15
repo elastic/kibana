@@ -19,8 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const find = getService('find');
 
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/71559
-  describe.skip('Alert Details', function () {
+  describe('Alert Details', function () {
     describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
