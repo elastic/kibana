@@ -79,8 +79,6 @@ export interface VisualizeOutput extends EmbeddableOutput {
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
-const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'timelion'];
-
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
@@ -124,8 +122,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
 
-    this.inspectorAdapters = this.vis.type.inspectorAdapters;
-
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
       .subscribe(this.updateHandler.bind(this));
@@ -148,7 +144,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   }
 
   public getInspectorAdapters = () => {
-    if (!this.handler || visTypesWithoutInspector.includes(this.vis.type.name)) {
+    if (!this.handler || (this.inspectorAdapters && !Object.keys(this.inspectorAdapters).length)) {
       return undefined;
     }
     return this.handler.inspect();
