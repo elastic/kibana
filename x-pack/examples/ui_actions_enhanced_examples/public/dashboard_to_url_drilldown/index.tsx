@@ -10,7 +10,7 @@ import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/publ
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
 import { ChartActionContext } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
-import { EventMeta } from '../../../../../src/plugins/ui_actions/public/actions';
+import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 
 function isValidUrl(url: string) {
   try {
@@ -102,11 +102,14 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
     return config.url;
   };
 
-  public readonly execute = async (config: Config, context: ActionContext, event: EventMeta) => {
+  public readonly execute = async (
+    config: Config,
+    context: ActionExecutionContext<ActionContext>
+  ) => {
     // Just for showcasing:
     // we can get trigger a which caused this drilldown execution
     // eslint-disable-next-line no-console
-    console.log(event.trigger?.id);
+    console.log(context.trigger?.id);
 
     const url = await this.getHref(config, context);
 

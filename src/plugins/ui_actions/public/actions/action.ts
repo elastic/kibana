@@ -36,7 +36,7 @@ export interface ActionExecutionMeta {
   trigger?: Trigger;
 }
 
-export type ActionExecutionContext<Context extends BaseContext = {}> = Context &
+export type ActionExecutionContext<Context extends BaseContext = BaseContext> = Context &
   ActionExecutionMeta;
 
 export interface Action<Context extends BaseContext = {}, T = ActionType>
@@ -78,19 +78,19 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: ActionExecutionContext<Context>): Promise<boolean>;
+  isCompatible(context: Context | ActionExecutionContext<Context>): Promise<boolean>;
 
   /**
    * Executes the action.
    */
-  execute(context: ActionExecutionContext<Context>): Promise<void>;
+  execute(context: Context | ActionExecutionContext<Context>): Promise<void>;
 
   /**
    * This method should return a link if this item can be clicked on. The link
    * is used to navigate user if user middle-clicks it or Ctrl + clicks or
    * right-clicks and selects "Open in new tab".
    */
-  getHref?(context: ActionExecutionContext<Context>): Promise<string | undefined>;
+  getHref?(context: Context | ActionExecutionContext<Context>): Promise<string | undefined>;
 }
 
 /**
@@ -112,19 +112,19 @@ export interface ActionDefinition<Context extends BaseContext = {}>
    * Returns a promise that resolves to true if this item is compatible given
    * the context and should be displayed to user, otherwise resolves to false.
    */
-  isCompatible?(context: ActionExecutionContext<Context>): Promise<boolean>;
+  isCompatible?(context: Context | ActionExecutionContext<Context>): Promise<boolean>;
 
   /**
    * Executes the action.
    */
-  execute(context: ActionExecutionContext<Context>): Promise<void>;
+  execute(context: Context | ActionExecutionContext<Context>): Promise<void>;
 
   /**
    * This method should return a link if this item can be clicked on. The link
    * is used to navigate user if user middle-clicks it or Ctrl + clicks or
    * right-clicks and selects "Open in new tab".
    */
-  getHref?(context: ActionExecutionContext<Context>): Promise<string | undefined>;
+  getHref?(context: Context | ActionExecutionContext<Context>): Promise<string | undefined>;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

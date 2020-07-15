@@ -19,11 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IEmbeddable } from '../../embeddable_plugin';
-import {
-  ActionByType,
-  ActionExecutionContext,
-  IncompatibleActionError,
-} from '../../ui_actions_plugin';
+import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
@@ -73,11 +69,11 @@ export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANE
     return isExpanded(embeddable) ? 'expand' : 'expand';
   }
 
-  public async isCompatible({ embeddable }: ActionExecutionContext<ExpandPanelActionContext>) {
+  public async isCompatible({ embeddable }: ExpandPanelActionContext) {
     return Boolean(embeddable.parent && isDashboard(embeddable.parent));
   }
 
-  public async execute({ embeddable }: ActionExecutionContext<ExpandPanelActionContext>) {
+  public async execute({ embeddable }: ExpandPanelActionContext) {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }

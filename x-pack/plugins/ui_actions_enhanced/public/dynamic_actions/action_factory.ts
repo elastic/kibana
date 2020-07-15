@@ -67,10 +67,10 @@ export class ActionFactory<
     const action = this.def.create(serializedAction);
     return {
       ...action,
-      isCompatible: async (context: ActionContext, meta): Promise<boolean> => {
+      isCompatible: async (context: ActionContext): Promise<boolean> => {
         if (!this.isCompatibleLicence()) return false;
         if (!action.isCompatible) return true;
-        return action.isCompatible(context, meta);
+        return action.isCompatible(context);
       },
     };
   }

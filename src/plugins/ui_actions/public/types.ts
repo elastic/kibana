@@ -20,12 +20,7 @@
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 import { Filter } from '../../data/public';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-  Trigger,
-} from './triggers';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
 import { IEmbeddable } from '../../embeddable/public';
 import { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
 
@@ -39,11 +34,6 @@ export type TriggerId = keyof TriggerContextMapping;
 
 export type BaseContext = object;
 export type TriggerContext = BaseContext;
-export interface BaseActionContext {
-  meta?: {
-    trigger?: Trigger;
-  };
-}
 
 export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
@@ -59,5 +49,5 @@ const DEFAULT_ACTION = '';
 export type ActionType = keyof ActionContextMapping;
 
 export interface ActionContextMapping {
-  [DEFAULT_ACTION]: BaseActionContext;
+  [DEFAULT_ACTION]: BaseContext;
 }
