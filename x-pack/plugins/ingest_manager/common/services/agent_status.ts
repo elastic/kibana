@@ -37,11 +37,11 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   return 'online';
 }
 
-export function buildKueryForEnrolingAgents() {
+export function buildKueryForEnrollingAgents() {
   return `not ${AGENT_SAVED_OBJECT_TYPE}.last_checkin:*`;
 }
 
-export function buildKueryForUnenrolingAgents() {
+export function buildKueryForUnenrollingAgents() {
   return `${AGENT_SAVED_OBJECT_TYPE}.unenrollment_started_at:*`;
 }
 
