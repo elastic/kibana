@@ -7,7 +7,11 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 
-import { ENDPOINT_DESCRIPTION, ENDPOINT_ID, ENDPOINT_NAME } from '../../../common/constants';
+import {
+  ENDPOINT_LIST_DESCRIPTION,
+  ENDPOINT_LIST_ID,
+  ENDPOINT_LIST_NAME,
+} from '../../../common/constants';
 import { ExceptionListSchema, ExceptionListSoSchema } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
@@ -33,13 +37,13 @@ export const createEndpointList = async ({
         comments: undefined,
         created_at: dateNow,
         created_by: user,
-        description: ENDPOINT_DESCRIPTION,
+        description: ENDPOINT_LIST_DESCRIPTION,
         entries: undefined,
         item_id: undefined,
-        list_id: ENDPOINT_ID,
+        list_id: ENDPOINT_LIST_ID,
         list_type: 'list',
         meta: undefined,
-        name: ENDPOINT_NAME,
+        name: ENDPOINT_LIST_NAME,
         tags: [],
         tie_breaker_id: tieBreaker ?? uuid.v4(),
         type: 'endpoint',
@@ -47,7 +51,7 @@ export const createEndpointList = async ({
       },
       {
         // We intentionally hard coding the id so that there can only be one exception list within the  space
-        id: ENDPOINT_ID,
+        id: ENDPOINT_LIST_ID,
       }
     );
     return transformSavedObjectToExceptionList({ savedObject });

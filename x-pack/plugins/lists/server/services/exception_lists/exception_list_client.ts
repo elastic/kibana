@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
-import { ENDPOINT_ID } from '../../../common/constants';
+import { ENDPOINT_LIST_ID } from '../../../common/constants';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -112,7 +112,7 @@ export class ExceptionListClient {
       description,
       entries,
       itemId,
-      listId: ENDPOINT_ID,
+      listId: ENDPOINT_LIST_ID,
       meta,
       name,
       namespaceType: 'agnostic',
@@ -412,7 +412,7 @@ export class ExceptionListClient {
     await this.createEndpointList();
     return findExceptionListItem({
       filter,
-      listId: ENDPOINT_ID,
+      listId: ENDPOINT_LIST_ID,
       namespaceType: 'agnostic',
       page,
       perPage,

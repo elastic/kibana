@@ -6,7 +6,7 @@
 
 import { IRouter } from 'kibana/server';
 
-import { ENDPOINT_ID, ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/siem_common_deps';
 import {
@@ -55,7 +55,7 @@ export const findEndpointListItemRoute = (router: IRouter): void => {
           // happen as the findEndpointListItem tries to auto-create the endpoint list if
           // does not exist.
           return siemResponse.error({
-            body: `list id: "${ENDPOINT_ID}" does not exist`,
+            body: `list id: "${ENDPOINT_LIST_ID}" does not exist`,
             statusCode: 404,
           });
         }
