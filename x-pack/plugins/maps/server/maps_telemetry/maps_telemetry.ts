@@ -96,22 +96,23 @@ function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
 
 function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
   return layerLists.map((layerList: LayerDescriptor[]) => {
-    const countsById = _(layerList).countBy((layer: LayerDescriptor) => {
-      const isEmsFile =
-        layer.sourceDescriptor !== null
-          ? layer.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE
-          : false;
-      const id = (layer.sourceDescriptor as AbstractSourceDescriptor).id;
-      return isEmsFile && id ? id : 'false';
+    const emsLayers = layerList.filter((layer: LayerDescriptor) => {
+      return (
+        layer.sourceDescriptor !== null &&
+        layer.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE &&
+        (layer.sourceDescriptor as AbstractSourceDescriptor).id
+      );
+    });
+    const emsCountsById = _(emsLayers).countBy((layer: LayerDescriptor) => {
+      return (layer.sourceDescriptor as AbstractSourceDescriptor).id;
     });
 
-    const emsCountsById = countsById.pickBy((val, key) => key !== 'false');
     const layerTypeCount = emsCountsById.value();
     return layerTypeCount as ILayerTypeCount;
   }) as ILayerTypeCount[];
 }
 
-function isGeoshapeIndexPattern(
+function isFieldGeoShape(
   indexPatterns: IIndexPattern[],
   indexPatternId: string,
   geoField: string | undefined
@@ -155,21 +156,19 @@ function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescript
 
   const sourceDescriptor: SourceDescriptor = layer.sourceDescriptor;
   if (sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
-    return isGeoshapeIndexPattern(
+    return isFieldGeoShape(
       indexPatterns,
       (sourceDescriptor as ESGeoGridSourceDescriptor).indexPatternId,
       (sourceDescriptor as ESGeoGridSourceDescriptor).geoField
     );
-  } else if (sourceDescriptor.type === SOURCE_TYPES.ES_SEARCH) {
-    const isGeoShapeIndexPattern = isGeoshapeIndexPattern(
+  } else if (
+    sourceDescriptor.type === SOURCE_TYPES.ES_SEARCH &&
+    (sourceDescriptor as ESSearchSourceDescriptor).scalingType === SCALING_TYPES.CLUSTERS
+  ) {
+    return isFieldGeoShape(
       indexPatterns,
       (sourceDescriptor as ESSearchSourceDescriptor).indexPatternId,
       (sourceDescriptor as ESSearchSourceDescriptor).geoField
-    );
-
-    return (
-      isGeoShapeIndexPattern &&
-      (sourceDescriptor as ESSearchSourceDescriptor).scalingType === SCALING_TYPES.CLUSTERS
     );
   } else {
     return false;
