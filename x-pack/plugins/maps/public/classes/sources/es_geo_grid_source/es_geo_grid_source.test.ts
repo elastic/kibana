@@ -20,7 +20,11 @@ import {
   RENDER_AS,
   SOURCE_TYPES,
 } from '../../../../common/constants';
-import { MockSearchSource } from '../__tests__/mock_search_source';
+import { SearchSource } from '../../../../../../../src/plugins/data/public/search/search_source';
+
+export class MockSearchSource {
+  setField = jest.fn();
+}
 
 describe('ESGeoGridSource', () => {
   const geoFieldName = 'bar';
@@ -52,19 +56,22 @@ describe('ESGeoGridSource', () => {
   );
 
   describe('getGeoJsonWithMeta', () => {
-    let mockSearchSource;
+    let mockSearchSource: unknown;
     beforeEach(async () => {
       mockSearchSource = new MockSearchSource();
       const mockSearchService = {
         searchSource: {
           async create() {
-            return mockSearchSource;
+            return mockSearchSource as SearchSource;
           },
         },
       };
 
+      // @ts-expect-error
       getIndexPatternService.mockReturnValue(mockIndexPatternService);
+      // @ts-expect-error
       getSearchService.mockReturnValue(mockSearchService);
+      // @ts-expect-error
       fetchSearchSourceAndRecordWithInspector.mockReturnValue({
         took: 71,
         timed_out: false,
@@ -177,6 +184,8 @@ describe('ESGeoGridSource', () => {
             bounds: { bottom_right: [160, -80], top_left: [-160, 80] },
             field: 'bar',
             precision: 4,
+            shard_size: 65535,
+            size: 65535,
           },
         },
       });

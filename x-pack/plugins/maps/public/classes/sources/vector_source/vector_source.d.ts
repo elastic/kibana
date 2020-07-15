@@ -13,7 +13,6 @@ import {
   ESSearchSourceResponseMeta,
   MapExtent,
   MapQuery,
-  VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -62,7 +61,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
   ): MapExtent | null;
   getGeoJsonWithMeta(
-    layerName: 'string',
+    layerName: string,
     searchFilters: unknown[],
     registerCancelCallback: (callback: () => void) => void
   ): Promise<GeoJsonWithMeta>;
