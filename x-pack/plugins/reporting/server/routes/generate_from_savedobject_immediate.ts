@@ -7,8 +7,8 @@
 import { schema } from '@kbn/config-schema';
 import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
-import { scheduleTaskFnFactory } from '../export_types/csv_from_savedobject/server/create_job';
-import { runTaskFnFactory } from '../export_types/csv_from_savedobject/server/execute_job';
+import { scheduleTaskFnFactory } from '../export_types/csv_from_savedobject/create_job';
+import { runTaskFnFactory } from '../export_types/csv_from_savedobject/execute_job';
 import { LevelLogger as Logger } from '../lib';
 import { TaskRunResult } from '../types';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
