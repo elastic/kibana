@@ -18,6 +18,7 @@ A few notable services are called out below.
 * <<add-data-tutorials>>
 * <<development-visualize-index>>
 * <<code-exploration>>
+* <<kibana-dashboard-plugin>>
 
 include::add-data-tutorials.asciidoc[leveloffset=+1]
 
@@ -26,3 +27,5 @@ include::development-visualize-index.asciidoc[leveloffset=+1]
 include::security/index.asciidoc[leveloffset=+1]
 
 include::code-exploration.asciidoc[leveloffset=+1]
+
+include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset+1]
