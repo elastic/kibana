@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import querystring from 'querystring';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -263,9 +264,12 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
     describe('/api/apm/service-map/service/{serviceName}', () => {
       describe('when there is no data', () => {
         it('returns an object with nulls', async () => {
-          const response = await supertest.get(
-            '/api/apm/service-map/service/opbeans-node?start=2020-06-28T10%3A24%3A46.055Z&end=2020-06-29T10%3A24%3A46.055Z'
-          );
+          const q = querystring.stringify({
+            start: '2020-06-28T10:24:46.055Z',
+            end: '2020-06-29T10:24:46.055Z',
+            uiFilters: {},
+          });
+          const response = await supertest.get(`/api/apm/service-map/service/opbeans-node?${q}`);
 
           expect(response.status).to.be(200);
 
@@ -273,8 +277,10 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             avgCpuUsage: null,
             avgErrorRate: null,
             avgMemoryUsage: null,
-            avgRequestsPerMinute: null,
-            avgTransactionDuration: null,
+            transactionStats: {
+              avgRequestsPerMinute: null,
+              avgTransactionDuration: null,
+            },
           });
         });
       });
