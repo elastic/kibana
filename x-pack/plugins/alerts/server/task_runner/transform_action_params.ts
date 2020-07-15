@@ -45,7 +45,7 @@ export function transformActionParams({
       alertInstanceId,
       context,
       state,
-      alertParams,
+      params: alertParams,
     };
     return Mustache.render(value, variables);
   });
