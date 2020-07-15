@@ -21,7 +21,7 @@ def getSkippablePaths() {
 def getNotSkippablePaths() {
   return [
     // this file is auto-generated and changes to it need to be validated with CI
-    /^docs\/developer\/architecture\/code-exploration.asciidoc/,
+    /^docs\/developer\/architecture\/code-exploration.asciidoc$/,
   ]
 }
 
@@ -41,7 +41,7 @@ def areChangesSkippable() {
     }
 
     files = files.findAll { file ->
-      return !skippablePaths.find { regex -> file =~ regex} || notSkippablePaths.find { regex -> file =~ regex }
+      return !(skippablePaths.find { regex -> file =~ regex} && !notSkippablePaths.find { regex -> file =~ regex })
     }
 
     return files.size() < 1
