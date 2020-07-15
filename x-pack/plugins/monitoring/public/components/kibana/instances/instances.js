@@ -13,21 +13,22 @@ import {
   EuiSpacer,
   EuiLink,
   EuiCallOut,
+  EuiToolTip,
+  EuiHealth,
 } from '@elastic/eui';
 import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
-import { KibanaStatusIcon } from '../status_icon';
 import { StatusIcon } from '../../status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { AlertsStatus } from '../../../alerts/status';
 
-const getColumns = (setupMode) => {
+const getColumns = (setupMode, alerts) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -79,32 +80,33 @@ const getColumns = (setupMode) => {
       },
     },
     {
+      name: i18n.translate('xpack.monitoring.kibana.listing.alertsColumnTitle', {
+        defaultMessage: 'Alerts',
+      }),
+      field: 'isOnline',
+      width: '175px',
+      sortable: true,
+      render: () => {
+        return <AlertsStatus showBadge={true} alerts={alerts} />;
+      },
+    },
+    {
       name: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
       field: 'status',
-      render: (status, kibana) => (
-        <div
-          title={i18n.translate('xpack.monitoring.kibana.listing.instanceStatusTitle', {
-            defaultMessage: 'Instance status: {kibanaStatus}',
-            values: {
-              kibanaStatus: status,
-            },
-          })}
-          className="monTableCell__status"
-        >
-          <KibanaStatusIcon status={status} availability={kibana.availability} />
-          &nbsp;
-          {!kibana.availability ? (
-            <FormattedMessage
-              id="xpack.monitoring.kibana.listing.instanceStatus.offlineLabel"
-              defaultMessage="Offline"
-            />
-          ) : (
-            capitalize(status)
-          )}
-        </div>
-      ),
+      render: (status, kibana) => {
+        return (
+          <EuiToolTip content={status} position="bottom" trigger="hover">
+            <EuiHealth
+              color={kibana.availability ? 'success' : 'subdued'}
+              data-test-subj="statusIcon"
+            >
+              {capitalize(status)}
+            </EuiHealth>
+          </EuiToolTip>
+        );
+      },
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.loadAverageColumnTitle', {
@@ -157,7 +159,7 @@ const getColumns = (setupMode) => {
 
 export class KibanaInstances extends PureComponent {
   render() {
-    const { clusterStatus, setupMode, sorting, pagination, onTableChange } = this.props;
+    const { clusterStatus, alerts, setupMode, sorting, pagination, onTableChange } = this.props;
 
     let setupModeCallOut = null;
     // Merge the instances data with the setup data if enabled
@@ -245,7 +247,7 @@ export class KibanaInstances extends PureComponent {
       <EuiPage>
         <EuiPageBody>
           <EuiPanel>
-            <ClusterStatus stats={clusterStatus} />
+            <ClusterStatus stats={clusterStatus} alerts={alerts} />
           </EuiPanel>
           <EuiSpacer size="m" />
           {setupModeCallOut}
@@ -253,7 +255,7 @@ export class KibanaInstances extends PureComponent {
             <EuiMonitoringTable
               className="kibanaInstancesTable"
               rows={dataFlattened}
-              columns={getColumns(setupMode)}
+              columns={getColumns(setupMode, alerts)}
               sorting={sorting}
               pagination={pagination}
               setupMode={setupMode}
