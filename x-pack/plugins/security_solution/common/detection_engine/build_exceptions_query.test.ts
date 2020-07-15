@@ -1103,6 +1103,12 @@ describe('build_exceptions_query', () => {
       expect(query).toEqual([]);
     });
 
+    test('it returns empty array if lists is undefined', () => {
+      const query = buildQueryExceptions({ language: 'kuery', lists: undefined });
+
+      expect(query).toEqual([]);
+    });
+
     test('it returns expected query when lists exist and language is "kuery"', () => {
       const payload = getExceptionListItemSchemaMock();
       const payload2 = getExceptionListItemSchemaMock();
@@ -1112,43 +1118,33 @@ describe('build_exceptions_query', () => {
           field: 'parent',
           type: 'nested',
           entries: [
-            makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' }),
-            makeMatchEntry({ field: 'd', operator: 'excluded', value: 'valueD' }),
+            makeMatchEntry({ field: 'c', operator: 'included', value: 'valueC' }),
+            makeMatchEntry({ field: 'd', operator: 'included', value: 'valueD' }),
           ],
         },
-        makeMatchAnyEntry({ field: 'e' }),
+        makeMatchAnyEntry({ field: 'e', operator: 'excluded' }),
       ];
       const query = buildQueryExceptions({
         language: 'kuery',
         lists: [payload, payload2],
       });
       const expectedQuery =
-        'some.parentField:{ nested.field:"some value" } and not some.not.nested.field:"some value" and not b:("value-1" or "value-2") and parent:{ c:"valueC" and d:"valueD" } and not e:("value-1" or "value-2")';
+        'not ((some.parentField:{ nested.field:"some value" } and some.not.nested.field:"some value") or (b:("value-1" or "value-2") and parent:{ c:"valueC" and d:"valueD" } and not e:("value-1" or "value-2")))';
 
       expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
     });
 
     test('it returns expected query when lists exist and language is "lucene"', () => {
       const payload = getExceptionListItemSchemaMock();
+      payload.entries = [makeMatchAnyEntry({ field: 'a' }), makeMatchAnyEntry({ field: 'b' })];
       const payload2 = getExceptionListItemSchemaMock();
-      payload2.entries = [
-        makeMatchAnyEntry({ field: 'b' }),
-        {
-          field: 'parent',
-          type: 'nested',
-          entries: [
-            makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' }),
-            makeMatchEntry({ field: 'd', operator: 'excluded', value: 'valueD' }),
-          ],
-        },
-        makeMatchAnyEntry({ field: 'e' }),
-      ];
+      payload2.entries = [makeMatchAnyEntry({ field: 'c' }), makeMatchAnyEntry({ field: 'd' })];
       const query = buildQueryExceptions({
         language: 'lucene',
         lists: [payload, payload2],
       });
       const expectedQuery =
-        'some.parentField:{ nested.field:"some value" } AND NOT some.not.nested.field:"some value" AND NOT b:("value-1" OR "value-2") AND parent:{ c:"valueC" AND d:"valueD" } AND NOT e:("value-1" OR "value-2")';
+        'NOT ((a:("value-1" OR "value-2") AND b:("value-1" OR "value-2")) OR (c:("value-1" OR "value-2") AND d:("value-1" OR "value-2")))';
 
       expect(query).toEqual([{ query: expectedQuery, language: 'lucene' }]);
     });
@@ -1164,6 +1160,12 @@ describe('build_exceptions_query', () => {
           lists: [],
           exclude,
         });
+
+        expect(query).toEqual([]);
+      });
+
+      test('it returns empty array if lists is undefined', () => {
+        const query = buildQueryExceptions({ language: 'kuery', lists: undefined, exclude });
 
         expect(query).toEqual([]);
       });
@@ -1189,33 +1191,23 @@ describe('build_exceptions_query', () => {
           exclude,
         });
         const expectedQuery =
-          'some.parentField:{ nested.field:"some value" } and some.not.nested.field:"some value" and b:("value-1" or "value-2") and parent:{ c:"valueC" and d:"valueD" } and e:("value-1" or "value-2")';
+          '(some.parentField:{ nested.field:"some value" } and some.not.nested.field:"some value") or (b:("value-1" or "value-2") and parent:{ c:"valueC" and d:"valueD" } and e:("value-1" or "value-2"))';
 
         expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
       });
 
       test('it returns expected query when lists exist and language is "lucene"', () => {
         const payload = getExceptionListItemSchemaMock();
+        payload.entries = [makeMatchAnyEntry({ field: 'a' }), makeMatchAnyEntry({ field: 'b' })];
         const payload2 = getExceptionListItemSchemaMock();
-        payload2.entries = [
-          makeMatchAnyEntry({ field: 'b' }),
-          {
-            field: 'parent',
-            type: 'nested',
-            entries: [
-              makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' }),
-              makeMatchEntry({ field: 'd', operator: 'excluded', value: 'valueD' }),
-            ],
-          },
-          makeMatchAnyEntry({ field: 'e' }),
-        ];
+        payload2.entries = [makeMatchAnyEntry({ field: 'c' }), makeMatchAnyEntry({ field: 'd' })];
         const query = buildQueryExceptions({
           language: 'lucene',
           lists: [payload, payload2],
           exclude,
         });
         const expectedQuery =
-          'some.parentField:{ nested.field:"some value" } AND some.not.nested.field:"some value" AND b:("value-1" OR "value-2") AND parent:{ c:"valueC" AND d:"valueD" } AND e:("value-1" OR "value-2")';
+          '(a:("value-1" OR "value-2") AND b:("value-1" OR "value-2")) OR (c:("value-1" OR "value-2") AND d:("value-1" OR "value-2"))';
 
         expect(query).toEqual([{ query: expectedQuery, language: 'lucene' }]);
       });

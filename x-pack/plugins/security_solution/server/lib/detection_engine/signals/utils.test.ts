@@ -23,7 +23,6 @@ import {
   getGapBetweenRuns,
   errorAggregator,
   getListsClient,
-  hasLargeValueList,
   getSignalTimeTuples,
   getExceptions,
 } from './utils';
@@ -584,53 +583,6 @@ describe('utils', () => {
     });
   });
 
-  describe('#hasLargeValueList', () => {
-    test('it returns false if empty array', () => {
-      const hasLists = hasLargeValueList([]);
-
-      expect(hasLists).toBeFalsy();
-    });
-
-    test('it returns true if item of type EntryList exists', () => {
-      const entries: EntriesArray = [
-        {
-          field: 'actingProcess.file.signer',
-          type: 'list',
-          operator: 'included',
-          list: { id: 'some id', type: 'ip' },
-        },
-        {
-          field: 'file.signature.signer',
-          type: 'match',
-          operator: 'excluded',
-          value: 'Global Signer',
-        },
-      ];
-      const hasLists = hasLargeValueList(entries);
-
-      expect(hasLists).toBeTruthy();
-    });
-
-    test('it returns false if item of type EntryList does not exist', () => {
-      const entries: EntriesArray = [
-        {
-          field: 'actingProcess.file.signer',
-          type: 'match',
-          operator: 'included',
-          value: 'Elastic, N.V.',
-        },
-        {
-          field: 'file.signature.signer',
-          type: 'match',
-          operator: 'excluded',
-          value: 'Global Signer',
-        },
-      ];
-      const hasLists = hasLargeValueList(entries);
-
-      expect(hasLists).toBeFalsy();
-    });
-  });
   describe('getSignalTimeTuples', () => {
     test('should return a single tuple if no gap', () => {
       const someTuples = getSignalTimeTuples({

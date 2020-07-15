@@ -20,6 +20,7 @@ import {
   CreateExceptionListItemSchema,
 } from '../shared_imports';
 import { Language } from './schemas/common/schemas';
+import { hasLargeValueList } from './utils';
 
 type Operators = 'and' | 'or' | 'not';
 type LuceneOperators = 'AND' | 'OR' | 'NOT';
@@ -46,18 +47,16 @@ export const getLanguageBooleanOperator = ({
 export const operatorBuilder = ({
   operator,
   language,
-  exclude,
 }: {
   operator: Operator;
   language: Language;
-  exclude: boolean;
 }): string => {
   const not = getLanguageBooleanOperator({
     language,
     value: 'not',
   });
 
-  if ((exclude && operator === 'included') || (!exclude && operator === 'excluded')) {
+  if (operator === 'excluded') {
     return `${not} `;
   } else {
     return '';
@@ -67,14 +66,12 @@ export const operatorBuilder = ({
 export const buildExists = ({
   item,
   language,
-  exclude,
 }: {
   item: EntryExists;
   language: Language;
-  exclude: boolean;
 }): string => {
   const { operator, field } = item;
-  const exceptionOperator = operatorBuilder({ operator, language, exclude });
+  const exceptionOperator = operatorBuilder({ operator, language });
 
   switch (language) {
     case 'kuery':
@@ -89,14 +86,12 @@ export const buildExists = ({
 export const buildMatch = ({
   item,
   language,
-  exclude,
 }: {
   item: EntryMatch;
   language: Language;
-  exclude: boolean;
 }): string => {
   const { value, operator, field } = item;
-  const exceptionOperator = operatorBuilder({ operator, language, exclude });
+  const exceptionOperator = operatorBuilder({ operator, language });
 
   return `${exceptionOperator}${field}:"${value}"`;
 };
@@ -104,11 +99,9 @@ export const buildMatch = ({
 export const buildMatchAny = ({
   item,
   language,
-  exclude,
 }: {
   item: EntryMatchAny;
   language: Language;
-  exclude: boolean;
 }): string => {
   const { value, operator, field } = item;
 
@@ -117,7 +110,7 @@ export const buildMatchAny = ({
       return '';
     default:
       const or = getLanguageBooleanOperator({ language, value: 'or' });
-      const exceptionOperator = operatorBuilder({ operator, language, exclude });
+      const exceptionOperator = operatorBuilder({ operator, language });
       const matchAnyValues = value.map((v) => `"${v}"`);
 
       return `${exceptionOperator}${field}:(${matchAnyValues.join(` ${or} `)})`;
@@ -141,18 +134,16 @@ export const buildNested = ({
 export const evaluateValues = ({
   item,
   language,
-  exclude,
 }: {
   item: Entry | EntryNested;
   language: Language;
-  exclude: boolean;
 }): string => {
   if (entriesExists.is(item)) {
-    return buildExists({ item, language, exclude });
+    return buildExists({ item, language });
   } else if (entriesMatch.is(item)) {
-    return buildMatch({ item, language, exclude });
+    return buildMatch({ item, language });
   } else if (entriesMatchAny.is(item)) {
-    return buildMatchAny({ item, language, exclude });
+    return buildMatchAny({ item, language });
   } else if (entriesNested.is(item)) {
     return buildNested({ item, language });
   } else {
@@ -163,40 +154,40 @@ export const evaluateValues = ({
 export const formatQuery = ({
   exceptions,
   language,
+  exclude,
 }: {
   exceptions: string[];
   language: Language;
+  exclude: boolean;
 }): string => {
-  const and = getLanguageBooleanOperator({ language, value: 'and' });
-  const formattedExceptions = exceptions.map((exception, index) => {
+  const or = getLanguageBooleanOperator({ language, value: 'or' });
+  const not = getLanguageBooleanOperator({ language, value: 'not' });
+  const formattedExceptionItems = exceptions.map((exceptionItem, index) => {
     if (index === 0) {
-      return exception;
+      return `(${exceptionItem})`;
     }
 
-    return `${and} ${exception}`;
+    return `${or} (${exceptionItem})`;
   });
 
-  return formattedExceptions.join(' ');
+  const exceptionItemsQuery = formattedExceptionItems.join(' ');
+  return exclude ? `${not} (${exceptionItemsQuery})` : exceptionItemsQuery;
 };
 
 export const buildExceptionItemEntries = ({
-  lists,
+  entries,
   language,
-  exclude,
 }: {
-  lists: EntriesArray;
+  entries: EntriesArray;
   language: Language;
-  exclude: boolean;
 }): string => {
   const and = getLanguageBooleanOperator({ language, value: 'and' });
-  const exceptionItem = lists
-    .filter(({ type }) => type !== 'list')
-    .reduce<string[]>((accum, listItem) => {
-      const exceptionSegment = evaluateValues({ item: listItem, language, exclude });
-      return [...accum, exceptionSegment];
-    }, []);
+  const exceptionItemEntries = entries.reduce<string[]>((accum, listItem) => {
+    const exceptionSegment = evaluateValues({ item: listItem, language });
+    return [...accum, exceptionSegment];
+  }, []);
 
-  return exceptionItem.join(` ${and} `);
+  return exceptionItemEntries.join(` ${and} `);
 };
 
 export const buildQueryExceptions = ({
@@ -208,23 +199,29 @@ export const buildQueryExceptions = ({
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> | undefined;
   exclude?: boolean;
 }): DataQuery[] => {
-  if (lists != null && lists.length > 0) {
-    const exceptions = lists.reduce<string[]>((acc, exceptionItem) => {
-      return [
-        ...acc,
-        ...(exceptionItem.entries !== undefined
-          ? [buildExceptionItemEntries({ lists: exceptionItem.entries, language, exclude })]
-          : []),
-      ];
-    }, []);
-    const formattedQuery = formatQuery({ exceptions, language });
+  if (lists == null || (lists != null && lists.length === 0)) {
+    return [];
+  }
+
+  const exceptionItems = lists.reduce<string[]>((acc, exceptionItem) => {
+    const { entries } = exceptionItem;
+
+    if (entries != null && entries.length > 0 && !hasLargeValueList(entries)) {
+      return [...acc, buildExceptionItemEntries({ entries, language })];
+    } else {
+      return acc;
+    }
+  }, []);
+
+  if (exceptionItems.length === 0) {
+    return [];
+  } else {
+    const formattedQuery = formatQuery({ exceptions: exceptionItems, language, exclude });
     return [
       {
         query: formattedQuery,
         language,
       },
     ];
-  } else {
-    return [];
   }
 };
