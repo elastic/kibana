@@ -222,7 +222,6 @@ StartDatafeedModal.propTypes = {
 };
 
 function getLowestLatestTime(jobs) {
-  console.log('jobs', jobs);
   const times = jobs.map((j) => j.earliestStartTimestampMs || 0);
   return moment(Math.min(...times));
 }
