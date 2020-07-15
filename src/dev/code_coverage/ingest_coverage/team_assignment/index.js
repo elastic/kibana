@@ -30,9 +30,7 @@ const updatePipeline = update(TEAM_ASSIGNMENT_PIPELINE_NAME);
 function execute({ flags, log }) {
   if (flags.verbose) log.verbose(`### Verbose logging enabled`);
 
-  const updatePipe = updatePipeline(log);
-
-  fetch().fold(noop, updatePipe);
+  fetch().fold(noop, updatePipeline(log));
 }
 
 function description() {
