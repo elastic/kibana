@@ -36,6 +36,8 @@ import { getDraftTimelinesRoute } from '../lib/timeline/routes/get_draft_timelin
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/clean_draft_timelines_route';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
+import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_prepacked_timelines_route';
+import { getTimelineByIdRoute } from '../lib/timeline/routes/get_timeline_by_id_route';
 
 export const initRoutes = (
   router: IRouter,
@@ -53,8 +55,8 @@ export const initRoutes = (
   deleteRulesRoute(router);
   findRulesRoute(router);
 
-  addPrepackedRulesRoute(router);
-  getPrepackagedRulesStatusRoute(router);
+  addPrepackedRulesRoute(router, config, security);
+  getPrepackagedRulesStatusRoute(router, config, security);
   createRulesBulkRoute(router, ml);
   updateRulesBulkRoute(router, ml);
   patchRulesBulkRoute(router, ml);
@@ -66,9 +68,12 @@ export const initRoutes = (
   exportRulesRoute(router, config);
 
   importTimelinesRoute(router, config, security);
-  exportTimelinesRoute(router, config);
+  exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
+  getTimelineByIdRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
+
+  installPrepackedTimelinesRoute(router, config, security);
 
   findRulesStatusesRoute(router);
 

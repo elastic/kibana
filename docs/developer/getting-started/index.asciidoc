@@ -29,7 +29,7 @@ you can switch to the correct version when using nvm by running:
 ----
 nvm use
 ----
- 
+
 Install the latest version of https://yarnpkg.com[yarn].
 
 Bootstrap {kib} and install all the dependencies:
@@ -93,13 +93,13 @@ yarn es snapshot --license trial
 
 `trial` will give you access to all capabilities.
 
-Read about more options for <<running-elasticsearch>>, like connecting to a remote host, running from source, 
-preserving data inbetween runs, running remote cluster, etc. 
+Read about more options for <<running-elasticsearch>>, like connecting to a remote host, running from source,
+preserving data inbetween runs, running remote cluster, etc.
 
 [float]
 === Run {kib}
 
-In another terminal window, start up {kib}. Include developer examples by adding an optional `--run-examples` flag.  
+In another terminal window, start up {kib}. Include developer examples by adding an optional `--run-examples` flag.
 
 [source,bash]
 ----
@@ -125,8 +125,6 @@ cause the {kib} server to reboot.
 
 * <<kibana-debugging>>
 
-* <<kibana-sass>>
-
 * <<building-kibana>>
 
 * <<development-plugin-resources>>
@@ -136,8 +134,6 @@ include::running-kibana-advanced.asciidoc[]
 include::sample-data.asciidoc[]
 
 include::debugging.asciidoc[]
-
-include::sass.asciidoc[]
 
 include::building-kibana.asciidoc[]
 

@@ -17,8 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
         __typename: 'KpiNetworkData',
         networkEvents: 6158,
@@ -85,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -99,8 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('packetbeat/default'));
       after(() => esArchiver.unload('packetbeat/default'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
       const expectedResult = {
         __typename: 'KpiNetworkData',
         networkEvents: 6158,
@@ -166,6 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })

@@ -209,7 +209,7 @@ def runErrorReporter() {
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun}
+      node scripts/report_failed_tests ${dryRun} target/junit/**/*.xml
     """,
     "Report failed tests, if necessary"
   )

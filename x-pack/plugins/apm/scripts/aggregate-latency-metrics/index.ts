@@ -9,7 +9,8 @@ import { argv } from 'yargs';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
 import { parse, format } from 'url';
-import { unique, without, set, merge, flatten } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { unique, without, merge, flatten } from 'lodash';
 import * as histogram from 'hdr-histogram-js';
 import { ESSearchResponse } from '../../typings/elasticsearch';
 import {

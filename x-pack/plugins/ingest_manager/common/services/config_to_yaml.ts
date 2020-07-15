@@ -12,7 +12,7 @@ const CONFIG_KEYS_ORDER = [
   'revision',
   'type',
   'outputs',
-  'settings',
+  'agent',
   'inputs',
   'enabled',
   'use_output',
