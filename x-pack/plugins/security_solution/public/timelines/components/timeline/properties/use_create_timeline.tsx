@@ -8,7 +8,12 @@ import { useDispatch } from 'react-redux';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
-import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
+import { useFullScreen } from '../../../../common/containers/use_full_screen';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineTypeLiteral,
+} from '../../../../../common/types/timeline';
 
 export const useCreateTimelineButton = ({
   timelineId,
@@ -20,9 +25,14 @@ export const useCreateTimelineButton = ({
   closeGearMenu?: () => void;
 }) => {
   const dispatch = useDispatch();
+  const { timelineFullScreen, setTimelineFullScreen } = useFullScreen();
 
   const createTimeline = useCallback(
-    ({ id, show }) =>
+    ({ id, show }) => {
+      if (id === TimelineId.active && timelineFullScreen) {
+        setTimelineFullScreen(false);
+      }
+
       dispatch(
         timelineActions.createTimeline({
           id,
@@ -30,8 +40,9 @@ export const useCreateTimelineButton = ({
           show,
           timelineType,
         })
-      ),
-    [dispatch, timelineType]
+      );
+    },
+    [dispatch, setTimelineFullScreen, timelineFullScreen, timelineType]
   );
 
   const handleButtonClick = useCallback(() => {
