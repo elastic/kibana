@@ -7,7 +7,7 @@ Tile layers display image tiles served from a tile server.
 [role="screenshot"]
 image::maps/images/tile_layer.png[]
 
-To add a tile layer to your map, click *Add layer*, then select one of the following layers:
+To add a tile layer to your map, click *Add layer*, then select one of the following:
 
 *Configured Tile Map Service*:: Tile map service configured in kibana.yml.
 See map.tilemap.url in <<settings>> for details.
