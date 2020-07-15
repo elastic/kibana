@@ -10,47 +10,50 @@ import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { createSearchItems } from './new_job_utils';
 
 describe('createSearchItems', () => {
-  const savedSearch = ({
-    client: {
-      http: {
-        basePath: {
-          basePath: '/abc',
-          serverBasePath: '/abc',
-        },
-        anonymousPaths: {},
-      },
-      batchQueue: [],
-    },
-    attributes: {
-      title: 'not test',
-      description: '',
-      hits: 0,
-      columns: ['_source'],
-      sort: [],
-      version: 1,
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: '',
-      },
-    },
-    _version: 'WzI0OSw0XQ==',
-    id: '4b9b1010-c678-11ea-b6e6-e942978fa29c',
-    type: 'search',
-    migrationVersion: {
-      search: '7.4.0',
-    },
-    references: [
-      {
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-        id: '7e252840-bd27-11ea-8a6c-75d1a0bd08ab',
-      },
-    ],
-  } as unknown) as SavedSearchSavedObject;
-
   const kibanaConfig = {} as IUiSettingsClient;
   const indexPattern = ({
     fields: [],
   } as unknown) as IIndexPattern;
+
+  let savedSearch = ({} as unknown) as SavedSearchSavedObject;
+  beforeEach(() => {
+    savedSearch = ({
+      client: {
+        http: {
+          basePath: {
+            basePath: '/abc',
+            serverBasePath: '/abc',
+          },
+          anonymousPaths: {},
+        },
+        batchQueue: [],
+      },
+      attributes: {
+        title: 'not test',
+        description: '',
+        hits: 0,
+        columns: ['_source'],
+        sort: [],
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '',
+        },
+      },
+      _version: 'WzI0OSw0XQ==',
+      id: '4b9b1010-c678-11ea-b6e6-e942978fa29c',
+      type: 'search',
+      migrationVersion: {
+        search: '7.4.0',
+      },
+      references: [
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: '7e252840-bd27-11ea-8a6c-75d1a0bd08ab',
+        },
+      ],
+    } as unknown) as SavedSearchSavedObject;
+  });
 
   test('should match index pattern', () => {
     const resp = createSearchItems(kibanaConfig, indexPattern, null);
