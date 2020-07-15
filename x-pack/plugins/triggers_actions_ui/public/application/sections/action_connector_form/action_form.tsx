@@ -45,7 +45,6 @@ import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
-import { ServiceNowConnectorConfiguration } from '../../../common';
 
 interface ActionAccordionFormProps {
   actions: AlertAction[];
@@ -132,14 +131,7 @@ export const ActionForm = ({
       try {
         setIsLoadingConnectors(true);
         const loadedConnectors = await loadConnectors({ http });
-        setConnectors(
-          loadedConnectors.filter(
-            (action) =>
-              action.actionTypeId !== ServiceNowConnectorConfiguration.id ||
-              (action.actionTypeId === ServiceNowConnectorConfiguration.id &&
-                !action.config.isCaseOwned)
-          )
-        );
+        setConnectors(loadedConnectors);
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -313,6 +305,7 @@ export const ActionForm = ({
               editAction={setActionParamsProperty}
               messageVariables={messageVariables}
               defaultMessage={defaultActionMessage ?? undefined}
+              docLinks={docLinks}
             />
           </Suspense>
         ) : null}

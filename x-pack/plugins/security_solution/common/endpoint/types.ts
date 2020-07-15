@@ -334,13 +334,13 @@ export interface AlertEvent {
     start: number;
     thread?: ThreadFields[];
     uptime: number;
-    Ext: {
+    Ext?: {
       /*
        * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
        * values towards the end of the array are more distant ancestors (grandparents). Therefore
        * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
        */
-      ancestry: string[];
+      ancestry?: string[];
       code_signature: Array<{
         subject_name: string;
         trusted: boolean;
@@ -539,8 +539,8 @@ export interface EndpointEvent {
      * values towards the end of the array are more distant ancestors (grandparents). Therefore
      * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
      */
-    Ext: {
-      ancestry: string[];
+    Ext?: {
+      ancestry?: string[];
     };
   };
   user?: {

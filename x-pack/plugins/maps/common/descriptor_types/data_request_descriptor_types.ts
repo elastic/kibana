@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { RENDER_AS, SORT_ORDER, SCALING_TYPES, SOURCE_TYPES } from '../constants';
+import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
 
@@ -18,6 +18,7 @@ export type MapFilters = {
   refreshTimerLastTriggeredAt?: string;
   timeFilters: TimeRange;
   zoom: number;
+  geogridPrecision?: number;
 };
 
 type ESSearchSourceSyncMeta = {
@@ -26,12 +27,10 @@ type ESSearchSourceSyncMeta = {
   scalingType: SCALING_TYPES;
   topHitsSplitField: string;
   topHitsSize: number;
-  sourceType: SOURCE_TYPES.ES_SEARCH;
 };
 
 type ESGeoGridSourceSyncMeta = {
   requestType: RENDER_AS;
-  sourceType: SOURCE_TYPES.ES_GEO_GRID;
 };
 
 export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta | null;

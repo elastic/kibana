@@ -13,32 +13,32 @@ import { FilterManager, FormFilter } from '../models/filter';
 // TODO - add function for returning a list of just the filter IDs.
 // TODO - add function for returning a list of filter IDs plus item count.
 function getAllFilters(context: RequestHandlerContext) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+  const mgr = new FilterManager(context.ml!.mlClient);
   return mgr.getAllFilters();
 }
 
 function getAllFilterStats(context: RequestHandlerContext) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+  const mgr = new FilterManager(context.ml!.mlClient);
   return mgr.getAllFilterStats();
 }
 
 function getFilter(context: RequestHandlerContext, filterId: string) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+  const mgr = new FilterManager(context.ml!.mlClient);
   return mgr.getFilter(filterId);
 }
 
 function newFilter(context: RequestHandlerContext, filter: FormFilter) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+  const mgr = new FilterManager(context.ml!.mlClient);
   return mgr.newFilter(filter);
 }
 
 function updateFilter(context: RequestHandlerContext, filterId: string, filter: FormFilter) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+  const mgr = new FilterManager(context.ml!.mlClient);
   return mgr.updateFilter(filterId, filter);
 }
 
 function deleteFilter(context: RequestHandlerContext, filterId: string) {
-  const mgr = new FilterManager(context.ml!.mlClient.callAsCurrentUser);
+  const mgr = new FilterManager(context.ml!.mlClient);
   return mgr.deleteFilter(filterId);
 }
 
