@@ -28,4 +28,4 @@ include::security/index.asciidoc[leveloffset=+1]
 
 include::code-exploration.asciidoc[leveloffset=+1]
 
-include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset+1]
+include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset=+1]
