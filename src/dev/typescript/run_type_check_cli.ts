@@ -90,8 +90,9 @@ export function runTypeCheckCli() {
   execInProjects(log, projects, process.execPath, (project) => [
     ...(project.name.startsWith('x-pack') ? ['--max-old-space-size=4096'] : []),
     require.resolve('typescript/bin/tsc'),
-    ...['--project', project.tsConfigPath],
+    ...(project.config.compilerOptions?.composite
+      ? ['-b', project.tsConfigPath]
+      : ['--noEmit', '--project', project.tsConfigPath]),
     ...tscArgs,
-    ...(project.disableNoEmit ? [] : ['--noEmit']),
   ]);
 }

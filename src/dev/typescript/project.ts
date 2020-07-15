@@ -22,7 +22,6 @@ import { basename, dirname, relative, resolve } from 'path';
 
 import { IMinimatch, Minimatch } from 'minimatch';
 import { parseConfigFileTextToJson } from 'typescript';
-import deepMerge from 'deepmerge';
 
 import { REPO_ROOT } from '../constants';
 
@@ -36,17 +35,7 @@ function makeMatchers(directory: string, patterns: string[]) {
 }
 
 function parseTsConfig(path: string) {
-  // eslint-disable-next-line prefer-const
-  let { error, config } = parseConfigFileTextToJson(path, readFileSync(path, 'utf8'));
-  if (config.extends) {
-    const extendsPath = resolve(dirname(path), config.extends);
-    const extendSource = parseTsConfig(extendsPath);
-    // This is a really rough approximation of Typescript's `extends`
-    // behaviour and doesn't correctly include all files. But I couldn't find
-    // a public API to read a fully extend config. Seems like
-    // `getParsedCommandLine` might be what we want but unsure how to use it?
-    config = deepMerge(config, extendSource);
-  }
+  const { error, config } = parseConfigFileTextToJson(path, readFileSync(path, 'utf8'));
 
   if (error) {
     throw error;
@@ -81,7 +70,7 @@ export class Project {
       exclude?: string[];
     };
 
-    if (files || !include) {
+    if ((files && files.length > 0) || !include) {
       throw new Error(
         'tsconfig.json files in the Kibana repo must use "include" keys and not "files"'
       );
@@ -91,7 +80,7 @@ export class Project {
     this.disableTypeCheck = options.disableTypeCheck || false;
     this.disableNoEmit = options.disableNoEmit || false;
     this.name = options.name || relative(REPO_ROOT, this.directory) || basename(this.directory);
-    this.include = makeMatchers(this.directory, include);
+    this.include = makeMatchers(this.directory, include || []);
     this.exclude = makeMatchers(this.directory, exclude);
   }
 
