@@ -6,11 +6,11 @@
 
 import { SearchParams } from 'elasticsearch';
 
-import { LegacyAPICaller, SavedObjectsClient } from '../../../../../../src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { jobServiceProvider } from '../../../../ml/server/models/job_service';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DataRecognizer } from '../../../../ml/server/models/data_recognizer';
+import {
+  LegacyAPICaller,
+  SavedObjectsClient,
+  KibanaRequest,
+} from '../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
 import { DetectionRulesUsage, MlJobsUsage } from './index';
@@ -165,13 +165,18 @@ export const getMlJobsUsage = async (ml: MlPluginSetup | undefined): Promise<MlJ
 
   if (ml) {
     try {
-      const mlCaller = ml.mlClient.callAsInternalUser;
-      const modules = await new DataRecognizer(
-        mlCaller,
-        ({} as unknown) as SavedObjectsClient
-      ).listModules();
+      const fakeRequest = { headers: {}, params: 'DummyKibanaRequest' } as KibanaRequest;
+      const fakeSOClient = {} as SavedObjectsClient;
+      const internalMlClient = {
+        callAsCurrentUser: ml?.mlClient.callAsInternalUser,
+        callAsInternalUser: ml?.mlClient.callAsInternalUser,
+      };
+
+      const modules = await ml
+        .modulesProvider(internalMlClient, fakeRequest, fakeSOClient)
+        .listModules();
       const moduleJobs = modules.flatMap((module) => module.jobs);
-      const jobs = await jobServiceProvider(mlCaller).jobsSummary(['siem']);
+      const jobs = await ml.jobServiceProvider(internalMlClient, fakeRequest).jobsSummary(['siem']);
 
       jobsUsage = jobs.reduce((usage, job) => {
         const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);

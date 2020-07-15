@@ -31,7 +31,13 @@ jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
     services: mockCoreServices.createStart(),
   }),
+  useNotifications: () => {
+    return {
+      toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError: jest.fn() },
+    };
+  },
 }));
+
 export const MockI18nService = i18nServiceMock.create();
 export const I18nServiceConstructor = jest.fn().mockImplementation(() => MockI18nService);
 jest.doMock('@kbn/i18n', () => ({

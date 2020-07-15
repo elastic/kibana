@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import '../../../../common/mock/match_media';
 import { RulesPage } from './index';
 import { useUserInfo } from '../../../components/user_info';
 import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
