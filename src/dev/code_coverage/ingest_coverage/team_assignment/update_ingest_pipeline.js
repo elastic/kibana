@@ -19,7 +19,7 @@
 
 import { createFailError } from '@kbn/dev-utils';
 import { RESEARCH_CLUSTER_ES_HOST } from '../constants';
-import { pretty } from '../utils';
+import { pretty, green } from '../utils';
 
 const { Client } = require('@elastic/elasticsearch');
 
@@ -29,8 +29,8 @@ const client = new Client({ node });
 export const update = (id) => (log) => async (body) => {
   try {
     await client.ingest.putPipeline({ id, body });
-    log.verbose(id);
-    log.verbose(`${body.slice(0, 300)}...`);
+    log.verbose(`### Ingestion Pipeline ID: ${green(id)}`);
+    log.verbose(`### Payload Partial: \n${body.slice(0, 300)}...`);
   } catch (e) {
     throw createFailError(`${pretty(e.meta)}`);
   }
