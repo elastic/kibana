@@ -118,7 +118,7 @@ the dashboard has a reference to a visualization, and that has a reference to an
 
 [source,sh]
 ----
-$ curl -X POST "localhost:5601/api/spaces/_copy_saved_objects"
+$ curl -X POST api/spaces/_copy_saved_objects
 {
   "objects": [{
     "type": "dashboard",
@@ -171,7 +171,7 @@ the dashboard has a reference to a visualization, and that has a reference to an
 
 [source,sh]
 ----
-$ curl -X POST "localhost:5601/api/spaces/_copy_saved_objects"
+$ curl -X POST api/spaces/_copy_saved_objects
 {
   "objects": [{
     "type": "dashboard",
@@ -219,7 +219,7 @@ this example, the dashboard has a reference to a visualization and a canvas, and
 
 [source,sh]
 ----
-$ curl -X POST "localhost:5601/api/spaces/_copy_saved_objects"
+$ curl -X POST api/spaces/_copy_saved_objects
 {
   "objects": [{
     "type": "dashboard",

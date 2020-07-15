@@ -98,7 +98,7 @@ Resolve conflict errors for an index pattern, visualization, and canvas by overw
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"index-pattern","id":"my-pattern","overwrite":true},{"type":"visualization","id":"my-vis","overwrite":true,"destinationId":"another-vis"},{"type":"canvas","id":"my-canvas","overwrite":true,"destinationId":"yet-another-canvas"},{"type":"dashboard","id":"my-dashboard"}]'
+$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"index-pattern","id":"my-pattern","overwrite":true},{"type":"visualization","id":"my-vis","overwrite":true,"destinationId":"another-vis"},{"type":"canvas","id":"my-canvas","overwrite":true,"destinationId":"yet-another-canvas"},{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
 // KIBANA
 
@@ -156,7 +156,7 @@ Resolve a missing reference error for a visualization by replacing the index pat
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_resolve_import_errors" -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern-*","to":"existing-pattern"}]},{"type":"dashboard","id":"my-dashboard"}]'
+$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern-*","to":"existing-pattern"}]},{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
 // KIBANA
 

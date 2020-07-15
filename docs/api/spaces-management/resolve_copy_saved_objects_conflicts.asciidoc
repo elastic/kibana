@@ -136,7 +136,7 @@ Resolve conflict errors for an index pattern, visualization, and canvas by overw
 
 [source,sh]
 ----
-$ curl -X POST "localhost:5601/api/spaces/_resolve_copy_saved_objects_errors"
+$ curl -X POST api/spaces/_resolve_copy_saved_objects_errors
 {
   "objects": [{
     "type": "dashboard",

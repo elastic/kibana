@@ -19,7 +19,7 @@ export const mockOptionsNetwork: RequestBasicOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
+  timerange: { interval: '12h', to: '2019-02-11T02:26:46.071Z', from: '2019-02-10T02:26:46.071Z' },
   filterQuery: {},
 };
 
@@ -28,7 +28,11 @@ export const mockRequestNetwork = {
     operationName: 'GetOverviewNetworkQuery',
     variables: {
       sourceId: 'default',
-      timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
+      timerange: {
+        interval: '12h',
+        from: '2019-02-10T02:30:30.772Z',
+        to: '2019-02-11T02:30:30.772Z',
+      },
       filterQuery: '',
     },
     query:
@@ -90,7 +94,7 @@ export const mockOptionsHost: RequestBasicOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
+  timerange: { interval: '12h', to: '2019-02-11T02:26:46.071Z', from: '2019-02-10T02:26:46.071Z' },
   filterQuery: {},
 };
 
@@ -99,7 +103,11 @@ export const mockRequestHost = {
     operationName: 'GetOverviewHostQuery',
     variables: {
       sourceId: 'default',
-      timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
+      timerange: {
+        interval: '12h',
+        from: '2019-02-10T02:30:30.772Z',
+        to: '2019-02-11T02:30:30.772Z',
+      },
       filterQuery: '',
     },
     query:
