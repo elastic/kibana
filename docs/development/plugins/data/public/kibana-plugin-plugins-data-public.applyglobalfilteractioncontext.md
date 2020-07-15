@@ -4,8 +4,6 @@
 
 ## ApplyGlobalFilterActionContext interface
 
-Action context for 
-
 <b>Signature:</b>
 
 ```typescript

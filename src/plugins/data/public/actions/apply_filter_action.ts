@@ -26,12 +26,7 @@ import type { IEmbeddable } from '../../../embeddable/public';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
-type ActionGlobalApplyFilterFilterType = typeof ACTION_GLOBAL_APPLY_FILTER;
 
-/**
- * Action context for {@link ActionGlobalApplyFilterFilterType}
- * @public
- */
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
@@ -45,8 +40,8 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
 export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): ActionByType<ActionGlobalApplyFilterFilterType> {
-  return createAction<ActionGlobalApplyFilterFilterType>({
+): ActionByType<typeof ACTION_GLOBAL_APPLY_FILTER> {
+  return createAction<typeof ACTION_GLOBAL_APPLY_FILTER>({
     type: ACTION_GLOBAL_APPLY_FILTER,
     id: ACTION_GLOBAL_APPLY_FILTER,
     getIconType: () => 'filter',
