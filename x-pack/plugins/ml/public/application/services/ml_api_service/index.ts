@@ -372,6 +372,16 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
+    checkIndexExists({ index }: { index: string }) {
+      const body = JSON.stringify({ index });
+
+      return httpService.http<any>({
+        path: `${basePath()}/index_exists`,
+        method: 'POST',
+        body,
+      });
+    },
+
     getFieldCaps({ index, fields }: { index: string; fields: string[] }) {
       const body = JSON.stringify({
         ...(index !== undefined ? { index } : {}),
