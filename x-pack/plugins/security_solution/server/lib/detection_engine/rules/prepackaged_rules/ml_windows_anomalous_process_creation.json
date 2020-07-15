@@ -5,7 +5,7 @@
   ],
   "description": "Identifies unusual parent-child process relationships that can indicate malware execution or persistence mechanisms. Malicious scripts often call on other applications and processes as part of their exploit payload. For example, when a malicious Office document runs scripts as part of an exploit payload, Excel or Word may start a script interpreter process, which, in turn, runs a script that downloads and executes malware. Another common scenario is Outlook running an unusual process when malware is downloaded in an email. Monitoring and identifying anomalous process relationships is a method of detecting new and emerging malware that is not yet recognized by anti-virus scanners.",
   "false_positives": [
-    "Users running scripts in the course of technical support operations of software upgrades could trigger this signal. A newly installed program or one that runs rarely as part of a monthly or quarterly workflow could trigger this signal."
+    "Users running scripts in the course of technical support operations of software upgrades could trigger this alert. A newly installed program or one that runs rarely as part of a monthly or quarterly workflow could trigger this alert."
   ],
   "from": "now-45m",
   "interval": "15m",

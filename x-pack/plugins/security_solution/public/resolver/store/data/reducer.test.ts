@@ -166,6 +166,15 @@ describe('Resolver Data Middleware', () => {
 
         expect(selectedEventsForFirstChildNode).toBe(firstChildNodeInTree.relatedEvents);
       });
+      it('should return related events for the category equal to the number of events of that type provided', () => {
+        const relatedEventsByCategory = selectors.relatedEventsByCategory(store.getState());
+        const relatedEventsForOvercountedCategory = relatedEventsByCategory(
+          firstChildNodeInTree.id
+        )(categoryToOverCount);
+        expect(relatedEventsForOvercountedCategory.length).toBe(
+          eventStatsForFirstChildNode.byCategory[categoryToOverCount] - 1
+        );
+      });
       it('should indicate the limit has been exceeded because the number of related events received for the category is less than what the stats count said it would be', () => {
         const selectedRelatedInfo = selectors.relatedEventInfoByEntityId(store.getState());
         const shouldShowLimit = selectedRelatedInfo(firstChildNodeInTree.id)
