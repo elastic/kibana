@@ -20,7 +20,6 @@ import {
 } from '../../hooks/use_create_analytics_form';
 import { State } from '../../hooks/use_create_analytics_form/state';
 import { DataFrameAnalyticsListRow } from '../analytics_list/common';
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 interface PropDefinition {
@@ -328,11 +327,11 @@ export function extractCloningConfig({
   }) as unknown) as CloneDataFrameAnalyticsConfig;
 }
 
-export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
-  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
-    defaultMessage: 'Clone job',
-  });
+const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
+  defaultMessage: 'Clone job',
+});
 
+export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
   const { actions } = createAnalyticsForm;
 
   const onClick = async (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
@@ -348,23 +347,7 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
   };
 }
 
-interface CloneButtonProps {
-  item: DataFrameAnalyticsListRow;
-  createAnalyticsForm: CreateAnalyticsFormProps;
-}
-
-/**
- * Temp component to have Clone job button with the same look as the other actions.
- * Replace with {@link getCloneAction} as soon as all the actions are refactored
- * to support EuiContext with a valid DOM structure without nested buttons.
- */
-export const CloneButton: FC<CloneButtonProps> = ({ createAnalyticsForm, item }) => {
-  const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
-
-  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
-    defaultMessage: 'Clone job',
-  });
-
+export const useNavigateToWizardWithClonedJob = () => {
   const {
     services: {
       application: { navigateToUrl },
@@ -375,7 +358,7 @@ export const CloneButton: FC<CloneButtonProps> = ({ createAnalyticsForm, item })
 
   const savedObjectsClient = savedObjects.client;
 
-  const onClick = async () => {
+  return async (item: DataFrameAnalyticsListRow) => {
     const sourceIndex = Array.isArray(item.config.source.index)
       ? item.config.source.index[0]
       : item.config.source.index;
@@ -419,9 +402,19 @@ export const CloneButton: FC<CloneButtonProps> = ({ createAnalyticsForm, item })
       );
     }
   };
+};
 
-  const buttonDisabled = !canCreateDataFrameAnalytics;
+interface CloneButtonProps {
+  isDisabled: boolean;
+  onClick: () => void;
+}
 
+/**
+ * Temp component to have Clone job button with the same look as the other actions.
+ * Replace with {@link getCloneAction} as soon as all the actions are refactored
+ * to support EuiContext with a valid DOM structure without nested buttons.
+ */
+export const CloneButton: FC<CloneButtonProps> = ({ isDisabled, onClick }) => {
   const button = (
     <EuiButtonEmpty
       aria-label={buttonText}
@@ -429,7 +422,7 @@ export const CloneButton: FC<CloneButtonProps> = ({ createAnalyticsForm, item })
       data-test-subj="mlAnalyticsJobCloneButton"
       flush="left"
       iconType="copy"
-      isDisabled={buttonDisabled}
+      isDisabled={isDisabled}
       onClick={onClick}
       size="s"
     >
@@ -437,7 +430,7 @@ export const CloneButton: FC<CloneButtonProps> = ({ createAnalyticsForm, item })
     </EuiButtonEmpty>
   );
 
-  if (buttonDisabled) {
+  if (isDisabled) {
     return (
       <EuiToolTip
         position="top"

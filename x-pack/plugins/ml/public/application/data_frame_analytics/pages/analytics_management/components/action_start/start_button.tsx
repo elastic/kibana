@@ -8,30 +8,27 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../capabilities/check_capabilities';
+import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 
-import { DataFrameAnalyticsListRow, isCompletedAnalyticsJob } from '../analytics_list/common';
+import { DataFrameAnalyticsListRow } from '../analytics_list/common';
+
+const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.startActionName', {
+  defaultMessage: 'Start',
+});
 
 interface StartButtonProps {
+  canStartStopDataFrameAnalytics: boolean;
+  isDisabled: boolean;
   item: DataFrameAnalyticsListRow;
-  onClick: (item: DataFrameAnalyticsListRow) => void;
+  onClick: () => void;
 }
 
-export const StartButton: FC<StartButtonProps> = ({ item, onClick }) => {
-  const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
-
-  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.startActionName', {
-    defaultMessage: 'Start',
-  });
-
-  // Disable start for analytics jobs which have completed.
-  const completeAnalytics = isCompletedAnalyticsJob(item.stats);
-
-  const buttonDisabled = !canStartStopDataFrameAnalytics || completeAnalytics;
-
+export const StartButton: FC<StartButtonProps> = ({
+  canStartStopDataFrameAnalytics,
+  isDisabled,
+  item,
+  onClick,
+}) => {
   const button = (
     <EuiButtonEmpty
       aria-label={buttonText}
@@ -39,15 +36,15 @@ export const StartButton: FC<StartButtonProps> = ({ item, onClick }) => {
       data-test-subj="mlAnalyticsJobStartButton"
       flush="left"
       iconType="play"
-      isDisabled={buttonDisabled}
-      onClick={() => onClick(item)}
+      isDisabled={isDisabled}
+      onClick={onClick}
       size="s"
     >
       {buttonText}
     </EuiButtonEmpty>
   );
 
-  if (buttonDisabled) {
+  if (isDisabled) {
     return (
       <EuiToolTip
         position="top"

@@ -10,21 +10,16 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
+const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.editActionName', {
+  defaultMessage: 'Edit',
+});
 
 interface EditButtonProps {
+  isDisabled: boolean;
   onClick: () => void;
 }
 
-export const EditButton: FC<EditButtonProps> = ({ onClick }) => {
-  const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
-
-  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.editActionName', {
-    defaultMessage: 'Edit',
-  });
-
-  const buttonDisabled = !canCreateDataFrameAnalytics;
-
+export const EditButton: FC<EditButtonProps> = ({ isDisabled, onClick }) => {
   const button = (
     <EuiButtonEmpty
       aria-label={buttonText}
@@ -32,7 +27,7 @@ export const EditButton: FC<EditButtonProps> = ({ onClick }) => {
       data-test-subj="mlAnalyticsJobEditButton"
       flush="left"
       iconType="pencil"
-      isDisabled={buttonDisabled}
+      isDisabled={isDisabled}
       onClick={onClick}
       size="s"
     >
@@ -40,7 +35,7 @@ export const EditButton: FC<EditButtonProps> = ({ onClick }) => {
     </EuiButtonEmpty>
   );
 
-  if (buttonDisabled) {
+  if (isDisabled) {
     return (
       <EuiToolTip
         position="top"

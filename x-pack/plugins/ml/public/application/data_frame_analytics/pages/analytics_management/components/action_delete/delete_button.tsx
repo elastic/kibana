@@ -7,27 +7,20 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../capabilities/check_capabilities';
+import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 import { isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from '../analytics_list/common';
 
+const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.deleteActionName', {
+  defaultMessage: 'Delete',
+});
+
 interface DeleteButtonProps {
+  isDisabled: boolean;
   item: DataFrameAnalyticsListRow;
-  onClick: (item: DataFrameAnalyticsListRow) => void;
+  onClick: () => void;
 }
 
-export const DeleteButton: FC<DeleteButtonProps> = ({ item, onClick }) => {
-  const disabled = isDataFrameAnalyticsRunning(item.stats.state);
-  const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
-
-  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.deleteActionName', {
-    defaultMessage: 'Delete',
-  });
-
-  const buttonDisabled = disabled || !canDeleteDataFrameAnalytics;
-
+export const DeleteButton: FC<DeleteButtonProps> = ({ isDisabled, item, onClick }) => {
   const button = (
     <EuiButtonEmpty
       aria-label={buttonText}
@@ -35,20 +28,20 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ item, onClick }) => {
       data-test-subj="mlAnalyticsJobDeleteButton"
       flush="left"
       iconType="trash"
-      isDisabled={buttonDisabled}
-      onClick={() => onClick(item)}
+      isDisabled={isDisabled}
+      onClick={onClick}
       size="s"
     >
       {buttonText}
     </EuiButtonEmpty>
   );
 
-  if (buttonDisabled) {
+  if (isDisabled) {
     return (
       <EuiToolTip
         position="top"
         content={
-          disabled
+          isDataFrameAnalyticsRunning(item.stats.state)
             ? i18n.translate(
                 'xpack.ml.dataframe.analyticsList.deleteActionDisabledToolTipContent',
                 {
