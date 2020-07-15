@@ -10,8 +10,9 @@ import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '..
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../types';
 import { CallESAsCurrentUser } from '../../../types';
 import { getInstallation, savedObjectTypes } from './index';
+import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
-import { packageConfigService } from '../..';
+import { packageConfigService, appContextService } from '../..';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -25,7 +26,6 @@ export async function removeInstallation(options: {
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
   if (installation.removable === false)
     throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
-  const installedObjects = installation.installed || [];
 
   const { total } = await packageConfigService.list(savedObjectsClient, {
     kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
@@ -38,48 +38,40 @@ export async function removeInstallation(options: {
       `unable to remove package with existing package config(s) in use by agent(s)`
     );
 
+  // recreate or delete index patterns when a package is uninstalled
+  await installIndexPatterns(savedObjectsClient);
+
+  // Delete the installed assets
+  const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
+  await deleteAssets(installedAssets, savedObjectsClient, callCluster);
+
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
 
-  // recreate or delete index patterns when a package is uninstalled
-  await installIndexPatterns(savedObjectsClient);
-
-  // Delete the installed asset
-  await deleteAssets(installedObjects, savedObjectsClient, callCluster);
-
   // successful delete's in SO client return {}. return something more useful
-  return installedObjects;
+  return installedAssets;
 }
 async function deleteAssets(
   installedObjects: AssetReference[],
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
+  const logger = appContextService.getLogger();
   const deletePromises = installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
     if (savedObjectTypes.includes(assetType)) {
-      savedObjectsClient.delete(assetType, id);
+      return savedObjectsClient.delete(assetType, id);
     } else if (assetType === ElasticsearchAssetType.ingestPipeline) {
-      deletePipeline(callCluster, id);
+      return deletePipeline(callCluster, id);
     } else if (assetType === ElasticsearchAssetType.indexTemplate) {
-      deleteTemplate(callCluster, id);
+      return deleteTemplate(callCluster, id);
     }
   });
   try {
     await Promise.all([...deletePromises]);
   } catch (err) {
-    throw new Error(err.message);
-  }
-}
-async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Promise<void> {
-  // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
-  if (id && id !== '*') {
-    try {
-      await callCluster('ingest.deletePipeline', { id });
-    } catch (err) {
-      throw new Error(`error deleting pipeline ${id}`);
-    }
+    logger.error(err);
   }
 }
 
@@ -108,31 +100,14 @@ async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): P
   }
 }
 
-export async function deleteAssetsByType({
-  savedObjectsClient,
-  callCluster,
-  installedObjects,
-  assetType,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  callCluster: CallESAsCurrentUser;
-  installedObjects: AssetReference[];
-  assetType: ElasticsearchAssetType;
-}) {
-  const toDelete = installedObjects.filter((asset) => asset.type === assetType);
-  try {
-    await deleteAssets(toDelete, savedObjectsClient, callCluster);
-  } catch (err) {
-    throw new Error(err.message);
-  }
-}
-
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
   installedObjects: AssetReference[]
 ) {
+  const logger = appContextService.getLogger();
   const deletePromises = installedObjects.map(({ id, type }) => {
     const assetType = type as AssetType;
+
     if (savedObjectTypes.includes(assetType)) {
       return savedObjectsClient.delete(assetType, id);
     }
@@ -140,6 +115,6 @@ export async function deleteKibanaSavedObjectsAssets(
   try {
     await Promise.all(deletePromises);
   } catch (err) {
-    throw new Error('error deleting saved object asset');
+    logger.warn(err);
   }
 }
