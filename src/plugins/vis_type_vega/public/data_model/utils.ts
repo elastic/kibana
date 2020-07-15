@@ -23,13 +23,14 @@ export class Utils {
   /**
    * If the 2nd array parameter in args exists, append it to the warning/error string value
    */
-  static formatWarningToStr(value) {
-    if (arguments.length >= 2) {
+  static formatWarningToStr(...args: any[]) {
+    let value = args[0];
+    if (args.length >= 2) {
       try {
-        if (typeof arguments[1] === 'string') {
-          value += `\n${arguments[1]}`;
+        if (typeof args[1] === 'string') {
+          value += `\n${args[1]}`;
         } else {
-          value += '\n' + compactStringify(arguments[1], { maxLength: 70 });
+          value += '\n' + compactStringify(args[1], { maxLength: 70 });
         }
       } catch (err) {
         // ignore
@@ -38,12 +39,13 @@ export class Utils {
     return value;
   }
 
-  static formatErrorToStr(error) {
+  static formatErrorToStr(...args: any[]) {
+    let error: Error | string = args[0];
     if (!error) {
       error = 'ERR';
     } else if (error instanceof Error) {
       error = error.message;
     }
-    return Utils.formatWarningToStr(error, ...Array.from(arguments).slice(1));
+    return Utils.formatWarningToStr(error, ...Array.from(args).slice(1));
   }
 }
