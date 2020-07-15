@@ -18,34 +18,78 @@
  */
 
 import _ from 'lodash';
-import { vega, vegaLite } from '../lib/vega';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
-import { EsQueryParser } from './es_query_parser';
 import hjson from 'hjson';
+import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+// @ts-ignore
+import { vega, vegaLite } from '../lib/vega';
+import { EsQueryParser } from './es_query_parser';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
-import { VISUALIZATION_COLORS } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { SearchAPI } from './search_api';
+import { TimeCache } from './time_cache';
+import { IServiceSettings } from '../../../maps_legacy/public';
+import {
+  Bool,
+  Data,
+  VegaSpec,
+  VegaConfig,
+  TooltipConfig,
+  DstObj,
+  UrlParserConfig,
+  PendingType,
+  ControlsLocation,
+  ControlsDirection,
+  KibanaConfig,
+} from './types';
 
 // Set default single color to match other Kibana visualizations
-const defaultColor = VISUALIZATION_COLORS[0];
-const locToDirMap = {
+const defaultColor: string = VISUALIZATION_COLORS[0];
+
+const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
   right: 'row',
   top: 'column-reverse',
   bottom: 'column',
 };
-const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v5.json';
+const DEFAULT_SCHEMA: string = 'https://vega.github.io/schema/vega/v5.json';
 
 // If there is no "%type%" parameter, use this parser
-const DEFAULT_PARSER = 'elasticsearch';
+const DEFAULT_PARSER: string = 'elasticsearch';
 
 export class VegaParser {
-  constructor(spec, searchAPI, timeCache, filters, serviceSettings) {
-    this.spec = spec;
+  spec: VegaSpec;
+  hideWarnings: boolean;
+  error?: string;
+  warnings: string[];
+  _urlParsers: UrlParserConfig;
+  isVegaLite?: boolean;
+  useHover?: boolean;
+  _config?: VegaConfig;
+  useMap?: boolean;
+  renderer?: string;
+  tooltips?: boolean | TooltipConfig;
+  mapConfig?: object;
+  vlspec?: VegaSpec;
+  useResize?: boolean;
+  paddingWidth?: number;
+  paddingHeight?: number;
+  containerDir?: ControlsLocation | ControlsDirection;
+  controlsDir?: ControlsLocation;
+
+  constructor(
+    spec: VegaSpec | string,
+    searchAPI: SearchAPI,
+    timeCache: TimeCache,
+    filters: Bool,
+    serviceSettings: IServiceSettings
+  ) {
+    this.spec = spec as VegaSpec;
     this.hideWarnings = false;
+
     this.error = undefined;
     this.warnings = [];
 
@@ -90,10 +134,10 @@ export class VegaParser {
     this.tooltips = this._parseTooltips();
 
     this._setDefaultColors();
-    this._parseControlPlacement(this._config);
+    this._parseControlPlacement();
     if (this.useMap) {
       this.mapConfig = this._parseMapConfig();
-    } else if (this.spec.autosize === undefined) {
+    } else if (this.spec && this.spec.autosize === undefined) {
       // Default autosize should be fit, unless it's a map (leaflet-vega handles that)
       this.spec.autosize = { type: 'fit', contains: 'padding' };
     }
@@ -123,6 +167,7 @@ export class VegaParser {
     // This way we let leaflet-vega library inject a different default projection for tile maps.
     // Also, VL injects default padding and autosize values, but neither should be set for vega-leaflet.
     if (this.useMap) {
+      if (!this.spec || !this.vlspec) return;
       const hasConfig = _.isPlainObject(this.vlspec.config);
       if (this.vlspec.config === undefined || (hasConfig && !this.vlspec.config.projection)) {
         // Assume VL generates spec.projections = an array of exactly one object named 'projection'
@@ -168,49 +213,52 @@ export class VegaParser {
    */
   _calcSizing() {
     this.useResize = false;
-    if (!this.useMap) {
-      // when useResize is true, vega's canvas size will be set based on the size of the container,
-      // and will be automatically updated on resize events.
-      // We delete width & height if the autosize is set to "fit"
-      // We also set useResize=true in case autosize=none, and width & height are not set
-      const autosize = this.spec.autosize.type || this.spec.autosize;
-      if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
-        this.useResize = true;
-      }
-    }
 
     // Padding is not included in the width/height by default
     this.paddingWidth = 0;
     this.paddingHeight = 0;
-    if (this.useResize && this.spec.padding && this.spec.autosize.contains !== 'padding') {
-      if (typeof this.spec.padding === 'object') {
-        this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
-        this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);
-      } else {
-        this.paddingWidth += 2 * (+this.spec.padding || 0);
-        this.paddingHeight += 2 * (+this.spec.padding || 0);
+    if (this.spec) {
+      if (!this.useMap) {
+        // when useResize is true, vega's canvas size will be set based on the size of the container,
+        // and will be automatically updated on resize events.
+        // We delete width & height if the autosize is set to "fit"
+        // We also set useResize=true in case autosize=none, and width & height are not set
+        const autosize = this.spec.autosize.type || this.spec.autosize;
+        if (autosize === 'fit' || (autosize === 'none' && !this.spec.width && !this.spec.height)) {
+          this.useResize = true;
+        }
       }
-    }
 
-    if (this.useResize && (this.spec.width || this.spec.height)) {
-      if (this.isVegaLite) {
-        delete this.spec.width;
-        delete this.spec.height;
-      } else {
-        this._onWarning(
-          i18n.translate(
-            'visTypeVega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage',
-            {
-              defaultMessage:
-                'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
-              values: {
-                autosizeParam: 'autosize=fit',
-                widthParam: '"width"',
-                heightParam: '"height"',
-              },
-            }
-          )
-        );
+      if (this.useResize && this.spec.padding && this.spec.autosize.contains !== 'padding') {
+        if (typeof this.spec.padding === 'object') {
+          this.paddingWidth += (+this.spec.padding.left || 0) + (+this.spec.padding.right || 0);
+          this.paddingHeight += (+this.spec.padding.top || 0) + (+this.spec.padding.bottom || 0);
+        } else {
+          this.paddingWidth += 2 * (+this.spec.padding || 0);
+          this.paddingHeight += 2 * (+this.spec.padding || 0);
+        }
+      }
+
+      if (this.useResize && (this.spec.width || this.spec.height)) {
+        if (this.isVegaLite) {
+          delete this.spec.width;
+          delete this.spec.height;
+        } else {
+          this._onWarning(
+            i18n.translate(
+              'visTypeVega.vegaParser.widthAndHeightParamsAreIgnoredWithAutosizeFitWarningMessage',
+              {
+                defaultMessage:
+                  'The {widthParam} and {heightParam} params are ignored with {autosizeParam}',
+                values: {
+                  autosizeParam: 'autosize=fit',
+                  widthParam: '"width"',
+                  heightParam: '"height"',
+                },
+              }
+            )
+          );
+        }
       }
     }
   }
@@ -220,9 +268,11 @@ export class VegaParser {
    * @private
    */
   _parseControlPlacement() {
-    this.containerDir = locToDirMap[this._config.controlsLocation];
+    this.containerDir = this._config?.controlsLocation
+      ? locToDirMap[this._config.controlsLocation]
+      : undefined;
     if (this.containerDir === undefined) {
-      if (this._config.controlsLocation === undefined) {
+      if (this._config && this._config.controlsLocation === undefined) {
         this.containerDir = 'column';
       } else {
         throw new Error(
@@ -230,14 +280,14 @@ export class VegaParser {
             defaultMessage:
               'Unrecognized {controlsLocationParam} value. Expecting one of [{locToDirMap}]',
             values: {
-              locToDirMap: `"${locToDirMap.keys().join('", "')}"`,
+              locToDirMap: `"${Object.keys(locToDirMap).join('", "')}"`,
               controlsLocationParam: 'controlsLocation',
             },
           })
         );
       }
     }
-    const dir = this._config.controlsDirection;
+    const dir = this._config?.controlsDirection;
     if (dir !== undefined && dir !== 'horizontal' && dir !== 'vertical') {
       throw new Error(
         i18n.translate('visTypeVega.vegaParser.unrecognizedDirValueErrorMessage', {
@@ -254,51 +304,53 @@ export class VegaParser {
    * @returns {object} kibana config
    * @private
    */
-  _parseConfig() {
-    let result;
-    if (this.spec._hostConfig !== undefined) {
-      result = this.spec._hostConfig;
-      delete this.spec._hostConfig;
-      if (!_.isPlainObject(result)) {
-        throw new Error(
-          i18n.translate('visTypeVega.vegaParser.hostConfigValueTypeErrorMessage', {
-            defaultMessage: 'If present, {configName} must be an object',
-            values: { configName: '"_hostConfig"' },
+  _parseConfig(): KibanaConfig | {} {
+    let result: KibanaConfig | null = null;
+    if (this.spec) {
+      if (this.spec._hostConfig !== undefined) {
+        result = this.spec._hostConfig;
+        delete this.spec._hostConfig;
+        if (!_.isPlainObject(result)) {
+          throw new Error(
+            i18n.translate('visTypeVega.vegaParser.hostConfigValueTypeErrorMessage', {
+              defaultMessage: 'If present, {configName} must be an object',
+              values: { configName: '"_hostConfig"' },
+            })
+          );
+        }
+        this._onWarning(
+          i18n.translate('visTypeVega.vegaParser.hostConfigIsDeprecatedWarningMessage', {
+            defaultMessage:
+              '{deprecatedConfigName} has been deprecated. Use {newConfigName} instead.',
+            values: {
+              deprecatedConfigName: '"_hostConfig"',
+              newConfigName: 'config.kibana',
+            },
           })
         );
       }
-      this._onWarning(
-        i18n.translate('visTypeVega.vegaParser.hostConfigIsDeprecatedWarningMessage', {
-          defaultMessage:
-            '{deprecatedConfigName} has been deprecated. Use {newConfigName} instead.',
-          values: {
-            deprecatedConfigName: '"_hostConfig"',
-            newConfigName: 'config.kibana',
-          },
-        })
-      );
-    }
-    if (_.isPlainObject(this.spec.config) && this.spec.config.kibana !== undefined) {
-      result = this.spec.config.kibana;
-      delete this.spec.config.kibana;
-      if (!_.isPlainObject(result)) {
-        throw new Error(
-          i18n.translate('visTypeVega.vegaParser.kibanaConfigValueTypeErrorMessage', {
-            defaultMessage: 'If present, {configName} must be an object',
-            values: { configName: 'config.kibana' },
-          })
-        );
+      if (_.isPlainObject(this.spec.config) && this.spec.config.kibana !== undefined) {
+        result = this.spec.config.kibana;
+        delete this.spec.config.kibana;
+        if (!_.isPlainObject(result)) {
+          throw new Error(
+            i18n.translate('visTypeVega.vegaParser.kibanaConfigValueTypeErrorMessage', {
+              defaultMessage: 'If present, {configName} must be an object',
+              values: { configName: 'config.kibana' },
+            })
+          );
+        }
       }
     }
     return result || {};
   }
 
   _parseTooltips() {
-    if (this._config.tooltips === false) {
+    if (this._config && this._config.tooltips === false) {
       return false;
     }
 
-    const result = this._config.tooltips || {};
+    const result: TooltipConfig = (this._config?.tooltips as TooltipConfig) || {};
 
     if (result.position === undefined) {
       result.position = 'top';
@@ -352,12 +404,12 @@ export class VegaParser {
    * @private
    */
   _parseMapConfig() {
-    const res = {
-      delayRepaint: this._config.delayRepaint === undefined ? true : this._config.delayRepaint,
+    const res: VegaConfig = {
+      delayRepaint: this._config?.delayRepaint === undefined ? true : this._config.delayRepaint,
     };
 
-    const validate = (name, isZoom) => {
-      const val = this._config[name];
+    const validate = (name: string, isZoom: boolean) => {
+      const val = this._config ? this._config[name] : undefined;
       if (val !== undefined) {
         const parsed = parseFloat(val);
         if (Number.isFinite(parsed) && (!isZoom || (parsed >= 0 && parsed <= 30))) {
@@ -381,7 +433,7 @@ export class VegaParser {
     validate(`maxZoom`, true);
 
     // `false` is a valid value
-    res.mapStyle = this._config.mapStyle === undefined ? `default` : this._config.mapStyle;
+    res.mapStyle = this._config?.mapStyle === undefined ? `default` : this._config.mapStyle;
     if (res.mapStyle !== `default` && res.mapStyle !== false) {
       this._onWarning(
         i18n.translate('visTypeVega.vegaParser.mapStyleValueTypeWarningMessage', {
@@ -400,7 +452,7 @@ export class VegaParser {
     this._parseBool('zoomControl', res, true);
     this._parseBool('scrollWheelZoom', res, false);
 
-    const maxBounds = this._config.maxBounds;
+    const maxBounds = this._config?.maxBounds;
     if (maxBounds !== undefined) {
       if (
         !Array.isArray(maxBounds) ||
@@ -423,8 +475,8 @@ export class VegaParser {
     return res;
   }
 
-  _parseBool(paramName, dstObj, dflt) {
-    const val = this._config[paramName];
+  _parseBool(paramName: string, dstObj: DstObj, dflt: boolean | string | number) {
+    const val = this._config ? this._config[paramName] : undefined;
     if (val === undefined) {
       dstObj[paramName] = dflt;
     } else if (typeof val !== 'boolean') {
@@ -448,6 +500,7 @@ export class VegaParser {
    * @private
    */
   _parseSchema() {
+    if (!this.spec) return false;
     if (!this.spec.$schema) {
       this._onWarning(
         i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
@@ -486,13 +539,13 @@ export class VegaParser {
    * @private
    */
   async _resolveDataUrls() {
-    const pending = {};
+    const pending: PendingType = {};
 
-    this._findObjectDataUrls(this.spec, (obj) => {
+    this._findObjectDataUrls(this.spec!, (obj: Data) => {
       const url = obj.url;
       delete obj.url;
-      let type = url['%type%'];
-      delete url['%type%'];
+      let type = url!['%type%'];
+      delete url!['%type%'];
       if (type === undefined) {
         type = DEFAULT_PARSER;
       }
@@ -533,7 +586,8 @@ export class VegaParser {
    * @param {string} [key] field name of the current object
    * @private
    */
-  _findObjectDataUrls(obj, onFind, key) {
+
+  _findObjectDataUrls(obj: VegaSpec | Data, onFind: (data: Data) => void, key?: unknown) {
     if (Array.isArray(obj)) {
       for (const elem of obj) {
         this._findObjectDataUrls(elem, onFind, key);
@@ -557,7 +611,7 @@ export class VegaParser {
             )
           );
         }
-        onFind(obj);
+        onFind(obj as Data);
       } else {
         for (const k of Object.keys(obj)) {
           this._findObjectDataUrls(obj[k], onFind, k);
@@ -582,7 +636,7 @@ export class VegaParser {
       // https://github.com/vega/vega/issues/1083
       // Don't set defaults if spec.config.mark.color or fill are set
       if (
-        !this.spec.config.mark ||
+        !this.spec?.config.mark ||
         (this.spec.config.mark.color === undefined && this.spec.config.mark.fill === undefined)
       ) {
         this._setDefaultValue(defaultColor, 'config', 'arc', 'fill');
@@ -605,7 +659,7 @@ export class VegaParser {
    * @param {string} fields
    * @private
    */
-  _setDefaultValue(value, ...fields) {
+  _setDefaultValue(value: unknown, ...fields: string[]) {
     let o = this.spec;
     for (let i = 0; i < fields.length - 1; i++) {
       const field = fields[i];
@@ -627,9 +681,10 @@ export class VegaParser {
    * Add a warning to the warnings array
    * @private
    */
-  _onWarning() {
+  _onWarning(...args: any[]) {
     if (!this.hideWarnings) {
-      this.warnings.push(Utils.formatWarningToStr(...arguments));
+      this.warnings.push(Utils.formatWarningToStr(args));
+      return Utils.formatWarningToStr(args);
     }
   }
 }
