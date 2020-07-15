@@ -23,6 +23,8 @@ import { BuilderButtonOptions } from './builder_button_options';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { Loader } from '../../loader';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import exceptionableFields from '../exceptionable_fields.json';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -172,6 +174,17 @@ export const ExceptionBuilder = ({
     );
   }, [exceptions]);
 
+  // Filters index pattern fields by exceptionable fields if list type is endpoint
+  const filterIndexPatterns = useCallback(() => {
+    if (listType === 'endpoint') {
+      return {
+        ...indexPatterns,
+        fields: indexPatterns.fields.filter(({ name }) => exceptionableFields.includes(name)),
+      };
+    }
+    return indexPatterns;
+  }, [indexPatterns, listType]);
+
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
   // on the index, as a result, created a temporary id when new exception items are first
@@ -216,7 +229,7 @@ export const ExceptionBuilder = ({
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
-                indexPattern={indexPatterns}
+                indexPattern={filterIndexPatterns()}
                 isLoading={indexPatternLoading}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}
