@@ -28,9 +28,26 @@ export function getDataHandler<T extends ObservabilityApp>(appName: T) {
   }
 }
 
+function getPromiseResult(promiseResult: PromiseFulfilledResult<any> | PromiseRejectedResult) {
+  if (promiseResult.status === 'fulfilled') {
+    return promiseResult.value;
+  }
+  // eslint-disable-next-line no-console
+  console.error('Error while fetching has data', promiseResult.reason);
+  return false;
+}
+
 export async function fetchHasData() {
   const apps: ObservabilityApp[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics'];
   const promises = apps.map((app) => getDataHandler(app)?.hasData());
-  const [apm, uptime, logs, metrics] = await Promise.allSettled(promises);
-  return { apm, uptime, infra_logs: logs, infra_metrics: metrics };
+  const [apm, uptime, logs, metrics] = await Promise.allSettled(promises).then((results) =>
+    results.map(getPromiseResult)
+  );
+
+  return {
+    apm,
+    uptime,
+    infra_logs: logs,
+    infra_metrics: metrics,
+  };
 }
