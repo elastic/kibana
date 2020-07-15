@@ -14,7 +14,7 @@ import {
   EntryList,
   ExceptionListItemSchema,
 } from '../../../../../lists/common/schemas';
-import { hasLargeValueList } from './utils';
+import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;
