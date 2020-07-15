@@ -47,7 +47,6 @@ export function getEnabled(): boolean;
 export function getShowMapVisualizationTypes(): boolean;
 export function getShowMapsInspectorAdapter(): boolean;
 export function getPreserveDrawingBuffer(): boolean;
-export function getEnableVectorTiles(): boolean;
 export function getProxyElasticMapsServiceInMaps(): boolean;
 export function getIsGoldPlus(): boolean;
 
