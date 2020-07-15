@@ -160,6 +160,10 @@ export const formatQuery = ({
   language: Language;
   exclude: boolean;
 }): string => {
+  if (exceptions == null || (exceptions != null && exceptions.length === 0)) {
+    return '';
+  }
+
   const or = getLanguageBooleanOperator({ language, value: 'or' });
   const not = getLanguageBooleanOperator({ language, value: 'not' });
   const formattedExceptionItems = exceptions.map((exceptionItem, index) => {

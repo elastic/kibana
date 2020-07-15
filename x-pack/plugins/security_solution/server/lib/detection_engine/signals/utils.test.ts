@@ -9,7 +9,6 @@ import sinon from 'sinon';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
-import { EntriesArray } from '../../../../common/shared_imports';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';

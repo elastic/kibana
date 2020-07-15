@@ -365,28 +365,28 @@ describe('get_filter', () => {
             { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
             {
               bool: {
-                filter: [
-                  {
-                    nested: {
-                      path: 'some.parentField',
-                      query: {
-                        bool: {
-                          minimum_should_match: 1,
-                          should: [
-                            {
-                              match_phrase: {
-                                'some.parentField.nested.field': 'some value',
-                              },
+                must_not: {
+                  bool: {
+                    filter: [
+                      {
+                        nested: {
+                          path: 'some.parentField',
+                          query: {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'some.parentField.nested.field': 'some value',
+                                  },
+                                },
+                              ],
                             },
-                          ],
+                          },
+                          score_mode: 'none',
                         },
                       },
-                      score_mode: 'none',
-                    },
-                  },
-                  {
-                    bool: {
-                      must_not: {
+                      {
                         bool: {
                           minimum_should_match: 1,
                           should: [
@@ -398,9 +398,9 @@ describe('get_filter', () => {
                           ],
                         },
                       },
-                    },
+                    ],
                   },
-                ],
+                },
               },
             },
           ],
