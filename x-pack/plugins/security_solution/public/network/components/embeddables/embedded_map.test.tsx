@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import '../../../common/mock/match_media';
 import { useIndexPatterns } from '../../../common/hooks/use_index_patterns';
 import { EmbeddedMapComponent } from './embedded_map';
 

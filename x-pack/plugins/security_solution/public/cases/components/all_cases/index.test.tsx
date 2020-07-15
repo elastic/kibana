@@ -7,6 +7,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
+
+import '../../../common/mock/match_media';
 import { AllCases } from '.';
 import { TestProviders } from '../../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
