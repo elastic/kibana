@@ -429,8 +429,8 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
           const monitorInfo = await libs.requests.getLatestMonitor({
             callES: options.services.callCluster,
             dynamicSettings,
-            dateStart: verifiedParams.right.timerange.from,
-            dateEnd: verifiedParams.right.timerange.to,
+            dateStart: params!.timerange.from,
+            dateEnd: params!.timerange.to,
             monitorId: monitorLoc.monitor_id,
             observerLocation: monitorLoc.location,
             status: 'down',
@@ -444,11 +444,11 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
             ...options.state,
             monitor: monitorInfo.monitor?.name || monitorInfo.monitor?.id,
             monitorId: monitorInfo.monitor.id,
-            monitorUrl: monitorInfo.url.full,
+            monitorUrl: monitorInfo.url?.full,
             monitorType: monitorInfo.monitor?.type,
             latestErrorMessage: monitorInfo.error?.message,
             observerLocation: monitorInfo.observer?.geo?.name,
-            observerHostname: monitorInfo.observer?.hostname,
+            observerHostname: monitorInfo.agent?.hostname,
             ...updateState(options.state, true),
           });
 

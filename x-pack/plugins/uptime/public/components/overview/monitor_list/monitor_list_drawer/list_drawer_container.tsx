@@ -17,7 +17,7 @@ import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_ty
 interface ContainerProps {
   summary: MonitorSummary;
   monitorDetails: MonitorDetails;
-  loadMonitorDetails: typeof getMonitorDetailsAction;
+  loadMonitorDetails: typeof getMonitorDetailsAction.get;
 }
 
 const Container: React.FC<ContainerProps> = ({ summary, loadMonitorDetails, monitorDetails }) => {
@@ -41,7 +41,7 @@ const mapStateToProps = (state: AppState, { summary }: any) => ({
 
 const mapDispatchToProps = (dispatch: any) => ({
   loadMonitorDetails: (actionPayload: MonitorDetailsActionPayload) =>
-    dispatch(getMonitorDetailsAction(actionPayload)),
+    dispatch(getMonitorDetailsAction.get(actionPayload)),
 });
 
 export const MonitorListDrawer = connect(mapStateToProps, mapDispatchToProps)(Container);

@@ -56,13 +56,7 @@ export const MonitorListComponent: ({
   linkParameters,
   pageSize,
   setPageSize,
-}: {
-  filters: any;
-  monitorList: { list: any; error: any; loading: any };
-  linkParameters: any;
-  pageSize: any;
-  setPageSize: any;
-}) => any = ({
+}: Props) => any = ({
   filters,
   monitorList: { list, error, loading },
   linkParameters,
@@ -150,6 +144,7 @@ export const MonitorListComponent: ({
     },
     {
       name: 'Actions',
+      width: '100px',
       actions: [
         {
           name: 'Alert',

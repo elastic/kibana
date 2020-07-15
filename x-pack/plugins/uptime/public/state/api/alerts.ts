@@ -8,8 +8,8 @@ import { ACTION_GROUP_DEFINITIONS, API_URLS, CLIENT_ALERT_TYPES } from '../../..
 import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
 
-import { MonitorIdParam } from '../actions/types';
-import { Alert } from '../../../../triggers_actions_ui/public';
+import { AlertsResult, MonitorIdParam } from '../actions/types';
+import { Alert, AlertAction } from '../../../../triggers_actions_ui/public';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -19,16 +19,18 @@ export const fetchConnectors = async () => {
   return await apiService.get(API_URLS.ALERT_ACTIONS);
 };
 
+export interface NewAlertParams {
+  monitorId: string;
+  monitorName?: string;
+  defaultActions: ActionConnector[];
+}
+
 export const createAlert = async ({
   defaultActions,
   monitorId,
   monitorName,
-}: {
-  monitorId: string;
-  monitorName: string;
-  defaultActions: ActionConnector[];
-}) => {
-  const actions = [];
+}: NewAlertParams): Promise<Alert> => {
+  const actions: AlertAction[] = [];
   defaultActions.forEach((aId) => {
     actions.push({
       id: aId.id,
@@ -63,7 +65,7 @@ export const createAlert = async ({
   return await apiService.post(API_URLS.CREATE_ALERT, data);
 };
 
-export const fetchMonitorAlertRecords = async (): Promise<Alert[]> => {
+export const fetchMonitorAlertRecords = async (): Promise<AlertsResult> => {
   const data = {
     page: 1,
     per_page: 500,

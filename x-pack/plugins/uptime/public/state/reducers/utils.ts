@@ -41,7 +41,7 @@ export function handleAsyncAction<ReducerState>(
   };
 }
 
-export function getAsyncInitialState(initialData = null) {
+export function asyncInitState(initialData = null) {
   return {
     data: initialData,
     loading: false,
