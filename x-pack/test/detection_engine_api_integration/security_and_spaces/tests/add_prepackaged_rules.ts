@@ -15,7 +15,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('add_prepackaged_rules', () => {
+  // https://github.com/elastic/kibana/issues/71814
+  describe.skip('add_prepackaged_rules', () => {
     describe('validation errors', () => {
       it('should give an error that the index must exist first if it does not exist before adding prepackaged rules', async () => {
         const { body } = await supertest
