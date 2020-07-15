@@ -109,6 +109,29 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     blockRefresh
   );
 
+  const onQueryChange: EuiSearchBarProps['onChange'] = ({
+    query,
+    queryText: newQueryText,
+    error,
+  }) => {
+    if (error) {
+      setSearchError(error.message);
+    } else {
+      let clauses: Clause[] = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      if (clauses.length > 0) {
+        setQueryText(newQueryText);
+        setFilterActive(true);
+        filterAnalytics(clauses as Array<TermClause | FieldClause>);
+      } else {
+        setFilterActive(false);
+      }
+      setSearchError(undefined);
+    }
+  };
+
   // Query text/job_id based on url but only after getAnalytics is done first
   // jobIdSelected makes sure the query is only run once since analytics is being refreshed constantly
   const selectedId = getSelectedJobIdFromUrl(window.location.href);
@@ -117,8 +140,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       if (selectedId !== undefined) {
         setJobIdSelected(true);
         setQueryText(selectedId);
-        const selectedIdQuery: Query = EuiSearchBar.Query.parse(selectedId);
-        onQueryChange({ query: selectedIdQuery, error: undefined });
+        const selectedIdQuery = EuiSearchBar.Query.parse(selectedId);
+        onQueryChange({ query: selectedIdQuery, queryText: selectedId, error: null });
       }
     }
   }, [jobIdSelected, analytics]);
@@ -128,25 +151,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     isLoading: setIsLoading,
     onRefresh: () => getAnalytics(true),
   });
-
-  const onQueryChange: EuiSearchBarProps['onChange'] = ({ query, error }) => {
-    if (error) {
-      setSearchError(error.message);
-    } else {
-      let clauses: Clause[] = [];
-      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
-        clauses = query.ast.clauses;
-      }
-      if (clauses.length > 0) {
-        setQueryText(query.text);
-        setFilterActive(true);
-        filterAnalytics(clauses as Array<TermClause | FieldClause>);
-      } else {
-        setFilterActive(false);
-      }
-      setSearchError(undefined);
-    }
-  };
 
   const filterAnalytics = (clauses: Array<TermClause | FieldClause>) => {
     setIsLoading(true);
