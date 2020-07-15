@@ -32,7 +32,7 @@ def areChangesSkippable() {
 
   try {
     def skippablePaths = getSkippablePaths()
-    def notSkippablePaths = getSkippablePaths()
+    def notSkippablePaths = getNotSkippablePaths()
     def files = getChangedFiles()
 
     // 3000 is the max files GH API will return
@@ -41,7 +41,8 @@ def areChangesSkippable() {
     }
 
     files = files.findAll { file ->
-      return !(skippablePaths.find { regex -> file =~ regex} && !notSkippablePaths.find { regex -> file =~ regex })
+      def skippable = skippablePaths.find { regex -> file =~ regex} && !notSkippablePaths.find { regex -> file =~ regex }
+      return !skippable
     }
 
     return files.size() < 1
