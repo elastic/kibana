@@ -167,6 +167,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
 export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   isNew,
   author: ['Elastic'],
+  isAssociatedToEndpointList: false,
   isBuildingBlock: false,
   timestampOverride: '',
   ruleNameOverride: '',
