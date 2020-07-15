@@ -16,7 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { querySavedObjectType } from './query';
-export { indexPatternSavedObjectType } from './index_patterns';
-export { kqlTelemetry } from './kql_telemetry';
-export { searchTelemetry } from './search_telemetry';
+
+export enum SEARCH_EVENT_TYPE {
+  QUERY_TIMED_OUT = 'queryTimedOut',
+  QUERIES_CANCELLED = 'queriesCancelled',
+  LONG_QUERY_POPUP_SHOWN = 'longQueryPopupShown',
+  LONG_QUERY_DIALOG_DISMISSED = 'longQueryDialogDismissed',
+  LONG_QUERY_RUN_BEYOND_TIMEOUT = 'longQueryRunBeyondTimeout',
+}
+
+export interface SearchUsageCollector {
+  trackQueryTimedOut: () => Promise<void>;
+  trackQueriesCancelled: () => Promise<void>;
+  trackLongQueryPopupShown: () => Promise<void>;
+  trackLongQueryDialogDismissed: () => Promise<void>;
+  trackLongQueryRunBeyondTimeout: () => Promise<void>;
+  trackError: (duration: number) => Promise<void>;
+  trackSuccess: (duration: number) => Promise<void>;
+}
