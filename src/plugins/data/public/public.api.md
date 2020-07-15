@@ -742,6 +742,8 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
 //
 // @public (undocumented)
 export interface IEsSearchResponse extends IKibanaSearchResponse {
+    isPartial?: boolean;
+    isRunning?: boolean;
     // (undocumented)
     rawResponse: SearchResponse_2<any>;
 }
@@ -1149,11 +1151,10 @@ export type InputTimeRange = TimeRange | {
 // @public (undocumented)
 export type ISearch = (request: IKibanaSearchRequest, options?: ISearchOptions) => Observable<IKibanaSearchResponse>;
 
-// Warning: (ae-forgotten-export) The symbol "IStrategyOptions" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ISearchGeneric" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ISearchGeneric = (request: IEsSearchRequest, options?: IStrategyOptions) => Observable<IEsSearchResponse>;
+export type ISearchGeneric = (request: IEsSearchRequest, options?: ISearchOptions) => Observable<IEsSearchResponse>;
 
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1161,6 +1162,8 @@ export type ISearchGeneric = (request: IEsSearchRequest, options?: IStrategyOpti
 export interface ISearchOptions {
     // (undocumented)
     signal?: AbortSignal;
+    // (undocumented)
+    strategy?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "SearchSource" needs to be exported by the entry point index.d.ts
@@ -1661,7 +1664,7 @@ export class SearchInterceptor {
     // (undocumented)
     protected readonly requestTimeout?: number | undefined;
     // (undocumented)
-    protected runSearch(request: IEsSearchRequest, combinedSignal: AbortSignal): Observable<IEsSearchResponse>;
+    protected runSearch(request: IEsSearchRequest, combinedSignal: AbortSignal, strategy?: string): Observable<IEsSearchResponse>;
     search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
     // (undocumented)
     protected setupTimers(options?: ISearchOptions): {

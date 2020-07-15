@@ -31,7 +31,6 @@ import {
   SearchExamplesPluginSetupDeps,
   SearchExamplesPluginStartDeps,
 } from './types';
-import { defineRoutes } from './routes';
 import { mySearchStrategyProvider } from './my_strategy';
 
 export class SearchExamplesPlugin
@@ -59,9 +58,6 @@ export class SearchExamplesPlugin
       const myStrategy = mySearchStrategyProvider(depsStart.data);
       deps.data.search.registerSearchStrategy('myStrategy', myStrategy);
     });
-
-    // Register server side APIs
-    defineRoutes(router);
 
     return {};
   }
