@@ -9,8 +9,8 @@ import { map, truncate } from 'lodash';
 import open from 'opn';
 import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import { ViewZoomWidthHeight } from '../../../export_types/common/layouts/layout';
 import { LevelLogger } from '../../../lib';
+import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ConditionalHeaders, ElementPosition } from '../../../types';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 

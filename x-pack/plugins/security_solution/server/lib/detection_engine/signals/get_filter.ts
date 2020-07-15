@@ -49,49 +49,62 @@ export const getFilter = async ({
   query,
   lists,
 }: GetFilterArgs): Promise<unknown> => {
-  switch (type) {
-    case 'query': {
-      if (query != null && language != null && index != null) {
-        return getQueryFilter(query, language, filters || [], index, lists);
-      } else {
-        throw new BadRequestError('query, filters, and index parameter should be defined');
+  const queryFilter = () => {
+    if (query != null && language != null && index != null) {
+      return getQueryFilter(query, language, filters || [], index, lists);
+    } else {
+      throw new BadRequestError('query, filters, and index parameter should be defined');
+    }
+  };
+
+  const savedQueryFilter = async () => {
+    if (savedId != null && index != null) {
+      try {
+        // try to get the saved object first
+        const savedObject = await services.savedObjectsClient.get<QueryAttributes>(
+          'query',
+          savedId
+        );
+        return getQueryFilter(
+          savedObject.attributes.query.query,
+          savedObject.attributes.query.language,
+          savedObject.attributes.filters,
+          index,
+          lists
+        );
+      } catch (err) {
+        // saved object does not exist, so try and fall back if the user pushed
+        // any additional language, query, filters, etc...
+        if (query != null && language != null && index != null) {
+          return getQueryFilter(query, language, filters || [], index, lists);
+        } else {
+          // user did not give any additional fall back mechanism for generating a rule
+          // rethrow error for activity monitoring
+          throw err;
+        }
       }
+    } else {
+      throw new BadRequestError('savedId parameter should be defined');
+    }
+  };
+
+  switch (type) {
+    case 'threshold': {
+      return savedId != null ? savedQueryFilter() : queryFilter();
+    }
+    case 'query': {
+      return queryFilter();
     }
     case 'saved_query': {
-      if (savedId != null && index != null) {
-        try {
-          // try to get the saved object first
-          const savedObject = await services.savedObjectsClient.get<QueryAttributes>(
-            'query',
-            savedId
-          );
-          return getQueryFilter(
-            savedObject.attributes.query.query,
-            savedObject.attributes.query.language,
-            savedObject.attributes.filters,
-            index,
-            lists
-          );
-        } catch (err) {
-          // saved object does not exist, so try and fall back if the user pushed
-          // any additional language, query, filters, etc...
-          if (query != null && language != null && index != null) {
-            return getQueryFilter(query, language, filters || [], index, lists);
-          } else {
-            // user did not give any additional fall back mechanism for generating a rule
-            // rethrow error for activity monitoring
-            throw err;
-          }
-        }
-      } else {
-        throw new BadRequestError('savedId parameter should be defined');
-      }
+      return savedQueryFilter();
     }
     case 'machine_learning': {
       throw new BadRequestError(
         'Unsupported Rule of type "machine_learning" supplied to getFilter'
       );
     }
+    default: {
+      return assertUnreachable(type);
+    }
   }
-  return assertUnreachable(type);
 };

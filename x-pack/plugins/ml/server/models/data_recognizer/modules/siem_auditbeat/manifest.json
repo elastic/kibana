@@ -1,7 +1,7 @@
 {
   "id": "siem_auditbeat",
-  "title": "SIEM Auditbeat",
-  "description": "Detect suspicious network activity and unusual processes in Auditbeat data (beta).",
+  "title": "Security: Auditbeat",
+  "description": "Detect suspicious network activity and unusual processes in Auditbeat data.",
   "type": "Auditbeat data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*",

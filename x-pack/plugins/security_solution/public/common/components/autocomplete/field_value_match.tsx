@@ -22,6 +22,7 @@ interface AutocompleteFieldMatchProps {
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
+  fieldInputWidth?: number;
   onChange: (arg: string) => void;
 }
 
@@ -33,6 +34,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   isLoading,
   isDisabled = false,
   isClearable = false,
+  fieldInputWidth,
   onChange,
 }): JSX.Element => {
   const [isLoadingSuggestions, suggestions, updateSuggestions] = useFieldValueAutocomplete({
@@ -97,6 +99,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       isInvalid={!isValid}
       sortMatchesBy="startsWith"
       data-test-subj="valuesAutocompleteComboBox matchComboxBox"
+      style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
       fullWidth
       async
     />
