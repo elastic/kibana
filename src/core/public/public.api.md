@@ -1300,7 +1300,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     perPage?: number;
     preference?: string;
-    rawSearchFields?: string[];
+    rootSearchFields?: string[];
     search?: string;
     searchFields?: string[];
     // (undocumented)

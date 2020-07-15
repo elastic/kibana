@@ -95,7 +95,7 @@ describe('#checkOriginConflicts', () => {
       const { type, id, originId } = object;
       const search = `"${rawIdPrefix}${type}:${originId || id}" | "${originId || id}"`; // this template works for our basic test cases
       const expectedOptions = expect.objectContaining({ type, search });
-      // exclude rawSearchFields, page, perPage, and fields attributes from assertion -- these are constant
+      // exclude rootSearchFields, page, perPage, and fields attributes from assertion -- these are constant
       // exclude namespace from assertion -- a separate test covers that
       expect(find).toHaveBeenNthCalledWith(n, expectedOptions);
     };

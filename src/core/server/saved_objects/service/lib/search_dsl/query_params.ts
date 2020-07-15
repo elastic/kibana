@@ -39,24 +39,24 @@ function getTypes(mappings: IndexMapping, type?: string | string[]) {
 }
 
 /**
- *  Get the field params based on the types, searchFields, and rawSearchFields
+ *  Get the field params based on the types, searchFields, and rootSearchFields
  */
 function getFieldsForTypes(
   types: string[],
   searchFields: string[] = [],
-  rawSearchFields: string[] = []
+  rootSearchFields: string[] = []
 ) {
-  if (!searchFields.length && !rawSearchFields.length) {
+  if (!searchFields.length && !rootSearchFields.length) {
     return {
       lenient: true,
       fields: ['*'],
     };
   }
 
-  let fields = [...rawSearchFields];
+  let fields = [...rootSearchFields];
   fields.forEach((field) => {
     if (field.indexOf('.') !== -1) {
-      throw new Error(`rawSearchFields entry "${field}" is invalid: cannot contain "." character`);
+      throw new Error(`rootSearchFields entry "${field}" is invalid: cannot contain "." character`);
     }
   });
 
@@ -129,7 +129,7 @@ interface QueryParams {
   type?: string | string[];
   search?: string;
   searchFields?: string[];
-  rawSearchFields?: string[];
+  rootSearchFields?: string[];
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
@@ -145,7 +145,7 @@ export function getQueryParams({
   type,
   search,
   searchFields,
-  rawSearchFields,
+  rootSearchFields,
   defaultSearchOperator,
   hasReference,
   kueryNode,
@@ -211,7 +211,7 @@ export function getQueryParams({
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(types, searchFields, rawSearchFields),
+          ...getFieldsForTypes(types, searchFields, rootSearchFields),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         },
       },

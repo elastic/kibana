@@ -82,9 +82,11 @@ export interface SavedObjectsFindOptions {
   search?: string;
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
-  /** The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be raw and will not be
-   * modified. If used in conjunction with `searchFields`, both are concatenated together. */
-  rawSearchFields?: string[];
+  /**
+   * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
+   * be modified. If used in conjunction with `searchFields`, both are concatenated together.
+   */
+  rootSearchFields?: string[];
   hasReference?: { type: string; id: string };
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string;

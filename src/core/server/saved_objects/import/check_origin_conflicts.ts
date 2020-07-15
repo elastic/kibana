@@ -101,7 +101,7 @@ const checkOriginConflict = async (
   const findOptions = {
     type,
     search,
-    rawSearchFields: ['_id', 'originId'],
+    rootSearchFields: ['_id', 'originId'],
     page: 1,
     perPage: 10,
     fields: ['title'],

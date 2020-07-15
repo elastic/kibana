@@ -309,7 +309,7 @@ describe('#getQueryParams', () => {
       });
     });
 
-    describe('`searchFields` and `rawSearchFields` parameters', () => {
+    describe('`searchFields` and `rootSearchFields` parameters', () => {
       const getExpectedFields = (searchFields: string[], typeOrTypes: string | string[]) => {
         const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
         return searchFields.map((x) => types.map((y) => `${y}.${x}`)).flat();
@@ -317,10 +317,10 @@ describe('#getQueryParams', () => {
 
       const test = ({
         searchFields,
-        rawSearchFields,
+        rootSearchFields,
       }: {
         searchFields?: string[];
-        rawSearchFields?: string[];
+        rootSearchFields?: string[];
       }) => {
         for (const typeOrTypes of ALL_TYPE_SUBSETS) {
           const result = getQueryParams({
@@ -329,9 +329,9 @@ describe('#getQueryParams', () => {
             type: typeOrTypes,
             search,
             searchFields,
-            rawSearchFields,
+            rootSearchFields,
           });
-          let fields = rawSearchFields || [];
+          let fields = rootSearchFields || [];
           if (searchFields) {
             fields = fields.concat(getExpectedFields(searchFields, typeOrTypes));
           }
@@ -344,9 +344,9 @@ describe('#getQueryParams', () => {
           type: undefined,
           search,
           searchFields,
-          rawSearchFields,
+          rootSearchFields,
         });
-        let fields = rawSearchFields || [];
+        let fields = rootSearchFields || [];
         if (searchFields) {
           fields = fields.concat(getExpectedFields(searchFields, ALL_TYPES));
         }
@@ -361,20 +361,20 @@ describe('#getQueryParams', () => {
             type: undefined,
             search,
             searchFields: undefined,
-            rawSearchFields: ['foo', 'bar.baz'],
+            rootSearchFields: ['foo', 'bar.baz'],
           })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"rawSearchFields entry \\"bar.baz\\" is invalid: cannot contain \\".\\" character"`
+          `"rootSearchFields entry \\"bar.baz\\" is invalid: cannot contain \\".\\" character"`
         );
       });
 
-      it('includes lenient flag and all fields when `searchFields` and `rawSearchFields` are not specified', () => {
+      it('includes lenient flag and all fields when `searchFields` and `rootSearchFields` are not specified', () => {
         const result = getQueryParams({
           mappings,
           registry,
           search,
           searchFields: undefined,
-          rawSearchFields: undefined,
+          rootSearchFields: undefined,
         });
         expectResult(result, expect.objectContaining({ lenient: true, fields: ['*'] }));
       });
@@ -392,15 +392,15 @@ describe('#getQueryParams', () => {
       });
 
       it('includes specified raw search fields', () => {
-        test({ rawSearchFields: ['_id'] });
+        test({ rootSearchFields: ['_id'] });
       });
 
       it('supports multiple raw search fields', () => {
-        test({ rawSearchFields: ['_id', 'originId'] });
+        test({ rootSearchFields: ['_id', 'originId'] });
       });
 
       it('supports search fields and raw search fields', () => {
-        test({ searchFields: ['title'], rawSearchFields: ['_id'] });
+        test({ searchFields: ['title'], rootSearchFields: ['_id'] });
       });
     });
 
