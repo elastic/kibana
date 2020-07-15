@@ -85,6 +85,17 @@ export function createCreateIndexStream({
         stats.createdIndex(index, { settings });
       } catch (err) {
         if (
+          err?.body?.error?.reason?.includes('index exists with the same name as the alias') &&
+          attemptNumber < 3
+        ) {
+          log.info(
+            `failed to create aliases [${aliases}] because ES indicated an index/alias already exists, trying again`
+          );
+          await attemptToCreate(attemptNumber + 1);
+          return;
+        }
+
+        if (
           get(err, 'body.error.type') !== 'resource_already_exists_exception' ||
           attemptNumber >= 3
         ) {
