@@ -11,18 +11,18 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
+  Logger,
 } from 'src/core/server';
 
 import { BASE_EVENT_LOG_API_PATH } from '../../common';
 import { findOptionsSchema, FindOptionsType } from '../event_log_client';
-import { QueryEventsBySavedObjectResult } from '../es/cluster_client_adapter';
 
 const paramSchema = schema.object({
   type: schema.string(),
   id: schema.string(),
 });
 
-export const findRoute = (router: IRouter) => {
+export const findRoute = (router: IRouter, systemLogger: Logger) => {
   router.get(
     {
       path: `${BASE_EVENT_LOG_API_PATH}/{type}/{id}/_find`,
@@ -45,14 +45,15 @@ export const findRoute = (router: IRouter) => {
         query,
       } = req;
 
-      let result: QueryEventsBySavedObjectResult;
       try {
-        result = await eventLogClient.findEventsBySavedObject(type, id, query);
+        return res.ok({
+          body: await eventLogClient.findEventsBySavedObject(type, id, query),
+        });
       } catch (err) {
+        const call = `findEventsBySavedObject(${type}, ${id}, ${JSON.stringify(query)})`;
+        systemLogger.debug(`error calling eventLog ${call}: ${err.message}`);
         return res.notFound();
       }
-
-      return res.ok({ body: result });
     })
   );
 };

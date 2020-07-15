@@ -96,7 +96,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     // Routes
     const router = core.http.createRouter();
     // Register routes
-    findRoute(router);
+    findRoute(router, this.systemLogger);
 
     return this.eventLogService;
   }

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { IEvent } from '../../../../../../plugins/event_log/server';
-
 import { IValidatedEvent } from '../../../../plugins/event_log/server';
 import { getUrlPrefix } from '.';
 import { FtrProviderContext } from '../ftr_provider_context';
