@@ -282,7 +282,20 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <EuiSpacer size="l" />
-            <EuiFormRow label={I18n.BUILDING_BLOCK} isInvalid={false} fullWidth>
+            <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
+              <CommonUseField
+                path="isAssociatedToEndpointList"
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
+                  'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    isDisabled: isLoading,
+                  },
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow label={I18n.BUILDING_BLOCK} fullWidth>
               <CommonUseField
                 path="isBuildingBlock"
                 componentProps={{
@@ -291,7 +304,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   euiFieldProps: {
                     fullWidth: true,
                     isDisabled: isLoading,
-                    placeholder: '',
                   },
                 }}
               />
