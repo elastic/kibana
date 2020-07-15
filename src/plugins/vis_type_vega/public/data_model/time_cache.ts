@@ -17,26 +17,36 @@
  * under the License.
  */
 
+import { TimefilterContract } from '../../../data/public';
+import { TimeRange } from '../../../data/common';
+import { CacheBounds } from './types';
+
 /**
  * Optimization caching - always return the same value if queried within this time
  * @type {number}
  */
-const AlwaysCacheMaxAge = 40;
+
+const AlwaysCacheMaxAge: number = 40;
 
 /**
  * This class caches timefilter's bounds to minimize number of server requests
  */
 export class TimeCache {
-  constructor(timefilter, maxAge) {
+  _timefilter: TimefilterContract;
+  _maxAge: number;
+  _cachedBounds?: CacheBounds;
+  _cacheTS: number;
+  _timeRange?: TimeRange;
+
+  constructor(timefilter: TimefilterContract, maxAge: number) {
     this._timefilter = timefilter;
     this._maxAge = maxAge;
-    this._cachedBounds = null;
     this._cacheTS = 0;
   }
 
   // Simplifies unit testing
   // noinspection JSMethodCanBeStatic
-  _now() {
+  _now(): number {
     return Date.now();
   }
 
@@ -44,10 +54,10 @@ export class TimeCache {
    * Get cached time range values
    * @returns {{min: number, max: number}}
    */
-  getTimeBounds() {
+  getTimeBounds(): CacheBounds {
     const ts = this._now();
 
-    let bounds;
+    let bounds: CacheBounds | null = null;
     if (this._cachedBounds) {
       const diff = ts - this._cacheTS;
 
@@ -76,7 +86,7 @@ export class TimeCache {
     return this._cachedBounds;
   }
 
-  setTimeRange(timeRange) {
+  setTimeRange(timeRange: TimeRange): void {
     this._timeRange = timeRange;
   }
 
@@ -85,11 +95,11 @@ export class TimeCache {
    * @returns {{min: number, max: number}}
    * @private
    */
-  _getBounds() {
-    const bounds = this._timefilter.calculateBounds(this._timeRange);
+  _getBounds(): CacheBounds {
+    const bounds = this._timefilter.calculateBounds(this._timeRange!);
     return {
-      min: bounds.min.valueOf(),
-      max: bounds.max.valueOf(),
+      min: bounds.min!.valueOf(),
+      max: bounds.max!.valueOf(),
     };
   }
 }

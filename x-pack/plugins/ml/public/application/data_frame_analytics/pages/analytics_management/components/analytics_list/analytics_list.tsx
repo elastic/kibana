@@ -49,7 +49,6 @@ import {
 } from '../../../../../components/ml_in_memory_table';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
-import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
 
@@ -72,13 +71,11 @@ interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
   blockRefresh?: boolean;
-  createAnalyticsForm?: CreateAnalyticsFormProps;
 }
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
   isMlEnabledInSpace = true,
   blockRefresh = false,
-  createAnalyticsForm,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
@@ -228,8 +225,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     expandedRowItemIds,
     setExpandedRowItemIds,
     isManagementTable,
-    isMlEnabledInSpace,
-    createAnalyticsForm
+    isMlEnabledInSpace
   );
 
   // Before the analytics have been loaded for the first time, display the loading indicator only.
@@ -268,7 +264,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             </h2>
           }
           actions={
-            !isManagementTable && createAnalyticsForm
+            !isManagementTable
               ? [
                   <EuiButtonEmpty
                     onClick={() => setIsSourceIndexModalVisible(true)}
@@ -370,10 +366,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            {!isManagementTable && createAnalyticsForm && (
+            {!isManagementTable && (
               <EuiFlexItem grow={false}>
                 <CreateAnalyticsButton
-                  {...createAnalyticsForm}
+                  isDisabled={disabled}
                   setIsSourceIndexModalVisible={setIsSourceIndexModalVisible}
                 />
               </EuiFlexItem>
