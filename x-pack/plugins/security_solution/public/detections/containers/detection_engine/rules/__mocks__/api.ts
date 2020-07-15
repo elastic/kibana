@@ -34,6 +34,9 @@ export const getPrePackagedRulesStatus = async ({
     rules_installed: 12,
     rules_not_installed: 0,
     rules_not_updated: 0,
+    timelines_installed: 0,
+    timelines_not_installed: 0,
+    timelines_not_updated: 0,
   });
 
 export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> =>

@@ -88,12 +88,15 @@ export const getTopHitMetricAgg = () => {
             };
           } else {
             if (field.readFromDocValues) {
-              // always format date fields as date_time to avoid
-              // displaying unformatted dates like epoch_millis
-              // or other not-accepted momentjs formats
-              const format =
-                field.type === KBN_FIELD_TYPES.DATE ? 'date_time' : 'use_field_mapping';
-              output.params.docvalue_fields = [{ field: field.name, format }];
+              output.params.docvalue_fields = [
+                {
+                  field: field.name,
+                  // always format date fields as date_time to avoid
+                  // displaying unformatted dates like epoch_millis
+                  // or other not-accepted momentjs formats
+                  ...(field.type === KBN_FIELD_TYPES.DATE && { format: 'date_time' }),
+                },
+              ];
             }
             output.params._source = field.name === '_source' ? true : field.name;
           }

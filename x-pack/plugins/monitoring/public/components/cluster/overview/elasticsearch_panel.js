@@ -5,11 +5,11 @@
  */
 
 import React, { Fragment } from 'react';
+import moment from 'moment-timezone';
 import { get, capitalize } from 'lodash';
 import { formatNumber } from '../../../lib/format_number';
 import {
   ClusterItemContainer,
-  HealthStatusIndicator,
   BytesPercentageUsage,
   DisabledIfNoDataAndInSetupModeLink,
 } from './helpers';
@@ -26,14 +26,24 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiFlexGroup,
+  EuiHealth,
+  EuiText,
 } from '@elastic/eui';
-import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from '../../logs/reason';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import {
+  ELASTICSEARCH_SYSTEM_ID,
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CLUSTER_HEALTH,
+  ALERT_CPU_USAGE,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+} from '../../../../common/constants';
+import { AlertsBadge } from '../../../alerts/badge';
+import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 
 const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
@@ -52,6 +62,8 @@ const calculateShards = (shards) => {
     replicas,
   };
 };
+
+const formatDateLocal = (input) => moment.tz(input, moment.tz.guess()).format('LL');
 
 function getBadgeColorFromLogLevel(level) {
   switch (level) {
@@ -138,23 +150,26 @@ function renderLog(log) {
   );
 }
 
+const OVERVIEW_PANEL_ALERTS = [ALERT_CLUSTER_HEALTH, ALERT_LICENSE_EXPIRATION];
+
+const NODES_PANEL_ALERTS = [
+  ALERT_CPU_USAGE,
+  ALERT_NODES_CHANGED,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+];
+
 export function ElasticsearchPanel(props) {
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
   const indices = clusterStats.indices;
   const setupMode = props.setupMode;
+  const alerts = props.alerts;
 
   const goToElasticsearch = () => getSafeForExternalLink('#/elasticsearch');
   const goToNodes = () => getSafeForExternalLink('#/elasticsearch/nodes');
   const goToIndices = () => getSafeForExternalLink('#/elasticsearch/indices');
 
   const { primaries, replicas } = calculateShards(get(props, 'cluster_stats.indices.shards', {}));
-
-  const statusIndicator = <HealthStatusIndicator status={clusterStats.status} />;
-
-  const licenseText = (
-    <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />
-  );
 
   const setupModeData = get(setupMode.data, 'elasticsearch');
   const setupModeTooltip =
@@ -199,40 +214,80 @@ export function ElasticsearchPanel(props) {
     return null;
   };
 
+  const statusColorMap = {
+    green: 'success',
+    yellow: 'warning',
+    red: 'danger',
+  };
+
+  let nodesAlertStatus = null;
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {
+    const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    nodesAlertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsBadge alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
+
+  let overviewAlertStatus = null;
+  if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_ALERTS)) {
+    const alertsList = OVERVIEW_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    overviewAlertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsBadge alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
+
   return (
-    <ClusterItemContainer
-      {...props}
-      statusIndicator={statusIndicator}
-      url="elasticsearch"
-      title="Elasticsearch"
-      extras={licenseText}
-    >
+    <ClusterItemContainer {...props} url="elasticsearch" title="Elasticsearch">
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiTitle size="s">
-              <h3>
-                <DisabledIfNoDataAndInSetupModeLink
-                  setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeData}
-                  href={goToElasticsearch()}
-                  aria-label={i18n.translate(
-                    'xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel',
-                    {
-                      defaultMessage: 'Elasticsearch Overview',
-                    }
-                  )}
-                  data-test-subj="esOverview"
-                >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.esPanel.overviewLinkLabel"
-                    defaultMessage="Overview"
-                  />
-                </DisabledIfNoDataAndInSetupModeLink>
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <DisabledIfNoDataAndInSetupModeLink
+                      setupModeEnabled={setupMode.enabled}
+                      setupModeData={setupModeData}
+                      href={goToElasticsearch()}
+                      aria-label={i18n.translate(
+                        'xpack.monitoring.cluster.overview.esPanel.overviewLinkAriaLabel',
+                        {
+                          defaultMessage: 'Elasticsearch Overview',
+                        }
+                      )}
+                      data-test-subj="esOverview"
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.esPanel.overviewLinkLabel"
+                        defaultMessage="Overview"
+                      />
+                    </DisabledIfNoDataAndInSetupModeLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+              {overviewAlertStatus}
+            </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.healthLabel"
+                  defaultMessage="Health"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiHealth color={statusColorMap[clusterStats.status]} data-test-subj="statusIcon">
+                  <FormattedMessage
+                    id="xpack.monitoring.cluster.overview.healthStatusDescription"
+                    defaultMessage="Health is {status}"
+                    values={{ status: clusterStats.status || 'n/a' }}
+                  />
+                </EuiHealth>
+              </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.esPanel.versionLabel"
@@ -258,13 +313,43 @@ export function ElasticsearchPanel(props) {
                 {formatNumber(get(nodes, 'jvm.max_uptime_in_millis'), 'time_since')}
               </EuiDescriptionListDescription>
               {showMlJobs()}
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.esPanel.licenseLabel"
+                  defaultMessage="License"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="esLicenseType">
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiLink href={getSafeForExternalLink('#/license')}>
+                      {capitalize(props.license.type)}
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      {props.license.expiry_date_in_millis === undefined ? (
+                        ''
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.monitoring.cluster.overview.esPanel.expireDateText"
+                          defaultMessage="expires on {expiryDate}"
+                          values={{
+                            expiryDate: formatDateLocal(props.license.expiry_date_in_millis),
+                          }}
+                        />
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
@@ -280,7 +365,12 @@ export function ElasticsearchPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeTooltip}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  {setupModeTooltip}
+                  {nodesAlertStatus}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">

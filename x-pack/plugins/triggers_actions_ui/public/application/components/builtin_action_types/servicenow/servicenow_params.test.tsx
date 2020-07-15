@@ -6,6 +6,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import ServiceNowParamsFields from './servicenow_params';
+import { DocLinksStart } from 'kibana/public';
 
 describe('ServiceNowParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -29,6 +30,7 @@ describe('ServiceNowParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         messageVariables={[]}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="urgencySelect"]').length > 0).toBeTruthy();

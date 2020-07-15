@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiSpacer, EuiText, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
+import styled from 'styled-components';
 import {
   CrumbInfo,
   formatDate,
@@ -20,6 +21,7 @@ import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
 import { useResolverDispatch } from '../use_resolver_dispatch';
+import { RelatedEventLimitWarning } from '../limit_warnings';
 
 /**
  * This view presents a list of related events of a given type for a given process.
@@ -40,16 +42,53 @@ interface MatchingEventEntry {
   setQueryParams: () => void;
 }
 
+const StyledRelatedLimitWarning = styled(RelatedEventLimitWarning)`
+  flex-flow: row wrap;
+  display: block;
+  align-items: baseline;
+  margin-top: 1em;
+
+  & .euiCallOutHeader {
+    display: inline;
+    margin-right: 0.25em;
+  }
+
+  & .euiText {
+    display: inline;
+  }
+
+  & .euiText p {
+    display: inline;
+  }
+`;
+
 const DisplayList = memo(function DisplayList({
   crumbs,
   matchingEventEntries,
+  eventType,
+  processEntityId,
 }: {
   crumbs: Array<{ text: string | JSX.Element; onClick: () => void }>;
   matchingEventEntries: MatchingEventEntry[];
+  eventType: string;
+  processEntityId: string;
 }) {
+  const relatedLookupsByCategory = useSelector(selectors.relatedEventInfoByEntityId);
+  const lookupsForThisNode = relatedLookupsByCategory(processEntityId);
+  const shouldShowLimitWarning = lookupsForThisNode?.shouldShowLimitForCategory(eventType);
+  const numberDisplayed = lookupsForThisNode?.numberActuallyDisplayedForCategory(eventType);
+  const numberMissing = lookupsForThisNode?.numberNotDisplayedForCategory(eventType);
+
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
+      {shouldShowLimitWarning && typeof numberDisplayed !== 'undefined' && numberMissing ? (
+        <StyledRelatedLimitWarning
+          eventType={eventType}
+          numberActuallyDisplayed={numberDisplayed}
+          numberMissing={numberMissing}
+        />
+      ) : null}
       <EuiSpacer size="l" />
       <>
         {matchingEventEntries.map((eventView, index) => {
@@ -125,9 +164,6 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
   const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
   const relatedsReady = relatedsReadyMap.get(processEntityId);
 
-  const relatedEventsForThisProcess = useSelector(selectors.relatedEventsByEntityId).get(
-    processEntityId
-  );
   const dispatch = useResolverDispatch();
 
   useEffect(() => {
@@ -150,39 +186,30 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
     ];
   }, [pushToQueryParams, eventsString]);
 
-  const relatedEventsToDisplay = useMemo(() => {
-    return relatedEventsForThisProcess?.events || [];
-  }, [relatedEventsForThisProcess?.events]);
+  const relatedByCategory = useSelector(selectors.relatedEventsByCategory);
 
   /**
    * A list entry will be displayed for each of these
    */
   const matchingEventEntries: MatchingEventEntry[] = useMemo(() => {
-    const relateds = relatedEventsToDisplay
-      .reduce((a: ResolverEvent[], candidate) => {
-        if (event.primaryEventCategory(candidate) === eventType) {
-          a.push(candidate);
-        }
-        return a;
-      }, [])
-      .map((resolverEvent) => {
-        const eventTime = event.eventTimestamp(resolverEvent);
-        const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime);
-        const entityId = event.eventId(resolverEvent);
+    const relateds = relatedByCategory(processEntityId)(eventType).map((resolverEvent) => {
+      const eventTime = event.eventTimestamp(resolverEvent);
+      const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime);
+      const entityId = event.eventId(resolverEvent);
 
-        return {
-          formattedDate,
-          eventCategory: `${eventType}`,
-          eventType: `${event.ecsEventType(resolverEvent)}`,
-          name: event.descriptiveName(resolverEvent),
-          entityId,
-          setQueryParams: () => {
-            pushToQueryParams({ crumbId: entityId, crumbEvent: processEntityId });
-          },
-        };
-      });
+      return {
+        formattedDate,
+        eventCategory: `${eventType}`,
+        eventType: `${event.ecsEventType(resolverEvent)}`,
+        name: event.descriptiveName(resolverEvent),
+        entityId,
+        setQueryParams: () => {
+          pushToQueryParams({ crumbId: entityId, crumbEvent: processEntityId });
+        },
+      };
+    });
     return relateds;
-  }, [relatedEventsToDisplay, eventType, processEntityId, pushToQueryParams]);
+  }, [relatedByCategory, eventType, processEntityId, pushToQueryParams]);
 
   const crumbs = useMemo(() => {
     return [
@@ -250,6 +277,13 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
     );
   }
 
-  return <DisplayList crumbs={crumbs} matchingEventEntries={matchingEventEntries} />;
+  return (
+    <DisplayList
+      crumbs={crumbs}
+      processEntityId={processEntityId}
+      matchingEventEntries={matchingEventEntries}
+      eventType={eventType}
+    />
+  );
 });
 ProcessEventListNarrowedByType.displayName = 'ProcessEventListNarrowedByType';

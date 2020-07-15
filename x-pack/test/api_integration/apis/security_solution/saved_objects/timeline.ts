@@ -137,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           title: 'some title',
-          dateRange: { start: 1560195800755, end: 1560282200756 },
+          dateRange: { start: '2019-06-10T19:43:20.755Z', end: '2019-06-11T19:43:20.756Z' },
           sort: { columnId: '@timestamp', sortDirection: 'desc' },
         };
         const response = await client.mutate<any>({

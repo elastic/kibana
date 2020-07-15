@@ -73,11 +73,15 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
           return;
         }
         const [min, max] = x;
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        });
       },
       [setAbsoluteRangeDatePicker]
     );
-    const { indicesExist, indexPattern } = useWithSource();
+    const { docValueFields, indicesExist, indexPattern } = useWithSource();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -175,6 +179,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
               <EuiSpacer />
 
               <HostDetailsTabs
+                docValueFields={docValueFields}
                 isInitializing={isInitializing}
                 deleteQuery={deleteQuery}
                 pageFilters={hostDetailsPageFilters}
