@@ -12,7 +12,6 @@ export default function ({ loadTestFile }) {
 
     loadTestFile(require.resolve('./cluster/list'));
     loadTestFile(require.resolve('./cluster/overview'));
-    loadTestFile(require.resolve('./cluster/alerts'));
     // loadTestFile(require.resolve('./cluster/license'));
 
     loadTestFile(require.resolve('./elasticsearch/overview'));
