@@ -7,7 +7,8 @@
 /* eslint-disable complexity */
 
 import ApolloClient from 'apollo-client';
-import { getOr, set, isEmpty } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
