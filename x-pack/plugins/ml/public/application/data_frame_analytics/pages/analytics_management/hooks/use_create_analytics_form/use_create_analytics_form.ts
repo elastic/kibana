@@ -25,7 +25,6 @@ import { reducer } from './reducer';
 import {
   getInitialState,
   getJobConfigFromFormState,
-  EsIndexName,
   FormMessage,
   State,
   SourceIndexMap,
