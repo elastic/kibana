@@ -16311,7 +16311,6 @@
     "xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription.noteText": "注意：可能要过几分钟后，作业才会开始计算结果。",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.startTrial": "开始为期 14 天的免费试用",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.startTrialDesc": "要访问持续时间异常检测，必须订阅 Elastic 白金级许可证。",
-    "xpack.uptime.monitorCharts.durationChart.bottomAxis.title": "鏃堕棿鎴",
     "xpack.uptime.monitorCharts.durationChart.leftAxis.title": "持续时间 (ms)",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "监测持续时间（毫秒）",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly": "监测持续时间（异常：{noOfAnomalies}）",

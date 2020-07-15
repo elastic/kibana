@@ -6,7 +6,7 @@
 
 import React, { useContext, useState } from 'react';
 
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants';
 import {
@@ -55,16 +55,14 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
     dispatch(deleteAlertAction.get({ alertId: anomalyAlert?.id as string }));
 
   const button = (
-    <EuiButtonEmpty
+    <EuiButton
       data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
-      iconType={hasMLJob ? 'arrowDown' : 'machineLearningApp'}
-      iconSide={hasMLJob ? 'right' : 'left'}
       onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
       disabled={hasMLJob && !canDeleteMLJob}
       isLoading={isMLJobCreating || isMLJobLoading}
     >
       {hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 
   const panels = [
@@ -74,7 +72,6 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       items: [
         {
           name: labels.EXPLORE_IN_ML_APP,
-          icon: <EuiIcon type="dataVisualizer" size="m" />,
           href: getMLJobLinkHref({
             basePath,
             monitorId,
@@ -87,7 +84,6 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
           'data-test-subj': anomalyAlert
             ? 'uptimeDisableAnomalyAlertBtn'
             : 'uptimeEnableAnomalyAlertBtn',
-          icon: <EuiIcon type={anomalyAlert ? 'bellSlash' : 'bell'} size="m" />,
           onClick: () => {
             if (anomalyAlert) {
               setIsConfirmAlertDeleteOpen(true);
@@ -100,7 +96,6 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         {
           name: labels.DISABLE_ANOMALY_DETECTION,
           'data-test-subj': 'uptimeDeleteMLJobBtn',
-          icon: <EuiIcon type="trash" size="m" />,
           onClick: () => {
             setIsPopOverOpen(false);
             onJobDelete();

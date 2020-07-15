@@ -16304,7 +16304,6 @@
     "xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription.noteText": "注:ジョブが結果の計算を開始するまでに少し時間がかかる場合があります。",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.startTrial": "無料の 14 日トライアルを開始",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.startTrialDesc": "期間異常検知機能を利用するには、Elastic Platinum ライセンスが必要です。",
-    "xpack.uptime.monitorCharts.durationChart.bottomAxis.title": "タイムスタンプ",
     "xpack.uptime.monitorCharts.durationChart.leftAxis.title": "期間ms",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "監視期間",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly": "監視期間 (異常: {noOfAnomalies})",
