@@ -8372,8 +8372,6 @@
     "xpack.ingestManager.setupPage.enableFleet": "创建用户并启用 Fleet",
     "xpack.ingestManager.setupPage.enableText": "要使用 Fleet，必须创建 Elastic 用户。此用户可以创建 API 密钥并写入到 logs-* and metrics-*。",
     "xpack.ingestManager.setupPage.enableTitle": "启用 Fleet",
-    "xpack.ingestManager.setupPage.missingRequirementsDescription": "要使用 Fleet，必须启用以下功能：{space}- 启用 Elasticsearch API 密钥。{space}- 启用 TLS 以保护代理和 Kibana 之间的通信。 ",
-    "xpack.ingestManager.setupPage.missingRequirementsTitle": "缺失的要求",
     "xpack.ingestManager.unenrollAgents.confirmModal.cancelButtonLabel": "取消",
     "xpack.ingestManager.unenrollAgents.confirmModal.confirmButtonLabel": "取消注册",
     "xpack.ingestManager.unenrollAgents.confirmModal.deleteMultipleTitle": "取消注册 {count, plural, one {# 个代理} other {# 个代理}}？",
