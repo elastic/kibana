@@ -13,6 +13,8 @@ import {
   getActionsStepsData,
   getHumanizedDuration,
   getModifiedAboutDetailsData,
+  getPrePackagedRuleStatus,
+  getPrePackagedTimelineStatus,
   determineDetailsValue,
   userHasNoPermissions,
 } from './helpers';
@@ -392,6 +394,114 @@ describe('rule helpers', () => {
       const userHasNoPermissionsExpectedResult = false;
 
       expect(result).toEqual(userHasNoPermissionsExpectedResult);
+    });
+  });
+
+  describe('getPrePackagedRuleStatus', () => {
+    test('ruleNotInstalled', () => {
+      const rulesInstalled = 0;
+      const rulesNotInstalled = 1;
+      const rulesNotUpdated = 0;
+      const result: boolean = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('ruleNotInstalled');
+    });
+
+    test('ruleInstalled', () => {
+      const rulesInstalled = 1;
+      const rulesNotInstalled = 0;
+      const rulesNotUpdated = 0;
+      const result: boolean = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('ruleInstalled');
+    });
+
+    test('someRuleUninstall', () => {
+      const rulesInstalled = 1;
+      const rulesNotInstalled = 1;
+      const rulesNotUpdated = 0;
+      const result: boolean = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('someRuleUninstall');
+    });
+
+    test('ruleNeedUpdate', () => {
+      const rulesInstalled = 1;
+      const rulesNotInstalled = 0;
+      const rulesNotUpdated = 1;
+      const result: boolean = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('ruleNeedUpdate');
+    });
+  });
+
+  describe('getPrePackagedTimelineStatus', () => {
+    test('timelinesNotInstalled', () => {
+      const rulesInstalled = 0;
+      const rulesNotInstalled = 1;
+      const rulesNotUpdated = 0;
+      const result: boolean = getPrePackagedTimelineStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('timelinesNotInstalled');
+    });
+
+    test('timelinesInstalled', () => {
+      const rulesInstalled = 1;
+      const rulesNotInstalled = 0;
+      const rulesNotUpdated = 0;
+      const result: boolean = getPrePackagedTimelineStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('timelinesInstalled');
+    });
+
+    test('someTimelineUninstall', () => {
+      const rulesInstalled = 1;
+      const rulesNotInstalled = 1;
+      const rulesNotUpdated = 0;
+      const result: boolean = getPrePackagedTimelineStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('someTimelineUninstall');
+    });
+
+    test('timelineNeedUpdate', () => {
+      const rulesInstalled = 1;
+      const rulesNotInstalled = 0;
+      const rulesNotUpdated = 1;
+      const result: boolean = getPrePackagedTimelineStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('timelineNeedUpdate');
     });
   });
 });

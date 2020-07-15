@@ -440,8 +440,6 @@ describe('failure cases', () => {
       });
     });
 
-    // -----Start commonUpdateTemplateTimelineCheck----
-
     test('should return error if trying to update a timeline template that does not exist', () => {
       const isHandlingTemplateTimeline = true;
       const version = mockGetTemplateTimelineValue.version;
@@ -516,8 +514,6 @@ describe('failure cases', () => {
         statusCode: 409,
       });
     });
-
-    // -----End commonUpdateTemplateTimelineCheck----
 
     test('should return error if given templateTimelineVersion field is less or equal to existing templateTimelineVersion of timelin template', () => {
       const isHandlingTemplateTimeline = true;
