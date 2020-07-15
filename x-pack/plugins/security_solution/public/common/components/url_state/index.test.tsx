@@ -38,7 +38,7 @@ jest.mock('../../utils/route/use_route_spy', () => ({
 
 jest.mock('../super_date_picker', () => ({
   formatDate: (date: string) => {
-    return 11223344556677;
+    return '2020-01-01T00:00:00.000Z';
   },
 }));
 
@@ -53,11 +53,14 @@ jest.mock('../../lib/kibana', () => ({
       },
     },
   }),
+  KibanaServices: {
+    get: jest.fn(() => ({ uiSettings: { get: () => ({ from: 'now-24h', to: 'now' }) } })),
+  },
 }));
 
 describe('UrlStateContainer', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
   describe('handleInitialize', () => {
     describe('URL state updates redux', () => {
@@ -75,19 +78,19 @@ describe('UrlStateContainer', () => {
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockSetRelativeRangeDatePicker.mock.calls[1][0]).toEqual({
-              from: 11223344556677,
+              from: '2020-01-01T00:00:00.000Z',
               fromStr: 'now-1d/d',
               kind: 'relative',
-              to: 11223344556677,
+              to: '2020-01-01T00:00:00.000Z',
               toStr: 'now-1d/d',
               id: 'global',
             });
 
             expect(mockSetRelativeRangeDatePicker.mock.calls[0][0]).toEqual({
-              from: 11223344556677,
+              from: '2020-01-01T00:00:00.000Z',
               fromStr: 'now-15m',
               kind: 'relative',
-              to: 11223344556677,
+              to: '2020-01-01T00:00:00.000Z',
               toStr: 'now',
               id: 'timeline',
             });
@@ -104,16 +107,16 @@ describe('UrlStateContainer', () => {
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
 
             expect(mockSetAbsoluteRangeDatePicker.mock.calls[1][0]).toEqual({
-              from: 1556736012685,
+              from: '2019-05-01T18:40:12.685Z',
               kind: 'absolute',
-              to: 1556822416082,
+              to: '2019-05-02T18:40:16.082Z',
               id: 'global',
             });
 
             expect(mockSetAbsoluteRangeDatePicker.mock.calls[0][0]).toEqual({
-              from: 1556736012685,
+              from: '2019-05-01T18:40:12.685Z',
               kind: 'absolute',
-              to: 1556822416082,
+              to: '2019-05-02T18:40:16.082Z',
               id: 'timeline',
             });
           }
@@ -157,7 +160,7 @@ describe('UrlStateContainer', () => {
             ).toEqual({
               hash: '',
               pathname: examplePath,
-              search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+              search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
               state: '',
             });
           }
@@ -195,10 +198,10 @@ describe('UrlStateContainer', () => {
 
         if (CONSTANTS.detectionsPage === page) {
           expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({
-            from: 11223344556677,
+            from: '2020-01-01T00:00:00.000Z',
             fromStr: 'now-1d/d',
             kind: 'relative',
-            to: 11223344556677,
+            to: '2020-01-01T00:00:00.000Z',
             toStr: 'now-1d/d',
             id: 'global',
           });

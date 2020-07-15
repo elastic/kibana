@@ -20,8 +20,6 @@
 import { Filter, esQuery, TimeRange, Query } from '../../data/public';
 
 import { SearchAPI } from './data_model/search_api';
-
-// @ts-ignore
 import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
@@ -64,7 +62,6 @@ export function createVegaRequestHandler(
 
     const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
     const filtersDsl = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
-    // @ts-ignore
     const { VegaParser } = await import('./data_model/vega_parser');
     const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, serviceSettings);
 
