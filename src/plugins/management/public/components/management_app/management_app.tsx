@@ -17,36 +17,32 @@
  * under the License.
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  AppMountContext,
-  AppMountParameters,
-  ChromeBreadcrumb,
-  ScopedHistory,
-} from 'kibana/public';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiPage } from '@elastic/eui';
-import { ManagementStart } from '../../types';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { reactRouterNavigate } from '../../../../kibana_react/public';
+import { SectionsServiceStart } from '../../types';
 
 import './management_app.scss';
 
 interface ManagementAppProps {
   appBasePath: string;
-  context: AppMountContext;
   history: AppMountParameters['history'];
   dependencies: ManagementAppDependencies;
 }
 
 export interface ManagementAppDependencies {
-  management: ManagementStart;
+  sections: SectionsServiceStart;
   kibanaVersion: string;
+  setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
 }
 
-export const ManagementApp = ({ context, dependencies, history }: ManagementAppProps) => {
+export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => {
+  const { setBreadcrumbs } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
 
@@ -55,24 +51,24 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
     window.scrollTo(0, 0);
   }, []);
 
-  const setBreadcrumbs = useCallback(
+  const setBreadcrumbsScoped = useCallback(
     (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
       const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
         ...item,
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
       });
 
-      context.core.chrome.setBreadcrumbs([
+      setBreadcrumbs([
         wrapBreadcrumb(MANAGEMENT_BREADCRUMB, history),
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
       ]);
     },
-    [context.core.chrome, history]
+    [setBreadcrumbs, history]
   );
 
   useEffect(() => {
-    setSections(dependencies.management.sections.getSectionsEnabled());
-  }, [dependencies.management.sections]);
+    setSections(dependencies.sections.getSectionsEnabled());
+  }, [dependencies.sections]);
 
   if (!sections) {
     return null;
@@ -84,7 +80,7 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
         <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
         <ManagementRouter
           history={history}
-          setBreadcrumbs={setBreadcrumbs}
+          setBreadcrumbs={setBreadcrumbsScoped}
           onAppMounted={onAppMounted}
           sections={sections}
           dependencies={dependencies}

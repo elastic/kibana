@@ -10,7 +10,7 @@ import { NodeStatusIcon } from '../node';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 
-export function NodeDetailStatus({ stats }) {
+export function NodeDetailStatus({ stats, alerts }) {
   const {
     transport_address: transportAddress,
     usedHeap,
@@ -28,6 +28,10 @@ export function NodeDetailStatus({ stats }) {
   const percentSpaceUsed = (freeSpace / totalSpace) * 100;
 
   const metrics = [
+    {
+      label: 'Alerts',
+      value: <span>{Object.values(alerts).length}</span>,
+    },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.transportAddress', {
         defaultMessage: 'Transport Address',

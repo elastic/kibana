@@ -255,6 +255,7 @@ export const severity_mapping_item = t.exact(
     severity,
   })
 );
+export type SeverityMappingItem = t.TypeOf<typeof severity_mapping_item>;
 
 export const severity_mapping = t.array(severity_mapping_item);
 export type SeverityMapping = t.TypeOf<typeof severity_mapping>;
@@ -275,7 +276,12 @@ export type To = t.TypeOf<typeof to>;
 export const toOrUndefined = t.union([to, t.undefined]);
 export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
 
-export const type = t.keyof({ machine_learning: null, query: null, saved_query: null });
+export const type = t.keyof({
+  machine_learning: null,
+  query: null,
+  saved_query: null,
+  threshold: null,
+});
 export type Type = t.TypeOf<typeof type>;
 
 export const typeOrUndefined = t.union([type, t.undefined]);
@@ -369,6 +375,17 @@ export type Threat = t.TypeOf<typeof threat>;
 export const threatOrUndefined = t.union([threat, t.undefined]);
 export type ThreatOrUndefined = t.TypeOf<typeof threatOrUndefined>;
 
+export const threshold = t.exact(
+  t.type({
+    field: t.string,
+    value: PositiveIntegerGreaterThanZero,
+  })
+);
+export type Threshold = t.TypeOf<typeof threshold>;
+
+export const thresholdOrUndefined = t.union([threshold, t.undefined]);
+export type ThresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
+
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const updated_by = t.string;
@@ -406,6 +423,11 @@ export const success_count = PositiveInteger;
 export const rules_custom_installed = PositiveInteger;
 export const rules_not_installed = PositiveInteger;
 export const rules_not_updated = PositiveInteger;
+
+export const timelines_installed = PositiveInteger;
+export const timelines_updated = PositiveInteger;
+export const timelines_not_installed = PositiveInteger;
+export const timelines_not_updated = PositiveInteger;
 
 export const note = t.string;
 export type Note = t.TypeOf<typeof note>;

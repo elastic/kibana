@@ -5,7 +5,7 @@
   ],
   "description": "Identifies unusual listening ports on Linux instances that can indicate execution of unauthorized services, backdoors, or persistence mechanisms.",
   "false_positives": [
-    "A newly installed program or one that rarely uses the network could trigger this signal."
+    "A newly installed program or one that rarely uses the network could trigger this alert."
   ],
   "from": "now-45m",
   "interval": "15m",

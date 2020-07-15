@@ -74,15 +74,21 @@ describe('rule helpers', () => {
           ],
           saved_id: 'test123',
         },
+        threshold: {
+          field: ['host.name'],
+          value: '50',
+        },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
         },
       };
-      const aboutRuleStepData = {
+
+      const aboutRuleStepData: AboutStepRule = {
         author: [],
         description: '24/7',
         falsePositives: ['test'],
+        isAssociatedToEndpointList: false,
         isBuildingBlock: false,
         isNew: false,
         license: 'Elastic License',
@@ -206,6 +212,10 @@ describe('rule helpers', () => {
           filters: [],
           saved_id: "Garrett's IP",
         },
+        threshold: {
+          field: [],
+          value: '100',
+        },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
@@ -234,6 +244,10 @@ describe('rule helpers', () => {
           },
           filters: [],
           saved_id: undefined,
+        },
+        threshold: {
+          field: [],
+          value: '100',
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
