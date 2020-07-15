@@ -7,7 +7,7 @@
 
 import { ISource } from './source';
 
-type SourceRegistryEntry = {
+export type SourceRegistryEntry = {
   ConstructorFunction: new (
     sourceDescriptor: any, // this is the source-descriptor that corresponds specifically to the particular ISource instance
     inspectorAdapters?: object

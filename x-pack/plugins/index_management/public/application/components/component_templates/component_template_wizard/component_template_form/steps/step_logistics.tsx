@@ -119,7 +119,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           description={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameDescription"
-              defaultMessage="A unique identifier for this component template."
+              defaultMessage="Unique name for this component template."
             />
           }
         >
@@ -143,7 +143,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           description={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription"
-              defaultMessage="A number that identifies the component template to external management systems."
+              defaultMessage="Number used by external management systems to identify the component template."
             />
           }
         >
@@ -167,7 +167,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             <>
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDescription"
-                defaultMessage="Arbitrary metadata that is stored in cluster state. {learnMoreLink}"
+                defaultMessage="Arbitrary information about the template, stored in the cluster state. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
                     <EuiLink
@@ -178,7 +178,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                       {i18n.translate(
                         'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDocumentionLink',
                         {
-                          defaultMessage: 'Learn more',
+                          defaultMessage: 'Learn more.',
                         }
                       )}
                     </EuiLink>

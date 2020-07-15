@@ -93,7 +93,6 @@ export const updateExceptionListItem = async ({
     );
     return transformSavedObjectUpdateToExceptionListItem({
       exceptionListItem,
-      namespaceType,
       savedObject,
     });
   }
