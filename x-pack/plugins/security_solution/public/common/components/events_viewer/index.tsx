@@ -27,9 +27,9 @@ import { InspectButtonContainer } from '../inspect';
 export interface OwnProps {
   defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
-  end: number;
+  end: string;
   id: string;
-  start: number;
+  start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
@@ -65,9 +65,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
 }) => {
-  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
-    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
-  );
+  const [
+    { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
+  ] = useFetchIndexPatterns(defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY));
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -120,10 +120,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       <EventsViewer
         browserFields={browserFields}
         columns={columns}
+        docValueFields={docValueFields}
         id={id}
         dataProviders={dataProviders!}
         deletedEventIds={deletedEventIds}
         end={end}
+        isLoadingIndexPattern={isLoadingIndexPattern}
         filters={globalFilters}
         headerFilterGroup={headerFilterGroup}
         indexPattern={indexPatterns}

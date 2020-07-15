@@ -315,6 +315,7 @@ export default function ({ getService }: FtrProviderContext) {
             indexName: INDEX_NAME,
             eventId: ID,
             defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            docValueFields: [],
           },
         })
         .then((resp) => {

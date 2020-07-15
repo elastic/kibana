@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import { get } from 'lodash';
 import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
-import { ClusterStatus } from '..//cluster_status';
+import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -16,10 +16,12 @@ import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsStatus } from '../../../alerts/status';
 
 export class Listing extends PureComponent {
   getColumns() {
     const setupMode = this.props.setupMode;
+    const alerts = this.props.alerts;
 
     return [
       {
@@ -62,6 +64,17 @@ export class Listing extends PureComponent {
               {setupModeStatus}
             </div>
           );
+        },
+      },
+      {
+        name: i18n.translate('xpack.monitoring.logstash.nodes.alertsColumnTitle', {
+          defaultMessage: 'Alerts',
+        }),
+        field: 'isOnline',
+        width: '175px',
+        sortable: true,
+        render: () => {
+          return <AlertsStatus showBadge={true} alerts={alerts} />;
         },
       },
       {
@@ -133,7 +146,7 @@ export class Listing extends PureComponent {
   }
 
   render() {
-    const { stats, sorting, pagination, onTableChange, data, setupMode } = this.props;
+    const { stats, alerts, sorting, pagination, onTableChange, data, setupMode } = this.props;
     const columns = this.getColumns();
     const flattenedData = data.map((item) => ({
       ...item,
@@ -160,7 +173,7 @@ export class Listing extends PureComponent {
       <EuiPage>
         <EuiPageBody>
           <EuiPanel>
-            <ClusterStatus stats={stats} />
+            <ClusterStatus stats={stats} alerts={alerts} />
           </EuiPanel>
           <EuiSpacer size="m" />
           {setupModeCallOut}

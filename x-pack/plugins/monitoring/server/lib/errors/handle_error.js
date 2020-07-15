@@ -9,7 +9,7 @@ import { isKnownError, handleKnownError } from './known_errors';
 import { isAuthError, handleAuthError } from './auth_errors';
 
 export function handleError(err, req) {
-  req.logger.error(err);
+  req && req.logger && req.logger.error(err);
 
   // specially handle auth errors
   if (isAuthError(err)) {
