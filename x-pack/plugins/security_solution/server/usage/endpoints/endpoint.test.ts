@@ -41,9 +41,9 @@ describe('test security solution endpoint telemetry', () => {
         "os": Array [],
         "policies": Object {
           "malware": Object {
+            "active": 0,
             "failure": 0,
-            "success": 0,
-            "warning": 0,
+            "inactive": 0,
           },
         },
         "total_installed": 0,
@@ -68,8 +68,8 @@ describe('test security solution endpoint telemetry', () => {
         policies: {
           malware: {
             failure: 0,
-            success: 0,
-            warning: 0,
+            active: 0,
+            inactive: 0,
           },
         },
       });
@@ -102,8 +102,8 @@ describe('test security solution endpoint telemetry', () => {
         policies: {
           malware: {
             failure: 1,
-            success: 0,
-            warning: 0,
+            active: 0,
+            inactive: 0,
           },
         },
       });
@@ -134,8 +134,8 @@ describe('test security solution endpoint telemetry', () => {
         policies: {
           malware: {
             failure: 0,
-            success: 1,
-            warning: 0,
+            active: 1,
+            inactive: 0,
           },
         },
       });

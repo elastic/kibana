@@ -80,6 +80,55 @@ const mockPolicyPayload = (malwareStatus: 'success' | 'warning' | 'failure') =>
   JSON.stringify({
     'endpoint-security': {
       Endpoint: {
+        configuration: {
+          inputs: [
+            {
+              id: '0d466df0-c60f-11ea-a5c5-151665e785c4',
+              policy: {
+                linux: {
+                  events: {
+                    file: true,
+                    network: true,
+                    process: true,
+                  },
+                  logging: {
+                    file: 'info',
+                  },
+                },
+                mac: {
+                  events: {
+                    file: true,
+                    network: true,
+                    process: true,
+                  },
+                  logging: {
+                    file: 'info',
+                  },
+                  malware: {
+                    mode: 'prevent',
+                  },
+                },
+                windows: {
+                  events: {
+                    dll_and_driver_load: true,
+                    dns: true,
+                    file: true,
+                    network: true,
+                    process: true,
+                    registry: true,
+                    security: true,
+                  },
+                  logging: {
+                    file: 'info',
+                  },
+                  malware: {
+                    mode: 'prevent',
+                  },
+                },
+              },
+            },
+          ],
+        },
         policy: {
           applied: {
             id: '0d466df0-c60f-11ea-a5c5-151665e785c4',
@@ -113,6 +162,18 @@ const mockPolicyPayload = (malwareStatus: 'success' | 'warning' | 'failure') =>
       agent: {
         id: 'testAgentId',
         version: '8.0.0-SNAPSHOT',
+      },
+      host: {
+        architecture: 'x86_64',
+        id: 'a4148b63-1758-ab1f-a6d3-f95075cb1a9c',
+        os: {
+          Ext: {
+            variant: 'Windows 10 Pro',
+          },
+          full: 'Windows 10 Pro 2004 (10.0.19041.329)',
+          name: 'Windows',
+          version: '2004 (10.0.19041.329)',
+        },
       },
     },
   });
