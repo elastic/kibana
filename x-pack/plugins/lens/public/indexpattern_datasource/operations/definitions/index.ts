@@ -6,11 +6,13 @@
 
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { KibanaDatatable } from 'src/plugins/expressions';
 import { termsOperation } from './terms';
 import { cardinalityOperation } from './cardinality';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
 import { countOperation } from './count';
+import { mathOperation } from './math';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
@@ -29,6 +31,7 @@ const internalOperationDefinitions = [
   cardinalityOperation,
   sumOperation,
   countOperation,
+  mathOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -84,7 +87,9 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */
-  toEsAggsConfig: (column: C, columnId: string) => unknown;
+  toEsAggsConfig?: (column: C, columnId: string) => unknown;
+  clientSideExecution?: (column: C, table: KibanaDatatable) => KibanaDatatable;
+  showInBuilder?: boolean;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
@@ -104,6 +109,7 @@ interface BaseBuildColumnArgs {
   layerId: string;
   columns: Partial<Record<string, IndexPatternColumn>>;
   indexPattern: IndexPattern;
+  columnId: string;
 }
 
 interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn>

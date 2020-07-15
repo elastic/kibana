@@ -197,6 +197,7 @@ export function buildColumn({
   indexPattern,
   suggestedPriority,
   previousColumn,
+  columnId,
 }: {
   op: OperationType;
   columns: Partial<Record<string, IndexPatternColumn>>;
@@ -205,6 +206,7 @@ export function buildColumn({
   indexPattern: IndexPattern;
   field: IndexPatternField;
   previousColumn?: IndexPatternColumn;
+  columnId: string;
 }): IndexPatternColumn {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -218,6 +220,7 @@ export function buildColumn({
     layerId,
     indexPattern,
     previousColumn,
+    columnId,
   };
 
   if (!field) {

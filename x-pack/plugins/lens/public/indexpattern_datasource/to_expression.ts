@@ -14,22 +14,43 @@ import { dateHistogramOperation } from './operations/definitions';
 function getExpressionForLayer(
   indexPattern: IndexPattern,
   columns: Record<string, IndexPatternColumn>,
-  columnOrder: string[]
+  columnOrder: string[],
+  tree: IndexPatternColumn
 ): Ast | null {
   if (columnOrder.length === 0) {
     return null;
   }
 
   function getEsAggsConfig<C extends IndexPatternColumn>(column: C, columnId: string) {
-    return operationDefinitionMap[column.operationType].toEsAggsConfig(column, columnId);
+    return operationDefinitionMap[column.operationType].toEsAggsConfig!(column, columnId);
   }
 
-  const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
-  const bucketsCount = columnEntries.filter(([, entry]) => entry.isBucketed).length;
-  const metricsCount = columnEntries.length - bucketsCount;
+  const esAggsColumnEntries = [];
+  const nodeQueue = [tree];
+  const clientSideOperations = [];
+  const handledClientSideNodes = {};
 
-  if (columnEntries.length) {
-    const aggs = columnEntries.map(([colId, col]) => {
+  while (nodeQueue.length > 0) {
+    const currentNode = nodeQueue.shift();
+    if (!currentNode.isClientSideOperation) {
+      esAggsColumnEntries.push([currentNode.columnId, currentNode]);
+    } else {
+      if (!handledClientSideNodes[currentNode.columnId]) {
+        clientSideOperations.push(currentNode);
+      }
+      handledClientSideNodes[currentNode.columnId] = true;
+      (currentNode.children || []).forEach((childNode) => {
+        handledClientSideNodes[childNode.columnId] = true;
+      });
+    }
+    nodeQueue.push(...(currentNode.children || []));
+  }
+
+  const bucketsCount = esAggsColumnEntries.filter(([, entry]) => entry.isBucketed).length;
+  const metricsCount = esAggsColumnEntries.length - bucketsCount;
+
+  if (esAggsColumnEntries.length) {
+    const aggs = esAggsColumnEntries.map(([colId, col]) => {
       return getEsAggsConfig(col, colId);
     });
 
@@ -92,6 +113,17 @@ function getExpressionForLayer(
       )
       .filter((field): field is string => Boolean(field));
 
+    const clientSideExpressions = clientSideOperations.map((node) => {
+      return {
+        type: 'function',
+        function: 'lens_client_calculations',
+        arguments: {
+          // todo strip all unused stuff from the subtree
+          tree: [JSON.stringify(node)],
+        },
+      };
+    });
+
     return {
       type: 'expression',
       chain: [
@@ -115,6 +147,7 @@ function getExpressionForLayer(
           },
         },
         ...formatterOverrides,
+        ...clientSideExpressions,
       ],
     };
   }
@@ -127,7 +160,8 @@ export function toExpression(state: IndexPatternPrivateState, layerId: string) {
     return getExpressionForLayer(
       state.indexPatterns[state.layers[layerId].indexPatternId],
       state.layers[layerId].columns,
-      state.layers[layerId].columnOrder
+      state.layers[layerId].columnOrder,
+      state.layers[layerId].tree
     );
   }
 

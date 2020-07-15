@@ -156,6 +156,7 @@ export function onDrop(
         suggestedPriority: props.suggestedPriority,
         field: droppedItem.field,
         previousColumn: selectedColumn,
+        columnId: props.columnId,
       });
 
   trackUiEvent('drop_onto_dimension');

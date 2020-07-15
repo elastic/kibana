@@ -13,10 +13,13 @@ import { Operation, DimensionPriority } from '../../../types';
  */
 export interface BaseIndexPatternColumn extends Operation {
   // Private
+  id: string;
   operationType: string;
   sourceField: string;
   suggestedPriority?: DimensionPriority;
   customLabel?: boolean;
+  children?: BaseIndexPatternColumn[];
+  isClientSideOperation?: boolean;
 }
 
 // Formatting can optionally be added to any column

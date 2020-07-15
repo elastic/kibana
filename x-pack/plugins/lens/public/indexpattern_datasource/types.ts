@@ -33,9 +33,12 @@ export interface IndexPatternField {
 
 export interface IndexPatternLayer {
   columnOrder: string[];
+  // these are the user visible columns (could be replaced with just ids in a later iteration)
   columns: Record<string, IndexPatternColumn>;
   // Each layer is tied to the index pattern that created it
   indexPatternId: string;
+  // this is the root node of the tree
+  tree: IndexPatternColumn;
 }
 
 export interface IndexPatternPersistedState {
