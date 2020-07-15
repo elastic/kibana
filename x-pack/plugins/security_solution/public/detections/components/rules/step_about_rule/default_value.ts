@@ -18,6 +18,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   author: [],
   name: '',
   description: '',
+  isAssociatedToEndpointList: false,
   isBuildingBlock: false,
   isNew: true,
   severity: { value: 'low', mapping: [] },
