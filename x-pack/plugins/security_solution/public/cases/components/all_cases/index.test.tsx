@@ -7,6 +7,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
+
+import '../../../common/mock/match_media';
 import { AllCases } from '.';
 import { TestProviders } from '../../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
@@ -28,14 +30,6 @@ const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
-
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-  return {
-    ...originalModule,
-    useHistory: jest.fn(),
-  };
-});
 
 jest.mock('../../../common/components/link_to');
 

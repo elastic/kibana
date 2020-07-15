@@ -255,6 +255,10 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
     optional: true,
     formKey: 'modelMemoryLimit',
   },
+  max_num_threads: {
+    optional: true,
+    formKey: 'maxNumThreads',
+  },
 });
 
 /**

@@ -69,6 +69,11 @@ export const databaseDocumentIDToAbort = composeSelectors(
   dataSelectors.databaseDocumentIDToAbort
 );
 
+export const resolverComponentInstanceID = composeSelectors(
+  dataStateSelector,
+  dataSelectors.resolverComponentInstanceID
+);
+
 export const processAdjacencies = composeSelectors(
   dataStateSelector,
   dataSelectors.processAdjacencies
@@ -96,11 +101,30 @@ export const relatedEventsByEntityId = composeSelectors(
 );
 
 /**
+ * Returns a function that returns a function (when supplied with an entity id for a node)
+ * that returns related events for a node that match an event.category (when supplied with the category)
+ */
+export const relatedEventsByCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsByCategory
+);
+
+/**
  * Entity ids to booleans for waiting status
  */
 export const relatedEventsReady = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsReady
+);
+
+/**
+ * Business logic lookup functions by ECS category by entity id.
+ * Example usage:
+ * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
+ */
+export const relatedEventInfoByEntityId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventInfoByEntityId
 );
 
 /**
@@ -157,6 +181,16 @@ export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoa
  * Whether or not the resolver encountered an error while fetching data
  */
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
+
+/**
+ * True if the children cursor is not null
+ */
+export const hasMoreChildren = composeSelectors(dataStateSelector, dataSelectors.hasMoreChildren);
+
+/**
+ * True if the ancestor cursor is not null
+ */
+export const hasMoreAncestors = composeSelectors(dataStateSelector, dataSelectors.hasMoreAncestors);
 
 /**
  * An array containing all the processes currently in the Resolver than can be graphed

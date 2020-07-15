@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
 import {
   ImportResponse,
@@ -15,7 +15,7 @@ import {
 } from '../../../common/types/file_datavisualizer';
 import { InputData } from './file_data_visualizer';
 
-export function importDataProvider(callAsCurrentUser: LegacyAPICaller) {
+export function importDataProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
   async function importData(
     id: string,
     index: string,
