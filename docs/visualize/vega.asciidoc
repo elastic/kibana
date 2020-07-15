@@ -9,7 +9,8 @@ or static data. Use the {kib} extensions to Vega to embed Vega into
 your dashboard, and to add interactivity to the visualizations.
 
 Vega and Vega-Lite are both declarative formats to create visualizations
-using JSON. Vega-Lite is an easier format to use that compiles into Vega.
+using JSON. Both use a different syntax for declaring visualizations,
+and are not fully interchangeable.
 
 [float]
 [[when-to-vega]]
@@ -17,23 +18,18 @@ using JSON. Vega-Lite is an easier format to use that compiles into Vega.
 
 Vega and Vega-Lite are capable of building most of the visualizations
 that {kib} provides, but with higher complexity. The most common reason
-to use Vega in {kib} is that your data or
-visualization isn't supported in other tools in {kib}, especially
-in these cases:
+to use Vega in {kib} is that {kib} is missing support for the query or
+visualization, for example:
 
-* Aggregations using the `nested` mapping
-* Aggregations with bucket scripts
-* Queries using that custom time filters
+* Aggregations using the `nested` or `parent/child` mapping
+* Aggregations without a {kib} index pattern
+* Queries using custom time filters
 * Complex calculations
-* Calculating percentage changes
 * Extracting data from _source instead of aggregation
 * Scatter charts
 * Sankey charts
 * Custom maps
 * Using a visual theme that {kib} does not provide
-
-Because Vega supports all of these, it is often easier to write a Vega spec
-than to develop a {kib} plugin when in need of more features.
 
 [[vega-lite-tutorial]]
 === Tutorial: First visualization in Vega-Lite
@@ -44,18 +40,21 @@ for a more comprehensive
 https://vega.github.io/vega-lite/tutorials/getting_started.html[introduction to Vega-Lite],
 while only covering the basics.
 
+In this tutorial, you will build a stacked area chart from one of the {kib} sample data
+sets.
+
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_1.png[]
+
+Before beginning this tutorial, install the <<add-sample-data, eCommerce sample data>>
+set.
+
 When you first open the Vega editor in {kib}, you will see a pre-populated
 line chart which shows the total number of documents across all your indices
 within the time range.
 
 [role="screenshot"]
 image::visualize/images/vega_lite_default.png[]
-
-In this tutorial, you will build a stacked area chart from one of the {kib} sample data
-sets:
-
-[role="screenshot"]
-image::visualize/images/vega_lite_tutorial_1.png[]
 
 The text editor contains a Vega-Lite spec written in https://hjson.github.io/[HJSON],
 which is similar to JSON but optimized for human editing. HJSON supports:
@@ -90,8 +89,8 @@ Click "Update". The result is probably not what you expect. You should see a fla
 line with 0 results.
 
 You've only changed the index, so the difference must be the query is returning
-no results. You can try the <<vega-data, Vega debugging process>>, but intuition
-may be faster for this particular problem.
+no results. You can try the <<vega-browser-debugging-console, Vega debugging process>>,
+but intuition may be faster for this particular problem.
 
 In this case, the problem is that you are querying the field `@timestamp`,
 which does not exist in the `kibana_sample_data_ecommerce` data. Find and replace
@@ -246,8 +245,13 @@ You'll see that the response format looks different from the previous query:
 }
 ```
 
-Now that we have data that we're happy with, it's time to convert this valid
-query back into a Vega-Lite data section, by adding the {kib} Vega context:
+Now that we have data that we're happy with, it's time to convert from an
+isolated {es} query into a query with {kib} integration. Looking at the
+<<vega-queries, reference for writing {es} queries in Vega>>, you will
+see the full list of special tokens that are used in this query, such
+as `%context: true`. This query has also replaced `"fixed_interval": "1d"`
+with `interval: {%autointerval%: true}`. Copy the final query into
+your spec:
 
 ```yaml
   data: {
@@ -283,9 +287,13 @@ query back into a Vega-Lite data section, by adding the {kib} Vega context:
 
 If you copy and paste that into your Vega-Lite spec, and click "Update",
 you will see a warning saying `Infinite extent for field "key": [Infinity, -Infinity]`.
-Let's use our Vega debugging skills to understand why.
+Let's use our <<vega-browser-debugging-console, Vega debugging skills>> to understand why.
 
-Open the browser dev tools console and type
+Vega-Lite generates data using the names `source_0` and `data_0`. `source_0` contains
+the results from the {es} query, and `data_0` contains the visually encoded results
+which are shown in the chart. To debug this problem, you need to compare both.
+
+To look at the source, open the browser dev tools console and type
 `VEGA_DEBUG.view.data('source_0')`. You will see:
 
 ```js
@@ -297,7 +305,7 @@ Open the browser dev tools console and type
 }, ...]
 ```
 
-Open the browser dev tools console and type
+To compare to the visually encoded data, open the browser dev tools console and type
 `VEGA_DEBUG.view.data('data_0')`. You will see:
 
 ```js
@@ -662,16 +670,18 @@ First, create an almost-blank Vega chart by pasting this into the editor:
     scale: y
   }]
   
-  marks: [{
-    type: area
-    from: {
-      data: source_0
-    }
-    encode: {
-      update: {
+  marks: [
+    {
+      type: area
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+        }
       }
     }
-  }]
+  ]
 }
 ```
 
@@ -743,28 +753,30 @@ on the real data.
 Next, encode the fields `key` and `doc_count` as the X and Y values:
 
 ```yaml
-  marks: [{
-    type: area
-    from: {
-      data: source_0
-    }
-    encode: {
-      update: {
-        x: {
-          scale: x
-          field: key
-        }
-        y: {
-          scale: y
-          value: 0
-        }
-        y2: {
-          scale: y
-          field: doc_count
+  marks: [
+    {
+      type: area
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+          x: {
+            scale: x
+            field: key
+          }
+          y: {
+            scale: y
+            value: 0
+          }
+          y2: {
+            scale: y
+            field: doc_count
+          }
         }
       }
     }
-  }]
+  ]
 ```
 
 Click "Update" and you will get a basic area chart:
@@ -801,7 +813,7 @@ date:
         }
       }
     }
-  }]
+  }
 ```
 
 Next, we will create a Vega signal to make the points clickable. You can access
@@ -1047,82 +1059,87 @@ The final Vega spec for this tutorial is here:
     scale: y
   }]
   
-  marks: [{
-    type: area
-    from: {
-      data: source_0
-    }
-    encode: {
-      update: {
-        x: {
-          scale: x
-          field: key
+  marks: [
+    {
+      type: area
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+          x: {
+            scale: x
+            field: key
+          }
+          y: {
+            scale: y
+            value: 0
+          }
+          y2: {
+            scale: y
+            field: doc_count
+          }
         }
-        y: {
-          scale: y
-          value: 0
+      }
+    },
+    {
+      name: point
+      type: symbol
+      style: ["point"]
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+          x: {
+            scale: x
+            field: key
+          }
+          y: {
+            scale: y
+            field: doc_count
+          }
+          size: {
+            value: 100
+          }
+          fill: {
+            value: black
+          }
+          cursor: { value: "pointer" }
         }
-        y2: {
-          scale: y
-          field: doc_count
+      }
+    },
+    {
+      type: rule
+      interactive: false
+      encode: {
+        update: {
+          y: {value: 0}
+          y2: {signal: "height"}
+          stroke: {value: "gray"}
+          strokeDash: {
+            value: [2, 1]
+          }
+          x: {signal: "max(currentX,0)"}
+          defined: {signal: "currentX > 0"}
+        }
+      }
+    },
+    {
+      type: rect
+      name: selectedRect
+      encode: {
+        update: {
+          height: {signal: "height"}
+          fill: {value: "#333"}
+          fillOpacity: {value: 0.2}
+          x: {signal: "selected[0]"}
+          x2: {signal: "selected[1]"}
+          defined: {signal: "selected[0] !== selected[1]"}
         }
       }
     }
-  }, {
-    name: point
-    type: symbol
-    style: ["point"]
-    from: {
-      data: source_0
-    }
-    encode: {
-      update: {
-        x: {
-          scale: x
-          field: key
-        }
-        y: {
-          scale: y
-          field: doc_count
-        }
-        size: {
-          value: 100
-        }
-        fill: {
-          value: black
-        }
-        cursor: { value: "pointer" }
-      }
-    }
-  }, {
-    type: rule
-    interactive: false
-    encode: {
-      update: {
-        y: {value: 0}
-        y2: {signal: "height"}
-        stroke: {value: "gray"}
-        strokeDash: {
-          value: [2, 1]
-        }
-        x: {signal: "max(currentX,0)"}
-        defined: {signal: "currentX > 0"}
-      }
-    }
-  }, {
-    type: rect
-    name: selectedRect
-    encode: {
-      update: {
-        height: {signal: "height"}
-        fill: {value: "#333"}
-        fillOpacity: {value: 0.2}
-        x: {signal: "selected[0]"}
-        x2: {signal: "selected[1]"}
-        defined: {signal: "selected[0] !== selected[1]"}
-      }
-    }
-  }]
+  ]
   
   signals: [
     {
@@ -1237,7 +1254,7 @@ and respects the padding values. To override this behavior, change the
 
 {kib} registers a default https://vega.github.io/vega/docs/schemes/[Vega color scheme]
 with the id `elastic`, and sets a default color for each `mark` type.
-Override it by providing an alternate
+Override it by providing a different `stroke`, `fill`, or `color` (Vega-Lite) value.
 
 [[vega-queries]]
 ==== Writing {es} queries in Vega
@@ -1258,8 +1275,9 @@ These tokens are:
 * `{%timefilter%: true}`: Replaced by an {es} range query with upper and lower bounds
 * `{%timefilter%: "min" | "max"}`: Replaced only by the upper or lower bounds
 * `{%timefilter: true, shift: -1, unit: 'hour'}`: Generates a time range query one hour in the past
-* `{%autointerval%: true}`: Replaced by the string representing the time interval, such as `1h`
-* `{%autointerval%: 10}`: Replaced by a string which is approximately dividing the time into 10 ranges
+* `{%autointerval%: true}`: Replaced by the string which contains the automatic {kib} time interval, such as `1h`
+* `{%autointerval%: 10}`: Replaced by a string which is approximately dividing the time into 10 ranges, allowing
+  you to influence the automatic interval
 * `"%dashboard_context-must_clause%"`: String replaced by object containing filters
 * `"%dashboard_context-filter_clause%"`: String replaced by an object containing filters
 * `"%dashboard_context-must_not_clause%"`: String replaced by an object containing filters
@@ -1381,7 +1399,7 @@ except that the time range is shifted back by 10 minutes:
 }
 ----
 
-NOTE: When using `"%context%": true` or defining a value for "%timefield%"` the body cannot contain a query. To customize the query within the VEGA specification (e.g. add an additional filter, or shift the timefilter), define your query and use the placeholders as in the example above. The placeholders will be replaced by the actual context of the dashboard or visualization once parsed.
+NOTE: When using `"%context%": true` or defining a value for `"%timefield%"` the body cannot contain a query. To customize the query within the VEGA specification (e.g. add an additional filter, or shift the timefilter), define your query and use the placeholders as in the example above. The placeholders will be replaced by the actual context of the dashboard or visualization once parsed.
 
 The `"%timefilter%"` can also be used to specify a single min or max
 value. The date_histogram's `extended_bounds` can be set
@@ -1602,7 +1620,7 @@ The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Veg
 * https://vega.github.io/vega/docs/[Docs]
 * https://vega.github.io/vega/examples/[Examples]
 
-TIP: When you use the examples, you may
+TIP: When you use the examples in {kib}, you may
 need to modify the "data" section to use absolute URL. For example,
 replace `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`.
