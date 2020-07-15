@@ -14,6 +14,7 @@ import {
   SavedTimeline,
   TimelineSavedObject,
   TimelineTypeLiteralWithNull,
+  ExportTimelineNotFoundError,
   TimelineStatusLiteralWithNull,
   TemplateTimelineTypeLiteralWithNull,
   TemplateTimelineType,
@@ -35,6 +36,7 @@ import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_sav
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from './saved_object_mappings';
 import { draftTimelineDefaults } from './default_timeline';
+import { AuthenticatedUser } from '../../../../security/server';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -81,7 +83,7 @@ export interface Timeline {
     timelineId: string | null,
     version: string | null,
     timeline: SavedTimeline,
-    timelineType?: TimelineTypeLiteralWithNull
+    isImmutable?: boolean
   ) => Promise<ResponseTimeline>;
 
   deleteTimeline: (request: FrameworkRequest, timelineIds: string[]) => Promise<void>;
@@ -160,6 +162,33 @@ const getTimelineTypeFilter = (
   return filters.filter((f) => f != null).join(' and ');
 };
 
+export const getExistingPrepackagedTimelines = async (
+  request: FrameworkRequest,
+  countsOnly?: boolean,
+  pageInfo?: PageInfoTimeline | null
+): Promise<{
+  totalCount: number;
+  timeline: TimelineSavedObject[];
+}> => {
+  const queryPageInfo = countsOnly
+    ? {
+        perPage: 1,
+        page: 1,
+      }
+    : pageInfo ?? {};
+  const elasticTemplateTimelineOptions = {
+    type: timelineSavedObjectType,
+    ...queryPageInfo,
+    filter: getTimelineTypeFilter(
+      TimelineType.template,
+      TemplateTimelineType.elastic,
+      TimelineStatus.immutable
+    ),
+  };
+
+  return getAllSavedTimeline(request, elasticTemplateTimelineOptions);
+};
+
 export const getAllTimeline = async (
   request: FrameworkRequest,
   onlyUserFavorite: boolean | null,
@@ -172,8 +201,8 @@ export const getAllTimeline = async (
 ): Promise<AllTimelinesResponse> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
-    perPage: pageInfo != null ? pageInfo.pageSize : undefined,
-    page: pageInfo != null ? pageInfo.pageIndex : undefined,
+    perPage: pageInfo?.pageSize ?? undefined,
+    page: pageInfo?.pageIndex ?? undefined,
     search: search != null ? search : undefined,
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
@@ -195,17 +224,6 @@ export const getAllTimeline = async (
     perPage: 1,
     page: 1,
     filter: getTimelineTypeFilter(TimelineType.template, null, null),
-  };
-
-  const elasticTemplateTimelineOptions = {
-    type: timelineSavedObjectType,
-    perPage: 1,
-    page: 1,
-    filter: getTimelineTypeFilter(
-      TimelineType.template,
-      TemplateTimelineType.elastic,
-      TimelineStatus.immutable
-    ),
   };
 
   const customTemplateTimelineOptions = {
@@ -231,7 +249,7 @@ export const getAllTimeline = async (
     getAllSavedTimeline(request, options),
     getAllSavedTimeline(request, timelineOptions),
     getAllSavedTimeline(request, templateTimelineOptions),
-    getAllSavedTimeline(request, elasticTemplateTimelineOptions),
+    getExistingPrepackagedTimelines(request, true),
     getAllSavedTimeline(request, customTemplateTimelineOptions),
     getAllSavedTimeline(request, favoriteTimelineOptions),
   ]);
@@ -336,16 +354,18 @@ export const persistTimeline = async (
   request: FrameworkRequest,
   timelineId: string | null,
   version: string | null,
-  timeline: SavedTimeline
+  timeline: SavedTimeline,
+  isImmutable?: boolean
 ): Promise<ResponseTimeline> => {
   const savedObjectsClient = request.context.core.savedObjects.client;
+  const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
   try {
     if (timelineId == null) {
       // Create new timeline
       const newTimeline = convertSavedObjectToSavedTimeline(
         await savedObjectsClient.create(
           timelineSavedObjectType,
-          pickSavedTimeline(timelineId, timeline, request.user)
+          pickSavedTimeline(timelineId, timeline, userInfo)
         )
       );
       return {
@@ -358,7 +378,7 @@ export const persistTimeline = async (
     await savedObjectsClient.update(
       timelineSavedObjectType,
       timelineId,
-      pickSavedTimeline(timelineId, timeline, request.user),
+      pickSavedTimeline(timelineId, timeline, userInfo),
       {
         version: version || undefined,
       }
@@ -537,3 +557,50 @@ export const timelineWithReduxProperties = (
   pinnedEventIds: pinnedEvents.map((e) => e.eventId),
   pinnedEventsSaveObject: pinnedEvents,
 });
+
+export const getTimelines = async (request: FrameworkRequest, timelineIds?: string[] | null) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+  let exportedIds = timelineIds;
+  if (timelineIds == null || timelineIds.length === 0) {
+    const { timeline: savedAllTimelines } = await getAllTimeline(
+      request,
+      false,
+      null,
+      null,
+      null,
+      TimelineStatus.active,
+      null,
+      null
+    );
+    exportedIds = savedAllTimelines.map((t) => t.savedObjectId);
+  }
+
+  const savedObjects = await Promise.resolve(
+    savedObjectsClient.bulkGet(
+      exportedIds?.reduce(
+        (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
+        [] as Array<{ id: string; type: string }>
+      )
+    )
+  );
+
+  const timelineObjects: {
+    timelines: TimelineSavedObject[];
+    errors: ExportTimelineNotFoundError[];
+  } = savedObjects.saved_objects.reduce(
+    (acc, savedObject) => {
+      return savedObject.error == null
+        ? {
+            errors: acc.errors,
+            timelines: [...acc.timelines, convertSavedObjectToSavedTimeline(savedObject)],
+          }
+        : { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
+    },
+    {
+      timelines: [] as TimelineSavedObject[],
+      errors: [] as ExportTimelineNotFoundError[],
+    }
+  );
+
+  return timelineObjects;
+};

@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
@@ -39,6 +39,7 @@ import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unau
 import * as i18n from './translations';
 import { LinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
+import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
@@ -62,6 +63,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   const history = useHistory();
   const [lastAlerts] = useAlertInfo({});
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const loading = userInfoLoading || listsConfigLoading;
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
@@ -70,7 +72,11 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      setAbsoluteRangeDatePicker({
+        id: 'global',
+        from: new Date(min).toISOString(),
+        to: new Date(max).toISOString(),
+      });
     },
     [setAbsoluteRangeDatePicker]
   );
@@ -81,6 +87,24 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       history.push(getRulesUrl());
     },
     [history]
+  );
+
+  const alertsHistogramDefaultFilters = useMemo(
+    () => [...filters, ...buildShowBuildingBlockFilter(showBuildingBlockAlerts)],
+    [filters, showBuildingBlockAlerts]
+  );
+
+  // AlertsTable manages global filters itself, so not including `filters`
+  const alertsTableDefaultFilters = useMemo(
+    () => buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+    [showBuildingBlockAlerts]
+  );
+
+  const onShowBuildingBlockAlertsChangedCallback = useCallback(
+    (newShowBuildingBlockAlerts: boolean) => {
+      setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
+    },
+    [setShowBuildingBlockAlerts]
   );
 
   const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
@@ -141,7 +165,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
 
             <AlertsHistogramPanel
               deleteQuery={deleteQuery}
-              filters={filters}
+              filters={alertsHistogramDefaultFilters}
               from={from}
               query={query}
               setQuery={setQuery}
@@ -158,6 +182,9 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
               hasIndexWrite={hasIndexWrite ?? false}
               canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
               from={from}
+              defaultFilters={alertsTableDefaultFilters}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
               signalsIndex={signalIndexName ?? ''}
               to={to}
             />

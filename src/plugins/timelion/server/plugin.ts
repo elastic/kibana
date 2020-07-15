@@ -16,12 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import { TimelionConfigType } from './config';
 
 export class TimelionPlugin implements Plugin {
-  constructor(context: PluginInitializerContext) {}
+  constructor(context: PluginInitializerContext<TimelionConfigType>) {}
 
-  setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
+    core.capabilities.registerProvider(() => ({
+      timelion: {
+        save: true,
+      },
+    }));
     core.savedObjects.registerType({
       name: 'timelion-sheet',
       hidden: false,
@@ -44,6 +53,42 @@ export class TimelionPlugin implements Plugin {
           title: { type: 'text' },
           version: { type: 'integer' },
         },
+      },
+    });
+
+    core.uiSettings.register({
+      'timelion:showTutorial': {
+        name: i18n.translate('timelion.uiSettings.showTutorialLabel', {
+          defaultMessage: 'Show tutorial',
+        }),
+        value: false,
+        description: i18n.translate('timelion.uiSettings.showTutorialDescription', {
+          defaultMessage: 'Should I show the tutorial by default when entering the timelion app?',
+        }),
+        category: ['timelion'],
+        schema: schema.boolean(),
+      },
+      'timelion:default_columns': {
+        name: i18n.translate('timelion.uiSettings.defaultColumnsLabel', {
+          defaultMessage: 'Default columns',
+        }),
+        value: 2,
+        description: i18n.translate('timelion.uiSettings.defaultColumnsDescription', {
+          defaultMessage: 'Number of columns on a timelion sheet by default',
+        }),
+        category: ['timelion'],
+        schema: schema.number(),
+      },
+      'timelion:default_rows': {
+        name: i18n.translate('timelion.uiSettings.defaultRowsLabel', {
+          defaultMessage: 'Default rows',
+        }),
+        value: 2,
+        description: i18n.translate('timelion.uiSettings.defaultRowsDescription', {
+          defaultMessage: 'Number of rows on a timelion sheet by default',
+        }),
+        category: ['timelion'],
+        schema: schema.number(),
       },
     });
   }
