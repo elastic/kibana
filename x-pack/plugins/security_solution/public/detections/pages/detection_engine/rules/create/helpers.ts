@@ -153,6 +153,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
     riskScore,
     severity,
     threat,
+    isAssociatedToEndpointList,
     isBuildingBlock,
     isNew,
     note,
@@ -163,6 +164,13 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
     ...(isBuildingBlock ? { building_block_type: 'default' } : {}),
+    ...(isAssociatedToEndpointList
+      ? {
+          exceptions_list: [
+            { id: 'endpoint_list', namespace_type: 'agnostic', type: 'endpoint' },
+          ] as AboutStepRuleJson['exceptions_list'],
+        }
+      : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore.value,
