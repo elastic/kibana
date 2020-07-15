@@ -39,10 +39,8 @@ export interface SavedObjectsImportRetry {
     to: string;
   }>;
   /**
-   * @deprecated
    * If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where
-   * `createNewCopies` mode is disabled and ambiguous source conflicts are detected. When `createNewCopies` mode is permanently enabled,
-   * this field will be redundant and can be removed.
+   * `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
    */
   createNewCopy?: boolean;
 }
@@ -155,12 +153,7 @@ export interface SavedObjectsImportOptions {
   readStream: Readable;
   /** The maximum number of object to import */
   objectLimit: number;
-  /**
-   * @deprecated
-   * If true, will override existing object if present. This option will be removed and permanently disabled in a future release.
-   *
-   * Note: this has no effect when used with the `createNewCopies` option.
-   */
+  /** If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option. */
   overwrite: boolean;
   /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
   savedObjectsClient: SavedObjectsClientContract;
@@ -168,11 +161,7 @@ export interface SavedObjectsImportOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   /** if specified, will import in given namespace, else will import as global object */
   namespace?: string;
-  /**
-   * @deprecated
-   * If true, will create new copies of import objects, each with a random `id` and undefined `originId`. This option will be removed and
-   * permanently enabled in a future release.
-   */
+  /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
 }
 
@@ -193,11 +182,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
   retries: SavedObjectsImportRetry[];
   /** if specified, will import in given namespace */
   namespace?: string;
-  /**
-   * @deprecated
-   * If true, will create new copies of import objects, each with a random `id` and undefined `originId`. This option will be removed and
-   * permanently enabled in a future release.
-   */
+  /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
 }
 

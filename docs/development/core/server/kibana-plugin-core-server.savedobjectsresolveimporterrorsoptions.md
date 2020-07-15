@@ -16,7 +16,7 @@ export interface SavedObjectsResolveImportErrorsOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [createNewCopies](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.createnewcopies.md) | <code>boolean</code> |  |
+|  [createNewCopies](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.createnewcopies.md) | <code>boolean</code> | If true, will create new copies of import objects, each with a random <code>id</code> and undefined <code>originId</code>. |
 |  [namespace](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.namespace.md) | <code>string</code> | if specified, will import in given namespace |
 |  [objectLimit](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.objectlimit.md) | <code>number</code> | The maximum number of object to import |
 |  [readStream](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.readstream.md) | <code>Readable</code> | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to resolve errors from |

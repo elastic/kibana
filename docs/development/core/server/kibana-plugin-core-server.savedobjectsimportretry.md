@@ -16,7 +16,7 @@ export interface SavedObjectsImportRetry
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [createNewCopy](./kibana-plugin-core-server.savedobjectsimportretry.createnewcopy.md) | <code>boolean</code> |  |
+|  [createNewCopy](./kibana-plugin-core-server.savedobjectsimportretry.createnewcopy.md) | <code>boolean</code> | If <code>createNewCopy</code> is specified, the new object has a new (undefined) origin ID. This is only needed for the case where <code>createNewCopies</code> mode is disabled and ambiguous source conflicts are detected. |
 |  [destinationId](./kibana-plugin-core-server.savedobjectsimportretry.destinationid.md) | <code>string</code> | The object ID that will be created or overwritten. If not specified, the <code>id</code> field will be used. |
 |  [id](./kibana-plugin-core-server.savedobjectsimportretry.id.md) | <code>string</code> |  |
 |  [overwrite](./kibana-plugin-core-server.savedobjectsimportretry.overwrite.md) | <code>boolean</code> |  |

@@ -4,10 +4,7 @@
 
 ## SavedObjectsImportRetry.createNewCopy property
 
-> Warning: This API is now obsolete.
-> 
-> If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected. When `createNewCopies` mode is permanently enabled, this field will be redundant and can be removed.
-> 
+If `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
 
 <b>Signature:</b>
 

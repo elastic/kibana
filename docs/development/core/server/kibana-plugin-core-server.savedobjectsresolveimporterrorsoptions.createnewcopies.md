@@ -4,10 +4,7 @@
 
 ## SavedObjectsResolveImportErrorsOptions.createNewCopies property
 
-> Warning: This API is now obsolete.
-> 
-> If true, will create new copies of import objects, each with a random `id` and undefined `originId`<!-- -->. This option will be removed and permanently enabled in a future release.
-> 
+If true, will create new copies of import objects, each with a random `id` and undefined `originId`<!-- -->.
 
 <b>Signature:</b>
 

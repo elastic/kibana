@@ -2292,11 +2292,9 @@ export interface SavedObjectsImportMissingReferencesError {
 
 // @public
 export interface SavedObjectsImportOptions {
-    // @deprecated (undocumented)
     createNewCopies: boolean;
     namespace?: string;
     objectLimit: number;
-    // @deprecated (undocumented)
     overwrite: boolean;
     readStream: Readable;
     savedObjectsClient: SavedObjectsClientContract;
@@ -2317,7 +2315,6 @@ export interface SavedObjectsImportResponse {
 
 // @public
 export interface SavedObjectsImportRetry {
-    // @deprecated (undocumented)
     createNewCopy?: boolean;
     destinationId?: string;
     // (undocumented)
@@ -2470,7 +2467,6 @@ export interface SavedObjectsRepositoryFactory {
 
 // @public
 export interface SavedObjectsResolveImportErrorsOptions {
-    // @deprecated (undocumented)
     createNewCopies: boolean;
     namespace?: string;
     objectLimit: number;

@@ -4,12 +4,7 @@
 
 ## SavedObjectsImportOptions.overwrite property
 
-> Warning: This API is now obsolete.
-> 
-> If true, will override existing object if present. This option will be removed and permanently disabled in a future release.
-> 
-> Note: this has no effect when used with the `createNewCopies` option.
-> 
+If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option.
 
 <b>Signature:</b>
 

@@ -1383,7 +1383,6 @@ export interface SavedObjectsImportResponse {
 
 // @public
 export interface SavedObjectsImportRetry {
-    // @deprecated (undocumented)
     createNewCopy?: boolean;
     destinationId?: string;
     // (undocumented)
