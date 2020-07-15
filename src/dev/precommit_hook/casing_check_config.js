@@ -61,6 +61,9 @@ export const IGNORE_FILE_GLOBS = [
   // filename required by api-extractor
   'api-documenter.json',
 
+  // filename must match upstream filenames from lodash
+  'packages/elastic-safer-lodash-set/**/*',
+
   // TODO fix file names in APM to remove these
   'x-pack/plugins/apm/public/**/*',
   'x-pack/plugins/apm/scripts/**/*',
@@ -173,12 +176,12 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

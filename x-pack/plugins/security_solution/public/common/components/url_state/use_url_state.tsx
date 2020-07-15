@@ -18,6 +18,7 @@ import {
   getTitle,
   replaceStateInLocation,
   updateUrlStateString,
+  decodeRisonUrlState,
 } from './helpers';
 import {
   UrlStateContainerPropTypes,
@@ -26,8 +27,10 @@ import {
   KeyUrlState,
   ALL_URL_STATE_KEYS,
   UrlStateToRedux,
+  UrlState,
 } from './types';
 import { SecurityPageName } from '../../../app/types';
+import { TimelineUrl } from '../../../timelines/store/timeline/model';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -36,6 +39,21 @@ function usePrevious(value: PreviousLocationUrlState) {
   });
   return ref.current;
 }
+
+const updateTimelineAtinitialization = (
+  urlKey: CONSTANTS,
+  newUrlStateString: string,
+  urlState: UrlState
+) => {
+  let updateUrlState = true;
+  if (urlKey === CONSTANTS.timeline) {
+    const timeline = decodeRisonUrlState<TimelineUrl>(newUrlStateString);
+    if (timeline != null && urlState.timeline.id === timeline.id) {
+      updateUrlState = false;
+    }
+  }
+  return updateUrlState;
+};
 
 export const useUrlStateHooks = ({
   detailName,
@@ -78,13 +96,15 @@ export const useUrlStateHooks = ({
             getParamFromQueryString(getQueryStringFromLocation(mySearch), urlKey) ??
             newUrlStateString;
           if (isInitializing || !deepEqual(updatedUrlStateString, newUrlStateString)) {
-            urlStateToUpdate = [
-              ...urlStateToUpdate,
-              {
-                urlKey,
-                newUrlStateString: updatedUrlStateString,
-              },
-            ];
+            if (updateTimelineAtinitialization(urlKey, newUrlStateString, urlState)) {
+              urlStateToUpdate = [
+                ...urlStateToUpdate,
+                {
+                  urlKey,
+                  newUrlStateString: updatedUrlStateString,
+                },
+              ];
+            }
           }
         }
       } else if (

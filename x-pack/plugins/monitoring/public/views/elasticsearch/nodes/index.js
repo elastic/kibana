@@ -15,7 +15,11 @@ import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { ELASTICSEARCH_SYSTEM_ID, CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
+import {
+  ELASTICSEARCH_SYSTEM_ID,
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_CPU_USAGE,
+} from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -75,7 +79,13 @@ uiRoutes.when('/elasticsearch/nodes', {
         getPageData,
         $scope,
         $injector,
-        fetchDataImmediately: false, // We want to apply pagination before sending the first request
+        fetchDataImmediately: false, // We want to apply pagination before sending the first request,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_CPU_USAGE],
+          },
+        },
       });
 
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
@@ -104,6 +114,7 @@ uiRoutes.when('/elasticsearch/nodes', {
                   clusterUuid={globalState.cluster_uuid}
                   setupMode={setupMode}
                   nodes={nodes}
+                  alerts={this.alerts}
                   showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
                   {...this.getPaginationTableProps(pagination)}
                 />

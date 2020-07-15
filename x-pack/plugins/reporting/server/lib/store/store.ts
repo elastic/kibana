@@ -7,8 +7,8 @@
 import { ElasticsearchServiceSetup } from 'src/core/server';
 import { LevelLogger } from '../';
 import { ReportingCore } from '../../';
-import { LayoutInstance } from '../../export_types/common/layouts';
 import { indexTimestamp } from './index_timestamp';
+import { LayoutInstance } from '../layouts';
 import { mapping } from './mapping';
 import { Report } from './report';
 
