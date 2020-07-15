@@ -23,7 +23,8 @@ import { BuilderButtonOptions } from './builder_button_options';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { Loader } from '../../loader';
-import { exceptionableFields } from '../exceptionable_fields';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import exceptionableFields from '../exceptionable_fields.json';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
