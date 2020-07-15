@@ -38,7 +38,6 @@ interface MatchingEventEntry {
   eventType: string;
   eventCategory: string;
   name: { subject: string; descriptor?: string };
-  entityId: string;
   setQueryParams: () => void;
 }
 
@@ -202,9 +201,11 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
         eventCategory: `${eventType}`,
         eventType: `${event.ecsEventType(resolverEvent)}`,
         name: event.descriptiveName(resolverEvent),
-        entityId: String(entityId),
         setQueryParams: () => {
-          pushToQueryParams({ crumbId: String(entityId), crumbEvent: processEntityId });
+          pushToQueryParams({
+            crumbId: entityId === undefined ? '' : String(entityId),
+            crumbEvent: processEntityId,
+          });
         },
       };
     });
