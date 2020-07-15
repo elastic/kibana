@@ -115,8 +115,11 @@ export function useForm<T extends FormData = FormData>(
     (path, value) => {
       const _formData$ = getFormData$();
       const currentFormData = _formData$.value;
-      const nextValue = { ...currentFormData, [path]: value };
-      _formData$.next(nextValue);
+
+      if (currentFormData[path] !== value) {
+        _formData$.next({ ...currentFormData, [path]: value });
+      }
+
       return _formData$.value;
     },
     [getFormData$]

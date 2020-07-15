@@ -517,28 +517,13 @@ export const useField = <T>(
     serializeOutput,
   ]);
 
-  form.__addField(field as FieldHook<any>); // Executed first (1)
-
-  useEffect(() => {
-    /**
-     * NOTE: effect cleanup actually happens *after* the new component has been mounted,
-     * but before the next effect callback is run.
-     * Ref: https://kentcdodds.com/blog/understanding-reacts-key-prop
-     *
-     * This means that, the "form.__addField(field)" outside the effect will be called *before*
-     * the cleanup `form.__removeField(path);` creating a race condition.
-     *
-     * TODO: See how we could refactor "use_field" & "use_form" to avoid having the
-     * `form.__addField(field)` call outside the effect.
-     */
-    __addField(field as FieldHook<any>); // Executed third (3)
-  }, [field, __addField]);
+  form.__addField(field as FieldHook<any>);
 
   useEffect(() => {
     return () => {
       // Remove field from the form when it is unmounted or if its path changes.
       isUnmounted.current = true;
-      __removeField(path); // Executed second (2)
+      __removeField(path);
     };
   }, [path, __removeField]);
 
