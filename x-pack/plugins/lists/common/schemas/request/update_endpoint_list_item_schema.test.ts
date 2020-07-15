@@ -10,15 +10,15 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
 
 import {
-  UpdateExceptionListItemSchema,
-  updateExceptionListItemSchema,
-} from './update_exception_list_item_schema';
-import { getUpdateExceptionListItemSchemaMock } from './update_exception_list_item_schema.mock';
+  UpdateEndpointListItemSchema,
+  updateEndpointListItemSchema,
+} from './update_endpoint_list_item_schema';
+import { getUpdateEndpointListItemSchemaMock } from './update_endpoint_list_item_schema.mock';
 
 describe('update_exception_list_item_schema', () => {
   test('it should validate a typical exception list item request', () => {
-    const payload = getUpdateExceptionListItemSchemaMock();
-    const decoded = updateExceptionListItemSchema.decode(payload);
+    const payload = getUpdateEndpointListItemSchemaMock();
+    const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -26,9 +26,9 @@ describe('update_exception_list_item_schema', () => {
   });
 
   test('it should not accept an undefined for "description"', () => {
-    const payload = getUpdateExceptionListItemSchemaMock();
+    const payload = getUpdateEndpointListItemSchemaMock();
     delete payload.description;
-    const decoded = updateExceptionListItemSchema.decode(payload);
+    const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -38,9 +38,9 @@ describe('update_exception_list_item_schema', () => {
   });
 
   test('it should not accept an undefined for "name"', () => {
-    const payload = getUpdateExceptionListItemSchemaMock();
+    const payload = getUpdateEndpointListItemSchemaMock();
     delete payload.name;
-    const decoded = updateExceptionListItemSchema.decode(payload);
+    const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -50,9 +50,9 @@ describe('update_exception_list_item_schema', () => {
   });
 
   test('it should not accept an undefined for "type"', () => {
-    const payload = getUpdateExceptionListItemSchemaMock();
+    const payload = getUpdateEndpointListItemSchemaMock();
     delete payload.type;
-    const decoded = updateExceptionListItemSchema.decode(payload);
+    const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -62,11 +62,11 @@ describe('update_exception_list_item_schema', () => {
   });
 
   test('it should not accept a value for "list_id"', () => {
-    const payload: UpdateExceptionListItemSchema & {
+    const payload: UpdateEndpointListItemSchema & {
       list_id?: string;
-    } = getUpdateExceptionListItemSchemaMock();
+    } = getUpdateEndpointListItemSchemaMock();
     payload.list_id = 'some new list_id';
-    const decoded = updateExceptionListItemSchema.decode(payload);
+    const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "list_id"']);
@@ -74,10 +74,10 @@ describe('update_exception_list_item_schema', () => {
   });
 
   test('it should accept an undefined for "meta" but strip it out', () => {
-    const payload = getUpdateExceptionListItemSchemaMock();
-    const outputPayload = getUpdateExceptionListItemSchemaMock();
+    const payload = getUpdateEndpointListItemSchemaMock();
+    const outputPayload = getUpdateEndpointListItemSchemaMock();
     delete payload.meta;
-    const decoded = updateExceptionListItemSchema.decode(payload);
+    const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     delete outputPayload.meta;
@@ -86,11 +86,11 @@ describe('update_exception_list_item_schema', () => {
   });
 
   test('it should accept an undefined for "comments" but return an array', () => {
-    const inputPayload = getUpdateExceptionListItemSchemaMock();
-    const outputPayload = getUpdateExceptionListItemSchemaMock();
+    const inputPayload = getUpdateEndpointListItemSchemaMock();
+    const outputPayload = getUpdateEndpointListItemSchemaMock();
     delete inputPayload.comments;
     outputPayload.comments = [];
-    const decoded = updateExceptionListItemSchema.decode(inputPayload);
+    const decoded = updateEndpointListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -98,23 +98,11 @@ describe('update_exception_list_item_schema', () => {
   });
 
   test('it should accept an undefined for "entries" but return an array', () => {
-    const inputPayload = getUpdateExceptionListItemSchemaMock();
-    const outputPayload = getUpdateExceptionListItemSchemaMock();
+    const inputPayload = getUpdateEndpointListItemSchemaMock();
+    const outputPayload = getUpdateEndpointListItemSchemaMock();
     delete inputPayload.entries;
     outputPayload.entries = [];
-    const decoded = updateExceptionListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
-  test('it should accept an undefined for "namespace_type" but return enum "single"', () => {
-    const inputPayload = getUpdateExceptionListItemSchemaMock();
-    const outputPayload = getUpdateExceptionListItemSchemaMock();
-    delete inputPayload.namespace_type;
-    outputPayload.namespace_type = 'single';
-    const decoded = updateExceptionListItemSchema.decode(inputPayload);
+    const decoded = updateEndpointListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -122,11 +110,11 @@ describe('update_exception_list_item_schema', () => {
   });
 
   test('it should accept an undefined for "tags" but return an array', () => {
-    const inputPayload = getUpdateExceptionListItemSchemaMock();
-    const outputPayload = getUpdateExceptionListItemSchemaMock();
+    const inputPayload = getUpdateEndpointListItemSchemaMock();
+    const outputPayload = getUpdateEndpointListItemSchemaMock();
     delete inputPayload.tags;
     outputPayload.tags = [];
-    const decoded = updateExceptionListItemSchema.decode(inputPayload);
+    const decoded = updateEndpointListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -134,33 +122,23 @@ describe('update_exception_list_item_schema', () => {
   });
 
   test('it should accept an undefined for "_tags" but return an array', () => {
-    const inputPayload = getUpdateExceptionListItemSchemaMock();
-    const outputPayload = getUpdateExceptionListItemSchemaMock();
+    const inputPayload = getUpdateEndpointListItemSchemaMock();
+    const outputPayload = getUpdateEndpointListItemSchemaMock();
     delete inputPayload._tags;
     outputPayload._tags = [];
-    const decoded = updateExceptionListItemSchema.decode(inputPayload);
+    const decoded = updateEndpointListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "item_id" and generate a correct body not counting the uuid', () => {
-    const inputPayload = getUpdateExceptionListItemSchemaMock();
-    delete inputPayload.item_id;
-    const decoded = updateExceptionListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    delete (message.schema as UpdateExceptionListItemSchema).item_id;
-    expect(message.schema).toEqual(inputPayload);
-  });
-
   test('it should not allow an extra key to be sent in', () => {
-    const payload: UpdateExceptionListItemSchema & {
+    const payload: UpdateEndpointListItemSchema & {
       extraKey?: string;
-    } = getUpdateExceptionListItemSchemaMock();
+    } = getUpdateEndpointListItemSchemaMock();
     payload.extraKey = 'some new value';
-    const decoded = updateExceptionListItemSchema.decode(payload);
+    const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "extraKey"']);
