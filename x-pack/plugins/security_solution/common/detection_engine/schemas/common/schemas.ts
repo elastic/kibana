@@ -424,6 +424,11 @@ export const rules_custom_installed = PositiveInteger;
 export const rules_not_installed = PositiveInteger;
 export const rules_not_updated = PositiveInteger;
 
+export const timelines_installed = PositiveInteger;
+export const timelines_updated = PositiveInteger;
+export const timelines_not_installed = PositiveInteger;
+export const timelines_not_updated = PositiveInteger;
+
 export const note = t.string;
 export type Note = t.TypeOf<typeof note>;
 

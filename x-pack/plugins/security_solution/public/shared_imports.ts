@@ -49,4 +49,5 @@ export {
   ExceptionList,
   Pagination,
   UseExceptionListSuccess,
+  addEndpointExceptionList,
 } from '../../lists/public';

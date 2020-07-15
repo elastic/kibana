@@ -10,6 +10,7 @@ import React from 'react';
 import { OverviewHostProps } from '../overview_host';
 import { OverviewNetworkProps } from '../overview_network';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
+import '../../../common/mock/match_media';
 
 import { EventCounts } from '.';
 

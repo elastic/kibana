@@ -11,6 +11,7 @@ import {
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
+  TIMELINE_PREPACKAGED_URL,
 } from '../../../../../common/constants';
 import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 
@@ -18,6 +19,7 @@ import { requestMock } from '../../../detection_engine/routes/__mocks__';
 
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
+import { GetTimelineByIdSchemaQuery } from '../schemas/get_timeline_by_id_schema';
 
 const readable = new stream.Readable();
 export const getExportTimelinesRequest = () =>
@@ -171,6 +173,19 @@ export const cleanDraftTimelinesRequest = (timelineType: TimelineType) =>
     body: {
       timelineType,
     },
+  });
+
+export const getTimelineByIdRequest = (query: GetTimelineByIdSchemaQuery) =>
+  requestMock.create({
+    method: 'get',
+    path: TIMELINE_URL,
+    query,
+  });
+
+export const installPrepackedTimelinesRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: TIMELINE_PREPACKAGED_URL,
   });
 
 export const mockTimelinesSavedObjects = () => ({
