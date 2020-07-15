@@ -144,7 +144,7 @@ describe('ESGeoGridSource', () => {
         () => {}
       );
 
-      expect(meta.areResultsTrimmed).toEqual(false);
+      expect(meta && meta.areResultsTrimmed).toEqual(false);
       expect(data).toEqual({
         type: 'FeatureCollection',
         features: [
@@ -163,7 +163,8 @@ describe('ESGeoGridSource', () => {
         ],
       });
 
-      function getProperty(property) {
+      function getProperty(property: string) {
+        // @ts-expect-error
         const call = mockSearchSource.setField.mock.calls.find((c) => {
           return c[0] === property;
         });

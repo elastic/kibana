@@ -12,6 +12,7 @@ import { IField } from '../../fields/field';
 import {
   ESSearchSourceResponseMeta,
   MapExtent,
+  MapFilters,
   MapQuery,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -41,7 +42,7 @@ export interface IVectorSource extends ISource {
   ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: 'string',
-    searchFilters: unknown[],
+    searchFilters: MapFilters,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<GeoJsonWithMeta>;
 
@@ -62,7 +63,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: unknown[],
+    searchFilters: MapFilters,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<GeoJsonWithMeta>;
 
