@@ -93,7 +93,7 @@ export const buildMatch = ({
   const { value, operator, field } = item;
   const exceptionOperator = operatorBuilder({ operator, language });
 
-  return `${exceptionOperator}${field}:${value}`;
+  return `${exceptionOperator}${field}:"${value}"`;
 };
 
 export const buildMatchAny = ({
