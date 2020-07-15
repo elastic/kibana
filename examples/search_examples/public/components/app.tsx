@@ -44,6 +44,7 @@ import {
   DataPublicPluginStart,
   IndexPatternSelect,
   IEsSearchResponse,
+  IIndexPattern,
 } from '../../../../src/plugins/data/public';
 
 interface SearchExamplesAppDeps {
@@ -65,10 +66,13 @@ export const SearchExamplesApp = ({
   const [indexPatternId, setIndexPatternId] = useState<string>();
 
   const doAsyncSearch = async (strategy?: string) => {
-    const indexPattern = await data.indexPatterns.get(indexPatternId);
+    let indexPattern: IIndexPattern | undefined;
+    if (indexPatternId) {
+      indexPattern = await data.indexPatterns.get(indexPatternId);
+    }
     const request = {
       params: {
-        index: indexPattern.title,
+        index: indexPattern ? indexPattern.title : '',
         body: {
           aggs: {
             avg_bytes: { avg: { field: 'bytes' } },
