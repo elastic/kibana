@@ -31,9 +31,7 @@ export type ActionTypeParams = Record<string, any>;
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
-  getScopedCallCluster(
-    clusterClient: ILegacyClusterClient
-  ): ILegacyScopedClusterClient['callAsCurrentUser'];
+  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
 declare module 'src/core/server' {

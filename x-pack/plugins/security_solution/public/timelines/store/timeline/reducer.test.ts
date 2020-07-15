@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { cloneDeep } from 'lodash/fp';
 
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
@@ -48,6 +49,8 @@ import { ColumnHeaderOptions } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+
 const timelineByIdMock: TimelineById = {
   foo: {
     dataProviders: [
@@ -70,6 +73,7 @@ const timelineByIdMock: TimelineById = {
     description: '',
     deletedEventIds: [],
     eventIdToNoteIds: {},
+    excludedRowRendererIds: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
     id: 'foo',
@@ -91,13 +95,12 @@ const timelineByIdMock: TimelineById = {
     pinnedEventIds: {},
     pinnedEventsSaveObject: {},
     dateRange: {
-      start: 0,
-      end: 0,
+      start: '2020-07-07T08:20:18.966Z',
+      end: '2020-07-08T08:20:18.966Z',
     },
     selectedEventIds: {},
     show: true,
     showCheckboxes: false,
-    showRowRenderers: true,
     sort: {
       columnId: '@timestamp',
       sortDirection: Direction.desc,
@@ -1009,8 +1012,8 @@ describe('Timeline', () => {
     test('should return a new reference and not the same reference', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        start: 23,
-        end: 33,
+        start: '2020-07-07T08:20:18.966Z',
+        end: '2020-07-08T08:20:18.966Z',
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
@@ -1019,16 +1022,16 @@ describe('Timeline', () => {
     test('should update the timeline range', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        start: 23,
-        end: 33,
+        start: '2020-07-07T08:20:18.966Z',
+        end: '2020-07-08T08:20:18.966Z',
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual(
         set(
           'foo.dateRange',
           {
-            start: 23,
-            end: 33,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           timelineByIdMock
         )
@@ -1119,6 +1122,7 @@ describe('Timeline', () => {
           deletedEventIds: [],
           description: '',
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1134,12 +1138,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1215,6 +1218,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1230,12 +1234,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1421,6 +1424,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1436,12 +1440,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1517,6 +1520,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1532,12 +1536,11 @@ describe('Timeline', () => {
           templateTimelineVersion: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1619,6 +1622,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1634,12 +1638,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1722,6 +1725,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1737,12 +1741,11 @@ describe('Timeline', () => {
           templateTimelineVersion: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1917,6 +1920,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -1932,12 +1936,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',
@@ -1995,6 +1998,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           isFavorite: false,
@@ -2003,7 +2007,6 @@ describe('Timeline', () => {
           isLoading: false,
           id: 'foo',
           savedObjectId: null,
-          showRowRenderers: true,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
@@ -2013,8 +2016,8 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
@@ -2099,6 +2102,7 @@ describe('Timeline', () => {
           description: '',
           deletedEventIds: [],
           eventIdToNoteIds: {},
+          excludedRowRendererIds: [],
           highlightedDropAndProviderId: '',
           historyIds: [],
           id: 'foo',
@@ -2116,12 +2120,11 @@ describe('Timeline', () => {
           templateTimelineId: null,
           noteIds: [],
           dateRange: {
-            start: 0,
-            end: 0,
+            start: '2020-07-07T08:20:18.966Z',
+            end: '2020-07-08T08:20:18.966Z',
           },
           selectedEventIds: {},
           show: true,
-          showRowRenderers: true,
           showCheckboxes: false,
           sort: {
             columnId: '@timestamp',

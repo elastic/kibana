@@ -22,6 +22,7 @@ import styled, { ThemeContext } from 'styled-components';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { appsSection } from '../home/section';
+import { IngestManagerPanel } from '../../components/app/ingest_manager_panel';
 
 const EuiCardWithoutPadding = styled(EuiCard)`
   padding: 0;
@@ -84,7 +85,9 @@ export const LandingPage = () => {
                 size="xl"
                 alt="observability overview image"
                 url={core.http.basePath.prepend(
-                  '/plugins/observability/assets/observability_overview.png'
+                  `/plugins/observability/assets/illustration_${
+                    theme.darkMode ? 'dark' : 'light'
+                  }.svg`
                 )}
               />
             </EuiFlexItem>
@@ -107,6 +110,16 @@ export const LandingPage = () => {
                   defaultMessage: 'Get started',
                 })}
               </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiSpacer size="xxl" />
+
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}>
+              <IngestManagerPanel />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

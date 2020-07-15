@@ -103,9 +103,6 @@ export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
   return 'raw';
 };
 
-export const showGraphView = (graphEventId?: string) =>
-  graphEventId != null && graphEventId.length > 0;
-
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   return (
     get(['agent', 'type', 0], ecsData) === 'endpoint' &&
@@ -131,3 +128,38 @@ export const getInvestigateInResolverAction = ({
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: eventId })),
   width: DEFAULT_ICON_BUTTON_WIDTH,
 });
+
+/**
+ * The minimum height of a timeline-based events viewer body, as seen in several
+ * views, e.g. `Detections`, `Events`, `External events`, etc
+ */
+export const MIN_EVENTS_VIEWER_BODY_HEIGHT = 500; // px
+
+interface GetEventsViewerBodyHeightParams {
+  /** the height of the header, e.g. the section containing "`Showing n event / alerts`, and `Open` / `In progress` / `Closed` filters" */
+  headerHeight: number;
+  /** the height of the footer, e.g. "`25 of 100 events / alerts`, `Load More`, `Updated n minutes ago`" */
+  footerHeight: number;
+  /** the height of the global Kibana chrome, common throughout the app */
+  kibanaChromeHeight: number;
+  /** the (combined) height of other non-events viewer content, e.g. the global search / filter bar in full screen mode */
+  otherContentHeight: number;
+  /** the full height of the window */
+  windowHeight: number;
+}
+
+export const getEventsViewerBodyHeight = ({
+  footerHeight,
+  headerHeight,
+  kibanaChromeHeight,
+  otherContentHeight,
+  windowHeight,
+}: GetEventsViewerBodyHeightParams) => {
+  if (windowHeight === 0 || !isFinite(windowHeight)) {
+    return MIN_EVENTS_VIEWER_BODY_HEIGHT;
+  }
+
+  const combinedHeights = kibanaChromeHeight + otherContentHeight + headerHeight + footerHeight;
+
+  return Math.max(MIN_EVENTS_VIEWER_BODY_HEIGHT, windowHeight - combinedHeights);
+};

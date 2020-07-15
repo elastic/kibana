@@ -13,6 +13,7 @@ import {
   TimelineTypeLiteralWithNull,
   TimelineStatus,
   TemplateTimelineTypeLiteral,
+  RowRendererId,
 } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
@@ -46,6 +47,7 @@ export interface OpenTimelineResult {
   created?: number | null;
   description?: string | null;
   eventIdToNoteIds?: Readonly<Record<string, string[]>> | null;
+  excludedRowRendererIds?: RowRendererId[] | null;
   favorite?: FavoriteTimelineResult[] | null;
   noteIds?: string[] | null;
   notes?: TimelineResultNote[] | null;
@@ -187,10 +189,10 @@ export interface OpenTimelineProps {
 export interface UpdateTimeline {
   duplicate: boolean;
   id: string;
-  from: number;
+  from: string;
   notes: NoteResult[] | null | undefined;
   timeline: TimelineModel;
-  to: number;
+  to: string;
   ruleNote?: string;
 }
 

@@ -8,6 +8,7 @@ import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -43,8 +44,8 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-const startDate = 1579553397080;
-const endDate = 1579639797080;
+const startDate = '2020-01-20T20:49:57.080Z';
+const endDate = '2020-01-21T20:49:57.080Z';
 
 interface MockedProvidedQuery {
   request: {
@@ -73,9 +74,9 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
           'auditbeat-*',
           'endgame-*',
           'filebeat-*',
+          'logs-*',
           'packetbeat-*',
           'winlogbeat-*',
-          'logs-*',
         ],
         inspect: false,
       },

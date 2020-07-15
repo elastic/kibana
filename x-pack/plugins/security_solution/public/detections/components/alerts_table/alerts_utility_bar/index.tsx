@@ -8,8 +8,9 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import numeral from '@elastic/numeral';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 import styled from 'styled-components';
+
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Link } from '../../../../common/components/link_icon';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
@@ -18,6 +19,7 @@ import {
   UtilityBarAction,
   UtilityBarGroup,
   UtilityBarSection,
+  UtilityBarSpacer,
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
 import * as i18n from './translations';
@@ -34,10 +36,16 @@ interface AlertsUtilityBarProps {
   currentFilter: Status;
   selectAll: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showBuildingBlockAlerts: boolean;
+  onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
   showClearSelection: boolean;
   totalCount: number;
   updateAlertsStatus: UpdateAlertsStatus;
 }
+
+const UtilityBarFlexGroup = styled(EuiFlexGroup)`
+  min-width: 175px;
+`;
 
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   canUserCRUD,
@@ -48,6 +56,8 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   selectedEventIds,
   currentFilter,
   selectAll,
+  showBuildingBlockAlerts,
+  onShowBuildingBlockAlertsChanged,
   showClearSelection,
   updateAlertsStatus,
 }) => {
@@ -68,10 +78,6 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   const formattedSelectedEventsCount = numeral(Object.keys(selectedEventIds).length).format(
     defaultNumberFormat
   );
-
-  const UtilityBarFlexGroup = styled(EuiFlexGroup)`
-    min-width: 175px;
-  `;
 
   const UtilityBarPopoverContent = (closePopover: () => void) => (
     <UtilityBarFlexGroup direction="column">
@@ -125,17 +131,36 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
     </UtilityBarFlexGroup>
   );
 
+  const UtilityBarAdditionalFiltersContent = (closePopover: () => void) => (
+    <UtilityBarFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiCheckbox
+          id="showBuildingBlockAlertsCheckbox"
+          aria-label="showBuildingBlockAlerts"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            closePopover();
+            onShowBuildingBlockAlertsChanged(e.target.checked);
+          }}
+          checked={showBuildingBlockAlerts}
+          color="text"
+          data-test-subj="showBuildingBlockAlertsCheckbox"
+          label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
+        />
+      </EuiFlexItem>
+    </UtilityBarFlexGroup>
+  );
+
   return (
     <>
       <UtilityBar>
-        <UtilityBarSection>
+        <UtilityBarSection grow={true}>
           <UtilityBarGroup>
             <UtilityBarText dataTestSubj="showingAlerts">
               {i18n.SHOWING_ALERTS(formattedTotalCount, totalCount)}
             </UtilityBarText>
           </UtilityBarGroup>
 
-          <UtilityBarGroup>
+          <UtilityBarGroup grow={true}>
             {canUserCRUD && hasIndexWrite && (
               <>
                 <UtilityBarText dataTestSubj="selectedAlerts">
@@ -174,6 +199,17 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
                 </UtilityBarAction>
               </>
             )}
+            <UtilityBarSpacer />
+            <UtilityBarAction
+              dataTestSubj="additionalFilters"
+              disabled={areEventsLoading}
+              iconType="arrowDown"
+              iconSide="right"
+              ownFocus={false}
+              popoverContent={UtilityBarAdditionalFiltersContent}
+            >
+              {i18n.ADDITIONAL_FILTERS_ACTIONS}
+            </UtilityBarAction>
           </UtilityBarGroup>
         </UtilityBarSection>
       </UtilityBar>

@@ -38,6 +38,8 @@ exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
+exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_GC_COUNT 1`] = `undefined`;
@@ -182,6 +184,8 @@ exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
+exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_GC_COUNT 1`] = `undefined`;
@@ -325,6 +329,8 @@ exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
+
+exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 

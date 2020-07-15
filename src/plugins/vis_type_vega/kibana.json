@@ -3,5 +3,6 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "visualizations", "mapsLegacy", "expressions"]
+  "requiredPlugins": ["data", "visualizations", "mapsLegacy", "expressions"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }

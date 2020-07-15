@@ -21,7 +21,12 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral, TimelineType } from '../../../../common/types/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineType,
+  RowRendererId,
+} from '../../../../common/types/timeline';
+import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
@@ -127,9 +132,10 @@ interface AddNewTimelineParams {
   columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];
   dateRange?: {
-    start: number;
-    end: number;
+    start: string;
+    end: string;
   };
+  excludedRowRendererIds?: RowRendererId[];
   filters?: Filter[];
   id: string;
   itemsPerPage?: number;
@@ -140,7 +146,6 @@ interface AddNewTimelineParams {
   show?: boolean;
   sort?: Sort;
   showCheckboxes?: boolean;
-  showRowRenderers?: boolean;
   timelineById: TimelineById;
   timelineType: TimelineTypeLiteral;
 }
@@ -149,7 +154,8 @@ interface AddNewTimelineParams {
 export const addNewTimeline = ({
   columns,
   dataProviders = [],
-  dateRange = { start: 0, end: 0 },
+  dateRange: mayDateRange,
+  excludedRowRendererIds = [],
   filters = timelineDefaults.filters,
   id,
   itemsPerPage = timelineDefaults.itemsPerPage,
@@ -157,10 +163,11 @@ export const addNewTimeline = ({
   sort = timelineDefaults.sort,
   show = false,
   showCheckboxes = false,
-  showRowRenderers = true,
   timelineById,
   timelineType,
 }: AddNewTimelineParams): TimelineById => {
+  const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
+  const dateRange = mayDateRange ?? { start: startDateRange, end: endDateRange };
   const templateTimelineInfo =
     timelineType === TimelineType.template
       ? {
@@ -176,6 +183,7 @@ export const addNewTimeline = ({
       columns,
       dataProviders,
       dateRange,
+      excludedRowRendererIds,
       filters,
       itemsPerPage,
       kqlQuery,
@@ -186,7 +194,6 @@ export const addNewTimeline = ({
       isSaving: false,
       isLoading: false,
       showCheckboxes,
-      showRowRenderers,
       timelineType,
       ...templateTimelineInfo,
     },
@@ -748,8 +755,8 @@ export const updateTimelineProviders = ({
 
 interface UpdateTimelineRangeParams {
   id: string;
-  start: number;
-  end: number;
+  start: string;
+  end: string;
   timelineById: TimelineById;
 }
 
@@ -1433,6 +1440,28 @@ export const updateFilters = ({ id, filters, timelineById }: UpdateFiltersParams
     [id]: {
       ...timeline,
       filters,
+    },
+  };
+};
+
+interface UpdateExcludedRowRenderersIds {
+  id: string;
+  excludedRowRendererIds: RowRendererId[];
+  timelineById: TimelineById;
+}
+
+export const updateExcludedRowRenderersIds = ({
+  id,
+  excludedRowRendererIds,
+  timelineById,
+}: UpdateExcludedRowRenderersIds): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      excludedRowRendererIds,
     },
   };
 };

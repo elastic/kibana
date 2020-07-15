@@ -21,9 +21,6 @@ interface Props {
   value?: MappingsConfiguration;
 }
 
-const stringifyJson = (json: GenericObject) =>
-  Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
-
 const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
   const {
     dynamicMapping: {
@@ -40,22 +37,17 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
 
   const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
 
-  let parsedMeta;
-  try {
-    parsedMeta = JSON.parse(metaField);
-  } catch {
-    parsedMeta = {};
-  }
-
-  return {
+  const serialized = {
     dynamic,
     numeric_detection,
     date_detection,
     dynamic_date_formats,
-    _source: { ...sourceField },
-    _meta: parsedMeta,
+    _source: sourceField,
+    _meta: metaField,
     _routing,
   };
+
+  return serialized;
 };
 
 const formDeserializer = (formData: GenericObject) => {
@@ -64,7 +56,11 @@ const formDeserializer = (formData: GenericObject) => {
     numeric_detection,
     date_detection,
     dynamic_date_formats,
-    _source: { enabled, includes, excludes },
+    _source: { enabled, includes, excludes } = {} as {
+      enabled?: boolean;
+      includes?: string[];
+      excludes?: string[];
+    },
     _meta,
     _routing,
   } = formData;
@@ -82,7 +78,7 @@ const formDeserializer = (formData: GenericObject) => {
       includes,
       excludes,
     },
-    metaField: stringifyJson(_meta),
+    metaField: _meta ?? {},
     _routing,
   };
 };
@@ -98,22 +94,23 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
     id: 'configurationForm',
   });
   const dispatch = useDispatch();
+  const { subscribe, submit, reset, getFormData } = form;
 
   useEffect(() => {
-    const subscription = form.subscribe(({ data, isValid, validate }) => {
+    const subscription = subscribe(({ data, isValid, validate }) => {
       dispatch({
         type: 'configuration.update',
         value: {
           data,
           isValid,
           validate,
-          submitForm: form.submit,
+          submitForm: submit,
         },
       });
     });
 
     return subscription.unsubscribe;
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, subscribe, submit]);
 
   useEffect(() => {
     if (isMounted.current === undefined) {
@@ -129,18 +126,18 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
 
     // If the value has changed (it probably means that we have loaded a new JSON)
     // we need to reset the form to update the fields values.
-    form.reset({ resetValues: true });
-  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+    reset({ resetValues: true });
+  }, [value, reset]);
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
 
       // Save a snapshot of the form state so we can get back to it when navigating back to the tab
-      const configurationData = form.getFormData();
+      const configurationData = getFormData();
       dispatch({ type: 'configuration.save', value: configurationData });
     };
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [getFormData, dispatch]);
 
   return (
     <Form
