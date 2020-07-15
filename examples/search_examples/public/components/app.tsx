@@ -82,7 +82,7 @@ export const SearchExamplesApp = ({
     });
     search$.subscribe((response) => {
       // Need to add is running and is partial to oss
-      if (!response.is_partial && !response.is_running) {
+      if (!response.isPartial && !response.isRunning) {
         notifications.toasts.addSuccess(
           `Searched ${response.rawResponse.hits.total} documents. Result is ${
             response.rawResponse.aggregations.avg_bytes.value

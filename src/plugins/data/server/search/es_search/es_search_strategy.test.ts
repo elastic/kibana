@@ -78,7 +78,7 @@ describe('ES search strategy', () => {
     });
   });
 
-  it('returns total, loaded, and raw response', async () => {
+  it('has all response parameters', async () => {
     const params = { index: 'logstash-*' };
     const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
@@ -86,7 +86,8 @@ describe('ES search strategy', () => {
       params,
     });
 
-    expect(response).toHaveProperty('total');
+    expect(response.isRunning).toBe(false);
+    expect(response.isPartial).toBe(false);
     expect(response).toHaveProperty('loaded');
     expect(response).toHaveProperty('rawResponse');
   });
