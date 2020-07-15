@@ -80,8 +80,7 @@ export const createStore = (
     )
   );
 
-  // @ts-ignore
-  epicMiddleware.run(createRootEpic<State>()); // TODO: the addition of fullScreen should not cause this error
+  epicMiddleware.run(createRootEpic<State>());
 
   return store;
 };
