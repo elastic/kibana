@@ -1,21 +1,35 @@
 .homSolutionsPanel {
   margin-top: -$euiSizeXL*2;
 
-  .homSolutionsPanel__solutionWrapper {
+  .homeSolutionsPanel--restrictHalfWidth {
+    max-width: 50%;
+  }
+
+  .homSolutionsPanel__solutionPanel {
     display: flex;
     align-items: stretch;
 
+    .homSolutionsPanel__solutionTitle {
+      .euiToken {
+        padding: $euiSizeS;
+      }
+    }
+
     .homSolutionsPanel__CTA {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
       justify-content: center;
+      padding: $euiSize;
     }
   }
 
-  .homSolutionsPanel__appSearch {
-    .homSolutionsPanel__appSearchHeader {
+  .homSolutionsPanel__enterpriseSearch {
+    .homSolutionsPanel__enterpriseSearchHeader {
       background-color: #017d73;
       color: $euiColorEmptyShade;
 
-      .homSolutionsPanel__appSearchTopLeftImage {
+      .homSolutionsPanel__enterpriseSearchTopLeftImage {
         .euiImage__img {
           position: absolute;
           top: 0;
@@ -26,7 +40,7 @@
         }
       }
 
-      .homSolutionsPanel__appSearchBottomRightImage {
+      .homSolutionsPanel__enterpriseSearchBottomRightImage {
         .euiImage__img {
           position: absolute;
           right: 0;
@@ -79,8 +93,6 @@
   }
 
   .homSolutionsPanel__kibana {
-    max-width: 50%;
-
     .homSolutionsPanel__kibanaHeader {
       background-color: #006bb4;
       color: $euiColorEmptyShade;

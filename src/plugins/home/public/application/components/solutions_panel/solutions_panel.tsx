@@ -26,54 +26,56 @@ import { createAppNavigationHandler } from '../app_navigation_handler';
 
 interface Props {
   addBasePath: (path: string) => string;
-  appSearch?: FeatureCatalogueEntry;
+  enterpriseSearch?: FeatureCatalogueEntry;
   observability?: FeatureCatalogueEntry;
   securitySolution?: FeatureCatalogueEntry;
 }
 
 // TODO: Bolding the first word/verb won't look write in other languages
 const getActionsText = (actions: Array<{ verb: string; text: string }>) => (
-  <EuiText size="s" style={{ padding: '16px' }}>
-    {actions.map(({ verb, text }) => (
-      <p key={`${verb} ${text}`}>
-        <strong>{verb}</strong> {text}
-      </p>
-    ))}
-  </EuiText>
+  <EuiFlexItem grow={1}>
+    <EuiText size="s" className="homSolutionsPanel__CTA">
+      {actions.map(({ verb, text }) => (
+        <p key={`${verb} ${text}`}>
+          <strong>{verb}</strong> {text}
+        </p>
+      ))}
+    </EuiText>
+  </EuiFlexItem>
 );
 
 // TODO: Should this live here? Should it be registered per app?
 const solutionCTAs = {
-  appSearch: [
+  enterpriseSearch: [
     {
-      verb: i18n.translate('home.solutionsPanel.appSearch.firstActionVerb', {
+      verb: i18n.translate('home.solutionsPanel.enterpriseSearch.firstActionVerb', {
         defaultMessage: 'Build',
         description:
           'The first word of this sentence is bolded. Full sentence: "Build a powerful website search."',
       }),
-      text: i18n.translate('home.solutionsPanel.appSearch.firstActionText', {
+      text: i18n.translate('home.solutionsPanel.enterpriseSearch.firstActionText', {
         defaultMessage: 'a powerful website search.',
         description: 'Full sentence: "Build a powerful website search."',
       }),
     },
     {
-      verb: i18n.translate('home.solutionsPanel.appSearch.secondActionVerb', {
+      verb: i18n.translate('home.solutionsPanel.enterpriseSearch.secondActionVerb', {
         defaultMessage: 'Search',
         description:
           'The first word of this sentence is bolded. Full sentence: "Search any data from any application."',
       }),
-      text: i18n.translate('home.solutionsPanel.appSearch.secondActionText', {
+      text: i18n.translate('home.solutionsPanel.enterpriseSearch.secondActionText', {
         defaultMessage: 'any data from any application.',
         description: 'Full sentence: "Search any data from any application."',
       }),
     },
     {
-      verb: i18n.translate('home.solutionsPanel.appSearch.thirdActionVerb', {
+      verb: i18n.translate('home.solutionsPanel.enterpriseSearch.thirdActionVerb', {
         defaultMessage: 'Unify',
         description:
           'The first word of this sentence is bolded. Full sentence: "Unify searchable workplace content."',
       }),
-      text: i18n.translate('home.solutionsPanel.appSearch.thirdActionText', {
+      text: i18n.translate('home.solutionsPanel.enterpriseSearch.thirdActionText', {
         defaultMessage: 'searchable workplace content.',
         description: 'Full sentence: "Unify searchable workplace content."',
       }),
@@ -219,27 +221,30 @@ const solutionCTAs = {
   ],
 };
 
+const halfWidthClass = 'homeSolutionsPanel--restrictHalfWidth';
+
 export const SolutionsPanel: FunctionComponent<Props> = ({
   addBasePath,
-  appSearch,
+  enterpriseSearch,
   observability,
   securitySolution,
 }) => (
-  <EuiFlexGroup>
-    {appSearch || observability || securitySolution ? (
-      <EuiFlexItem>
+  <EuiFlexGroup justifyContent="spaceAround">
+    {enterpriseSearch || observability || securitySolution ? (
+      <EuiFlexItem className={halfWidthClass}>
         {/* TODO: once app search is merged, register add to feature catalogue and remove hard coded text here */}
         <EuiFlexGroup direction="column">
-          {appSearch ? (
-            <EuiFlexItem className="homSolutionsPanel__appSearch">
+          {enterpriseSearch ? (
+            <EuiFlexItem className="homSolutionsPanel__enterpriseSearch">
               <EuiPanel
                 paddingSize="none"
+                className="homSolutionsPanel__solutionPanel"
                 onClick={createAppNavigationHandler('/app/app_search')} // TODO: double check this url once enterprise search plugin is merged
               >
                 <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__appSearchHeader">
+                  <EuiFlexItem grow={1} className="homSolutionsPanel__enterpriseSearchHeader">
                     <EuiImage
-                      className="homSolutionsPanel__appSearchTopLeftImage"
+                      className="homSolutionsPanel__enterpriseSearchTopLeftImage"
                       url={addBasePath(
                         '/plugins/home/assets/background_enterprise_search_top_left_2x.png'
                       )}
@@ -248,26 +253,30 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                     <SolutionsTitle
                       iconType="logoEnterpriseSearch"
                       title="Enterprise Search"
-                      subtitle={i18n.translate('home.solutionsPanel.appSearchSubtitle', {
+                      subtitle={i18n.translate('home.solutionsPanel.enterpriseSearchSubtitle', {
                         defaultMessage: 'Search everything',
                       })}
                     />
                     <EuiImage
-                      className="homSolutionsPanel__appSearchBottomRightImage"
+                      className="homSolutionsPanel__enterpriseSearchBottomRightImage"
                       url={addBasePath(
                         '/plugins/home/assets/background_enterprise_search_bottom_right_2x.png'
                       )}
                       alt="Enterprise search bottom right background graphic"
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={1}>{getActionsText(solutionCTAs.appSearch)}</EuiFlexItem>
+                  {getActionsText(solutionCTAs.enterpriseSearch)}
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
           ) : null}
           {observability ? (
             <EuiFlexItem className="homSolutionsPanel__observability">
-              <EuiPanel paddingSize="none" onClick={createAppNavigationHandler(observability.path)}>
+              <EuiPanel
+                paddingSize="none"
+                className="homSolutionsPanel__solutionPanel"
+                onClick={createAppNavigationHandler(observability.path)}
+              >
                 <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem grow={1} className="homSolutionsPanel__observabilityHeader">
                     <EuiImage
@@ -283,7 +292,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                       subtitle={observability.description}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={1}>{getActionsText(solutionCTAs.observability)}</EuiFlexItem>
+                  {getActionsText(solutionCTAs.observability)}
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
@@ -292,6 +301,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
             <EuiFlexItem className="homSolutionsPanel__securitySolution">
               <EuiPanel
                 paddingSize="none"
+                className="homSolutionsPanel__solutionPanel"
                 onClick={createAppNavigationHandler(securitySolution.path)}
               >
                 <EuiFlexGroup gutterSize="none">
@@ -309,9 +319,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                       subtitle={securitySolution.description}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={1}>
-                    {getActionsText(solutionCTAs.securitySolution)}
-                  </EuiFlexItem>
+                  {getActionsText(solutionCTAs.securitySolution)}
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
@@ -319,8 +327,13 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     ) : null}
-    <EuiFlexItem className="homSolutionsPanel__kibana">
-      <EuiPanel paddingSize="none" onClick={createAppNavigationHandler('/app/dashboards')}>
+
+    <EuiFlexItem className={`homSolutionsPanel__kibana ${halfWidthClass}`}>
+      <EuiPanel
+        paddingSize="none"
+        className="homSolutionsPanel__solutionPanel"
+        onClick={createAppNavigationHandler('/app/dashboards')}
+      >
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={1} className="homSolutionsPanel__kibanaHeader">
             <EuiImage
@@ -341,7 +354,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
               alt="Kibana bottom right background graphic"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>{getActionsText(solutionCTAs.kibana)}</EuiFlexItem>
+          {getActionsText(solutionCTAs.kibana)}
         </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>

@@ -1,3 +1,7 @@
+.homHome__synopsisItem {
+  max-width: 50%;
+}
+
 @include euiBreakpoint('xs', 's', 'm') {
   .homHome__synopsisItem {
     flex-basis: 100% !important;

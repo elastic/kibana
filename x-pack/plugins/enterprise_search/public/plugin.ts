@@ -44,7 +44,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     core.application.register({
       id: 'appSearch',
-      title: 'Enterprise search',
+      title: 'App Search',
       appRoute: '/app/enterprise_search/app_search',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {

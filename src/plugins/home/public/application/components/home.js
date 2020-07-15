@@ -120,7 +120,7 @@ export class Home extends Component {
   findDirectoryById = (id) =>
     this.props.directories.find((directory) => directory.showOnHomePage && directory.id === id);
 
-  renderDirectory = (directory, { isBeta, betaLabel } = {}) => {
+  renderDirectory = (directory) => {
     const { addBasePath } = this.props;
 
     return directory ? (
@@ -132,8 +132,6 @@ export class Home extends Component {
           title={directory.title}
           url={addBasePath(directory.path)}
           wrapInPanel
-          isBeta={isBeta}
-          betaLabel={betaLabel}
         />
       </EuiFlexItem>
     ) : null;
@@ -143,7 +141,7 @@ export class Home extends Component {
     const { addBasePath, canChangeHomeRoute = true } = this.props;
 
     const fileDataVisualizer = this.findDirectoryById('ml_file_data_visualizer');
-    const ingestManager = this.findDirectoryById('ingestManager', { isBeta: true });
+    const ingestManager = this.findDirectoryById('ingestManager');
     const security = this.findDirectoryById('security');
     const monitoring = this.findDirectoryById('monitoring');
     const snapshotRestore = this.findDirectoryById('snapshot_restore');
@@ -224,7 +222,7 @@ export class Home extends Component {
             <SolutionsPanel
               addBasePath={addBasePath}
               observability={this.findDirectoryById('observability')}
-              appSearch={this.findDirectoryById('appSearch')}
+              enterpriseSearch={this.findDirectoryById('appSearch')}
               securitySolution={this.findDirectoryById('securitySolution')}
             />
 
@@ -242,7 +240,11 @@ export class Home extends Component {
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="tableDensityExpanded" size="s">
+                  <EuiButtonEmpty
+                    iconType="tableDensityExpanded"
+                    href="#/tutorial_directory/sampleData"
+                    size="s"
+                  >
                     <FormattedMessage
                       id="home.addData.sampleDataButtonLabel"
                       defaultMessage="Try our sample data"
@@ -255,9 +257,9 @@ export class Home extends Component {
 
               <EuiFlexGroup>
                 <EuiFlexItem grow={1}>
-                  <EuiFlexGroup>
+                  <EuiFlexGroup justifyContent="spaceAround">
                     {this.renderDirectory(fileDataVisualizer)}
-                    <EuiFlexItem>
+                    <EuiFlexItem className="homHome__synopsisItem">
                       <Synopsis
                         description={i18n.translate('home.addData.addIntegrationDescription', {
                           defaultMessage: 'Add data from a variety of common sources.',
@@ -294,7 +296,7 @@ export class Home extends Component {
 
                   <EuiSpacer />
 
-                  <EuiFlexGroup>
+                  <EuiFlexGroup justifyContent="spaceAround">
                     {this.renderDirectory(security)}
                     {this.renderDirectory(monitoring)}
                     {this.renderDirectory(snapshotRestore)}

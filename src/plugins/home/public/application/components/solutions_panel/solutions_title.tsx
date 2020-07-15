@@ -35,7 +35,7 @@ interface Props {
 }
 
 export const SolutionsTitle: FunctionComponent<Props> = ({ title, subtitle, iconType }) => (
-  <EuiFlexGroup gutterSize="none" alignItems="center">
+  <EuiFlexGroup gutterSize="none" alignItems="center" className="homSolutionsPanel__solutionTitle">
     <EuiFlexItem className="eui-textCenter">
       <p>
         <EuiToken iconType={iconType} shape="circle" fill="light" size="l" />
