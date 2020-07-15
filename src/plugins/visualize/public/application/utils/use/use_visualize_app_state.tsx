@@ -37,6 +37,7 @@ import { VisualizeConstants } from '../../visualize_constants';
 export const useVisualizeAppState = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
+  byValue: boolean,
   instance?: SavedVisInstance
 ) => {
   const [hasUnappliedChanges, setHasUnappliedChanges] = useState(false);
@@ -49,6 +50,7 @@ export const useVisualizeAppState = (
       const { stateContainer, stopStateSync } = createVisualizeAppState({
         stateDefaults,
         kbnUrlStateStorage: services.kbnUrlStateStorage,
+        byValue,
       });
 
       const onDirtyStateChange = ({ isDirty }: { isDirty: boolean }) => {
@@ -114,7 +116,7 @@ export const useVisualizeAppState = (
         stopSyncingAppFilters();
       };
     }
-  }, [eventEmitter, instance, services]);
+  }, [eventEmitter, instance, services, byValue]);
 
   return { appState, hasUnappliedChanges };
 };

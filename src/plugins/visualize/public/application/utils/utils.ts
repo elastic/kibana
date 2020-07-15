@@ -66,6 +66,6 @@ export const visStateToEditorState = (
     query: vis.data.searchSource?.getOwnField('query') || getDefaultQuery(services),
     filters: (vis.data.searchSource?.getOwnField('filter') as Filter[]) || [],
     vis: { ...savedVisState.visState, title: vis.title },
-    linked: !!savedVis.savedSearchId,
+    linked: savedVis ? !!savedVis.savedSearchId : !!savedVisState.savedSearchId,
   };
 };

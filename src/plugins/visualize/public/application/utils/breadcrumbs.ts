@@ -43,7 +43,10 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getEditBreadcrumbs(text: string) {
+export function getEditBreadcrumbs(text?: string) {
+  if (!text) {
+    return [...getLandingBreadcrumbs(), { text: 'Edit' }];
+  }
   return [
     ...getLandingBreadcrumbs(),
     {

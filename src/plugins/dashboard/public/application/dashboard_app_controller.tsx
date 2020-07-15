@@ -436,12 +436,12 @@ export class DashboardAppController {
                   savedObjectId: incomingState.id,
                 });
               } else if ('input' in incomingState) {
-                const input = incomingState.input;
+                const { input, type, embeddableId } = incomingState;
                 delete input.id;
                 const explicitInput = {
                   savedVis: input,
                 };
-                container.addOrUpdateEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
+                container.addOrUpdateEmbeddable<EmbeddableInput>(type, explicitInput, embeddableId);
               }
             }
           }

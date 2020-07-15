@@ -43,6 +43,7 @@ interface TopNavConfigParams {
   savedVisInstance: SavedVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
+  embeddableId?: string;
 }
 
 export const getTopNavConfig = (
@@ -55,6 +56,7 @@ export const getTopNavConfig = (
     savedVisInstance: { embeddableHandler, savedVis, vis },
     stateContainer,
     visualizationIdFromUrl,
+    embeddableId,
   }: TopNavConfigParams,
   {
     application,
@@ -142,8 +144,26 @@ export const getTopNavConfig = (
     }
   }
 
+  const createVisReference = () => {
+    if (!originatingApp) {
+      return;
+    }
+    const state = {
+      input: {
+        ...vis.serialize(),
+        id: embeddableId ? embeddableId : uuid.v4(),
+      },
+      type: VISUALIZE_EMBEDDABLE_TYPE,
+      embeddableId: '',
+    };
+    if (embeddableId) {
+      state.embeddableId = embeddableId;
+    }
+    embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, { state });
+  };
+
   const topNavMenu: TopNavMenuData[] = [
-    ...(originatingApp && savedVis.id
+    ...(originatingApp && ((savedVis && savedVis.id) || embeddableId)
       ? [
           {
             id: 'saveAndReturn',
@@ -175,24 +195,27 @@ export const getTopNavConfig = (
                 confirmOverwrite: false,
                 returnToOrigin: true,
               };
+              if (originatingApp === 'dashboards' && featureFlagConfig.showNewVisualizeFlow) {
+                return createVisReference();
+              }
               return doSave(saveOptions);
             },
           },
         ]
       : []),
-    ...(visualizeCapabilities.save
+    ...(visualizeCapabilities.save && !embeddableId
       ? [
           {
             id: 'save',
             label:
-              savedVis.id && originatingApp
+              savedVis && savedVis.id && originatingApp
                 ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
                     defaultMessage: 'save as',
                   })
                 : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
                     defaultMessage: 'save',
                   }),
-            emphasize: !savedVis.id || !originatingApp,
+            emphasize: !savedVis || !savedVis.id || !originatingApp,
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),
@@ -234,20 +257,6 @@ export const getTopNavConfig = (
                 }
                 return response;
               };
-
-              const createVisReference = () => {
-                if (!originatingApp) {
-                  return;
-                }
-                const input = {
-                  ...vis.serialize(),
-                  id: uuid.v4(),
-                };
-                embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
-                  state: { input, type: VISUALIZE_EMBEDDABLE_TYPE },
-                });
-              };
-
               const saveModal = (
                 <SavedObjectSaveModalOrigin
                   documentInfo={savedVis}
@@ -276,7 +285,7 @@ export const getTopNavConfig = (
       }),
       testId: 'shareTopNavButton',
       run: (anchorElement) => {
-        if (share) {
+        if (share && savedVis) {
           share.toggleShareContextMenu({
             anchorElement,
             allowEmbed: true,
@@ -292,7 +301,7 @@ export const getTopNavConfig = (
         }
       },
       // disable the Share button if no action specified
-      disableButton: !share,
+      disableButton: !share || embeddableId,
     },
     {
       id: 'inspector',

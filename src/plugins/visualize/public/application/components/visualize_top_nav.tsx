@@ -104,6 +104,7 @@ const TopNav = ({
     stateContainer,
     visualizationIdFromUrl,
     services,
+    embeddableId,
   ]);
   const [indexPattern, setIndexPattern] = useState(vis.data.indexPattern);
   const showDatePicker = () => {

@@ -27,6 +27,7 @@ export interface EmbeddableEditorState {
   originatingApp: string;
   byValueMode?: boolean;
   valueInput?: EmbeddableInput;
+  embeddableId?: string;
 }
 
 export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {
