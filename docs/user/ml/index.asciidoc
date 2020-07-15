@@ -47,20 +47,20 @@ create {anomaly-jobs} and manage jobs and {dfeeds} from the *Job Management*
 pane: 
 
 [role="screenshot"]
-image::user/ml/images/ml-job-management.jpg[Job Management]
+image::user/ml/images/ml-job-management.png[Job Management]
 
 You can use the *Settings* pane to create and edit 
 {ml-docs}/ml-calendars.html[calendars] and the filters that are used in 
 {ml-docs}/ml-rules.html[custom rules]:
 
 [role="screenshot"]
-image::user/ml/images/ml-settings.jpg[Calendar Management]
+image::user/ml/images/ml-settings.png[Calendar Management]
 
 The *Anomaly Explorer* and *Single Metric Viewer* display the results of your
 {anomaly-jobs}. For example:
 
 [role="screenshot"]
-image::user/ml/images/ml-single-metric-viewer.jpg[Single Metric Viewer]
+image::user/ml/images/ml-single-metric-viewer.png[Single Metric Viewer]
 
 You can optionally add annotations by drag-selecting a period of time in
 the *Single Metric Viewer* and adding a description. For example, you can add an
@@ -68,7 +68,7 @@ explanation for anomalies in that time period or provide notes about what is
 occurring in your operational environment at that time:
 
 [role="screenshot"]
-image::user/ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotations]
+image::user/ml/images/ml-annotations-list.png[Single Metric Viewer with annotations]
 
 In some circumstances, annotations are also added automatically. For example, if
 the {anomaly-job} detects that there is missing data, it annotates the affected 
@@ -94,8 +94,8 @@ The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
 indices that contain the results alongside your source data. 
 
 If you have a license that includes the {ml-features}, you can create
-{dfanalytics-jobs} and view their results on the *Analytics* page
-in {kib}. For example:
+{dfanalytics-jobs} and view their results on the *Data Frame Analytics* page in
+{kib}. For example:
 
 [role="screenshot"]
 image::user/ml/images/outliers.png[{oldetection-cap} results in {kib}]
