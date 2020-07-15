@@ -50,7 +50,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { forceStartDatafeeds } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { forceStartDatafeeds } = jobServiceProvider(context.ml!.mlClient);
         const { datafeedIds, start, end } = request.body;
         const resp = await forceStartDatafeeds(datafeedIds, start, end);
 
@@ -84,7 +84,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { stopDatafeeds } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { stopDatafeeds } = jobServiceProvider(context.ml!.mlClient);
         const { datafeedIds } = request.body;
         const resp = await stopDatafeeds(datafeedIds);
 
@@ -118,7 +118,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { deleteJobs } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { deleteJobs } = jobServiceProvider(context.ml!.mlClient);
         const { jobIds } = request.body;
         const resp = await deleteJobs(jobIds);
 
@@ -152,7 +152,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { closeJobs } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { closeJobs } = jobServiceProvider(context.ml!.mlClient);
         const { jobIds } = request.body;
         const resp = await closeJobs(jobIds);
 
@@ -186,7 +186,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { forceStopAndCloseJob } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { forceStopAndCloseJob } = jobServiceProvider(context.ml!.mlClient);
         const { jobId } = request.body;
         const resp = await forceStopAndCloseJob(jobId);
 
@@ -225,7 +225,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { jobsSummary } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { jobsSummary } = jobServiceProvider(context.ml!.mlClient);
         const { jobIds } = request.body;
         const resp = await jobsSummary(jobIds);
 
@@ -259,7 +259,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { jobsWithTimerange } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { jobsWithTimerange } = jobServiceProvider(context.ml!.mlClient);
         const resp = await jobsWithTimerange();
 
         return response.ok({
@@ -292,7 +292,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { createFullJobsList } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { createFullJobsList } = jobServiceProvider(context.ml!.mlClient);
         const { jobIds } = request.body;
         const resp = await createFullJobsList(jobIds);
 
@@ -322,7 +322,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { getAllGroups } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { getAllGroups } = jobServiceProvider(context.ml!.mlClient);
         const resp = await getAllGroups();
 
         return response.ok({
@@ -355,7 +355,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { updateGroups } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { updateGroups } = jobServiceProvider(context.ml!.mlClient);
         const { jobs } = request.body;
         const resp = await updateGroups(jobs);
 
@@ -385,7 +385,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { deletingJobTasks } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { deletingJobTasks } = jobServiceProvider(context.ml!.mlClient);
         const resp = await deletingJobTasks();
 
         return response.ok({
@@ -418,7 +418,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { jobsExist } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { jobsExist } = jobServiceProvider(context.ml!.mlClient);
         const { jobIds } = request.body;
         const resp = await jobsExist(jobIds);
 
@@ -454,7 +454,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         const { indexPattern } = request.params;
         const isRollup = request.query.rollup === 'true';
         const savedObjectsClient = context.core.savedObjects.client;
-        const { newJobCaps } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { newJobCaps } = jobServiceProvider(context.ml!.mlClient);
         const resp = await newJobCaps(indexPattern, isRollup, savedObjectsClient);
 
         return response.ok({
@@ -499,7 +499,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
           splitFieldValue,
         } = request.body;
 
-        const { newJobLineChart } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { newJobLineChart } = jobServiceProvider(context.ml!.mlClient);
         const resp = await newJobLineChart(
           indexPatternTitle,
           timeField,
@@ -553,9 +553,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
           splitFieldName,
         } = request.body;
 
-        const { newJobPopulationChart } = jobServiceProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { newJobPopulationChart } = jobServiceProvider(context.ml!.mlClient);
         const resp = await newJobPopulationChart(
           indexPatternTitle,
           timeField,
@@ -593,7 +591,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { getAllJobAndGroupIds } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { getAllJobAndGroupIds } = jobServiceProvider(context.ml!.mlClient);
         const resp = await getAllJobAndGroupIds();
 
         return response.ok({
@@ -626,7 +624,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { getLookBackProgress } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { getLookBackProgress } = jobServiceProvider(context.ml!.mlClient);
         const { jobId, start, end } = request.body;
         const resp = await getLookBackProgress(jobId, start, end);
 
@@ -660,10 +658,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { validateCategoryExamples } = categorizationExamplesProvider(
-          context.ml!.mlClient.callAsCurrentUser,
-          context.ml!.mlClient.callAsInternalUser
-        );
+        const { validateCategoryExamples } = categorizationExamplesProvider(context.ml!.mlClient);
         const {
           indexPatternTitle,
           timeField,
@@ -716,7 +711,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { topCategories } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { topCategories } = jobServiceProvider(context.ml!.mlClient);
         const { jobId, count } = request.body;
         const resp = await topCategories(jobId, count);
 
@@ -750,7 +745,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { revertModelSnapshot } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+        const { revertModelSnapshot } = jobServiceProvider(context.ml!.mlClient);
         const {
           jobId,
           snapshotId,
