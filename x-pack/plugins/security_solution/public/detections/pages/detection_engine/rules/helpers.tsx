@@ -186,6 +186,13 @@ export type PrePackagedRuleStatus =
   | 'someRuleUninstall'
   | 'unknown';
 
+export type PrePackagedTimelineStatus =
+  | 'timelinesNotInstalled'
+  | 'timelinesInstalled'
+  | 'someTimelineUninstall'
+  | 'timelineNeedUpdate'
+  | 'unknown';
+
 export const getPrePackagedRuleStatus = (
   rulesInstalled: number | null,
   rulesNotInstalled: number | null,
@@ -222,6 +229,45 @@ export const getPrePackagedRuleStatus = (
     rulesNotUpdated > 0
   ) {
     return 'ruleNeedUpdate';
+  }
+  return 'unknown';
+};
+export const getPrePackagedTimelineStatus = (
+  timelinesInstalled: number | null,
+  timelinesNotInstalled: number | null,
+  timelinesNotUpdated: number | null
+): PrePackagedTimelineStatus => {
+  if (
+    timelinesNotInstalled != null &&
+    timelinesInstalled === 0 &&
+    timelinesNotInstalled > 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'timelinesNotInstalled';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled === 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'timelinesInstalled';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesNotInstalled != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled > 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'someTimelineUninstall';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesNotInstalled != null &&
+    timelinesNotUpdated != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled >= 0 &&
+    timelinesNotUpdated > 0
+  ) {
+    return 'timelineNeedUpdate';
   }
   return 'unknown';
 };
