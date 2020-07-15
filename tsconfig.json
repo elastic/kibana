@@ -1,8 +1,9 @@
 {
   "references": [
     {"path": "./tsconfig.oss.json"},
-    {"path": "./tsconfig.test.json"}, //TODO: Looks like tests weren't previously checked??
+    {"path": "./tsconfig.test.json"},
     {"path": "./examples/embeddable_examples"}
   ],
-  "files": []
+  "files": [],
+  "include": []
 }

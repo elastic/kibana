@@ -10,15 +10,5 @@
       "esnext",
       "dom"
     ]
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "../typings/elastic__node_crypto.d.ts",
-    "typings/**/*"
-  ],
-  "exclude": [
-    "plugin_functional/plugins/**/*",
-    "interpreter_functional/plugins/**/*"
-  ]
+  }
 }
