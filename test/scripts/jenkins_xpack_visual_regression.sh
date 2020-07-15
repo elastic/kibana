@@ -17,6 +17,9 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 cd "$KIBANA_DIR"
 source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
 
+cd "$KIBANA_DIR"
+source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
+
 echo " -> running visual regression tests from x-pack directory"
 cd "$XPACK_DIR"
 yarn percy exec -t 10000 -- -- \
