@@ -115,7 +115,8 @@ export class HeadlessChromiumDriverFactory {
 
         logger.debug(`Browser page driver created`);
       } catch (err) {
-        observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
+        observer.error(new Error(`Error spawning Chromium browser!`));
+        observer.error(err);
         throw err;
       }
 
@@ -215,7 +216,12 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page) {
-    const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
+    const pageErrorSubject$ = new Rx.Subject<Error>();
+    // This handler MUST be registered to avoid unhandled promise rejection
+    page.on('error', (err) => {
+      pageErrorSubject$.next(err);
+    });
+    const pageError$ = pageErrorSubject$.pipe(
       mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.errorDetected', {
@@ -226,7 +232,11 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
+    const uncaughtExceptionPageErrorSubject$ = new Rx.Subject<Error>();
+    page.on('pageerror', (err) => {
+      uncaughtExceptionPageErrorSubject$.next(err);
+    });
+    const uncaughtExceptionPageError$ = uncaughtExceptionPageErrorSubject$.pipe(
       mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
@@ -237,7 +247,11 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
+    const browserDisconnectSubject$ = new Rx.Subject<Error>();
+    browser.on('disconnected', (err) => {
+      browserDisconnectSubject$.next(err);
+    });
+    const browserDisconnect$ = browserDisconnectSubject$.pipe(
       mergeMap(() =>
         Rx.throwError(
           new Error(

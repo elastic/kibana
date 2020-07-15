@@ -123,6 +123,7 @@ export function screenshotsObservableFactory(
             );
 
             return setup$.pipe(
+              takeUntil(exit$),
               mergeMap(
                 async (data: ScreenSetupData): Promise<ScreenshotResults> => {
                   const elements = data.elementsPositionAndAttributes
