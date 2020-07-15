@@ -7,8 +7,8 @@
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
 import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
-import * as contexts from '../export_types/common/lib/screenshots/constants';
 import { LevelLogger } from '../lib';
+import * as contexts from '../lib/screenshots/constants';
 import { CaptureConfig, ElementsPositionAndAttribute } from '../types';
 
 interface CreateMockBrowserDriverFactoryOpts {

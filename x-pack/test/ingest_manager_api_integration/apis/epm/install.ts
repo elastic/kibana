@@ -21,7 +21,9 @@ export default function ({ getService }: FtrProviderContext) {
   const mappingsPackage = 'overrides-0.1.0';
   const server = dockerServers.get('registry');
 
-  describe('installs packages that include settings and mappings overrides', async () => {
+  // Temporarily skipped to promote snapshot
+  // Re-enabled in https://github.com/elastic/kibana/pull/71727
+  describe.skip('installs packages that include settings and mappings overrides', async () => {
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests

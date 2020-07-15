@@ -35,6 +35,8 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
@@ -56,8 +58,8 @@ describe('StatefulTimeline', () => {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
-  const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
-  const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
+  const startDate = '2018-03-23T18:49:23.132Z';
+  const endDate = '2018-03-24T03:33:52.253Z';
 
   const mocks = [
     { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
