@@ -33,6 +33,17 @@ describe('create_endpoint_list_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should NOT allow missing fields', () => {
+    const payload = getExceptionListSchemaMock();
+    delete payload.list_id;
+    const decoded = createEndpointListSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors)).length).toEqual(1);
+    expect(message.schema).toEqual({});
+  });
+
   test('it should not allow an extra key to be sent in', () => {
     const payload: CreateEndpointListSchema & {
       extraKey?: string;

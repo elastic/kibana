@@ -10,6 +10,6 @@ import * as t from 'io-ts';
 
 import { exceptionListSchema } from './exception_list_schema';
 
-export const createEndpointListSchema = t.union([exceptionListSchema, t.type({})]);
+export const createEndpointListSchema = t.union([exceptionListSchema, t.exact(t.type({}))]);
 
 export type CreateEndpointListSchema = t.TypeOf<typeof createEndpointListSchema>;
