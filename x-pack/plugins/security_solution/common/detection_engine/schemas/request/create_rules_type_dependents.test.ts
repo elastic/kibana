@@ -65,4 +65,26 @@ describe('create_rules_type_dependents', () => {
     const errors = createRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['when "timeline_title" exists, "timeline_id" must also exist']);
   });
+
+  test('threshold is required when type is threshold and validates with it', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threshold',
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['when "type" is "threshold", "threshold" is required']);
+  });
+
+  test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threshold',
+      threshold: {
+        field: '',
+        value: -1,
+      },
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
+  });
 });

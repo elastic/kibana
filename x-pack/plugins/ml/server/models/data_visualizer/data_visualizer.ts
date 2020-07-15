@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import _ from 'lodash';
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
@@ -180,7 +180,7 @@ type BatchStats =
   | FieldExamples;
 
 const getAggIntervals = async (
-  callAsCurrentUser: LegacyAPICaller,
+  { callAsCurrentUser }: ILegacyScopedClusterClient,
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
@@ -238,14 +238,15 @@ const getAggIntervals = async (
 
 // export for re-use by transforms plugin
 export const getHistogramsForFields = async (
-  callAsCurrentUser: LegacyAPICaller,
+  mlClusterClient: ILegacyScopedClusterClient,
   indexPatternTitle: string,
   query: any,
   fields: HistogramField[],
   samplerShardSize: number
 ) => {
+  const { callAsCurrentUser } = mlClusterClient;
   const aggIntervals = await getAggIntervals(
-    callAsCurrentUser,
+    mlClusterClient,
     indexPatternTitle,
     query,
     fields,
@@ -348,10 +349,12 @@ export const getHistogramsForFields = async (
 };
 
 export class DataVisualizer {
-  callAsCurrentUser: LegacyAPICaller;
+  private _mlClusterClient: ILegacyScopedClusterClient;
+  private _callAsCurrentUser: ILegacyScopedClusterClient['callAsCurrentUser'];
 
-  constructor(callAsCurrentUser: LegacyAPICaller) {
-    this.callAsCurrentUser = callAsCurrentUser;
+  constructor(mlClusterClient: ILegacyScopedClusterClient) {
+    this._callAsCurrentUser = mlClusterClient.callAsCurrentUser;
+    this._mlClusterClient = mlClusterClient;
   }
 
   // Obtains overall stats on the fields in the supplied index pattern, returning an object
@@ -447,7 +450,7 @@ export class DataVisualizer {
     samplerShardSize: number
   ): Promise<any> {
     return await getHistogramsForFields(
-      this.callAsCurrentUser,
+      this._mlClusterClient,
       indexPatternTitle,
       query,
       fields,
@@ -626,7 +629,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.callAsCurrentUser('search', {
+    const resp = await this._callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
@@ -693,7 +696,7 @@ export class DataVisualizer {
     };
     filterCriteria.push({ exists: { field } });
 
-    const resp = await this.callAsCurrentUser('search', {
+    const resp = await this._callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
@@ -735,7 +738,7 @@ export class DataVisualizer {
       aggs,
     };
 
-    const resp = await this.callAsCurrentUser('search', {
+    const resp = await this._callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -838,7 +841,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.callAsCurrentUser('search', {
+    const resp = await this._callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -959,7 +962,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.callAsCurrentUser('search', {
+    const resp = await this._callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -1033,7 +1036,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.callAsCurrentUser('search', {
+    const resp = await this._callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -1100,7 +1103,7 @@ export class DataVisualizer {
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
     };
 
-    const resp = await this.callAsCurrentUser('search', {
+    const resp = await this._callAsCurrentUser('search', {
       index,
       size,
       body,
@@ -1162,7 +1165,7 @@ export class DataVisualizer {
       },
     };
 
-    const resp = await this.callAsCurrentUser('search', {
+    const resp = await this._callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
