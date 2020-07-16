@@ -30,8 +30,8 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/71987
-  describe.skip('dashboard filter bar', () => {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('dashboard filter bar', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -69,6 +69,7 @@ export default function ({ getService, getPageObjects }) {
       it('uses default index pattern on an empty dashboard', async () => {
         await testSubjects.click('addFilter');
         await dashboardExpect.fieldSuggestions(['bytes']);
+        await filterBar.ensureFieldEditorModalIsClosed();
       });
 
       it('shows index pattern of vis when one is added', async () => {
