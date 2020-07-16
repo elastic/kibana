@@ -101,18 +101,7 @@ This section summarizes the changes in each release.
 [[release-notes-6.8.11]]
 == {kib} 6.8.11
 
-[float]
-[[security-update-6.8.11]]
-=== Security updates
-* In {kib} 6.8.11 and earlier, there is a denial of service (DoS) flaw in Timelion. Attackers can construct a URL that when viewed by a {kib} user, 
-the {kib} process consumes large amounts of CPU and becomes unresponsive, CVE-2020-7016.
-+
-You must upgrade to 6.8.11. If you are unable to upgrade, set `timelion.enabled` to `false` in your kibana.yml file to disable Timelion.
-
-* In all {kib} versions, region map visualizations contain a stored XSS flaw. Attackers that can edit or create region map visualizations can obtain 
-sensitive information or perform destructive actions on behalf of {kib} users who view the region map visualization, CVE-2020-7017.
-+
-You must upgrade to 6.8.11. If you are unable to upgrade, set `xpack.maps.enabled`, `region_map.enabled`, and `tile_map.enabled` to `false` in kibana.yml to disable map visualizations.
+coming::[6.8.11]
 
 [float]
 [[enhancement-v6.8.11]]
