@@ -10,10 +10,11 @@ import dateMath from '@elastic/datemath';
 import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import { EntriesArray, ExceptionListItemSchema } from '../../../../../lists/common/schemas';
+import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
 import { BulkResponse, BulkResponseErrorAggregation, isValidUnit } from './types';
 import { BuildRuleMessage } from './rule_messages';
+import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -146,11 +147,6 @@ export const getListsClient = async ({
   );
 
   return { listClient, exceptionsClient };
-};
-
-export const hasLargeValueList = (entries: EntriesArray): boolean => {
-  const found = entries.filter(({ type }) => type === 'list');
-  return found.length > 0;
 };
 
 export const getExceptions = async ({

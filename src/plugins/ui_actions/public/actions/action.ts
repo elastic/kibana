@@ -91,6 +91,13 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
    * right-clicks and selects "Open in new tab".
    */
   getHref?(context: Context | ActionExecutionContext<Context>): Promise<string | undefined>;
+
+  /**
+   * Determines if action should be executed automatically,
+   * without first showing up in context menu.
+   * false by default.
+   */
+  shouldAutoExecute?(context: Context): Promise<boolean>;
 }
 
 /**
@@ -118,6 +125,13 @@ export interface ActionDefinition<Context extends BaseContext = {}>
    * Executes the action.
    */
   execute(context: Context | ActionExecutionContext<Context>): Promise<void>;
+
+  /**
+   * Determines if action should be executed automatically,
+   * without first showing up in context menu.
+   * false by default.
+   */
+  shouldAutoExecute?(context: Context): Promise<boolean>;
 
   /**
    * This method should return a link if this item can be clicked on. The link
