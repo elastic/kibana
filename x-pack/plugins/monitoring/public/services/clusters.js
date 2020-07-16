@@ -64,6 +64,10 @@ export function monitoringClustersProvider($injector) {
     }
 
     function ensureMetricbeatEnabled() {
+      if (Legacy.shims.isCloud) {
+        return Promise.resolve();
+      }
+
       return $http
         .get('../api/monitoring/v1/elasticsearch_settings/check/internal_monitoring')
         .then(({ data }) => {
