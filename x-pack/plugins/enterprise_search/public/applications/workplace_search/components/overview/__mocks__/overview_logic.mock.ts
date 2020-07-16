@@ -29,14 +29,14 @@ export const mockLogicValues = {
   flashMessages: {},
 } as IOverviewValues;
 
+export const mockLogicActions = {
+  initializeOverview: jest.fn(() => ({})),
+};
+
 jest.mock('kea', () => ({
   ...(jest.requireActual('kea') as object),
-  useActions: jest.fn(() => ({
-    initializeOverview: jest.fn(() => ({})),
-  })),
-  useValues: jest.fn(() => ({
-    ...mockLogicValues,
-  })),
+  useActions: jest.fn(() => ({ ...mockLogicActions })),
+  useValues: jest.fn(() => ({ ...mockLogicValues })),
 }));
 
 import { useValues } from 'kea';

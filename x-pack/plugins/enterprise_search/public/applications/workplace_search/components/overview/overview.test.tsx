@@ -6,10 +6,9 @@
 
 import '../../../__mocks__/react_router_history.mock';
 import './__mocks__/overview_logic.mock';
-import { setMockValues } from './__mocks__';
+import { mockLogicActions, setMockValues } from './__mocks__';
 
 import React from 'react';
-import { useActions } from 'kea';
 import { shallow, mount } from 'enzyme';
 
 import { ErrorState } from '../error_state';
@@ -39,10 +38,9 @@ describe('Overview', () => {
 
   describe('happy-path states', () => {
     it('calls initialize function', async () => {
-      const { initializeOverview } = useActions() as any;
       mount(<Overview />);
 
-      expect(initializeOverview).toHaveBeenCalled();
+      expect(mockLogicActions.initializeOverview).toHaveBeenCalled();
     });
 
     it('renders onboarding state', () => {
