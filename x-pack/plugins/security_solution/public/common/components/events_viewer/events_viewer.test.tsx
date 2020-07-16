@@ -8,6 +8,7 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import '../../mock/match_media';
 import { mockIndexPattern, TestProviders } from '../../mock';
 import { wait } from '../../lib/helpers';
 

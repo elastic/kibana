@@ -14,6 +14,7 @@ import {
   EntryList,
   ExceptionListItemSchema,
 } from '../../../../../lists/common/schemas';
+import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;
@@ -31,7 +32,25 @@ export const filterEventsAgainstList = async ({
   buildRuleMessage,
 }: FilterEventsAgainstList): Promise<SignalSearchResponse> => {
   try {
+    logger.debug(buildRuleMessage(`exceptionsList: ${JSON.stringify(exceptionsList, null, 2)}`));
     if (exceptionsList == null || exceptionsList.length === 0) {
+      logger.debug(buildRuleMessage('about to return original search result'));
+      return eventSearchResult;
+    }
+
+    const exceptionItemsWithLargeValueLists = exceptionsList.reduce<ExceptionListItemSchema[]>(
+      (acc, exception) => {
+        const { entries } = exception;
+        if (hasLargeValueList(entries)) {
+          return [...acc, exception];
+        }
+
+        return acc;
+      },
+      []
+    );
+
+    if (exceptionItemsWithLargeValueLists.length === 0) {
       logger.debug(buildRuleMessage('about to return original search result'));
       return eventSearchResult;
     }
@@ -40,7 +59,7 @@ export const filterEventsAgainstList = async ({
     const isStringableType = (val: SearchTypes) =>
       ['string', 'number', 'boolean'].includes(typeof val);
     // grab the signals with values found in the given exception lists.
-    const filteredHitsPromises = exceptionsList.map(
+    const filteredHitsPromises = exceptionItemsWithLargeValueLists.map(
       async (exceptionItem: ExceptionListItemSchema) => {
         const { entries } = exceptionItem;
 
