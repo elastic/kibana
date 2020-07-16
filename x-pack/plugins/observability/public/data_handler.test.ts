@@ -511,28 +511,41 @@ describe('registerDataHandler', () => {
       registerDataHandler({
         appName: 'apm',
         fetchData: async () => (({} as unknown) as ApmFetchDataResponse),
-        hasData: async () => true,
+        hasData: async () => false,
       });
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: async () => (({} as unknown) as LogsFetchDataResponse),
-        hasData: async () => true,
+        hasData: async () => false,
       });
       registerDataHandler({
         appName: 'infra_metrics',
         fetchData: async () => (({} as unknown) as MetricsFetchDataResponse),
-        hasData: async () => true,
+        hasData: async () => false,
       });
       registerDataHandler({
         appName: 'uptime',
         fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
-        hasData: async () => true,
+        hasData: async () => false,
       });
       expect(await fetchHasData()).toEqual({
-        apm: true,
-        uptime: true,
-        infra_logs: true,
-        infra_metrics: true,
+        apm: false,
+        uptime: false,
+        infra_logs: false,
+        infra_metrics: false,
+      });
+    });
+    it('returns false when has data was not registered', async () => {
+      unregisterDataHandler({ appName: 'apm' });
+      unregisterDataHandler({ appName: 'infra_logs' });
+      unregisterDataHandler({ appName: 'infra_metrics' });
+      unregisterDataHandler({ appName: 'uptime' });
+
+      expect(await fetchHasData()).toEqual({
+        apm: false,
+        uptime: false,
+        infra_logs: false,
+        infra_metrics: false,
       });
     });
   });
