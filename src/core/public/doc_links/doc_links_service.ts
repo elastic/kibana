@@ -112,8 +112,8 @@ export class DocLinksService {
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
         siem: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/index.html`,
-          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/install-siem.html`,
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
+          gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/install-siem.html`,
         },
         query: {
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,

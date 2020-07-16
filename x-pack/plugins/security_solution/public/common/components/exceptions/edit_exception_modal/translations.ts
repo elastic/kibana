@@ -10,8 +10,15 @@ export const CANCEL = i18n.translate('xpack.securitySolution.exceptions.editExce
   defaultMessage: 'Cancel',
 });
 
-export const EDIT_EXCEPTION = i18n.translate(
-  'xpack.securitySolution.exceptions.editException.editException',
+export const EDIT_EXCEPTION_SAVE_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.editExceptionSaveButton',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const EDIT_EXCEPTION_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.editExceptionTitle',
   {
     defaultMessage: 'Edit Exception',
   }
