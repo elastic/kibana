@@ -79,7 +79,7 @@ export class MapsAppView extends React.Component {
 
     this._initMap();
 
-    this._updateBreadcrumbs();
+    this._setBreadcrumbs();
 
     this.props.onAppLeave((actions) => {
       if (this._hasUnsavedChanges()) {

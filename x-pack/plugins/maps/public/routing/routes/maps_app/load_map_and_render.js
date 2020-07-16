@@ -27,9 +27,8 @@ export const LoadMapAndRender = class extends React.Component {
   }
 
   async _loadSavedMap() {
-    const { savedMapId } = this.props.match.params;
     try {
-      const savedMap = await getMapsSavedObjectLoader().get(savedMapId);
+      const savedMap = await getMapsSavedObjectLoader().get(this.props.savedMapId);
       if (this._isMounted) {
         this.setState({ savedMap });
       }

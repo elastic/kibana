@@ -39,12 +39,17 @@ const App = ({ history, appBasePath, onAppLeave }) => {
           <Switch>
             <Route
               path={`/map/:savedMapId`}
-              render={(props) => <LoadMapAndRender {...props} onAppLeave={onAppLeave} />}
+              render={(props) => (
+                <LoadMapAndRender
+                  savedMapId={props.match.params.savedMapId}
+                  onAppLeave={onAppLeave}
+                />
+              )}
             />
             <Route
               exact
               path={`/map`}
-              render={(props) => <LoadMapAndRender {...props} onAppLeave={onAppLeave} />}
+              render={() => <LoadMapAndRender onAppLeave={onAppLeave} />}
             />
             // Redirect other routes to list, or if hash-containing, their non-hash equivalents
             <Route
