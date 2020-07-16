@@ -405,7 +405,7 @@ export class SessionIndex {
         },
       });
 
-      if (typeof response.deleted === 'number') {
+      if (response.deleted > 0) {
         this.options.logger.debug(
           `Cleaned up ${response.deleted} invalid or expired session values.`
         );

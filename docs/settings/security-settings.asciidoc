@@ -237,6 +237,20 @@ string of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '70ms', '5s', '3d', '1Y').
 [cols="2*<"]
 |===
 
+| `xpack.security.session.cleanupInterval`
+| Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default this value is 1 hour. The minimum value is 1 minute.
+
+|===
+
+[TIP]
+============
+The format is a
+string of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '20m', '24h', '7d', '1w').
+============
+
+[cols="2*<"]
+|===
+
 | `xpack.security.loginAssistanceMessage`
   | Adds a message to the login screen. Useful for displaying information about maintenance windows, links to corporate sign up pages etc.
 

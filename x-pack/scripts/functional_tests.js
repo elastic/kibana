@@ -28,6 +28,8 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/kerberos_api_integration/config.ts'),
   require.resolve('../test/kerberos_api_integration/anonymous_access.config.ts'),
   require.resolve('../test/saml_api_integration/config.ts'),
+  require.resolve('../test/security_api_integration/session_idle.config.ts'),
+  require.resolve('../test/security_api_integration/session_lifespan.config.ts'),
   require.resolve('../test/token_api_integration/config.js'),
   require.resolve('../test/oidc_api_integration/config.ts'),
   require.resolve('../test/oidc_api_integration/implicit_flow.config.ts'),
