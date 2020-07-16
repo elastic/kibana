@@ -84,47 +84,6 @@ Object {
 }
 `;
 
-exports[`agent configuration queries getAllEnvironments fetches all environments 1`] = `
-Object {
-  "body": Object {
-    "aggs": Object {
-      "environments": Object {
-        "terms": Object {
-          "field": "service.environment",
-          "size": 100,
-        },
-      },
-    },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
-          Object {
-            "term": Object {
-              "service.name": "foo",
-            },
-          },
-        ],
-      },
-    },
-    "size": 0,
-  },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
-}
-`;
-
 exports[`agent configuration queries getExistingEnvironmentsForService fetches unavailable environments 1`] = `
 Object {
   "body": Object {

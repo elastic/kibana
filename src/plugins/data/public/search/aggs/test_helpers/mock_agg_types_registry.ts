@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { getAggTypes } from '../agg_types';
 import { BucketAggType } from '../buckets/bucket_agg_type';
@@ -74,17 +74,11 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
     const coreSetup = coreMock.createSetup();
     coreSetup.uiSettings.get = mockUiSettings;
 
-    const coreStart = coreMock.createStart();
-    coreSetup.uiSettings.get = mockUiSettings;
-
     const aggTypes = getAggTypes({
       calculateBounds: jest.fn(),
       getInternalStartServices: () =>
         (({
           fieldFormats: fieldFormatsServiceMock.createStartContract(),
-          notifications: notificationServiceMock.createStartContract(),
-          uiSettings: coreStart.uiSettings,
-          injectedMetadata: coreStart.injectedMetadata,
         } as unknown) as InternalStartServices),
       uiSettings: coreSetup.uiSettings,
     });

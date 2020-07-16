@@ -9,6 +9,7 @@ import React from 'react';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { getColumnsWithTimestamp } from '../../../common/components/event_details/helpers';
 
 import { FieldName } from './field_name';
@@ -24,7 +25,6 @@ const defaultProps = {
   }),
   fieldId: timestampFieldId,
   onUpdateColumns: jest.fn(),
-  timelineId: 'timeline-id',
 };
 
 describe('FieldName', () => {
@@ -46,8 +46,7 @@ describe('FieldName', () => {
         <FieldName {...defaultProps} />
       </TestProviders>
     );
-
-    wrapper.simulate('mouseenter');
+    wrapper.find('div').at(1).simulate('mouseenter');
     wrapper.update();
     expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
   });

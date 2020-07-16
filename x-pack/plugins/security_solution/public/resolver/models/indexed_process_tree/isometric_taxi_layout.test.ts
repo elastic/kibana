@@ -148,5 +148,24 @@ describe('resolver graph layout', () => {
     it('renders right', () => {
       expect(layout()).toMatchSnapshot();
     });
+    it('should have node a at level 1', () => {
+      expect(layout().ariaLevels.get(processA)).toBe(1);
+    });
+    it('should have nodes b and c at level 2', () => {
+      expect(layout().ariaLevels.get(processB)).toBe(2);
+      expect(layout().ariaLevels.get(processC)).toBe(2);
+    });
+    it('should have nodes d, e, f, and g at level 3', () => {
+      expect(layout().ariaLevels.get(processD)).toBe(3);
+      expect(layout().ariaLevels.get(processE)).toBe(3);
+      expect(layout().ariaLevels.get(processF)).toBe(3);
+      expect(layout().ariaLevels.get(processG)).toBe(3);
+    });
+    it('should have node h at level 4', () => {
+      expect(layout().ariaLevels.get(processH)).toBe(4);
+    });
+    it('should have 9 items in the map of aria levels', () => {
+      expect(layout().ariaLevels.size).toBe(9);
+    });
   });
 });

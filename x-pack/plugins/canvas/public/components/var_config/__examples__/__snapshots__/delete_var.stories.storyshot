@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Variables/DeleteVar default 1`] = `
+Array [
+  <div
+    className="canvasVarHeader__triggerWrapper"
+  >
+    <button
+      className="canvasVarHeader__button"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="canvasVarHeader__iconWrapper"
+      >
+        <div
+          data-euiicon-type="sortLeft"
+          style={
+            Object {
+              "verticalAlign": "top",
+            }
+          }
+        />
+      </span>
+      <span>
+        <span
+          className="canvasVarHeader__anchor"
+        >
+          Delete variable?
+        </span>
+      </span>
+    </button>
+  </div>,
+  <div
+    className="canvasSidebar__accordionContent"
+  >
+    <div>
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            className="euiText euiText--small"
+          >
+            <div
+              className="euiTextColor euiTextColor--subdued"
+            >
+              Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButton euiButton--danger euiButton--small euiButton--fill"
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButton__content"
+            >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="trash"
+                size="m"
+              />
+              <span
+                className="euiButton__text"
+              >
+                Delete variable
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButtonEmpty__content"
+            >
+              <span
+                className="euiButtonEmpty__text"
+              >
+                Cancel
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;

@@ -35,11 +35,12 @@ import {
 } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
-import { isHorizontalChart } from './state_helpers';
+import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
+import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
@@ -92,6 +93,13 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['lens_xy_legendConfig'],
       help: i18n.translate('xpack.lens.xyChart.legend.help', {
         defaultMessage: 'Configure the chart legend.',
+      }),
+    },
+    fittingFunction: {
+      types: ['string'],
+      options: [...fittingFunctionDefinitions.map(({ id }) => id)],
+      help: i18n.translate('xpack.lens.xyChart.fittingFunction.help', {
+        defaultMessage: 'Define how missing values are treated',
       }),
     },
     layers: {
@@ -191,7 +199,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers } = args;
+  const { legend, layers, fittingFunction } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -433,6 +441,7 @@ export function XYChart({
             data: rows,
             xScaleType,
             yScaleType,
+            color: () => getSeriesColor(layer, accessor),
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,
@@ -463,7 +472,7 @@ export function XYChart({
               }
               // This handles both split and single-y cases:
               // * If split series without formatting, show the value literally
-              // * If single Y, the seriesKey will be the acccessor, so we show the human-readable name
+              // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
               return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
             },
           };
@@ -472,7 +481,9 @@ export function XYChart({
 
           switch (seriesType) {
             case 'line':
-              return <LineSeries key={index} {...seriesProps} />;
+              return (
+                <LineSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+              );
             case 'bar':
             case 'bar_stacked':
             case 'bar_percentage_stacked':
@@ -480,11 +491,21 @@ export function XYChart({
             case 'bar_horizontal_stacked':
             case 'bar_horizontal_percentage_stacked':
               return <BarSeries key={index} {...seriesProps} />;
-            default:
+            case 'area_stacked':
               return <AreaSeries key={index} {...seriesProps} />;
+            case 'area':
+              return (
+                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+              );
+            default:
+              return assertNever(seriesType);
           }
         })
       )}
     </Chart>
   );
+}
+
+function assertNever(x: never): never {
+  throw new Error('Unexpected series type: ' + x);
 }

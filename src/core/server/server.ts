@@ -27,6 +27,7 @@ import {
   coreDeprecationProvider,
 } from './config';
 import { CoreApp } from './core_app';
+import { AuditTrailService } from './audit_trail';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
@@ -76,6 +77,7 @@ export class Server {
   private readonly status: StatusService;
   private readonly logging: LoggingService;
   private readonly coreApp: CoreApp;
+  private readonly auditTrail: AuditTrailService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
@@ -105,6 +107,7 @@ export class Server {
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
     this.httpResources = new HttpResourcesService(core);
+    this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
   }
 
@@ -127,6 +130,7 @@ export class Server {
       pluginDependencies: new Map([...pluginTree, [this.legacy.legacyId, [...pluginTree.keys()]]]),
     });
 
+    const auditTrailSetup = this.auditTrail.setup();
     const uuidSetup = await this.uuid.setup();
 
     const httpSetup = await this.http.setup({
@@ -183,6 +187,7 @@ export class Server {
       uuid: uuidSetup,
       rendering: renderingSetup,
       httpResources: httpResourcesSetup,
+      auditTrail: auditTrailSetup,
       logging: loggingSetup,
     };
 
@@ -203,7 +208,11 @@ export class Server {
 
   public async start() {
     this.log.debug('starting server');
-    const elasticsearchStart = await this.elasticsearch.start();
+    const auditTrailStart = this.auditTrail.start();
+
+    const elasticsearchStart = await this.elasticsearch.start({
+      auditTrail: auditTrailStart,
+    });
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
@@ -220,6 +229,7 @@ export class Server {
       metrics: metricsStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
+      auditTrail: auditTrailStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -254,6 +264,7 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    await this.auditTrail.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
@@ -277,6 +288,7 @@ export class Server {
           uiSettings: {
             client: coreStart.uiSettings.asScopedToClient(savedObjectsClient),
           },
+          auditor: coreStart.auditTrail.asScoped(req),
         };
       }
     );

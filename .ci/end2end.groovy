@@ -14,6 +14,7 @@ pipeline {
     HOME = "${env.WORKSPACE}"
     E2E_DIR = 'x-pack/plugins/apm/e2e'
     PIPELINE_LOG_LEVEL = 'DEBUG'
+    KBN_OPTIMIZER_THEMES = 'v7light'
   }
   options {
     timeout(time: 1, unit: 'HOURS')

@@ -18,7 +18,7 @@ import {
 } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
-export const initGetLogEntryCategoryExamplesRoute = ({ framework }: InfraBackendLibs) => {
+export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -37,6 +37,11 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework }: InfraBackend
         },
       } = request.body;
 
+      const sourceConfiguration = await sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        sourceId
+      );
+
       try {
         assertHasInfraMlPlugins(requestContext);
 
@@ -46,7 +51,8 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework }: InfraBackend
           startTime,
           endTime,
           categoryId,
-          exampleCount
+          exampleCount,
+          sourceConfiguration
         );
 
         return response.ok({

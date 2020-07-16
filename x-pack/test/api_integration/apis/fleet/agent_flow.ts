@@ -18,7 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const esClient = getService('es');
 
-  describe.skip('fleet_agent_flow', () => {
+  describe('fleet_agent_flow', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
@@ -90,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
           events: [
             {
               type: 'ACTION_RESULT',
-              subtype: 'CONFIG',
+              subtype: 'ACKNOWLEDGED',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
               action_id: configChangeAction.id,
               agent_id: enrollmentResponse.item.id,
@@ -132,7 +132,43 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       expect(unenrollResponse.success).to.eql(true);
 
-      // Checkin after unenrollment
+      //  Checkin after unenrollment
+      const { body: checkinAfterUnenrollResponse } = await supertestWithoutAuth
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .set('kbn-xsrf', 'xx')
+        .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
+        .send({
+          events: [],
+        })
+        .expect(200);
+
+      expect(checkinAfterUnenrollResponse.success).to.eql(true);
+      expect(checkinAfterUnenrollResponse.actions).length(1);
+      expect(checkinAfterUnenrollResponse.actions[0].type).be('UNENROLL');
+      const unenrollAction = checkinAfterUnenrollResponse.actions[0];
+
+      //  ack unenroll actions
+      const { body: ackUnenrollApiResponse } = await supertestWithoutAuth
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/acks`)
+        .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          events: [
+            {
+              type: 'ACTION_RESULT',
+              subtype: 'ACKNOWLEDGED',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              action_id: unenrollAction.id,
+              agent_id: enrollmentResponse.item.id,
+              message: 'hello',
+              payload: 'payload',
+            },
+          ],
+        })
+        .expect(200);
+      expect(ackUnenrollApiResponse.success).to.eql(true);
+
+      // Checkin after unenrollment acknowledged
       await supertestWithoutAuth
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')

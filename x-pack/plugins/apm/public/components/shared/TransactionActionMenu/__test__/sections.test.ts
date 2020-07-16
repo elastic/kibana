@@ -17,6 +17,18 @@ describe('Transaction action menu', () => {
   const date = '2020-02-06T11:00:00.000Z';
   const timestamp = { us: new Date(date).getTime() };
 
+  const urlParams = {
+    rangeFrom: 'now-24h',
+    rangeTo: 'now',
+    refreshPaused: true,
+    refreshInterval: 0,
+  };
+
+  const location = ({
+    search:
+      '?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+  } as unknown) as Location;
+
   it('shows required sections only', () => {
     const transaction = ({
       timestamp,
@@ -28,8 +40,8 @@ describe('Transaction action menu', () => {
       getSections({
         transaction,
         basePath,
-        location: ({} as unknown) as Location,
-        urlParams: {},
+        location,
+        urlParams,
       })
     ).toEqual([
       [
@@ -42,7 +54,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
+                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
               condition: true,
             },
           ],
@@ -77,8 +89,8 @@ describe('Transaction action menu', () => {
       getSections({
         transaction,
         basePath,
-        location: ({} as unknown) as Location,
-        urlParams: {},
+        location,
+        urlParams,
       })
     ).toEqual([
       [
@@ -113,7 +125,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
+                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
               condition: true,
             },
           ],
@@ -148,8 +160,8 @@ describe('Transaction action menu', () => {
       getSections({
         transaction,
         basePath,
-        location: ({} as unknown) as Location,
-        urlParams: {},
+        location,
+        urlParams,
       })
     ).toEqual([
       [
@@ -183,7 +195,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20123',
+                'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20%22123%22',
               condition: true,
             },
           ],

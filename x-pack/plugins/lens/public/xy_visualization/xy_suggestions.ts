@@ -432,6 +432,7 @@ function buildSuggestion({
 
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    fittingFunction: currentState?.fittingFunction || 'None',
     preferredSeriesType: seriesType,
     layers: [...keptLayers, newLayer],
   };

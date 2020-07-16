@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the execution of commands and scripts via System Manager. Execution methods such as RunShellScript, RunPowerShellScript, and alike can be abused by an authenticated attacker to install a backdoor or to interact with a compromised instance via reverse-shell using system only commands.",
+  "false_positives": [
+    "Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Suspicious commands from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS Execution via System Manager",
+  "query": "event.module:aws and event.dataset:aws.cloudtrail and event.provider:ssm.amazonaws.com and event.action:SendCommand and event.outcome:success",
+  "references": [
+    "https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-plugins.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "37b211e8-4e2f-440f-86d8-06cc8f158cfa",
+  "severity": "low",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1064",
+          "name": "Scripting",
+          "reference": "https://attack.mitre.org/techniques/T1064/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1086",
+          "name": "PowerShell",
+          "reference": "https://attack.mitre.org/techniques/T1086/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

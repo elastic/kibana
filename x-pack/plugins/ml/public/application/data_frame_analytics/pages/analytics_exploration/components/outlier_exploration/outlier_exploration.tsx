@@ -29,10 +29,11 @@ import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { defaultSearchQuery, useResultsViewConfig, INDEX_STATUS } from '../../../../common';
 
-import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
+import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/use_columns';
 
 import { ExplorationQueryBar } from '../exploration_query_bar';
 import { ExplorationTitle } from '../exploration_title';
+import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
@@ -49,7 +50,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     values: { jobId },
   });
 
-  const { indexPattern, jobConfig, jobStatus } = useResultsViewConfig(jobId);
+  const { indexPattern, jobConfig, jobStatus, needsDestIndexPattern } = useResultsViewConfig(jobId);
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
 
@@ -82,6 +83,9 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
 
   return (
     <EuiPanel data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
+      {jobConfig !== undefined && needsDestIndexPattern && (
+        <IndexPatternPrompt destIndex={jobConfig.dest.index} />
+      )}
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceBetween"

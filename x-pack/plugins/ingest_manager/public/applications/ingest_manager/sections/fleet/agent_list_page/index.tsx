@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { CSSProperties } from 'styled-components';
 import { AgentEnrollmentFlyout } from '../components';
-import { Agent } from '../../../types';
+import { Agent, AgentConfig } from '../../../types';
 import {
   usePagination,
   useCapabilities,
@@ -178,11 +178,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }
 
   if (selectedStatus.length) {
-    if (kuery) {
-      kuery = `(${kuery}) and`;
-    }
-
-    kuery = selectedStatus
+    const kueryStatus = selectedStatus
       .map((status) => {
         switch (status) {
           case 'online':
@@ -196,6 +192,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         return '';
       })
       .join(' or ');
+
+    if (kuery) {
+      kuery = `(${kuery}) and ${kueryStatus}`;
+    } else {
+      kuery = kueryStatus;
+    }
   }
 
   const agentsRequest = useGetAgents(
@@ -220,6 +222,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   });
 
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
+  const agentConfigsIndexedById = useMemo(() => {
+    return agentConfigs.reduce((acc, config) => {
+      acc[config.id] = config;
+
+      return acc;
+    }, {} as { [k: string]: AgentConfig });
+  }, [agentConfigs]);
   const { isLoading: isAgentConfigsLoading } = agentConfigsRequest;
 
   const columns = [
@@ -236,7 +245,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
-      width: '100px',
+      width: '120px',
       name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
@@ -245,7 +254,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     {
       field: 'config_id',
       name: i18n.translate('xpack.ingestManager.agentList.configColumnTitle', {
-        defaultMessage: 'Configuration',
+        defaultMessage: 'Agent config',
       }),
       render: (configId: string, agent: Agent) => {
         const configName = agentConfigs.find((p) => p.id === configId)?.name;
@@ -271,9 +280,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 </EuiText>
               </EuiFlexItem>
             )}
-            {agent.config_revision &&
-              agent.config_newest_revision &&
-              agent.config_newest_revision > agent.config_revision && (
+            {agent.config_id &&
+              agent.config_revision &&
+              agentConfigsIndexedById[agent.config_id] &&
+              agentConfigsIndexedById[agent.config_id].revision > agent.config_revision && (
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="xs" className="eui-textNoWrap">
                     <EuiIcon size="m" type="alert" color="warning" />
@@ -345,7 +355,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
             <FormattedMessage
               id="xpack.ingestManager.agentList.addButton"
-              defaultMessage="Enroll new agent"
+              defaultMessage="Add agent"
             />
           </EuiButton>
         ) : null
@@ -445,7 +455,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                     >
                       <FormattedMessage
                         id="xpack.ingestManager.agentList.configFilterText"
-                        defaultMessage="Configs"
+                        defaultMessage="Agent config"
                       />
                     </EuiFilterButton>
                   }

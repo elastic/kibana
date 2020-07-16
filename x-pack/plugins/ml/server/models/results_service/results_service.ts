@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -30,7 +30,8 @@ interface Influencer {
   fieldValue: any;
 }
 
-export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
+export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
+  const { callAsCurrentUser } = mlClusterClient;
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -435,6 +436,6 @@ export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
     getCategoryExamples,
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
-    getPartitionFieldsValues: getPartitionFieldsValuesFactory(callAsCurrentUser),
+    getPartitionFieldsValues: getPartitionFieldsValuesFactory(mlClusterClient),
   };
 }
