@@ -69,6 +69,7 @@ export const Create = React.memo(() => {
     options: { stripEmptyFields: false },
     schema,
   });
+  const { submit } = form;
   const { tags: tagOptions } = useGetTags();
   const [options, setOptions] = useState(
     tagOptions.map((label) => ({
@@ -91,12 +92,12 @@ export const Create = React.memo(() => {
   const handleTimelineClick = useTimelineClick();
 
   const onSubmit = useCallback(async () => {
-    const { isValid, data } = await form.submit();
+    const { isValid, data } = await submit();
     if (isValid) {
       // `postCase`'s type is incorrect, it actually returns a promise
       await postCase(data);
     }
-  }, [form, postCase]);
+  }, [submit, postCase]);
 
   const handleSetIsCancel = useCallback(() => {
     history.push('/');
