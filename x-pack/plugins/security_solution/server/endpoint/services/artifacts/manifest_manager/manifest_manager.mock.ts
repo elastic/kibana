@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line max-classes-per-file
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
 import { createPackageConfigMock } from '../../../../../../ingest_manager/common/mocks';
@@ -21,28 +20,17 @@ import {
   getEmptyMockArtifacts,
 } from '../../../lib/artifacts/mocks';
 
-export class ManifestManagerMock extends ManifestManager {
-  protected buildExceptionListArtifacts = jest.fn().mockResolvedValue(getMockArtifactsWithDiff());
-
-  public getLastComputedManifest = jest.fn().mockResolvedValue(getMockManifest({ compress: true }));
-
-  protected getManifestClient = jest
-    .fn()
-    .mockReturnValue(getManifestClientMock(this.savedObjectsClient));
-}
-
-export class EmptyManifestManagerMock extends ManifestManagerMock {
-  protected buildExceptionListArtifacts = jest.fn().mockResolvedValue(getEmptyMockArtifacts());
-
-  public getLastComputedManifest = jest.fn().mockResolvedValue(null);
+export enum ManifestManagerMockType {
+  InitialSystemState,
+  NormalFlow,
 }
 
 export const getManifestManagerMock = (opts?: {
-  empty?: boolean;
+  mockType?: ManifestManagerMockType;
   cache?: ExceptionsCache;
   packageConfigService?: jest.Mocked<PackageConfigServiceInterface>;
   savedObjectsClient?: ReturnType<typeof savedObjectsClientMock.create>;
-}): ManifestManagerMock => {
+}): ManifestManager => {
   let cache = new ExceptionsCache(5);
   if (opts?.cache !== undefined) {
     cache = opts.cache;
@@ -62,9 +50,33 @@ export const getManifestManagerMock = (opts?: {
     savedObjectsClient = opts.savedObjectsClient;
   }
 
-  const ManifestClass = opts?.empty ? EmptyManifestManagerMock : ManifestManagerMock;
+  class ManifestManagerMock extends ManifestManager {
+    protected buildExceptionListArtifacts = jest.fn().mockImplementation(() => {
+      const mockType = opts?.mockType ?? ManifestManagerMockType.NormalFlow;
+      switch (mockType) {
+        case ManifestManagerMockType.InitialSystemState:
+          return getEmptyMockArtifacts();
+        case ManifestManagerMockType.NormalFlow:
+          return getMockArtifactsWithDiff();
+      }
+    });
 
-  const manifestManager = new ManifestClass({
+    public getLastComputedManifest = jest.fn().mockImplementation(() => {
+      const mockType = opts?.mockType ?? ManifestManagerMockType.NormalFlow;
+      switch (mockType) {
+        case ManifestManagerMockType.InitialSystemState:
+          return null;
+        case ManifestManagerMockType.NormalFlow:
+          return getMockManifest({ compress: true });
+      }
+    });
+
+    protected getManifestClient = jest
+      .fn()
+      .mockReturnValue(getManifestClientMock(this.savedObjectsClient));
+  }
+
+  const manifestManager = new ManifestManagerMock({
     artifactClient: getArtifactClientMock(savedObjectsClient),
     cache,
     packageConfigService,
