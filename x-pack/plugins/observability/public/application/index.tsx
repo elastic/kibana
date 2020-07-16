@@ -16,7 +16,7 @@ import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
 import { Breadcrumbs, routes } from '../routes';
 
-const observabilityLabel = {
+const observabilityLabelBreadcrumb = {
   text: i18n.translate('xpack.observability.observability.breadcrumb.', {
     defaultMessage: 'Observability',
   }),
@@ -39,7 +39,7 @@ const App = () => {
           const Wrapper = () => {
             const { core } = usePluginContext();
 
-            const breadcrumb = [observabilityLabel, ...route.breadcrumb];
+            const breadcrumb = [observabilityLabelBreadcrumb, ...route.breadcrumb];
             useEffect(() => {
               core.chrome.setBreadcrumbs(breadcrumb);
             }, [core, breadcrumb]);
