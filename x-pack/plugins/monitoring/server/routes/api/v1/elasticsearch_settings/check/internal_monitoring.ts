@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { CatIndicesParams } from 'elasticsearch';
+// @ts-ignore
 import { handleError } from '../../../../../lib/errors';
 import { RouteDependencies } from '../../../../../types';
 
