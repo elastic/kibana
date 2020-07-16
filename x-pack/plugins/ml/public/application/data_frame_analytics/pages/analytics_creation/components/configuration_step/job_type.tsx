@@ -21,24 +21,21 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
   const outlierHelpText = i18n.translate(
     'xpack.ml.dataframe.analytics.create.outlierDetectionHelpText',
     {
-      defaultMessage:
-        'Outlier detection identifies unusual data points in the dataset. Outlier detection jobs analyze only numeric and boolean fields. Use the advanced editor to add custom options to the configuration.',
+      defaultMessage: 'Outlier detection identifies unusual data points in the data set.',
     }
   );
 
   const regressionHelpText = i18n.translate(
     'xpack.ml.dataframe.analytics.create.outlierRegressionHelpText',
     {
-      defaultMessage:
-        'Regression makes predictions on your data after it determines certain relationships among your data points. Regression jobs analyze numeric, categorical, and boolean fields. Use the advanced editor to apply custom options.',
+      defaultMessage: 'Regression predicts numerical values in the data set.',
     }
   );
 
   const classificationHelpText = i18n.translate(
     'xpack.ml.dataframe.analytics.create.classificationHelpText',
     {
-      defaultMessage:
-        'Classification predicts the class or category of a given data point in a dataset. Classification jobs support fields that are numeric, boolean, text, keyword, or ip. Use the advanced editor to apply custom options.',
+      defaultMessage: 'Classification predicts labels of data points in the data set.',
     }
   );
 
