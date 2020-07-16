@@ -7,6 +7,7 @@
 import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
 import { Legacy } from '../legacy_shims';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
+import { showSecurityToast } from '../alerts/lib/security_toasts';
 
 function formatClusters(clusters) {
   return clusters.map(formatCluster);
@@ -55,10 +56,10 @@ export function monitoringClustersProvider($injector) {
     }
 
     function ensureAlertsEnabled() {
-      return $http.post('../api/monitoring/v1/alerts/enable', {}).catch(() => {
-        /**
-         * Ignoring for now, but should really indicate what is the cause
-         */
+      return $http.post('../api/monitoring/v1/alerts/enable', {}).catch((err) => {
+        const Private = $injector.get('Private');
+        const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+        return ajaxErrorHandlers(err);
       });
     }
 
@@ -66,7 +67,8 @@ export function monitoringClustersProvider($injector) {
       return getClusters().then((clusters) => {
         if (clusters.length) {
           return ensureAlertsEnabled()
-            .then(() => {
+            .then(({ data }) => {
+              showSecurityToast(data);
               once = true;
               return clusters;
             })

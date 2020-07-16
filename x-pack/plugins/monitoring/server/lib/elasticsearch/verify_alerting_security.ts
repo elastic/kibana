@@ -5,7 +5,6 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
-
 import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 
 export interface AlertingFrameworkHealth {
@@ -25,14 +24,9 @@ export interface XPackUsageSecurity {
 }
 
 export class AlertingSecurity {
-  private static _encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
-
-  public static readonly init = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => {
-    AlertingSecurity._encryptedSavedObjects = encryptedSavedObjects;
-  };
-
   public static readonly getSecurityHealth = async (
-    context: RequestHandlerContext
+    context: RequestHandlerContext,
+    encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
   ): Promise<AlertingFrameworkHealth> => {
     const {
       security: {
@@ -47,16 +41,9 @@ export class AlertingSecurity {
       }
     );
 
-    if (!AlertingSecurity._encryptedSavedObjects) {
-      throw Error(
-        'AlertingSecurity.init() needs to be set before using AlertingSecurity.getSecurityHealth'
-      );
-    }
-
     return {
       isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
-      hasPermanentEncryptionKey: !AlertingSecurity._encryptedSavedObjects
-        .usingEphemeralEncryptionKey,
+      hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
     };
   };
 }

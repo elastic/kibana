@@ -80,7 +80,6 @@ export class Plugin {
   }
 
   async setup(core: CoreSetup, plugins: PluginsSetup) {
-    AlertingSecurity.init(plugins.encryptedSavedObjects);
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config
         .create<TypeOf<typeof configSchema>>()
@@ -205,6 +204,7 @@ export class Plugin {
       requireUIRoutes(this.monitoringCore, {
         router,
         licenseService: this.licenseService,
+        encryptedSavedObjects: plugins.encryptedSavedObjects,
       });
       initInfraSource(config, plugins.infra);
     }

@@ -58,6 +58,7 @@ export interface MonitoringCoreConfig {
 export interface RouteDependencies {
   router: IRouter;
   licenseService: MonitoringLicenseService;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface MonitoringCore {

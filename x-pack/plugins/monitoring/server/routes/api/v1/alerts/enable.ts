@@ -23,20 +23,28 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
     },
     async (context, _request, response) => {
       try {
-        const {
-          isSufficientlySecure,
-          hasPermanentEncryptionKey,
-        } = await AlertingSecurity.getSecurityHealth(context);
+        const alerts = AlertsFactory.getAll().filter((a) => a.isEnabled(npRoute.licenseService));
+
+        if (alerts.length) {
+          const {
+            isSufficientlySecure,
+            hasPermanentEncryptionKey,
+          } = await AlertingSecurity.getSecurityHealth(context, npRoute.encryptedSavedObjects);
+
+          if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
+            return response.ok({
+              body: {
+                isSufficientlySecure,
+                hasPermanentEncryptionKey,
+              },
+            });
+          }
+        }
+
         const alertsClient = context.alerting?.getAlertsClient();
         const actionsClient = context.actions?.getActionsClient();
         const types = context.actions?.listTypes();
-        if (
-          !alertsClient ||
-          !actionsClient ||
-          !types ||
-          !isSufficientlySecure ||
-          !hasPermanentEncryptionKey
-        ) {
+        if (!alertsClient || !actionsClient || !types) {
           return response.notFound();
         }
 
@@ -68,7 +76,6 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
           },
         ];
 
-        const alerts = AlertsFactory.getAll().filter((a) => a.isEnabled(npRoute.licenseService));
         const createdAlerts = await Promise.all(
           alerts.map(
             async (alert) => await alert.createIfDoesNotExist(alertsClient, actionsClient, actions)
