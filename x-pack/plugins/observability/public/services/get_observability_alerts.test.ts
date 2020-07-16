@@ -40,7 +40,43 @@ describe('getObservabilityAlerts', () => {
     expect(alerts).toEqual([]);
   });
 
-  it('Shows alerts from Observability', async () => {
+  it('Returns empty array when alerts are not allowed based on consumer type', async () => {
+    const core = ({
+      http: {
+        get: async () => {
+          return {
+            data: [
+              {
+                id: 1,
+                consumer: 'siem',
+              },
+              {
+                id: 2,
+                consumer: 'kibana',
+              },
+              {
+                id: 3,
+                consumer: 'index',
+              },
+              {
+                id: 4,
+                consumer: 'foo',
+              },
+              {
+                id: 5,
+                consumer: 'bar',
+              },
+            ],
+          };
+        },
+        basePath,
+      },
+    } as unknown) as AppMountContext['core'];
+    const alerts = await getObservabilityAlerts({ core });
+    expect(alerts).toEqual([]);
+  });
+
+  it('Shows alerts from Observability and Alerts', async () => {
     const core = ({
       http: {
         get: async () => {
@@ -66,6 +102,10 @@ describe('getObservabilityAlerts', () => {
                 id: 5,
                 consumer: 'metrics',
               },
+              {
+                id: 6,
+                consumer: 'alerts',
+              },
             ],
           };
         },
@@ -90,6 +130,10 @@ describe('getObservabilityAlerts', () => {
       {
         id: 5,
         consumer: 'metrics',
+      },
+      {
+        id: 6,
+        consumer: 'alerts',
       },
     ]);
   });
