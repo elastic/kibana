@@ -34,7 +34,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       api: [],
-      ui: ['alerting:show'],
+      ui: [],
     },
     read: {
       app: [],
@@ -51,7 +51,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       api: [],
-      ui: ['alerting:show'],
+      ui: [],
     },
   },
 };

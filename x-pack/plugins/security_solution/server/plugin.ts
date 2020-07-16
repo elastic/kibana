@@ -170,6 +170,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       privileges: {
         all: {
           app: [...securitySubPlugins, 'kibana'],
@@ -189,7 +192,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           alerting: {
             all: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
-          ui: ['show', 'crud', 'alerting:show'],
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: ['show', 'crud'],
         },
         read: {
           app: [...securitySubPlugins, 'kibana'],
@@ -209,7 +215,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           alerting: {
             all: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
-          ui: ['show', 'alerting:show'],
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: ['show'],
         },
       },
     });

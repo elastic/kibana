@@ -25,7 +25,7 @@ import { Section, routeToConnectors, routeToAlerts } from './constants';
 import { getCurrentBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { useAppDependencies } from './app_context';
-import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabilities';
+import { hasShowActionsCapability } from './lib/capabilities';
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';

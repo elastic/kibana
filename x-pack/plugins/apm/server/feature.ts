@@ -17,6 +17,9 @@ export const APM_FEATURE = {
   navLinkId: 'apm',
   app: ['apm', 'kibana'],
   catalogue: ['apm'],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
@@ -30,6 +33,9 @@ export const APM_FEATURE = {
       alerting: {
         all: Object.values(AlertType),
       },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       ui: ['show', 'save', 'alerting:show', 'alerting:save'],
     },
     read: {
@@ -42,6 +48,9 @@ export const APM_FEATURE = {
       },
       alerting: {
         all: Object.values(AlertType),
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
       },
       ui: ['show', 'alerting:show', 'alerting:save'],
     },

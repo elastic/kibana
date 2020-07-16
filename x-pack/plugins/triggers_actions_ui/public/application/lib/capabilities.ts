@@ -15,15 +15,6 @@ import { Alert, AlertType } from '../../types';
 
 type Capabilities = Record<string, any>;
 
-const apps = ['apm', 'siem', 'uptime', 'infrastructure', 'actions', BUILT_IN_ALERTS_FEATURE_ID];
-
-function hasCapability(capabilities: Capabilities, capability: string) {
-  return apps.some((app) => capabilities[app]?.[capability]);
-}
-
-export const hasShowAlertsCapability = (capabilities: Capabilities) =>
-  hasCapability(capabilities, 'alerting:show');
-
 export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
 export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
 export const hasExecuteActionsCapability = (capabilities: Capabilities) =>

@@ -44,6 +44,9 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         defaultMessage: 'Alerts Example',
       }),
       app: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       privileges: {
         all: {
           alerting: {
@@ -53,7 +56,10 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
             all: [],
             read: [],
           },
-          ui: ['alerting:show'],
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: [],
         },
         read: {
           alerting: {
@@ -63,7 +69,10 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
             all: [],
             read: [],
           },
-          ui: ['alerting:show'],
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: [],
         },
       },
     });
