@@ -20,8 +20,8 @@ export function useResolverQueryParams() {
   const history = useHistory();
   const urlSearch = useLocation().search;
   const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
-  const uniqueCrumbIdKey: string = `${resolverComponentInstanceID}CrumbId`;
-  const uniqueCrumbEventKey: string = `${resolverComponentInstanceID}CrumbEvent`;
+  const uniqueCrumbIdKey: string = `resolver-id:${resolverComponentInstanceID}`;
+  const uniqueCrumbEventKey: string = `resolver-event:${resolverComponentInstanceID}`;
   const pushToQueryParams = useCallback(
     (newCrumbs: CrumbInfo) => {
       // Construct a new set of params from the current set (minus empty params)
@@ -51,9 +51,15 @@ export function useResolverQueryParams() {
     const parsed = querystring.parse(urlSearch.slice(1));
     const crumbEvent = parsed[uniqueCrumbEventKey];
     const crumbId = parsed[uniqueCrumbIdKey];
+    function valueForParam(param: string | string[]): string {
+      if (Array.isArray(param)) {
+        return param[0] || '';
+      }
+      return param || '';
+    }
     return {
-      crumbEvent: Array.isArray(crumbEvent) ? crumbEvent[0] : crumbEvent,
-      crumbId: Array.isArray(crumbId) ? crumbId[0] : crumbId,
+      crumbEvent: valueForParam(crumbEvent),
+      crumbId: valueForParam(crumbId),
     };
   }, [urlSearch, uniqueCrumbIdKey, uniqueCrumbEventKey]);
 
