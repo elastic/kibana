@@ -63,7 +63,7 @@ export async function installKibanaAssets(options: {
 
     if (installedKibanaRefs?.length) {
       await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedKibanaRefs);
-      // await deleteKibanaInstalledRefs(savedObjectsClient, pkgName, installedKibanaRefs);
+      await deleteKibanaInstalledRefs(savedObjectsClient, pkgName, installedKibanaRefs);
     }
   }
 
