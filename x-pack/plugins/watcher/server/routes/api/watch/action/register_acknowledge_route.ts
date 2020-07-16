@@ -11,7 +11,6 @@ import { isEsError } from '../../../../shared_imports';
 // @ts-ignore
 import { WatchStatus } from '../../../../models/watch_status/index';
 import { RouteDependencies } from '../../../../types';
-import { licensePreRoutingFactory } from '../../../../lib/license_pre_routing_factory';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),
@@ -29,15 +28,15 @@ function acknowledgeAction(
   });
 }
 
-export function registerAcknowledgeRoute(deps: RouteDependencies) {
-  deps.router.put(
+export function registerAcknowledgeRoute({ router, license }: RouteDependencies) {
+  router.put(
     {
       path: '/api/watcher/watch/{watchId}/action/{actionId}/acknowledge',
       validate: {
         params: paramsSchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { watchId, actionId } = request.params;
 
       try {

@@ -9,7 +9,6 @@ import { ILegacyScopedClusterClient } from 'kibana/server';
 import { isEsError } from '../../shared_imports';
 // @ts-ignore
 import { Fields } from '../../models/fields/index';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
@@ -28,15 +27,15 @@ function fetchFields(dataClient: ILegacyScopedClusterClient, indexes: string[]) 
   return dataClient.callAsCurrentUser('fieldCaps', params);
 }
 
-export function registerListFieldsRoute(deps: RouteDependencies) {
-  deps.router.post(
+export function registerListFieldsRoute({ router, license }: RouteDependencies) {
+  router.post(
     {
       path: '/api/watcher/fields',
       validate: {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { indexes } = request.body;
 
       try {

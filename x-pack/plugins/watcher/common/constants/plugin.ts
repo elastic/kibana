@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LICENSE_TYPE_GOLD, LicenseType } from '../../../../legacy/common/constants';
+import { i18n } from '@kbn/i18n';
+import { LicenseType } from '../../../licensing/common/types';
+
+const goldLicense: LicenseType = 'gold';
 
 export const PLUGIN = {
   ID: 'watcher',
-  MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_GOLD as LicenseType,
-  getI18nName: (i18n: any): string => {
+  MINIMUM_LICENSE_REQUIRED: goldLicense,
+  getI18nName: (): string => {
     return i18n.translate('xpack.watcher.appName', {
       defaultMessage: 'Watcher',
     });

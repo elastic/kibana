@@ -5,28 +5,18 @@
  */
 
 import { IRouter } from 'kibana/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import { License } from './services';
 
-import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
-
-export interface Dependencies {
+export interface SetupDependencies {
   licensing: LicensingPluginSetup;
 }
 
-export interface ServerShim {
-  route: any;
-  plugins: {
-    xpack_main: XPackMainPlugin;
-    watcher: any;
-  };
+export interface StartDependencies {
+  licensing: LicensingPluginStart;
 }
 
 export interface RouteDependencies {
   router: IRouter;
-  getLicenseStatus: () => LicenseStatus;
-}
-
-export interface LicenseStatus {
-  hasRequired: boolean;
-  message?: string;
+  license: License;
 }

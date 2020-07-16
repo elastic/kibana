@@ -9,7 +9,6 @@ import { isEsError } from '../../../shared_imports';
 // @ts-ignore
 import { Settings } from '../../../models/settings/index';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchClusterSettings(client: ILegacyScopedClusterClient) {
   return client.callAsInternalUser('cluster.getSettings', {
@@ -18,13 +17,13 @@ function fetchClusterSettings(client: ILegacyScopedClusterClient) {
   });
 }
 
-export function registerLoadRoute(deps: RouteDependencies) {
-  deps.router.get(
+export function registerLoadRoute({ router, license }: RouteDependencies) {
+  router.get(
     {
       path: '/api/watcher/settings',
       validate: false,
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       try {
         const settings = await fetchClusterSettings(ctx.watcher!.client);
         return response.ok({ body: Settings.fromUpstreamJson(settings).downstreamJson });
