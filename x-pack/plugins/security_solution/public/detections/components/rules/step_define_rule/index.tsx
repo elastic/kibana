@@ -17,7 +17,6 @@ import { useFetchIndexPatterns } from '../../../containers/detection_engine/rule
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useMlCapabilities } from '../../../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
 import {
   filterRuleFieldsForType,
   RuleFields,
@@ -109,58 +108,46 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
-  const [localRuleType, setLocalRuleType] = useState(
-    defaultValues?.ruleType || stepDefineDefaultValue.ruleType
-  );
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [myStepData, setMyStepData] = useState<DefineStepRule>({
+  const initialState = defaultValues ?? {
     ...stepDefineDefaultValue,
     index: indicesConfig ?? [],
-  });
+  };
+  const [localRuleType, setLocalRuleType] = useState(initialState.ruleType);
+  const [myStepData, setMyStepData] = useState<DefineStepRule>(initialState);
   const [
     { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
   ] = useFetchIndexPatterns(myStepData.index);
 
   const { form } = useForm({
-    defaultValue: myStepData,
+    defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const clearErrors = useCallback(() => form.reset({ resetValues: false }), [form]);
+  const { getFields, reset, submit } = form;
+  const clearErrors = useCallback(() => reset({ resetValues: false }), [reset]);
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
       setStepData(RuleStep.defineRule, null, false);
-      const { isValid, data } = await form.submit();
+      const { isValid, data } = await submit();
       if (isValid && setStepData) {
         setStepData(RuleStep.defineRule, data, isValid);
         setMyStepData({ ...data, isNew: false } as DefineStepRule);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [setStepData, submit]);
 
   useEffect(() => {
-    const { isNew, ...values } = myStepData;
-    if (defaultValues != null && !deepEqual(values, defaultValues)) {
-      const newValues = { ...values, ...defaultValues, isNew: false };
-      setMyStepData(newValues);
-      setFieldValue(form, schema, newValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValues, setMyStepData, setFieldValue]);
-
-  useEffect(() => {
-    if (setForm != null) {
+    if (setForm) {
       setForm(RuleStep.defineRule, form);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [form, setForm]);
 
   const handleResetIndices = useCallback(() => {
-    const indexField = form.getFields().index;
+    const indexField = getFields().index;
     indexField.setValue(indicesConfig);
-  }, [form, indicesConfig]);
+  }, [getFields, indicesConfig]);
 
   const handleOpenTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(true);
@@ -281,11 +268,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 fields={{
                   thresholdField: {
                     path: 'threshold.field',
-                    defaultValue: defaultValues?.threshold?.field,
+                    defaultValue: initialState.threshold.field,
                   },
                   thresholdValue: {
                     path: 'threshold.value',
-                    defaultValue: defaultValues?.threshold?.value,
+                    defaultValue: initialState.threshold.value,
                   },
                 }}
               >
