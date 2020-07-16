@@ -86,6 +86,12 @@ const planeTuple = (transformMatrix, x, y) => {
 };
 
 const rectangleAtPoint = ({ transformMatrix, a, b }, x, y) => {
+  if (x === Infinity || y === Infinity) {
+    return {
+      inside: false,
+    };
+  }
+
   const { inverseProjection, planeVector } = planeTuple(transformMatrix, x, y);
 
   // Determine z (depth) by composing the x, y vector out of local unit x and unit y vectors; by knowing the
