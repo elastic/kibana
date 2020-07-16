@@ -8,6 +8,8 @@ import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty, EuiFormRow } from
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import {
   RuleStepProps,
   RuleStep,
@@ -94,6 +96,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
     defineRuleData?.index ?? []
   );
+  const exceptionsDisabledForRule =
+    defineRuleData?.ruleType &&
+    (isMlRule(defineRuleData.ruleType) || isThresholdRule(defineRuleData.ruleType));
 
   const { form } = useForm({
     defaultValue: initialState,
@@ -274,8 +279,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   euiFieldProps: {
-                    fullWidth: true,
-                    isDisabled: isLoading,
+                    disabled: isLoading || exceptionsDisabledForRule,
                   },
                 }}
               />
@@ -287,8 +291,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleBuildingBlock',
                   'data-test-subj': 'detectionEngineStepAboutRuleBuildingBlock',
                   euiFieldProps: {
-                    fullWidth: true,
-                    isDisabled: isLoading,
+                    disabled: isLoading,
                   },
                 }}
               />
