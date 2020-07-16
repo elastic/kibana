@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiLoadingSpinner, EuiText, EuiIconTip } from '@elastic/eui';
+import React, { Fragment } from 'react';
+import { EuiLoadingSpinner, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SummarizedCopyToSpaceResult, SummarizedSavedObjectResult } from '..';
 
@@ -68,23 +68,20 @@ export const CopyStatusIndicator = (props: Props) => {
         type={'alert'}
         color={'warning'}
         content={
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.spaces.management.copyToSpace.copyStatus.conflictsMessage"
-                defaultMessage="A saved object with a matching id ({id}) already exists in this space."
-                values={{
-                  id: objectResult.conflict!.obj.id,
-                }}
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="xpack.spaces.management.copyToSpace.copyStatus.conflictsOverwriteMessage"
-                defaultMessage="Enable 'Overwrite' to replace this version with the copied one."
-              />
-            </p>
-          </EuiText>
+          <Fragment>
+            <FormattedMessage
+              id="xpack.spaces.management.copyToSpace.copyStatus.conflictsMessage"
+              defaultMessage="A saved object with a matching id ({id}) already exists in this space."
+              values={{
+                id: objectResult.conflict!.obj.id,
+              }}
+            />
+            <EuiSpacer />
+            <FormattedMessage
+              id="xpack.spaces.management.copyToSpace.copyStatus.conflictsOverwriteMessage"
+              defaultMessage="Enable 'Overwrite' to replace this version with the copied one."
+            />
+          </Fragment>
         }
       />
     );
