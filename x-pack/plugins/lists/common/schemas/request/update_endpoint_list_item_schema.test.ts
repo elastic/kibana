@@ -15,8 +15,8 @@ import {
 } from './update_endpoint_list_item_schema';
 import { getUpdateEndpointListItemSchemaMock } from './update_endpoint_list_item_schema.mock';
 
-describe('update_exception_list_item_schema', () => {
-  test('it should validate a typical exception list item request', () => {
+describe('update_endpoint_list_item_schema', () => {
+  test('it should validate a typical list item request', () => {
     const payload = getUpdateEndpointListItemSchemaMock();
     const decoded = updateEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

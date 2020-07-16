@@ -34,12 +34,13 @@ export const createEndpointListRoute = (router: IRouter): void => {
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        // Our goal is be fast as possible and block the least amount of
         const exceptionLists = getExceptionListClient(context);
         const createdList = await exceptionLists.createEndpointList();
         // We always return ok on a create  endpoint list route but with an empty body as
         // an additional fetch of the full list would be slower and the UI has everything hard coded
-        // within it to get the  list if it needs details about it.
+        // within it to get the list if it needs details about it. Our goal is to be as fast as possible
+        // and block the least amount of time with this route since it could end up in various parts of the
+        // stack at some point such as repeatedly being called by endpoint agents.
         const body = createdList ?? {};
         const [validated, errors] = validate(body, createEndpointListSchema);
         if (errors != null) {

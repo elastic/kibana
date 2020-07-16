@@ -13,7 +13,7 @@ import { DeleteListItemSchema, deleteListItemSchema } from './delete_list_item_s
 import { getDeleteListItemSchemaMock } from './delete_list_item_schema.mock';
 
 describe('delete_list_item_schema', () => {
-  test('it should validate a typical exception list item request', () => {
+  test('it should validate a typical list item request', () => {
     const payload = getDeleteListItemSchemaMock();
     const decoded = deleteListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -21,18 +21,6 @@ describe('delete_list_item_schema', () => {
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
-  });
-
-  test('it should NOT accept a value for "namespace_type" since it does not require one', () => {
-    const payload: DeleteListItemSchema & {
-      namespace_type: string;
-    } = { ...getDeleteListItemSchemaMock(), namespace_type: 'single' };
-    delete payload.namespace_type;
-    const decoded = deleteListItemSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(getDeleteListItemSchemaMock());
   });
 
   test('it should not allow an extra key to be sent in', () => {

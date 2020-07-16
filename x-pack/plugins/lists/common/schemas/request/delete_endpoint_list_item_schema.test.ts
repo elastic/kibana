@@ -15,8 +15,8 @@ import {
 } from './delete_endpoint_list_item_schema';
 import { getDeleteEndpointListItemSchemaMock } from './delete_endpoint_list_item_schema.mock';
 
-describe('delete_exception_list_item_schema', () => {
-  test('it should validate a typical exception list item request', () => {
+describe('delete_endpoint_list_item_schema', () => {
+  test('it should validate a typical endpoint list item request', () => {
     const payload = getDeleteEndpointListItemSchemaMock();
     const decoded = deleteEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

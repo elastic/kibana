@@ -16,7 +16,7 @@ import {
 } from './read_endpoint_list_item_schema';
 
 describe('read_endpoint_list_item_schema', () => {
-  test('it should validate a typical exception list request', () => {
+  test('it should validate a typical list request', () => {
     const payload = getReadEndpointListItemSchemaMock();
     const decoded = readEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

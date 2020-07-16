@@ -19,7 +19,7 @@ import {
 import { getCreateEndpointListItemSchemaMock } from './create_endpoint_list_item_schema.mock';
 
 describe('create_endpoint_list_item_schema', () => {
-  test('it should validate a typical exception list item request not counting the auto generated uuid', () => {
+  test('it should validate a typical list item request not counting the auto generated uuid', () => {
     const payload = getCreateEndpointListItemSchemaMock();
     const decoded = createEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

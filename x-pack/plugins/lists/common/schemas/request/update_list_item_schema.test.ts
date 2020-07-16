@@ -13,7 +13,7 @@ import { UpdateListItemSchema, updateListItemSchema } from './update_list_item_s
 import { getUpdateListItemSchemaMock } from './update_list_item_schema.mock';
 
 describe('update_list_item_schema', () => {
-  test('it should validate a typical exception list item request', () => {
+  test('it should validate a typical list item request', () => {
     const payload = getUpdateListItemSchemaMock();
     const decoded = updateListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
