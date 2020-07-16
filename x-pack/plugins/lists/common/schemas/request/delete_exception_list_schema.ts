@@ -8,7 +8,8 @@
 
 import * as t from 'io-ts';
 
-import { NamespaceType, id, list_id, namespace_type } from '../common/schemas';
+import { id, list_id, namespace_type } from '../common/schemas';
+import { NamespaceType } from '../types';
 
 export const deleteExceptionListSchema = t.exact(
   t.partial({

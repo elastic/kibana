@@ -18,6 +18,7 @@ export type MapFilters = {
   refreshTimerLastTriggeredAt?: string;
   timeFilters: TimeRange;
   zoom: number;
+  geogridPrecision?: number;
 };
 
 type ESSearchSourceSyncMeta = {
@@ -51,7 +52,6 @@ export type VectorStyleRequestMeta = MapFilters & {
 
 export type ESSearchSourceResponseMeta = {
   areResultsTrimmed?: boolean;
-  sourceType?: string;
 
   // top hits meta
   areEntitiesTrimmed?: boolean;

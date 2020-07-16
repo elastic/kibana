@@ -1,0 +1,29 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to modify an Okta multi-factor authentication (MFA) rule in order to remove or weaken an organization's security controls.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if Okta MFA rules are regularly modified in your organization."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Modify Okta MFA Rule",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:(policy.rule.update or policy.rule.delete)",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "000047bb-b27a-47ec-8b62-ef1a5d2c9e19",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "type": "query",
+  "version": 1
+}

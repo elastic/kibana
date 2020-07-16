@@ -63,7 +63,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         ...(registryPort
-          ? [`--xpack.ingestManager.epm.registryUrl=http://localhost:${registryPort}`]
+          ? [`--xpack.ingestManager.registryUrl=http://localhost:${registryPort}`]
           : []),
       ],
     },

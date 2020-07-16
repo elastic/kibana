@@ -46,7 +46,7 @@ export const buildSignal = (doc: SignalSourceHit, rule: Partial<RulesSchema>): S
   const ruleWithoutInternalTags = removeInternalTagsFromRule(rule);
   const parent = buildAncestor(doc, rule);
   const ancestors = buildAncestorsSignal(doc, rule);
-  const signal: Signal = {
+  let signal: Signal = {
     parent,
     ancestors,
     original_time: doc._source['@timestamp'],
@@ -54,7 +54,11 @@ export const buildSignal = (doc: SignalSourceHit, rule: Partial<RulesSchema>): S
     rule: ruleWithoutInternalTags,
   };
   if (doc._source.event != null) {
-    return { ...signal, original_event: doc._source.event };
+    signal = { ...signal, original_event: doc._source.event };
+  }
+  if (doc._source.threshold_count != null) {
+    signal = { ...signal, threshold_count: doc._source.threshold_count };
+    delete doc._source.threshold_count;
   }
   return signal;
 };

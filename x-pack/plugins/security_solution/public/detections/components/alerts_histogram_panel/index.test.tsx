@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import '../../../common/mock/match_media';
 import { AlertsHistogramPanel } from './index';
 
 jest.mock('react-router-dom', () => {
@@ -40,10 +41,10 @@ jest.mock('../../../common/components/navigation/use_get_url_search');
 
 describe('AlertsHistogramPanel', () => {
   const defaultProps = {
-    from: 0,
+    from: '2020-07-07T08:20:18.966Z',
     signalIndexName: 'signalIndexName',
     setQuery: jest.fn(),
-    to: 1,
+    to: '2020-07-08T08:20:18.966Z',
     updateDateRange: jest.fn(),
   };
 

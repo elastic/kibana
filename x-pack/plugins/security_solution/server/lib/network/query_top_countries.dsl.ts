@@ -36,7 +36,11 @@ export const buildTopCountriesQuery = ({
 }: NetworkTopCountriesRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    { range: { [timestamp]: { gte: from, lte: to } } },
+    {
+      range: {
+        [timestamp]: { gte: from, lte: to, format: 'strict_date_optional_time' },
+      },
+    },
   ];
 
   const dslQuery = {

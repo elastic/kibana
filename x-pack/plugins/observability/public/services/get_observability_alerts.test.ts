@@ -7,6 +7,8 @@
 import { AppMountContext } from 'kibana/public';
 import { getObservabilityAlerts } from './get_observability_alerts';
 
+const basePath = { prepend: (path: string) => path };
+
 describe('getObservabilityAlerts', () => {
   it('Returns empty array when api throws exception', async () => {
     const core = ({
@@ -14,6 +16,7 @@ describe('getObservabilityAlerts', () => {
         get: async () => {
           throw new Error('Boom');
         },
+        basePath,
       },
     } as unknown) as AppMountContext['core'];
 
@@ -29,6 +32,7 @@ describe('getObservabilityAlerts', () => {
             data: undefined,
           };
         },
+        basePath,
       },
     } as unknown) as AppMountContext['core'];
 
@@ -65,6 +69,7 @@ describe('getObservabilityAlerts', () => {
             ],
           };
         },
+        basePath,
       },
     } as unknown) as AppMountContext['core'];
 

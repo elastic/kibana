@@ -9,6 +9,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import React from 'react';
 
 import { wait } from '../../../common/lib/helpers';
+import '../../../common/mock/match_media';
 import { TestProviders, apolloClient } from '../../../common/mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../common/mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
