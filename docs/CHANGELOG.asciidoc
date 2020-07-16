@@ -42,20 +42,9 @@ This section summarizes the changes in each release.
 [[release-notes-7.8.1]]
 == {kib} 7.8.1
 
+coming::[7.8.1]
+
 See also <<breaking-changes-7.8,breaking changes in 7.8>>.
-
-[float]
-[[security-update-7.8.1]]
-=== Security updates
-* In {kib} 7.8.1 and earlier, there is a denial of service (DoS) flaw in Timelion. Attackers can construct a URL that when viewed
-by a {kib} user, the {kib} process consumes large amounts of CPU and becomes unresponsive, CVE-2020-7016.
-+
-You must upgrade to 7.8.1. If you are unable to upgrade, set `timelion.enabled` to `false` in your kibana.yml file to disable Timelion.
-
-* In all {kib} versions, region map visualizations contain a stored XSS flaw. Attackers that can edit or create region map visualizations can obtain sensitive information 
-or perform destructive actions on behalf of {kib} users who view the region map visualization, CVE-2020-7017.
-+
-You must upgrade to 7.8.1. If you are unable to upgrade, set `xpack.maps.enabled`, `region_map.enabled`, and `tile_map.enabled` to `false` in kibana.yml to disable map visualizations.
 
 [float]
 [[bug-v7.8.1]]
