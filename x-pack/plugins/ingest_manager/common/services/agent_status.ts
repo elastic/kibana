@@ -46,7 +46,7 @@ export function buildKueryForUnenrollingAgents() {
 }
 
 export function buildKueryForOnlineAgents() {
-  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()}) AND not (${buildKueryForEnrolingAgents()}) AND not (${buildKueryForUnenrolingAgents()})`;
+  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()}) AND not (${buildKueryForEnrollingAgents()}) AND not (${buildKueryForUnenrollingAgents()})`;
 }
 
 export function buildKueryForErrorAgents() {
