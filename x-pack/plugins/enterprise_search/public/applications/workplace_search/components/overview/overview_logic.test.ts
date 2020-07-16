@@ -104,17 +104,20 @@ describe('OverviewLogic', () => {
   describe('initializeOverview', () => {
     it('calls API and sets values', async () => {
       const mockHttp = mockKibanaContext.http;
+      const mockApi = jest.fn(() => mockLogicValues as any);
+      const setServerDataSpy = jest.spyOn(OverviewLogic.actions, 'setServerData');
+
       await act(async () =>
         OverviewLogic.actions.initializeOverview({
           http: {
             ...mockHttp,
-            get: () => mockLogicValues as any,
+            get: mockApi,
           },
         })
       );
 
-      expect(mockHttp.get).toHaveBeenCalledWith('/api/workplace_search/overview');
-      expect(OverviewLogic.actions.setServerData).toHaveBeenCalled();
+      expect(mockApi).toHaveBeenCalledWith('/api/workplace_search/overview');
+      expect(setServerDataSpy).toHaveBeenCalled();
     });
   });
 });
