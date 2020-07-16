@@ -312,7 +312,16 @@ describe('chart_switch', () => {
       {
         state: {},
         table: {
-          columns: ['2'],
+          columns: [
+            {
+              columnId: 'a',
+              operation: {
+                label: '',
+                dataType: 'string',
+                isBucketed: true,
+              },
+            },
+          ],
           isMultiRow: true,
           layerId: 'a',
           changeType: 'unchanged',
