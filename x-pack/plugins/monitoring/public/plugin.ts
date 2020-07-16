@@ -74,7 +74,7 @@ export class MonitoringPlugin
     const app: App = {
       id,
       title,
-      order: 9002,
+      order: 9030,
       euiIconType: icon,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
