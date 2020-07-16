@@ -11,8 +11,3 @@ declare module 'kea' {
   export function resetContext(context: object): object;
   export function kea(logic: object): object;
 }
-
-declare module 'kea-waitfor' {
-  export function waitForAction(): object;
-  export function waitForPlugin(): object;
-}
