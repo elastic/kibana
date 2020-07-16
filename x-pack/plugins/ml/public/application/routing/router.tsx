@@ -33,9 +33,10 @@ export interface PageProps {
 }
 
 interface PageDependencies {
-  setBreadcrumbs: ChromeStart['setBreadcrumbs'];
-  indexPatterns: IndexPatternsContract;
   config: IUiSettingsClient;
+  history: AppMountParameters['history'];
+  indexPatterns: IndexPatternsContract;
+  setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
@@ -71,10 +72,9 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
  * use in components further down via `useUrlState()`.
  */
 export const MlRouter: FC<{
-  history: AppMountParameters['history'];
   pageDeps: PageDependencies;
-}> = ({ history, pageDeps }) => (
-  <Router history={history}>
+}> = ({ pageDeps }) => (
+  <Router history={pageDeps.history}>
     <LegacyHashUrlRedirect>
       <UrlStateProvider>
         <div className="ml-app">

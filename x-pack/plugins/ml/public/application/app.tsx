@@ -49,6 +49,7 @@ export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const pageDeps = {
+    history: appMountParams.history,
     indexPatterns: deps.data.indexPatterns,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
@@ -70,7 +71,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
       <KibanaContextProvider
         services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
       >
-        <MlRouter pageDeps={pageDeps} history={appMountParams.history} />
+        <MlRouter pageDeps={pageDeps} />
       </KibanaContextProvider>
     </I18nContext>
   );
