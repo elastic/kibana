@@ -7,6 +7,7 @@
 import { ajaxErrorHandlersProvider } from '../lib/ajax_error_handler';
 import { Legacy } from '../legacy_shims';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
+import { showInternalMonitoringToast } from '../lib/internal_monitoring_toasts';
 
 function formatClusters(clusters) {
   return clusters.map(formatCluster);
@@ -62,10 +63,26 @@ export function monitoringClustersProvider($injector) {
       });
     }
 
+    function ensureMetricbeatEnabled() {
+      return $http
+        .get('../api/monitoring/v1/elasticsearch_settings/check/internal_monitoring')
+        .then(({ data }) => {
+          showInternalMonitoringToast({
+            legacyIndices: data.legacy_indices,
+            metricbeatIndices: data.mb_indices,
+          });
+        })
+        .catch((err) => {
+          const Private = $injector.get('Private');
+          const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+          return ajaxErrorHandlers(err);
+        });
+    }
+
     if (!once) {
       return getClusters().then((clusters) => {
         if (clusters.length) {
-          return ensureAlertsEnabled()
+          return Promise.all([ensureAlertsEnabled(), ensureMetricbeatEnabled()])
             .then(() => {
               once = true;
               return clusters;
