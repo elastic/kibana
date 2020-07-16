@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import angular, { auto } from 'angular';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import './index.scss';
 
 import {
   AppMountParameters,
@@ -240,7 +241,6 @@ export class DiscoverPlugin
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        const [, pluginsStart] = await core.getStartServices();
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
         }
@@ -254,7 +254,6 @@ export class DiscoverPlugin
           plugins: { data: dataStart },
         } = await this.initializeServices();
         await this.initializeInnerAngular();
-        pluginsStart.kibanaLegacy.loadStyles();
 
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
