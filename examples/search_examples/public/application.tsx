@@ -24,7 +24,7 @@ import { AppPluginStartDependencies } from './types';
 import { SearchExamplesApp } from './components/app';
 
 export const renderApp = (
-  { notifications, savedObjects }: CoreStart,
+  { notifications, savedObjects, uiSettings }: CoreStart,
   { navigation, data }: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
@@ -33,6 +33,7 @@ export const renderApp = (
       basename={appBasePath}
       notifications={notifications}
       savedObjectsClient={savedObjects.client}
+      uiSettings={uiSettings}
       navigation={navigation}
       data={data}
     />,

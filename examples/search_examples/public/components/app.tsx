@@ -36,6 +36,7 @@ import {
 } from '@elastic/eui';
 
 import { CoreStart } from '../../../../src/core/public';
+import { getEsQueryConfig, buildEsQuery, Filter } from '../../../../src/plugins/data/common';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
 import { PLUGIN_ID, PLUGIN_NAME, IMyStrategyResponse } from '../../common';
@@ -45,12 +46,13 @@ import {
   IndexPatternSelect,
   IEsSearchResponse,
   IndexPattern,
-  RangeFilter,
+  QueryState,
 } from '../../../../src/plugins/data/public';
 
 interface SearchExamplesAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
+  uiSettings: CoreStart['uiSettings'];
   savedObjectsClient: CoreStart['savedObjects']['client'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
@@ -59,12 +61,18 @@ interface SearchExamplesAppDeps {
 export const SearchExamplesApp = ({
   basename,
   notifications,
+  uiSettings,
   savedObjectsClient,
   navigation,
   data,
 }: SearchExamplesAppDeps) => {
   const [result, setResult] = useState<IEsSearchResponse | undefined>();
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
+  const [queryState, setQueryState] = useState<QueryState | null>();
+
+  data.query.state$.subscribe(({ changes, state }) => {
+    setQueryState(state);
+  });
 
   useEffect(() => {
     const setDefaultIndexPattern = async () => {
@@ -79,15 +87,15 @@ export const SearchExamplesApp = ({
     if (!indexPattern) return;
 
     const timeFilter = data.query.timefilter.timefilter.createFilter(indexPattern);
-    const filters = data.query.filterManager.getFilters();
+    const filters = [...(queryState?.filters || []), ...(timeFilter ? [timeFilter] : [])];
 
-    // We need to talk about this
-    const queryFilters = filters.map((filter) => filter.query);
-    const allFilters = timeFilter
-      ? queryFilters.concat({
-          range: (timeFilter as RangeFilter).range,
-        })
-      : queryFilters;
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
+    const query = buildEsQuery(
+      indexPattern,
+      queryState?.queryString || [],
+      filters,
+      esQueryConfigs
+    );
 
     const request = {
       params: {
@@ -97,9 +105,7 @@ export const SearchExamplesApp = ({
             avg_bytes: { avg: { field: 'bytes' } },
           },
           query: {
-            bool: {
-              filter: allFilters,
-            },
+            ...query,
           },
         },
       },
