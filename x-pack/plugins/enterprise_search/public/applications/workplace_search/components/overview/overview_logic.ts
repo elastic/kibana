@@ -8,7 +8,8 @@ import { HttpSetup } from 'src/core/public';
 
 import { kea } from 'kea';
 
-import { IAccount, IFlashMessagesProps, IOrganization } from '../../types';
+import { IAccount, IOrganization } from '../../types';
+import { IFlashMessagesProps, IKeaLogic } from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
 
@@ -50,6 +51,10 @@ export interface IOverviewValues extends IOverviewServerData {
 
 interface IListenerParams {
   actions: IOverviewActions;
+}
+
+interface IOverviewLogic extends IKeaLogic, IListenerParams {
+  values: IOverviewValues;
 }
 
 export const OverviewLogic = kea({
@@ -95,7 +100,7 @@ export const OverviewLogic = kea({
       },
     ],
     flashMessages: [
-      null,
+      {},
       {
         setFlashMessages: (_: IOverviewValues, { flashMessages }: IOverviewValues) => flashMessages,
       },
@@ -200,4 +205,4 @@ export const OverviewLogic = kea({
       }
     },
   }),
-});
+}) as IOverviewLogic;

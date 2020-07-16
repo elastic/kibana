@@ -9,7 +9,8 @@ import './__mocks__/overview_logic.mock';
 import { setMockValues } from './__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { useActions } from 'kea';
+import { shallow, mount } from 'enzyme';
 
 import { ErrorState } from '../error_state';
 import { Loading } from '../shared/loading';
@@ -28,7 +29,7 @@ describe('Overview', () => {
       expect(wrapper.find(Loading)).toHaveLength(1);
     });
 
-    it('hasErrorConnecting', async () => {
+    it('hasErrorConnecting', () => {
       setMockValues({ hasErrorConnecting: true });
       const wrapper = shallow(<Overview />);
 
@@ -37,7 +38,14 @@ describe('Overview', () => {
   });
 
   describe('happy-path states', () => {
-    it('renders onboarding state', async () => {
+    it('calls initialize function', async () => {
+      const { initializeOverview } = useActions() as any;
+      mount(<Overview />);
+
+      expect(initializeOverview).toHaveBeenCalled();
+    });
+
+    it('renders onboarding state', () => {
       setMockValues({ dataLoading: false });
       const wrapper = shallow(<Overview />);
 
@@ -47,8 +55,9 @@ describe('Overview', () => {
       expect(wrapper.find(RecentActivity)).toHaveLength(1);
     });
 
-    it('renders when onboarding complete', async () => {
+    it('renders when onboarding complete', () => {
       setMockValues({
+        dataLoading: false,
         hasUsers: true,
         hasOrgSources: true,
         isOldAccount: true,

@@ -11,7 +11,7 @@ export const mockLogicValues = {
   accountsCount: 0,
   activityFeed: [],
   canCreateContentSources: false,
-  canCreateInvitations: true,
+  canCreateInvitations: false,
   currentUser: {} as IUser,
   fpAccount: {} as IAccount,
   hasOrgSources: false,
@@ -32,7 +32,7 @@ export const mockLogicValues = {
 jest.mock('kea', () => ({
   ...(jest.requireActual('kea') as object),
   useActions: jest.fn(() => ({
-    initializeOverview: () => ({}),
+    initializeOverview: jest.fn(() => ({})),
   })),
   useValues: jest.fn(() => ({
     ...mockLogicValues,
