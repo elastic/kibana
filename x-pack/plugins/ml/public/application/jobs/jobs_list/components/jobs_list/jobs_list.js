@@ -202,7 +202,7 @@ export class JobsList extends Component {
         sortable: true,
         truncateText: false,
         dataType: 'number',
-        render: (count) => (count ? toLocaleString(count) : ''),
+        render: (count) => (count !== undefined ? toLocaleString(count) : ''),
         width: '10%',
       },
       {
