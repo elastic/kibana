@@ -173,8 +173,8 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
         processed_record_count: job.data_counts?.processed_record_count,
         earliestStartTimestampMs: getEarliestDatafeedStartTime(
-          dataCounts?.latest_record_timestamp as number,
-          dataCounts?.latest_bucket_timestamp as number,
+          dataCounts?.latest_record_timestamp,
+          dataCounts?.latest_bucket_timestamp,
           parseTimeIntervalForJob(job.analysis_config?.bucket_span)
         ),
         memory_status: job.model_size_stats ? job.model_size_stats.memory_status : '',
@@ -188,8 +188,8 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
         latestTimestampMs: dataCounts?.latest_record_timestamp,
         earliestTimestampMs: dataCounts?.earliest_record_timestamp,
         latestResultsTimestampMs: getLatestDataOrBucketTimestamp(
-          dataCounts?.latest_record_timestamp as number,
-          dataCounts?.latest_bucket_timestamp as number
+          dataCounts?.latest_record_timestamp,
+          dataCounts?.latest_bucket_timestamp
         ),
         isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: job.node ? job.node.name : undefined,
