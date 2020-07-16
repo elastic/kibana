@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
