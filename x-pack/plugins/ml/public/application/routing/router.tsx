@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { useEffect, FC } from 'react';
 import { useHistory, useLocation, Router, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
@@ -56,11 +56,12 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
   const history = useHistory();
   const location = useLocation();
 
-  if (location.hash.startsWith('#/')) {
-    const newHash = location.hash.replace('#', '');
-    history.push(newHash);
-    return null;
-  }
+  useEffect(() => {
+    if (location.hash.startsWith('#/')) {
+      const newHash = location.hash.replace('#', '');
+      history.push(newHash);
+    }
+  }, [location.hash]);
 
   return <>{children}</>;
 };
