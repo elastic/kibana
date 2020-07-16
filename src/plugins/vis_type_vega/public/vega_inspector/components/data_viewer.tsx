@@ -27,7 +27,7 @@ interface DataViewerProps {
 }
 
 export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
-  const [inspectDataSets, setInspectDataSets] = useState<InspectDataSets[]>();
+  const [inspectDataSets, setInspectDataSets] = useState<InspectDataSets[]>([]);
   const [selectedView, setSelectedView] = useState<InspectDataSets>();
 
   const onViewChange: EuiComboBoxProps<unknown>['onChange'] = useCallback(
