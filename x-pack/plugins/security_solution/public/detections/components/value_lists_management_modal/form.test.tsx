@@ -7,7 +7,6 @@ import React, { FormEvent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { waitForUpdates } from '../../../common/utils/test_utils';
 import { TestProviders } from '../../../common/mock';
 import { ValueListsForm } from './form';
 import { useImportList } from '../../../shared_imports';
@@ -30,10 +29,6 @@ const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<voi
       fileChange(([file] as unknown) as FormEvent);
     }
   });
-  await waitForUpdates(container);
-  expect(
-    container.find('button[data-test-subj="value-lists-form-import-action"]').prop('disabled')
-  ).not.toEqual(true);
 };
 
 describe('ValueListsForm', () => {
@@ -68,7 +63,6 @@ describe('ValueListsForm', () => {
     await mockSelectFile(container, mockFile);
 
     container.find('button[data-test-subj="value-lists-form-import-action"]').simulate('click');
-    await waitForUpdates(container);
 
     expect(mockImportList).toHaveBeenCalledWith(expect.objectContaining({ file: mockFile }));
   });
@@ -80,12 +74,11 @@ describe('ValueListsForm', () => {
     }));
 
     const onError = jest.fn();
-    const container = mount(
+    mount(
       <TestProviders>
         <ValueListsForm onError={onError} onSuccess={jest.fn()} />
       </TestProviders>
     );
-    await waitForUpdates(container);
 
     expect(onError).toHaveBeenCalledWith('whoops');
   });
@@ -97,12 +90,11 @@ describe('ValueListsForm', () => {
     }));
 
     const onSuccess = jest.fn();
-    const container = mount(
+    mount(
       <TestProviders>
         <ValueListsForm onSuccess={onSuccess} onError={jest.fn()} />
       </TestProviders>
     );
-    await waitForUpdates(container);
 
     expect(onSuccess).toHaveBeenCalledWith({ mockResult: true });
   });
