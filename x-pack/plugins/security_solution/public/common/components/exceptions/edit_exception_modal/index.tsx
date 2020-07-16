@@ -93,7 +93,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
-  const toasts = useAppToasts();
+  const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
@@ -102,15 +102,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onError = useCallback(
     (error) => {
-      toasts.addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
+      addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
       onCancel();
     },
-    [onCancel, toasts]
+    [addError, onCancel]
   );
   const onSuccess = useCallback(() => {
-    toasts.addSuccess(i18n.EDIT_EXCEPTION_SUCCESS);
+    addSuccess(i18n.EDIT_EXCEPTION_SUCCESS);
     onConfirm();
-  }, [onConfirm, toasts]);
+  }, [addSuccess, onConfirm]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {

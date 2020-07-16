@@ -46,7 +46,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const { start: findLists, ...lists } = useFindLists();
   const { start: deleteList, result: deleteResult } = useDeleteList();
   const [exportListId, setExportListId] = useState<string>();
-  const toasts = useAppToasts();
+  const { addError, addSuccess } = useAppToasts();
 
   const fetchLists = useCallback(() => {
     findLists({ cursor, http, pageIndex: pageIndex + 1, pageSize });
@@ -83,21 +83,21 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const handleUploadError = useCallback(
     (error: Error) => {
       if (error.name !== 'AbortError') {
-        toasts.addError(error, { title: i18n.UPLOAD_ERROR });
+        addError(error, { title: i18n.UPLOAD_ERROR });
       }
     },
-    [toasts]
+    [addError]
   );
   const handleUploadSuccess = useCallback(
     (response: ListSchema) => {
-      toasts.addSuccess({
+      addSuccess({
         text: i18n.uploadSuccessMessage(response.name),
         title: i18n.UPLOAD_SUCCESS_TITLE,
       });
       fetchLists();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [toasts]
+    [addSuccess]
   );
 
   useEffect(() => {

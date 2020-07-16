@@ -79,7 +79,7 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
   });
   const { lists } = useKibana().services;
   const http = useHttp();
-  const toasts = useAppToasts();
+  const { addError, addSuccess } = useAppToasts();
   const { loading, start: readListPrivileges, ...readState } = useReadListPrivileges();
 
   const readPrivileges = useCallback(() => {
@@ -121,11 +121,11 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
     const error = readState.error;
     if (error != null) {
       setState({ isAuthenticated: false, canManageIndex: false, canWriteIndex: false });
-      toasts.addError(error, {
+      addError(error, {
         title: i18n.LISTS_PRIVILEGES_READ_FAILURE,
       });
     }
-  }, [readState.error, toasts]);
+  }, [addError, readState.error]);
 
   return { loading, ...state };
 };

@@ -24,7 +24,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
   const [error, setError] = useState<unknown>(null);
   const { lists } = useKibana().services;
   const http = useHttp();
-  const toasts = useAppToasts();
+  const { addError, addSucess } = useAppToasts();
   const { loading: readLoading, start: readListIndex, ...readListIndexState } = useReadListIndex();
   const {
     loading: createLoading,
@@ -76,19 +76,19 @@ export const useListsIndex = (): UseListsIndexReturn => {
         setIndexExists(false);
       } else {
         setError(err);
-        toasts.addError(err, { title: i18n.LISTS_INDEX_FETCH_FAILURE });
+        addError(err, { title: i18n.LISTS_INDEX_FETCH_FAILURE });
       }
     }
-  }, [readListIndexState.error, toasts]);
+  }, [addError, readListIndexState.error]);
 
   // handle create error
   useEffect(() => {
     const err = createListIndexState.error;
     if (err != null) {
       setError(err);
-      toasts.addError(err, { title: i18n.LISTS_INDEX_CREATE_FAILURE });
+      addError(err, { title: i18n.LISTS_INDEX_CREATE_FAILURE });
     }
-  }, [createListIndexState.error, toasts]);
+  }, [addError, createListIndexState.error]);
 
   return {
     createIndex,

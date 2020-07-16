@@ -13,11 +13,14 @@ jest.mock('../lib/kibana');
 
 describe('useDeleteList', () => {
   let addErrorMock: jest.Mock;
+  let addSuccessMock: jest.Mock;
 
   beforeEach(() => {
     addErrorMock = jest.fn();
+    addSuccessMock = jest.fn();
     (useToasts as jest.Mock).mockImplementation(() => ({
       addError: addErrorMock,
+      addSuccess: addSuccessMock,
     }));
   });
 
