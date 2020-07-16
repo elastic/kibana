@@ -17,6 +17,16 @@ export interface MonitoringIndicesTypes {
   metricbeatIndices: boolean;
 }
 
+const enterSetupModeLabel = () =>
+  i18n.translate('xpack.monitoring.internalMonitoringToast.enterSetupMode', {
+    defaultMessage: 'Enter setup mode',
+  });
+
+const learnMoreLabel = () =>
+  i18n.translate('xpack.monitoring.internalMonitoringToast.learnMoreAction', {
+    defaultMessage: 'Learn more',
+  });
+
 const showIfLegacyOnlyIndices = () => {
   const { ELASTIC_WEBSITE_URL } = Legacy.shims.docLinks;
   const toast = Legacy.shims.toastNotifications.addWarning({
@@ -41,9 +51,7 @@ const showIfLegacyOnlyIndices = () => {
             toggleSetupMode(true);
           }}
         >
-          {i18n.translate('xpack.monitoring.internalMonitoringToast.learnMoreAction', {
-            defaultMessage: 'Enter setup mode',
-          })}
+          {enterSetupModeLabel()}
         </EuiLink>
 
         <EuiSpacer />
@@ -52,9 +60,7 @@ const showIfLegacyOnlyIndices = () => {
           external
           target="_blank"
         >
-          {i18n.translate('xpack.monitoring.internalMonitoringToast.learnMoreAction', {
-            defaultMessage: 'Learn more',
-          })}
+          {learnMoreLabel()}
         </EuiLink>
       </div>
     ),
@@ -85,9 +91,7 @@ const showIfLegacyAndMetricbeatIndices = () => {
             toggleSetupMode(true);
           }}
         >
-          {i18n.translate('xpack.monitoring.internalAndMetricbeatMonitoringToast.learnMoreAction', {
-            defaultMessage: 'Enter setup mode',
-          })}
+          {enterSetupModeLabel()}
         </EuiLink>
 
         <EuiSpacer />
@@ -96,9 +100,7 @@ const showIfLegacyAndMetricbeatIndices = () => {
           external
           target="_blank"
         >
-          {i18n.translate('xpack.monitoring.internalAndMetricbeatMonitoringToast.learnMoreAction', {
-            defaultMessage: 'Learn more',
-          })}
+          {learnMoreLabel()}
         </EuiLink>
       </div>
     ),
