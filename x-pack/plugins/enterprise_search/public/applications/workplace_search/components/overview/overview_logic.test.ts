@@ -6,7 +6,6 @@
 
 import { resetContext } from 'kea';
 import { act } from 'react-dom/test-utils';
-import { waitForPlugin } from 'kea-waitfor';
 
 import { mockKibanaContext } from '../../../__mocks__';
 
@@ -16,9 +15,7 @@ import { OverviewLogic } from './overview_logic';
 let unmount: any;
 
 beforeEach(() => {
-  resetContext({
-    plugins: [waitForPlugin],
-  });
+  resetContext();
   unmount = OverviewLogic.mount() as any;
   jest.clearAllMocks();
 });

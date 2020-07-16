@@ -20260,11 +20260,6 @@ kdbush@^3.0.0:
   resolved "https://registry.yarnpkg.com/kdbush/-/kdbush-3.0.0.tgz#f8484794d47004cc2d85ed3a79353dbe0abc2bf0"
   integrity sha512-hRkd6/XW4HTsA9vjVpY9tuXJYLSlelnkTmVFu4M9/7MIYQtFcHpbugAU7UbOfjOiVSVYl2fqgBuJ32JUmRo5Ew==
 
-kea-waitfor@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/kea-waitfor/-/kea-waitfor-0.1.0.tgz#d968a200192da05e2fb0562309d622f594b933e7"
-  integrity sha512-+iXPYQKLBVkCmhtXq5bzNa2AJkr+ytojK8VhbkGYWcnOgBCWM/oTreI35mSnso+eU2+v+866/rP2122ZWT6D4Q==
-
 kea@^2.0.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/kea/-/kea-2.1.1.tgz#6e3c65c4873b67d270a2ec7bf73b0d178937234c"
