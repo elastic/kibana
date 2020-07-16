@@ -38,7 +38,6 @@ interface MatchingEventEntry {
   eventType: string;
   eventCategory: string;
   name: { subject: string; descriptor?: string };
-  entityId: string;
   setQueryParams: () => void;
 }
 
@@ -164,9 +163,6 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
   const relatedsReadyMap = useSelector(selectors.relatedEventsReady);
   const relatedsReady = relatedsReadyMap.get(processEntityId);
 
-  const relatedEventsForThisProcess = useSelector(selectors.relatedEventsByEntityId).get(
-    processEntityId
-  );
   const dispatch = useResolverDispatch();
 
   useEffect(() => {
@@ -189,39 +185,32 @@ export const ProcessEventListNarrowedByType = memo(function ProcessEventListNarr
     ];
   }, [pushToQueryParams, eventsString]);
 
-  const relatedEventsToDisplay = useMemo(() => {
-    return relatedEventsForThisProcess?.events || [];
-  }, [relatedEventsForThisProcess?.events]);
+  const relatedByCategory = useSelector(selectors.relatedEventsByCategory);
 
   /**
    * A list entry will be displayed for each of these
    */
   const matchingEventEntries: MatchingEventEntry[] = useMemo(() => {
-    const relateds = relatedEventsToDisplay
-      .reduce((a: ResolverEvent[], candidate) => {
-        if (event.primaryEventCategory(candidate) === eventType) {
-          a.push(candidate);
-        }
-        return a;
-      }, [])
-      .map((resolverEvent) => {
-        const eventTime = event.eventTimestamp(resolverEvent);
-        const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime);
-        const entityId = event.eventId(resolverEvent);
+    const relateds = relatedByCategory(processEntityId)(eventType).map((resolverEvent) => {
+      const eventTime = event.eventTimestamp(resolverEvent);
+      const formattedDate = typeof eventTime === 'undefined' ? '' : formatDate(eventTime);
+      const entityId = event.eventId(resolverEvent);
 
-        return {
-          formattedDate,
-          eventCategory: `${eventType}`,
-          eventType: `${event.ecsEventType(resolverEvent)}`,
-          name: event.descriptiveName(resolverEvent),
-          entityId,
-          setQueryParams: () => {
-            pushToQueryParams({ crumbId: entityId, crumbEvent: processEntityId });
-          },
-        };
-      });
+      return {
+        formattedDate,
+        eventCategory: `${eventType}`,
+        eventType: `${event.ecsEventType(resolverEvent)}`,
+        name: event.descriptiveName(resolverEvent),
+        setQueryParams: () => {
+          pushToQueryParams({
+            crumbId: entityId === undefined ? '' : String(entityId),
+            crumbEvent: processEntityId,
+          });
+        },
+      };
+    });
     return relateds;
-  }, [relatedEventsToDisplay, eventType, processEntityId, pushToQueryParams]);
+  }, [relatedByCategory, eventType, processEntityId, pushToQueryParams]);
 
   const crumbs = useMemo(() => {
     return [

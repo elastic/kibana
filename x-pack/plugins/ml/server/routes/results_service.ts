@@ -17,7 +17,7 @@ import {
 import { resultsServiceProvider } from '../models/results_service';
 
 function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+  const rs = resultsServiceProvider(context.ml!.mlClient);
   const {
     jobIds,
     criteriaFields,
@@ -47,24 +47,24 @@ function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
 }
 
 function getCategoryDefinition(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+  const rs = resultsServiceProvider(context.ml!.mlClient);
   return rs.getCategoryDefinition(payload.jobId, payload.categoryId);
 }
 
 function getCategoryExamples(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+  const rs = resultsServiceProvider(context.ml!.mlClient);
   const { jobId, categoryIds, maxExamples } = payload;
   return rs.getCategoryExamples(jobId, categoryIds, maxExamples);
 }
 
 function getMaxAnomalyScore(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+  const rs = resultsServiceProvider(context.ml!.mlClient);
   const { jobIds, earliestMs, latestMs } = payload;
   return rs.getMaxAnomalyScore(jobIds, earliestMs, latestMs);
 }
 
 function getPartitionFieldsValues(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient.callAsCurrentUser);
+  const rs = resultsServiceProvider(context.ml!.mlClient);
   const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
 }

@@ -9,7 +9,7 @@ import { ResolverAction } from '../actions';
 import { resolverReducer } from '../reducer';
 import { ResolverState } from '../../types';
 import { LegacyEndpointEvent, ResolverEvent } from '../../../../common/endpoint/types';
-import { visibleProcessNodePositionsAndEdgeLineSegments } from '../selectors';
+import { visibleNodesAndEdgeLines } from '../selectors';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../../models/resolver_tree';
 
@@ -119,15 +119,11 @@ describe('resolver visible entities', () => {
       store.dispatch(cameraAction);
     });
     it('the visibleProcessNodePositions list should only include 2 nodes', () => {
-      const { processNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
-        store.getState()
-      )(0);
+      const { processNodePositions } = visibleNodesAndEdgeLines(store.getState())(0);
       expect([...processNodePositions.keys()].length).toEqual(2);
     });
     it('the visibleEdgeLineSegments list should only include one edge line', () => {
-      const { connectingEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
-        store.getState()
-      )(0);
+      const { connectingEdgeLineSegments } = visibleNodesAndEdgeLines(store.getState())(0);
       expect(connectingEdgeLineSegments.length).toEqual(1);
     });
   });
@@ -151,15 +147,11 @@ describe('resolver visible entities', () => {
       store.dispatch(cameraAction);
     });
     it('the visibleProcessNodePositions list should include all process nodes', () => {
-      const { processNodePositions } = visibleProcessNodePositionsAndEdgeLineSegments(
-        store.getState()
-      )(0);
+      const { processNodePositions } = visibleNodesAndEdgeLines(store.getState())(0);
       expect([...processNodePositions.keys()].length).toEqual(5);
     });
     it('the visibleEdgeLineSegments list include all lines', () => {
-      const { connectingEdgeLineSegments } = visibleProcessNodePositionsAndEdgeLineSegments(
-        store.getState()
-      )(0);
+      const { connectingEdgeLineSegments } = visibleNodesAndEdgeLines(store.getState())(0);
       expect(connectingEdgeLineSegments.length).toEqual(4);
     });
   });

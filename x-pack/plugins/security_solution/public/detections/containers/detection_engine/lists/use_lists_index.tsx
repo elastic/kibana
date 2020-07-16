@@ -18,6 +18,8 @@ export interface UseListsIndexState {
 export interface UseListsIndexReturn extends UseListsIndexState {
   loading: boolean;
   createIndex: () => void;
+  createIndexError: unknown;
+  createIndexResult: { acknowledged: boolean } | undefined;
 }
 
 export const useListsIndex = (): UseListsIndexReturn => {
@@ -96,5 +98,11 @@ export const useListsIndex = (): UseListsIndexReturn => {
     }
   }, [createListIndexState.error, toasts]);
 
-  return { loading, createIndex, ...state };
+  return {
+    loading,
+    createIndex,
+    createIndexError: createListIndexState.error,
+    createIndexResult: createListIndexState.result,
+    ...state,
+  };
 };

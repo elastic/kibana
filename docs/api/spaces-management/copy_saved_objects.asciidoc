@@ -96,7 +96,7 @@ Copy a dashboard with the `my-dashboard` ID, including all references from the `
 
 [source,sh]
 ----
-$ curl -X POST "localhost:5601/api/spaces/_copy_saved_objects"
+$ curl -X POST api/spaces/_copy_saved_objects
 {
   "objects": [{
     "type": "dashboard",
@@ -137,7 +137,7 @@ Copy a visualization with the `my-viz` ID from the `marketing` space to the `def
 
 [source,sh]
 ----
-$ curl -X POST "localhost:5601/s/marketing/api/spaces/_copy_saved_objects"
+$ curl -X POST s/marketing/api/spaces/_copy_saved_objects
 {
   "objects": [{
     "type": "visualization",
