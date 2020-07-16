@@ -13,7 +13,6 @@ import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
-import { reducer } from 'recompose';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
 import {
   TimelineResult,
