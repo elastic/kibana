@@ -158,6 +158,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
     },
 
+    async openChartSwitchPopover() {
+      if (await testSubjects.exists('visTypeTitle')) {
+        return;
+      }
+      await retry.try(async () => {
+        await testSubjects.click('lnsChartSwitchPopover');
+        await testSubjects.existOrFail('visTypeTitle');
+      });
+    },
+
     /**
      * Checks a specific subvisualization in the chart switcher for a "data loss" indicator
      *
@@ -169,16 +179,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       const element = await testSubjects.find(`lnsChartSwitchPopover_${subVisualizationId}`);
       return await testSubjects.descendantExists('euiKeyPadMenuItem__betaBadgeWrapper', element);
-    },
-
-    async openChartSwitchPopover() {
-      if (await testSubjects.exists('visTypeTitle')) {
-        return;
-      }
-      await retry.try(async () => {
-        await testSubjects.click('lnsChartSwitchPopover');
-        await testSubjects.existOrFail('visTypeTitle');
-      });
     },
 
     /**
