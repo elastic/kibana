@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import formatNumber from './format_number';
+import { formatNumber } from './format_number';
 
 describe('format byte', () => {
   test('zero', () => {

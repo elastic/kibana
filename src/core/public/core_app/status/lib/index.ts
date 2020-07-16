@@ -17,22 +17,5 @@
  * under the License.
  */
 
-import numeral from '@elastic/numeral';
-
-export default function formatNumber(num, which) {
-  let format = '0.00';
-  let postfix = '';
-  switch (which) {
-    case 'byte':
-      format += ' b';
-      break;
-    case 'ms':
-      postfix = ' ms';
-      break;
-    case 'integer':
-      format = '0';
-      break;
-  }
-
-  return numeral(num).format(format) + postfix;
-}
+export { formatNumber } from './format_number';
+export { loadStatus, Metric } from './load_status';

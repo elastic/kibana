@@ -26,7 +26,8 @@ import {
 } from '../application';
 import { HttpSetup, HttpStart } from '../http';
 import { CoreContext } from '../core_system';
-import { renderApp, setupUrlOverflowDetection } from './errors';
+import { renderApp as renderErrorApp, setupUrlOverflowDetection } from './errors';
+import { renderApp as renderStatusApp } from './status';
 import { NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
 import { InjectedMetadataSetup } from '../injected_metadata';
@@ -58,13 +59,22 @@ export class CoreApp {
         // Do not use an async import here in order to ensure that network failures
         // cannot prevent the error UI from displaying. This UI is tiny so an async
         // import here is probably not useful anyways.
-        return renderApp(params, { basePath: http.basePath });
+        return renderErrorApp(params, { basePath: http.basePath });
       },
     });
 
     if (injectedMetadata.getAnonymousStatusPage()) {
       http.anonymousPaths.register('/status');
     }
+    application.register(this.coreContext.coreId, {
+      id: 'status',
+      title: 'Server Status',
+      appRoute: '/status',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      mount(params: AppMountParameters) {
+        return renderStatusApp(params, {});
+      },
+    });
   }
 
   public start({ application, http, notifications, uiSettings }: StartDeps) {

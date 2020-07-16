@@ -16,3 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import { AppMountParameters } from '../../application';
+
+// @ts-expect-error
+import StatusApp from './components/status_app';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface Deps {}
+
+export const renderApp = ({ element, history }: AppMountParameters, {}: Deps) => {
+  ReactDOM.render(
+    <I18nProvider>
+      <StatusApp buildNum={buildNum} buildSha={buildSha} />
+    </I18nProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};

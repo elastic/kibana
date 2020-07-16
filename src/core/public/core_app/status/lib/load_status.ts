@@ -18,20 +18,23 @@
  */
 
 import _ from 'lodash';
-
-import chrome from 'ui/chrome';
-import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { ServerStatus, StatusResponse } from '../../../../types/status';
+import { HttpSetup, HttpFetchError } from '../../../http';
+import { NotificationsSetup } from '../../../notifications';
 
-// Module-level error returned by notify.error
-let errorNotif;
+export interface Metric {
+  name: string;
+  value: number | number[];
+  type?: string;
+}
 
 /*
-Returns an object of any keys that should be included for metrics.
-*/
-function formatMetrics(data) {
+ * Returns an object of any keys that should be included for metrics.
+ */
+function formatMetrics(data: StatusResponse): Metric[] {
   if (!data.metrics) {
-    return null;
+    return [];
   }
 
   return [
@@ -88,7 +91,7 @@ function formatMetrics(data) {
 /**
  * Reformat the backend data to make the frontend views simpler.
  */
-function formatStatus(status) {
+function formatStatus(status: ServerStatus) {
   return {
     id: status.id,
     state: {
@@ -100,64 +103,46 @@ function formatStatus(status) {
   };
 }
 
-async function fetchData() {
-  return fetch(chrome.addBasePath('/api/status'), {
-    method: 'get',
-    credentials: 'same-origin',
-  });
-}
-
 /*
 Get the status from the server API and format it for display.
 
 `fetchFn` can be injected for testing, defaults to the implementation above.
 */
-async function loadStatus(fetchFn = fetchData) {
-  // Clear any existing error banner.
-  if (errorNotif) {
-    errorNotif.clear();
-    errorNotif = null;
-  }
-
-  let response;
+export async function loadStatus({
+  http,
+  notifications,
+}: {
+  http: HttpSetup;
+  notifications: NotificationsSetup;
+}) {
+  let response: StatusResponse;
 
   try {
-    response = await fetchFn();
+    response = await http.get('/api/status', {
+      credentials: 'same-origin',
+    });
   } catch (e) {
-    // If the fetch failed to connect, display an error and bail.
-    const serverIsDownErrorMessage = i18n.translate(
-      'statusPage.loadStatus.serverIsDownErrorMessage',
-      {
-        defaultMessage: 'Failed to request server status. Perhaps your server is down?',
-      }
-    );
-
-    errorNotif = toastNotifications.addDanger(serverIsDownErrorMessage);
-    return e;
+    if (e instanceof HttpFetchError && (e.response?.status ?? 0) >= 400) {
+      notifications.toasts.addDanger(
+        i18n.translate('statusPage.loadStatus.serverStatusCodeErrorMessage', {
+          defaultMessage: 'Failed to request server status with status code {responseStatus}',
+          values: { responseStatus: e.response?.status },
+        })
+      );
+    } else {
+      notifications.toasts.addDanger(
+        i18n.translate('statusPage.loadStatus.serverIsDownErrorMessage', {
+          defaultMessage: 'Failed to request server status. Perhaps your server is down?',
+        })
+      );
+    }
+    throw e;
   }
-
-  if (response.status >= 400) {
-    // If the server does not respond with a successful status, display an error and bail.
-    const serverStatusCodeErrorMessage = i18n.translate(
-      'statusPage.loadStatus.serverStatusCodeErrorMessage',
-      {
-        defaultMessage: 'Failed to request server status with status code {responseStatus}',
-        values: { responseStatus: response.status },
-      }
-    );
-
-    errorNotif = toastNotifications.addDanger(serverStatusCodeErrorMessage);
-    return;
-  }
-
-  const data = await response.json();
 
   return {
-    name: data.name,
-    statuses: data.status.statuses.map(formatStatus),
-    serverState: formatStatus(data.status.overall).state,
-    metrics: formatMetrics(data),
+    name: response.name,
+    statuses: response.status.statuses.map(formatStatus),
+    serverState: formatStatus(response.status.overall).state,
+    metrics: formatMetrics(response),
   };
 }
-
-export default loadStatus;

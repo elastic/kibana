@@ -17,22 +17,24 @@
  * under the License.
  */
 
-import {
-  fatalErrorsServiceMock,
-  notificationServiceMock,
-  overlayServiceMock,
-} from '../../../../../core/public/mocks';
+import numeral from '@elastic/numeral';
 
-jest.doMock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-      notifications: notificationServiceMock.createSetupContract(),
-    },
-  },
-  npStart: {
-    core: {
-      overlays: overlayServiceMock.createStartContract(),
-    },
-  },
-}));
+type NumberType = 'byte' | 'ms' | 'integer';
+
+export function formatNumber(num: number, which: NumberType) {
+  let format = '0.00';
+  let postfix = '';
+  switch (which) {
+    case 'byte':
+      format += ' b';
+      break;
+    case 'ms':
+      postfix = ' ms';
+      break;
+    case 'integer':
+      format = '0';
+      break;
+  }
+
+  return numeral(num).format(format) + postfix;
+}
