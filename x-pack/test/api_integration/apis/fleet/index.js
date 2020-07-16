@@ -5,9 +5,7 @@
  */
 
 export default function loadTests({ loadTestFile }) {
-  // Temporarily skipped to promote snapshot
-  // Re-enabled in https://github.com/elastic/kibana/pull/71727
-  describe.skip('Fleet Endpoints', () => {
+  describe('Fleet Endpoints', () => {
     loadTestFile(require.resolve('./setup'));
     loadTestFile(require.resolve('./delete_agent'));
     loadTestFile(require.resolve('./list_agent'));

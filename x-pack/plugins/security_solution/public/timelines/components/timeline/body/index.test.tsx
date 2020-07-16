@@ -7,6 +7,7 @@ import { ReactWrapper } from '@elastic/eui/node_modules/@types/enzyme';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../graphql/types';
 import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';

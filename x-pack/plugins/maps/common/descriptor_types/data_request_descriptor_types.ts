@@ -18,6 +18,7 @@ export type MapFilters = {
   refreshTimerLastTriggeredAt?: string;
   timeFilters: TimeRange;
   zoom: number;
+  geogridPrecision?: number;
 };
 
 type ESSearchSourceSyncMeta = {

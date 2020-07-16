@@ -6,45 +6,46 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../capabilities/check_capabilities';
+import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 
-import { DataFrameAnalyticsListRow, isCompletedAnalyticsJob } from '../analytics_list/common';
+import { DataFrameAnalyticsListRow } from '../analytics_list/common';
+
+const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.startActionName', {
+  defaultMessage: 'Start',
+});
 
 interface StartButtonProps {
+  canStartStopDataFrameAnalytics: boolean;
+  isDisabled: boolean;
   item: DataFrameAnalyticsListRow;
-  onClick: (item: DataFrameAnalyticsListRow) => void;
+  onClick: () => void;
 }
 
-export const StartButton: FC<StartButtonProps> = ({ item, onClick }) => {
-  const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
-
-  const buttonStartText = i18n.translate('xpack.ml.dataframe.analyticsList.startActionName', {
-    defaultMessage: 'Start',
-  });
-
-  // Disable start for analytics jobs which have completed.
-  const completeAnalytics = isCompletedAnalyticsJob(item.stats);
-
-  const disabled = !canStartStopDataFrameAnalytics || completeAnalytics;
-
-  let startButton = (
-    <EuiLink
-      color={disabled ? 'subdued' : 'text'}
-      onClick={disabled ? undefined : () => onClick(item)}
-      aria-label={buttonStartText}
+export const StartButton: FC<StartButtonProps> = ({
+  canStartStopDataFrameAnalytics,
+  isDisabled,
+  item,
+  onClick,
+}) => {
+  const button = (
+    <EuiButtonEmpty
+      aria-label={buttonText}
+      color="text"
       data-test-subj="mlAnalyticsJobStartButton"
+      flush="left"
+      iconType="play"
+      isDisabled={isDisabled}
+      onClick={onClick}
+      size="s"
     >
-      <EuiIcon type="play" /> {buttonStartText}
-    </EuiLink>
+      {buttonText}
+    </EuiButtonEmpty>
   );
 
-  if (!canStartStopDataFrameAnalytics || completeAnalytics) {
-    startButton = (
+  if (isDisabled) {
+    return (
       <EuiToolTip
         position="top"
         content={
@@ -57,10 +58,10 @@ export const StartButton: FC<StartButtonProps> = ({ item, onClick }) => {
               })
         }
       >
-        {startButton}
+        {button}
       </EuiToolTip>
     );
   }
 
-  return startButton;
+  return button;
 };
