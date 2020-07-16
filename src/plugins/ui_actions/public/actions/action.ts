@@ -31,7 +31,7 @@ export type ActionByType<T extends ActionType> = Action<ActionContextMapping[T],
 export interface ActionExecutionMeta {
   /**
    * Trigger that executed the action
-   * Since action could be trigger witout
+   * Optional - since action could be executed without a trigger
    */
   trigger?: Trigger;
 }
@@ -131,7 +131,7 @@ export interface ActionDefinition<Context extends BaseContext = {}>
    * without first showing up in context menu.
    * false by default.
    */
-  shouldAutoExecute?(context: Context): Promise<boolean>;
+  shouldAutoExecute?(context: Context | ActionExecutionContext<Context>): Promise<boolean>;
 
   /**
    * This method should return a link if this item can be clicked on. The link

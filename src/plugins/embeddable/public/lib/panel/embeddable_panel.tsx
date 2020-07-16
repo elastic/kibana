@@ -311,7 +311,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
 
     return await buildContextMenuForActions({
-      actions: sortedActions.map((action) => [action, { embeddable: this.props.embeddable }]),
+      actions: sortedActions.map((action) => ({
+        action,
+        context: { embeddable: this.props.embeddable },
+      })),
       closeMenu: this.closeMyContextMenuPanel,
     });
   };

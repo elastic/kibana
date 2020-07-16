@@ -96,9 +96,12 @@ export class UiActionsExecutionService {
     }, 0);
   }
 
-  private async executeSingleTask({ context, action, defer }: ExecuteActionTask) {
+  private async executeSingleTask({ context, action, defer, trigger }: ExecuteActionTask) {
     try {
-      await action.execute(context);
+      await action.execute({
+        ...context,
+        trigger,
+      });
       defer.resolve();
     } catch (e) {
       defer.reject(e);
@@ -107,7 +110,11 @@ export class UiActionsExecutionService {
 
   private async executeMultipleActions(tasks: ExecuteActionTask[]) {
     const panel = await buildContextMenuForActions({
-      actions: tasks.map(({ action, context }) => [action, context]),
+      actions: tasks.map(({ action, context, trigger }) => ({
+        action,
+        context,
+        trigger,
+      })),
       title: tasks[0].trigger.title, // title of context menu is title of trigger which originated the chain
       closeMenu: () => {
         tasks.forEach((t) => t.defer.resolve());

@@ -30,7 +30,15 @@ export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
 });
 
-type ActionWithContext<Context extends BaseContext = BaseContext> = [Action<Context>, Context];
+interface ActionWithContext<Context extends BaseContext = BaseContext> {
+  action: Action<Context>;
+  context: Context;
+
+  /**
+   * Trigger that caused this action
+   */
+  trigger?: Trigger;
+}
 
 /**
  * Transforms an array of Actions to the shape EuiContextMenuPanel expects.
@@ -67,15 +75,18 @@ async function buildEuiContextMenuPanelItems({
   closeMenu: () => void;
 }) {
   const items: EuiContextMenuPanelItemDescriptor[] = new Array(actions.length);
-  const promises = actions.map(async ([action, actionContext], index) => {
-    const isCompatible = await action.isCompatible(actionContext);
+  const promises = actions.map(async ({ action, context, trigger }, index) => {
+    const isCompatible = await action.isCompatible({
+      ...context,
+      trigger,
+    });
     if (!isCompatible) {
       return;
     }
 
     items[index] = await convertPanelActionToContextMenuItem({
       action,
-      actionContext,
+      actionContext: context,
       closeMenu,
     });
   });
@@ -88,10 +99,12 @@ async function buildEuiContextMenuPanelItems({
 async function convertPanelActionToContextMenuItem<Context extends object>({
   action,
   actionContext,
+  trigger,
   closeMenu,
 }: {
   action: Action<Context>;
   actionContext: Context;
+  trigger?: Trigger;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelItemDescriptor> {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
@@ -115,20 +128,29 @@ async function convertPanelActionToContextMenuItem<Context extends object>({
         !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
       ) {
         event.preventDefault();
-        action.execute(actionContext);
+        action.execute({
+          ...actionContext,
+          trigger,
+        });
       } else {
         // let browser handle navigation
       }
     } else {
       // not a link
-      action.execute(actionContext);
+      action.execute({
+        ...actionContext,
+        trigger,
+      });
     }
 
     closeMenu();
   };
 
   if (action.getHref) {
-    const href = await action.getHref(actionContext);
+    const href = await action.getHref({
+      ...actionContext,
+      trigger,
+    });
     if (href) {
       menuPanelItem.href = href;
     }
