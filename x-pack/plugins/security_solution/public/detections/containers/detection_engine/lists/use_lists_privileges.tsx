@@ -80,7 +80,7 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
   const { lists } = useKibana().services;
   const http = useHttp();
   const toasts = useAppToasts();
-  const { loading, start: readListPrivileges, ...privilegesState } = useReadListPrivileges();
+  const { loading, start: readListPrivileges, ...readState } = useReadListPrivileges();
 
   const readPrivileges = useCallback(() => {
     if (lists) {
@@ -90,20 +90,20 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
 
   // initRead
   useEffect(() => {
-    if (!loading && !privilegesState.error && state.isAuthenticated === null) {
+    if (!loading && !readState.error && state.isAuthenticated === null) {
       readPrivileges();
     }
-  }, [loading, privilegesState.error, readPrivileges, state.isAuthenticated]);
+  }, [loading, readState.error, readPrivileges, state.isAuthenticated]);
 
   // handleReadResult
   useEffect(() => {
-    if (privilegesState.result != null) {
+    if (readState.result != null) {
       try {
         const {
           is_authenticated: isAuthenticated,
           lists: { index: listsPrivileges },
           listItems: { index: listItemsPrivileges },
-        } = privilegesState.result as ListPrivileges;
+        } = readState.result as ListPrivileges;
 
         setState({
           isAuthenticated,
@@ -114,18 +114,18 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
         setState({ isAuthenticated: null, canManageIndex: false, canWriteIndex: false });
       }
     }
-  }, [privilegesState.result]);
+  }, [readState.result]);
 
   // handleReadError
   useEffect(() => {
-    const error = privilegesState.error;
+    const error = readState.error;
     if (error != null) {
       setState({ isAuthenticated: false, canManageIndex: false, canWriteIndex: false });
       toasts.addError(error, {
         title: i18n.LISTS_PRIVILEGES_READ_FAILURE,
       });
     }
-  }, [privilegesState.error, toasts]);
+  }, [readState.error, toasts]);
 
   return { loading, ...state };
 };
