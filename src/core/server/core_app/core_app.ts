@@ -57,6 +57,7 @@ export class CoreApp {
     coreSetup.httpResources.createRegistrar(router).register(
       {
         path: '/status',
+        validate: false,
         options: {
           authRequired: !anonymousStatusPage,
         },
