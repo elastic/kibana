@@ -43,6 +43,8 @@ experimental[] Create a centrally-managed Logstash pipeline, or update an existi
 --------------------------------------------------
 $ curl -X PUT api/logstash/pipeline/hello-world
 {
+  "id": "hello-world",
+  "description": "hello-world pipeline",
   "pipeline": "input { stdin {} } output { stdout {} }",
   "settings": {
     "queue.type": "persisted"
