@@ -7,8 +7,8 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useReadListPrivileges } from '../../../../shared_imports';
-import { useHttp, useToasts, useKibana } from '../../../../common/lib/kibana';
-import { isApiError } from '../../../../common/utils/api';
+import { useHttp, useKibana } from '../../../../common/lib/kibana';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 
 export interface UseListsPrivilegesState {
@@ -79,7 +79,7 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
   });
   const { lists } = useKibana().services;
   const http = useHttp();
-  const toasts = useToasts();
+  const toasts = useAppToasts();
   const { loading, start: readListPrivileges, ...privilegesState } = useReadListPrivileges();
 
   const readPrivileges = useCallback(() => {
@@ -90,10 +90,10 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
 
   // initRead
   useEffect(() => {
-    if (!loading && state.isAuthenticated === null) {
+    if (!loading && !privilegesState.error && state.isAuthenticated === null) {
       readPrivileges();
     }
-  }, [loading, readPrivileges, state.isAuthenticated]);
+  }, [loading, privilegesState.error, readPrivileges, state.isAuthenticated]);
 
   // handleReadResult
   useEffect(() => {
@@ -119,11 +119,10 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
   // handleReadError
   useEffect(() => {
     const error = privilegesState.error;
-    if (isApiError(error)) {
-      setState({ isAuthenticated: null, canManageIndex: false, canWriteIndex: false });
+    if (error != null) {
+      setState({ isAuthenticated: false, canManageIndex: false, canWriteIndex: false });
       toasts.addError(error, {
         title: i18n.LISTS_PRIVILEGES_READ_FAILURE,
-        toastMessage: error.body.message,
       });
     }
   }, [privilegesState.error, toasts]);
