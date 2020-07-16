@@ -24,13 +24,13 @@ import {
   AppNavLinkStatus,
   AppMountParameters,
 } from '../application';
-import { HttpSetup, HttpStart } from '../http';
-import { CoreContext } from '../core_system';
+import type { HttpSetup, HttpStart } from '../http';
+import type { CoreContext } from '../core_system';
+import type { NotificationsSetup, NotificationsStart } from '../notifications';
+import type { IUiSettingsClient } from '../ui_settings';
+import type { InjectedMetadataSetup } from '../injected_metadata';
 import { renderApp as renderErrorApp, setupUrlOverflowDetection } from './errors';
 import { renderApp as renderStatusApp } from './status';
-import { NotificationsSetup, NotificationsStart } from '../notifications';
-import { IUiSettingsClient } from '../ui_settings';
-import { InjectedMetadataSetup } from '../injected_metadata';
 
 interface SetupDeps {
   application: InternalApplicationSetup;

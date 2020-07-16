@@ -25,7 +25,7 @@ import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http'
 import { LegacyNavLink, LegacyServiceDiscoverPlugins } from '../legacy';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
-import { InternalStatusServiceSetup } from '../status';
+import type { InternalStatusServiceSetup } from '../status';
 
 /** @internal */
 export interface RenderingMetadata {

@@ -18,11 +18,11 @@
  */
 
 import _ from 'lodash';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
-import { ServerStatus, StatusResponse } from '../../../../types/status';
-import { HttpSetup, HttpFetchError } from '../../../http';
-import { NotificationsSetup } from '../../../notifications';
+import type { UnwrapPromise } from '@kbn/utility-types';
+import type { ServerStatus, StatusResponse } from '../../../../types/status';
+import type { HttpSetup } from '../../../http';
+import type { NotificationsSetup } from '../../../notifications';
 
 export interface Metric {
   name: string;
@@ -131,7 +131,7 @@ export async function loadStatus({
       credentials: 'same-origin',
     });
   } catch (e) {
-    if (e instanceof HttpFetchError && (e.response?.status ?? 0) >= 400) {
+    if ((e.response?.status ?? 0) >= 400) {
       notifications.toasts.addDanger(
         i18n.translate('statusPage.loadStatus.serverStatusCodeErrorMessage', {
           defaultMessage: 'Failed to request server status with status code {responseStatus}',

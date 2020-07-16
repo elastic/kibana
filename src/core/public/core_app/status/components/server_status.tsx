@@ -20,7 +20,7 @@
 import React, { FunctionComponent } from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FormattedStatus } from '../lib';
+import type { FormattedStatus } from '../lib';
 
 interface ServerStateProps {
   name: string;

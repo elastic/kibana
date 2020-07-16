@@ -42,8 +42,8 @@ import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
-import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { CoreApp } from './core_app';
+import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
   rootDomElement: HTMLElement;
