@@ -217,12 +217,7 @@ export class HeadlessChromiumDriverFactory {
   }
 
   getPageExit(browser: Browser, page: Page) {
-    const pageErrorSubject$ = new Rx.Subject<Error>();
-    // This handler MUST be registered to avoid unhandled promise rejection
-    page.on('error', (err) => {
-      pageErrorSubject$.next(err);
-    });
-    const pageError$ = pageErrorSubject$.pipe(
+    const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
       mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.errorDetected', {
@@ -233,11 +228,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const uncaughtExceptionPageErrorSubject$ = new Rx.Subject<Error>();
-    page.on('pageerror', (err) => {
-      uncaughtExceptionPageErrorSubject$.next(err);
-    });
-    const uncaughtExceptionPageError$ = uncaughtExceptionPageErrorSubject$.pipe(
+    const uncaughtExceptionPageError$ = Rx.fromEvent<Error>(page, 'pageerror').pipe(
       mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
@@ -248,11 +239,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const browserDisconnectSubject$ = new Rx.Subject<Error>();
-    browser.on('disconnected', (err) => {
-      browserDisconnectSubject$.next(err);
-    });
-    const browserDisconnect$ = browserDisconnectSubject$.pipe(
+    const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
       mergeMap(() =>
         Rx.throwError(
           new Error(
