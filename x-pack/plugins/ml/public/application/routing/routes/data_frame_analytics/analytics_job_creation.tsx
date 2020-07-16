@@ -15,20 +15,18 @@ import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_creation';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const analyticsJobsCreationRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const analyticsJobsCreationRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/data_frame_analytics/new_job',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameManagementLabel', {
         defaultMessage: 'Data Frame Analytics',
       }),
-      href: getUrlForApp('ml', { path: '/data_frame_analytics' }),
+      onClick: breadcrumbOnClickFactory('/data_frame_analytics', application),
     },
   ],
 });

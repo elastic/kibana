@@ -26,12 +26,12 @@ import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { AnomalyDetectionSettingsContext, Settings } from '../../../settings';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const settingsRouteFactory = (getUrlForApp: ApplicationStart['getUrlForApp']): MlRoute => ({
+export const settingsRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/settings',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
   ],
 });
 

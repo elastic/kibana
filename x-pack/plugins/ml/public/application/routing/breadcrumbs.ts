@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiBreadcrumb } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+
 import { ApplicationStart, ChromeBreadcrumb } from 'kibana/public';
 
 export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
@@ -59,12 +62,22 @@ const breadcrumbs = {
 };
 type Breadcrumb = keyof typeof breadcrumbs;
 
+export const breadcrumbOnClickFactory = (
+  path: string | undefined,
+  { getUrlForApp, navigateToUrl }: ApplicationStart
+): EuiBreadcrumb['onClick'] => {
+  return (e) => {
+    e.preventDefault();
+    navigateToUrl(getUrlForApp('ml', { path }));
+  };
+};
+
 export const getBreadcrumbWithUrlForApp = (
   breadcrumbName: Breadcrumb,
-  getUrlForApp: ApplicationStart['getUrlForApp']
-) => {
+  application: ApplicationStart
+): EuiBreadcrumb => {
   return {
     ...breadcrumbs[breadcrumbName],
-    href: getUrlForApp('ml', { path: breadcrumbs[breadcrumbName].href }),
+    onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, application),
   };
 };

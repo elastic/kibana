@@ -39,14 +39,12 @@ import { basicResolvers } from '../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 
-export const timeSeriesExplorerRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const timeSeriesExplorerRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/timeseriesexplorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
         defaultMessage: 'Single Metric Viewer',

@@ -26,21 +26,19 @@ import {
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { FilterLists } from '../../../settings/filter_lists';
 
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const filterListRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const filterListRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/settings/filter_lists',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
         defaultMessage: 'Filter lists',
       }),
-      href: '#/settings/filter_lists',
+      onClick: breadcrumbOnClickFactory('/settings/filter_lists', application),
     },
   ],
 });

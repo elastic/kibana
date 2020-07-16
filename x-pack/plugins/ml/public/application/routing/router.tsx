@@ -78,9 +78,7 @@ export const MlRouter: FC<{
   pageDeps: PageDependencies;
 }> = ({ pageDeps }) => {
   const {
-    services: {
-      application: { getUrlForApp },
-    },
+    services: { application },
   } = useMlKibana();
 
   return (
@@ -89,7 +87,7 @@ export const MlRouter: FC<{
         <UrlStateProvider>
           <div className="ml-app">
             {Object.entries(routes).map(([name, routeFactory]) => {
-              const route = routeFactory(getUrlForApp);
+              const route = routeFactory(application);
 
               return (
                 <Route

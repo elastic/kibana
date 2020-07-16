@@ -30,9 +30,9 @@ interface IndexOrSearchPageProps extends PageProps {
   mode: MODE;
 }
 
-const getBreadcrumbs = (getUrlForApp: ApplicationStart['getUrlForApp']) => [
-  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', getUrlForApp),
+const getBreadcrumbs = (application: ApplicationStart) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
       defaultMessage: 'Create job',
@@ -41,9 +41,7 @@ const getBreadcrumbs = (getUrlForApp: ApplicationStart['getUrlForApp']) => [
   },
 ];
 
-export const indexOrSearchRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const indexOrSearchRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/jobs/new_job/step/index_or_search',
   render: (props, deps) => (
     <PageWrapper
@@ -53,12 +51,10 @@ export const indexOrSearchRouteFactory = (
       mode={MODE.NEW_JOB}
     />
   ),
-  breadcrumbs: getBreadcrumbs(getUrlForApp),
+  breadcrumbs: getBreadcrumbs(application),
 });
 
-export const dataVizIndexOrSearchRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const dataVizIndexOrSearchRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/datavisualizer_index_select',
   render: (props, deps) => (
     <PageWrapper
@@ -68,7 +64,7 @@ export const dataVizIndexOrSearchRouteFactory = (
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getBreadcrumbs(getUrlForApp),
+  breadcrumbs: getBreadcrumbs(application),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {

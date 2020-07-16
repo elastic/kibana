@@ -33,12 +33,12 @@ import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 
-export const explorerRouteFactory = (getUrlForApp: ApplicationStart['getUrlForApp']): MlRoute => ({
+export const explorerRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/explorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
         defaultMessage: 'Anomaly Explorer',

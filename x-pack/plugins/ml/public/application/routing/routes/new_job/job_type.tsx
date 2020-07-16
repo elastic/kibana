@@ -17,12 +17,12 @@ import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../jobs/new_job/pages/job_type';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const jobTypeRouteFactory = (getUrlForApp: ApplicationStart['getUrlForApp']): MlRoute => ({
+export const jobTypeRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/jobs/new_job/step/job_type',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectJobType', {
         defaultMessage: 'Create job',

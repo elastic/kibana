@@ -26,7 +26,7 @@ import {
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from '../../../settings/filter_lists';
 
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 enum MODE {
   NEW,
@@ -37,36 +37,32 @@ interface NewFilterPageProps extends PageProps {
   mode: MODE;
 }
 
-export const newFilterListRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const newFilterListRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/settings/filter_lists/new_filter_list',
   render: (props, deps) => <PageWrapper {...props} mode={MODE.NEW} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
         defaultMessage: 'Create',
       }),
-      href: '#/settings/filter_lists/new',
+      onClick: breadcrumbOnClickFactory('/settings/filter_lists/new', application),
     },
   ],
 });
 
-export const editFilterListRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const editFilterListRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/settings/filter_lists/edit_filter_list/:filterId',
   render: (props, deps) => <PageWrapper {...props} mode={MODE.EDIT} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
         defaultMessage: 'Edit',
       }),
-      href: '#/settings/filter_lists/edit',
+      onClick: breadcrumbOnClickFactory('/settings/filter_lists/edit', application),
     },
   ],
 });

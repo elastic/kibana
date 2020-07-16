@@ -20,18 +20,18 @@ import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capab
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { useTimefilter } from '../../contexts/kibana';
-import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
+import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
-export const overviewRouteFactory = (getUrlForApp: ApplicationStart['getUrlForApp']): MlRoute => ({
+export const overviewRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/overview',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.overview.overviewLabel', {
         defaultMessage: 'Overview',
       }),
-      href: getUrlForApp('ml', { path: '/overview' }),
+      onClick: breadcrumbOnClickFactory('/overview', application),
     },
   ],
 });

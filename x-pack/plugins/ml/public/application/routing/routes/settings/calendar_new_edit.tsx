@@ -25,7 +25,7 @@ import {
 } from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { NewCalendar } from '../../../settings/calendars';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 enum MODE {
   NEW,
@@ -36,36 +36,32 @@ interface NewCalendarPageProps extends PageProps {
   mode: MODE;
 }
 
-export const newCalendarRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const newCalendarRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/settings/calendars_list/new_calendar',
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
       }),
-      href: '/settings/calendars_list/new_calendar',
+      onClick: breadcrumbOnClickFactory('/settings/calendars_list/new_calendar', application),
     },
   ],
 });
 
-export const editCalendarRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const editCalendarRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/settings/calendars_list/edit_calendar/:calendarId',
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',
       }),
-      href: '/settings/calendars_list/edit_calendar',
+      onClick: breadcrumbOnClickFactory('/settings/calendars_list/edit_calendar', application),
     },
   ],
 });

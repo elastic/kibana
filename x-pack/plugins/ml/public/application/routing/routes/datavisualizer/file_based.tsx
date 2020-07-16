@@ -24,12 +24,12 @@ import { loadIndexPatterns } from '../../../util/index_utils';
 
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const fileBasedRouteFactory = (getUrlForApp: ApplicationStart['getUrlForApp']): MlRoute => ({
+export const fileBasedRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/filedatavisualizer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
         defaultMessage: 'File',

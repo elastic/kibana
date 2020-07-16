@@ -19,14 +19,12 @@ import { Page } from '../../../data_frame_analytics/pages/analytics_exploration'
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common/analytics';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const analyticsJobExplorationRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const analyticsJobExplorationRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/data_frame_analytics/exploration',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameExplorationLabel', {
         defaultMessage: 'Exploration',

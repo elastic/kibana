@@ -21,12 +21,12 @@ import { checkBasicLicense } from '../../../license';
 import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const selectorRouteFactory = (getUrlForApp: ApplicationStart['getUrlForApp']): MlRoute => ({
+export const selectorRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/datavisualizer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', application),
   ],
 });
 

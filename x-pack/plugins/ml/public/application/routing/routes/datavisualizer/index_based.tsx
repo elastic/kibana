@@ -21,14 +21,12 @@ import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const indexBasedRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const indexBasedRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/jobs/new_job/datavisualizer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.indexLabel', {
         defaultMessage: 'Index',

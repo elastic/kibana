@@ -25,21 +25,19 @@ import {
 } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { CalendarsList } from '../../../settings/calendars';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const calendarListRouteFactory = (
-  getUrlForApp: ApplicationStart['getUrlForApp']
-): MlRoute => ({
+export const calendarListRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/settings/calendars_list',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
         defaultMessage: 'Calendar management',
       }),
-      href: '/settings/calendars_list',
+      onClick: breadcrumbOnClickFactory('/settings/calendars_list', application),
     },
   ],
 });

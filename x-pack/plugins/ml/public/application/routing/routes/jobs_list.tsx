@@ -20,12 +20,12 @@ import { JobsPage } from '../../jobs/jobs_list';
 import { useTimefilter } from '../../contexts/kibana';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
-export const jobListRouteFactory = (getUrlForApp: ApplicationStart['getUrlForApp']): MlRoute => ({
+export const jobListRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/jobs',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.jobManagementLabel', {
         defaultMessage: 'Job Management',

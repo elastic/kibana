@@ -19,13 +19,13 @@ import { checkViewOrCreateJobs } from '../../../jobs/new_job/recognize/resolvers
 import { mlJobService } from '../../../services/job_service';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const recognizeRouteFactory = (getUrlForApp: ApplicationStart['getUrlForApp']): MlRoute => ({
+export const recognizeRouteFactory = (application: ApplicationStart): MlRoute => ({
   path: '/jobs/new_job/recognize',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', getUrlForApp),
-    getBreadcrumbWithUrlForApp('CREATE_JOB_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('CREATE_JOB_BREADCRUMB', application),
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabelRecognize', {
         defaultMessage: 'Recognized index',
