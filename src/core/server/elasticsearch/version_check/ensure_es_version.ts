@@ -29,10 +29,10 @@ import {
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
 import { Logger } from '../../logging';
-import { LegacyAPICaller } from '../legacy';
+import type { ElasticsearchClient } from '../client';
 
 export interface PollEsNodesVersionOptions {
-  callWithInternalUser: LegacyAPICaller;
+  internalClient: ElasticsearchClient;
   log: Logger;
   kibanaVersion: string;
   ignoreVersionMismatch: boolean;
@@ -137,7 +137,7 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
 }
 
 export const pollEsNodesVersion = ({
-  callWithInternalUser,
+  internalClient,
   log,
   kibanaVersion,
   ignoreVersionMismatch,
@@ -147,10 +147,11 @@ export const pollEsNodesVersion = ({
   return timer(0, healthCheckInterval).pipe(
     exhaustMap(() => {
       return from(
-        callWithInternalUser('nodes.info', {
-          filterPath: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+        internalClient.nodes.info<NodesInfo>({
+          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
         })
       ).pipe(
+        map(({ body }) => body),
         catchError((_err) => {
           return of({ nodes: {} });
         })
