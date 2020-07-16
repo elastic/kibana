@@ -7,7 +7,6 @@
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 
 import {
   RuleStepProps,
@@ -35,7 +34,6 @@ import * as I18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/form';
-import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
@@ -44,8 +42,8 @@ import { AutocompleteField } from '../autocomplete_field';
 const CommonUseField = getUseField({ component: Field });
 
 interface StepAboutRuleProps extends RuleStepProps {
-  defaultValues?: AboutStepRule | null;
-  defineRuleData?: DefineStepRule | null;
+  defaultValues?: AboutStepRule;
+  defineRuleData?: DefineStepRule;
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -91,48 +89,35 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setForm,
   setStepData,
 }) => {
-  const [myStepData, setMyStepData] = useState<AboutStepRule>(stepAboutDefaultValue);
+  const initialState = defaultValues ?? stepAboutDefaultValue;
+  const [myStepData, setMyStepData] = useState<AboutStepRule>(initialState);
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
     defineRuleData?.index ?? []
   );
 
   const { form } = useForm({
-    defaultValue: myStepData,
+    defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
+  const { getFields, submit } = form;
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
       setStepData(RuleStep.aboutRule, null, false);
-      const { isValid, data } = await form.submit();
+      const { isValid, data } = await submit();
       if (isValid) {
         setStepData(RuleStep.aboutRule, data, isValid);
         setMyStepData({ ...data, isNew: false } as AboutStepRule);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [setStepData, submit]);
 
   useEffect(() => {
-    const { isNew, ...initDefaultValue } = myStepData;
-    if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
-      const myDefaultValues = {
-        ...defaultValues,
-        isNew: false,
-      };
-      setMyStepData(myDefaultValues);
-      setFieldValue(form, schema, myDefaultValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValues]);
-
-  useEffect(() => {
-    if (setForm != null) {
+    if (setForm) {
       setForm(RuleStep.aboutRule, form);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [setForm, form]);
 
   return isReadOnlyView && myStepData.name != null ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
@@ -338,8 +323,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {
               const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-              const severityField = form.getFields().severity;
-              const riskScoreField = form.getFields().riskScore;
+              const severityField = getFields().severity;
+              const riskScoreField = getFields().riskScore;
               if (
                 severityField.value !== severity &&
                 newRiskScore != null &&
