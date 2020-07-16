@@ -22,7 +22,6 @@ import Hapi from 'hapi';
 // @ts-ignore not TS yet
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
-// @ts-ignore not TS yet
 import { fromRoot } from '../core/server/utils';
 import { getNpUiPluginPublicDirs } from './np_ui_plugin_public_dirs';
 import KbnServer, { KibanaConfig } from '../legacy/server/kbn_server';
