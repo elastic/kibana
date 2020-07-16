@@ -78,6 +78,7 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');
         await dashboardExpect.fieldSuggestions(['animal']);
+        await filterBar.ensureFieldEditorModalIsClosed();
       });
 
       it('works when a vis with no index pattern is added', async () => {
