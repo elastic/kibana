@@ -13,6 +13,7 @@ import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
+  getMapSettings,
   getWaitingForMapReadyLayerListRaw,
   getQuery,
 } from '../selectors/map_selectors';
@@ -42,7 +43,7 @@ import {
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
-import { syncDataForAllLayers } from './data_request_actions';
+import { fitToDataBounds, syncDataForAllLayers } from './data_request_actions';
 import { addLayer } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
@@ -226,7 +227,11 @@ export function setQuery({
       filters,
     });
 
-    await dispatch<any>(syncDataForAllLayers());
+    if (getMapSettings(getState()).autoFitToDataBounds) {
+      dispatch(fitToDataBounds());
+    } else {
+      await dispatch<any>(syncDataForAllLayers());
+    }
   };
 }
 
