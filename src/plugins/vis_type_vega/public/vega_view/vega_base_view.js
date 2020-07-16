@@ -147,7 +147,7 @@ export class VegaBaseView {
             defaultMessage:
               'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
             values: {
-              enableExternalUrls: 'vega.enableExternalUrls: true',
+              enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
               kibanaConfigFileName: 'kibana.yml',
             },
           })
