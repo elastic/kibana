@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import angular, { auto } from 'angular';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import './index.scss';
 
 import {
   AppMountParameters,
