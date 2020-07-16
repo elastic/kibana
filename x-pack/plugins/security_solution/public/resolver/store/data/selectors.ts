@@ -8,7 +8,6 @@ import rbush from 'rbush';
 import { createSelector, defaultMemoize } from 'reselect';
 import {
   DataState,
-  AdjacentProcessMap,
   Vector2,
   IndexedEntity,
   IndexedEdgeLineSegment,
@@ -21,7 +20,7 @@ import {
   isTerminatedProcess,
   uniquePidForProcess,
 } from '../../models/process_event';
-import { factory as indexedProcessTreeFactory } from '../../models/indexed_process_tree';
+import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
 import { isEqual } from '../../models/aabb';
 
 import {
@@ -107,7 +106,7 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
   graphableProcesses
   /* eslint-enable no-shadow */
 ) {
-  return indexedProcessTreeFactory(graphableProcesses);
+  return indexedProcessTreeModel.factory(graphableProcesses);
 });
 
 /**
@@ -131,33 +130,44 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
 }
 
 /**
+ * Returns a function that returns a function (when supplied with an entity id for a node)
+ * that returns related events for a node that match an event.category (when supplied with the category)
+ */
+export const relatedEventsByCategory = createSelector(
+  relatedEventsByEntityId,
+  function provideGettersByCategory(
+    /* eslint-disable no-shadow */
+    relatedEventsByEntityId
+    /* eslint-enable no-shadow */
+  ) {
+    return defaultMemoize((entityId: string) => {
+      return defaultMemoize((ecsCategory: string) => {
+        const relatedById = relatedEventsByEntityId.get(entityId);
+        // With no related events, we can't return related by category
+        if (!relatedById) {
+          return [];
+        }
+        return relatedById.events.reduce(
+          (eventsByCategory: ResolverEvent[], candidate: ResolverEvent) => {
+            if ([candidate && allEventCategories(candidate)].flat().includes(ecsCategory)) {
+              eventsByCategory.push(candidate);
+            }
+            return eventsByCategory;
+          },
+          []
+        );
+      });
+    });
+  }
+);
+
+/**
  * returns a map of entity_ids to booleans indicating if it is waiting on related event
  * A value of `undefined` can be interpreted as `not yet requested`
  */
 export function relatedEventsReady(data: DataState): Map<string, boolean> {
   return data.relatedEventsReady;
 }
-
-export const processAdjacencies = createSelector(
-  indexedProcessTree,
-  graphableProcesses,
-  function selectProcessAdjacencies(
-    /* eslint-disable no-shadow */
-    indexedProcessTree,
-    graphableProcesses
-    /* eslint-enable no-shadow */
-  ) {
-    const processToAdjacencyMap = new Map<ResolverEvent, AdjacentProcessMap>();
-    const { idToAdjacent } = indexedProcessTree;
-
-    for (const graphableProcess of graphableProcesses) {
-      const processPid = uniquePidForProcess(graphableProcess);
-      const adjacencyMap = idToAdjacent.get(processPid)!;
-      processToAdjacencyMap.set(graphableProcess, adjacencyMap);
-    }
-    return { processToAdjacencyMap };
-  }
-);
 
 /**
  * `true` if there were more children than we got in the last request.
@@ -198,7 +208,7 @@ export const relatedEventInfoByEntityId: (
   ) {
     if (!relatedEventsStats) {
       // If there are no related event stats, there are no related event info objects
-      return (entityId: string) => null;
+      return () => null;
     }
     return (entityId) => {
       const stats = relatedEventsStats.get(entityId);
@@ -302,7 +312,8 @@ export function databaseDocumentIDToFetch(state: DataState): string | null {
     return null;
   }
 }
-export const processNodePositionsAndEdgeLineSegments = createSelector(
+
+export const layout = createSelector(
   indexedProcessTree,
   function processNodePositionsAndEdgeLineSegments(
     /* eslint-disable no-shadow */
@@ -313,9 +324,62 @@ export const processNodePositionsAndEdgeLineSegments = createSelector(
   }
 );
 
-const indexedProcessNodePositionsAndEdgeLineSegments = createSelector(
-  processNodePositionsAndEdgeLineSegments,
-  function visibleProcessNodePositionsAndEdgeLineSegments({
+/**
+ * Given a nodeID (aka entity_id) get the indexed process event.
+ * Legacy functions take process events instead of nodeID, use this to get
+ * process events for them.
+ */
+export const processEventForID: (
+  state: DataState
+) => (nodeID: string) => ResolverEvent | null = createSelector(
+  indexedProcessTree,
+  (tree) => (nodeID: string) => indexedProcessTreeModel.processEvent(tree, nodeID)
+);
+
+/**
+ * Takes a nodeID (aka entity_id) and returns the associated aria level as a number or null if the node ID isn't in the tree.
+ */
+export const ariaLevel: (state: DataState) => (nodeID: string) => number | null = createSelector(
+  layout,
+  processEventForID,
+  ({ ariaLevels }, processEventGetter) => (nodeID: string) => {
+    const node = processEventGetter(nodeID);
+    return node ? ariaLevels.get(node) ?? null : null;
+  }
+);
+
+/**
+ * Returns the following sibling if there is one, or `null`.
+ */
+export const followingSibling: (
+  state: DataState
+) => (nodeID: string) => string | null = createSelector(
+  indexedProcessTree,
+  processEventForID,
+  (tree, eventGetter) => {
+    return (nodeID: string) => {
+      const event = eventGetter(nodeID);
+
+      // event not found
+      if (event === null) {
+        return null;
+      }
+      const nextSibling = indexedProcessTreeModel.nextSibling(tree, event);
+
+      // next sibling not found
+      if (nextSibling === undefined) {
+        return null;
+      }
+
+      // return the node ID
+      return uniquePidForProcess(nextSibling);
+    };
+  }
+);
+
+const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = createSelector(
+  layout,
+  function ({
     /* eslint-disable no-shadow */
     processNodePositions,
     edgeLineSegments,
@@ -362,47 +426,46 @@ const indexedProcessNodePositionsAndEdgeLineSegments = createSelector(
   }
 );
 
-export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
-  indexedProcessNodePositionsAndEdgeLineSegments,
-  function visibleProcessNodePositionsAndEdgeLineSegments(tree) {
-    // memoize the results of this call to avoid unnecessarily rerunning
-    let lastBoundingBox: AABB | null = null;
-    let currentlyVisible: VisibleEntites = {
-      processNodePositions: new Map<ResolverEvent, Vector2>(),
-      connectingEdgeLineSegments: [],
-    };
-    return (boundingBox: AABB) => {
-      if (lastBoundingBox !== null && isEqual(lastBoundingBox, boundingBox)) {
-        return currentlyVisible;
-      } else {
-        const {
-          minimum: [minX, minY],
-          maximum: [maxX, maxY],
-        } = boundingBox;
-        const entities = tree.search({
-          minX,
-          minY,
-          maxX,
-          maxY,
-        });
-        const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
-          entities
-            .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
-            .map((node) => [node.entity, node.position])
-        );
-        const connectingEdgeLineSegments = entities
-          .filter((entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine')
-          .map((node) => node.entity);
-        currentlyVisible = {
-          processNodePositions: visibleProcessNodePositions,
-          connectingEdgeLineSegments,
-        };
-        lastBoundingBox = boundingBox;
-        return currentlyVisible;
-      }
-    };
-  }
-);
+export const nodesAndEdgelines: (
+  state: DataState
+) => (query: AABB) => VisibleEntites = createSelector(spatiallyIndexedLayout, function (tree) {
+  // memoize the results of this call to avoid unnecessarily rerunning
+  let lastBoundingBox: AABB | null = null;
+  let currentlyVisible: VisibleEntites = {
+    processNodePositions: new Map<ResolverEvent, Vector2>(),
+    connectingEdgeLineSegments: [],
+  };
+  return (boundingBox: AABB) => {
+    if (lastBoundingBox !== null && isEqual(lastBoundingBox, boundingBox)) {
+      return currentlyVisible;
+    } else {
+      const {
+        minimum: [minX, minY],
+        maximum: [maxX, maxY],
+      } = boundingBox;
+      const entities = tree.search({
+        minX,
+        minY,
+        maxX,
+        maxY,
+      });
+      const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
+        entities
+          .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
+          .map((node) => [node.entity, node.position])
+      );
+      const connectingEdgeLineSegments = entities
+        .filter((entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine')
+        .map((node) => node.entity);
+      currentlyVisible = {
+        processNodePositions: visibleProcessNodePositions,
+        connectingEdgeLineSegments,
+      };
+      lastBoundingBox = boundingBox;
+      return currentlyVisible;
+    }
+  };
+});
 
 /**
  * If there is a pending request that's for a entity ID that doesn't matche the `entityID`, then we should cancel it.
