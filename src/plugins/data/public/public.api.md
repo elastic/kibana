@@ -1498,6 +1498,8 @@ export interface QueryState {
     // (undocumented)
     filters?: Filter[];
     // (undocumented)
+    queryString?: Query;
+    // (undocumented)
     refreshInterval?: RefreshInterval;
     // (undocumented)
     time?: TimeRange;
