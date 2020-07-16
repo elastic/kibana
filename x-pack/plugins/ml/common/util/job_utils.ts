@@ -628,11 +628,11 @@ export function getEarliestDatafeedStartTime(
   bucketSpan?: Duration | null | undefined
 ): number | undefined {
   if (latestRecordTimestamp !== undefined && latestBucketTimestamp !== undefined) {
-    // if bucket span is availble (e.g. 15m) add it to the latest bucket timestamp in ms
-    const latestBucketStartTime = bucketSpan
+    // if bucket span is available (e.g. 15m) add it to the latest bucket timestamp in ms
+    const adjustedBucketStartTime = bucketSpan
       ? moment(latestBucketTimestamp).add(bucketSpan).valueOf()
       : latestBucketTimestamp;
-    return Math.max(latestRecordTimestamp, latestBucketStartTime);
+    return Math.max(latestRecordTimestamp, adjustedBucketStartTime);
   } else {
     return latestRecordTimestamp !== undefined ? latestRecordTimestamp : latestBucketTimestamp;
   }
