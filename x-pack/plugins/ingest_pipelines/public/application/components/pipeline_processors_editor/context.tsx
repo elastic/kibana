@@ -25,6 +25,8 @@ import {
   ContextValue,
   ContextValueState,
   Links,
+  ProcessorInternal,
+  OnUpdateToolTipInitPositionHandler,
 } from './types';
 
 import { useProcessorsState, isOnFailureSelector } from './processors_reducer';
@@ -33,11 +35,15 @@ import { deserialize } from './deserialize';
 
 import { serialize } from './serialize';
 
-import { OnSubmitHandler, ProcessorSettingsForm } from './components/processor_settings_form';
-
 import { OnActionHandler } from './components/processors_tree';
 
-import { ProcessorRemoveModal } from './components';
+import {
+  Position,
+  ProcessorRemoveModal,
+  PipelineProcessorsItemTooltip,
+  ProcessorSettingsForm,
+  OnSubmitHandler,
+} from './components';
 
 import { getValue } from './utils';
 
@@ -64,6 +70,8 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   children,
 }) => {
   const initRef = useRef(false);
+  const tooltipInitPosition = useRef<Position | undefined>();
+
   const [mode, setMode] = useState<EditorMode>(() => ({
     id: 'idle',
   }));
@@ -172,17 +180,23 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             type: 'moveProcessor',
             payload: action.payload,
           });
+          tooltipInitPosition.current = undefined;
           break;
         case 'selectToMove':
           setMode({ id: 'movingProcessor', arg: action.payload.info });
           break;
         case 'cancelMove':
           setMode({ id: 'idle' });
+          tooltipInitPosition.current = undefined;
           break;
       }
     },
     [processorsDispatch, setMode]
   );
+
+  const onUpdateTooltipInitPosition = useCallback<OnUpdateToolTipInitPositionHandler>((pos) => {
+    tooltipInitPosition.current = pos;
+  }, []);
 
   // Memoize the state object to ensure we do not trigger unnecessary re-renders and so
   // this object can be used safely further down the tree component tree.
@@ -201,10 +215,21 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       value={{
         links,
         onTreeAction,
+        onUpdateTooltipInitPosition,
         state,
       }}
     >
       {children}
+
+      {mode.id === 'movingProcessor' && tooltipInitPosition.current && (
+        <PipelineProcessorsItemTooltip
+          processor={getValue<ProcessorInternal>(mode.arg.selector, {
+            processors,
+            onFailure: onFailureProcessors,
+          })}
+          initialPosition={tooltipInitPosition.current}
+        />
+      )}
 
       {mode.id === 'editingProcessor' || mode.id === 'creatingProcessor' ? (
         <ProcessorSettingsForm
@@ -219,7 +244,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       {mode.id === 'removingProcessor' && (
         <ProcessorRemoveModal
           selector={mode.arg.selector}
-          processor={getValue(mode.arg.selector, {
+          processor={getValue<ProcessorInternal>(mode.arg.selector, {
             processors,
             onFailure: onFailureProcessors,
           })}

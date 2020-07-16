@@ -16,7 +16,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { ProcessorInternal, ProcessorSelector, ContextValueEditor } from '../../types';
+import {
+  ProcessorInternal,
+  ProcessorSelector,
+  ContextValueEditor,
+  OnUpdateToolTipInitPositionHandler,
+} from '../../types';
 import { selectorToDataTestSubject } from '../../utils';
 import { ProcessorsDispatch } from '../../processors_reducer';
 
@@ -35,6 +40,7 @@ export interface Props {
   editor: ContextValueEditor;
   handlers: Handlers;
   selector: ProcessorSelector;
+  onUpdateTooltipInitPosition: OnUpdateToolTipInitPositionHandler;
   description?: string;
   movingProcessor?: ProcessorInfo;
   renderOnFailureHandlers?: () => React.ReactNode;
@@ -45,6 +51,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     processor,
     description,
     handlers: { onCancelMove, onMove },
+    onUpdateTooltipInitPosition,
     selector,
     movingProcessor,
     renderOnFailureHandlers,
@@ -83,6 +90,15 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
       });
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
+      const changeHandler: React.ChangeEventHandler<any> = (event) => {
+        if (!isMovingThisProcessor) {
+          const { x, y } = event.target.getBoundingClientRect();
+          onUpdateTooltipInitPosition({ x, y });
+          onMove();
+        } else {
+          onCancelMove();
+        }
+      };
       const moveButton = (
         <EuiButtonToggle
           isEmpty={!isMovingThisProcessor}
@@ -94,7 +110,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           disabled={isDisabled && !isMovingThisProcessor}
           label={label}
           aria-label={label}
-          onChange={() => (!isMovingThisProcessor ? onMove() : onCancelMove())}
+          onChange={changeHandler}
         />
       );
       // Remove the tooltip from the DOM to prevent it from lingering if the mouse leave event

@@ -7,7 +7,7 @@
 import { Dispatch } from 'react';
 import { OnFormUpdateArg } from '../../../shared_imports';
 import { SerializeResult } from './serialize';
-import { OnActionHandler, ProcessorInfo } from './components/processors_tree';
+import { OnActionHandler, ProcessorInfo, Position } from './components';
 import { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
 
 export interface Links {
@@ -46,6 +46,8 @@ export interface OnUpdateHandlerArg extends FormValidityState {
 
 export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
 
+export type OnUpdateToolTipInitPositionHandler = (pos: Position) => void;
+
 /**
  * The editor can be in different modes. This enables us to hold
  * a reference to data dispatch to the reducer (like the {@link ProcessorSelector}
@@ -76,5 +78,6 @@ export interface ContextValueState {
 export interface ContextValue {
   links: Links;
   onTreeAction: OnActionHandler;
+  onUpdateTooltipInitPosition: OnUpdateToolTipInitPositionHandler;
   state: ContextValueState;
 }

@@ -16,12 +16,13 @@ import {
 type Props = Omit<ViewComponentProps, 'editor' | 'processorsDispatch'>;
 
 export const PipelineProcessorsEditorItem: FunctionComponent<Props> = (props) => {
-  const { state } = usePipelineProcessorsContext();
+  const { state, onUpdateTooltipInitPosition } = usePipelineProcessorsContext();
 
   return (
     <ViewComponent
       {...props}
       editor={state.editor}
+      onUpdateTooltipInitPosition={onUpdateTooltipInitPosition}
       processorsDispatch={state.processors.dispatch}
     />
   );
