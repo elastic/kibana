@@ -183,7 +183,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-          <EuiSpacer size="m" />
           {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"

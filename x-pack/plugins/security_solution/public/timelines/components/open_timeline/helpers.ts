@@ -13,6 +13,7 @@ import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
+import { reducer } from 'recompose';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
 import {
   TimelineResult,
@@ -212,6 +213,28 @@ const getDataProviders = (
   return dataProviders;
 };
 
+export const getTimelineTitle = (
+  timeline: TimelineResult,
+  duplicate: boolean,
+  timelineType?: TimelineType
+) => {
+  const isCreateFromAction = timeline.timelineType !== timelineType;
+  if (isCreateFromAction) return '';
+
+  return duplicate ? `${timeline.title} - Duplicate` : timeline.title || '';
+};
+
+export const getTimelineStatus = (
+  timeline: TimelineResult,
+  duplicate: boolean,
+  timelineType?: TimelineType
+) => {
+  const isCreateTimelineFromAction = timeline.timelineType !== timelineType;
+  if (isCreateTimelineFromAction) return TimelineStatus.draft;
+
+  return duplicate ? TimelineStatus.active : timeline.status;
+};
+
 // eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
@@ -234,11 +257,11 @@ export const defaultTimelineToTimelineModel = (
     pinnedEventIds: setPinnedEventIds(duplicate, timeline.pinnedEventIds),
     pinnedEventsSaveObject: setPinnedEventsSaveObject(duplicate, timeline.pinnedEventsSaveObject),
     id: duplicate ? '' : timeline.savedObjectId,
-    status: duplicate ? TimelineStatus.active : timeline.status,
+    status: getTimelineStatus(timeline, duplicate, timelineType),
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
     timelineType: timelineType ?? timeline.timelineType,
-    title: duplicate ? `${timeline.title} - Duplicate` : timeline.title || '',
+    title: getTimelineTitle(timeline, duplicate, timelineType),
     templateTimelineId: getTemplateTimelineId(timeline, duplicate, timelineType),
     templateTimelineVersion: duplicate && isTemplate ? 1 : timeline.templateTimelineVersion,
   };
