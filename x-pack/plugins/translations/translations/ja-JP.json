@@ -9588,7 +9588,6 @@
     "xpack.ml.dataframe.analyticsList.title": "分析ジョブ",
     "xpack.ml.dataframe.analyticsList.type": "タイプ",
     "xpack.ml.dataframe.analyticsList.viewActionName": "表示",
-    "xpack.ml.dataframe.analyticsList.viewAriaLabel": "表示",
     "xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage": "データフレーム分析 {jobId} の作成リクエストが受け付けられました。",
     "xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink": "インデックス名の制限に関する詳細。",
     "xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameExplorationLabel": "データフレーム分析",
