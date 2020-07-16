@@ -211,7 +211,7 @@ export class ManifestManager {
           new Date(),
           ManifestConstants.SCHEMA_VERSION,
           ManifestConstants.INITIAL_VERSION
-        ); // create empty manifest
+        );
       } else if (oldManifest == null) {
         this.logger.debug('Manifest does not exist yet. Waiting...');
         return null;
@@ -294,11 +294,11 @@ export class ManifestManager {
             value: {},
           };
 
-          const newArtifactManifest = { ...artifactManifest };
-          newArtifactManifest.value = manifest.toEndpointFormat();
-
-          if (!Manifest.pkgConfigsAreEqual(artifactManifest, newArtifactManifest)) {
-            newPackageConfig.inputs[0].config.artifact_manifest = newArtifactManifest;
+          const oldManifest = Manifest.fromPkgConfig(artifactManifest.value);
+          if (!manifest.equals(oldManifest)) {
+            newPackageConfig.inputs[0].config.artifact_manifest = {
+              value: manifest.toEndpointFormat(),
+            };
 
             try {
               await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);

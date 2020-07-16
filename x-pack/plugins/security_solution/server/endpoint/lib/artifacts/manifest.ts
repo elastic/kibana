@@ -5,7 +5,6 @@
  */
 
 import { createHash } from 'crypto';
-import { PackageConfigConfigRecordEntry } from '../../../../../ingest_manager/common/types/models/package_config';
 import { validate } from '../../../../common/validate';
 import { InternalArtifactSchema, InternalManifestSchema } from '../../schemas/artifacts';
 import {
@@ -13,7 +12,6 @@ import {
   ManifestSchemaVersion,
 } from '../../../../common/endpoint/schema/common';
 import { ManifestSchema, manifestSchema } from '../../../../common/endpoint/schema/manifest';
-import { ManifestConstants } from './common';
 import { ManifestEntry } from './manifest_entry';
 
 export interface ManifestDiff {
@@ -68,13 +66,31 @@ export class Manifest {
     return manifest;
   }
 
-  public static pkgConfigsAreEqual(
-    leftPkgConfig: PackageConfigConfigRecordEntry,
-    rightPkgConfig: PackageConfigConfigRecordEntry
-  ): boolean {
-    const leftHash = createHash('sha256').update(JSON.stringify(leftPkgConfig)).digest('hex');
-    const rightHash = createHash('sha256').update(JSON.stringify(leftPkgConfig)).digest('hex');
-    return leftHash === rightHash;
+  public static fromPkgConfig(manifestPkgConfig: ManifestSchema): Manifest {
+    const manifest = new Manifest(
+      new Date(),
+      manifestPkgConfig.schema_version,
+      manifestPkgConfig.manifest_version
+    );
+    for (const [identifier, artifactRecord] of Object.entries(manifestPkgConfig.artifacts)) {
+      const artifact = {
+        identifier,
+        compressionAlgorithm: artifactRecord.compression_algorithm,
+        encryptionAlgorithm: artifactRecord.encryption_algorithm,
+        decodedSha256: artifactRecord.decoded_sha256,
+        decodedSize: artifactRecord.decoded_size,
+        encodedSha256: artifactRecord.encoded_sha256,
+        encodedSize: artifactRecord.encoded_size,
+        created: Date.now(),
+        body: 'unused',
+      };
+      manifest.addEntry(artifact);
+    }
+    return manifest;
+  }
+
+  public equals(manifest: Manifest): boolean {
+    return this.getSha256() === manifest.getSha256();
   }
 
   public getSha256(): string {
@@ -136,7 +152,7 @@ export class Manifest {
 
   public toEndpointFormat(): ManifestSchema {
     const manifestObj: ManifestSchema = {
-      manifest_version: this.version ?? ManifestConstants.INITIAL_VERSION,
+      manifest_version: this.getSha256(),
       schema_version: this.schemaVersion,
       artifacts: {},
     };
