@@ -377,7 +377,7 @@ export const HostList = () => {
       data-test-subj="hostPage"
       headerLeft={
         <>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="l">
                 <h1 data-test-subj="pageViewHeaderLeftTitle">

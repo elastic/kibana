@@ -348,7 +348,6 @@ describe('helpers', () => {
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
-        rule_name_override: '',
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
@@ -369,7 +368,6 @@ describe('helpers', () => {
             ],
           },
         ],
-        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
@@ -392,7 +390,6 @@ describe('helpers', () => {
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
-        rule_name_override: '',
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
@@ -413,7 +410,6 @@ describe('helpers', () => {
             ],
           },
         ],
-        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
@@ -434,7 +430,6 @@ describe('helpers', () => {
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
-        rule_name_override: '',
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
@@ -455,7 +450,6 @@ describe('helpers', () => {
             ],
           },
         ],
-        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
@@ -508,7 +502,6 @@ describe('helpers', () => {
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
-        rule_name_override: '',
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
@@ -519,7 +512,6 @@ describe('helpers', () => {
             technique: [{ id: '456', name: 'technique1', reference: 'technique reference' }],
           },
         ],
-        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);

@@ -97,7 +97,6 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
@@ -127,6 +126,8 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
             });
           }
         }
+        // This will create the endpoint list if it does not exist yet
+        await context.lists?.getExceptionListClient().createEndpointList();
 
         const createdRule = await createRules({
           alertsClient,

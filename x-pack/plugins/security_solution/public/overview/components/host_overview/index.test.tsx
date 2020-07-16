@@ -6,6 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { HostOverview } from './index';
@@ -19,12 +20,12 @@ describe('Host Summary Component', () => {
           <HostOverview
             anomaliesData={mockAnomalies}
             data={mockData.Hosts.edges[0].node}
-            endDate={new Date('2019-06-18T06:00:00.000Z').valueOf()}
+            endDate="2019-06-18T06:00:00.000Z"
             id="hostOverview"
             isLoadingAnomaliesData={false}
             loading={false}
             narrowDateRange={jest.fn()}
-            startDate={new Date('2019-06-15T06:00:00.000Z').valueOf()}
+            startDate="2019-06-15T06:00:00.000Z"
           />
         </TestProviders>
       );

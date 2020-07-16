@@ -11,8 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // Temporarily skipped to promote snapshot
-  // Re-enabled in https://github.com/elastic/kibana/pull/71727
+  // FLAKY: https://github.com/elastic/kibana/issues/72053
   describe.skip('fleet_setup', () => {
     beforeEach(async () => {
       try {

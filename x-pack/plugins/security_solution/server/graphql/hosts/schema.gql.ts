@@ -99,6 +99,7 @@ export const hostsSchema = gql`
       sort: HostsSortField!
       filterQuery: String
       defaultIndex: [String!]!
+      docValueFields: [docValueFieldsInput!]!
     ): HostsData!
     HostOverview(
       id: String
@@ -106,6 +107,11 @@ export const hostsSchema = gql`
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): HostItem!
-    HostFirstLastSeen(id: String, hostName: String!, defaultIndex: [String!]!): FirstLastSeenHost!
+    HostFirstLastSeen(
+      id: String
+      hostName: String!
+      defaultIndex: [String!]!
+      docValueFields: [docValueFieldsInput!]!
+    ): FirstLastSeenHost!
   }
 `;

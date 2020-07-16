@@ -10,7 +10,6 @@ import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common
 import { RunTaskFnFactory, ScheduledTaskParams, TaskRunResult } from '../../types';
 import { createGenerateCsv } from '../csv/generate_csv';
 import { JobParamsPanelCsv, SearchPanel } from './types';
-import { getFakeRequest } from './lib/get_fake_request';
 import { getGenerateCsvParams } from './lib/get_csv_job';
 
 /*
@@ -44,18 +43,9 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
     const { jobParams } = jobPayload;
     const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
     const generateCsv = createGenerateCsv(jobLogger);
-    const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & {
-      panel: SearchPanel;
-    };
+    const { panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
 
     jobLogger.debug(`Execute job generating [${visType}] csv`);
-
-    if (isImmediate && req) {
-      jobLogger.info(`Executing job from Immediate API using request context`);
-    } else {
-      jobLogger.info(`Executing job async using encrypted headers`);
-      req = await getFakeRequest(jobPayload, config.get('encryptionKey')!, jobLogger);
-    }
 
     const savedObjectsClient = context.core.savedObjects.client;
 
