@@ -9593,7 +9593,6 @@
     "xpack.ml.dataframe.analyticsList.title": "分析作业",
     "xpack.ml.dataframe.analyticsList.type": "类型",
     "xpack.ml.dataframe.analyticsList.viewActionName": "查看",
-    "xpack.ml.dataframe.analyticsList.viewAriaLabel": "查看",
     "xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage": "数据帧分析 {jobId} 创建请求已确认。",
     "xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink": "详细了解索引名称限制。",
     "xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameExplorationLabel": "数据帧分析",
