@@ -52,6 +52,23 @@ export class CoreApp {
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
+
+    const anonymousStatusPage = coreSetup.status.isStatusPageAnonymous();
+    coreSetup.httpResources.createRegistrar(router).register(
+      {
+        path: '/status',
+        options: {
+          authRequired: !anonymousStatusPage,
+        },
+      },
+      async (context, request, response) => {
+        if (anonymousStatusPage) {
+          return response.renderAnonymousCoreApp();
+        } else {
+          return response.renderCoreApp();
+        }
+      }
+    );
   }
   private registerStaticDirs(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));

@@ -215,13 +215,8 @@ export function uiRenderMixin(kbnServer, server, config) {
     async handler(req, h) {
       const id = req.params.id;
       const app = server.getUiAppById(id);
-
       try {
-        if (kbnServer.status.isGreen()) {
-          return await h.renderApp(app);
-        } else {
-          return await h.renderStatusPage();
-        }
+        return await h.renderApp(app);
       } catch (err) {
         throw Boom.boomify(err);
       }
