@@ -73,7 +73,6 @@ export interface GraphDependencies {
 
 export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: GraphDependencies) => {
   kibanaLegacy.loadFontAwesome();
-  kibanaLegacy.loadStyles();
   const graphAngularModule = createLocalAngularModule(deps.navigation);
   configureAppAngularModule(
     graphAngularModule,
