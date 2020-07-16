@@ -11,10 +11,14 @@ import {
 } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import * as Registry from '../../registry';
-import { AssetType, KibanaAssetType, AssetReference } from '../../../../types';
+import {
+  AssetType,
+  KibanaAssetType,
+  AssetReference,
+  KibanaAssetReference,
+} from '../../../../types';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 import { getInstallationObject, savedObjectTypes } from '../../packages';
-import { saveInstalledKibanaRefs } from '../../packages/install';
 
 type SavedObjectToBe = Required<SavedObjectsBulkCreateObject> & { type: AssetType };
 export type ArchiveAsset = Pick<
@@ -49,7 +53,7 @@ export async function installKibanaAssets(options: {
   pkgName: string;
   paths: string[];
   isUpdate: boolean;
-}): Promise<AssetReference[]> {
+}): Promise<KibanaAssetReference[]> {
   const { savedObjectsClient, paths, pkgName, isUpdate } = options;
 
   if (isUpdate) {
@@ -59,22 +63,20 @@ export async function installKibanaAssets(options: {
 
     if (installedKibanaRefs?.length) {
       await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedKibanaRefs);
-      await deleteKibanaInstalledRefs(savedObjectsClient, pkgName, installedKibanaRefs);
+      // await deleteKibanaInstalledRefs(savedObjectsClient, pkgName, installedKibanaRefs);
     }
   }
 
   // install the new assets and save installation references
   const kibanaAssetTypes = Object.values(KibanaAssetType);
-  const installationPromises = kibanaAssetTypes.map((assetType) =>
-    installKibanaSavedObjects({ savedObjectsClient, assetType, paths })
+  const installedAssets = await Promise.all(
+    kibanaAssetTypes.map((assetType) =>
+      installKibanaSavedObjects({ savedObjectsClient, assetType, paths })
+    )
   );
   // installKibanaSavedObjects returns AssetReference[], so .map creates AssetReference[][]
   // call .flat to flatten into one dimensional array
-  const newInstalledKibanaAssets = await Promise.all(installationPromises).then((results) =>
-    results.flat()
-  );
-  await saveInstalledKibanaRefs(savedObjectsClient, pkgName, newInstalledKibanaAssets);
-  return newInstalledKibanaAssets;
+  return installedAssets.flat();
 }
 export const deleteKibanaInstalledRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
