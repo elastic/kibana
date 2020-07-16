@@ -60,26 +60,6 @@ const TagContainer = styled.div`
 
 TagContainer.displayName = 'TagContainer';
 
-const AdvancedSettingsAccordion = styled(EuiAccordion)`
-  .euiAccordion__iconWrapper {
-    display: none;
-  }
-
-  .euiAccordion__childWrapper {
-    transition-duration: 1ms; /* hack to fire Step accordion to set proper content's height */
-  }
-
-  &.euiAccordion-isOpen .euiButtonEmpty__content > svg {
-    transform: rotate(90deg);
-  }
-`;
-
-const AdvancedSettingsAccordionButton = (
-  <EuiButtonEmpty flush="left" size="s" iconType="arrowRight">
-    {I18n.ADVANCED_SETTINGS}
-  </EuiButtonEmpty>
-);
-
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   addPadding = false,
   defaultValues,
@@ -198,10 +178,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
           </TagContainer>
           <EuiSpacer size="l" />
-          <AdvancedSettingsAccordion
+          <EuiAccordion
             data-test-subj="advancedSettings"
             id="advancedSettingsAccordion"
-            buttonContent={AdvancedSettingsAccordionButton}
+            buttonContent={I18n.ADVANCED_SETTINGS}
           >
             <EuiSpacer size="l" />
             <UseField
@@ -322,7 +302,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 placeholder: '',
               }}
             />
-          </AdvancedSettingsAccordion>
+          </EuiAccordion>
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {
               const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
