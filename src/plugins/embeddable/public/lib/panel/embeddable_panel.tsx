@@ -125,9 +125,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshNotifications() {
-    let notifications = await this.props.getActions(PANEL_NOTIFICATION_TRIGGER, {
-      embeddable: this.props.embeddable,
-    });
+    let notifications;
+    // TODO: remove this try/catch
+    try {
+      notifications = await this.props.getActions(PANEL_NOTIFICATION_TRIGGER, {
+        embeddable: this.props.embeddable,
+      });
+    } catch (e) {
+      return;
+    }
     if (!this.mounted) return;
 
     const { disabledActions } = this.props.embeddable.getInput();

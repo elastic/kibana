@@ -171,24 +171,44 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     // TODO: In the current infrastructure, embeddables in a container do not react properly to
     // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
     // until the container logic is fixed.
-    const finalPanels = { ...this.input.panels };
-    delete finalPanels[previousPanelState.explicitInput.id];
-    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
-    finalPanels[newPanelId] = {
-      ...previousPanelState,
-      ...newPanelState,
-      gridData: {
-        ...previousPanelState.gridData,
-        i: newPanelId,
-      },
-      explicitInput: {
-        ...newPanelState.explicitInput,
-        id: newPanelId,
-      },
-    };
-    this.updateInput({
-      panels: finalPanels,
-      lastReloadRequestTime: new Date().getTime(),
+    // const finalPanels = { ...this.input.panels };
+    // delete finalPanels[previousPanelState.explicitInput.id];
+    // const newPanelId = newPanelState.explicitInput?.id || previousPanelState.explicitInput.id;
+    // this.input.panels[newPanelId] = {
+    //   ...previousPanelState,
+    //   ...newPanelState,
+    //   gridData: {
+    //     ...previousPanelState.gridData,
+    //     i: newPanelId,
+    //   },
+    //   explicitInput: {
+    //     ...newPanelState.explicitInput,
+    //     id: newPanelId,
+    //   },
+    // };
+    // this.updateInput({
+    //   panels: this.input.panels,
+    //   lastReloadRequestTime: Date.now(),
+    // });
+    this.untilEmbeddableLoaded(previousPanelState.explicitInput.id).then((embeddable) => {
+      // console.log('Pre', embeddable, {
+      //   ...previousPanelState.explicitInput,
+      //   ...newPanelState,
+      // });
+      const changes = {
+        panels: {
+          [previousPanelState.explicitInput.id]: {
+            type: newPanelState.type,
+            explicitInput: { ...previousPanelState.explicitInput, ...newPanelState.explicitInput },
+          },
+        },
+      };
+      // console.log({ changes });
+      embeddable.updateInput(changes);
+      // console.log('Post', embeddable, {
+      //   ...previousPanelState.explicitInput,
+      //   ...newPanelState,
+      // });
     });
   }
 

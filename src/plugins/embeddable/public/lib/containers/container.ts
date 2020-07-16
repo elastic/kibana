@@ -211,6 +211,9 @@ export abstract class Container<
       throw new PanelNotFoundError();
     }
     const panelState: PanelState = this.input.panels[embeddableId];
+    if (!panelState.explicitInput) {
+      // console.log('No data in here!', embeddableId, panelState);
+    }
     return panelState as PanelState<TEmbeddableInput>;
   }
 
