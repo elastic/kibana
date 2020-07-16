@@ -5,17 +5,17 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
-import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
-import { EuiFieldText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
-import { AddMessageVariables } from '../../add_message_variables';
 import { ServiceNowActionParams } from './types';
+import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
+import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 
 const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   ServiceNowActionParams
@@ -75,13 +75,6 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, description, comment, severity, impact, urgency]);
-
-  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editSubActionProperty(
-      paramsProperty,
-      ((actionParams as any).subActionParams[paramsProperty] ?? '').concat(` {{${variable}}}`)
-    );
-  };
 
   return (
     <Fragment>
@@ -164,96 +157,44 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
             defaultMessage: 'Short description',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) => onSelectMessageVariable('title', variable)}
-            paramsProperty="title"
-          />
-        }
       >
-        <EuiFieldText
-          fullWidth
-          name="title"
-          data-test-subj="titleInput"
-          isInvalid={errors.title.length > 0 && title !== undefined}
-          value={title || ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editSubActionProperty('title', e.target.value);
-          }}
-          onBlur={() => {
-            if (!title) {
-              editSubActionProperty('title', '');
-            }
-          }}
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editSubActionProperty}
+          messageVariables={messageVariables}
+          paramsProperty={'title'}
+          inputTargetValue={title}
+          errors={errors.title as string[]}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editSubActionProperty}
+        messageVariables={messageVariables}
+        paramsProperty={'description'}
+        inputTargetValue={description}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.descriptionTextAreaFieldLabel',
           {
             defaultMessage: 'Description (optional)',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('description', variable)
-            }
-            paramsProperty="description"
-          />
-        }
-      >
-        <EuiTextArea
-          fullWidth
-          name="description"
-          value={description || ''}
-          data-test-subj="incidentDescriptionTextArea"
-          onChange={(e) => {
-            editSubActionProperty('description', e.target.value);
-          }}
-          onBlur={() => {
-            if (!description) {
-              editSubActionProperty('description', '');
-            }
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
+        errors={errors.description as string[]}
+      />
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editSubActionProperty}
+        messageVariables={messageVariables}
+        paramsProperty={'comment'}
+        inputTargetValue={comment}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.commentsTextAreaFieldLabel',
           {
             defaultMessage: 'Additional comments (optional)',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('comment', variable)
-            }
-            paramsProperty="comment"
-          />
-        }
-      >
-        <EuiTextArea
-          fullWidth
-          name="comment"
-          value={comment || ''}
-          data-test-subj="incidentCommentTextArea"
-          onChange={(e) => {
-            editSubActionProperty('comment', e.target.value);
-          }}
-          onBlur={() => {
-            if (!comment) {
-              editSubActionProperty('comment', '');
-            }
-          }}
-        />
-      </EuiFormRow>
+        errors={errors.comment as string[]}
+      />
     </Fragment>
   );
 };
