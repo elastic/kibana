@@ -9491,7 +9491,6 @@
     "xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError": "索引模式 {indexPatternName} 已存在。",
     "xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob": "创建数据帧分析作业时发生错误：",
     "xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList": "获取现有数据帧分析作业 ID 时发生错误：",
-    "xpack.ml.dataframe.analytics.create.errorGettingDataFrameIndexNames": "获取现有索引名称时发生错误：",
     "xpack.ml.dataframe.analytics.create.errorGettingIndexPatternTitles": "获取现有索引模式标题时发生错误：",
     "xpack.ml.dataframe.analytics.create.errorStartingDataFrameAnalyticsJob": "启动数据帧分析作业时发生错误：",
     "xpack.ml.dataframe.analytics.create.indexPatternAlreadyExistsError": "具有此名称的索引模式已存在。",

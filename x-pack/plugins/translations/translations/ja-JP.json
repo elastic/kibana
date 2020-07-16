@@ -9487,7 +9487,6 @@
     "xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError": "インデックスパターン{indexPatternName}はすでに作成されています。",
     "xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob": "データフレーム分析ジョブの作成中にエラーが発生しました。",
     "xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList": "既存のデータフレーム分析ジョブIDの取得中にエラーが発生しました。",
-    "xpack.ml.dataframe.analytics.create.errorGettingDataFrameIndexNames": "既存のインデックス名の取得中にエラーが発生しました。",
     "xpack.ml.dataframe.analytics.create.errorGettingIndexPatternTitles": "既存のインデックスパターンのタイトルの取得中にエラーが発生しました。",
     "xpack.ml.dataframe.analytics.create.errorStartingDataFrameAnalyticsJob": "データフレーム分析ジョブの開始中にエラーが発生しました。",
     "xpack.ml.dataframe.analytics.create.indexPatternAlreadyExistsError": "このタイトルのインデックスパターンが既に存在します。",
