@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { DiscoverStart } from '../../../../../../src/plugins/discover/public';
-import { EmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
 import { ViewMode, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -17,7 +16,6 @@ export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
 export interface PluginDeps {
   discover: Pick<DiscoverStart, 'urlGenerator'>;
-  embeddable: Pick<EmbeddableStart, 'filtersAndTimeRangeFromContext'>;
 }
 
 export interface CoreDeps {

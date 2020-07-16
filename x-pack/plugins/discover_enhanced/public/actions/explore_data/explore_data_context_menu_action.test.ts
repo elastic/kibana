@@ -8,7 +8,6 @@ import { ExploreDataContextMenuAction } from './explore_data_context_menu_action
 import { Params, PluginDeps } from './abstract_explore_data_action';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
-import { EmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
 import { i18n } from '@kbn/i18n';
 import {
   VisualizeEmbeddableContract,
@@ -37,16 +36,9 @@ const setup = () => {
     createUrl: jest.fn(() => Promise.resolve('/xyz/app/discover/foo#bar')),
   } as unknown) as UrlGenerator;
 
-  const filtersAndTimeRangeFromContext = jest.fn((async () => ({
-    filters: [],
-  })) as EmbeddableStart['filtersAndTimeRangeFromContext']);
-
   const plugins: PluginDeps = {
     discover: {
       urlGenerator,
-    },
-    embeddable: {
-      filtersAndTimeRangeFromContext,
     },
   };
 

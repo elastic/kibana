@@ -59,6 +59,7 @@ import {
   mapAndFlattenFilters,
   extractTimeFilter,
   convertRangeFilterToTimeRangeString,
+  extractTimeRange,
 } from './query';
 
 // Filter helpers namespace:
@@ -99,6 +100,7 @@ export const esFilters = {
   convertRangeFilterToTimeRangeString,
   mapAndFlattenFilters,
   extractTimeFilter,
+  extractTimeRange,
 };
 
 export {
