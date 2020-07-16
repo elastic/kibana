@@ -24,23 +24,31 @@ import { FilterManager } from '../filter_manager';
 import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../kibana_utils/public';
 import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
+import { QueryStringContract } from '../query_string';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },
   filterManager,
+  queryString,
 }: {
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
+  queryString: QueryStringContract;
 }): Observable<{ changes: QueryStateChange; state: QueryState }> {
   return new Observable((subscriber) => {
     const state = createStateContainer<QueryState>({
       time: timefilter.getTime(),
       refreshInterval: timefilter.getRefreshInterval(),
       filters: filterManager.getFilters(),
+      queryString: queryString.getQuery(),
     });
 
     let currentChange: QueryStateChange = {};
     const subs: Subscription[] = [
+      queryString.getQueryUpdate$().subscribe(() => {
+        currentChange.queryString = true;
+        state.set({ ...state.get(), queryString: queryString.getQuery() });
+      }),
       timefilter.getTimeUpdate$().subscribe(() => {
         currentChange.time = true;
         state.set({ ...state.get(), time: timefilter.getTime() });
