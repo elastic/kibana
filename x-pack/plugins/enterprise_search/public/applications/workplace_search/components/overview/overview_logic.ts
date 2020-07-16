@@ -45,6 +45,7 @@ export interface IOverviewActions {
 export interface IOverviewValues extends IOverviewServerData {
   dataLoading: boolean;
   hideOnboarding: boolean;
+  statsColumns: 'halves' | 'fourths';
   hasErrorConnecting: boolean;
   flashMessages: IFlashMessagesProps;
 }

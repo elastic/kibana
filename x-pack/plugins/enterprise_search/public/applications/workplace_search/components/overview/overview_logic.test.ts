@@ -101,6 +101,29 @@ describe('OverviewLogic', () => {
     });
   });
 
+  describe('selectors', () => {
+    it('will set `hideOnboarding`', () => {
+      OverviewLogic.actions.setServerData({
+        ...mockLogicValues,
+        hasUsers: true,
+        hasOrgSources: true,
+        isOldAccount: true,
+        organization: {
+          name: 'foo',
+          defaultOrgName: 'bar',
+        },
+      });
+
+      expect(OverviewLogic.values.hideOnboarding).toEqual(true);
+    });
+
+    it('will set `statsColumns`', () => {
+      OverviewLogic.actions.setServerData({ ...mockLogicValues, isFederatedAuth: false });
+
+      expect(OverviewLogic.values.statsColumns).toEqual('fourths');
+    });
+  });
+
   describe('initializeOverview', () => {
     it('calls API and sets values', async () => {
       const mockHttp = mockKibanaContext.http;
@@ -118,6 +141,22 @@ describe('OverviewLogic', () => {
 
       expect(mockApi).toHaveBeenCalledWith('/api/workplace_search/overview');
       expect(setServerDataSpy).toHaveBeenCalled();
+    });
+
+    it('handles error state', async () => {
+      const mockHttp = mockKibanaContext.http;
+      const setHasErrorConnectingSpy = jest.spyOn(OverviewLogic.actions, 'setHasErrorConnecting');
+
+      await act(async () =>
+        OverviewLogic.actions.initializeOverview({
+          http: {
+            ...mockHttp,
+            get: () => Promise.reject(),
+          },
+        })
+      );
+
+      expect(setHasErrorConnectingSpy).toHaveBeenCalled();
     });
   });
 });
