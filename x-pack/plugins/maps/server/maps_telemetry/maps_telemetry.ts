@@ -6,13 +6,25 @@
 
 import _ from 'lodash';
 import {
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
   SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
-import { SOURCE_TYPES, ES_GEO_FIELD_TYPE, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { LayerDescriptor } from '../../common/descriptor_types';
+import {
+  ES_GEO_FIELD_TYPE,
+  LAYER_TYPE,
+  MAP_SAVED_OBJECT_TYPE,
+  SCALING_TYPES,
+  SOURCE_TYPES,
+} from '../../common/constants';
+import {
+  AbstractSourceDescriptor,
+  ESGeoGridSourceDescriptor,
+  ESSearchSourceDescriptor,
+  LayerDescriptor,
+  SourceDescriptor,
+} from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
 import { getInternalRepository } from '../kibana_server_services';
@@ -82,6 +94,111 @@ function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
   };
 }
 
+function getEMSLayerCount(layerLists: LayerDescriptor[][]): ILayerTypeCount[] {
+  return layerLists.map((layerList: LayerDescriptor[]) => {
+    const emsLayers = layerList.filter((layer: LayerDescriptor) => {
+      return (
+        layer.sourceDescriptor !== null &&
+        layer.sourceDescriptor.type === SOURCE_TYPES.EMS_FILE &&
+        (layer.sourceDescriptor as AbstractSourceDescriptor).id
+      );
+    });
+    const emsCountsById = _(emsLayers).countBy((layer: LayerDescriptor) => {
+      return (layer.sourceDescriptor as AbstractSourceDescriptor).id;
+    });
+
+    const layerTypeCount = emsCountsById.value();
+    return layerTypeCount as ILayerTypeCount;
+  }) as ILayerTypeCount[];
+}
+
+function isFieldGeoShape(
+  indexPatterns: IIndexPattern[],
+  indexPatternId: string,
+  geoField: string | undefined
+): boolean {
+  if (!geoField) {
+    return false;
+  }
+
+  const matchIndexPattern = indexPatterns.find((indexPattern: IIndexPattern) => {
+    return indexPattern.id === indexPatternId;
+  });
+
+  if (!matchIndexPattern) {
+    return false;
+  }
+
+  const fieldList: IFieldType[] =
+    matchIndexPattern.attributes && matchIndexPattern.attributes.fields
+      ? JSON.parse(matchIndexPattern.attributes.fields)
+      : [];
+
+  const matchField = fieldList.find((field: IFieldType) => {
+    return field.name === geoField;
+  });
+
+  return !!matchField && matchField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE;
+}
+
+function isGeoShapeAggLayer(indexPatterns: IIndexPattern[], layer: LayerDescriptor): boolean {
+  if (layer.sourceDescriptor === null) {
+    return false;
+  }
+
+  if (
+    layer.type !== LAYER_TYPE.VECTOR &&
+    layer.type !== LAYER_TYPE.BLENDED_VECTOR &&
+    layer.type !== LAYER_TYPE.HEATMAP
+  ) {
+    return false;
+  }
+
+  const sourceDescriptor: SourceDescriptor = layer.sourceDescriptor;
+  if (sourceDescriptor.type === SOURCE_TYPES.ES_GEO_GRID) {
+    return isFieldGeoShape(
+      indexPatterns,
+      (sourceDescriptor as ESGeoGridSourceDescriptor).indexPatternId,
+      (sourceDescriptor as ESGeoGridSourceDescriptor).geoField
+    );
+  } else if (
+    sourceDescriptor.type === SOURCE_TYPES.ES_SEARCH &&
+    (sourceDescriptor as ESSearchSourceDescriptor).scalingType === SCALING_TYPES.CLUSTERS
+  ) {
+    return isFieldGeoShape(
+      indexPatterns,
+      (sourceDescriptor as ESSearchSourceDescriptor).indexPatternId,
+      (sourceDescriptor as ESSearchSourceDescriptor).geoField
+    );
+  } else {
+    return false;
+  }
+}
+
+function getGeoShapeAggCount(
+  layerLists: LayerDescriptor[][],
+  indexPatterns: IIndexPattern[]
+): number {
+  const countsPerMap: number[] = layerLists.map((layerList: LayerDescriptor[]) => {
+    const geoShapeAggLayers = layerList.filter((layerDescriptor) => {
+      return isGeoShapeAggLayer(indexPatterns, layerDescriptor);
+    });
+    return geoShapeAggLayers.length;
+  });
+
+  return _.sum(countsPerMap);
+}
+
+export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
+  return mapSavedObjects.map((savedMapObject) => {
+    const layerList =
+      savedMapObject.attributes && savedMapObject.attributes.layerListJSON
+        ? JSON.parse(savedMapObject.attributes.layerListJSON)
+        : [];
+    return layerList as LayerDescriptor[];
+  });
+}
+
 export function buildMapsTelemetry({
   mapSavedObjects,
   indexPatternSavedObjects,
@@ -91,17 +208,13 @@ export function buildMapsTelemetry({
   indexPatternSavedObjects: IIndexPattern[];
   settings: SavedObjectAttribute;
 }): SavedObjectAttributes {
-  const layerLists = mapSavedObjects.map((savedMapObject) =>
-    savedMapObject.attributes && savedMapObject.attributes.layerListJSON
-      ? JSON.parse(savedMapObject.attributes.layerListJSON)
-      : []
-  );
+  const layerLists: LayerDescriptor[][] = getLayerLists(mapSavedObjects);
   const mapsCount = layerLists.length;
 
-  const dataSourcesCount = layerLists.map((lList) => {
+  const dataSourcesCount = layerLists.map((layerList: LayerDescriptor[]) => {
     // todo: not every source-descriptor has an id
     // @ts-ignore
-    const sourceIdList = lList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
+    const sourceIdList = layerList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
 
@@ -109,15 +222,7 @@ export function buildMapsTelemetry({
   const layerTypesCount = layerLists.map((lList) => _.countBy(lList, 'type'));
 
   // Count of EMS Vector layers used
-  const emsLayersCount = layerLists.map((lList) =>
-    _(lList)
-      .countBy((layer: LayerDescriptor) => {
-        const isEmsFile = _.get(layer, 'sourceDescriptor.type') === SOURCE_TYPES.EMS_FILE;
-        return isEmsFile && _.get(layer, 'sourceDescriptor.id');
-      })
-      .pickBy((val, key) => key !== 'false')
-      .value()
-  ) as ILayerTypeCount[];
+  const emsLayersCount = getEMSLayerCount(layerLists);
 
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
@@ -127,11 +232,16 @@ export function buildMapsTelemetry({
     indexPatternsWithGeoPointFieldCount,
     indexPatternsWithGeoShapeFieldCount,
   } = getIndexPatternsWithGeoFieldCount(indexPatternSavedObjects);
+
+  // Tracks whether user users Gold+ only functionality
+  const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists, indexPatternSavedObjects);
+
   return {
     settings,
     indexPatternsWithGeoFieldCount,
     indexPatternsWithGeoPointFieldCount,
     indexPatternsWithGeoShapeFieldCount,
+    geoShapeAggLayersCount,
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture

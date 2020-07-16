@@ -6,17 +6,17 @@ exports[`Transform: Transform List Actions <StopAction /> Minimal initialization
   delay="regular"
   position="top"
 >
-  <EuiLink
+  <EuiButtonEmpty
     aria-label="Stop"
-    color="subdued"
+    color="text"
     data-test-subj="transformActionStop"
+    flush="left"
+    iconType="stop"
+    isDisabled={true}
     onClick={[Function]}
+    size="s"
   >
-    <EuiIcon
-      type="stop"
-    />
-     
     Stop
-  </EuiLink>
+  </EuiButtonEmpty>
 </EuiToolTip>
 `;
