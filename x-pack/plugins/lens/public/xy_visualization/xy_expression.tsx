@@ -102,17 +102,21 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
-    hideXAxisTitle: {
-      types: ['boolean'],
-      help: 'Hide X axis title',
+    tickLabelsVisibilitySettings: {
+      types: ['lens_xy_tickLabelsConfig'],
+      help: 'Show x and y axes tick labels',
     },
-    showXAxisGridlines: {
-      types: ['boolean'],
-      help: 'Show X axis gridlines',
+    gridlinesVisibilitySettings: {
+      types: ['lens_xy_gridlinesConfig'],
+      help: 'Show x and y gridlines',
     },
-    hideXAxisTickLabels: {
+    showXAxisTitle: {
       types: ['boolean'],
-      help: 'Hide X axis tick labels',
+      help: 'Hide X-axis title',
+    },
+    showYAxisTitle: {
+      types: ['boolean'],
+      help: 'Hide Y-axis title',
     },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -215,9 +219,10 @@ export function XYChart({
     legend,
     layers,
     fittingFunction,
-    hideXAxisTitle,
-    showXAxisGridlines,
-    hideXAxisTickLabels,
+    tickLabelsVisibilitySettings,
+    gridlinesVisibilitySettings,
+    showXAxisTitle,
+    showYAxisTitle,
   } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -392,12 +397,12 @@ export function XYChart({
       <Axis
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
-        title={!hideXAxisTitle ? xTitle : undefined}
-        showGridLines={showXAxisGridlines}
+        title={showXAxisTitle ? xTitle : undefined}
+        showGridLines={gridlinesVisibilitySettings.x}
         gridLineStyle={{ strokeWidth: 2 }}
         hide={filteredLayers[0].hide}
         // @ts-ignore, temporary solution for not displaying the ticks
-        tickFormat={!hideXAxisTickLabels ? (d) => xAxisFormatter.convert(d) : () => {}}
+        tickFormat={tickLabelsVisibilitySettings.x ? (d) => xAxisFormatter.convert(d) : () => {}}
       />
 
       {yAxesConfiguration.map((axis, index) => (
@@ -407,17 +412,22 @@ export function XYChart({
           groupId={axis.groupId}
           position={axis.position}
           title={
-            axis.series
-              .map(
-                (series) =>
-                  data.tables[series.layer].columns.find((column) => column.id === series.accessor)
-                    ?.name
-              )
-              .filter((name) => Boolean(name))[0] || args.yTitle
+            showYAxisTitle
+              ? args.yTitle ||
+                axis.series
+                  .map(
+                    (series) =>
+                      data.tables[series.layer].columns.find(
+                        (column) => column.id === series.accessor
+                      )?.name
+                  )
+                  .filter((name) => Boolean(name))[0]
+              : undefined
           }
-          showGridLines={false}
+          showGridLines={gridlinesVisibilitySettings.y}
           hide={filteredLayers[0].hide}
-          tickFormat={(d) => axis.formatter.convert(d)}
+          // @ts-ignore, temporary solution for not displaying the ticks
+          tickFormat={tickLabelsVisibilitySettings.y ? (d) => xAxisFormatter.convert(d) : () => {}}
         />
       ))}
 

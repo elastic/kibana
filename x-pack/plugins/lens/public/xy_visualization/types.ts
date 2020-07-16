@@ -59,6 +59,81 @@ export const legendConfig: ExpressionFunctionDefinition<
   },
 };
 
+export interface AxesSettingsConfig {
+  x: boolean;
+  y: boolean;
+}
+
+type TickLabelsConfigResult = AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
+
+export const tickLabelsConfig: ExpressionFunctionDefinition<
+  'lens_xy_tickLabelsConfig',
+  null,
+  AxesSettingsConfig,
+  TickLabelsConfigResult
+> = {
+  name: 'lens_xy_tickLabelsConfig',
+  aliases: [],
+  type: 'lens_xy_tickLabelsConfig',
+  help: `Configure the xy chart's tick labels appearance`,
+  inputTypes: ['null'],
+  args: {
+    x: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.tickLabels.help', {
+        defaultMessage: 'Specifies whether or not the tick labels are visible.',
+      }),
+    },
+    y: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.tickLabels.help', {
+        defaultMessage: 'Specifies whether or not the tick labels are visible.',
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: TickLabelsConfig) {
+    return {
+      type: 'lens_xy_tickLabelsConfig',
+      ...args,
+    };
+  },
+};
+
+type GridlinesConfigResult = AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
+
+export const gridlinesConfig: ExpressionFunctionDefinition<
+  'lens_xy_gridlinesConfig',
+  null,
+  AxesSettingsConfig,
+  GridlinesConfigResult
+> = {
+  name: 'lens_xy_gridlinesConfig',
+  aliases: [],
+  type: 'lens_xy_gridlinesConfig',
+  help: `Configure the xy chart's gridlines appearance`,
+  inputTypes: ['null'],
+  args: {
+    x: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.gridlines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines are visible.',
+      }),
+    },
+    y: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.gridlines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines are visible.',
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: gridlinesConfig) {
+    return {
+      type: 'lens_xy_gridlinesConfig',
+      ...args,
+    };
+  },
+};
+
 interface AxisConfig {
   title: string;
   hide?: boolean;
@@ -227,9 +302,10 @@ export interface XYArgs {
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
   fittingFunction?: FittingFunction;
-  hideXAxisTitle?: boolean;
-  showXAxisGridlines?: boolean;
-  hideXAxisTickLabels?: boolean;
+  showXAxisTitle?: boolean;
+  showYAxisTitle?: boolean;
+  tickLabelsVisibilitySettings: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
+  gridlinesVisibilitySettings: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
 }
 
 // Persisted parts of the state
@@ -239,9 +315,10 @@ export interface XYState {
   fittingFunction?: FittingFunction;
   layers: LayerConfig[];
   xTitle?: string;
-  hideXAxisTitle?: boolean;
-  showXAxisGridlines?: boolean;
-  hideXAxisTickLabels?: boolean;
+  showXAxisTitle?: boolean;
+  showYAxisTitle?: boolean;
+  tickLabelsVisibilitySettings: AxesSettingsConfig;
+  gridlinesVisibilitySettings: AxesSettingsConfig;
 }
 
 export type State = XYState;

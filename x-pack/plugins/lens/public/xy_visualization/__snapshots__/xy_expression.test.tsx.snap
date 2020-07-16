@@ -27,6 +27,7 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     }
     id="x"
     position="bottom"
+    showGridLines={true}
     tickFormat={[Function]}
     title="c"
   />
@@ -37,7 +38,6 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title="a"
   />
   <Connect(SpecInstance)
     color={[Function]}
@@ -157,6 +157,7 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     id="x"
     position="bottom"
+    showGridLines={true}
     tickFormat={[Function]}
     title="c"
   />
@@ -167,7 +168,6 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title="a"
   />
   <Connect(SpecInstance)
     color={[Function]}
@@ -277,6 +277,7 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     id="x"
     position="left"
+    showGridLines={true}
     tickFormat={[Function]}
     title="c"
   />
@@ -287,7 +288,6 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title="a"
   />
   <Connect(SpecInstance)
     color={[Function]}
@@ -397,6 +397,7 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     }
     id="x"
     position="bottom"
+    showGridLines={true}
     tickFormat={[Function]}
     title="c"
   />
@@ -407,7 +408,6 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title="a"
   />
   <Connect(SpecInstance)
     color={[Function]}
@@ -527,6 +527,7 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     }
     id="x"
     position="bottom"
+    showGridLines={true}
     tickFormat={[Function]}
     title="c"
   />
@@ -537,7 +538,6 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title="a"
   />
   <Connect(SpecInstance)
     color={[Function]}
@@ -655,6 +655,7 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     id="x"
     position="bottom"
+    showGridLines={true}
     tickFormat={[Function]}
     title="c"
   />
@@ -665,7 +666,6 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     position="left"
     showGridLines={false}
     tickFormat={[Function]}
-    title="a"
   />
   <Connect(SpecInstance)
     color={[Function]}
@@ -783,6 +783,7 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     id="x"
     position="left"
+    showGridLines={true}
     tickFormat={[Function]}
     title="c"
   />
@@ -793,7 +794,6 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     position="bottom"
     showGridLines={false}
     tickFormat={[Function]}
-    title="a"
   />
   <Connect(SpecInstance)
     color={[Function]}

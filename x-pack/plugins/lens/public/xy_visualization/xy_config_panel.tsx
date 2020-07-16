@@ -32,7 +32,7 @@ import {
   VisualizationDimensionEditorProps,
   VisualizationToolbarProps,
 } from '../types';
-import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
+import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
@@ -95,15 +95,76 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
 }
 
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
+  const axes = [
+    {
+      id: 'x',
+      label: 'X-axis',
+    },
+    {
+      id: 'y',
+      label: 'Y-axis',
+    },
+  ];
+
   const [open, setOpen] = useState(false);
   const hasNonBarSeries = props.state?.layers.some(
     (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
   );
   const [xtitle, setXtitle] = useState<string>(props.state?.xTitle || '');
+  const [ytitle, setYtitle] = useState<string>(props.state?.yTitle || '');
+  const [tickLabelsVisibilitySettings, setTickLabelsVisibilitySettings] = useState<
+    AxesSettingsConfig
+  >({
+    ['x']: props.state?.tickLabelsVisibilitySettings
+      ? props.state.tickLabelsVisibilitySettings.x
+      : true,
+    ['y']: props.state?.tickLabelsVisibilitySettings
+      ? props.state.tickLabelsVisibilitySettings.y
+      : true,
+  });
+  const [gridlinesVisibilitySettings, setGridlinesVisibilitySettings] = useState<
+    AxesSettingsConfig
+  >({
+    ['x']: props.state?.gridlinesVisibilitySettings?.x,
+    ['y']: props.state?.gridlinesVisibilitySettings?.y,
+  });
 
   const onXTitleChange = (value: string): void => {
     setXtitle(value);
     props.setState({ ...props.state, xTitle: value });
+  };
+
+  const onYTitleChange = (value: string): void => {
+    setYtitle(value);
+    props.setState({ ...props.state, yTitle: value });
+  };
+
+  const onTickLabelsVisibilitySettingsChange = (optionId) => {
+    const newTickLabelsVisibilitySettings = {
+      ...tickLabelsVisibilitySettings,
+      ...{
+        [optionId]: !tickLabelsVisibilitySettings[optionId],
+      },
+    };
+    setTickLabelsVisibilitySettings(newTickLabelsVisibilitySettings);
+    props.setState({
+      ...props.state,
+      tickLabelsVisibilitySettings: newTickLabelsVisibilitySettings,
+    });
+  };
+
+  const onGridlinesVisibilitySettingsChange = (optionId) => {
+    const newGridlinesVisibilitySettings = {
+      ...gridlinesVisibilitySettings,
+      ...{
+        [optionId]: !gridlinesVisibilitySettings[optionId],
+      },
+    };
+    setGridlinesVisibilitySettings(newGridlinesVisibilitySettings);
+    props.setState({
+      ...props.state,
+      gridlinesVisibilitySettings: newGridlinesVisibilitySettings,
+    });
   };
 
   return (
@@ -169,79 +230,110 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             </EuiFormRow>
           </EuiToolTip>
           <EuiHorizontalRule margin="s" />
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.TickLabels', {
+              defaultMessage: 'Tick Labels',
+            })}
+          >
+            <EuiButtonGroup
+              name="lnsTickLabels"
+              legend="Group of Tick Labels Visibility Settings"
+              options={axes}
+              idToSelectedMap={tickLabelsVisibilitySettings}
+              onChange={(id) => onTickLabelsVisibilitySettingsChange(id)}
+              buttonSize="compressed"
+              isFullWidth
+              type="multi"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.Gridlines', {
+              defaultMessage: 'Gridlines',
+            })}
+          >
+            <EuiButtonGroup
+              name="lndGridlines"
+              legend="Group of Gridlines Visibility Settings"
+              options={axes}
+              idToSelectedMap={gridlinesVisibilitySettings}
+              onChange={(id) => onGridlinesVisibilitySettingsChange(id)}
+              buttonSize="compressed"
+              isFullWidth
+              type="multi"
+            />
+          </EuiFormRow>
+          <EuiHorizontalRule margin="s" />
           <EuiTitle size="xxs">
-            <span>X Axis</span>
+            <span>Axis Titles</span>
           </EuiTitle>
           <EuiFormRow
             display="columnCompressed"
-            label={i18n.translate('xpack.lens.xyChart.XAxisTitleLabel', {
-              defaultMessage: 'Title',
-            })}
+            label={
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>X-axis</EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSwitch
+                    data-test-subj="lnsshowXAxisTitleSwitch"
+                    showLabel={false}
+                    label={i18n.translate('xpack.lens.xyChart.showXAxisTitleLabel', {
+                      defaultMessage: 'show X-axis Title',
+                    })}
+                    onChange={({ target }) =>
+                      props.setState({ ...props.state, showXAxisTitle: target.checked })
+                    }
+                    checked={props.state?.showXAxisTitle ?? true}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
           >
             <EuiFieldText
               data-test-subj="lnsXAxisTitle"
               compressed
-              placeholder="Overwrite X Axis Title"
+              placeholder="Overwrite X-axis title"
               value={xtitle}
+              disabled={
+                props.state && 'showXAxisTitle' in props.state ? !props.state.showXAxisTitle : false
+              }
               onChange={({ target }) => onXTitleChange(target.value)}
-              aria-label="Overwrite X Axis Title"
+              aria-label="Overwrite X-axis title"
             />
           </EuiFormRow>
           <EuiFormRow
-            display="columnCompressedSwitch"
-            label={i18n.translate('xpack.lens.xyChart.HideXAxisTitleLabel', {
-              defaultMessage: 'Hide Title',
-            })}
+            display="columnCompressed"
+            label={
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>Y-axis</EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSwitch
+                    data-test-subj="lnsShowYAxisTitleSwitch"
+                    showLabel={false}
+                    label={i18n.translate('xpack.lens.xyChart.ShowYAxisTitleLabel', {
+                      defaultMessage: 'Show Y-axis Title',
+                    })}
+                    onChange={({ target }) =>
+                      props.setState({ ...props.state, showYAxisTitle: target.checked })
+                    }
+                    checked={props.state?.showYAxisTitle ?? true}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
           >
-            <EuiSwitch
-              data-test-subj="lnsHideXAxisTitleSwitch"
-              showLabel={false}
-              label={i18n.translate('xpack.lens.xyChart.HideXAxisTitleLabel', {
-                defaultMessage: 'Hide Title',
-              })}
-              onChange={({ target }) =>
-                props.setState({ ...props.state, hideXAxisTitle: target.checked })
+            <EuiFieldText
+              data-test-subj="lnsYAxisTitle"
+              compressed
+              placeholder="Overwrite Y-axis title"
+              value={ytitle}
+              disabled={
+                props.state && 'showYAxisTitle' in props.state ? !props.state.showYAxisTitle : false
               }
-              checked={props.state?.hideXAxisTitle || false}
+              onChange={({ target }) => onYTitleChange(target.value)}
+              aria-label="Overwrite Y-axis title"
             />
           </EuiFormRow>
-          <EuiFormRow
-            display="columnCompressedSwitch"
-            label={i18n.translate('xpack.lens.xyChart.hideXAxisTickLabels', {
-              defaultMessage: 'Hide tick labels',
-            })}
-          >
-            <EuiSwitch
-              data-test-subj="lnsHideXAxisTickLabelsSwitch"
-              showLabel={false}
-              label={i18n.translate('xpack.lens.xyChart.hideXAxisTickLabels', {
-                defaultMessage: 'Hide tick labels',
-              })}
-              onChange={({ target }) =>
-                props.setState({ ...props.state, hideXAxisTickLabels: target.checked })
-              }
-              checked={props.state?.hideXAxisTickLabels || false}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            display="columnCompressedSwitch"
-            label={i18n.translate('xpack.lens.xyChart.ShowXAxisGridLines', {
-              defaultMessage: 'Show Gridlines',
-            })}
-          >
-            <EuiSwitch
-              data-test-subj="lnsShowXAxisGridLinesSwitch"
-              showLabel={false}
-              label={i18n.translate('xpack.lens.xyChart.ShowXAxisGridLines', {
-                defaultMessage: 'Show Gridlines',
-              })}
-              onChange={({ target }) =>
-                props.setState({ ...props.state, showXAxisGridlines: target.checked })
-              }
-              checked={props.state?.showXAxisGridlines || false}
-            />
-          </EuiFormRow>
-          <EuiHorizontalRule margin="s" />
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>

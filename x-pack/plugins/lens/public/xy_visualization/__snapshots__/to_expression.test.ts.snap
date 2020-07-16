@@ -8,11 +8,24 @@ Object {
         "fittingFunction": Array [
           "Carry",
         ],
-        "hideXAxisTickLabels": Array [
-          false,
-        ],
-        "hideXAxisTitle": Array [
-          false,
+        "gridlinesVisibilitySettings": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    false,
+                  ],
+                  "y": Array [
+                    true,
+                  ],
+                },
+                "function": "lens_xy_gridlinesConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
         "layers": Array [
           Object {
@@ -78,8 +91,30 @@ Object {
             "type": "expression",
           },
         ],
-        "showXAxisGridlines": Array [
+        "showXAxisTitle": Array [
           true,
+        ],
+        "showYAxisTitle": Array [
+          true,
+        ],
+        "tickLabelsVisibilitySettings": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    false,
+                  ],
+                  "y": Array [
+                    true,
+                  ],
+                },
+                "function": "lens_xy_tickLabelsConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
         "xTitle": Array [
           "col_a",

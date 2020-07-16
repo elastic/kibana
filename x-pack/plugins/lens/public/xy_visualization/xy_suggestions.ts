@@ -404,9 +404,17 @@ function buildSuggestion({
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     fittingFunction: currentState?.fittingFunction || 'None',
     xTitle: currentState?.xTitle,
-    hideXAxisTitle: currentState?.hideXAxisTitle || false,
-    showXAxisGridlines: currentState?.showXAxisGridlines || false,
-    hideXAxisTickLabels: currentState?.hideXAxisTickLabels || false,
+    yTitle: currentState?.yTitle,
+    showXAxisTitle: currentState?.showXAxisTitle ?? true,
+    showYAxisTitle: currentState?.showYAxisTitle ?? true,
+    tickLabelsVisibilitySettings: currentState?.tickLabelsVisibilitySettings || {
+      x: true,
+      y: true,
+    },
+    gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
+      x: false,
+      y: false,
+    },
     preferredSeriesType: seriesType,
     layers: [...keptLayers, newLayer],
   };

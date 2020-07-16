@@ -41,7 +41,8 @@ describe('#toExpression', () => {
           legend: { position: Position.Bottom, isVisible: true },
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
-          showXAxisGridlines: true,
+          tickLabelsVisibilitySettings: { x: false, y: true },
+          gridlinesVisibilitySettings: { x: false, y: true },
           layers: [
             {
               layerId: 'first',
@@ -78,7 +79,7 @@ describe('#toExpression', () => {
     ).toEqual('None');
   });
 
-  it('should default the hideXAxisTitle, showXAxisGridlines and hideXAxisTickLabels to false', () => {
+  it('should default the showXAxisTitle and showYAxisTitle to true', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
@@ -95,9 +96,8 @@ describe('#toExpression', () => {
       },
       frame
     ) as Ast;
-    expect(expression.chain[0].arguments.hideXAxisTitle[0]).toBeFalsy();
-    expect(expression.chain[0].arguments.showXAxisGridlines[0]).toBeFalsy();
-    expect(expression.chain[0].arguments.hideXAxisTickLabels[0]).toBeFalsy();
+    expect(expression.chain[0].arguments.showXAxisTitle[0]).toBe(true);
+    expect(expression.chain[0].arguments.showYAxisTitle[0]).toBe(true);
   });
 
   it('should not generate an expression when missing x', () => {
@@ -174,5 +174,55 @@ describe('#toExpression', () => {
         d: 'col_d',
       }),
     ]);
+  });
+
+  it('should default the tick labels visibility settings to true', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame
+    ) as Ast;
+    expect(
+      (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments.x
+    ).toBeTruthy();
+    expect(
+      (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments.y
+    ).toBeTruthy();
+  });
+
+  it('should default the gridlines visibility settings to false', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame
+    ) as Ast;
+    expect(
+      (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments.x
+    ).toBeTruthy();
+    expect(
+      (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments.y
+    ).toBeTruthy();
   });
 });

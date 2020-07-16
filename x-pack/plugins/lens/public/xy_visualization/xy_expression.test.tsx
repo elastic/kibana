@@ -22,7 +22,15 @@ import { LensMultiTable } from '../types';
 import { KibanaDatatable, KibanaDatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
+import {
+  XYArgs,
+  LegendConfig,
+  legendConfig,
+  layerConfig,
+  LayerArgs,
+  AxesSettingsConfig,
+  tickLabelsConfig,
+} from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
@@ -211,6 +219,18 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     isVisible: false,
     position: Position.Top,
   },
+  showXAxisTitle: true,
+  showyAxisTitle: true,
+  tickLabelsVisibilitySettings: {
+    type: 'lens_xy_tickLabelsConfig',
+    x: true,
+    y: false,
+  },
+  gridlinesVisibilitySettings: {
+    type: 'lens_xy_gridlinesConfig',
+    x: true,
+    y: false,
+  },
   layers,
 });
 
@@ -264,6 +284,20 @@ describe('xy_expression', () => {
         type: 'lens_xy_layer',
         ...args,
       });
+    });
+  });
+
+  test('tickLabelsConfig produces the correct arguments', () => {
+    const args: AxesSettingsConfig = {
+      x: true,
+      y: false,
+    };
+
+    const result = tickLabelsConfig.fn(null, args, createMockExecutionContext());
+
+    expect(result).toEqual({
+      type: 'lens_xy_tickLabelsConfig',
+      ...args,
     });
   });
 
@@ -1365,10 +1399,10 @@ describe('xy_expression', () => {
       expect(convertSpy).toHaveBeenCalledWith('I');
     });
 
-    test('it should not pass the formatter function to the axis if the hideXAxisTickLabels switch is on', () => {
+    test('it should not pass the formatter function to the x axis if the visibility of the tick labels is off', () => {
       const { data, args } = sampleArgs();
 
-      args.hideXAxisTickLabels = true;
+      args.tickLabelsVisibilitySettings.x = false;
 
       const instance = shallow(
         <XYChart
@@ -1429,6 +1463,16 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        tickLabelsVisibilitySettings: {
+          type: 'lens_xy_tickLabelsConfig',
+          x: true,
+          y: true,
+        },
+        gridlinesVisibilitySettings: {
+          type: 'lens_xy_gridlinesConfig',
+          x: true,
+          y: false,
+        },
         layers: [
           {
             layerId: 'first',
@@ -1498,6 +1542,16 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        tickLabelsVisibilitySettings: {
+          type: 'lens_xy_tickLabelsConfig',
+          x: true,
+          y: false,
+        },
+        gridlinesVisibilitySettings: {
+          type: 'lens_xy_gridlinesConfig',
+          x: true,
+          y: false,
+        },
         layers: [
           {
             layerId: 'first',
@@ -1554,6 +1608,16 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        tickLabelsVisibilitySettings: {
+          type: 'lens_xy_tickLabelsConfig',
+          x: true,
+          y: false,
+        },
+        gridlinesVisibilitySettings: {
+          type: 'lens_xy_gridlinesConfig',
+          x: true,
+          y: false,
+        },
         layers: [
           {
             layerId: 'first',
@@ -1670,7 +1734,7 @@ describe('xy_expression', () => {
     test('it should hide the X axis title if the corresponding switch is on', () => {
       const { data, args } = sampleArgs();
 
-      args.hideXAxisTitle = true;
+      args.showXAxisTitle = false;
 
       const component = shallow(
         <XYChart

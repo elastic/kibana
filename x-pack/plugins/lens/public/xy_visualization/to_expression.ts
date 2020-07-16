@@ -117,7 +117,7 @@ export const buildExpression = (
         function: 'lens_xy_chart',
         arguments: {
           xTitle: [state.xTitle || xTitle],
-          yTitle: [yTitle],
+          yTitle: [state.yTitle || yTitle],
           legend: [
             {
               type: 'expression',
@@ -134,9 +134,46 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
-          hideXAxisTitle: [state.hideXAxisTitle || false],
-          showXAxisGridlines: [state.showXAxisGridlines || false],
-          hideXAxisTickLabels: [state.hideXAxisTickLabels || false],
+          showXAxisTitle: [state.showXAxisTitle ?? true],
+          showYAxisTitle: [state.showYAxisTitle ?? true],
+          tickLabelsVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_tickLabelsConfig',
+                  arguments: {
+                    x: [
+                      state?.tickLabelsVisibilitySettings
+                        ? state.tickLabelsVisibilitySettings.x
+                        : true,
+                    ],
+                    y: [
+                      state?.tickLabelsVisibilitySettings
+                        ? state.tickLabelsVisibilitySettings.y
+                        : true,
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+          gridlinesVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_gridlinesConfig',
+                  arguments: {
+                    x: [state?.gridlinesVisibilitySettings?.x],
+                    y: [state?.gridlinesVisibilitySettings?.y],
+                  },
+                },
+              ],
+            },
+          ],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
