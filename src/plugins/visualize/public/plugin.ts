@@ -121,7 +121,6 @@ export class VisualizePlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         this.currentHistory = params.history;
-        pluginsStart.kibanaLegacy.loadStyles();
 
         // make sure the index pattern list is up to date
         pluginsStart.data.indexPatterns.clearCache();

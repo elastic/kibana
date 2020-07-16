@@ -41,7 +41,6 @@ export function createRegionMapVisualization({
 
     async render(esResponse, visParams) {
       getKibanaLegacy().loadFontAwesome();
-      getKibanaLegacy().loadStyles();
       await super.render(esResponse, visParams);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
