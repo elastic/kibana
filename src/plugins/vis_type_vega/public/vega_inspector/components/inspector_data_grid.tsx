@@ -28,7 +28,9 @@ const inspectorDataGridAriaLabel = i18n.translate('visTypeVega.inspector.dataGri
 
 const DEFAULT_PAGE_SIZE = 15;
 
-export const InspectorDataGrid = ({ columns, data }: VegaRuntimeData) => {
+type InspectorDataGridProps = VegaRuntimeData;
+
+export const InspectorDataGrid = ({ columns, data }: InspectorDataGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
   const onChangeItemsPerPage = useCallback(
     (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
@@ -92,10 +94,31 @@ export const InspectorDataGrid = ({ columns, data }: VegaRuntimeData) => {
     return gridData.slice(rowStart, rowEnd);
   }, [gridData, pagination]);
 
+  // Resize
+  const [columnsWidth, setColumnsWidth] = useState<Record<string, number>>({});
+
+  const onColumnResize: EuiDataGridProps['onColumnResize'] = useCallback(
+    ({ columnId, width }) => {
+      setColumnsWidth({
+        ...columnsWidth,
+        [columnId]: width,
+      });
+    },
+    [columnsWidth]
+  );
+
   return (
     <EuiDataGrid
       aria-label={inspectorDataGridAriaLabel}
-      columns={columns}
+      columns={columns.map((column) => {
+        if (columnsWidth[column.id]) {
+          return {
+            ...column,
+            initialWidth: columnsWidth[column.id],
+          };
+        }
+        return column;
+      })}
       columnVisibility={{
         visibleColumns,
         setVisibleColumns,
@@ -106,6 +129,7 @@ export const InspectorDataGrid = ({ columns, data }: VegaRuntimeData) => {
       toolbarVisibility={{
         showFullScreenSelector: false,
       }}
+      onColumnResize={onColumnResize}
       pagination={{
         ...pagination,
         pageSizeOptions: [DEFAULT_PAGE_SIZE, 25, 50],

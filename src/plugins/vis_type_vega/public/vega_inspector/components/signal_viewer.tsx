@@ -26,6 +26,8 @@ interface SignalViewerProps {
   vegaAdapter: VegaAdapter;
 }
 
+const initialSignalColumnWidth = 150;
+
 export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {
   const [inspectSignalsSets, setInspectSignalsSets] = useState<InspectSignalsSets>();
 
@@ -48,7 +50,18 @@ export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {
   return (
     <>
       <EuiSpacer size="s" />
-      <InspectorDataGrid columns={inspectSignalsSets.columns} data={inspectSignalsSets.data} />
+      <InspectorDataGrid
+        columns={inspectSignalsSets.columns.map((column, index) => {
+          if (index === 0) {
+            return {
+              ...column,
+              initialWidth: initialSignalColumnWidth,
+            };
+          }
+          return column;
+        })}
+        data={inspectSignalsSets.data}
+      />
     </>
   );
 };
