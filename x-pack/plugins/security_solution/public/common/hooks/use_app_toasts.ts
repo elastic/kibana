@@ -8,13 +8,13 @@ import { useCallback } from 'react';
 
 import { ErrorToastOptions } from '../../../../../../src/core/public';
 import { useToasts } from '../lib/kibana';
-import { KibanaApiError, isApiError } from '../utils/api';
+import { isAppError, AppError } from '../utils/api';
 
 export const useAppToasts = () => {
   const toasts = useToasts();
 
-  const addApiError = useCallback(
-    (error: KibanaApiError, options: ErrorToastOptions) => {
+  const addAppError = useCallback(
+    (error: AppError, options: ErrorToastOptions) => {
       toasts.addError(error, {
         ...options,
         toastMessage: error.body.message,
@@ -25,8 +25,8 @@ export const useAppToasts = () => {
 
   const addError = useCallback(
     (error: unknown, options: ErrorToastOptions) => {
-      if (isApiError(error)) {
-        addApiError(error, options);
+      if (isAppError(error)) {
+        addAppError(error, options);
       } else {
         if (error instanceof Error) {
           toasts.addError(error, options);
@@ -35,7 +35,7 @@ export const useAppToasts = () => {
         }
       }
     },
-    [addApiError, toasts]
+    [addAppError, toasts]
   );
 
   return { ...toasts, addError };

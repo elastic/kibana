@@ -30,7 +30,7 @@ describe('useDeleteList', () => {
     expect(addErrorMock).toHaveBeenCalledWith(error, { title: 'title' });
   });
 
-  it("uses a KibanaApiError's body.message as the toastMessage", async () => {
+  it("uses a AppError's body.message as the toastMessage", async () => {
     const kibanaApiError = {
       message: 'Not Found',
       body: { status_code: 404, message: 'Detailed Message' },

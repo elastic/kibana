@@ -8,7 +8,7 @@ import { useEffect, useState, useCallback } from 'react';
 
 import { useReadListIndex, useCreateListIndex } from '../../../../shared_imports';
 import { useHttp, useKibana } from '../../../../common/lib/kibana';
-import { isApiError } from '../../../../common/utils/api';
+import { isSecurityAppError } from '../../../../common/utils/api';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
@@ -72,7 +72,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
   useEffect(() => {
     const err = readListIndexState.error;
     if (err != null) {
-      if (isApiError(err) && err.body.status_code === 404) {
+      if (isSecurityAppError(err) && err.body.status_code === 404) {
         setIndexExists(false);
       } else {
         setError(err);
