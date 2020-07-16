@@ -235,22 +235,19 @@ export const searchAfterAndBulkCreate = async ({
           logger.debug(
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
           );
+
           if (
-            filteredEvents.hits.hits[0].sort == null ||
-            filteredEvents.hits.hits[0].sort.length === 0
+            filteredEvents.hits.hits != null &&
+            filteredEvents.hits.hits[0].sort != null &&
+            filteredEvents.hits.hits[0].sort.length !== 0
           ) {
-            logger.debug('\n\n\nBREAKING HERE 3\n\n\n');
-            logger.debug(buildRuleMessage('sortIds was empty on filter'));
-            toReturn.success = true;
-            break;
-          } else if (
-            filteredEvents.hits.hits !== null &&
-            filteredEvents.hits.hits[0].sort !== null
-          ) {
-            logger.debug('SETTING SORT ID HERE');
             sortId = filteredEvents.hits.hits[0].sort
               ? filteredEvents.hits.hits[0].sort[0]
               : undefined;
+          } else {
+            logger.debug(buildRuleMessage('sortIds was empty on search'));
+            toReturn.success = true;
+            break;
           }
         } else {
           // we are guaranteed to have searchResult hits at this point
