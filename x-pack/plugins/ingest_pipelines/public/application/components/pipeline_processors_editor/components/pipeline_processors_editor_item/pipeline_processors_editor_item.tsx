@@ -160,7 +160,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
 
               {processor.options.if ? (
                 <EuiFlexItem grow={false}>
-                  <IfBadge isDisabled={isInMoveMode} />
+                  <IfBadge isDimmed={isDimmed} />
                 </EuiFlexItem>
               ) : undefined}
 
