@@ -38,7 +38,9 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
   const [hasHeaders, setHasHeaders] = useState<boolean>(false);
 
-  editActionConfig('method', 'post'); // set method to POST by default
+  if (!method) {
+    editActionConfig('method', 'post'); // set method to POST by default
+  }
 
   const headerErrors = {
     keyHeader: new Array<string>(),
