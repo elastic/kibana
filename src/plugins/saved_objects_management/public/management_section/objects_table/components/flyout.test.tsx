@@ -85,19 +85,6 @@ describe('Flyout', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should toggle the overwrite all control', async () => {
-    const component = shallowRender(defaultProps);
-
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component.state('isOverwriteAllChecked')).toBe(true);
-    component.find('EuiSwitch').simulate('change');
-    expect(component.state('isOverwriteAllChecked')).toBe(false);
-  });
-
   it('should allow picking a file', async () => {
     const component = shallowRender(defaultProps);
 
@@ -191,7 +178,7 @@ describe('Flyout', () => {
       component.setState({ file: mockFile, isLegacyFile: false });
       await component.instance().import();
 
-      expect(importFileMock).toHaveBeenCalledWith(defaultProps.http, mockFile, true);
+      expect(importFileMock).toHaveBeenCalledWith(defaultProps.http, mockFile, false, true);
       expect(component.state()).toMatchObject({
         conflictedIndexPatterns: undefined,
         conflictedSavedObjectsLinkedToSavedSearches: undefined,

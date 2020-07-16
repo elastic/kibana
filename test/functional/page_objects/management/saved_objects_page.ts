@@ -48,7 +48,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
-        await testSubjects.click('importSavedObjectsOverwriteToggle');
+        await testSubjects.click('importSavedObjectsImportModeOverwriteSwitch');
       } else {
         log.debug(`Leaving overwriteAll alone`);
       }

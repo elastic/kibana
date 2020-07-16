@@ -2983,7 +2983,6 @@
     "savedObjectsManagement.objectsTable.flyout.invalidFormatOfImportedFileErrorMessage": "已保存对象文件格式无效，无法导入。",
     "savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody": "只需使用更新的导出功能生成 NDJSON 文件，便万事俱备。",
     "savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle": "将不再支持 JSON 文件",
-    "savedObjectsManagement.objectsTable.flyout.overwriteSavedObjectsLabel": "自动覆盖所有已保存对象？",
     "savedObjectsManagement.objectsTable.flyout.renderConflicts.columnCountDescription": "受影响对象数目",
     "savedObjectsManagement.objectsTable.flyout.renderConflicts.columnCountName": "计数",
     "savedObjectsManagement.objectsTable.flyout.renderConflicts.columnIdDescription": "索引模式的 ID",

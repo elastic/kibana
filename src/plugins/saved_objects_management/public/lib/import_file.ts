@@ -25,17 +25,21 @@ interface ImportResponse {
   errors?: SavedObjectsImportError[];
 }
 
-export async function importFile(http: HttpStart, file: File, overwriteAll: boolean = false) {
+export async function importFile(
+  http: HttpStart,
+  file: File,
+  createNewCopies: boolean,
+  overwrite: boolean
+) {
   const formData = new FormData();
   formData.append('file', file);
+  const query = createNewCopies ? { createNewCopies } : { overwrite };
   return await http.post<ImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {
       // Important to be undefined, it forces proper headers to be set for FormData
       'Content-Type': undefined,
     },
-    query: {
-      overwrite: overwriteAll,
-    },
+    query,
   });
 }

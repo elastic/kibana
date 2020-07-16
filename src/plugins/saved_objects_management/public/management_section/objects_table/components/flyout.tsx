@@ -30,7 +30,6 @@ import {
   EuiTitle,
   EuiForm,
   EuiFormRow,
-  EuiSwitch,
   EuiFilePicker,
   EuiInMemoryTable,
   EuiSelect,
@@ -66,6 +65,10 @@ import {
 import { ISavedObjectsManagementServiceRegistry } from '../../../services';
 import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
 import { OverwriteModal } from './overwrite_modal';
+import { ImportModeControl, ImportMode } from './import_mode_control';
+
+const CREATE_NEW_COPIES_DEFAULT = false;
+const OVERWRITE_ALL_DEFAULT = true;
 
 export interface FlyoutProps {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
@@ -91,7 +94,7 @@ export interface FlyoutState {
   file?: File;
   importCount: number;
   indexPatterns?: IIndexPattern[];
-  isOverwriteAllChecked: boolean;
+  importMode: ImportMode;
   loadingMessage?: string;
   isLegacyFile: boolean;
   status: string;
@@ -116,7 +119,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       file: undefined,
       importCount: 0,
       indexPatterns: undefined,
-      isOverwriteAllChecked: true,
+      importMode: { createNewCopies: CREATE_NEW_COPIES_DEFAULT, overwrite: OVERWRITE_ALL_DEFAULT },
       loadingMessage: undefined,
       isLegacyFile: false,
       status: 'idle',
@@ -132,10 +135,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     this.setState({ indexPatterns } as any);
   };
 
-  changeOverwriteAll = () => {
-    this.setState((state) => ({
-      isOverwriteAllChecked: !state.isOverwriteAllChecked,
-    }));
+  changeImportMode = (importMode: FlyoutState['importMode']) => {
+    this.setState(() => ({ importMode }));
   };
 
   setImportFile = (files: FileList | null) => {
@@ -157,12 +158,13 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    */
   import = async () => {
     const { http } = this.props;
-    const { file, isOverwriteAllChecked } = this.state;
+    const { file, importMode } = this.state;
+    const { createNewCopies, overwrite } = importMode;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, isOverwriteAllChecked);
+      const response = await importFile(http, file!, createNewCopies, overwrite);
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -241,7 +243,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
 
   legacyImport = async () => {
     const { serviceRegistry, indexPatterns, overlays, http, allowedTypes } = this.props;
-    const { file, isOverwriteAllChecked } = this.state;
+    const { file, importMode } = this.state;
 
     this.setState({ status: 'loading', error: undefined });
 
@@ -293,7 +295,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       failedImports,
     } = await resolveSavedObjects(
       contents,
-      isOverwriteAllChecked,
+      importMode.overwrite,
       serviceRegistry.all().map((e) => e.service),
       indexPatterns,
       overlays.openConfirm
@@ -358,7 +360,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   confirmLegacyImport = async () => {
     const {
       conflictedIndexPatterns,
-      isOverwriteAllChecked,
+      importMode,
       conflictedSavedObjectsLinkedToSavedSearches,
       conflictedSearchDocs,
       failedImports,
@@ -389,11 +391,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           importCount += await resolveIndexPatternConflicts(
             resolutions,
             conflictedIndexPatterns!,
-            isOverwriteAllChecked,
-            {
-              indexPatterns,
-              search,
-            }
+            importMode.overwrite,
+            { indexPatterns, search }
           );
         }
         this.setState({
@@ -404,7 +403,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         });
         importCount += await saveObjects(
           conflictedSavedObjectsLinkedToSavedSearches!,
-          isOverwriteAllChecked
+          importMode.overwrite
         );
         this.setState({
           loadingMessage: i18n.translate(
@@ -416,7 +415,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           conflictedSearchDocs!,
           serviceRegistry.all().map((e) => e.service),
           indexPatterns,
-          isOverwriteAllChecked
+          importMode.overwrite
         );
         this.setState({
           loadingMessage: i18n.translate(
@@ -426,7 +425,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         });
         importCount += await saveObjects(
           failedImports!.map(({ obj }) => obj) as any[],
-          isOverwriteAllChecked
+          importMode.overwrite
         );
       } catch (e) {
         this.setState({
@@ -592,10 +591,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     const {
       status,
       loadingMessage,
-      isOverwriteAllChecked,
       importCount,
       failedImports = [],
       isLegacyFile,
+      importMode,
     } = this.state;
 
     if (status === 'loading') {
@@ -741,17 +740,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           />
         </EuiFormRow>
         <EuiFormRow>
-          <EuiSwitch
-            name="overwriteAll"
-            label={
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.flyout.overwriteSavedObjectsLabel"
-                defaultMessage="Automatically overwrite all saved objects?"
-              />
-            }
-            data-test-subj="importSavedObjectsOverwriteToggle"
-            checked={isOverwriteAllChecked}
-            onChange={this.changeOverwriteAll}
+          <ImportModeControl
+            initialValues={importMode}
+            isLegacyFile={isLegacyFile}
+            updateSelection={(newValues: ImportMode) => this.changeImportMode(newValues)}
           />
         </EuiFormRow>
       </EuiForm>

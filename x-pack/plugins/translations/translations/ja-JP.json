@@ -2982,7 +2982,6 @@
     "savedObjectsManagement.objectsTable.flyout.invalidFormatOfImportedFileErrorMessage": "保存されたオブジェクトのファイル形式が無効なため、インポートできません。",
     "savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody": "最新のレポートでNDJSONファイルを作成すれば完了です。",
     "savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle": "JSONファイルのサポートが終了します",
-    "savedObjectsManagement.objectsTable.flyout.overwriteSavedObjectsLabel": "すべての保存されたオブジェクトを自動的に上書きしますか？",
     "savedObjectsManagement.objectsTable.flyout.renderConflicts.columnCountDescription": "影響されるオブジェクトの数です",
     "savedObjectsManagement.objectsTable.flyout.renderConflicts.columnCountName": "カウント",
     "savedObjectsManagement.objectsTable.flyout.renderConflicts.columnIdDescription": "インデックスパターンのIDです",

@@ -213,6 +213,10 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "path": "/home/foo.ndjson",
           },
           "importCount": 0,
+          "importMode": Object {
+            "createNewCopies": false,
+            "overwrite": true,
+          },
           "indexPatterns": Array [
             Object {
               "id": "1",
@@ -222,7 +226,6 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             },
           ],
           "isLegacyFile": false,
-          "isOverwriteAllChecked": true,
           "loadingMessage": undefined,
           "status": "loading",
           "successfulImports": Array [],
@@ -635,18 +638,15 @@ exports[`Flyout should render import step 1`] = `
         hasEmptyLabelSpace={false}
         labelType="label"
       >
-        <EuiSwitch
-          checked={true}
-          data-test-subj="importSavedObjectsOverwriteToggle"
-          label={
-            <FormattedMessage
-              defaultMessage="Automatically overwrite all saved objects?"
-              id="savedObjectsManagement.objectsTable.flyout.overwriteSavedObjectsLabel"
-              values={Object {}}
-            />
+        <ImportModeControl
+          initialValues={
+            Object {
+              "createNewCopies": false,
+              "overwrite": true,
+            }
           }
-          name="overwriteAll"
-          onChange={[Function]}
+          isLegacyFile={false}
+          updateSelection={[Function]}
         />
       </EuiFormRow>
     </EuiForm>
