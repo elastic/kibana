@@ -35,7 +35,7 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
           'Trace transactions through a distributed architecture and map your services’ interactions to easily spot performance bottlenecks.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.apm.link', {
-        defaultMessage: 'Install agent',
+        defaultMessage: 'Install Agent',
       }),
       href: core.http.basePath.prepend('/app/home#/tutorial/apm'),
     },
