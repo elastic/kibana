@@ -98,7 +98,7 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
                 const iconType = type in AssetIcons && AssetIcons[type];
                 const iconNode = iconType ? <EuiIcon type={iconType} size="s" /> : '';
                 return (
-                  <FacetButton key={type} quantity={parts.length} icon={iconNode} disabled={true}>
+                  <FacetButton key={type} quantity={parts.length} icon={iconNode} isDisabled={true}>
                     <EuiTextColor color="subdued">{AssetTitleMap[type]}</EuiTextColor>
                   </FacetButton>
                 );
