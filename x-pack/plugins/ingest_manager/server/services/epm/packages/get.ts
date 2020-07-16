@@ -17,8 +17,8 @@ function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
 }
 
-export async function getCategories() {
-  return Registry.fetchCategories();
+export async function getCategories(options: Registry.CategoriesParams) {
+  return Registry.fetchCategories(options);
 }
 
 export async function getPackages(
@@ -26,8 +26,8 @@ export async function getPackages(
     savedObjectsClient: SavedObjectsClientContract;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient } = options;
-  const registryItems = await Registry.fetchList({ category: options.category }).then((items) => {
+  const { savedObjectsClient, experimental, category } = options;
+  const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
     );
@@ -56,7 +56,7 @@ export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {
   const { savedObjectsClient } = options;
-  const allPackages = await getPackages({ savedObjectsClient });
+  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
   const installedPackages = allPackages.filter(
     (pkg) => (pkg.status = InstallationStatus.installed)
   );
@@ -69,7 +69,7 @@ export async function getLimitedPackages(options: {
       });
     })
   );
-  return installedPackagesInfo.filter((pkgInfo) => isPackageLimited).map((pkgInfo) => pkgInfo.name);
+  return installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
 }
 
 export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {

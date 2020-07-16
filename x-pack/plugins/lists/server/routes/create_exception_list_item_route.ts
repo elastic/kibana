@@ -16,6 +16,7 @@ import {
 } from '../../common/schemas';
 
 import { getExceptionListClient } from './utils/get_exception_list_client';
+import { endpointDisallowedFields } from './endpoint_disallowed_fields';
 
 export const createExceptionListItemRoute = (router: IRouter): void => {
   router.post(
@@ -70,6 +71,22 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
               statusCode: 409,
             });
           } else {
+            if (exceptionList.type === 'endpoint') {
+              for (const entry of entries) {
+                if (entry.type === 'list') {
+                  return siemResponse.error({
+                    body: `cannot add exception item with entry of type "list" to endpoint exception list`,
+                    statusCode: 400,
+                  });
+                }
+                if (endpointDisallowedFields.includes(entry.field)) {
+                  return siemResponse.error({
+                    body: `cannot add endpoint exception item on field ${entry.field}`,
+                    statusCode: 400,
+                  });
+                }
+              }
+            }
             const createdList = await exceptionLists.createExceptionListItem({
               _tags,
               comments,

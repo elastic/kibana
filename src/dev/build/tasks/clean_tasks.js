@@ -201,45 +201,6 @@ export const CleanExtraBinScriptsTask = {
   },
 };
 
-export const CleanExtraBrowsersTask = {
-  description: 'Cleaning extra browsers from platform-specific builds',
-
-  async run(config, log, build) {
-    const getBrowserPathsForPlatform = (platform) => {
-      const reportingDir = 'x-pack/plugins/reporting';
-      const chromiumDir = '.chromium';
-      const chromiumPath = (p) =>
-        build.resolvePathForPlatform(platform, reportingDir, chromiumDir, p);
-      return (platforms) => {
-        const paths = [];
-        if (platforms.windows) {
-          paths.push(chromiumPath('chromium-*-win32.zip'));
-          paths.push(chromiumPath('chromium-*-windows.zip'));
-        }
-
-        if (platforms.darwin) {
-          paths.push(chromiumPath('chromium-*-darwin.zip'));
-        }
-
-        if (platforms.linux) {
-          paths.push(chromiumPath('chromium-*-linux.zip'));
-        }
-        return paths;
-      };
-    };
-    for (const platform of config.getNodePlatforms()) {
-      const getBrowserPaths = getBrowserPathsForPlatform(platform);
-      if (platform.isWindows()) {
-        await deleteAll(getBrowserPaths({ linux: true, darwin: true }), log);
-      } else if (platform.isMac()) {
-        await deleteAll(getBrowserPaths({ linux: true, windows: true }), log);
-      } else if (platform.isLinux()) {
-        await deleteAll(getBrowserPaths({ windows: true, darwin: true }), log);
-      }
-    }
-  },
-};
-
 export const CleanEmptyFoldersTask = {
   description: 'Cleaning all empty folders recursively',
 

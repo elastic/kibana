@@ -13,7 +13,7 @@ import {
   DataFrameAnalyticsConfig,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
-import { CloneDataFrameAnalyticsConfig } from '../../components/analytics_list/action_clone';
+import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
@@ -23,6 +23,7 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
 }
 
 export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 0;
+export const DEFAULT_MAX_NUM_THREADS = 1;
 export const UNSET_CONFIG_ITEM = '--';
 
 export type EsIndexName = string;
@@ -68,6 +69,7 @@ export interface State {
     jobConfigQueryString: string | undefined;
     lambda: number | undefined;
     loadingFieldOptions: boolean;
+    maxNumThreads: undefined | number;
     maxTrees: undefined | number;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
@@ -82,6 +84,7 @@ export interface State {
     previousJobType: null | AnalyticsJobType;
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
+    resultsField: undefined | string;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -91,7 +94,6 @@ export interface State {
     trainingPercent: number;
   };
   disabled: boolean;
-  indexNames: EsIndexName[];
   indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isAdvancedEditorValidJson: boolean;
@@ -133,6 +135,7 @@ export const getInitialState = (): State => ({
     jobConfigQueryString: undefined,
     lambda: undefined,
     loadingFieldOptions: false,
+    maxNumThreads: DEFAULT_MAX_NUM_THREADS,
     maxTrees: undefined,
     method: undefined,
     modelMemoryLimit: undefined,
@@ -147,6 +150,7 @@ export const getInitialState = (): State => ({
     previousJobType: null,
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
+    resultsField: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
@@ -160,7 +164,6 @@ export const getInitialState = (): State => ({
     !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics'),
-  indexNames: [],
   indexPatternsMap: {},
   isAdvancedEditorEnabled: false,
   isAdvancedEditorValidJson: true,
@@ -197,6 +200,17 @@ export const getJobConfigFromFormState = (
     },
     model_memory_limit: formState.modelMemoryLimit,
   };
+
+  if (formState.maxNumThreads !== undefined) {
+    jobConfig.max_num_threads = formState.maxNumThreads;
+  }
+
+  const resultsFieldEmpty =
+    typeof formState?.resultsField === 'string' && formState?.resultsField.trim() === '';
+
+  if (jobConfig.dest && !resultsFieldEmpty) {
+    jobConfig.dest.results_field = formState.resultsField;
+  }
 
   if (
     formState.jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
@@ -277,10 +291,12 @@ export function getCloneFormStateFromJobConfig(
   const resultState: Partial<State['form']> = {
     jobType,
     description: analyticsJobConfig.description ?? '',
+    resultsField: analyticsJobConfig.dest.results_field,
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
+    maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields.includes,
   };
 
