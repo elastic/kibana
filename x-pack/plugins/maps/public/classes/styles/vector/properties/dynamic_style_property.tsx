@@ -316,12 +316,6 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
     }
   }
 
-  getNumericalMbFeatureStateValue(value: unknown) {
-    // @ts-expect-error
-    const valueAsFloat = parseFloat(value);
-    return isNaN(valueAsFloat) ? null : valueAsFloat;
-  }
-
   renderLegendDetailRow() {
     return null;
   }
