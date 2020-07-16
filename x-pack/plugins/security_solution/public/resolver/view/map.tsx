@@ -53,10 +53,13 @@ export const ResolverMap = React.memo(function ({
   useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID });
 
   const { timestamp } = useContext(SideEffectContext);
+
+  // use this for the entire render in order to keep things in sync
+  const timeAtRender = timestamp();
+
   const { processNodePositions, connectingEdgeLineSegments } = useSelector(
-    selectors.visibleProcessNodePositionsAndEdgeLineSegments
-  )(timestamp());
-  const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
+    selectors.visibleNodesAndEdgeLines
+  )(timeAtRender);
   const relatedEventsStats = useSelector(selectors.relatedEventsStats);
   const terminatedProcesses = useSelector(selectors.terminatedProcesses);
   const { projectionMatrix, ref, onMouseDown } = useCamera();
@@ -100,24 +103,19 @@ export const ResolverMap = React.memo(function ({
             />
           ))}
           {[...processNodePositions].map(([processEvent, position]) => {
-            const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
             const processEntityId = entityId(processEvent);
-            if (!adjacentNodeMap) {
-              // This should never happen
-              throw new Error('Issue calculating adjacency node map.');
-            }
             return (
               <ProcessEventDot
                 key={processEntityId}
                 position={position}
                 projectionMatrix={projectionMatrix}
                 event={processEvent}
-                adjacentNodeMap={adjacentNodeMap}
                 relatedEventsStatsForProcess={
                   relatedEventsStats ? relatedEventsStats.get(entityId(processEvent)) : undefined
                 }
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
                 isProcessOrigin={false}
+                timeAtRender={timeAtRender}
               />
             );
           })}
