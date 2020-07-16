@@ -5,19 +5,15 @@
  */
 
 import { Observable } from 'rxjs';
-import { LegacyClusterClient, SavedObjectsClientContract } from 'src/core/server';
-
 import { schema, TypeOf } from '@kbn/config-schema';
+import { LegacyClusterClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
+import { SpacesServiceSetup } from '../../spaces/server';
+
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
-
-interface EventLogServiceCtorParams {
-  esContext: EsContext;
-  savedObjectsClient: SavedObjectsClientContract;
-}
 
 const optionalDateFieldSchema = schema.maybe(
   schema.string({
@@ -60,14 +56,30 @@ export type FindOptionsType = Pick<
 > &
   Partial<TypeOf<typeof findOptionsSchema>>;
 
+interface EventLogServiceCtorParams {
+  esContext: EsContext;
+  savedObjectsClient: SavedObjectsClientContract;
+  spacesService?: SpacesServiceSetup;
+  request: KibanaRequest;
+}
+
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClient implements IEventLogClient {
   private esContext: EsContext;
   private savedObjectsClient: SavedObjectsClientContract;
+  private spacesService?: SpacesServiceSetup;
+  private request: KibanaRequest;
 
-  constructor({ esContext, savedObjectsClient }: EventLogServiceCtorParams) {
+  constructor({
+    esContext,
+    savedObjectsClient,
+    spacesService,
+    request,
+  }: EventLogServiceCtorParams) {
     this.esContext = esContext;
     this.savedObjectsClient = savedObjectsClient;
+    this.spacesService = spacesService;
+    this.request = request;
   }
 
   async findEventsBySavedObject(
@@ -75,13 +87,20 @@ export class EventLogClient implements IEventLogClient {
     id: string,
     options?: Partial<FindOptionsType>
   ): Promise<QueryEventsBySavedObjectResult> {
+    const findOptions = findOptionsSchema.validate(options ?? {});
+
+    const space = await this.spacesService?.getActiveSpace(this.request);
+    const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
+
     // verify the user has the required permissions to view this saved object
     await this.savedObjectsClient.get(type, id);
+
     return await this.esContext.esAdapter.queryEventsBySavedObject(
       this.esContext.esNames.alias,
+      namespace,
       type,
       id,
-      findOptionsSchema.validate(options ?? {})
+      findOptions
     );
   }
 }
