@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  extractCloningConfig,
-  isAdvancedConfig,
-  useNavigateToWizardWithClonedJob,
-  CloneButton,
-  CloneDataFrameAnalyticsConfig,
-} from './clone_button';
+export default function ({ loadTestFile }) {
+  describe('management', function () {
+    this.tags(['ciGroup2']);
+
+    loadTestFile(require.resolve('./create_index_pattern_wizard'));
+  });
+}
