@@ -11,7 +11,8 @@ import {
   TaskManagerStartContract,
 } from '../../../../../task_manager/server';
 import { EndpointAppContext } from '../../types';
-import { reportErrors } from './common';
+import { reportErrors, ManifestConstants } from './common';
+import { InternalArtifactSchema } from '../../schemas/artifacts';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -89,41 +90,65 @@ export class ManifestTask {
       return;
     }
 
-    let errors: Error[] = [];
     try {
-      // get snapshot based on exception-list-agnostic SOs
-      // with diffs from last computed manifest
-      const snapshot = await manifestManager.getSnapshot();
-      if (snapshot) {
-        // create new artifacts, if necessary
-        errors = await manifestManager.syncArtifacts(snapshot, 'add');
-        if (errors.length) {
-          reportErrors(this.logger, errors);
-          throw new Error('Error writing new artifacts.');
-        }
+      // Last manifest we computed, which was saved to ES
+      const oldManifest = await manifestManager.getLastComputedManifest(
+        ManifestConstants.SCHEMA_VERSION
+      );
+      if (oldManifest == null) {
+        this.logger.debug('User manifest not available yet.');
+        return;
+      }
 
-        // commit latest manifest state to user-artifact-manifest SO
-        const error = await manifestManager.commit(snapshot.manifest);
+      // New computed manifest based on current state of exception list
+      const newManifest = await manifestManager.buildNewManifest(
+        ManifestConstants.SCHEMA_VERSION,
+        oldManifest
+      );
+      const diffs = newManifest.diff(oldManifest);
+
+      // Compress new artifacts
+      const adds = diffs.filter((diff) => diff.type === 'add').map((diff) => diff.id);
+      for (const artifactId of adds) {
+        const compressError = await newManifest.compressArtifact(artifactId);
+        if (compressError) {
+          throw compressError;
+        }
+      }
+
+      // Persist new artifacts
+      const artifacts = adds
+        .map((artifactId) => newManifest.getArtifact(artifactId))
+        .filter((artifact) => artifact !== undefined) as InternalArtifactSchema[];
+      if (artifacts.length !== adds.length) {
+        throw new Error('Invalid artifact encountered.');
+      }
+      const persistErrors = await manifestManager.pushArtifacts(artifacts);
+      if (persistErrors.length) {
+        reportErrors(this.logger, persistErrors);
+        throw new Error('Unable to persist new artifacts.');
+      }
+
+      // Commit latest manifest state, if different
+      if (diffs.length) {
+        const error = await manifestManager.commit(newManifest);
         if (error) {
-          reportErrors(this.logger, [error]);
-          throw new Error('Error committing manifest.');
+          throw error;
         }
+      }
 
-        // write to ingest-manager package configs, if necessary
-        errors = await manifestManager.dispatch(snapshot.manifest);
-        if (errors.length) {
-          reportErrors(this.logger, errors);
-          throw new Error('Error dispatching manifest.');
-        }
+      // Try dispatching to ingest-manager package configs
+      const dispatchErrors = await manifestManager.tryDispatch(newManifest);
+      if (dispatchErrors.length) {
+        reportErrors(this.logger, dispatchErrors);
+        throw new Error('Error dispatching manifest.');
+      }
 
-        // clean up old artifacts
-        errors = await manifestManager.syncArtifacts(snapshot, 'delete');
-        if (errors.length) {
-          reportErrors(this.logger, errors);
-          throw new Error('Error cleaning up outdated artifacts.');
-        }
-      } else {
-        throw new Error('Unable to create manifest snapshot.');
+      // Try to clean up superceded artifacts
+      const deletes = diffs.filter((diff) => diff.type === 'delete').map((diff) => diff.id);
+      const deleteErrors = await manifestManager.deleteArtifacts(deletes);
+      if (deleteErrors.length) {
+        reportErrors(this.logger, deleteErrors);
       }
     } catch (err) {
       this.logger.error(err);

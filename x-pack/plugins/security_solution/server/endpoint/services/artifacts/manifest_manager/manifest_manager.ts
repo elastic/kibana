@@ -5,7 +5,6 @@
  */
 
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
-import { createHash } from 'crypto';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
@@ -17,11 +16,15 @@ import {
   getFullEndpointExceptionList,
   ExceptionsCache,
   ManifestDiff,
+  getArtifactId,
 } from '../../../lib/artifacts';
-import { InternalArtifactSchema, internalArtifactCompleteSchema } from '../../../schemas/artifacts';
+import {
+  InternalArtifactSchema,
+  InternalArtifactCompleteSchema,
+  internalArtifactCompleteSchema,
+} from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
-import { compressExceptionList } from '../../../lib/artifacts/lists';
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
@@ -79,8 +82,8 @@ export class ManifestManager {
   protected async buildExceptionListArtifacts(
     schemaVersion: string
   ): Promise<InternalArtifactSchema[]> {
-    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce(
-      async (acc: Promise<InternalArtifactSchema[]>, os) => {
+    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce<Promise<InternalArtifactSchema[]>>(
+      async (acc, os) => {
         const exceptionList = await getFullEndpointExceptionList(
           this.exceptionListClient,
           os,
@@ -88,69 +91,72 @@ export class ManifestManager {
         );
         const artifacts = await acc;
         const artifact = await buildArtifact(exceptionList, os, schemaVersion);
-        artifacts.push(artifact);
-        return Promise.resolve(artifacts);
+        return Promise.resolve([...artifacts, artifact]);
       },
       Promise.resolve([])
     );
   }
 
   /**
-   * Writes new artifact SOs based on provided snapshot.
+   * Writes new artifact SO.
    *
-   * @param snapshot A ManifestSnapshot to use for writing the artifacts.
+   * @param artifact An InternalArtifactCompleteSchema representing the artifact.
+   * @returns {Promise<Error | null>} An error, if encountered, or null.
+   */
+  protected async pushArtifact(artifact: InternalArtifactCompleteSchema): Promise<Error | null> {
+    const artifactId = getArtifactId(artifact);
+    try {
+      // Write the artifact SO
+      await this.artifactClient.createArtifact(artifact);
+
+      // Cache the compressed body of the artifact
+      this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
+    } catch (err) {
+      if (err.status === 409) {
+        this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
+      } else {
+        return err;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Writes new artifact SOs.
+   *
+   * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  private async writeArtifacts(snapshot: ManifestSnapshot): Promise<Error[]> {
+  public async pushArtifacts(artifacts: InternalArtifactSchema[]): Promise<Error[]> {
     const errors: Error[] = [];
-    for (const diff of snapshot.diffs) {
-      const artifact = snapshot.manifest.getArtifact(diff.id);
-      if (artifact === undefined) {
-        throw new Error(
-          `Corrupted manifest detected. Diff contained artifact ${diff.id} not in manifest.`
-        );
-      } else if (!internalArtifactCompleteSchema.is(artifact)) {
-        throw new Error(`Incomplete artifact detected: ${diff.id}`);
-      }
-
-      const compressedArtifact = await compressExceptionList(Buffer.from(artifact.body, 'base64'));
-      artifact.body = compressedArtifact.toString('base64');
-      artifact.encodedSize = compressedArtifact.byteLength;
-      artifact.compressionAlgorithm = 'zlib';
-      artifact.encodedSha256 = createHash('sha256').update(compressedArtifact).digest('hex');
-
-      try {
-        // Write the artifact SO
-        await this.artifactClient.createArtifact(artifact);
-        // Cache the compressed body of the artifact
-        this.cache.set(diff.id, Buffer.from(artifact.body, 'base64'));
-      } catch (err) {
-        if (err.status === 409) {
-          this.logger.debug(`Tried to create artifact ${diff.id}, but it already exists.`);
-        } else {
-          // TODO: log error here?
+    for (const artifact of artifacts) {
+      if (internalArtifactCompleteSchema.is(artifact)) {
+        const err = await this.pushArtifact(artifact);
+        if (err) {
           errors.push(err);
         }
+      } else {
+        errors.push(new Error(`Incomplete artifact: ${getArtifactId(artifact)}`));
       }
     }
     return errors;
   }
 
   /**
-   * Deletes old artifact SOs based on provided snapshot.
+   * Deletes outdated artifact SOs.
    *
-   * @param snapshot A ManifestSnapshot to use for deleting the artifacts.
+   * The artifact may still remain in the cache.
+   *
+   * @param artifactId The ID of the artifact to delete..
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  private async deleteArtifacts(snapshot: ManifestSnapshot): Promise<Error[]> {
-    // TODO: delete all artifacts not in manifest?
+  public async deleteArtifacts(artifactIds: string[]): Promise<Error[]> {
     const errors: Error[] = [];
-    for (const diff of snapshot.diffs) {
+    for (const artifactId of artifactIds) {
       try {
-        // Delete the artifact SO
-        await this.artifactClient.deleteArtifact(diff.id);
-        // TODO: should we delete the cache entry here?
-        this.logger.info(`Cleaned up artifact ${diff.id}`);
+        await this.artifactClient.deleteArtifact(artifactId);
+        this.logger.info(`Cleaned up artifact ${artifactId}`);
       } catch (err) {
         errors.push(err);
       }
@@ -163,7 +169,7 @@ export class ManifestManager {
    * user-artifact-manifest SO.
    *
    * @param schemaVersion The schema version of the manifest.
-   * @returns {Promise<Manifest | null>} The last dispatched manifest, or null if does not exist.
+   * @returns {Promise<Manifest | null>} The last computed manifest, or null if does not exist.
    * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
    */
   public async getLastComputedManifest(schemaVersion: string): Promise<Manifest | null> {
@@ -190,86 +196,31 @@ export class ManifestManager {
     }
   }
 
-  /**
-   * Snapshots a manifest based on current state of exception-list-agnostic SOs.
-   *
-   * @param opts Optional parameters for snapshot retrieval.
-   * @param opts.initialize Initialize a new Manifest when no manifest SO can be retrieved.
-   * @returns {Promise<ManifestSnapshot | null>} A snapshot of the manifest, or null if not initialized.
-   */
-  public async getSnapshot(opts?: ManifestSnapshotOpts): Promise<ManifestSnapshot | null> {
-    try {
-      let oldManifest: Manifest | null;
+  public async buildNewManifest(
+    schemaVersion: string,
+    baselineManifest?: Manifest
+  ): Promise<Manifest> {
+    // Build new exception list artifacts
+    const artifacts = await this.buildExceptionListArtifacts(ArtifactConstants.SCHEMA_VERSION);
 
-      // Get the last-dispatched manifest
-      oldManifest = await this.getLastComputedManifest(ManifestConstants.SCHEMA_VERSION);
+    // Build new manifest
+    const manifest = Manifest.fromArtifacts(
+      artifacts,
+      ManifestConstants.SCHEMA_VERSION,
+      baselineManifest ?? Manifest.getDefault(schemaVersion)
+    );
 
-      if (oldManifest === null && opts !== undefined && opts.initialize) {
-        oldManifest = new Manifest(ManifestConstants.SCHEMA_VERSION);
-      } else if (oldManifest == null) {
-        this.logger.debug('Manifest does not exist yet. Waiting...');
-        return null;
-      }
-
-      // Build new exception list artifacts
-      const artifacts = await this.buildExceptionListArtifacts(ArtifactConstants.SCHEMA_VERSION);
-
-      // Build new manifest
-      const newManifest = Manifest.fromArtifacts(
-        artifacts,
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest
-      );
-
-      // Get diffs
-      const diffs = newManifest.diff(oldManifest);
-
-      return {
-        manifest: newManifest,
-        diffs,
-      };
-    } catch (err) {
-      this.logger.error(err);
-      return null;
-    }
+    return manifest;
   }
 
   /**
-   * Syncs artifacts based on provided snapshot.
-   *
-   * Creates artifacts that do not yet exist and cleans up old artifacts that have been
-   * superceded by this snapshot.
-   *
-   * @param snapshot A ManifestSnapshot to use for sync.
-   * @returns {Promise<Error[]>} Any errors encountered.
-   */
-  public async syncArtifacts(
-    snapshot: ManifestSnapshot,
-    diffType: 'add' | 'delete'
-  ): Promise<Error[]> {
-    const filteredDiffs = snapshot.diffs.filter((diff) => {
-      return diff.type === diffType;
-    });
-
-    const tmpSnapshot = { ...snapshot };
-    tmpSnapshot.diffs = filteredDiffs;
-
-    if (diffType === 'add') {
-      return this.writeArtifacts(tmpSnapshot);
-    } else if (diffType === 'delete') {
-      return this.deleteArtifacts(tmpSnapshot);
-    }
-
-    return [new Error(`Unsupported diff type: ${diffType}`)];
-  }
-
-  /**
-   * Dispatches the manifest by writing it to the endpoint package config.
+   * Dispatches the manifest by writing it to the endpoint package config, if different
+   * from the manifest already in the config.
    *
    * @param manifest The Manifest to dispatch.
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  public async dispatch(manifest: Manifest): Promise<Error[]> {
+  public async tryDispatch(manifest: Manifest): Promise<Error[]> {
     let paging = true;
     let page = 1;
     const errors: Error[] = [];
@@ -288,7 +239,9 @@ export class ManifestManager {
             value: {},
           };
 
-          const oldManifest = Manifest.fromPkgConfig(artifactManifest.value);
+          const oldManifest =
+            Manifest.fromPkgConfig(artifactManifest.value) ??
+            Manifest.getDefault(ManifestConstants.SCHEMA_VERSION);
           if (!manifest.equals(oldManifest)) {
             newPackageConfig.inputs[0].config.artifact_manifest = {
               value: manifest.toEndpointFormat(),
@@ -318,10 +271,10 @@ export class ManifestManager {
   }
 
   /**
-   * Commits a manifest to indicate that it has been dispatched.
+   * Commits a manifest to indicate that a new version has been computed.
    *
    * @param manifest The Manifest to commit.
-   * @returns {Promise<Error | null>} An error if encountered, or null if successful.
+   * @returns {Promise<Error | null>} An error, if encountered, or null.
    */
   public async commit(manifest: Manifest): Promise<Error | null> {
     try {

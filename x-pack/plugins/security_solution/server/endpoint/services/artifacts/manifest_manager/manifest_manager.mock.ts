@@ -4,48 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
 import { createPackageConfigMock } from '../../../../../../ingest_manager/common/mocks';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { listMock } from '../../../../../../lists/server/mocks';
-import {
-  ExceptionsCache,
-  Manifest,
-  buildArtifact,
-  getFullEndpointExceptionList,
-} from '../../../lib/artifacts';
-import { InternalArtifactSchema } from '../../../schemas/artifacts';
+import { ExceptionsCache } from '../../../lib/artifacts';
 import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
 import { ManifestManager } from './manifest_manager';
-
-async function mockBuildExceptionListArtifacts(
-  os: string,
-  schemaVersion: string
-): Promise<InternalArtifactSchema[]> {
-  const mockExceptionClient = listMock.getExceptionListClient();
-  const first = getFoundExceptionListItemSchemaMock();
-  mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-  const exceptions = await getFullEndpointExceptionList(mockExceptionClient, os, schemaVersion);
-  return [await buildArtifact(exceptions, os, schemaVersion)];
-}
+import {
+  getMockManifest,
+  getMockArtifactsWithDiff,
+  getEmptyMockArtifacts,
+} from '../../../lib/artifacts/mocks';
 
 export class ManifestManagerMock extends ManifestManager {
-  protected buildExceptionListArtifacts = jest
-    .fn()
-    .mockResolvedValue(mockBuildExceptionListArtifacts('linux', 'v1'));
+  protected buildExceptionListArtifacts = jest.fn().mockResolvedValue(getMockArtifactsWithDiff());
 
-  public getLastDispatchedManifest = jest.fn().mockResolvedValue(new Manifest('v1'));
+  public getLastComputedManifest = jest.fn().mockResolvedValue(getMockManifest({ compress: true }));
 
   protected getManifestClient = jest
     .fn()
     .mockReturnValue(getManifestClientMock(this.savedObjectsClient));
 }
 
+export class EmptyManifestManagerMock extends ManifestManagerMock {
+  protected buildExceptionListArtifacts = jest.fn().mockResolvedValue(getEmptyMockArtifacts());
+
+  public getLastComputedManifest = jest.fn().mockResolvedValue(null);
+}
+
 export const getManifestManagerMock = (opts?: {
+  empty?: boolean;
   cache?: ExceptionsCache;
   packageConfigService?: jest.Mocked<PackageConfigServiceInterface>;
   savedObjectsClient?: ReturnType<typeof savedObjectsClientMock.create>;
@@ -69,7 +62,9 @@ export const getManifestManagerMock = (opts?: {
     savedObjectsClient = opts.savedObjectsClient;
   }
 
-  const manifestManager = new ManifestManagerMock({
+  const ManifestClass = opts?.empty ? EmptyManifestManagerMock : ManifestManagerMock;
+
+  const manifestManager = new ManifestClass({
     artifactClient: getArtifactClientMock(savedObjectsClient),
     cache,
     packageConfigService,

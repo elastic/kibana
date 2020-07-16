@@ -6,13 +6,18 @@
 
 import { createHash } from 'crypto';
 import { validate } from '../../../../common/validate';
-import { InternalArtifactSchema, InternalManifestSchema } from '../../schemas/artifacts';
+import {
+  InternalArtifactSchema,
+  InternalManifestSchema,
+  internalArtifactCompleteSchema,
+} from '../../schemas/artifacts';
 import {
   manifestSchemaVersion,
   ManifestSchemaVersion,
 } from '../../../../common/endpoint/schema/common';
 import { ManifestSchema, manifestSchema } from '../../../../common/endpoint/schema/manifest';
 import { ManifestEntry } from './manifest_entry';
+import { maybeCompressArtifact, isCompressed } from './lists';
 
 export interface ManifestDiff {
   type: string;
@@ -36,7 +41,7 @@ export class Manifest {
     );
 
     if (errors != null || validated === null) {
-      throw new Error(`Invalid manifest version: ${schemaVersion}`);
+      throw new Error(`Invalid manifest schema version: ${schemaVersion}`);
     }
 
     this.schemaVersion = validated;
@@ -64,21 +69,45 @@ export class Manifest {
     return manifest;
   }
 
-  public static fromPkgConfig(manifestPkgConfig: ManifestSchema): Manifest {
-    const manifest = new Manifest(manifestPkgConfig.schema_version);
-    for (const [identifier, artifactRecord] of Object.entries(manifestPkgConfig.artifacts)) {
-      const artifact = {
-        identifier,
-        compressionAlgorithm: artifactRecord.compression_algorithm,
-        encryptionAlgorithm: artifactRecord.encryption_algorithm,
-        decodedSha256: artifactRecord.decoded_sha256,
-        decodedSize: artifactRecord.decoded_size,
-        encodedSha256: artifactRecord.encoded_sha256,
-        encodedSize: artifactRecord.encoded_size,
-      };
-      manifest.addEntry(artifact);
+  public static fromPkgConfig(manifestPkgConfig: ManifestSchema): Manifest | null {
+    if (manifestSchema.is(manifestPkgConfig)) {
+      const manifest = new Manifest(manifestPkgConfig.schema_version);
+      for (const [identifier, artifactRecord] of Object.entries(manifestPkgConfig.artifacts)) {
+        const artifact = {
+          identifier,
+          compressionAlgorithm: artifactRecord.compression_algorithm,
+          encryptionAlgorithm: artifactRecord.encryption_algorithm,
+          decodedSha256: artifactRecord.decoded_sha256,
+          decodedSize: artifactRecord.decoded_size,
+          encodedSha256: artifactRecord.encoded_sha256,
+          encodedSize: artifactRecord.encoded_size,
+        };
+        manifest.addEntry(artifact);
+      }
+      return manifest;
+    } else {
+      return null;
     }
-    return manifest;
+  }
+
+  public async compressArtifact(id: string): Promise<Error | null> {
+    try {
+      const artifact = this.getArtifact(id);
+      if (artifact == null) {
+        throw new Error(`Corrupted manifest detected. Artifact ${id} not in manifest.`);
+      }
+
+      const compressedArtifact = await maybeCompressArtifact(artifact);
+      if (!isCompressed(compressedArtifact)) {
+        throw new Error(`Unable to compress artifact: ${id}`);
+      } else if (!internalArtifactCompleteSchema.is(compressedArtifact)) {
+        throw new Error(`Incomplete artifact detected: ${id}`);
+      }
+      this.addEntry(compressedArtifact);
+    } catch (err) {
+      return err;
+    }
+    return null;
   }
 
   public equals(manifest: Manifest): boolean {

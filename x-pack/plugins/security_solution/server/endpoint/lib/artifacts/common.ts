@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from 'src/core/server';
+import { InternalArtifactSchema } from '../../schemas/artifacts';
 
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
@@ -15,6 +16,10 @@ export const ArtifactConstants = {
 export const ManifestConstants = {
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact-manifest',
   SCHEMA_VERSION: 'v1',
+};
+
+export const getArtifactId = (artifact: InternalArtifactSchema) => {
+  return `${artifact.identifier}-${artifact.decodedSha256}`;
 };
 
 export const reportErrors = (logger: Logger, errors: Error[]) => {

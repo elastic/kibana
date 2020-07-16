@@ -24,6 +24,7 @@ import {
   translatedEntryMatchMatcher,
   translatedEntryMatchAnyMatcher,
   TranslatedExceptionListItem,
+  internalArtifactCompleteSchema,
 } from '../../schemas';
 import { ArtifactConstants } from './common';
 
@@ -46,6 +47,28 @@ export async function buildArtifact(
     encodedSize: exceptionsBuffer.byteLength,
     body: exceptionsBuffer.toString('base64'),
   };
+}
+
+export async function maybeCompressArtifact(
+  uncompressedArtifact: InternalArtifactSchema
+): Promise<InternalArtifactSchema> {
+  const compressedArtifact = { ...uncompressedArtifact };
+  if (internalArtifactCompleteSchema.is(uncompressedArtifact)) {
+    const compressedExceptionList = await compressExceptionList(
+      Buffer.from(uncompressedArtifact.body, 'base64')
+    );
+    compressedArtifact.body = compressedExceptionList.toString('base64');
+    compressedArtifact.encodedSize = compressedExceptionList.byteLength;
+    compressedArtifact.compressionAlgorithm = 'zlib';
+    compressedArtifact.encodedSha256 = createHash('sha256')
+      .update(compressedExceptionList)
+      .digest('hex');
+  }
+  return compressedArtifact;
+}
+
+export function isCompressed(artifact: InternalArtifactSchema) {
+  return artifact.compressionAlgorithm === 'zlib';
 }
 
 export async function getFullEndpointExceptionList(

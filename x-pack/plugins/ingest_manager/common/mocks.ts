@@ -44,3 +44,46 @@ export const createPackageConfigMock = (): PackageConfig => {
     ],
   };
 };
+
+export const createPackageConfigWithManifestMock = (): PackageConfig => {
+  const packageConfig = createPackageConfigMock();
+  packageConfig.inputs[0].config!.artifact_manifest = {
+    value: {
+      artifacts: {
+        'endpoint-exceptionlist-linux-v1': {
+          compression_algorithm: 'zlib',
+          encryption_algorithm: 'none',
+          decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+          encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+          decoded_size: 14,
+          encoded_size: 22,
+          relative_url:
+            '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+        },
+        'endpoint-exceptionlist-macos-v1': {
+          compression_algorithm: 'zlib',
+          encryption_algorithm: 'none',
+          decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+          encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+          decoded_size: 14,
+          encoded_size: 22,
+          relative_url:
+            '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+        },
+        'endpoint-exceptionlist-windows-v1': {
+          compression_algorithm: 'zlib',
+          encryption_algorithm: 'none',
+          decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+          encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+          decoded_size: 14,
+          encoded_size: 22,
+          relative_url:
+            '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+        },
+      },
+      manifest_version: 'a9b7ef358a363f327f479e31efc4f228b2277a7fb4d1914ca9b4e7ca9ffcf537',
+      schema_version: 'v1',
+    },
+  };
+  return packageConfig;
+};

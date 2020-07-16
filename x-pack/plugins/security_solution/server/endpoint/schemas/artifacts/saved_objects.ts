@@ -12,6 +12,7 @@ import {
   sha256,
   size,
 } from '../../../../common/endpoint/schema/common';
+import { created } from './common';
 
 export const body = t.string; // base64
 
@@ -44,10 +45,29 @@ export const internalArtifactCompleteSchema = t.intersection([
 ]);
 export type InternalArtifactCompleteSchema = t.TypeOf<typeof internalArtifactCompleteSchema>;
 
+export const internalArtifactCreateSchema = t.intersection([
+  internalArtifactCompleteSchema,
+  t.exact(
+    t.type({
+      created,
+    })
+  ),
+]);
+export type InternalArtifactCreateSchema = t.TypeOf<typeof internalArtifactCreateSchema>;
+
 export const internalManifestSchema = t.exact(
   t.type({
     ids: t.array(identifier),
   })
 );
-
 export type InternalManifestSchema = t.TypeOf<typeof internalManifestSchema>;
+
+export const internalManifestCreateSchema = t.intersection([
+  internalManifestSchema,
+  t.exact(
+    t.type({
+      created,
+    })
+  ),
+]);
+export type InternalManifestCreateSchema = t.TypeOf<typeof internalManifestCreateSchema>;

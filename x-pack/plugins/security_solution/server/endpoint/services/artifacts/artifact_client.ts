@@ -6,7 +6,10 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import { ArtifactConstants } from '../../lib/artifacts';
-import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
+import {
+  InternalArtifactCompleteSchema,
+  InternalArtifactCreateSchema,
+} from '../../schemas/artifacts';
 
 export class ArtifactClient {
   private savedObjectsClient: SavedObjectsClientContract;
@@ -29,9 +32,12 @@ export class ArtifactClient {
   public async createArtifact(
     artifact: InternalArtifactCompleteSchema
   ): Promise<SavedObject<InternalArtifactCompleteSchema>> {
-    return this.savedObjectsClient.create<InternalArtifactCompleteSchema>(
+    return this.savedObjectsClient.create<InternalArtifactCreateSchema>(
       ArtifactConstants.SAVED_OBJECT_TYPE,
-      artifact,
+      {
+        ...artifact,
+        created: Date.now(),
+      },
       { id: this.getArtifactId(artifact) }
     );
   }

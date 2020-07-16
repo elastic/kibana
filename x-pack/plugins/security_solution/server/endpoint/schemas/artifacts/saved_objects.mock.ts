@@ -4,24 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildArtifact } from '../../lib/artifacts';
+import { buildArtifact, maybeCompressArtifact, isCompressed } from '../../lib/artifacts';
 import { getTranslatedExceptionListMock } from './lists.mock';
-import { InternalArtifactSchema, InternalManifestSchema } from './saved_objects';
+import {
+  InternalArtifactSchema,
+  InternalManifestSchema,
+  internalArtifactCompleteSchema,
+} from './saved_objects';
+
+const compressArtifact = async (artifact: InternalArtifactSchema) => {
+  const compressedArtifact = await maybeCompressArtifact(artifact);
+  if (!isCompressed(compressedArtifact)) {
+    throw new Error(`Unable to compress artifact: ${artifact.identifier}`);
+  } else if (!internalArtifactCompleteSchema.is(compressedArtifact)) {
+    throw new Error(`Incomplete artifact detected: ${artifact.identifier}`);
+  }
+  return compressedArtifact;
+};
 
 export const getInternalArtifactMock = async (
   os: string,
-  schemaVersion: string
+  schemaVersion: string,
+  opts?: { compress: boolean }
 ): Promise<InternalArtifactSchema> => {
-  return buildArtifact(getTranslatedExceptionListMock(), os, schemaVersion);
+  const artifact = await buildArtifact(getTranslatedExceptionListMock(), os, schemaVersion);
+  return opts?.compress ? compressArtifact(artifact) : artifact;
+};
+
+export const getEmptyInternalArtifactMock = async (
+  os: string,
+  schemaVersion: string,
+  opts?: { compress: boolean }
+): Promise<InternalArtifactSchema> => {
+  const artifact = await buildArtifact({ entries: [] }, os, schemaVersion);
+  return opts?.compress ? compressArtifact(artifact) : artifact;
 };
 
 export const getInternalArtifactMockWithDiffs = async (
   os: string,
-  schemaVersion: string
+  schemaVersion: string,
+  opts?: { compress: boolean }
 ): Promise<InternalArtifactSchema> => {
   const mock = getTranslatedExceptionListMock();
   mock.entries.pop();
-  return buildArtifact(mock, os, schemaVersion);
+  const artifact = await buildArtifact(mock, os, schemaVersion);
+  return opts?.compress ? compressArtifact(artifact) : artifact;
 };
 
 export const getInternalManifestMock = (): InternalManifestSchema => ({

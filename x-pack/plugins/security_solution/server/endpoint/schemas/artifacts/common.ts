@@ -13,6 +13,8 @@ export const buffer = new t.Type<Buffer, Buffer, unknown>(
   t.identity
 );
 
+export const created = t.number;
+
 export const encoding = t.keyof({
   identity: null,
 });

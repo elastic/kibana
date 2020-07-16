@@ -11,42 +11,55 @@ import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
 import { Manifest } from './lib/artifacts';
 import { reportErrors, ManifestConstants } from './lib/artifacts/common';
+import { InternalArtifactSchema } from './schemas/artifacts';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;
 
   try {
     manifest = await manifestManager.getLastComputedManifest(ManifestConstants.SCHEMA_VERSION);
+
+    // If we have not yet computed a manifest, then we have to do so now. This should only happen
+    // once.
+    if (manifest == null) {
+      // New computed manifest based on current state of exception list
+      const newManifest = await manifestManager.buildNewManifest(ManifestConstants.SCHEMA_VERSION);
+      const diffs = newManifest.diff(Manifest.getDefault(ManifestConstants.SCHEMA_VERSION));
+
+      // Compress new artifacts
+      const adds = diffs.filter((diff) => diff.type === 'add').map((diff) => diff.id);
+      for (const artifactId of adds) {
+        const compressError = await newManifest.compressArtifact(artifactId);
+        if (compressError) {
+          throw compressError;
+        }
+      }
+
+      // Persist new artifacts
+      const artifacts = adds
+        .map((artifactId) => newManifest.getArtifact(artifactId))
+        .filter((artifact) => artifact !== undefined) as InternalArtifactSchema[];
+      if (artifacts.length !== adds.length) {
+        throw new Error('Invalid artifact encountered.');
+      }
+      const persistErrors = await manifestManager.pushArtifacts(artifacts);
+      if (persistErrors.length) {
+        reportErrors(logger, persistErrors);
+        throw new Error('Unable to persist new artifacts.');
+      }
+
+      // Commit the manifest state
+      if (diffs.length) {
+        const error = await manifestManager.commit(newManifest);
+        if (error) {
+          throw error;
+        }
+      }
+
+      manifest = newManifest;
+    }
   } catch (err) {
     logger.error(err);
-  }
-
-  // If we have not yet computed a manifest, then we have to do so now. This should only happen
-  // once.
-  if (manifest === null) {
-    try {
-      const snapshot = await manifestManager.getSnapshot({ initialize: true });
-
-      if (snapshot && snapshot.diffs.length) {
-        // create new artifacts
-        const errors = await manifestManager.syncArtifacts(snapshot, 'add');
-        if (errors.length) {
-          reportErrors(logger, errors);
-          throw new Error('Error writing new artifacts.');
-        }
-      } else if (snapshot === null) {
-        throw new Error('Snapshot not available.');
-      }
-
-      const error = await manifestManager.commit(snapshot.manifest);
-      if (error) {
-        throw error;
-      }
-
-      return snapshot.manifest;
-    } catch (err) {
-      logger.error(err);
-    }
   }
 
   return manifest ?? Manifest.getDefault(ManifestConstants.SCHEMA_VERSION);
