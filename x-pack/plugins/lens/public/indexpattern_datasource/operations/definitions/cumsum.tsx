@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
+import { KibanaDatatable } from 'src/plugins/expressions';
 
 const mathLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Cumulative sum',
@@ -15,6 +16,7 @@ const mathLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
 
 export type MathIndexPatternColumn = FormattedIndexPatternColumn & {
   operationType: 'cumsum';
+  buckets: string[];
 };
 
 export const cumsumOperation: OperationDefinition<MathIndexPatternColumn> = {
@@ -39,7 +41,7 @@ export const cumsumOperation: OperationDefinition<MathIndexPatternColumn> = {
       };
     }
   },
-  buildColumn({ suggestedPriority, field, previousColumn, columnId }) {
+  buildColumn({ suggestedPriority, field, previousColumn, columnId, columns }) {
     return {
       id: columnId,
       label: mathLabel,
@@ -49,16 +51,30 @@ export const cumsumOperation: OperationDefinition<MathIndexPatternColumn> = {
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
-      params:
-        previousColumn && previousColumn.dataType === 'number'
+      isClientSideOperation: true,
+      params: {
+        ...(previousColumn && previousColumn.dataType === 'number'
           ? previousColumn.params
-          : { format: { id: 'number' } },
+          : { format: { id: 'number' } }),
+        // TOOD should actually just filter out the first date histogram, not all of them
+        buckets: Object.values(columns)
+          .filter((c) => c?.isBucketed && c?.operationType !== 'date_histogram')
+          .map((c) => c?.id),
+      },
     };
   },
   clientSideExecution(column, table) {
-    // TODO for each row, sum up the previous rows.
+    function getBucket(row: KibanaDatatable['rows'][number]) {
+      return column.params.buckets.map((b) => row[b]).join(',');
+    }
     table.columns.push({ id: column.id, name: 'Cumulative sum' });
-    table.rows = table.rows.map((row) => ({ ...row, [column.id]: 0 }));
+    table.rows = table.rows.map((row, index) => {
+      const currentBucket = getBucket(row);
+      const previous = table.rows.slice(0, index).reverse();
+      const veryPreviousRow = previous.find((r) => getBucket(r) === currentBucket);
+      row[column.id] = (veryPreviousRow ? veryPreviousRow[column.id] : 0) + row[column.children![0].id];
+      return row;
+    });
     return table;
   },
   isTransferable: () => {

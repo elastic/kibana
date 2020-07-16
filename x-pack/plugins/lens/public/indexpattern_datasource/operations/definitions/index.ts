@@ -86,6 +86,21 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
   /**
+   * React component for operation specific settings shown in the popover editor
+   */
+  builderParamEditor?: React.ComponentType<{
+    currentColumn: C;
+    setColumn: StateSetter<IndexPatternColumn>;
+    columnId: string;
+    layerId: string;
+    uiSettings: IUiSettingsClient;
+    storage: IStorageWrapper;
+    savedObjectsClient: SavedObjectsClientContract;
+    http: HttpSetup;
+    dateRange: DateRange;
+    data: DataPublicPluginStart;
+  }>;
+  /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.
    */

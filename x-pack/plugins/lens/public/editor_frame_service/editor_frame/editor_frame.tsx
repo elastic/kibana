@@ -292,23 +292,7 @@ export function EditorFrame(props: EditorFrameProps) {
             />
           )
         }
-        suggestionsPanel={
-          allLoaded && (
-            <SuggestionPanel
-              frame={framePublicAPI}
-              activeDatasourceId={state.activeDatasourceId}
-              activeVisualizationId={state.visualization.activeId}
-              datasourceMap={props.datasourceMap}
-              datasourceStates={state.datasourceStates}
-              visualizationState={state.visualization.state}
-              visualizationMap={props.visualizationMap}
-              dispatch={dispatch}
-              ExpressionRenderer={props.ExpressionRenderer}
-              stagedPreview={state.stagedPreview}
-              plugins={props.plugins}
-            />
-          )
-        }
+        suggestionsPanel={null}
       />
     </RootDragDropProvider>
   );

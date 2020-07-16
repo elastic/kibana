@@ -39,8 +39,9 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
       };
     }
   },
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  buildColumn({ suggestedPriority, field, previousColumn, columnId }) {
     return {
+      id: columnId,
       label: countLabel,
       dataType: 'number',
       operationType: 'count',

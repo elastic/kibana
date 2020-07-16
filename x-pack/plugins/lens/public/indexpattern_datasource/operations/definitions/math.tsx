@@ -8,6 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
+import React from 'react';
+import { EuiFieldText } from '@elastic/eui';
 
 const mathLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Math',
@@ -52,6 +54,7 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn> = {
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,
+      isClientSideOperation: true,
       params:
         previousColumn && previousColumn.dataType === 'number'
           ? previousColumn.params
@@ -71,5 +74,18 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn> = {
   nonLeaveNode: true,
   canAcceptChild(c, otherC) {
     return !otherC.isBucketed;
+  },
+  builderParamEditor: ({ setColumn, currentColumn: currentColumn, layerId, dateRange, data }) => {
+    return (
+      <EuiFieldText
+        value={currentColumn.params.tinyMathExpression}
+        onChange={(e) => {
+          setColumn({
+            ...currentColumn,
+            params: { ...currentColumn.params, tinyMathExpression: e.target.value },
+          });
+        }}
+      />
+    );
   },
 };

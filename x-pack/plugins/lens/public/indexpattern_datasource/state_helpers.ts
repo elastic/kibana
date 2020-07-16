@@ -100,13 +100,31 @@ export function changeColumn<C extends IndexPatternColumn>({
     columnId
   );
 
+  const columnOrder = getColumnOrder(newColumns);
+  // turn into tree
+  const tree = newColumns[columnOrder[0]];
+  let currentNode = tree;
+  columnOrder.slice(1).forEach((colId) => {
+    const col = newColumns[colId];
+    if (col.isBucketed) {
+      currentNode.children = [col];
+      currentNode = col;
+      return;
+    }
+    if (!currentNode.children) {
+      currentNode.children = [];
+    }
+    currentNode.children.push(col);
+  });
+
   return {
     ...state,
     layers: {
       ...state.layers,
       [layerId]: {
         ...state.layers[layerId],
-        columnOrder: getColumnOrder(newColumns),
+        tree,
+        columnOrder,
         columns: newColumns,
       },
     },

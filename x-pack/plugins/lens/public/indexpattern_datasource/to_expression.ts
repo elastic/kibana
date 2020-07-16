@@ -28,25 +28,25 @@ function getExpressionForLayer(
   const esAggsColumnEntries = [];
   const nodeQueue = [tree];
   const clientSideOperations = [];
-  const handledClientSideNodes = {};
+  const handledClientSideNodes: Record<string, boolean> = {};
 
   while (nodeQueue.length > 0) {
     const currentNode = nodeQueue.shift();
-    if (!currentNode.isClientSideOperation) {
-      esAggsColumnEntries.push([currentNode.columnId, currentNode]);
+    if (!currentNode!.isClientSideOperation) {
+      esAggsColumnEntries.push([currentNode!.id, currentNode]);
     } else {
-      if (!handledClientSideNodes[currentNode.columnId]) {
+      if (!handledClientSideNodes[currentNode!.id]) {
         clientSideOperations.push(currentNode);
       }
-      handledClientSideNodes[currentNode.columnId] = true;
+      handledClientSideNodes[currentNode!.id] = true;
       (currentNode.children || []).forEach((childNode) => {
-        handledClientSideNodes[childNode.columnId] = true;
+        handledClientSideNodes[childNode.id] = true;
       });
     }
     nodeQueue.push(...(currentNode.children || []));
   }
 
-  const bucketsCount = esAggsColumnEntries.filter(([, entry]) => entry.isBucketed).length;
+  const bucketsCount = esAggsColumnEntries.filter(([, entry]) => entry!.isBucketed).length;
   const metricsCount = esAggsColumnEntries.length - bucketsCount;
 
   if (esAggsColumnEntries.length) {
@@ -67,13 +67,13 @@ function getExpressionForLayer(
      * Example 3: [Terms, Terms, Count, Max]
      * Output: [`col-0-terms0`, `col-3-terms1`, `col-4-count`, `col-5-max`]
      */
-    const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
+    const idMap = esAggsColumnEntries.reduce((currentIdMap, [colId, column], index) => {
       const newIndex = column.isBucketed
         ? index * (metricsCount + 1) // Buckets are spaced apart by N + 1
         : (index ? index + 1 : 0) - bucketsCount + (bucketsCount - 1) * (metricsCount + 1);
       return {
         ...currentIdMap,
-        [`col-${columnEntries.length === 1 ? 0 : newIndex}-${colId}`]: {
+        [`col-${esAggsColumnEntries.length === 1 ? 0 : newIndex}-${colId}`]: {
           ...column,
           id: colId,
         },
@@ -82,7 +82,7 @@ function getExpressionForLayer(
 
     type FormattedColumn = Required<Extract<IndexPatternColumn, { params?: { format: unknown } }>>;
 
-    const columnsWithFormatters = columnEntries.filter(
+    const columnsWithFormatters = esAggsColumnEntries.filter(
       ([, col]) => col.params && 'format' in col.params && col.params.format
     ) as Array<[string, FormattedColumn]>;
     const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(([id, col]) => {

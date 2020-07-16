@@ -510,6 +510,8 @@ export function PopoverEditor(props: PopoverEditorProps) {
   }
 
   function renderBuilderNode(column: IndexPatternColumn) {
+    const BuilderParamEditor =
+      column && operationDefinitionMap[column.operationType].builderParamEditor;
     return (
       <React.Fragment key={column.id}>
         <p>Selected operation: {column.operationType}</p>
@@ -586,6 +588,44 @@ export function PopoverEditor(props: PopoverEditorProps) {
         >
           Delete
         </EuiButton>
+        {BuilderParamEditor && (
+          <>
+            <BuilderParamEditor
+              setColumn={(newColumn) => {
+                const nodeQueue = [editState];
+
+                while (nodeQueue.length > 0) {
+                  const currentNode = nodeQueue.shift();
+                  if (currentNode === column) {
+                    // eslint-disable-next-line guard-for-in
+                    for (const key in newColumn) {
+                      currentNode[key] = newColumn[key];
+                    }
+                    break;
+                  }
+                  nodeQueue.push(...(currentNode.children || []));
+                }
+
+                // TODO this is super dirty - as we mutated the original tree, we just set it back to itself. Should make a copy
+                const newEditState = { ...editState };
+                setEditState(newEditState);
+                if (cursor === editState) {
+                  setCursor(newEditState);
+                }
+              }}
+              columnId={column.id}
+              currentColumn={column}
+              storage={props.storage}
+              uiSettings={props.uiSettings}
+              savedObjectsClient={props.savedObjectsClient}
+              layerId={layerId}
+              http={props.http}
+              dateRange={props.dateRange}
+              data={props.data}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {cursor === column && <p>The cursor is here</p>}
         {column.children &&
           column.children.length === 1 &&
@@ -612,6 +652,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
             <EuiButton
               onClick={() => {
                 console.log(editState);
+                setState(
+                  changeColumn({
+                    state,
+                    layerId,
+                    columnId,
+                    newColumn: editState,
+                  })
+                );
                 // TODO flush it into the actual state
               }}
             >

@@ -49,8 +49,9 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  buildColumn({ suggestedPriority, field, previousColumn, columnId }) {
     return {
+      id: columnId,
       label: ofName(field.name),
       dataType: 'number',
       operationType: OPERATION_TYPE,

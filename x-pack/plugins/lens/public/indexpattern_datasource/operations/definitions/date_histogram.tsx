@@ -56,7 +56,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       };
     }
   },
-  buildColumn({ suggestedPriority, field }) {
+  buildColumn({ suggestedPriority, field, columnId }) {
     let interval = autoInterval;
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
@@ -64,6 +64,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       timeZone = field.aggregationRestrictions.date_histogram.time_zone;
     }
     return {
+      id: columnId,
       label: field.name,
       dataType: 'date',
       operationType: 'date_histogram',
