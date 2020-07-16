@@ -56,11 +56,6 @@ export class MapsAppView extends React.Component {
   }
 
   componentDidMount() {
-    const { savedMap } = this.props;
-
-    getCoreChrome().docTitle.change(savedMap.title);
-    getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap.id);
-
     // Init sync utils
     // eslint-disable-next-line react-hooks/rules-of-hooks
     this._globalSyncUnsubscribe = useGlobalStateSyncing();
