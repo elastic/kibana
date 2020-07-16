@@ -17,19 +17,21 @@
  * under the License.
  */
 
-export const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
+import { createFailError } from '@kbn/dev-utils';
+import { RESEARCH_CLUSTER_ES_HOST } from '../constants';
+import { pretty, green } from '../utils';
 
-export const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;
+const { Client } = require('@elastic/elasticsearch');
 
-export const RESEARCH_COVERAGE_INDEX =
-  process.env.RESEARCH_COVERAGE_INDEX || 'qa_research_code_coverage';
+const node = RESEARCH_CLUSTER_ES_HOST;
+const client = new Client({ node });
 
-export const RESEARCH_TOTALS_INDEX =
-  process.env.RESEARCH_TOTALS_INDEX || `qa_research_total_code_coverage`;
-
-export const TEAM_ASSIGNMENT_PIPELINE_NAME = process.env.PIPELINE_NAME || 'team_assignment';
-
-export const CODE_COVERAGE_CI_JOB_NAME = 'elastic+kibana+code-coverage';
-export const RESEARCH_CI_JOB_NAME = 'elastic+kibana+qa-research';
-export const CI_JOB_NAME = process.env.COVERAGE_JOB_NAME || RESEARCH_CI_JOB_NAME;
-export const RESEARCH_CLUSTER_ES_HOST = process.env.ES_HOST || 'http://localhost:9200';
+export const update = (id) => (log) => async (body) => {
+  try {
+    await client.ingest.putPipeline({ id, body });
+    log.verbose(`### Ingestion Pipeline ID: ${green(id)}`);
+    log.verbose(`### Payload Partial: \n${body.slice(0, 600)}...`);
+  } catch (e) {
+    throw createFailError(`${pretty(e.meta)}`);
+  }
+};

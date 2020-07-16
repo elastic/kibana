@@ -27,9 +27,8 @@ export const LoadMapAndRender = class extends React.Component {
   }
 
   async _loadSavedMap() {
-    const { savedMapId } = this.props.match.params;
     try {
-      const savedMap = await getMapsSavedObjectLoader().get(savedMapId);
+      const savedMap = await getMapsSavedObjectLoader().get(this.props.savedMapId);
       if (this._isMounted) {
         this.setState({ savedMap });
       }
@@ -48,11 +47,11 @@ export const LoadMapAndRender = class extends React.Component {
 
   render() {
     const { savedMap, failedToLoad } = this.state;
+
     if (failedToLoad) {
       return <Redirect to="/" />;
     }
 
-    const currentPath = this.props.match.url;
-    return savedMap ? <MapsAppView savedMap={savedMap} currentPath={currentPath} /> : null;
+    return savedMap ? <MapsAppView savedMap={savedMap} onAppLeave={this.props.onAppLeave} /> : null;
   }
 };
