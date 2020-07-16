@@ -78,7 +78,7 @@ export const updateEndpointOSTelemetry = (
   os: AgentLocalMetadata['os'],
   osTracker: OSTracker
 ): OSTracker => {
-  const updatedOSTracker = { ...osTracker };
+  const updatedOSTracker = cloneDeep(osTracker);
   const { version: osVersion, platform: osPlatform, full: osFullName } = os;
   if (osFullName && osVersion) {
     if (updatedOSTracker[osFullName]) updatedOSTracker[osFullName].count += 1;
@@ -122,8 +122,6 @@ export const updateEndpointPolicyTelemetry = (
   latestEndpointEvent: SavedObject<NewAgentEvent>,
   policiesTracker: PoliciesTelemetry
 ): PoliciesTelemetry => {
-  const updatedPoliciesTracker = cloneDeep(policiesTracker);
-
   const policyHostTypeToPolicyType = {
     Linux: 'linux',
     macOs: 'mac',
@@ -132,39 +130,56 @@ export const updateEndpointPolicyTelemetry = (
   const enabledMalwarePolicyTypes = ['prevent', 'detect'];
 
   // The policy details are sent as a string on the 'payload' attribute of the agent event
-  const endpointPolicyPayload = latestEndpointEvent.attributes.payload
-    ? JSON.parse(latestEndpointEvent.attributes.payload)
-    : null;
+  const { payload } = latestEndpointEvent.attributes;
 
-  if (endpointPolicyPayload) {
-    // Get the platform: windows, mac, or linux
-    const hostType =
-      policyHostTypeToPolicyType[
-        endpointPolicyPayload['endpoint-security']?.host?.os?.name as EndpointOSNames
-      ];
-    // Get whether the malware setting for the platform on the most recently provided config is active (prevent or detect is on) or off
-    const userDesiredMalwareState =
-      endpointPolicyPayload['endpoint-security'].Endpoint?.configuration?.inputs[0]?.policy[
-        hostType
-      ]?.malware?.mode;
-    const isAnActiveMalwareState = enabledMalwarePolicyTypes.includes(userDesiredMalwareState);
+  if (!payload) {
+    // This payload may not always be provided depending on the state of the endpoint. Guard again situations where it is not sent
+    return policiesTracker;
+  }
 
-    // Get the status of the application of the malware protection
-    const malwareStatus =
-      endpointPolicyPayload['endpoint-security'].Endpoint?.policy?.applied?.response?.configurations
-        ?.malware?.status;
+  let endpointPolicyPayload;
+  try {
+    endpointPolicyPayload = JSON.parse(latestEndpointEvent.attributes.payload);
+  } catch (error) {
+    return policiesTracker;
+  }
 
-    // the warning state for endpoint is still technically active
-    if (isAnActiveMalwareState && malwareStatus !== 'failure') {
-      updatedPoliciesTracker.malware.active += 1;
-    }
-    if (!isAnActiveMalwareState) {
-      updatedPoliciesTracker.malware.inactive += 1;
-    }
-    // The user wanted to activate malware, but that request failed
-    if (isAnActiveMalwareState && malwareStatus === 'failure') {
-      updatedPoliciesTracker.malware.failure += 1;
-    }
+  // Get the platform: windows, mac, or linux
+  const hostType =
+    policyHostTypeToPolicyType[
+      endpointPolicyPayload['endpoint-security']?.host?.os?.name as EndpointOSNames
+    ];
+  // Get whether the malware setting for the platform on the most recently provided config is active (prevent or detect is on) or off
+  const userDesiredMalwareState =
+    endpointPolicyPayload['endpoint-security'].Endpoint?.configuration?.inputs[0]?.policy[hostType]
+      ?.malware?.mode;
+
+  // Get the status of the application of the malware protection
+  const malwareStatus =
+    endpointPolicyPayload['endpoint-security'].Endpoint?.policy?.applied?.response?.configurations
+      ?.malware?.status;
+
+  if (!userDesiredMalwareState || !malwareStatus) {
+    // If we get policy information without the mode or status, then nothing to track or update
+    return policiesTracker;
+  }
+
+  const updatedPoliciesTracker = {
+    malware: { ...policiesTracker.malware },
+  };
+
+  const isAnActiveMalwareState = enabledMalwarePolicyTypes.includes(userDesiredMalwareState);
+
+  // we only check for 'not failure' as the 'warning' state for malware is still technically actively enabled (with warnings)
+  const successfullyEnabled = !!malwareStatus && malwareStatus !== 'failure';
+  const failedToEnable = !!malwareStatus && malwareStatus === 'failure';
+
+  if (isAnActiveMalwareState && successfullyEnabled) {
+    updatedPoliciesTracker.malware.active += 1;
+  } else if (!isAnActiveMalwareState && successfullyEnabled) {
+    updatedPoliciesTracker.malware.inactive += 1;
+  } else if (isAnActiveMalwareState && failedToEnable) {
+    updatedPoliciesTracker.malware.failure += 1;
   }
 
   return updatedPoliciesTracker;
@@ -179,22 +194,21 @@ export const updateEndpointPolicyTelemetry = (
 export const getEndpointTelemetryFromFleet = async (
   soClient: ISavedObjectsRepository
 ): Promise<EndpointUsage | {}> => {
-  // Retrieve every agent that references the endpoint as an installed package. It will not be listed if it was never installed
+  // Retrieve every agent (max 10000) that references the endpoint as an installed package. It will not be listed if it was never installed
   let endpointAgents;
   try {
     const response = await getFleetSavedObjectsMetadata(soClient);
     endpointAgents = response.saved_objects;
   } catch (error) {
-    // Return an empty object to handle request failure.
-    // Better to provide an empty object that default telemetry as this informs us of an error
+    // Better to provide an empty object rather than default telemetry as this better informs us of an error
     return {};
   }
 
-  const agentTotal = endpointAgents.length;
+  const endpointAgentsCount = endpointAgents.length;
   const endpointTelemetry = getDefaultEndpointTelemetry();
 
   // If there are no installed endpoints return the default telemetry object
-  if (!endpointAgents || agentTotal < 1) return endpointTelemetry;
+  if (!endpointAgents || endpointAgentsCount < 1) return endpointTelemetry;
 
   // Use unique hosts to prevent any potential duplicates
   const uniqueHostIds: Set<string> = new Set();
@@ -202,7 +216,7 @@ export const getEndpointTelemetryFromFleet = async (
   let dailyActiveCount = 0;
   let policyTracker: PoliciesTelemetry = { malware: { active: 0, inactive: 0, failure: 0 } };
 
-  for (let i = 0; i < agentTotal; i += 1) {
+  for (let i = 0; i < endpointAgentsCount; i += 1) {
     const { attributes: metadataAttributes } = endpointAgents[i];
     const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
     const { host, os, elastic } = localMetadata as AgentLocalMetadata; // AgentMetadata is just an empty blob, casting for our  use case
@@ -218,10 +232,10 @@ export const getEndpointTelemetryFromFleet = async (
           const response = await getLatestFleetEndpointEvent(soClient, agentId);
           agentEvents = response.saved_objects;
         } catch (error) {
-          // Continue on with the loop if the request fails
-          break;
+          // If the request fails we do not obtain `active within last 24 hours for this agent` or policy specifics
         }
 
+        // AgentEvents will have a max length of 1
         if (agentEvents && agentEvents.length > 0) {
           const latestEndpointEvent = agentEvents[0];
           dailyActiveCount = updateEndpointDailyActiveCount(
