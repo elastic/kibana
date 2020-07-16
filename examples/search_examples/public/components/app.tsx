@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -44,7 +44,8 @@ import {
   DataPublicPluginStart,
   IndexPatternSelect,
   IEsSearchResponse,
-  IIndexPattern,
+  IndexPattern,
+  RangeFilter,
 } from '../../../../src/plugins/data/public';
 
 interface SearchExamplesAppDeps {
@@ -63,19 +64,42 @@ export const SearchExamplesApp = ({
   data,
 }: SearchExamplesAppDeps) => {
   const [result, setResult] = useState<IEsSearchResponse | undefined>();
-  const [indexPatternId, setIndexPatternId] = useState<string>();
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
+
+  useEffect(() => {
+    const setDefaultIndexPattern = async () => {
+      const defaultIndexPattern = await data.indexPatterns.getDefault();
+      setIndexPattern(defaultIndexPattern);
+    };
+
+    setDefaultIndexPattern();
+  }, [data]);
 
   const doAsyncSearch = async (strategy?: string) => {
-    let indexPattern: IIndexPattern | undefined;
-    if (indexPatternId) {
-      indexPattern = await data.indexPatterns.get(indexPatternId);
-    }
+    if (!indexPattern) return;
+
+    const timeFilter = data.query.timefilter.timefilter.createFilter(indexPattern);
+    const filters = data.query.filterManager.getFilters();
+
+    // We need to talk about this
+    const queryFilters = filters.map((filter) => filter.query);
+    const allFilters = timeFilter
+      ? queryFilters.concat({
+          range: (timeFilter as RangeFilter).range,
+        })
+      : queryFilters;
+
     const request = {
       params: {
-        index: indexPattern ? indexPattern.title : '',
+        index: indexPattern.title,
         body: {
           aggs: {
             avg_bytes: { avg: { field: 'bytes' } },
+          },
+          query: {
+            bool: {
+              filter: allFilters,
+            },
           },
         },
       },
@@ -89,7 +113,7 @@ export const SearchExamplesApp = ({
         setResult(response);
         notifications.toasts.addSuccess(
           `Searched ${response.rawResponse.hits.total} documents. Result is ${
-            response.rawResponse.aggregations.avg_bytes.value
+            response.rawResponse.aggregations?.avg_bytes.value
           }. Is this Cool? ${(response as IMyStrategyResponse).cool}`
         );
       }
@@ -104,11 +128,18 @@ export const SearchExamplesApp = ({
     doAsyncSearch('myStrategy');
   };
 
+  if (!indexPattern) return null;
+
   return (
     <Router basename={basename}>
       <I18nProvider>
         <>
-          <navigation.ui.TopNavMenu appName={PLUGIN_ID} showSearchBar={true} />
+          <navigation.ui.TopNavMenu
+            appName={PLUGIN_ID}
+            showSearchBar={true}
+            useDefaultBehaviors={true}
+            indexPatterns={indexPattern ? [indexPattern] : undefined}
+          />
           <EuiPage restrictWidth="1000px">
             <EuiPageBody>
               <EuiPageHeader>
@@ -135,9 +166,10 @@ export const SearchExamplesApp = ({
                               defaultMessage: 'Select index pattern',
                             }
                           )}
-                          indexPatternId={indexPatternId || ''}
-                          onChange={(newIndexPatternId: any) => {
-                            setIndexPatternId(newIndexPatternId);
+                          indexPatternId={indexPattern?.id || ''}
+                          onChange={async (newIndexPatternId: any) => {
+                            const newIndexPattern = await data.indexPatterns.get(newIndexPatternId);
+                            setIndexPattern(newIndexPattern);
                           }}
                           isClearable={false}
                         />
@@ -148,7 +180,7 @@ export const SearchExamplesApp = ({
                     <p>
                       <FormattedMessage
                         id="searchExamples.timestampText"
-                        defaultMessage="Last query took: {time}"
+                        defaultMessage="Last query took: {time} ms"
                         values={{ time: result ? result?.rawResponse.took : 'Unknown' }}
                       />
                     </p>
