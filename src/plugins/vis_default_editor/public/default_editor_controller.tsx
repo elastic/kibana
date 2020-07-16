@@ -44,7 +44,6 @@ class DefaultEditorController {
   constructor(el: HTMLElement, vis: Vis, eventEmitter: EventEmitter, embeddableHandler: any) {
     this.el = el;
     const { type: visType } = vis;
-    debugger;
     const optionTabs = [
       ...(visType.schemas.buckets || visType.schemas.metrics
         ? [
@@ -70,7 +69,6 @@ class DefaultEditorController {
           ]
         : visType.editorConfig.optionTabs),
     ];
-    debugger;
     this.state = {
       vis: cloneDeep(vis),
       optionTabs,

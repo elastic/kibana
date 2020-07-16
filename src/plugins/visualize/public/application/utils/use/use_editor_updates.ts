@@ -37,7 +37,8 @@ export const useEditorUpdates = (
   setHasUnsavedChanges: (value: boolean) => void,
   appState: VisualizeAppStateContainer | null,
   savedVisInstance: SavedVisInstance | undefined,
-  visEditorController: IEditorController | undefined
+  visEditorController: IEditorController | undefined,
+  byValue?: boolean
 ) => {
   const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
   const [currentAppState, setCurrentAppState] = useState<VisualizeAppState>();
@@ -84,15 +85,17 @@ export const useEditorUpdates = (
       });
 
       const handleLinkedSearch = (linked: boolean) => {
-        if (linked && !savedVis.savedSearchId && savedSearch) {
+        if (linked && savedVis && !savedVis.savedSearchId && savedSearch) {
           savedVis.savedSearchId = savedSearch.id;
           vis.data.savedSearchId = savedSearch.id;
           if (vis.data.searchSource) {
             vis.data.searchSource.setParent(savedSearch.searchSource);
           }
-        } else if (!linked && savedVis.savedSearchId) {
+        } else if (!linked && savedVis && savedVis.savedSearchId) {
           delete savedVis.savedSearchId;
           delete vis.data.savedSearchId;
+        } else {
+          // TODO: something to do for when it's not a saved vis?
         }
       };
 
@@ -110,8 +113,7 @@ export const useEditorUpdates = (
 
       const unsubscribeStateUpdates = appState.subscribe((state) => {
         setCurrentAppState(state);
-
-        if (savedVis.id && !services.history.location.pathname.includes(savedVis.id)) {
+        if (savedVis && savedVis.id && !services.history.location.pathname.includes(savedVis.id)) {
           // this filters out the case when manipulating the browser history back/forward
           // and initializing different visualizations
           return;
@@ -127,6 +129,7 @@ export const useEditorUpdates = (
 
         // if the browser history was changed manually we need to reflect changes in the editor
         if (
+          savedVis &&
           !isEqual(
             {
               ...services.visualizations.convertFromSerializedVis(vis.serialize()).visState,

@@ -118,7 +118,7 @@ export class SearchInterceptor {
       }
 
       const { combinedSignal, cleanup } = this.setupTimers(options);
-      this.pendingCount$.next(++this.pendingCount);
+      lthis.pendingCount$.next(++this.pendingCount);
 
       return this.runSearch(request, combinedSignal).pipe(
         finalize(() => {

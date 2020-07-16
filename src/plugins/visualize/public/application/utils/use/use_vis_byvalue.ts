@@ -19,6 +19,7 @@
 
 import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
+import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { IEditorController, SavedVisInstance, VisualizeServices } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getEditBreadcrumbs } from '../breadcrumbs';
@@ -29,7 +30,7 @@ export const useVisByValue = (
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
   visualizationIdFromUrl: string | undefined,
-  valueInput?: object
+  valueInput?: VisualizeInput
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
@@ -39,7 +40,7 @@ export const useVisByValue = (
   const loaded = useRef(false);
   useEffect(() => {
     const { chrome } = services;
-    const getSavedVisInstance = async () => {
+    const getVisInstance = async () => {
       if (!valueInput || loaded.current) {
         return;
       }
@@ -52,9 +53,9 @@ export const useVisByValue = (
         eventEmitter,
         embeddableHandler
       );
+
       loaded.current = true;
       setState({
-        savedVis: valueInput.savedVis,
         savedVisInstance,
         visEditorController,
       });
@@ -64,7 +65,7 @@ export const useVisByValue = (
       chrome.setBreadcrumbs(getEditBreadcrumbs());
     }
 
-    getSavedVisInstance();
+    getVisInstance();
   }, [
     eventEmitter,
     isChromeVisible,

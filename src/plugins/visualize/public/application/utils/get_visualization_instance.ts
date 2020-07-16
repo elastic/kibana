@@ -19,61 +19,30 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  SavedVisState,
   SerializedVis,
   Vis,
   VisSavedObject,
   VisualizeEmbeddableContract,
+  VisualizeInput,
 } from 'src/plugins/visualizations/public';
 import { SearchSourceFields } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { createSavedSearchesLoader } from '../../../../discover/public';
 import { VisualizeServices } from '../types';
-import { EmbeddableInput } from '../../../../embeddable/public/lib/embeddables';
 
-export const getVisualizationInstanceFromInput = async (
-  {
+const createVisualizeEmbeddableAndLinkSavedSearch = async (
+  vis: Vis,
+  visualizeServices: VisualizeServices
+) => {
+  const {
     chrome,
     data,
     overlays,
-    visualizations,
     createVisEmbeddableFromObject,
     savedObjects,
-    savedVisualizations,
     toastNotifications,
-  }: VisualizeServices,
-  input?: EmbeddableInput,
-  opts?: Record<string, unknown> | string
-) => {
-  if (!input) {
-    return;
-  }
-  debugger;
-  const visState = input.savedVis as SerializedVis;
-  /* const uiState = visState.uiState;
-  delete visState.uiState;
-  const searchSource = visState.data.searchSource;
-  delete visState.data.searchSource;
-  const aggs = visState.data.aggs;
-  delete visState.data.aggs;
-*/
-
-  let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
-  /* vis.uiState = uiState;
-  vis.data = {};
-  vis.data.searchSource = searchSource;
-  vis.data.aggs = aggs;*/
-  debugger;
-
-  if (vis.type.setup) {
-    try {
-      vis = await vis.type.setup(vis);
-    } catch {
-      // skip this catch block
-    }
-  }
-
+  } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     timeRange: data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
@@ -102,20 +71,41 @@ export const getVisualizationInstanceFromInput = async (
     }).get(vis.data.savedSearchId);
   }
 
-  return { vis, savedSearch, embeddableHandler };
+  return { savedSearch, embeddableHandler };
+};
+
+export const getVisualizationInstanceFromInput = async (
+  visualizeServices: VisualizeServices,
+  input?: VisualizeInput,
+  opts?: Record<string, unknown> | string
+) => {
+  if (!input) {
+    return;
+  }
+  const { visualizations } = visualizeServices;
+  const visState = input.savedVis as SerializedVis;
+
+  let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
+  if (vis.type.setup) {
+    try {
+      vis = await vis.type.setup(vis);
+    } catch {
+      // skip this catch block
+    }
+  }
+  const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
+    vis,
+    visualizeServices
+  );
+  return {
+    vis,
+    embeddableHandler,
+    savedSearch,
+  };
 };
 
 export const getVisualizationInstance = async (
-  {
-    chrome,
-    data,
-    overlays,
-    visualizations,
-    createVisEmbeddableFromObject,
-    savedObjects,
-    savedVisualizations,
-    toastNotifications,
-  }: VisualizeServices,
+  visualizeServices: VisualizeServices,
   /**
    * opts can be either a saved visualization id passed as string,
    * or an object of new visualization params.
@@ -123,6 +113,7 @@ export const getVisualizationInstance = async (
    */
   opts?: Record<string, unknown> | string
 ) => {
+  const { visualizations, savedVisualizations } = visualizeServices;
   const savedVis: VisSavedObject = await savedVisualizations.get(opts);
 
   if (typeof opts !== 'string') {
@@ -130,7 +121,6 @@ export const getVisualizationInstance = async (
   }
   const serializedVis = visualizations.convertToSerializedVis(savedVis);
   let vis = await visualizations.createVis(serializedVis.type, serializedVis);
-
   if (vis.type.setup) {
     try {
       vis = await vis.type.setup(vis);
@@ -139,33 +129,14 @@ export const getVisualizationInstance = async (
     }
   }
 
-  const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
-    timeRange: data.query.timefilter.timefilter.getTime(),
-    filters: data.query.filterManager.getFilters(),
-    id: '',
-  })) as VisualizeEmbeddableContract;
-
-  embeddableHandler.getOutput$().subscribe((output) => {
-    if (output.error) {
-      toastNotifications.addError(output.error, {
-        title: i18n.translate('visualize.error.title', {
-          defaultMessage: 'Visualization error',
-        }),
-      });
-    }
-  });
-
-  let savedSearch: SavedObject | undefined;
-
-  if (vis.data.savedSearchId) {
-    savedSearch = await createSavedSearchesLoader({
-      savedObjectsClient: savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome,
-      overlays,
-    }).get(vis.data.savedSearchId);
-  }
-
-  return { vis, savedVis, savedSearch, embeddableHandler };
+  const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
+    vis,
+    visualizeServices
+  );
+  return {
+    vis,
+    embeddableHandler,
+    savedSearch,
+    savedVis,
+  };
 };

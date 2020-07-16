@@ -21,8 +21,7 @@ import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
-import { cloneDeep } from 'lodash';
-import { merge } from 'rxjs';
+import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { useKibana } from '../../../../kibana_react/public';
 import {
   useChromeVisibility,
@@ -41,9 +40,7 @@ export const VisualizeByValueEditor = () => {
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(true);
   const [embeddableId, setEmbeddableId] = useState<string>();
-  const [valueInput, setValueInput] = useState<string>();
-  const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
-  const [currentAppState, setCurrentAppState] = useState<VisualizeAppState>();
+  const [valueInput, setValueInput] = useState<VisualizeInput>();
 
   useEffect(() => {
     const { originatingApp: value, embeddableId: embeddableIdValue, valueInput: valueInputValue } =
@@ -61,7 +58,7 @@ export const VisualizeByValueEditor = () => {
     services,
     eventEmitter,
     isChromeVisible,
-    false,
+    undefined,
     valueInput
   );
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
@@ -70,64 +67,15 @@ export const VisualizeByValueEditor = () => {
     true,
     savedVisInstance
   );
-
-  // modified use_editor_updates basically
-  useEffect(() => {
-    if (!appState || !savedVisInstance) {
-      return;
-    }
-    const {
-      timefilter: { timefilter },
-      filterManager,
-    } = services.data.query;
-    const { embeddableHandler, savedVis, savedSearch } = savedVisInstance;
-    const vis = cloneDeep(savedVisInstance.vis);
-    const initialState = cloneDeep(appState.getState());
-    setCurrentAppState(initialState);
-    setIsEmbeddableRendered(true);
-
-    const reloadVisualization = () => {
-      if (visEditorController) {
-        visEditorController.render({
-          core: services,
-          data: services.data,
-          uiState: cloneDeep(vis.uiState),
-          timeRange: timefilter.getTime(),
-          filters: filterManager.getFilters(),
-          query: cloneDeep(appState.getState()).query,
-          linked: !!vis.data.savedSearchId,
-          savedSearch,
-        });
-      }
-    };
-
-    const subscriptions = merge(
-      timefilter.getTimeUpdate$(),
-      timefilter.getAutoRefreshFetch$(),
-      timefilter.getFetch$(),
-      filterManager.getFetches$()
-    ).subscribe({
-      next: () => {},
-      error: services.fatalErrors.add,
-    });
-
-    const updateOnChange = () => {
-      appState.transitions.set('uiState', vis.uiState.getChanges());
-    };
-
-    vis.uiState.on('change', updateOnChange);
-
-    const updateOnEmbeddableRendered = () => setIsEmbeddableRendered(true);
-    eventEmitter.on('embeddableRendered', updateOnEmbeddableRendered);
-    reloadVisualization();
-  }, [
-    appState,
-    eventEmitter,
-    savedVisInstance,
+  const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
+    eventEmitter,
     setHasUnsavedChanges,
+    appState,
+    savedVisInstance,
     visEditorController,
-  ]);
+    true
+  );
   // useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
@@ -139,20 +87,6 @@ export const VisualizeByValueEditor = () => {
 
   return (
     <div className={`app-container visEditor visEditor--${savedVisInstance?.vis.type.name}`}>
-      {savedVisInstance && appState && currentAppState && (
-        <VisualizeTopNav
-          currentAppState={currentAppState}
-          hasUnsavedChanges={hasUnsavedChanges}
-          setHasUnsavedChanges={setHasUnsavedChanges}
-          isChromeVisible={isChromeVisible}
-          isEmbeddableRendered={isEmbeddableRendered}
-          hasUnappliedChanges={hasUnappliedChanges}
-          originatingApp={originatingApp}
-          savedVisInstance={savedVisInstance}
-          stateContainer={appState}
-          embeddableId={embeddableId}
-        />
-      )}
       {savedVisInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
       <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
     </div>

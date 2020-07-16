@@ -219,7 +219,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
-    debugger;
     if (this.handler && dirty) {
       this.updateHandler();
     }

@@ -38,8 +38,7 @@ export const useSavedVisInstance = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
-  visualizationIdFromUrl: string | undefined,
-  valueInput?: object
+  visualizationIdFromUrl: string | undefined
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
@@ -60,7 +59,7 @@ export const useSavedVisInstance = (
     const getSavedVisInstance = async () => {
       try {
         let savedVisInstance: SavedVisInstance;
-
+        debugger;
         if (history.location.pathname === '/create') {
           const searchParams = parse(history.location.search);
           const visTypes = services.visualizations.all();
@@ -156,10 +155,6 @@ export const useSavedVisInstance = (
 
     if (isChromeVisible === undefined) {
       // wait for specifying chrome
-      return;
-    }
-
-    if (valueInput) {
       return;
     }
 
