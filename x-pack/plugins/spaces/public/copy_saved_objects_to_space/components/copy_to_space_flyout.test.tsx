@@ -288,6 +288,7 @@ describe('CopyToSpaceFlyout', () => {
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       ['space-1', 'space-2'],
       true,
+      false,
       true
     );
 
@@ -426,7 +427,8 @@ describe('CopyToSpaceFlyout', () => {
           },
         ],
       },
-      true
+      true,
+      false
     );
 
     expect(onClose).toHaveBeenCalledTimes(1);

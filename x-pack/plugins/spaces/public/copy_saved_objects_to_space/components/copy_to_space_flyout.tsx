@@ -41,11 +41,16 @@ interface Props {
   toastNotifications: ToastsStart;
 }
 
+const INCLUDE_RELATED_DEFAULT = true;
+const CREATE_NEW_COPIES_DEFAULT = false;
+const OVERWRITE_ALL_DEFAULT = true;
+
 export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
   const { onClose, savedObject, spacesManager, toastNotifications } = props;
   const [copyOptions, setCopyOptions] = useState<CopyOptions>({
-    includeRelated: true,
-    overwrite: true,
+    includeRelated: INCLUDE_RELATED_DEFAULT,
+    createNewCopies: CREATE_NEW_COPIES_DEFAULT,
+    overwrite: OVERWRITE_ALL_DEFAULT,
     selectedSpaceIds: [],
   });
 
@@ -93,6 +98,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
         [{ type: savedObject.type, id: savedObject.id }],
         copyOptions.selectedSpaceIds,
         copyOptions.includeRelated,
+        copyOptions.createNewCopies,
         copyOptions.overwrite
       );
       const processedResult = mapValues(copySavedObjectsResult, processImportResponse);
@@ -133,7 +139,8 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
         await spacesManager.resolveCopySavedObjectsErrors(
           [{ type: savedObject.type, id: savedObject.id }],
           retries,
-          copyOptions.includeRelated
+          copyOptions.includeRelated,
+          copyOptions.createNewCopies
         );
 
         toastNotifications.addSuccess(

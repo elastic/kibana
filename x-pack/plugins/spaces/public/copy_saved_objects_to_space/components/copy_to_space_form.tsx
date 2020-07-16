@@ -7,7 +7,6 @@
 import './copy_to_space_form.scss';
 import React from 'react';
 import {
-  EuiSwitch,
   EuiSpacer,
   EuiHorizontalRule,
   EuiFormRow,
@@ -18,6 +17,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CopyOptions } from '../types';
 import { Space } from '../../../common/model/space';
 import { SelectableSpacesControl } from './selectable_spaces_control';
+import { CopyModeControl, CopyMode } from './copy_mode_control';
 
 interface Props {
   spaces: Space[];
@@ -26,13 +26,21 @@ interface Props {
 }
 
 export const CopyToSpaceForm = (props: Props) => {
-  const setOverwrite = (overwrite: boolean) => props.onUpdate({ ...props.copyOptions, overwrite });
+  const changeCopyMode = ({ createNewCopies, overwrite }: CopyMode) =>
+    props.onUpdate({ ...props.copyOptions, createNewCopies, overwrite });
 
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
     props.onUpdate({ ...props.copyOptions, selectedSpaceIds });
 
   return (
     <div data-test-subj="copy-to-space-form">
+      <CopyModeControl
+        initialValues={props.copyOptions}
+        updateSelection={(newValues: CopyMode) => changeCopyMode(newValues)}
+      />
+
+      <EuiSpacer />
+
       <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
         <EuiListGroupItem
           className="spcCopyToSpaceIncludeRelated"
@@ -41,26 +49,12 @@ export const CopyToSpaceForm = (props: Props) => {
             <span className="spcCopyToSpaceIncludeRelated__label">
               <FormattedMessage
                 id="xpack.spaces.management.copyToSpace.includeRelatedFormLabel"
-                defaultMessage="Including related saved objects"
+                defaultMessage="Include related saved objects"
               />
             </span>
           }
         />
       </EuiListGroup>
-
-      <EuiSpacer />
-
-      <EuiSwitch
-        data-test-subj="cts-form-overwrite"
-        label={
-          <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.automaticallyOverwrite"
-            defaultMessage="Automatically overwrite all saved objects"
-          />
-        }
-        checked={props.copyOptions.overwrite}
-        onChange={(e) => setOverwrite(e.target.checked)}
-      />
 
       <EuiHorizontalRule margin="m" />
 

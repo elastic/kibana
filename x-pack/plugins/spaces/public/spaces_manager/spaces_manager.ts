@@ -75,6 +75,7 @@ export class SpacesManager {
     objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
     spaces: string[],
     includeReferences: boolean,
+    createNewCopies: boolean,
     overwrite: boolean
   ): Promise<CopySavedObjectsToSpaceResponse> {
     return this.http.post('/api/spaces/_copy_saved_objects', {
@@ -82,7 +83,7 @@ export class SpacesManager {
         objects,
         spaces,
         includeReferences,
-        overwrite,
+        ...(createNewCopies ? { createNewCopies } : { overwrite }),
       }),
     });
   }
@@ -90,12 +91,14 @@ export class SpacesManager {
   public async resolveCopySavedObjectsErrors(
     objects: Array<Pick<SavedObjectsManagementRecord, 'type' | 'id'>>,
     retries: unknown,
-    includeReferences: boolean
+    includeReferences: boolean,
+    createNewCopies: boolean
   ): Promise<CopySavedObjectsToSpaceResponse> {
     return this.http.post(`/api/spaces/_resolve_copy_saved_objects_errors`, {
       body: JSON.stringify({
         objects,
         includeReferences,
+        createNewCopies,
         retries,
       }),
     });
