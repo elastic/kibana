@@ -6,6 +6,7 @@
 
 export function UserMenuProvider({ getService }) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return new (class UserMenu {
     async clickLogoutButton() {
@@ -41,7 +42,10 @@ export function UserMenuProvider({ getService }) {
         return;
       }
 
-      await testSubjects.clickUntilExists('userMenuButton', 'userMenu');
+      await retry.try(async () => {
+        await testSubjects.click('userMenuButton');
+        await testSubjects.existOrFail('userMenu');
+      });
     }
   })();
 }

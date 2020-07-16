@@ -116,38 +116,6 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       await find.clickByCssSelector(testSubjSelector(selector), timeout);
     }
 
-    /**
-     * Clicks a specific element that should open/show another element.
-     * This will click the `clickSelector` element and check if the `existsSelector` element exists.
-     * If not it will repeat the click and check again if it exists. This is useful in situations
-     * where e.g. a popover doesn't show on the first click.
-     *
-     * @see https://github.com/elastic/kibana/issues/71256
-     */
-    public async clickUntilExists(clickSelector: string, existsSelector: string): Promise<void> {
-      log.debug(`TestSubjects.clickUntilExists(${clickSelector}, ${existsSelector})`);
-      await retry.try(async () => {
-        await this.click(clickSelector);
-        await this.existOrFail(existsSelector);
-      });
-    }
-
-    /**
-     * Clicks a specific element that should hide/close another element.
-     * This will click the `clickSelector` element and check if the `missingSelector` element is now missing.
-     * If not it will repeat the click and check again if it's missing. This is useful in situations
-     * where e.g. a popover doesn't close on the first click.
-     *
-     * @see https://github.com/elastic/kibana/issues/71256
-     */
-    public async clickUntilMissing(clickSelector: string, missingSelector: string): Promise<void> {
-      log.debug(`TestSubjects.clickUntilMissing(${clickSelector}, ${missingSelector})`);
-      await retry.try(async () => {
-        await this.click(clickSelector);
-        await this.missingOrFail(missingSelector);
-      });
-    }
-
     public async doubleClick(selector: string, timeout: number = FIND_TIME): Promise<void> {
       log.debug(`TestSubjects.doubleClick(${selector})`);
       const element = await this.find(selector, timeout);
