@@ -4,15 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './copy_to_space_form.scss';
 import React from 'react';
-import {
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiFormRow,
-  EuiListGroup,
-  EuiListGroupItem,
-} from '@elastic/eui';
+import { EuiSpacer, EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CopyOptions } from '../types';
 import { Space } from '../../../common/model/space';
@@ -41,28 +34,25 @@ export const CopyToSpaceForm = (props: Props) => {
 
       <EuiSpacer />
 
-      <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
-        <EuiListGroupItem
-          className="spcCopyToSpaceIncludeRelated"
-          iconType={'check'}
-          label={
-            <span className="spcCopyToSpaceIncludeRelated__label">
-              <FormattedMessage
-                id="xpack.spaces.management.copyToSpace.includeRelatedFormLabel"
-                defaultMessage="Include related saved objects"
-              />
-            </span>
-          }
-        />
-      </EuiListGroup>
+      <EuiSwitch
+        label={
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.includeRelatedFormLabel"
+            defaultMessage="Include related saved objects"
+          />
+        }
+        checked={true}
+        disabled={true}
+        onChange={() => {}} // noop
+      />
 
-      <EuiHorizontalRule margin="m" />
+      <EuiSpacer />
 
       <EuiFormRow
         label={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.selectSpacesLabel"
-            defaultMessage="Select spaces to copy into"
+            defaultMessage="Select space(s)"
           />
         }
         fullWidth

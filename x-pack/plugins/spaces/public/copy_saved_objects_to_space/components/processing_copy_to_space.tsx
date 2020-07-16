@@ -95,7 +95,7 @@ export const ProcessingCopyToSpace = (props: Props) => {
         <h5>
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyResultsLabel"
-            defaultMessage="Copy results"
+            defaultMessage="Results"
           />
         </h5>
       </EuiText>
