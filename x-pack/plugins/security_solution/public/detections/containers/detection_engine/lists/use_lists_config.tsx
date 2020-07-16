@@ -32,10 +32,10 @@ export const useListsConfig = (): UseListsConfigReturn => {
   const needsConfiguration = !enabled || canWriteIndex === false || needsIndexConfiguration;
 
   useEffect(() => {
-    if (needsIndex && canManageIndex && !hasIndexError) {
+    if (needsIndex && canManageIndex) {
       createIndex();
     }
-  }, [canManageIndex, createIndex, hasIndexError, needsIndex]);
+  }, [canManageIndex, createIndex, needsIndex]);
 
   return { canManageIndex, canWriteIndex, enabled, loading, needsConfiguration };
 };
