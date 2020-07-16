@@ -37,6 +37,11 @@ export const startAutoReload = actionCreator<{ id: InputsModelId }>('START_KQL_A
 
 export const stopAutoReload = actionCreator<{ id: InputsModelId }>('STOP_KQL_AUTO_RELOAD');
 
+export const setFullScreen = actionCreator<{
+  id: InputsModelId;
+  fullScreen: boolean;
+}>('SET_FULL_SCREEN');
+
 export const setQuery = actionCreator<{
   inputId: InputsModelId;
   id: string;

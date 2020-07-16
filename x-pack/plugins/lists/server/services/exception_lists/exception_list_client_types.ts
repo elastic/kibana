@@ -86,10 +86,20 @@ export interface DeleteExceptionListItemOptions {
   namespaceType: NamespaceType;
 }
 
+export interface DeleteEndpointListItemOptions {
+  id: IdOrUndefined;
+  itemId: ItemIdOrUndefined;
+}
+
 export interface GetExceptionListItemOptions {
   itemId: ItemIdOrUndefined;
   id: IdOrUndefined;
   namespaceType: NamespaceType;
+}
+
+export interface GetEndpointListItemOptions {
+  itemId: ItemIdOrUndefined;
+  id: IdOrUndefined;
 }
 
 export interface CreateExceptionListItemOptions {
@@ -99,6 +109,18 @@ export interface CreateExceptionListItemOptions {
   itemId: ItemId;
   listId: ListId;
   namespaceType: NamespaceType;
+  name: Name;
+  description: Description;
+  meta: MetaOrUndefined;
+  tags: Tags;
+  type: ExceptionListItemType;
+}
+
+export interface CreateEndpointListItemOptions {
+  _tags: _Tags;
+  comments: CreateCommentsArray;
+  entries: EntriesArray;
+  itemId: ItemId;
   name: Name;
   description: Description;
   meta: MetaOrUndefined;
@@ -120,9 +142,30 @@ export interface UpdateExceptionListItemOptions {
   type: ExceptionListItemTypeOrUndefined;
 }
 
+export interface UpdateEndpointListItemOptions {
+  _tags: _TagsOrUndefined;
+  comments: UpdateCommentsArray;
+  entries: EntriesArrayOrUndefined;
+  id: IdOrUndefined;
+  itemId: ItemIdOrUndefined;
+  name: NameOrUndefined;
+  description: DescriptionOrUndefined;
+  meta: MetaOrUndefined;
+  tags: TagsOrUndefined;
+  type: ExceptionListItemTypeOrUndefined;
+}
+
 export interface FindExceptionListItemOptions {
   listId: ListId;
   namespaceType: NamespaceType;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export interface FindEndpointListItemOptions {
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
