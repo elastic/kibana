@@ -21,7 +21,7 @@ With Lens, you can:
 To get started with *Lens*, click a field in the data panel, then drag and drop the field on a highlighted area.
 
 [role="screenshot"]
-image::images/lens_drag_drop.gif[]
+image::images/lens_drag_drop.gif[Drag and drop]
 
 You can incorporate many fields into your visualization, and Lens uses heuristics to decide how to apply each one to the visualization.
 
@@ -51,7 +51,7 @@ To help you decide exactly the data you want to display, get a quick summary of 
 To view the field summary information, navigate to the field, then click *i*.
 
 [role="screenshot"]
-image::images/lens_data_info.png[]
+image::images/lens_data_info.png[Data summary window]
 
 [float]
 [[change-the-visualization-type]]
@@ -62,7 +62,7 @@ image::images/lens_data_info.png[]
 *Suggestions* are shortcuts to alternate visualizations that *Lens* generates for you.
 
 [role="screenshot"]
-image::images/lens_suggestions.gif[]
+image::images/lens_suggestions.gif[Visualization suggestions]
 
 If you'd like to use a visualization type that is not suggested, click the visualization type,
 then select a new one. 
@@ -110,8 +110,6 @@ To start, you'll need to add the <<add-sample-data, sample ecommerce data>>.
 
 Drag and drop your data onto the visualization builder pane.
 
-. Open *Lens*.
-
 . Select the *kibana_sample_data_ecommerce* index pattern.
 
 . Click image:images/time-filter-calendar.png[], then click *Last 7 days*. 
@@ -138,14 +136,15 @@ image::images/lens_tutorial_2.png[Lens tutorial]
 
 Make your visualization look exactly how you want with the customization options.
 
-. Click *Average of taxful_total_price*.
+. Click *Average of taxful_total_price*, then Change the *Label* to `Sales`.
++
+image::images/lens_tutorial_3.1.png[Lens tutorial]
 
-.. Change the *Label* to `Sales`.
-
-. Click *Top values of category.keyword*.
-
-.. Change *Number of values* to `10`. The visualization updates to show there are only
-six available categories.
+. Click *Top values of category.keyword*, then change *Number of values* to `10`.
++
+The visualization updates to show there are only six available categories.
++
+image::images/lens_tutorial_3.1.png[Lens tutorial]
 +
 Look at the *Suggestions*. An area chart is not an option, but for sales data, a stacked area chart might be the best option.
 
