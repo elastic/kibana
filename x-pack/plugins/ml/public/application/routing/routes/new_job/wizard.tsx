@@ -8,6 +8,8 @@ import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { ApplicationStart } from 'kibana/public';
+
 import { basicResolvers } from '../../resolvers';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -16,20 +18,20 @@ import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import {
-  ANOMALY_DETECTION_BREADCRUMB,
-  CREATE_JOB_BREADCRUMB,
-  ML_BREADCRUMB,
-} from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
 }
 
-const baseBreadcrumbs = [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, CREATE_JOB_BREADCRUMB];
+const getBaseBreadcrumbs = (getUrlForApp: ApplicationStart['getUrlForApp']) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
+  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', getUrlForApp),
+  getBreadcrumbWithUrlForApp('CREATE_JOB_BREADCRUMB', getUrlForApp),
+];
 
-const singleMetricBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getSingleMetricBreadcrumbs = (getUrlForApp: ApplicationStart['getUrlForApp']) => [
+  ...getBaseBreadcrumbs(getUrlForApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.singleMetricLabel', {
       defaultMessage: 'Single metric',
@@ -38,8 +40,8 @@ const singleMetricBreadcrumbs = [
   },
 ];
 
-const multiMetricBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getMultiMetricBreadcrumbs = (getUrlForApp: ApplicationStart['getUrlForApp']) => [
+  ...getBaseBreadcrumbs(getUrlForApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.multiMetricLabel', {
       defaultMessage: 'Multi-metric',
@@ -48,8 +50,8 @@ const multiMetricBreadcrumbs = [
   },
 ];
 
-const populationBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getPopulationBreadcrumbs = (getUrlForApp: ApplicationStart['getUrlForApp']) => [
+  ...getBaseBreadcrumbs(getUrlForApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.populationLabel', {
       defaultMessage: 'Population',
@@ -58,8 +60,8 @@ const populationBreadcrumbs = [
   },
 ];
 
-const advancedBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getAdvancedBreadcrumbs = (getUrlForApp: ApplicationStart['getUrlForApp']) => [
+  ...getBaseBreadcrumbs(getUrlForApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.advancedConfigurationLabel', {
       defaultMessage: 'Advanced configuration',
@@ -68,8 +70,8 @@ const advancedBreadcrumbs = [
   },
 ];
 
-const categorizationBreadcrumbs = [
-  ...baseBreadcrumbs,
+const getCategorizationBreadcrumbs = (getUrlForApp: ApplicationStart['getUrlForApp']) => [
+  ...getBaseBreadcrumbs(getUrlForApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.categorizationLabel', {
       defaultMessage: 'Categorization',
@@ -78,35 +80,43 @@ const categorizationBreadcrumbs = [
   },
 ];
 
-export const singleMetricRoute: MlRoute = {
+export const singleMetricRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/jobs/new_job/single_metric',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.SINGLE_METRIC} deps={deps} />,
-  breadcrumbs: singleMetricBreadcrumbs,
-};
+  breadcrumbs: getSingleMetricBreadcrumbs(getUrlForApp),
+});
 
-export const multiMetricRoute: MlRoute = {
+export const multiMetricRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/jobs/new_job/multi_metric',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.MULTI_METRIC} deps={deps} />,
-  breadcrumbs: multiMetricBreadcrumbs,
-};
+  breadcrumbs: getMultiMetricBreadcrumbs(getUrlForApp),
+});
 
-export const populationRoute: MlRoute = {
+export const populationRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/jobs/new_job/population',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.POPULATION} deps={deps} />,
-  breadcrumbs: populationBreadcrumbs,
-};
+  breadcrumbs: getPopulationBreadcrumbs(getUrlForApp),
+});
 
-export const advancedRoute: MlRoute = {
+export const advancedRouteFactory = (getUrlForApp: ApplicationStart['getUrlForApp']): MlRoute => ({
   path: '/jobs/new_job/advanced',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.ADVANCED} deps={deps} />,
-  breadcrumbs: advancedBreadcrumbs,
-};
+  breadcrumbs: getAdvancedBreadcrumbs(getUrlForApp),
+});
 
-export const categorizationRoute: MlRoute = {
+export const categorizationRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/jobs/new_job/categorization',
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.CATEGORIZATION} deps={deps} />,
-  breadcrumbs: categorizationBreadcrumbs,
-};
+  breadcrumbs: getCategorizationBreadcrumbs(getUrlForApp),
+});
 
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });

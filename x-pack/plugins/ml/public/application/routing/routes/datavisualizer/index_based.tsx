@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
 import React, { FC } from 'react';
+import { parse } from 'query-string';
+
 import { i18n } from '@kbn/i18n';
+
+import { ApplicationStart } from 'kibana/public';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { Page } from '../../../datavisualizer/index_based';
@@ -15,24 +19,24 @@ import { checkBasicLicense } from '../../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
-import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  DATA_VISUALIZER_BREADCRUMB,
-  {
-    text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.indexLabel', {
-      defaultMessage: 'Index',
-    }),
-    href: '',
-  },
-];
-
-export const indexBasedRoute: MlRoute = {
+export const indexBasedRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/jobs/new_job/datavisualizer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', getUrlForApp),
+    {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.indexLabel', {
+        defaultMessage: 'Index',
+      }),
+      href: '',
+    },
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });

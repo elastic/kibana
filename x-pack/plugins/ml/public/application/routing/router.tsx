@@ -11,6 +11,8 @@ import { Location } from 'history';
 import { AppMountParameters, IUiSettingsClient, ChromeStart } from 'kibana/public';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
+
+import { useMlKibana } from '../contexts/kibana';
 import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
@@ -74,26 +76,38 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
  */
 export const MlRouter: FC<{
   pageDeps: PageDependencies;
-}> = ({ pageDeps }) => (
-  <Router history={pageDeps.history}>
-    <LegacyHashUrlRedirect>
-      <UrlStateProvider>
-        <div className="ml-app">
-          {Object.entries(routes).map(([name, route]) => (
-            <Route
-              key={name}
-              path={route.path}
-              exact
-              render={(props) => {
-                window.setTimeout(() => {
-                  pageDeps.setBreadcrumbs(route.breadcrumbs);
-                });
-                return route.render(props, pageDeps);
-              }}
-            />
-          ))}
-        </div>
-      </UrlStateProvider>
-    </LegacyHashUrlRedirect>
-  </Router>
-);
+}> = ({ pageDeps }) => {
+  const {
+    services: {
+      application: { getUrlForApp },
+    },
+  } = useMlKibana();
+
+  return (
+    <Router history={pageDeps.history}>
+      <LegacyHashUrlRedirect>
+        <UrlStateProvider>
+          <div className="ml-app">
+            {Object.entries(routes).map(([name, routeFactory]) => {
+              const route = routeFactory(getUrlForApp);
+
+              return (
+                <Route
+                  key={name}
+                  path={route.path}
+                  exact
+                  render={(props) => {
+                    window.setTimeout(() => {
+                      pageDeps.setBreadcrumbs(route.breadcrumbs);
+                    });
+                    return route.render(props, pageDeps);
+                  }}
+                />
+              );
+            })}
+          </div>
+        </UrlStateProvider>
+      </LegacyHashUrlRedirect>
+    </Router>
+  );
+};

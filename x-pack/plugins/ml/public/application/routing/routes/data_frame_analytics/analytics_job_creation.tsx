@@ -5,29 +5,33 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { parse } from 'query-string';
+
+import { i18n } from '@kbn/i18n';
+
+import { ApplicationStart } from 'kibana/public';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_creation';
-import { ML_BREADCRUMB } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  {
-    text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameManagementLabel', {
-      defaultMessage: 'Data Frame Analytics',
-    }),
-    href: '#/data_frame_analytics',
-  },
-];
-
-export const analyticsJobsCreationRoute: MlRoute = {
+export const analyticsJobsCreationRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/data_frame_analytics/new_job',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
+    {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameManagementLabel', {
+        defaultMessage: 'Data Frame Analytics',
+      }),
+      href: getUrlForApp('ml', { path: '/data_frame_analytics' }),
+    },
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { index, jobId, savedSearchId }: Record<string, any> = parse(location.search, {

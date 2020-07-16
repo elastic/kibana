@@ -5,12 +5,16 @@
  */
 
 import React, { FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
+
+import { ApplicationStart } from 'kibana/public';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
-import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { checkBasicLicense } from '../../../license';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
@@ -26,9 +30,9 @@ interface IndexOrSearchPageProps extends PageProps {
   mode: MODE;
 }
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  ANOMALY_DETECTION_BREADCRUMB,
+const getBreadcrumbs = (getUrlForApp: ApplicationStart['getUrlForApp']) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
+  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', getUrlForApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
       defaultMessage: 'Create job',
@@ -37,7 +41,9 @@ const breadcrumbs = [
   },
 ];
 
-export const indexOrSearchRoute: MlRoute = {
+export const indexOrSearchRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/jobs/new_job/step/index_or_search',
   render: (props, deps) => (
     <PageWrapper
@@ -47,10 +53,12 @@ export const indexOrSearchRoute: MlRoute = {
       mode={MODE.NEW_JOB}
     />
   ),
-  breadcrumbs,
-};
+  breadcrumbs: getBreadcrumbs(getUrlForApp),
+});
 
-export const dataVizIndexOrSearchRoute: MlRoute = {
+export const dataVizIndexOrSearchRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/datavisualizer_index_select',
   render: (props, deps) => (
     <PageWrapper
@@ -60,8 +68,8 @@ export const dataVizIndexOrSearchRoute: MlRoute = {
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs,
-};
+  breadcrumbs: getBreadcrumbs(getUrlForApp),
+});
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
   const newJobResolvers = {

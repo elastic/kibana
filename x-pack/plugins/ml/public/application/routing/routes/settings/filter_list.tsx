@@ -12,6 +12,8 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { ApplicationStart } from 'kibana/public';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
@@ -24,24 +26,24 @@ import {
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { FilterLists } from '../../../settings/filter_lists';
 
-import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  SETTINGS,
-  {
-    text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
-      defaultMessage: 'Filter lists',
-    }),
-    href: '#/settings/filter_lists',
-  },
-];
-
-export const filterListRoute: MlRoute = {
+export const filterListRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/settings/filter_lists',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    {
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
+        defaultMessage: 'Filter lists',
+      }),
+      href: '#/settings/filter_lists',
+    },
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver(undefined, undefined, deps.config, {

@@ -12,6 +12,8 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { ApplicationStart } from 'kibana/public';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
@@ -23,7 +25,8 @@ import {
 } from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from '../../../settings/filter_lists';
-import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
+
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 enum MODE {
   NEW,
@@ -34,39 +37,39 @@ interface NewFilterPageProps extends PageProps {
   mode: MODE;
 }
 
-const newBreadcrumbs = [
-  ML_BREADCRUMB,
-  SETTINGS,
-  {
-    text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
-      defaultMessage: 'Create',
-    }),
-    href: '#/settings/filter_lists/new',
-  },
-];
-
-const editBreadcrumbs = [
-  ML_BREADCRUMB,
-  SETTINGS,
-  {
-    text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
-      defaultMessage: 'Edit',
-    }),
-    href: '#/settings/filter_lists/edit',
-  },
-];
-
-export const newFilterListRoute: MlRoute = {
+export const newFilterListRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/settings/filter_lists/new_filter_list',
   render: (props, deps) => <PageWrapper {...props} mode={MODE.NEW} deps={deps} />,
-  breadcrumbs: newBreadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    {
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
+        defaultMessage: 'Create',
+      }),
+      href: '#/settings/filter_lists/new',
+    },
+  ],
+});
 
-export const editFilterListRoute: MlRoute = {
+export const editFilterListRouteFactory = (
+  getUrlForApp: ApplicationStart['getUrlForApp']
+): MlRoute => ({
   path: '/settings/filter_lists/edit_filter_list/:filterId',
   render: (props, deps) => <PageWrapper {...props} mode={MODE.EDIT} deps={deps} />,
-  breadcrumbs: editBreadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', getUrlForApp),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', getUrlForApp),
+    {
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
+        defaultMessage: 'Edit',
+      }),
+      href: '#/settings/filter_lists/edit',
+    },
+  ],
+});
 
 const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
   let filterId: string | undefined;
