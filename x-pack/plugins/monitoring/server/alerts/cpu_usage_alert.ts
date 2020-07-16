@@ -393,13 +393,13 @@ export class CpuUsageAlert extends BaseAlert {
         continue;
       }
 
-      const firingNodeUuids = nodes.reduce((list, node) => {
+      const firingNodeUuids = nodes.reduce((list: string[], node) => {
         const stat = node.meta as AlertCpuUsageNodeStats;
         if (node.shouldFire) {
           list.push(stat.nodeId);
         }
         return list;
-      }, []);
+      }, [] as string[]);
       firingNodeUuids.sort(); // It doesn't matter how we sort, but keep the order consistent
       const instanceId = `${this.type}:${cluster.clusterUuid}:${firingNodeUuids.join(',')}`;
       const instance = services.alertInstanceFactory(instanceId);
