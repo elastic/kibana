@@ -33,7 +33,6 @@ import { requireUIRoutes } from './routes';
 import { initBulkUploader } from './kibana_monitoring';
 // @ts-ignore
 import { initInfraSource } from './lib/logs/init_infra_source';
-import { AlertingSecurity } from './lib/elasticsearch/verify_alerting_security';
 import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { registerMonitoringCollection } from './telemetry_collection';
