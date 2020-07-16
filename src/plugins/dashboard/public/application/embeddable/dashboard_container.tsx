@@ -239,7 +239,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
   >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
-    const idToReplace = explicitInput.id;
+    const idToReplace = embeddableId || explicitInput.id;
     if (idToReplace && this.input.panels[idToReplace]) {
       this.replacePanel(this.input.panels[idToReplace], {
         type,

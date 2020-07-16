@@ -245,7 +245,7 @@ export const getTopNavConfig = (
                 const state = {
                   input: {
                     ...vis.serialize(),
-                    id: uuid.v4(),
+                    id: embeddableId ? embeddableId : uuid.v4(),
                   },
                   type: VISUALIZE_EMBEDDABLE_TYPE,
                   embeddableId: '',

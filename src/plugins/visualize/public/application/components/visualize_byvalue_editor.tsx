@@ -50,6 +50,8 @@ export const VisualizeByValueEditor = () => {
       {};
     setOriginatingApp(value);
     setValueInput(valueInputValue);
+    debugger;
+    setEmbeddableId(embeddableIdValue);
   }, [services]);
 
   const isChromeVisible = useChromeVisibility(services.chrome);
@@ -76,7 +78,7 @@ export const VisualizeByValueEditor = () => {
     visEditorController,
     true
   );
-  // useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
+  //useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
     // clean up all registered listeners if any is left
@@ -87,6 +89,21 @@ export const VisualizeByValueEditor = () => {
 
   return (
     <div className={`app-container visEditor visEditor--${savedVisInstance?.vis.type.name}`}>
+      {savedVisInstance && appState && currentAppState && (
+        <VisualizeTopNav
+          currentAppState={currentAppState}
+          hasUnsavedChanges={hasUnsavedChanges}
+          setHasUnsavedChanges={setHasUnsavedChanges}
+          isChromeVisible={isChromeVisible}
+          isEmbeddableRendered={isEmbeddableRendered}
+          hasUnappliedChanges={hasUnappliedChanges}
+          originatingApp={originatingApp}
+          savedVisInstance={savedVisInstance}
+          stateContainer={appState}
+          visualizationIdFromUrl={undefined}
+          embeddableId={embeddableId}
+        />
+      )}
       {savedVisInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
       <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
     </div>

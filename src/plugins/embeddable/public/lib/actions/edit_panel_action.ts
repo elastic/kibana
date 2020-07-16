@@ -115,11 +115,13 @@ export class EditPanelAction implements Action<ActionContext> {
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
       if (this.currentAppId) {
+        debugger;
         const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
         const state: EmbeddableEditorState = {
           originatingApp: this.currentAppId,
           byValueMode,
           valueInput: byValueMode ? embeddable.getInput() : undefined,
+          embeddableId: embeddable.id,
         };
         return { app, path, state };
       }
