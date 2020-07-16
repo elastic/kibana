@@ -28,13 +28,12 @@ export const getInternalArtifactsMock = async (
   os: string,
   schemaVersion: string
 ): Promise<InternalArtifactSchema[]> => {
-  // @ts-ignore
-  return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map(async () => {
+  // TODO: fix this type error
+  return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<InternalArtifactSchema[]>(async () => {
     await buildArtifact(getTranslatedExceptionListMock(), os, schemaVersion);
   });
 };
 
 export const getInternalManifestMock = (): InternalManifestSchema => ({
-  created: Date.now(),
   ids: [],
 });

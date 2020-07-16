@@ -20,15 +20,13 @@ export interface ManifestDiff {
 }
 
 export class Manifest {
-  private created: Date;
   private entries: Record<string, ManifestEntry>;
   private schemaVersion: ManifestSchemaVersion;
 
   // For concurrency control
-  private version: string;
+  private version: string | undefined;
 
-  constructor(created: Date, schemaVersion: string, version: string) {
-    this.created = created;
+  constructor(schemaVersion: string, version?: string) {
     this.entries = {};
     this.version = version;
 
@@ -45,7 +43,7 @@ export class Manifest {
   }
 
   public static getDefault(schemaVersion: string) {
-    return new Manifest(new Date(), schemaVersion, 'default');
+    return new Manifest(schemaVersion);
   }
 
   public static fromArtifacts(
@@ -53,7 +51,7 @@ export class Manifest {
     schemaVersion: string,
     oldManifest: Manifest
   ): Manifest {
-    const manifest = new Manifest(new Date(), schemaVersion, oldManifest.getVersion());
+    const manifest = new Manifest(schemaVersion, oldManifest.getVersion());
     artifacts.forEach((artifact) => {
       const id = `${artifact.identifier}-${artifact.decodedSha256}`;
       const existingArtifact = oldManifest.getArtifact(id);
@@ -67,11 +65,7 @@ export class Manifest {
   }
 
   public static fromPkgConfig(manifestPkgConfig: ManifestSchema): Manifest {
-    const manifest = new Manifest(
-      new Date(),
-      manifestPkgConfig.schema_version,
-      manifestPkgConfig.manifest_version
-    );
+    const manifest = new Manifest(manifestPkgConfig.schema_version);
     for (const [identifier, artifactRecord] of Object.entries(manifestPkgConfig.artifacts)) {
       const artifact = {
         identifier,
@@ -81,8 +75,6 @@ export class Manifest {
         decodedSize: artifactRecord.decoded_size,
         encodedSha256: artifactRecord.encoded_sha256,
         encodedSize: artifactRecord.encoded_size,
-        created: Date.now(),
-        body: 'unused',
       };
       manifest.addEntry(artifact);
     }
@@ -107,7 +99,7 @@ export class Manifest {
     return this.schemaVersion;
   }
 
-  public getVersion(): string {
+  public getVersion(): string | undefined {
     return this.version;
   }
 
@@ -128,8 +120,12 @@ export class Manifest {
     return this.entries;
   }
 
+  public getEntry(artifactId: string): ManifestEntry | undefined {
+    return this.entries[artifactId];
+  }
+
   public getArtifact(artifactId: string): InternalArtifactSchema | undefined {
-    return this.entries[artifactId]?.getArtifact();
+    return this.getEntry(artifactId)?.getArtifact();
   }
 
   public diff(manifest: Manifest): ManifestDiff[] {
@@ -171,7 +167,6 @@ export class Manifest {
 
   public toSavedObject(): InternalManifestSchema {
     return {
-      created: this.created.getTime(),
       ids: Object.keys(this.entries),
     };
   }

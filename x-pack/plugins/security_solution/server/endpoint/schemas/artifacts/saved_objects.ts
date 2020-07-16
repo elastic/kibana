@@ -12,11 +12,10 @@ import {
   sha256,
   size,
 } from '../../../../common/endpoint/schema/common';
-import { created } from './common';
 
 export const body = t.string; // base64
 
-export const internalArtifactSchema = t.exact(
+export const internalArtifactRecordSchema = t.exact(
   t.type({
     identifier,
     compressionAlgorithm,
@@ -25,16 +24,28 @@ export const internalArtifactSchema = t.exact(
     decodedSize: size,
     encodedSha256: sha256,
     encodedSize: size,
-    created,
-    body,
   })
 );
+export type InternalArtifactRecordSchema = t.TypeOf<typeof internalArtifactRecordSchema>;
 
+export const internalArtifactAdditionalFields = {
+  body,
+};
+
+export const internalArtifactSchema = t.intersection([
+  internalArtifactRecordSchema,
+  t.partial(internalArtifactAdditionalFields),
+]);
 export type InternalArtifactSchema = t.TypeOf<typeof internalArtifactSchema>;
+
+export const internalArtifactCompleteSchema = t.intersection([
+  internalArtifactRecordSchema,
+  t.exact(t.type(internalArtifactAdditionalFields)),
+]);
+export type InternalArtifactCompleteSchema = t.TypeOf<typeof internalArtifactCompleteSchema>;
 
 export const internalManifestSchema = t.exact(
   t.type({
-    created,
     ids: t.array(identifier),
   })
 );

@@ -17,7 +17,6 @@ import {
   buildArtifact,
   getFullEndpointExceptionList,
 } from '../../../lib/artifacts';
-import { ManifestConstants } from '../../../lib/artifacts/common';
 import { InternalArtifactSchema } from '../../../schemas/artifacts';
 import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
@@ -39,9 +38,7 @@ export class ManifestManagerMock extends ManifestManager {
     .fn()
     .mockResolvedValue(mockBuildExceptionListArtifacts('linux', 'v1'));
 
-  public getLastDispatchedManifest = jest
-    .fn()
-    .mockResolvedValue(new Manifest(new Date(), 'v1', ManifestConstants.INITIAL_VERSION));
+  public getLastDispatchedManifest = jest.fn().mockResolvedValue(new Manifest('v1'));
 
   protected getManifestClient = jest
     .fn()

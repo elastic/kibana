@@ -18,7 +18,7 @@ import {
   ExceptionsCache,
   ManifestDiff,
 } from '../../../lib/artifacts';
-import { InternalArtifactSchema } from '../../../schemas/artifacts';
+import { InternalArtifactSchema, internalArtifactCompleteSchema } from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 import { compressExceptionList } from '../../../lib/artifacts/lists';
@@ -79,7 +79,6 @@ export class ManifestManager {
   protected async buildExceptionListArtifacts(
     schemaVersion: string
   ): Promise<InternalArtifactSchema[]> {
-    // TODO: should wrap in try/catch?
     return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce(
       async (acc: Promise<InternalArtifactSchema[]>, os) => {
         const exceptionList = await getFullEndpointExceptionList(
@@ -110,6 +109,8 @@ export class ManifestManager {
         throw new Error(
           `Corrupted manifest detected. Diff contained artifact ${diff.id} not in manifest.`
         );
+      } else if (!internalArtifactCompleteSchema.is(artifact)) {
+        throw new Error(`Incomplete artifact detected: ${diff.id}`);
       }
 
       const compressedArtifact = await compressExceptionList(Buffer.from(artifact.body, 'base64'));
@@ -142,6 +143,7 @@ export class ManifestManager {
    * @returns {Promise<Error[]>} Any errors encountered.
    */
   private async deleteArtifacts(snapshot: ManifestSnapshot): Promise<Error[]> {
+    // TODO: delete all artifacts not in manifest?
     const errors: Error[] = [];
     for (const diff of snapshot.diffs) {
       try {
@@ -173,11 +175,7 @@ export class ManifestManager {
         throw new Error('No version returned for manifest.');
       }
 
-      const manifest = new Manifest(
-        new Date(manifestSo.attributes.created),
-        schemaVersion,
-        manifestSo.version
-      );
+      const manifest = new Manifest(schemaVersion, manifestSo.version);
 
       for (const id of manifestSo.attributes.ids) {
         const artifactSo = await this.artifactClient.getArtifact(id);
@@ -207,11 +205,7 @@ export class ManifestManager {
       oldManifest = await this.getLastComputedManifest(ManifestConstants.SCHEMA_VERSION);
 
       if (oldManifest === null && opts !== undefined && opts.initialize) {
-        oldManifest = new Manifest(
-          new Date(),
-          ManifestConstants.SCHEMA_VERSION,
-          ManifestConstants.INITIAL_VERSION
-        );
+        oldManifest = new Manifest(ManifestConstants.SCHEMA_VERSION);
       } else if (oldManifest == null) {
         this.logger.debug('Manifest does not exist yet. Waiting...');
         return null;
@@ -334,19 +328,19 @@ export class ManifestManager {
       const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
 
       // Commit the new manifest
-      if (manifest.getVersion() === ManifestConstants.INITIAL_VERSION) {
-        await manifestClient.createManifest(manifest.toSavedObject());
+      const manifestSo = manifest.toSavedObject();
+      const version = manifest.getVersion();
+
+      if (version == null) {
+        await manifestClient.createManifest(manifestSo);
+        this.logger.info('Committed initial manifest.');
       } else {
-        const version = manifest.getVersion();
-        if (version === ManifestConstants.INITIAL_VERSION) {
-          throw new Error('Updating existing manifest with baseline version. Bad state.');
-        }
-        await manifestClient.updateManifest(manifest.toSavedObject(), {
+        await manifestClient.updateManifest(manifestSo, {
           version,
         });
       }
 
-      this.logger.info(`Committed manifest ${manifest.getVersion()}`);
+      this.logger.info(`Committed manifest ${manifest.getSha256()}`);
     } catch (err) {
       return err;
     }

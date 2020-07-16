@@ -84,7 +84,7 @@ describe('manifest_manager', () => {
       expect(
         packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
       ).toEqual({
-        manifest_version: ManifestConstants.INITIAL_VERSION,
+        manifest_version: 'TODO',
         schema_version: 'v1',
         artifacts: {
           [artifact.identifier]: {
@@ -112,7 +112,7 @@ describe('manifest_manager', () => {
       expect(
         packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
       ).toEqual({
-        manifest_version: ManifestConstants.INITIAL_VERSION,
+        manifest_version: 'TODO',
         schema_version: 'v1',
         artifacts: {
           [artifact.identifier]: {

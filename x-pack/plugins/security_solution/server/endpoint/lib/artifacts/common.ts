@@ -15,7 +15,6 @@ export const ArtifactConstants = {
 export const ManifestConstants = {
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact-manifest',
   SCHEMA_VERSION: 'v1',
-  INITIAL_VERSION: 'WzAsMF0=',
 };
 
 export const reportErrors = (logger: Logger, errors: Error[]) => {

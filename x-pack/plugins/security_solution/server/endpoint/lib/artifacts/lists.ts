@@ -44,7 +44,6 @@ export async function buildArtifact(
     encodedSha256: sha256,
     decodedSize: exceptionsBuffer.byteLength,
     encodedSize: exceptionsBuffer.byteLength,
-    created: Date.now(),
     body: exceptionsBuffer.toString('base64'),
   };
 }
@@ -102,6 +101,7 @@ export function translateToEndpointExceptions(
   if (schemaVersion === 'v1') {
     exc.data.forEach((entry) => {
       const translatedItem = translateItem(schemaVersion, entry);
+      // TODO: is JSON.stringify deterministic?
       const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
       if (!entrySet.has(entryHash)) {
         entriesFiltered.push(translatedItem);

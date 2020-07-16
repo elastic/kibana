@@ -28,31 +28,27 @@ describe('manifest', () => {
       artifacts.push(artifactMacos);
       artifacts.push(artifactWindows);
 
-      manifest1 = new Manifest(now, 'v1', ManifestConstants.INITIAL_VERSION);
+      manifest1 = new Manifest('v1');
       manifest1.addEntry(artifactLinux);
       manifest1.addEntry(artifactMacos);
       manifest1.addEntry(artifactWindows);
       manifest1.setVersion('abcd');
 
       const newArtifactLinux = await getInternalArtifactMockWithDiffs('linux', 'v1');
-      manifest2 = new Manifest(new Date(), 'v1', ManifestConstants.INITIAL_VERSION);
+      manifest2 = new Manifest('v1');
       manifest2.addEntry(newArtifactLinux);
       manifest2.addEntry(artifactMacos);
       manifest2.addEntry(artifactWindows);
     });
 
     test('Can create manifest with valid schema version', () => {
-      const manifest = new Manifest(new Date(), 'v1', ManifestConstants.INITIAL_VERSION);
+      const manifest = new Manifest('v1');
       expect(manifest).toBeInstanceOf(Manifest);
     });
 
     test('Cannot create manifest with invalid schema version', () => {
       expect(() => {
-        new Manifest(
-          new Date(),
-          'abcd' as ManifestSchemaVersion,
-          ManifestConstants.INITIAL_VERSION
-        );
+        new Manifest('abcd' as ManifestSchemaVersion);
       }).toThrow();
     });
 
@@ -146,11 +142,7 @@ describe('manifest', () => {
     });
 
     test('Manifest can be created from list of artifacts', async () => {
-      const oldManifest = new Manifest(
-        new Date(),
-        ManifestConstants.SCHEMA_VERSION,
-        ManifestConstants.INITIAL_VERSION
-      );
+      const oldManifest = new Manifest(ManifestConstants.SCHEMA_VERSION);
       const manifest = Manifest.fromArtifacts(artifacts, 'v1', oldManifest);
       expect(
         manifest.contains(
