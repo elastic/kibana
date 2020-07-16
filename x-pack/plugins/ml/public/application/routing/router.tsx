@@ -44,27 +44,38 @@ export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children 
   );
 };
 
-const LegacyRedirect: FC = () => {
+/**
+ * This component provides compatibility with the previous hash based
+ * URL format used by HashRouter. Even if we migrate all internal URLs
+ * to one without hashes, we should keep this redirect in place to
+ * support legacy bookmarks and as a fallback for unmigrated URLs
+ * from other plugins.
+ */
+const LegacyHashUrlRedirect: FC = ({ children }) => {
   const history = useHistory();
   const location = useLocation();
 
   if (location.hash.startsWith('#/')) {
     const newHash = location.hash.replace('#', '');
     history.push(newHash);
+    return null;
   }
 
-  return null;
+  return <>{children}</>;
 };
 
+/**
+ * `MlRouter` is based on `BrowserRouter` and takes in `ScopedHistory` provided
+ * by Kibana. `LegacyHashUrlRedirect` provides compatibility with legacy hash based URLs.
+ * `UrlStateProvider` manages state stored in `_g/_a` URL parameters which can be
+ * use in components further down via `useUrlState()`.
+ */
 export const MlRouter: FC<{
   history: AppMountParameters['history'];
   pageDeps: PageDependencies;
-}> = ({ history, pageDeps }) => {
-  const setBreadcrumbs = pageDeps.setBreadcrumbs;
-
-  return (
-    <Router history={history}>
-      <LegacyRedirect />
+}> = ({ history, pageDeps }) => (
+  <Router history={history}>
+    <LegacyHashUrlRedirect>
       <UrlStateProvider>
         <div className="ml-app">
           {Object.entries(routes).map(([name, route]) => (
@@ -74,7 +85,7 @@ export const MlRouter: FC<{
               exact
               render={(props) => {
                 window.setTimeout(() => {
-                  setBreadcrumbs(route.breadcrumbs);
+                  pageDeps.setBreadcrumbs(route.breadcrumbs);
                 });
                 return route.render(props, pageDeps);
               }}
@@ -82,6 +93,6 @@ export const MlRouter: FC<{
           ))}
         </div>
       </UrlStateProvider>
-    </Router>
-  );
-};
+    </LegacyHashUrlRedirect>
+  </Router>
+);
