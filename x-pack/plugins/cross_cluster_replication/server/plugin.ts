@@ -15,6 +15,7 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  CoreStart,
   ILegacyCustomClusterClient,
   Plugin,
   Logger,
@@ -25,7 +26,7 @@ import {
 
 import { Index } from '../../index_management/server';
 import { PLUGIN } from '../common/constants';
-import { Dependencies } from './types';
+import { SetupDependencies, StartDependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
@@ -73,7 +74,8 @@ const ccrDataEnricher = async (indicesList: Index[], callWithRequest: LegacyAPIC
   }
 };
 
-export class CrossClusterReplicationServerPlugin implements Plugin<void, void, any, any> {
+export class CrossClusterReplicationServerPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies> {
   private readonly config$: Observable<CrossClusterReplicationConfig>;
   private readonly license: License;
   private readonly logger: Logger;
@@ -87,7 +89,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
 
   setup(
     { http, getStartServices }: CoreSetup,
-    { licensing, indexManagement, remoteClusters }: Dependencies
+    { licensing, indexManagement, remoteClusters }: SetupDependencies
   ) {
     this.config$
       .pipe(first())
@@ -107,6 +109,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
         }
       });
 
+    licensing.featureUsage.register(PLUGIN.TITLE, PLUGIN.minimumLicenseType);
     this.license.setup(
       {
         pluginId: PLUGIN.ID,
@@ -141,7 +144,9 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     });
   }
 
-  start() {}
+  start(core: CoreStart, { licensing }: StartDependencies) {
+    this.license.start({ licensing });
+  }
 
   stop() {
     if (this.ccrEsClient) {

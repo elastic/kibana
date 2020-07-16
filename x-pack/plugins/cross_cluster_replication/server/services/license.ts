@@ -11,8 +11,9 @@ import {
   RequestHandlerContext,
 } from 'src/core/server';
 
-import { LicensingPluginSetup } from '../../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/server';
 import { LicenseType } from '../../../licensing/common/types';
+import { PLUGIN } from '../../common/constants';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -25,6 +26,10 @@ interface SetupSettings {
   defaultErrorMessage: string;
 }
 
+interface StartDependencies {
+  licensing: LicensingPluginStart;
+}
+
 export class License {
   private licenseStatus: LicenseStatus = {
     isValid: false,
@@ -32,6 +37,8 @@ export class License {
   };
 
   private _isEsSecurityEnabled: boolean = false;
+
+  private notifyUsage: () => void = () => {};
 
   setup(
     { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
@@ -59,6 +66,12 @@ export class License {
     });
   }
 
+  start({ licensing }: StartDependencies) {
+    this.notifyUsage = () => {
+      licensing.featureUsage.notifyUsage(PLUGIN.TITLE);
+    };
+  }
+
   guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B>) {
     const license = this;
 
@@ -78,6 +91,7 @@ export class License {
         });
       }
 
+      license.notifyUsage();
       return handler(ctx, request, response);
     };
   }
