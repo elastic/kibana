@@ -211,11 +211,11 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   }
 
   componentWillUnmount() {
-    if (this.dragSelectSubscriber !== null) {
-      this.dragSelectSubscriber.unsubscribe();
-    }
-    const element = d3.select(this.rootNode.current!);
-    element.html('');
+    this.dragSelectSubscriber!.unsubscribe();
+    // Remove selector element from DOM
+    this.dragSelect.selector.remove();
+    // removes all mousedown event handlers
+    this.dragSelect.stop(true);
   }
 
   selectCell(cellsToSelect: any[], { laneLabels, bucketScore, times }: SelectedData) {
