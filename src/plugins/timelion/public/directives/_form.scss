@@ -29,5 +29,8 @@ select.form-control {
   background-repeat: no-repeat;
   background-position: calc(100% - #{$euiSizeS});
   padding-right: $euiSizeXL;
+}
 
+.fullWidth {
+  width: 100%;
 }
