@@ -23,9 +23,8 @@ import { fromNullable } from '../either';
 
 const ROOT = resolve(__dirname, '../../../../..');
 const resolveFromRoot = resolve.bind(null, ROOT);
-const path = `
-src/dev/code_coverage/ingest_coverage/team_assignment/ingestion_pipeline_painless.json`;
-const resolved = resolveFromRoot(path.trimStart());
+const path = 'ingestion_pipeline_painless.json';
+const resolved = resolveFromRoot(path);
 const getContents = (scriptPath) => readFileSync(scriptPath, 'utf8');
 
 export const fetch = () => fromNullable(resolved).map(getContents);
