@@ -13,4 +13,15 @@ export interface IAccount {
   supportEligible: boolean;
 }
 
+export interface IOrganization {
+  name: string;
+  defaultOrgName: string;
+}
+export interface IUser {
+  firstName: string;
+  email: string;
+  name: string;
+  color: string;
+}
+
 export type TSpacerSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
