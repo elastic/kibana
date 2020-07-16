@@ -21,17 +21,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AppMountParameters } from '../../application';
+import { HttpSetup } from '../../http';
+import { NotificationsSetup } from '../../notifications';
+import { StatusApp } from './status_app';
 
-// @ts-expect-error
-import StatusApp from './components/status_app';
+interface Deps {
+  http: HttpSetup;
+  notifications: NotificationsSetup;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Deps {}
-
-export const renderApp = ({ element, history }: AppMountParameters, {}: Deps) => {
+export const renderApp = ({ element }: AppMountParameters, { http, notifications }: Deps) => {
   ReactDOM.render(
     <I18nProvider>
-      <StatusApp buildNum={buildNum} buildSha={buildSha} />
+      <StatusApp http={http} notifications={notifications} />
     </I18nProvider>,
     element
   );

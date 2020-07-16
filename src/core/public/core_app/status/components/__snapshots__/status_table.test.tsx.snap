@@ -29,6 +29,7 @@ exports[`render 1`] = `
         "state": Object {
           "id": "green",
           "message": "Ready",
+          "title": "green",
           "uiColor": "secondary",
         },
       },

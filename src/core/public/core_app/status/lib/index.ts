@@ -18,4 +18,4 @@
  */
 
 export { formatNumber } from './format_number';
-export { loadStatus, Metric } from './load_status';
+export { loadStatus, Metric, FormattedStatus, ProcessedServerResponse } from './load_status';

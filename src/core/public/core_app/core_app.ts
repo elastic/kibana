@@ -28,7 +28,7 @@ import { HttpSetup, HttpStart } from '../http';
 import { CoreContext } from '../core_system';
 import { renderApp as renderErrorApp, setupUrlOverflowDetection } from './errors';
 import { renderApp as renderStatusApp } from './status';
-import { NotificationsStart } from '../notifications';
+import { NotificationsSetup, NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
 import { InjectedMetadataSetup } from '../injected_metadata';
 
@@ -36,6 +36,7 @@ interface SetupDeps {
   application: InternalApplicationSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
+  notifications: NotificationsSetup;
 }
 
 interface StartDeps {
@@ -50,7 +51,7 @@ export class CoreApp {
 
   constructor(private readonly coreContext: CoreContext) {}
 
-  public setup({ http, application, injectedMetadata }: SetupDeps) {
+  public setup({ http, application, injectedMetadata, notifications }: SetupDeps) {
     application.register(this.coreContext.coreId, {
       id: 'error',
       title: 'App Error',
@@ -72,7 +73,7 @@ export class CoreApp {
       appRoute: '/status',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount(params: AppMountParameters) {
-        return renderStatusApp(params, {});
+        return renderStatusApp(params, { http, notifications });
       },
     });
   }

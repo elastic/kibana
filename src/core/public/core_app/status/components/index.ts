@@ -17,22 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import StatusTable from './status_table';
-
-const STATE = {
-  id: 'green',
-  uiColor: 'secondary',
-  message: 'Ready',
-};
-
-test('render', () => {
-  const component = shallow(<StatusTable statuses={[{ id: 'plugin:1', state: STATE }]} />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
-
-test('render empty', () => {
-  const component = shallow(<StatusTable />);
-  expect(component.isEmptyRender()).toBe(true); // eslint-disable-line
-});
+export { MetricTile, MetricTiles } from './metric_tiles';
+export { ServerStatus } from './server_status';
+export { StatusTable } from './status_table';

@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { UnwrapPromise } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { ServerStatus, StatusResponse } from '../../../../types/status';
 import { HttpSetup, HttpFetchError } from '../../../http';
@@ -29,7 +30,17 @@ export interface Metric {
   type?: string;
 }
 
-/*
+export interface FormattedStatus {
+  id: string;
+  state: {
+    id: string;
+    title: string;
+    message: string;
+    uiColor: string;
+  };
+}
+
+/**
  * Returns an object of any keys that should be included for metrics.
  */
 function formatMetrics(data: StatusResponse): Metric[] {
@@ -91,7 +102,7 @@ function formatMetrics(data: StatusResponse): Metric[] {
 /**
  * Reformat the backend data to make the frontend views simpler.
  */
-function formatStatus(status: ServerStatus) {
+function formatStatus(status: ServerStatus): FormattedStatus {
   return {
     id: status.id,
     state: {
@@ -103,11 +114,9 @@ function formatStatus(status: ServerStatus) {
   };
 }
 
-/*
-Get the status from the server API and format it for display.
-
-`fetchFn` can be injected for testing, defaults to the implementation above.
-*/
+/**
+ * Get the status from the server API and format it for display.
+ */
 export async function loadStatus({
   http,
   notifications,
@@ -141,8 +150,11 @@ export async function loadStatus({
 
   return {
     name: response.name,
+    version: response.version,
     statuses: response.status.statuses.map(formatStatus),
     serverState: formatStatus(response.status.overall).state,
     metrics: formatMetrics(response),
   };
 }
+
+export type ProcessedServerResponse = UnwrapPromise<ReturnType<typeof loadStatus>>;

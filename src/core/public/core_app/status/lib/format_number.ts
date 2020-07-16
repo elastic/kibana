@@ -19,9 +19,7 @@
 
 import numeral from '@elastic/numeral';
 
-type NumberType = 'byte' | 'ms' | 'integer';
-
-export function formatNumber(num: number, which: NumberType) {
+export function formatNumber(num: number, which?: string) {
   let format = '0.00';
   let postfix = '';
   switch (which) {

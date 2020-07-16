@@ -17,17 +17,23 @@
  * under the License.
  */
 
-import 'ui/i18n';
-import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
-import { destroyStatusPage, renderStatusPage } from './components/render';
-import template from 'plugins/status_page/status_page.html';
+import React from 'react';
+import { shallow } from 'enzyme';
+import { StatusTable } from './status_table';
 
-npStart.core.chrome.navLinks.enableForcedAppSwitcherNavigation();
+const STATE = {
+  id: 'green',
+  uiColor: 'secondary',
+  message: 'Ready',
+  title: 'green',
+};
 
-chrome.setRootTemplate(template).setRootController('ui', function ($scope, buildNum, buildSha) {
-  $scope.$$postDigest(() => {
-    renderStatusPage(buildNum, buildSha.substr(0, 8));
-    $scope.$on('$destroy', destroyStatusPage);
-  });
+test('render', () => {
+  const component = shallow(<StatusTable statuses={[{ id: 'plugin:1', state: STATE }]} />);
+  expect(component).toMatchSnapshot(); // eslint-disable-line
+});
+
+test('render empty', () => {
+  const component = shallow(<StatusTable />);
+  expect(component.isEmptyRender()).toBe(true); // eslint-disable-line
 });

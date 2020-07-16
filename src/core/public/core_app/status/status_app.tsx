@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import loadStatus from '../lib/load_status';
-
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiLoadingSpinner,
   EuiText,
@@ -33,19 +30,25 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { HttpSetup } from '../../http';
+import { NotificationsSetup } from '../../notifications';
+import { loadStatus, ProcessedServerResponse } from './lib';
+import { MetricTiles, StatusTable, ServerStatus } from './components';
 
-import MetricTiles from './metric_tiles';
-import StatusTable from './status_table';
-import ServerStatus from './server_status';
+interface StatusAppProps {
+  http: HttpSetup;
+  notifications: NotificationsSetup;
+}
 
-class StatusApp extends Component {
-  static propTypes = {
-    buildNum: PropTypes.number.isRequired,
-    buildSha: PropTypes.string.isRequired,
-  };
+interface StatusAppState {
+  loading: boolean;
+  fetchError: boolean;
+  data: ProcessedServerResponse | null;
+}
 
-  constructor() {
-    super();
+export class StatusApp extends Component<StatusAppProps, StatusAppState> {
+  constructor(props: StatusAppProps) {
+    super(props);
     this.state = {
       loading: true,
       fetchError: false,
@@ -53,18 +56,17 @@ class StatusApp extends Component {
     };
   }
 
-  componentDidMount = async function () {
-    const data = await loadStatus();
-
-    if (data) {
-      this.setState({ loading: false, data: data });
-    } else {
-      this.setState({ fetchError: true, loading: false });
+  async componentDidMount() {
+    const { http, notifications } = this.props;
+    try {
+      const data = await loadStatus({ http, notifications });
+      this.setState({ loading: false, fetchError: false, data });
+    } catch (e) {
+      this.setState({ fetchError: true, loading: false, data: null });
     }
-  };
+  }
 
   render() {
-    const { buildNum, buildSha } = this.props;
     const { loading, fetchError, data } = this.state;
 
     // If we're still loading, return early with a spinner
@@ -84,7 +86,8 @@ class StatusApp extends Component {
     }
 
     // Extract the items needed to render each component
-    const { metrics, statuses, serverState, name } = data;
+    const { metrics, statuses, serverState, name, version } = data!;
+    const { build_hash: buildHash, build_number: buildNumber } = version;
 
     return (
       <EuiPage className="stsPage">
@@ -118,7 +121,7 @@ class StatusApp extends Component {
                           id="statusPage.statusApp.statusActions.buildText"
                           defaultMessage="BUILD {buildNum}"
                           values={{
-                            buildNum: <strong>{buildNum}</strong>,
+                            buildNum: <strong>{buildNumber}</strong>,
                           }}
                         />
                       </p>
@@ -131,7 +134,7 @@ class StatusApp extends Component {
                           id="statusPage.statusApp.statusActions.commitText"
                           defaultMessage="COMMIT {buildSha}"
                           values={{
-                            buildSha: <strong>{buildSha}</strong>,
+                            buildSha: <strong>{buildHash}</strong>,
                           }}
                         />
                       </p>
@@ -150,5 +153,3 @@ class StatusApp extends Component {
     );
   }
 }
-
-export default StatusApp;

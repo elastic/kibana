@@ -19,15 +19,17 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import ServerStatus from './server_status';
+import { ServerStatus } from './server_status';
 
 const STATE = {
   id: 'green',
   title: 'Green',
   uiColor: 'secondary',
+  state: 'green',
+  message: '',
 };
 
 test('render', () => {
   const component = shallow(<ServerStatus serverState={STATE} name="My Computer" />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { State as StatePropType } from '../lib/prop_types';
+import React, { FunctionComponent } from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedStatus } from '../lib';
 
-const ServerState = ({ name, serverState }) => (
+interface ServerStateProps {
+  name: string;
+  serverState: FormattedStatus['state'];
+}
+
+export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, serverState }) => (
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" style={{ flexGrow: 0 }}>
     <EuiFlexItem grow={false}>
       <EuiTitle>
@@ -45,10 +49,3 @@ const ServerState = ({ name, serverState }) => (
     </EuiFlexItem>
   </EuiFlexGroup>
 );
-
-ServerState.propTypes = {
-  name: PropTypes.string.isRequired,
-  serverState: StatePropType.isRequired,
-};
-
-export default ServerState;

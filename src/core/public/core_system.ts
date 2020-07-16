@@ -180,7 +180,7 @@ export class CoreSystem {
         ]),
       });
       const application = this.application.setup({ context, http, injectedMetadata });
-      this.coreApp.setup({ application, http, injectedMetadata });
+      this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
