@@ -115,7 +115,6 @@ export const JobsTableComponent = ({ isLoading, jobs, onJobStateChange }: JobTab
   return (
     <EuiBasicTable
       data-test-subj="jobs-table"
-      compressed={true}
       columns={getJobsTableColumns(isLoading, onJobStateChange, basePath)}
       items={getPaginatedItems(jobs, pageIndex, pageSize)}
       loading={isLoading}
