@@ -97,6 +97,34 @@ const Space1All: User = {
   },
 };
 
+const Space1AllAlertingNoneActions: User = {
+  username: 'space_1_all_alerts_none_actions',
+  fullName: 'space_1_all_alerts_none_actions',
+  password: 'space_1_all_alerts_none_actions-password',
+  role: {
+    name: 'space_1_all_alerts_none_actions_role',
+    kibana: [
+      {
+        feature: {
+          alertsFixture: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      // TODO: Remove once Elasticsearch doesn't require the permission for own keys
+      cluster: ['manage_api_key'],
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 const Space1AllWithRestrictedFixture: User = {
   username: 'space_1_all_with_restricted_fixture',
   fullName: 'space_1_all_with_restricted_fixture',
@@ -132,6 +160,7 @@ export const Users: User[] = [
   GlobalRead,
   Space1All,
   Space1AllWithRestrictedFixture,
+  Space1AllAlertingNoneActions,
 ];
 
 const Space1: Space = {
@@ -207,6 +236,15 @@ const Space1AllWithRestrictedFixtureAtSpace1: Space1AllWithRestrictedFixtureAtSp
   space: Space1,
 };
 
+interface Space1AllAlertingNoneActionsAtSpace1 extends Scenario {
+  id: 'space_1_all_alerts_none_actions at space1';
+}
+const Space1AllAlertingNoneActionsAtSpace1: Space1AllAlertingNoneActionsAtSpace1 = {
+  id: 'space_1_all_alerts_none_actions at space1',
+  user: Space1AllAlertingNoneActions,
+  space: Space1,
+};
+
 interface Space1AllAtSpace2 extends Scenario {
   id: 'space_1_all at space2';
 }
@@ -222,7 +260,8 @@ export const UserAtSpaceScenarios: [
   GlobalReadAtSpace1,
   Space1AllAtSpace1,
   Space1AllAtSpace2,
-  Space1AllWithRestrictedFixtureAtSpace1
+  Space1AllWithRestrictedFixtureAtSpace1,
+  Space1AllAlertingNoneActionsAtSpace1
 ] = [
   NoKibanaPrivilegesAtSpace1,
   SuperuserAtSpace1,
@@ -230,4 +269,5 @@ export const UserAtSpaceScenarios: [
   Space1AllAtSpace1,
   Space1AllAtSpace2,
   Space1AllWithRestrictedFixtureAtSpace1,
+  Space1AllAlertingNoneActionsAtSpace1,
 ];

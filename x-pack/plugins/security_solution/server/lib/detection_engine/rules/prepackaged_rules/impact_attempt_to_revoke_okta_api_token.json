@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies attempts to revoke an Okta API token. An adversary may attempt to revoke or delete an Okta API token to disrupt an organization's business operations.",
+  "false_positives": [
+    "If the behavior of revoking Okta API tokens is expected, consider adding exceptions to this rule to filter false positives."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Revoke Okta API Token",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:system.api_token.revoke",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "676cff2b-450b-4cf1-8ed2-c0c58a4a2dd7",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1531",
+          "name": "Account Access Removal",
+          "reference": "https://attack.mitre.org/techniques/T1531/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

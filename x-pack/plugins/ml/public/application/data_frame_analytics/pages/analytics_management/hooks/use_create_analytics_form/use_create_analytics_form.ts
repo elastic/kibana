@@ -18,10 +18,7 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import {
-  extractCloningConfig,
-  isAdvancedConfig,
-} from '../../components/analytics_list/action_clone';
+import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
 import { ActionDispatchers, ACTION } from './actions';
 import { reducer } from './reducer';

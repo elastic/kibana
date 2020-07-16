@@ -77,6 +77,7 @@ export interface PluginStartContract {
   isActionTypeEnabled(id: string): boolean;
   isActionExecutable(actionId: string, actionTypeId: string): boolean;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
+  getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
   preconfiguredActions: PreConfiguredAction[];
 }
 
@@ -241,7 +242,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       kibanaIndex,
       isESOUsingEphemeralEncryptionKey,
       preconfiguredActions,
-      security,
+      instantiateAuthorization,
     } = this;
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
@@ -288,7 +289,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       isActionExecutable: (actionId: string, actionTypeId: string) => {
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId);
       },
-      // Ability to get an actions client from legacy code
+      getActionsAuthorizationWithRequest(request: KibanaRequest) {
+        return instantiateAuthorization(request);
+      },
       async getActionsClientWithRequest(request: KibanaRequest) {
         if (isESOUsingEphemeralEncryptionKey === true) {
           throw new Error(
@@ -302,13 +305,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
           preconfiguredActions,
           request,
-          authorization: new ActionsAuthorization({
-            request,
-            authorization: security?.authz,
-            auditLogger: new ActionsAuthorizationAuditLogger(
-              security?.audit.getLogger(ACTIONS_FEATURE.id)
-            ),
-          }),
+          authorization: instantiateAuthorization(request),
           actionExecutor: actionExecutor!,
           executionEnqueuer: createExecutionEnqueuerFunction({
             taskManager: plugins.taskManager,
@@ -322,6 +319,17 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     };
   }
 
+  private instantiateAuthorization = (request: KibanaRequest) => {
+    return new ActionsAuthorization({
+      request,
+      authorization: this.security?.authz,
+      securityLicense: this.security?.license,
+      auditLogger: new ActionsAuthorizationAuditLogger(
+        this.security?.audit.getLogger(ACTIONS_FEATURE.id)
+      ),
+    });
+  };
+
   private getServicesFactory(
     getScopedClient: (request: KibanaRequest) => SavedObjectsClientContract,
     elasticsearch: ElasticsearchServiceStart
@@ -329,8 +337,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: getScopedClient(request),
-      getScopedCallCluster(clusterClient: ILegacyClusterClient) {
-        return clusterClient.asScoped(request).callAsCurrentUser;
+      getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
+        return clusterClient.asScoped(request);
       },
     });
   }
@@ -344,7 +352,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       isESOUsingEphemeralEncryptionKey,
       preconfiguredActions,
       actionExecutor,
-      security,
+      instantiateAuthorization,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -363,13 +371,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             scopedClusterClient: context.core.elasticsearch.legacy.client,
             preconfiguredActions,
             request,
-            authorization: new ActionsAuthorization({
-              request,
-              authorization: security?.authz,
-              auditLogger: new ActionsAuthorizationAuditLogger(
-                security?.audit.getLogger(ACTIONS_FEATURE.id)
-              ),
-            }),
+            authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,

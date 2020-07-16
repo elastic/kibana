@@ -351,7 +351,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
         <h1>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
-            defaultMessage="No permissions to create connector"
+            defaultMessage="No permissions to create connectors"
           />
         </h1>
       }

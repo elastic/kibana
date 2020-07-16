@@ -9,9 +9,10 @@ import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_ACTIONS_COLUMN_WIDTH,
-  SHOW_CHECK_BOXES_COLUMN_WIDTH,
   EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
+  SHOW_CHECK_BOXES_COLUMN_WIDTH,
 } from '../constants';
+import '../../../../../common/mock/match_media';
 
 describe('helpers', () => {
   describe('getColumnWidthFromType', () => {

@@ -34,6 +34,7 @@ interface Props {
   event: DetailItem[];
   forceExpand?: boolean;
   hideExpandButton?: boolean;
+  onEventToggled: () => void;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -48,6 +49,7 @@ export const ExpandableEvent = React.memo<Props>(
     id,
     timelineId,
     toggleColumn,
+    onEventToggled,
     onUpdateColumns,
   }) => (
     <ExpandableDetails hideExpandButton={true}>
@@ -59,6 +61,7 @@ export const ExpandableEvent = React.memo<Props>(
             columnHeaders={columnHeaders}
             data={event}
             id={id}
+            onEventToggled={onEventToggled}
             onUpdateColumns={onUpdateColumns}
             timelineId={timelineId}
             toggleColumn={toggleColumn}

@@ -9,11 +9,13 @@ import { KibanaRequest } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ActionsAuthorizationAuditLogger } from './audit_logger';
 import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { SecurityLicense } from '../../../security/common/licensing';
 
 export interface ConstructorOptions {
   request: KibanaRequest;
   auditLogger: ActionsAuthorizationAuditLogger;
   authorization?: SecurityPluginSetup['authz'];
+  securityLicense?: SecurityLicense;
 }
 
 const operationAlias: Record<
@@ -30,17 +32,19 @@ const operationAlias: Record<
 export class ActionsAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
+  private readonly securityLicense?: SecurityLicense;
   private readonly auditLogger: ActionsAuthorizationAuditLogger;
 
-  constructor({ request, authorization, auditLogger }: ConstructorOptions) {
+  constructor({ request, authorization, securityLicense, auditLogger }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
+    this.securityLicense = securityLicense;
     this.auditLogger = auditLogger;
   }
 
   public async ensureAuthorized(operation: string, actionTypeId?: string) {
-    const { authorization } = this;
-    if (authorization) {
+    const { authorization, securityLicense } = this;
+    if (authorization && securityLicense?.isEnabled()) {
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username } = await checkPrivileges(
         operationAlias[operation]

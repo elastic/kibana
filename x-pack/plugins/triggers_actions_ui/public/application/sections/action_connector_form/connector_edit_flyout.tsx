@@ -48,6 +48,7 @@ export const ConnectorEditFlyout = ({
     actionTypeRegistry,
     reloadConnectors,
     docLinks,
+    consumer,
   } = useActionsConnectorsContext();
   const canSave = hasSaveActionsCapability(capabilities);
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
@@ -186,6 +187,7 @@ export const ConnectorEditFlyout = ({
             http={http}
             docLinks={docLinks}
             capabilities={capabilities}
+            consumer={consumer}
           />
         ) : (
           <Fragment>

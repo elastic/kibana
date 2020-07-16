@@ -14,7 +14,6 @@ export const BUILT_IN_ALERTS_FEATURE = {
     defaultMessage: 'Built-In Alerts',
   }),
   icon: 'bell',
-  navLinkId: 'builtInAlerts',
   app: [],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -31,11 +30,11 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [],
       },
       savedObject: {
-        all: ['action', 'action_task_params'],
+        all: [],
         read: [],
       },
-      api: ['actions-read', 'actions-all'],
-      ui: ['actions:save', 'actions:delete'],
+      api: [],
+      ui: ['alerting:show'],
     },
     read: {
       app: [],
@@ -48,11 +47,11 @@ export const BUILT_IN_ALERTS_FEATURE = {
         read: [IndexThreshold],
       },
       savedObject: {
-        all: ['action_task_params'],
-        read: ['action'],
+        all: [],
+        read: [],
       },
-      api: ['actions-read'],
-      ui: [],
+      api: [],
+      ui: ['alerting:show'],
     },
   },
 };

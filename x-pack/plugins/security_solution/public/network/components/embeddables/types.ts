@@ -6,7 +6,6 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { RenderTooltipContentParams } from '../../../../../maps/public/classes/tooltips/tooltip_property';
-import { inputsModel } from '../../../common/store/inputs';
 
 export interface IndexPatternMapping {
   title: string;
@@ -29,12 +28,10 @@ export interface LayerMappingCollection {
   [indexPatternTitle: string]: LayerMapping;
 }
 
-export type SetQuery = (params: {
-  id: string;
-  inspect: inputsModel.InspectQuery | null;
-  loading: boolean;
-  refetch: inputsModel.Refetch;
-}) => void;
+export interface MapFeature {
+  id: number;
+  layerId: string;
+}
 
 export interface FeatureGeometry {
   coordinates: [number];

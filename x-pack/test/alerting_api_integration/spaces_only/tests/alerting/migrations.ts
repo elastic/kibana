@@ -31,7 +31,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body.consumer).to.equal('alerts');
     });
 
-    it('7.9.0 migrates the `metrics` consumer to be the `infrastructure`', async () => {
+    it('7.10.0 migrates the `metrics` consumer to be the `infrastructure`', async () => {
       const response = await supertest.get(
         `${getUrlPrefix(``)}/api/alerts/alert/74f3e6d7-b7bb-477d-ac28-fdf248d5f2a4`
       );

@@ -14,20 +14,23 @@ import { TaskStatus } from '../../task_manager/server';
 import { IntervalSchedule } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { actionsClientMock } from '../../actions/server/mocks';
+import { actionsClientMock, actionsAuthorizationMock } from '../../actions/server/mocks';
 import { AlertsAuthorization } from './authorization/alerts_authorization';
+import { ActionsAuthorization } from '../../actions/server';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
+const actionsAuthorization = actionsAuthorizationMock.create();
 
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   alertTypeRegistry,
   unsecuredSavedObjectsClient,
   authorization: (authorization as unknown) as AlertsAuthorization,
+  actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
@@ -141,6 +144,7 @@ describe('create()', () => {
             id: '1',
             type: 'action',
             attributes: {
+              actions: [],
               actionTypeId: 'test',
             },
             references: [],
@@ -193,6 +197,7 @@ describe('create()', () => {
         id: '1',
         type: 'alert',
         attributes: {
+          actions: [],
           scheduledTaskId: 'task-123',
         },
         references: [
@@ -284,6 +289,7 @@ describe('create()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         scheduledTaskId: 'task-123',
       },
       references: [
@@ -499,6 +505,7 @@ describe('create()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         scheduledTaskId: 'task-123',
       },
       references: [],
@@ -555,6 +562,7 @@ describe('create()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -667,6 +675,7 @@ describe('create()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -688,6 +697,7 @@ describe('create()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -744,6 +754,7 @@ describe('create()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -812,6 +823,7 @@ describe('create()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -863,6 +875,7 @@ describe('create()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         scheduledTaskId: 'task-123',
       },
       references: [
@@ -923,6 +936,7 @@ describe('create()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -974,6 +988,7 @@ describe('create()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         scheduledTaskId: 'task-123',
       },
       references: [
@@ -1037,6 +1052,17 @@ describe('enable()', () => {
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
       enabled: false,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: '1',
+          actionRef: '1',
+          params: {
+            foo: true,
+          },
+        },
+      ],
     },
     version: '123',
     references: [],
@@ -1090,6 +1116,7 @@ describe('enable()', () => {
       await alertsClient.enable({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'enable');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
     test('throws when user is not authorised to enable this type of alert', async () => {
@@ -1124,6 +1151,17 @@ describe('enable()', () => {
         updatedBy: 'elastic',
         apiKey: null,
         apiKeyOwner: null,
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
       },
       {
         version: '123',
@@ -1198,6 +1236,17 @@ describe('enable()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
       },
       {
         version: '123',
@@ -1284,6 +1333,17 @@ describe('disable()', () => {
       alertTypeId: 'myType',
       enabled: true,
       scheduledTaskId: 'task-123',
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: '1',
+          actionRef: '1',
+          params: {
+            foo: true,
+          },
+        },
+      ],
     },
     version: '123',
     references: [],
@@ -1307,6 +1367,7 @@ describe('disable()', () => {
       await alertsClient.disable({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'disable');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
     test('throws when user is not authorised to disable this type of alert', async () => {
@@ -1340,6 +1401,17 @@ describe('disable()', () => {
         enabled: false,
         scheduledTaskId: null,
         updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
       },
       {
         version: '123',
@@ -1369,6 +1441,17 @@ describe('disable()', () => {
         enabled: false,
         scheduledTaskId: null,
         updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
       },
       {
         version: '123',
@@ -1383,6 +1466,7 @@ describe('disable()', () => {
       ...existingDecryptedAlert,
       attributes: {
         ...existingDecryptedAlert.attributes,
+        actions: [],
         enabled: false,
       },
     });
@@ -1445,6 +1529,17 @@ describe('muteAll()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
         muteAll: false,
       },
       references: [],
@@ -1464,6 +1559,17 @@ describe('muteAll()', () => {
         id: '1',
         type: 'alert',
         attributes: {
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              actionTypeId: '1',
+              actionRef: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
           consumer: 'myApp',
           schedule: { interval: '10s' },
           alertTypeId: 'myType',
@@ -1483,6 +1589,7 @@ describe('muteAll()', () => {
       await alertsClient.muteAll({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'muteAll');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
     test('throws when user is not authorised to muteAll this type of alert', async () => {
@@ -1507,6 +1614,17 @@ describe('unmuteAll()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
         muteAll: true,
       },
       references: [],
@@ -1526,6 +1644,17 @@ describe('unmuteAll()', () => {
         id: '1',
         type: 'alert',
         attributes: {
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              actionTypeId: '1',
+              actionRef: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
           consumer: 'myApp',
           schedule: { interval: '10s' },
           alertTypeId: 'myType',
@@ -1545,6 +1674,7 @@ describe('unmuteAll()', () => {
       await alertsClient.unmuteAll({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'unmuteAll');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
     test('throws when user is not authorised to unmuteAll this type of alert', async () => {
@@ -1569,6 +1699,7 @@ describe('muteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
@@ -1597,6 +1728,7 @@ describe('muteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
@@ -1616,6 +1748,7 @@ describe('muteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
@@ -1636,6 +1769,17 @@ describe('muteInstance()', () => {
         id: '1',
         type: 'alert',
         attributes: {
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              actionTypeId: '1',
+              actionRef: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
           schedule: { interval: '10s' },
           alertTypeId: 'myType',
           consumer: 'myApp',
@@ -1652,6 +1796,7 @@ describe('muteInstance()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
 
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
         'myType',
         'myApp',
@@ -1687,6 +1832,7 @@ describe('unmuteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
@@ -1715,6 +1861,7 @@ describe('unmuteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
@@ -1734,6 +1881,7 @@ describe('unmuteInstance()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        actions: [],
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
@@ -1754,6 +1902,17 @@ describe('unmuteInstance()', () => {
         id: '1',
         type: 'alert',
         attributes: {
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              actionTypeId: '1',
+              actionRef: '1',
+              params: {
+                foo: true,
+              },
+            },
+          ],
           alertTypeId: 'myType',
           consumer: 'myApp',
           schedule: { interval: '10s' },
@@ -1770,6 +1929,7 @@ describe('unmuteInstance()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
 
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
         'myType',
         'myApp',
@@ -2150,6 +2310,7 @@ describe('find()', () => {
   beforeEach(() => {
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureAlertTypeIsAuthorized() {},
+      logSuccessfulAuthorization() {},
     });
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
@@ -2254,6 +2415,7 @@ describe('find()', () => {
         filter:
           '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))',
         ensureAlertTypeIsAuthorized() {},
+        logSuccessfulAuthorization() {},
       });
 
       const alertsClient = new AlertsClient(alertsClientParams);
@@ -2276,9 +2438,11 @@ describe('find()', () => {
 
     test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
       const ensureAlertTypeIsAuthorized = jest.fn();
+      const logSuccessfulAuthorization = jest.fn();
       authorization.getFindAuthorizationFilter.mockResolvedValue({
         filter: '',
         ensureAlertTypeIsAuthorized,
+        logSuccessfulAuthorization,
       });
 
       unsecuredSavedObjectsClient.find.mockReset();
@@ -2291,6 +2455,7 @@ describe('find()', () => {
             id: '1',
             type: 'alert',
             attributes: {
+              actions: [],
               alertTypeId: 'myType',
               consumer: 'myApp',
               tags: ['myTag'],
@@ -2325,6 +2490,7 @@ describe('find()', () => {
         type: 'alert',
       });
       expect(ensureAlertTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp');
+      expect(logSuccessfulAuthorization).toHaveBeenCalled();
     });
   });
 });
@@ -2345,6 +2511,7 @@ describe('delete()', () => {
       actions: [
         {
           group: 'default',
+          actionTypeId: '.no-op',
           actionRef: 'action_0',
           params: {
             foo: true,
@@ -2497,6 +2664,17 @@ describe('update()', () => {
       alertTypeId: 'myType',
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: '1',
+          actionRef: '1',
+          params: {
+            foo: true,
+          },
+        },
+      ],
     },
     references: [],
     version: '123',
@@ -2744,6 +2922,7 @@ describe('update()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -2897,6 +3076,7 @@ describe('update()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -3082,6 +3262,7 @@ describe('update()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -3151,6 +3332,7 @@ describe('update()', () => {
           id: '1',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test',
           },
           references: [],
@@ -3159,6 +3341,7 @@ describe('update()', () => {
           id: '2',
           type: 'action',
           attributes: {
+            actions: [],
             actionTypeId: 'test2',
           },
           references: [],
@@ -3285,6 +3468,7 @@ describe('update()', () => {
             id: '1',
             type: 'action',
             attributes: {
+              actions: [],
               actionTypeId: 'test',
             },
             references: [],
@@ -3295,6 +3479,7 @@ describe('update()', () => {
         id: alertId,
         type: 'alert',
         attributes: {
+          actions: [],
           enabled: true,
           alertTypeId: '123',
           schedule: currentSchedule,
@@ -3565,6 +3750,17 @@ describe('updateApiKey()', () => {
       alertTypeId: 'myType',
       consumer: 'myApp',
       enabled: true,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: '1',
+          actionRef: '1',
+          params: {
+            foo: true,
+          },
+        },
+      ],
     },
     version: '123',
     references: [],
@@ -3604,6 +3800,17 @@ describe('updateApiKey()', () => {
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
       },
       { version: '123' }
     );
@@ -3629,6 +3836,17 @@ describe('updateApiKey()', () => {
         apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
       },
       { version: '123' }
     );
@@ -3669,6 +3887,7 @@ describe('updateApiKey()', () => {
     test('ensures user is authorised to updateApiKey this type of alert under the consumer', async () => {
       await alertsClient.updateApiKey({ id: '1' });
 
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
         'myType',
         'myApp',

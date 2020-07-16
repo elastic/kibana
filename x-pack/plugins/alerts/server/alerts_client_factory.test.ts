@@ -17,7 +17,8 @@ import {
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { AuthenticatedUser } from '../../../plugins/security/common/model';
 import { securityMock } from '../../security/server/mocks';
-import { actionsMock } from '../../actions/server/mocks';
+import { PluginStartContract as ActionsStartContract } from '../../actions/server';
+import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { AuditLogger } from '../../security/server';
 import { ALERTS_FEATURE_ID } from '../common';
@@ -57,8 +58,14 @@ const fakeRequest = ({
   getSavedObjectsClient: () => savedObjectsClient,
 } as unknown) as Request;
 
+const actionsAuthorization = actionsAuthorizationMock.create();
+
 beforeEach(() => {
   jest.resetAllMocks();
+  alertsClientFactoryParams.actions = actionsMock.createStart();
+  (alertsClientFactoryParams.actions as jest.Mocked<
+    ActionsStartContract
+  >).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
   alertsClientFactoryParams.getSpaceId.mockReturnValue('default');
   alertsClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
 });
@@ -87,6 +94,7 @@ test('creates an alerts client with proper constructor arguments when security i
   expect(AlertsAuthorization).toHaveBeenCalledWith({
     request,
     authorization: securityPluginSetup.authz,
+    securityLicense: securityPluginSetup.license,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
     features: alertsClientFactoryParams.features,
     auditLogger: expect.any(AlertsAuthorizationAuditLogger),
@@ -95,9 +103,14 @@ test('creates an alerts client with proper constructor arguments when security i
   expect(AlertsAuthorizationAuditLogger).toHaveBeenCalledWith(logger);
   expect(securityPluginSetup.audit.getLogger).toHaveBeenCalledWith(ALERTS_FEATURE_ID);
 
+  expect(alertsClientFactoryParams.actions.getActionsAuthorizationWithRequest).toHaveBeenCalledWith(
+    request
+  );
+
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,
     authorization: expect.any(AlertsAuthorization),
+    actionsAuthorization,
     logger: alertsClientFactoryParams.logger,
     taskManager: alertsClientFactoryParams.taskManager,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
@@ -138,6 +151,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
     unsecuredSavedObjectsClient: savedObjectsClient,
     authorization: expect.any(AlertsAuthorization),
+    actionsAuthorization,
     logger: alertsClientFactoryParams.logger,
     taskManager: alertsClientFactoryParams.taskManager,
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,

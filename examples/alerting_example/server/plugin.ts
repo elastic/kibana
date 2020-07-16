@@ -53,7 +53,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['alerting:show'],
         },
         read: {
           alerting: {
@@ -63,7 +63,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['alerting:show'],
         },
       },
     });

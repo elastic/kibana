@@ -10,6 +10,7 @@ import {
   createResultTypeFilters,
   createTimeRangeFilters,
   defaultRequestParameters,
+  createDatasetsFilters,
 } from './common';
 
 export const createLogEntryRateQuery = (
@@ -18,7 +19,8 @@ export const createLogEntryRateQuery = (
   endTime: number,
   bucketDuration: number,
   size: number,
-  afterKey?: CompositeTimestampPartitionKey
+  afterKey?: CompositeTimestampPartitionKey,
+  datasets?: string[]
 ) => ({
   ...defaultRequestParameters,
   body: {
@@ -28,6 +30,7 @@ export const createLogEntryRateQuery = (
           ...createJobIdFilters(logRateJobId),
           ...createTimeRangeFilters(startTime, endTime),
           ...createResultTypeFilters(['model_plot', 'record']),
+          ...createDatasetsFilters(datasets),
           {
             term: {
               detector_index: {

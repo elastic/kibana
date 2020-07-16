@@ -253,6 +253,38 @@ export default function ({ getService }) {
     describe('delete', () => {
       it('should delete an index template', async () => {
         const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName, [getRandomString()]);
+
+        const { status: createStatus, body: createBody } = await createTemplate(payload);
+        if (createStatus !== 200) {
+          throw new Error(`Error creating template: ${createStatus} ${createBody.message}`);
+        }
+
+        let catTemplateResponse = await catTemplate(templateName);
+
+        expect(
+          catTemplateResponse.find((template) => template.name === payload.name).name
+        ).to.equal(templateName);
+
+        const { status: deleteStatus, body: deleteBody } = await deleteTemplates([
+          { name: templateName },
+        ]);
+        if (deleteStatus !== 200) {
+          throw new Error(`Error deleting template: ${deleteBody.message}`);
+        }
+
+        expect(deleteBody.errors).to.be.empty;
+        expect(deleteBody.templatesDeleted[0]).to.equal(templateName);
+
+        catTemplateResponse = await catTemplate(templateName);
+
+        expect(catTemplateResponse.find((template) => template.name === payload.name)).to.equal(
+          undefined
+        );
+      });
+
+      it('should delete a legacy index template', async () => {
+        const templateName = `template-${getRandomString()}`;
         const payload = getTemplatePayload(templateName, [getRandomString()], true);
 
         await createTemplate(payload).expect(200);

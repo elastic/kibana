@@ -2,6 +2,7 @@
 
 exports[`resolver graph layout when rendering no nodes renders right 1`] = `
 Object {
+  "ariaLevels": Map {},
   "edgeLineSegments": Array [],
   "processNodePositions": Map {},
 }
@@ -9,6 +10,22 @@ Object {
 
 exports[`resolver graph layout when rendering one node renders right 1`] = `
 Object {
+  "ariaLevels": Map {
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "process_name": "",
+        "unique_pid": 0,
+      },
+    } => 1,
+  },
   "edgeLineSegments": Array [],
   "processNodePositions": Map {
     Object {
@@ -34,6 +51,134 @@ Object {
 
 exports[`resolver graph layout when rendering two forks, and one fork has an extra long tine renders right 1`] = `
 Object {
+  "ariaLevels": Map {
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "process_name": "",
+        "unique_pid": 0,
+      },
+    } => 1,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "unique_pid": 1,
+        "unique_ppid": 0,
+      },
+    } => 2,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 2,
+        "unique_ppid": 0,
+      },
+    } => 2,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "termination_event",
+        "event_type_full": "process_event",
+        "unique_pid": 8,
+        "unique_ppid": 0,
+      },
+    } => 2,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 3,
+        "unique_ppid": 1,
+      },
+    } => 3,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 4,
+        "unique_ppid": 1,
+      },
+    } => 3,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 5,
+        "unique_ppid": 2,
+      },
+    } => 3,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 6,
+        "unique_ppid": 2,
+      },
+    } => 3,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "unique_pid": 7,
+        "unique_ppid": 6,
+      },
+    } => 4,
+  },
   "edgeLineSegments": Array [
     Object {
       "metadata": Object {
@@ -406,6 +551,36 @@ Object {
 
 exports[`resolver graph layout when rendering two nodes, one being the parent of the other renders right 1`] = `
 Object {
+  "ariaLevels": Map {
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "process_name": "",
+        "unique_pid": 0,
+      },
+    } => 1,
+    Object {
+      "@timestamp": 1582233383000,
+      "agent": Object {
+        "id": "",
+        "type": "",
+        "version": "",
+      },
+      "endgame": Object {
+        "event_subtype_full": "already_running",
+        "event_type_full": "process_event",
+        "unique_pid": 1,
+        "unique_ppid": 0,
+      },
+    } => 2,
+  },
   "edgeLineSegments": Array [
     Object {
       "metadata": Object {

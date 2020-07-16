@@ -7,7 +7,7 @@
 import React from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
-import { GlobalTime } from '../../containers/global_time';
+import { useGlobalTime } from '../../containers/use_global_time';
 import { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
 import {
@@ -104,60 +104,56 @@ const StatefulTopNComponent: React.FC<Props> = ({
   value,
 }) => {
   const kibana = useKibana();
+  const { from, deleteQuery, setQuery, to } = useGlobalTime();
 
   const options = getOptions(
     timelineId === TimelineId.active ? activeTimelineEventType : undefined
   );
 
   return (
-    <GlobalTime>
-      {({ from, deleteQuery, setQuery, to }) => (
-        <TopN
-          combinedQueries={
-            timelineId === TimelineId.active
-              ? combineQueries({
-                  browserFields,
-                  config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-                  dataProviders,
-                  end: activeTimelineTo,
-                  filters: activeTimelineFilters,
-                  indexPattern,
-                  kqlMode,
-                  kqlQuery: {
-                    language: 'kuery',
-                    query: activeTimelineKqlQueryExpression ?? '',
-                  },
-                  start: activeTimelineFrom,
-                })?.filterQuery
-              : undefined
-          }
-          data-test-subj="top-n"
-          defaultView={
-            timelineId === TimelineId.alertsPage || timelineId === TimelineId.alertsRulesDetailsPage
-              ? 'alert'
-              : options[0].value
-          }
-          deleteQuery={timelineId === TimelineId.active ? undefined : deleteQuery}
-          field={field}
-          filters={timelineId === TimelineId.active ? EMPTY_FILTERS : globalFilters}
-          from={timelineId === TimelineId.active ? activeTimelineFrom : from}
-          indexPattern={indexPattern}
-          indexToAdd={indexToAdd}
-          options={options}
-          query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
-          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-          setAbsoluteRangeDatePickerTarget={
-            timelineId === TimelineId.active ? 'timeline' : 'global'
-          }
-          setQuery={setQuery}
-          timelineId={timelineId}
-          to={timelineId === TimelineId.active ? activeTimelineTo : to}
-          toggleTopN={toggleTopN}
-          onFilterAdded={onFilterAdded}
-          value={value}
-        />
-      )}
-    </GlobalTime>
+    <TopN
+      combinedQueries={
+        timelineId === TimelineId.active
+          ? combineQueries({
+              browserFields,
+              config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              dataProviders,
+              end: activeTimelineTo,
+              filters: activeTimelineFilters,
+              indexPattern,
+              kqlMode,
+              kqlQuery: {
+                language: 'kuery',
+                query: activeTimelineKqlQueryExpression ?? '',
+              },
+              start: activeTimelineFrom,
+            })?.filterQuery
+          : undefined
+      }
+      data-test-subj="top-n"
+      defaultView={
+        timelineId === TimelineId.detectionsPage ||
+        timelineId === TimelineId.detectionsRulesDetailsPage
+          ? 'alert'
+          : options[0].value
+      }
+      deleteQuery={timelineId === TimelineId.active ? undefined : deleteQuery}
+      field={field}
+      filters={timelineId === TimelineId.active ? EMPTY_FILTERS : globalFilters}
+      from={timelineId === TimelineId.active ? activeTimelineFrom : from}
+      indexPattern={indexPattern}
+      indexToAdd={indexToAdd}
+      options={options}
+      query={timelineId === TimelineId.active ? EMPTY_QUERY : globalQuery}
+      setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+      setAbsoluteRangeDatePickerTarget={timelineId === TimelineId.active ? 'timeline' : 'global'}
+      setQuery={setQuery}
+      timelineId={timelineId}
+      to={timelineId === TimelineId.active ? activeTimelineTo : to}
+      toggleTopN={toggleTopN}
+      onFilterAdded={onFilterAdded}
+      value={value}
+    />
   );
 };
 

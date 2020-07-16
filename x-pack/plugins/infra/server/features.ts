@@ -31,17 +31,7 @@ export const METRICS_FEATURE = {
       alerting: {
         all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
-      ui: [
-        'show',
-        'configureSource',
-        'save',
-        'alerting:show',
-        'actions:show',
-        'alerting:save',
-        'actions:save',
-        'alerting:delete',
-        'actions:delete',
-      ],
+      ui: ['show', 'configureSource', 'save', 'alerting:show'],
     },
     read: {
       app: ['infra', 'kibana'],
@@ -54,15 +44,7 @@ export const METRICS_FEATURE = {
       alerting: {
         all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
-      ui: [
-        'show',
-        'alerting:show',
-        'actions:show',
-        'alerting:save',
-        'actions:save',
-        'alerting:delete',
-        'actions:delete',
-      ],
+      ui: ['show', 'alerting:show'],
     },
   },
 };

@@ -27,7 +27,7 @@ import { actionsAuthorizationMock } from './authorization/actions_authorization.
 
 const defaultKibanaIndex = '.kibana';
 const savedObjectsClient = savedObjectsClientMock.create();
-const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+const scopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();

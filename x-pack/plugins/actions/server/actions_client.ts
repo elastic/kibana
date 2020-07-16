@@ -159,7 +159,7 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.savedObjectsClient.update('action', id, {
+    const result = await this.savedObjectsClient.update<RawAction>('action', id, {
       actionTypeId,
       name,
       config: validatedActionTypeConfig as SavedObjectAttributes,

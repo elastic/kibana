@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, map, uniq, pick } from 'lodash';
+import { omit, isEqual, map, uniq, pick, truncate } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -13,7 +13,7 @@ import {
   SavedObjectReference,
   SavedObject,
 } from 'src/core/server';
-import { ActionsClient } from '../../actions/server';
+import { ActionsClient, ActionsAuthorization } from '../../actions/server';
 import {
   Alert,
   PartialAlert,
@@ -58,12 +58,13 @@ export interface ConstructorOptions {
   taskManager: TaskManagerStartContract;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   authorization: AlertsAuthorization;
+  actionsAuthorization: ActionsAuthorization;
   alertTypeRegistry: AlertTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceId?: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
-  createAPIKey: () => Promise<CreateAPIKeyResult>;
+  createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
   getActionsClient: () => Promise<ActionsClient>;
 }
@@ -140,11 +141,12 @@ export class AlertsClient {
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly authorization: AlertsAuthorization;
   private readonly alertTypeRegistry: AlertTypeRegistry;
-  private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
+  private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   private readonly invalidateAPIKey: (
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
+  private readonly actionsAuthorization: ActionsAuthorization;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 
   constructor({
@@ -160,6 +162,7 @@ export class AlertsClient {
     invalidateAPIKey,
     encryptedSavedObjectsClient,
     getActionsClient,
+    actionsAuthorization,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
@@ -173,6 +176,7 @@ export class AlertsClient {
     this.invalidateAPIKey = invalidateAPIKey;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.getActionsClient = getActionsClient;
+    this.actionsAuthorization = actionsAuthorization;
   }
 
   public async create({ data, options }: CreateOptions): Promise<Alert> {
@@ -187,7 +191,10 @@ export class AlertsClient {
 
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     const username = await this.getUserName();
-    const createdAPIKey = data.enabled ? await this.createAPIKey() : null;
+
+    const createdAPIKey = data.enabled
+      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+      : null;
 
     this.validateActions(alertType, data.actions);
 
@@ -268,6 +275,7 @@ export class AlertsClient {
     const {
       filter: authorizationFilter,
       ensureAlertTypeIsAuthorized,
+      logSuccessfulAuthorization,
     } = await this.authorization.getFindAuthorizationFilter();
 
     if (authorizationFilter) {
@@ -287,19 +295,23 @@ export class AlertsClient {
       type: 'alert',
     });
 
+    const authorizedData = data.map(({ id, attributes, updated_at, references }) => {
+      ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
+      return this.getAlertFromRaw(
+        id,
+        fields ? (pick(attributes, fields) as RawAlert) : attributes,
+        updated_at,
+        references
+      );
+    });
+
+    logSuccessfulAuthorization();
+
     return {
       page,
       perPage,
       total,
-      data: data.map(({ id, attributes, updated_at, references }) => {
-        ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
-        return this.getAlertFromRaw(
-          id,
-          fields ? (pick(attributes, fields) as RawAlert) : attributes,
-          updated_at,
-          references
-        );
-      }),
+      data: authorizedData,
     };
   }
 
@@ -398,7 +410,9 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const createdAPIKey = attributes.enabled ? await this.createAPIKey() : null;
+    const createdAPIKey = attributes.enabled
+      ? await this.createAPIKey(this.generateAPIKeyName(alertType.id, data.name))
+      : null;
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
     const updatedObject = await this.unsecuredSavedObjectsClient.update<RawAlert>(
@@ -469,13 +483,20 @@ export class AlertsClient {
       WriteOperations.UpdateApiKey
     );
 
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     const username = await this.getUserName();
     await this.unsecuredSavedObjectsClient.update(
       'alert',
       id,
       {
         ...attributes,
-        ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
+        ...this.apiKeyAsAlertAttributes(
+          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
+          username
+        ),
         updatedBy: username,
       },
       { version }
@@ -531,6 +552,10 @@ export class AlertsClient {
       WriteOperations.Enable
     );
 
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     if (attributes.enabled === false) {
       const username = await this.getUserName();
       await this.unsecuredSavedObjectsClient.update(
@@ -539,7 +564,12 @@ export class AlertsClient {
         {
           ...attributes,
           enabled: true,
-          ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
+          ...this.apiKeyAsAlertAttributes(
+            await this.createAPIKey(
+              this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+            ),
+            username
+          ),
           updatedBy: username,
         },
         { version }
@@ -583,6 +613,10 @@ export class AlertsClient {
       WriteOperations.Disable
     );
 
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
@@ -615,6 +649,10 @@ export class AlertsClient {
       WriteOperations.MuteAll
     );
 
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     await this.unsecuredSavedObjectsClient.update('alert', id, {
       muteAll: true,
       mutedInstanceIds: [],
@@ -629,6 +667,10 @@ export class AlertsClient {
       attributes.consumer,
       WriteOperations.UnmuteAll
     );
+
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
 
     await this.unsecuredSavedObjectsClient.update('alert', id, {
       muteAll: false,
@@ -648,6 +690,10 @@ export class AlertsClient {
       attributes.consumer,
       WriteOperations.MuteInstance
     );
+
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -680,6 +726,10 @@ export class AlertsClient {
       attributes.consumer,
       WriteOperations.UnmuteInstance
     );
+    if (attributes.actions.length) {
+      await this.actionsAuthorization.ensureAuthorized('execute');
+    }
+
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.unsecuredSavedObjectsClient.update(
@@ -826,5 +876,9 @@ export class AlertsClient {
 
   private includeFieldsRequiredForAuthentication(fields: string[]): string[] {
     return uniq([...fields, 'alertTypeId', 'consumer']);
+  }
+
+  private generateAPIKeyName(alertTypeId: string, alertName: string) {
+    return truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
   }
 }

@@ -38,50 +38,34 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           <p>
             <FormattedMessage
               id="xpack.ingestManager.alphaMessaging.introText"
-              defaultMessage="This release is experimental and is not subject to the support SLA. It is designed for users to test and offer feedback about Ingest
-            Manager and the new Elastic Agent. It is not intended for use in production environments since certain features may change or go away in a future release."
+              defaultMessage="Ingest Manager is under active development and is not intended for use in production environments. This beta release is designed for users to test and offer feedback about Ingest
+            Manager and the new Elastic Agent. This plugin is not subject to the support SLA."
             />
           </p>
-          <FormattedMessage
-            id="xpack.ingestManager.alphaMessaging.feedbackText"
-            defaultMessage="We encourage you to read our {docsLink} or to ask questions and send feedback in our {forumLink}."
-            values={{
-              docsLink: (
-                <EuiLink href="https://ela.st/ingest-manager-docs" external target="_blank">
-                  <FormattedMessage
-                    id="xpack.ingestManager.alphaMessaging.docsLink"
-                    defaultMessage="documentation"
-                  />
-                </EuiLink>
-              ),
-              forumLink: (
-                <EuiLink href="https://ela.st/ingest-manager-forum" external target="_blank">
-                  <FormattedMessage
-                    id="xpack.ingestManager.alphaMessaging.forumLink"
-                    defaultMessage="Discuss forum"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-          <p />
-
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.alphaMessaging.warningText"
-              defaultMessage="{note}: you should not store important data with Ingest Manager
-              since you will have limited visibility to it in a future release. This version uses an
-              indexing strategy that will be deprecated in a future release and there is no migration
-              path. Also, licensing for certain features is under consideration and may change in the future. As a result, you may lose access to certain features based on your license
-              tier."
+              id="xpack.ingestManager.alphaMessaging.feedbackText"
+              defaultMessage="We encourage you to read our {docsLink} or to ask questions and send feedback in our {forumLink}."
               values={{
-                note: (
-                  <strong>
+                docsLink: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/ingest-management/current/index.html"
+                    external
+                    target="_blank"
+                  >
                     <FormattedMessage
-                      id="xpack.ingestManager.alphaMessaging.warningNote"
-                      defaultMessage="Note"
+                      id="xpack.ingestManager.alphaMessaging.docsLink"
+                      defaultMessage="documentation"
                     />
-                  </strong>
+                  </EuiLink>
+                ),
+                forumLink: (
+                  <EuiLink href="https://ela.st/ingest-manager-forum" external target="_blank">
+                    <FormattedMessage
+                      id="xpack.ingestManager.alphaMessaging.forumLink"
+                      defaultMessage="Discuss forum"
+                    />
+                  </EuiLink>
                 ),
               }}
             />

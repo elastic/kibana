@@ -1051,7 +1051,7 @@ describe('setup contract', () => {
       let { getServerInfo } = await server.setup(config);
 
       expect(getServerInfo()).toEqual({
-        host: '127.0.0.1',
+        hostname: '127.0.0.1',
         name: 'kibana',
         port: 10002,
         protocol: 'http',
@@ -1065,7 +1065,7 @@ describe('setup contract', () => {
       }));
 
       expect(getServerInfo()).toEqual({
-        host: 'localhost',
+        hostname: 'localhost',
         name: 'custom-name',
         port: 12345,
         protocol: 'http',
@@ -1085,6 +1085,16 @@ describe('setup contract', () => {
       await server.stop();
       expect(() => {
         registerStaticDir('/path1/{path*}', '/path/to/resource');
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreRouting', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreRouting } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreRouting((req, res) => res.unauthorized());
       }).not.toThrow();
     });
   });

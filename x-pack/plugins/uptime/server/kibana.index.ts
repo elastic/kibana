@@ -47,14 +47,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         alerting: {
           all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
         },
-        ui: [
-          'save',
-          'configureSettings',
-          'show',
-          'alerting:show',
-          'alerting:save',
-          'alerting:delete',
-        ],
+        ui: ['save', 'configureSettings', 'show', 'alerting:show'],
       },
       read: {
         app: ['uptime', 'kibana'],
@@ -67,15 +60,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         alerting: {
           all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
         },
-        ui: [
-          'show',
-          'alerting:show',
-          'actions:show',
-          'alerting:save',
-          'actions:save',
-          'alerting:delete',
-          'actions:delete',
-        ],
+        ui: ['show', 'alerting:show'],
       },
     },
   });

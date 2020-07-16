@@ -16,7 +16,12 @@ import { registerBuiltInActionTypes } from './application/components/builtin_act
 import { registerBuiltInAlertTypes } from './application/components/builtin_alert_types';
 import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
-import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
+import {
+  ManagementSetup,
+  ManagementSectionId,
+  ManagementAppMountParams,
+  ManagementApp,
+} from '../../../../src/plugins/management/public';
 import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
@@ -53,6 +58,7 @@ export class Plugin
     > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  private managementApp?: ManagementApp;
 
   constructor(initializerContext: PluginInitializerContext) {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -62,34 +68,30 @@ export class Plugin
     this.alertTypeRegistry = alertTypeRegistry;
   }
 
-  public setup(
-    core: CoreSetup<PluginsStart>,
-    plugins: PluginsSetup
-  ): TriggersAndActionsUIPublicPluginSetup {
-    registerBuiltInActionTypes({
-      actionTypeRegistry: this.actionTypeRegistry,
-    });
+  public setup(core: CoreSetup, plugins: PluginsSetup): TriggersAndActionsUIPublicPluginSetup {
+    const actionTypeRegistry = this.actionTypeRegistry;
+    const alertTypeRegistry = this.alertTypeRegistry;
 
-    registerBuiltInAlertTypes({
-      alertTypeRegistry: this.alertTypeRegistry,
-    });
-
-    plugins.management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
+    this.managementApp = plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: 'triggersActions',
       title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
         defaultMessage: 'Alerts and Actions',
       }),
       order: 0,
-      mount: async (params) => {
-        const [coreStart, startPlugins] = await core.getStartServices();
+      async mount(params: ManagementAppMountParams) {
+        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+          CoreStart,
+          PluginsStart,
+          unknown
+        ];
         boot({
-          dataPlugin: startPlugins.data,
-          charts: startPlugins.charts,
-          alerts: startPlugins.alerts,
+          dataPlugin: pluginsStart.data,
+          charts: pluginsStart.charts,
+          alerts: pluginsStart.alerts,
           element: params.element,
-          toastNotifications: core.notifications.toasts,
-          http: core.http,
-          uiSettings: core.uiSettings,
+          toastNotifications: coreStart.notifications.toasts,
+          http: coreStart.http,
+          uiSettings: coreStart.uiSettings,
           docLinks: coreStart.docLinks,
           chrome: coreStart.chrome,
           savedObjects: coreStart.savedObjects.client,
@@ -98,11 +100,19 @@ export class Plugin
           navigateToApp: coreStart.application.navigateToApp,
           setBreadcrumbs: params.setBreadcrumbs,
           history: params.history,
-          actionTypeRegistry: this.actionTypeRegistry,
-          alertTypeRegistry: this.alertTypeRegistry,
+          actionTypeRegistry,
+          alertTypeRegistry,
         });
         return () => {};
       },
+    });
+
+    registerBuiltInActionTypes({
+      actionTypeRegistry: this.actionTypeRegistry,
+    });
+
+    registerBuiltInAlertTypes({
+      alertTypeRegistry: this.alertTypeRegistry,
     });
 
     return {

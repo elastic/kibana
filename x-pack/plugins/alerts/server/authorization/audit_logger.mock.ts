@@ -12,6 +12,7 @@ const createAlertsAuthorizationAuditLoggerMock = () => {
     alertsAuthorizationFailure: jest.fn(),
     alertsUnscopedAuthorizationFailure: jest.fn(),
     alertsAuthorizationSuccess: jest.fn(),
+    alertsBulkAuthorizationSuccess: jest.fn(),
   } as unknown) as jest.Mocked<AlertsAuthorizationAuditLogger>;
   return mocked;
 };

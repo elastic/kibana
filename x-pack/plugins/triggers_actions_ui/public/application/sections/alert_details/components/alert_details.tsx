@@ -71,14 +71,16 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     dataPlugin,
   } = useAppDependencies();
 
-  const canSaveAlert = hasAllPrivilege(alert, alertType);
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
+  const canSaveAlert =
+    hasAllPrivilege(alert, alertType) &&
+    // if the alert has actions, can the user save the alert's action params
+    (canExecuteActions || (!canExecuteActions && alert.actions.length === 0));
+
   const actionTypesByTypeId = keyBy(actionTypes, 'id');
   const hasEditButton =
     // can the user save the alert
     canSaveAlert &&
-    // if the alert has actions, can the user save the alert's action params
-    (canExecuteActions || (!canExecuteActions && alert.actions.length === 0)) &&
     // is this alert type editable from within Alerts Management
     (alertTypeRegistry.has(alert.alertTypeId)
       ? !alertTypeRegistry.get(alert.alertTypeId).requiresAppContext
@@ -262,7 +264,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 {alert.enabled ? (
-                  <AlertInstancesRouteWithApi requestRefresh={requestRefresh} alert={alert} />
+                  <AlertInstancesRouteWithApi
+                    requestRefresh={requestRefresh}
+                    alert={alert}
+                    readOnly={!canSaveAlert}
+                  />
                 ) : (
                   <Fragment>
                     <EuiSpacer />

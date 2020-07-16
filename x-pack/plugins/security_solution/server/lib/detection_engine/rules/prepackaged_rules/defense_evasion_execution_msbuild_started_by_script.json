@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An instance of MSBuild, the Microsoft Build Engine, was started by a script or the Windows command interpreter. This behavior is unusual and is sometimes used by malicious payloads.",
+  "false_positives": [
+    "The Build Engine is commonly used by Windows developers but use by non-engineers is unusual."
+  ],
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Microsoft Build Engine Started by a Script Process",
+  "query": "event.category:process and event.type: start and process.name:MSBuild.exe and process.parent.name:(cmd.exe or powershell.exe or cscript.exe or wscript.exe)",
+  "risk_score": 21,
+  "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae2",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1127",
+          "name": "Trusted Developer Utilities",
+          "reference": "https://attack.mitre.org/techniques/T1127/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1127",
+          "name": "Trusted Developer Utilities",
+          "reference": "https://attack.mitre.org/techniques/T1127/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

@@ -43,7 +43,7 @@ export function resolveImportErrorsTestSuiteFactory(
   esArchiver: any,
   supertest: SuperTest<any>
 ) {
-  const expectForbidden = expectResponses.forbidden('bulk_create');
+  const expectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: ResolveImportErrorsTestCase | ResolveImportErrorsTestCase[],
     statusCode: 200 | 403,
