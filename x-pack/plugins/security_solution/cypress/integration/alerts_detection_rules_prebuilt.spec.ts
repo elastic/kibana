@@ -67,7 +67,7 @@ describe('Alerts rules, prebuilt rules', () => {
   });
 });
 
-// https://github.com/elastic/kibana/issues/71814
+// FLAKY: https://github.com/elastic/kibana/issues/71814
 describe.skip('Deleting prebuilt rules', () => {
   beforeEach(() => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
