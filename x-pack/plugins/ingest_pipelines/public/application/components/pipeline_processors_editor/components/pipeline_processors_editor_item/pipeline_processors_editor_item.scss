@@ -23,12 +23,6 @@
   }
 
   &__ifBadge {
-    cursor: pointer;
-
-    &__codeSnippet {
-      max-width: 400px;
-    }
-
     &__label {
       &--disabled {
         color: $euiButtonColorDisabledText !important;

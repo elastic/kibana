@@ -5,75 +5,30 @@
  */
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState } from 'react';
-import {
-  EuiNotificationBadge,
-  EuiCode,
-  EuiCodeBlock,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
+import { EuiNotificationBadge, EuiCode } from '@elastic/eui';
 
 interface Props {
-  onClick: () => void;
   isDisabled: boolean;
-  ifCode: string;
 }
 
-const i18nTexts = {
-  badgeBody: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.ifBadgeLabel', {
-    defaultMessage: 'if',
-  }),
-  buttonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.item.buttonLabel', {
-    defaultMessage: 'Copy condition to clipboard',
-  }),
-};
-
-export const IfBadge: FunctionComponent<Props> = ({ onClick, isDisabled, ifCode }) => {
+export const IfBadge: FunctionComponent<Props> = ({ isDisabled }) => {
   const labelClasses = classNames('pipelineProcessorsEditor__item__ifBadge__label', {
     'pipelineProcessorsEditor__item__ifBadge__label--disabled': isDisabled,
   });
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   return (
-    <EuiPopover
-      isOpen={isPopoverOpen}
-      anchorPosition="rightCenter"
-      closePopover={() => {
-        setIsPopoverOpen(false);
-      }}
-      button={
-        <EuiNotificationBadge
-          data-test-subj="ifBadge"
-          className="pipelineProcessorsEditor__item__ifBadge"
-          size="s"
-          color="subdued"
-          onClick={isDisabled ? undefined : () => setIsPopoverOpen((prev) => !prev)}
-        >
-          <EuiCode className={labelClasses} transparentBackground>
-            {i18nTexts.badgeBody}
-          </EuiCode>
-        </EuiNotificationBadge>
-      }
+    <EuiNotificationBadge
+      data-test-subj="ifBadge"
+      className="pipelineProcessorsEditor__item__ifBadge"
+      size="s"
+      color="subdued"
     >
-      <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false} gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiCodeBlock
-            fontSize="m"
-            paddingSize="s"
-            transparentBackground
-            className="pipelineProcessorsEditor__item__ifBadge__codeSnippet"
-          >
-            {ifCode}
-          </EuiCodeBlock>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon aria-label={i18nTexts.buttonLabel} iconType="copy" onClick={onClick} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPopover>
+      <EuiCode className={labelClasses} transparentBackground>
+        {i18n.translate('xpack.ingestPipelines.pipelineEditor.item.ifBadgeLabel', {
+          defaultMessage: 'if',
+        })}
+      </EuiCode>
+    </EuiNotificationBadge>
   );
 };
