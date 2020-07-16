@@ -135,7 +135,7 @@ function translateItem(
   const itemSet = new Set();
   return {
     type: item.type,
-    entries: item.entries.reduce((translatedEntries: TranslatedEntry[], entry) => {
+    entries: item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
       const translatedEntry = translateEntry(schemaVersion, entry);
       if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
         const itemHash = createHash('sha256').update(JSON.stringify(translatedEntry)).digest('hex');
@@ -155,8 +155,8 @@ function translateEntry(
 ): TranslatedEntry | undefined {
   switch (entry.type) {
     case 'nested': {
-      const nestedEntries = entry.entries.reduce(
-        (entries: TranslatedEntryNestedEntry[], nestedEntry) => {
+      const nestedEntries = entry.entries.reduce<TranslatedEntryNestedEntry[]>(
+        (entries, nestedEntry) => {
           const translatedEntry = translateEntry(schemaVersion, nestedEntry);
           if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
             entries.push(translatedEntry);
