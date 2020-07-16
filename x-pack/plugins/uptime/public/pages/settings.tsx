@@ -128,7 +128,7 @@ export const SettingsPage: React.FC = () => {
 
   const resetForm = () => setFormFields(dss.settings ? { ...dss.settings } : null);
 
-  const isFormDirty = !isDirtyForm(formFields, dss.settings);
+  const isFormDirty = isDirtyForm(formFields, dss.settings);
 
   const canEdit: boolean =
     !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
