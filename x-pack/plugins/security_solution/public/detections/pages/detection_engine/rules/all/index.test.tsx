@@ -8,6 +8,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
+import '../../../../../common/mock/match_media';
 import { createKibanaContextProviderMock } from '../../../../../common/mock/kibana_react';
 import { TestProviders } from '../../../../../common/mock';
 import { wait } from '../../../../../common/lib/helpers';

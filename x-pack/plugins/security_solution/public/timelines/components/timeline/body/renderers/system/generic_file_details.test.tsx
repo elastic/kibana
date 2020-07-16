@@ -9,6 +9,7 @@ import React from 'react';
 
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
+import '../../../../../../common/mock/match_media';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
@@ -1230,8 +1231,8 @@ describe('SystemGenericFileDetails', () => {
       });
     });
 
-    test('it does NOT render the text "via" when eventAction is not a whitelisted action', () => {
-      const eventAction = 'a_non_whitelisted_event_action';
+    test('it does NOT render the text "via" when eventAction is not a allowlisted action', () => {
+      const eventAction = 'a_non_allowlisted_event_action';
 
       const wrapper = mount(
         <TestProviders>

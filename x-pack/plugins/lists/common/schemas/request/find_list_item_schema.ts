@@ -26,6 +26,9 @@ export const findListItemSchema = t.intersection([
   ),
 ]);
 
-export type FindListItemSchemaPartial = Identity<t.TypeOf<typeof findListItemSchema>>;
+export type FindListItemSchemaPartial = Identity<t.OutputOf<typeof findListItemSchema>>;
 
-export type FindListItemSchema = RequiredKeepUndefined<t.TypeOf<typeof findListItemSchema>>;
+// This type is used after a decode since some things are defaults after a decode.
+export type FindListItemSchemaPartialDecoded = RequiredKeepUndefined<
+  t.TypeOf<typeof findListItemSchema>
+>;

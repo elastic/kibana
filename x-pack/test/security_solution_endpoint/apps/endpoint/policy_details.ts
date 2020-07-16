@@ -19,8 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  // Temporarily skipped to promote snapshot
-  // Re-enabled in https://github.com/elastic/kibana/pull/71727
+  // FLAKY: https://github.com/elastic/kibana/issues/72102
   describe.skip('When on the Endpoint Policy Details Page', function () {
     this.tags(['ciGroup7']);
 
