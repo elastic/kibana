@@ -4,5 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ProgressBar, mlInMemoryTableFactory } from './ml_in_memory_table';
-export * from './types';
+export default function ({ loadTestFile }) {
+  describe('management', function () {
+    this.tags(['ciGroup2']);
+
+    loadTestFile(require.resolve('./create_index_pattern_wizard'));
+  });
+}
