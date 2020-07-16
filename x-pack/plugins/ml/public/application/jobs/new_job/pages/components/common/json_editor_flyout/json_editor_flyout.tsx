@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, FC, useState, useContext, useEffect } from 'react';
+import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -17,12 +18,14 @@ import {
   EuiTitle,
   EuiFlyoutBody,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import { collapseLiteralStrings } from '../../../../../../../../shared_imports';
-import { Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs';
+import { CombinedJob, Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
+import { DatafeedPreview } from '../datafeed_preview_flyout';
 
 const EDITOR_HEIGHT = '800px';
 export enum EDITOR_MODE {
@@ -38,20 +41,32 @@ interface Props {
 export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
+  const [showChangedIndicesWarning, setShowChangedIndicesWarning] = useState(false);
 
   const [jobConfigString, setJobConfigString] = useState(jobCreator.formattedJobJson);
   const [datafeedConfigString, setDatafeedConfigString] = useState(
     jobCreator.formattedDatafeedJson
   );
   const [saveable, setSaveable] = useState(false);
+  const [tempCombinedJob, setTempCombinedJob] = useState<CombinedJob | null>(null);
 
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
     setDatafeedConfigString(jobCreator.formattedDatafeedJson);
   }, [jobCreatorUpdated]);
 
-  const editJsonMode =
-    jobEditorMode === EDITOR_MODE.HIDDEN || datafeedEditorMode === EDITOR_MODE.HIDDEN;
+  useEffect(() => {
+    if (showJsonFlyout === true) {
+      // when the flyout opens, update the JSON
+      setJobConfigString(jobCreator.formattedJobJson);
+      setDatafeedConfigString(jobCreator.formattedDatafeedJson);
+      setShowChangedIndicesWarning(false);
+      debounceSetCombinedJob(jobCreator.formattedJobJson, jobCreator.formattedDatafeedJson, true);
+    }
+  }, [showJsonFlyout]);
+
+  const editJsonMode = false;
+  // jobEditorMode === EDITOR_MODE.HIDDEN || datafeedEditorMode === EDITOR_MODE.HIDDEN;
   const flyOutSize = editJsonMode ? 'm' : 'l';
   const readOnlyMode =
     jobEditorMode === EDITOR_MODE.READONLY && datafeedEditorMode === EDITOR_MODE.READONLY;
@@ -78,9 +93,30 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       valid =
         originalIndices.length === indices.length &&
         originalIndices.every((value, index) => value === indices[index]);
+      setShowChangedIndicesWarning(valid === false);
+    } else {
+      setShowChangedIndicesWarning(false);
     }
     setSaveable(valid);
   }
+
+  const debounceSetCombinedJob = debounce((job: string, datafeed: string, saveable2: boolean) => {
+    setTempCombinedJob(
+      saveable2
+        ? {
+            ...JSON.parse(job),
+            datafeed_config: JSON.parse(datafeed),
+          }
+        : null
+    );
+  }, 500);
+
+  useEffect(() => {
+    debounceSetCombinedJob(jobConfigString, datafeedConfigString, saveable);
+    return () => {
+      debounceSetCombinedJob.cancel();
+    };
+  }, [datafeedConfigString, saveable]);
 
   function onSave() {
     const jobConfig = JSON.parse(jobConfigString);
@@ -113,16 +149,41 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                 />
               )}
               {datafeedEditorMode !== EDITOR_MODE.HIDDEN && (
-                <Contents
-                  editJson={datafeedEditorMode === EDITOR_MODE.EDITABLE}
-                  onChange={onDatafeedChange}
-                  title={i18n.translate('xpack.ml.newJob.wizard.jsonFlyout.datafeed.title', {
-                    defaultMessage: 'Datafeed configuration JSON',
-                  })}
-                  value={datafeedConfigString}
-                />
+                <>
+                  <Contents
+                    editJson={datafeedEditorMode === EDITOR_MODE.EDITABLE}
+                    onChange={onDatafeedChange}
+                    title={i18n.translate('xpack.ml.newJob.wizard.jsonFlyout.datafeed.title', {
+                      defaultMessage: 'Datafeed configuration JSON',
+                    })}
+                    value={datafeedConfigString}
+                  />
+                  <EuiFlexItem>
+                    <DatafeedPreview combinedJob={tempCombinedJob} />
+                  </EuiFlexItem>
+                </>
               )}
             </EuiFlexGroup>
+            {showChangedIndicesWarning && (
+              <>
+                <EuiSpacer />
+                <EuiCallOut
+                  color="warning"
+                  size="s"
+                  title={i18n.translate(
+                    'xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutTitle',
+                    {
+                      defaultMessage: 'Indices have changed',
+                    }
+                  )}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutText"
+                    defaultMessage="It is not possible to alter the indices being used by the datafeed here. If you wish to use a different index, please start the job creation again select a different index pattern."
+                  />
+                </EuiCallOut>
+              </>
+            )}
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
