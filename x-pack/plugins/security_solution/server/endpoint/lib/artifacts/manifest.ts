@@ -18,6 +18,7 @@ import {
 import { ManifestSchema, manifestSchema } from '../../../../common/endpoint/schema/manifest';
 import { ManifestEntry } from './manifest_entry';
 import { maybeCompressArtifact, isCompressed } from './lists';
+import { getArtifactId } from './common';
 
 export interface ManifestDiff {
   type: string;
@@ -58,7 +59,7 @@ export class Manifest {
   ): Manifest {
     const manifest = new Manifest(schemaVersion, oldManifest.getVersion());
     artifacts.forEach((artifact) => {
-      const id = `${artifact.identifier}-${artifact.decodedSha256}`;
+      const id = getArtifactId(artifact);
       const existingArtifact = oldManifest.getArtifact(id);
       if (existingArtifact) {
         manifest.addEntry(existingArtifact);

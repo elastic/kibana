@@ -5,7 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { ArtifactConstants } from '../../lib/artifacts';
+import { ArtifactConstants, getArtifactId } from '../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
   InternalArtifactCreateSchema,
@@ -16,10 +16,6 @@ export class ArtifactClient {
 
   constructor(savedObjectsClient: SavedObjectsClientContract) {
     this.savedObjectsClient = savedObjectsClient;
-  }
-
-  public getArtifactId(artifact: InternalArtifactCompleteSchema) {
-    return `${artifact.identifier}-${artifact.decodedSha256}`;
   }
 
   public async getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema>> {
@@ -38,7 +34,7 @@ export class ArtifactClient {
         ...artifact,
         created: Date.now(),
       },
-      { id: this.getArtifactId(artifact) }
+      { id: getArtifactId(artifact) }
     );
   }
 

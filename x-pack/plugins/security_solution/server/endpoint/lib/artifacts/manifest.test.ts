@@ -6,7 +6,7 @@
 
 import { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { InternalArtifactSchema } from '../../schemas';
-import { ManifestConstants } from './common';
+import { ManifestConstants, getArtifactId } from './common';
 import { Manifest } from './manifest';
 import {
   getMockArtifacts,
@@ -146,7 +146,7 @@ describe('manifest', () => {
 
     test('Manifest returns data for given artifact', async () => {
       const artifact = artifacts[0];
-      const returned = manifest1.getArtifact(`${artifact.identifier}-${artifact.decodedSha256}`);
+      const returned = manifest1.getArtifact(getArtifactId(artifact));
       expect(returned).toEqual(artifact);
     });
 
