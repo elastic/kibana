@@ -9,49 +9,46 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import {
-  checkPermission,
-  createPermissionFailureMessage,
-} from '../../../../../capabilities/check_capabilities';
-
-import { stopAnalytics } from '../../services/analytics_service';
+import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 
 import { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
-const buttonStopText = i18n.translate('xpack.ml.dataframe.analyticsList.stopActionName', {
+const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.stopActionName', {
   defaultMessage: 'Stop',
 });
 
 interface StopButtonProps {
+  isDisabled: boolean;
   item: DataFrameAnalyticsListRow;
+  onClick: () => void;
 }
 
-export const StopButton: FC<StopButtonProps> = ({ item }) => {
-  const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
-
-  const stopButton = (
+export const StopButton: FC<StopButtonProps> = ({ isDisabled, item, onClick }) => {
+  const button = (
     <EuiButtonEmpty
-      size="xs"
+      aria-label={buttonText}
       color="text"
-      disabled={!canStartStopDataFrameAnalytics}
-      iconType="stop"
-      onClick={() => stopAnalytics(item)}
-      aria-label={buttonStopText}
       data-test-subj="mlAnalyticsJobStopButton"
+      flush="left"
+      iconType="stop"
+      isDisabled={isDisabled}
+      onClick={onClick}
+      size="s"
     >
-      {buttonStopText}
+      {buttonText}
     </EuiButtonEmpty>
   );
-  if (!canStartStopDataFrameAnalytics) {
+
+  if (isDisabled) {
     return (
       <EuiToolTip
         position="top"
         content={createPermissionFailureMessage('canStartStopDataFrameAnalytics')}
       >
-        {stopButton}
+        {button}
       </EuiToolTip>
     );
   }
 
-  return stopButton;
+  return button;
 };
