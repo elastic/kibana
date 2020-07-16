@@ -76,9 +76,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
     defineRuleData?.index ?? []
   );
-  const exceptionsDisabledForRule =
+  const canUseExceptions =
     defineRuleData?.ruleType &&
-    (isMlRule(defineRuleData.ruleType) || isThresholdRule(defineRuleData.ruleType));
+    !isMlRule(defineRuleData.ruleType) &&
+    !isThresholdRule(defineRuleData.ruleType);
 
   const { form } = useForm({
     defaultValue: initialState,
@@ -259,7 +260,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   euiFieldProps: {
-                    disabled: isLoading || exceptionsDisabledForRule,
+                    disabled: isLoading || !canUseExceptions,
                   },
                 }}
               />
