@@ -197,7 +197,6 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     return (
       <BasicTable
         columns={columns}
-        compressed
         data-test-subj="timelines-table"
         isExpandable={true}
         isSelectable={actionTimelineToShow.includes('selectable')}
