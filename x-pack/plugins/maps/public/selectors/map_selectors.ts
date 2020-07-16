@@ -424,6 +424,7 @@ export function hasUnsavedChanges(
 ) {
   const layerListConfigOnly = copyPersistentState(getLayerListRaw(state));
 
+  // @ts-expect-error
   const savedLayerList = savedMap.getLayerList();
 
   return !savedLayerList
