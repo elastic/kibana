@@ -8,36 +8,34 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import { checkPermission } from '../../../../../capabilities/check_capabilities';
+const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.editActionName', {
+  defaultMessage: 'Edit',
+});
 
 interface EditButtonProps {
+  isDisabled: boolean;
   onClick: () => void;
 }
 
-export const EditButton: FC<EditButtonProps> = ({ onClick }) => {
-  const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
-
-  const buttonEditText = i18n.translate('xpack.ml.dataframe.analyticsList.editActionName', {
-    defaultMessage: 'Edit',
-  });
-
-  const buttonDisabled = !canCreateDataFrameAnalytics;
-  const editButton = (
-    <EuiLink
+export const EditButton: FC<EditButtonProps> = ({ isDisabled, onClick }) => {
+  const button = (
+    <EuiButtonEmpty
+      aria-label={buttonText}
+      color="text"
       data-test-subj="mlAnalyticsJobEditButton"
-      color={buttonDisabled ? 'subdued' : 'text'}
-      disabled={buttonDisabled}
-      onClick={buttonDisabled ? undefined : onClick}
-      aria-label={buttonEditText}
-      style={{ padding: 0 }}
+      flush="left"
+      iconType="pencil"
+      isDisabled={isDisabled}
+      onClick={onClick}
+      size="s"
     >
-      <EuiIcon type="pencil" /> {buttonEditText}
-    </EuiLink>
+      {buttonText}
+    </EuiButtonEmpty>
   );
 
-  if (!canCreateDataFrameAnalytics) {
+  if (isDisabled) {
     return (
       <EuiToolTip
         position="top"
@@ -45,10 +43,10 @@ export const EditButton: FC<EditButtonProps> = ({ onClick }) => {
           defaultMessage: 'You do not have permission to edit analytics jobs.',
         })}
       >
-        {editButton}
+        {button}
       </EuiToolTip>
     );
   }
 
-  return editButton;
+  return button;
 };
