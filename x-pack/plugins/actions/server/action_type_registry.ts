@@ -112,7 +112,7 @@ export class ActionTypeRegistry {
   /**
    * Returns an action type, throws if not registered
    */
-  public get(id: string): ActionType {
+  public get<Type = ActionType>(id: string): Type {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeErrorMessage', {
@@ -123,7 +123,7 @@ export class ActionTypeRegistry {
         })
       );
     }
-    return this.actionTypes.get(id)!;
+    return (this.actionTypes.get(id)! as unknown) as Type;
   }
 
   /**

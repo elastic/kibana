@@ -5,11 +5,12 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
   ExternalIncidentServiceConfiguration,
+  ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfiguration,
   ExecutorParamsSchema,
 } from './schema';
@@ -81,9 +82,10 @@ async function executor(
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
     const { comments, externalId, ...restParams } = pushToServiceParams;
-    const mapping = config.incidentConfiguration
-      ? buildMap(config.incidentConfiguration.mapping)
-      : null;
+    const incidentConfiguration = (config as TypeOf<
+      typeof ExternalIncidentServiceConfigurationSchema
+    >).incidentConfiguration;
+    const mapping = incidentConfiguration ? buildMap(incidentConfiguration.mapping) : null;
     const externalObject =
       config.incidentConfiguration && mapping ? mapParams(restParams, mapping) : {};
 

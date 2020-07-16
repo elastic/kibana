@@ -5,11 +5,11 @@
  */
 
 import { curry, flow, get } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { ActionTypeExecutorOptions, ActionTypeExecutorResult, ActionType } from '../../types';
 
-import { ExecutorParamsSchema } from './schema';
+import { ExecutorParamsSchema, ExternalIncidentServiceConfigurationSchema } from './schema';
 
 import {
   CreateExternalServiceArgs,
@@ -92,7 +92,10 @@ export const createConnectorExecutor = ({
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
     const { comments, externalId, ...restParams } = pushToServiceParams;
 
-    const mapping = buildMap(config.casesConfiguration.mapping);
+    const mapping = buildMap(
+      (config as TypeOf<typeof ExternalIncidentServiceConfigurationSchema>).casesConfiguration
+        .mapping
+    );
     const externalCase = mapParams(restParams, mapping);
 
     data = await api.pushToService({

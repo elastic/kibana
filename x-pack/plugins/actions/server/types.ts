@@ -21,12 +21,9 @@ export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
 export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ActionTypeConfig = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ActionTypeSecrets = Record<string, any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ActionTypeParams = Record<string, any>;
+export type ActionTypeConfig = Record<string, unknown>;
+export type ActionTypeSecrets = Record<string, unknown>;
+export type ActionTypeParams = Record<string, unknown>;
 
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
@@ -85,14 +82,12 @@ export interface FindActionResult extends ActionResult {
 }
 
 // the result returned from an action type executor function
-export interface ActionTypeExecutorResult {
+export interface ActionTypeExecutorResult<Data = unknown> {
   actionId: string;
   status: 'ok' | 'error';
   message?: string;
   serviceMessage?: string;
-  // This will have to remain `any` until we can extend Action Executors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any;
+  data?: Data;
   retry?: null | boolean | Date;
 }
 

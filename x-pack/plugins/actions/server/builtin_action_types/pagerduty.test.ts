@@ -33,7 +33,7 @@ let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = (actionTypeRegistry.get(ACTION_TYPE_ID) as unknown) as PagerDutyActionType;
+  actionType = actionTypeRegistry.get<PagerDutyActionType>(ACTION_TYPE_ID);
   mockedLogger = logger;
 });
 
