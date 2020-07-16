@@ -58,13 +58,10 @@ export function ServiceMetricList({
         : null,
     },
     {
-      title: i18n.translate(
-        'xpack.apm.serviceMap.avgErrorsPerMinutePopoverMetric',
-        {
-          defaultMessage: 'Errors per minute (avg.)',
-        }
-      ),
-      description: avgErrorsPerMinute?.toFixed(2),
+      title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
+        defaultMessage: 'Trans. error rate (avg.)',
+      }),
+      description: isNumber(avgErrorRate) ? asPercent(avgErrorRate, 1) : null,
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverMetric', {
