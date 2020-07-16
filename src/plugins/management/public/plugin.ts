@@ -33,14 +33,9 @@ import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
 
 interface ManagementSetupDependencies {
   home: HomePublicPluginSetup;
-}
-
-interface ManagementStartDependencies {
-  kibanaLegacy: KibanaLegacyStart;
 }
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
@@ -90,8 +85,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     };
   }
 
-  public start(core: CoreStart, { kibanaLegacy }: ManagementStartDependencies) {
-    kibanaLegacy.loadStyles();
+  public start(core: CoreStart) {
     this.managementSections.start({ capabilities: core.application.capabilities });
     return {};
   }
