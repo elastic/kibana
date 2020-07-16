@@ -17,23 +17,16 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { ServiceConfigDescriptor } from '../internal_types';
 
-export class StatusPagePlugin implements Plugin<StatusPagePluginSetup, StatusPagePluginStart> {
-  public setup(core: CoreSetup) {
-    const isStatusPageAnonymous = core.injectedMetadata.getInjectedVar(
-      'isStatusPageAnonymous'
-    ) as boolean;
+const statusConfigSchema = schema.object({
+  allowAnonymous: schema.boolean({ defaultValue: false }),
+});
 
-    if (isStatusPageAnonymous) {
-      core.http.anonymousPaths.register('/status');
-    }
-  }
+export type StatusConfigType = TypeOf<typeof statusConfigSchema>;
 
-  public start() {}
-
-  public stop() {}
-}
-
-export type StatusPagePluginSetup = ReturnType<StatusPagePlugin['setup']>;
-export type StatusPagePluginStart = ReturnType<StatusPagePlugin['start']>;
+export const config: ServiceConfigDescriptor<StatusConfigType> = {
+  path: 'status',
+  schema: statusConfigSchema,
+};

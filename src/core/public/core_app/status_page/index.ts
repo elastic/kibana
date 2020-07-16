@@ -16,9 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { PluginInitializer } from 'kibana/public';
-import { StatusPagePlugin, StatusPagePluginSetup, StatusPagePluginStart } from './plugin';
-
-export const plugin: PluginInitializer<StatusPagePluginSetup, StatusPagePluginStart> = () =>
-  new StatusPagePlugin();

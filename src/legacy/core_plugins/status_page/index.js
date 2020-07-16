@@ -26,11 +26,6 @@ export default function (kibana) {
         hidden: true,
         url: '/status',
       },
-      injectDefaultVars(server) {
-        return {
-          isStatusPageAnonymous: server.config().get('status.allowAnonymous'),
-        };
-      },
     },
   });
 }

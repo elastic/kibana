@@ -29,10 +29,12 @@ import { CoreContext } from '../core_system';
 import { renderApp, setupUrlOverflowDetection } from './errors';
 import { NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
+import { InjectedMetadataSetup } from '../injected_metadata';
 
 interface SetupDeps {
   application: InternalApplicationSetup;
   http: HttpSetup;
+  injectedMetadata: InjectedMetadataSetup;
 }
 
 interface StartDeps {
@@ -47,7 +49,7 @@ export class CoreApp {
 
   constructor(private readonly coreContext: CoreContext) {}
 
-  public setup({ http, application }: SetupDeps) {
+  public setup({ http, application, injectedMetadata }: SetupDeps) {
     application.register(this.coreContext.coreId, {
       id: 'error',
       title: 'App Error',
@@ -59,6 +61,10 @@ export class CoreApp {
         return renderApp(params, { basePath: http.basePath });
       },
     });
+
+    if (injectedMetadata.getAnonymousStatusPage()) {
+      http.anonymousPaths.register('/status');
+    }
   }
 
   public start({ application, http, notifications, uiSettings }: StartDeps) {
