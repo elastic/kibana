@@ -245,7 +245,7 @@ export const searchAfterAndBulkCreate = async ({
               ? filteredEvents.hits.hits[0].sort[0]
               : undefined;
           } else {
-            logger.debug(buildRuleMessage('sortIds was empty on search'));
+            logger.debug(buildRuleMessage('sortIds was empty on filteredEvents'));
             toReturn.success = true;
             break;
           }
@@ -260,7 +260,7 @@ export const searchAfterAndBulkCreate = async ({
           ) {
             sortId = searchResult.hits.hits[0].sort ? searchResult.hits.hits[0].sort[0] : undefined;
           } else {
-            logger.debug(buildRuleMessage('sortIds was empty on search'));
+            logger.debug(buildRuleMessage('sortIds was empty on searchResult'));
             toReturn.success = true;
             break;
           }
