@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { tasks } from './tasks';
+import { AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
+import { tasks } from './tasks';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -14,6 +15,109 @@ describe('data telemetry collection tasks', () => {
     'apm_oss.spanIndices': 'apm-8.0.0-span',
     'apm_oss.transactionIndices': 'apm-8.0.0-transaction',
   } as ApmIndicesConfig;
+
+  describe('aggregated_transactions', () => {
+    const task = tasks.find((t) => t.name === 'aggregated_transactions');
+
+    it('returns aggregated transaction counts', async () => {
+      // This mock implementation returns different values based on the parameters,
+      // which should simulate all the queries that are done. For most of them we'll
+      // simulate the number of buckets by using the length of the key, but for a
+      // couple we'll simulate being paginated by returning an after_key.
+      const search = jest.fn().mockImplementation((params) => {
+        const isRumResult =
+          params.body.query.bool.filter &&
+          params.body.query.bool.filter.some(
+            (filter: any) =>
+              filter.terms && filter.terms[AGENT_NAME]?.includes('rum-js')
+          );
+        const isNonRumResult =
+          params.body.query.bool.filter &&
+          params.body.query.bool.filter.some(
+            (filter: any) =>
+              filter.terms && !filter.terms[AGENT_NAME]?.includes('rum-js')
+          );
+        const isPagedResult =
+          !!params.body.aggs?.current_implementation?.composite.after ||
+          !!params.body.aggs?.no_observer_name?.composite.after;
+        const isTotalResult = 'track_total_hits' in params.body;
+        const key = Object.keys(params.body.aggs ?? [])[0];
+
+        if (isRumResult) {
+          if (isTotalResult) {
+            return Promise.resolve({ hits: { total: { value: 3000 } } });
+          }
+        }
+
+        if (isNonRumResult) {
+          if (isTotalResult) {
+            return Promise.resolve({ hits: { total: { value: 2000 } } });
+          }
+        }
+
+        if (isPagedResult && key) {
+          return Promise.resolve({
+            hits: { total: { value: key.length } },
+            aggregations: { [key]: { buckets: [{}] } },
+          });
+        }
+
+        if (isTotalResult) {
+          return Promise.resolve({ hits: { total: { value: 1000 } } });
+        }
+
+        if (
+          key === 'current_implementation' ||
+          (key === 'no_observer_name' && !isPagedResult)
+        ) {
+          return Promise.resolve({
+            hits: { total: { value: key.length } },
+            aggregations: {
+              [key]: { after_key: {}, buckets: key.split('').map((_) => ({})) },
+            },
+          });
+        }
+
+        if (key) {
+          return Promise.resolve({
+            hits: { total: { value: key.length } },
+            aggregations: {
+              [key]: { buckets: key.split('').map((_) => ({})) },
+            },
+          });
+        }
+      });
+
+      expect(await task?.executor({ indices, search } as any)).toEqual({
+        aggregated_transactions: {
+          current_implementation: {
+            expected_metric_document_count: 23,
+            transaction_count: 1000,
+          },
+          no_observer_name: {
+            expected_metric_document_count: 17,
+            transaction_count: 1000,
+          },
+          no_rum: {
+            expected_metric_document_count: 6,
+            transaction_count: 2000,
+          },
+          no_rum_no_observer_name: {
+            expected_metric_document_count: 23,
+            transaction_count: 2000,
+          },
+          only_rum: {
+            expected_metric_document_count: 8,
+            transaction_count: 3000,
+          },
+          only_rum_no_observer_name: {
+            expected_metric_document_count: 25,
+            transaction_count: 3000,
+          },
+        },
+      });
+    });
+  });
 
   describe('cloud', () => {
     const task = tasks.find((t) => t.name === 'cloud');
