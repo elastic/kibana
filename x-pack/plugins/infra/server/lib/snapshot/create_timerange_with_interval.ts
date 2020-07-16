@@ -5,14 +5,30 @@
  */
 
 import { uniq } from 'lodash';
+import moment from 'moment';
 import { InfraSnapshotRequestOptions } from './types';
 import { getMetricsAggregations } from './query_helpers';
 import { calculateMetricInterval } from '../../utils/calculate_metric_interval';
-import { SnapshotModel, SnapshotModelMetricAggRT } from '../../../common/inventory_models/types';
+import {
+  SnapshotModel,
+  SnapshotModelMetricAggRT,
+  InventoryItemType,
+} from '../../../common/inventory_models/types';
 import { getDatasetForField } from '../../routes/metrics_explorer/lib/get_dataset_for_field';
 import { InfraTimerangeInput } from '../../../common/http_api/snapshot_api';
 import { ESSearchClient } from '.';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
+import { aggregationsToModulesCache, createIntervalCache } from '../caches';
+
+const createModulesCacheKey = (modules: string[], to: number, nodeType?: InventoryItemType) => {
+  const roundedDate = moment(to).startOf('hour').valueOf();
+  const modulesKey = uniq(modules).sort().join(',');
+  return `${nodeType || 'ALL'}:${modulesKey}: ${roundedDate}`;
+};
+
+const createDatasetCacheKey = (fields: string[]) => {
+  return uniq(fields).sort().join(',');
+};
 
 const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequestOptions) => {
   const { timerange } = options;
@@ -21,7 +37,11 @@ const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequ
   }
   const aggregations = getMetricsAggregations(options);
   const modules = await aggregationsToModules(client, aggregations, options);
-  return Math.max(
+  const cacheKey = createModulesCacheKey(modules, timerange.to, options.nodeType);
+  if (createIntervalCache.has(cacheKey)) {
+    return createIntervalCache.get(cacheKey) as number;
+  }
+  const interval = Math.max(
     (await calculateMetricInterval(
       client,
       {
@@ -34,6 +54,8 @@ const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequ
     )) || 60,
     60
   );
+  createIntervalCache.set(cacheKey, interval);
+  return interval;
 };
 
 export const createTimeRangeWithInterval = async (
@@ -70,11 +92,17 @@ const aggregationsToModules = async (
       return fields;
     }, [])
     .filter((v) => v) as string[];
-  const fields = await Promise.all(
+  const cacheKey = createDatasetCacheKey(uniqueFields);
+  if (aggregationsToModulesCache.has(cacheKey)) {
+    return aggregationsToModulesCache.get(cacheKey) as string[];
+  }
+  const datasets = await Promise.all(
     uniqueFields.map(
       async (field) =>
         await getDatasetForField(client, field as string, options.sourceConfiguration.metricAlias)
     )
   );
-  return fields.filter((f) => f) as string[];
+  const modules = datasets.filter((f) => f) as string[];
+  aggregationsToModulesCache.set(cacheKey, uniq(modules));
+  return uniq(modules);
 };
