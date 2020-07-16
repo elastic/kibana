@@ -261,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0.0 B',
-          total_by_field_count: '994',
+          // not checking total_by_field_count as the number of categories might change
           total_over_field_count: '0',
           total_partition_field_count: '2',
           bucket_allocation_failures_count: '0',
@@ -517,44 +517,18 @@ export default function ({ getService }: FtrProviderContext) {
             id: testData.jobId,
             description: testData.jobDescription,
             jobGroups: [...new Set(testData.jobGroups)].sort(),
-            recordCount: testData.expected.row.recordCount,
-            memoryStatus: testData.expected.row.memoryStatus,
-            jobState: testData.expected.row.jobState,
-            datafeedState: testData.expected.row.datafeedState,
-            latestTimestamp: testData.expected.row.latestTimestamp,
+            ...testData.expected.row,
           });
 
           await ml.jobTable.assertJobRowDetailsCounts(
             testData.jobId,
             {
               job_id: testData.jobId,
-              processed_record_count: testData.expected.counts.processed_record_count,
-              processed_field_count: testData.expected.counts.processed_field_count,
-              input_bytes: testData.expected.counts.input_bytes,
-              input_field_count: testData.expected.counts.input_field_count,
-              invalid_date_count: testData.expected.counts.invalid_date_count,
-              missing_field_count: testData.expected.counts.missing_field_count,
-              out_of_order_timestamp_count: testData.expected.counts.out_of_order_timestamp_count,
-              empty_bucket_count: testData.expected.counts.empty_bucket_count,
-              sparse_bucket_count: testData.expected.counts.sparse_bucket_count,
-              bucket_count: testData.expected.counts.bucket_count,
-              earliest_record_timestamp: testData.expected.counts.earliest_record_timestamp,
-              latest_record_timestamp: testData.expected.counts.latest_record_timestamp,
-              input_record_count: testData.expected.counts.input_record_count,
-              latest_bucket_timestamp: testData.expected.counts.latest_bucket_timestamp,
+              ...testData.expected.counts,
             },
             {
               job_id: testData.jobId,
-              result_type: testData.expected.modelSizeStats.result_type,
-              model_bytes_exceeded: testData.expected.modelSizeStats.model_bytes_exceeded,
-              total_by_field_count: testData.expected.modelSizeStats.total_by_field_count,
-              total_over_field_count: testData.expected.modelSizeStats.total_over_field_count,
-              total_partition_field_count:
-                testData.expected.modelSizeStats.total_partition_field_count,
-              bucket_allocation_failures_count:
-                testData.expected.modelSizeStats.bucket_allocation_failures_count,
-              memory_status: testData.expected.modelSizeStats.memory_status,
-              timestamp: testData.expected.modelSizeStats.timestamp,
+              ...testData.expected.modelSizeStats,
             }
           );
         });
@@ -780,44 +754,18 @@ export default function ({ getService }: FtrProviderContext) {
             id: testData.jobIdClone,
             description: testData.jobDescription,
             jobGroups: [...new Set(testData.jobGroupsClone)].sort(),
-            recordCount: testData.expected.row.recordCount,
-            memoryStatus: testData.expected.row.memoryStatus,
-            jobState: testData.expected.row.jobState,
-            datafeedState: testData.expected.row.datafeedState,
-            latestTimestamp: testData.expected.row.latestTimestamp,
+            ...testData.expected.row,
           });
 
           await ml.jobTable.assertJobRowDetailsCounts(
             testData.jobIdClone,
             {
               job_id: testData.jobIdClone,
-              processed_record_count: testData.expected.counts.processed_record_count,
-              processed_field_count: testData.expected.counts.processed_field_count,
-              input_bytes: testData.expected.counts.input_bytes,
-              input_field_count: testData.expected.counts.input_field_count,
-              invalid_date_count: testData.expected.counts.invalid_date_count,
-              missing_field_count: testData.expected.counts.missing_field_count,
-              out_of_order_timestamp_count: testData.expected.counts.out_of_order_timestamp_count,
-              empty_bucket_count: testData.expected.counts.empty_bucket_count,
-              sparse_bucket_count: testData.expected.counts.sparse_bucket_count,
-              bucket_count: testData.expected.counts.bucket_count,
-              earliest_record_timestamp: testData.expected.counts.earliest_record_timestamp,
-              latest_record_timestamp: testData.expected.counts.latest_record_timestamp,
-              input_record_count: testData.expected.counts.input_record_count,
-              latest_bucket_timestamp: testData.expected.counts.latest_bucket_timestamp,
+              ...testData.expected.counts,
             },
             {
               job_id: testData.jobIdClone,
-              result_type: testData.expected.modelSizeStats.result_type,
-              model_bytes_exceeded: testData.expected.modelSizeStats.model_bytes_exceeded,
-              total_by_field_count: testData.expected.modelSizeStats.total_by_field_count,
-              total_over_field_count: testData.expected.modelSizeStats.total_over_field_count,
-              total_partition_field_count:
-                testData.expected.modelSizeStats.total_partition_field_count,
-              bucket_allocation_failures_count:
-                testData.expected.modelSizeStats.bucket_allocation_failures_count,
-              memory_status: testData.expected.modelSizeStats.memory_status,
-              timestamp: testData.expected.modelSizeStats.timestamp,
+              ...testData.expected.modelSizeStats,
             }
           );
         });
