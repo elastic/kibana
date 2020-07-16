@@ -10,6 +10,15 @@ import { getObservabilityAlerts } from './get_observability_alerts';
 const basePath = { prepend: (path: string) => path };
 
 describe('getObservabilityAlerts', () => {
+  const originalConsole = global.console;
+  beforeAll(() => {
+    // mocks console to avoid poluting the test output
+    global.console = ({ error: jest.fn() } as unknown) as typeof console;
+  });
+
+  afterAll(() => {
+    global.console = originalConsole;
+  });
   it('Returns empty array when api throws exception', async () => {
     const core = ({
       http: {
