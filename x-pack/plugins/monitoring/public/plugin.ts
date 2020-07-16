@@ -93,7 +93,6 @@ export class MonitoringPlugin
         };
 
         pluginsStart.kibanaLegacy.loadFontAwesome();
-        pluginsStart.kibanaLegacy.loadStyles();
         this.setInitialTimefilter(deps);
 
         const monitoringApp = new AngularApp(deps);
