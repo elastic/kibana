@@ -64,9 +64,9 @@ export const EditConnector = React.memo(
     );
 
     const onError = useCallback(() => {
-      form.setFieldValue('connector', selectedConnector);
+      setFieldValue('connector', selectedConnector);
       setConnectorHasChanged(false);
-    }, [form, selectedConnector]);
+    }, [setFieldValue, selectedConnector]);
 
     const onCancelConnector = useCallback(() => {
       setFieldValue('connector', selectedConnector);

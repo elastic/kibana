@@ -432,8 +432,9 @@ describe('CaseView ', () => {
     wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
     wrapper.update();
     await wait();
-    expect(wrapper.find('button[data-test-subj="dropdown-connectors"]').text()).toBe(
-      'My Connector'
-    );
+    wrapper.update();
+    expect(
+      wrapper.find('[data-test-subj="dropdown-connectors"]').at(0).prop('valueOfSelected')
+    ).toBe('servicenow-1');
   });
 });
