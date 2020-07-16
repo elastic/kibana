@@ -13,7 +13,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
 import React, { Component, Fragment } from 'react';
-
+import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -130,7 +130,7 @@ export class AnnotationsTable extends Component {
     }
   }
 
-  getAnnotationsWithExtraInfo(annotations) {
+  getAnnotationsWithExtraInfo = memoizeOne((annotations) => {
     // if there is a specific view/chart entities that the annotations can be scoped to
     // add a new column called 'current_series'
     if (Array.isArray(this.props.chartDetails?.entityData?.entities)) {
@@ -147,7 +147,7 @@ export class AnnotationsTable extends Component {
       // if not make it return the original annotations
       return annotations;
     }
-  }
+  });
 
   getJob(jobId) {
     // check if the job was supplied via props and matches the supplied jobId
@@ -644,15 +644,18 @@ export class AnnotationsTable extends Component {
         name: CURRENT_SERIES,
         dataType: 'boolean',
         width: '0px',
+        render: () => '',
       }
     );
+
+    const items = this.getAnnotationsWithExtraInfo(annotations);
     return (
       <Fragment>
         <EuiInMemoryTable
           error={searchError}
           className="eui-textOverflowWrap"
           compressed={true}
-          items={this.getAnnotationsWithExtraInfo(annotations)}
+          items={items}
           columns={columns}
           pagination={{
             pageSizeOptions: [5, 10, 25],
