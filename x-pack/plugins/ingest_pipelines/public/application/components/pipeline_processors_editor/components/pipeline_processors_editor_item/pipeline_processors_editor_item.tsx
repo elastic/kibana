@@ -15,7 +15,6 @@ import {
   EuiPanel,
   EuiText,
   EuiToolTip,
-  copyToClipboard,
 } from '@elastic/eui';
 
 import { ProcessorInternal, ProcessorSelector, ContextValueEditor } from '../../types';
