@@ -12,3 +12,11 @@ export interface IFlashMessagesProps {
   isWrapped?: boolean;
   children?: React.ReactNode;
 }
+
+export interface IKeaLogic {
+  mount(): void;
+  values: object;
+  reducers(): object;
+  selectors?(): object;
+  listeners?(): object;
+}
