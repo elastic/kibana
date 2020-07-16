@@ -536,9 +536,9 @@ export function copyToSpaceTestSuiteFactory(
             const { success, successCount, successResults, errors } = getResult(response);
             const updatedAt = '2017-09-21T18:59:16.270Z';
             const destinations = [
-              // response should be sorted by ID in ascending order
-              { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
+              // response should be sorted by updatedAt in descending order
               { id: 'conflict_2_space_2', title: 'A shared saved-object in one space', updatedAt },
+              { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
             ];
             expect(success).to.eql(false);
             expect(successCount).to.eql(0);

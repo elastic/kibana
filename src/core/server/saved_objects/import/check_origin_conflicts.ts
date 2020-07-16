@@ -69,16 +69,11 @@ const createQuery = (type: string, id: string, rawIdPrefix: string) =>
 const transformObjectsToAmbiguousConflictFields = (
   objects: Array<SavedObject<{ title?: string }>>
 ) =>
-  objects
-    .map(({ id, attributes, updated_at: updatedAt }) => ({
-      id,
-      title: attributes?.title,
-      updatedAt,
-    }))
-    // Sort for two reasons: 1. consumers may want to identify multiple errors that have the same sources (by stringifying the `sources`
-    // array of each object they can be compared), and 2. it will be a less confusing experience for end-users if several ambiguous
-    // conflicts that share the same destinations all show those destinations in the same order.
-    .sort((a, b) => (a.id > b.id ? 1 : b.id > a.id ? -1 : 0));
+  objects.map(({ id, attributes, updated_at: updatedAt }) => ({
+    id,
+    title: attributes?.title,
+    updatedAt,
+  }));
 const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
   `${object.type}:${object.originId || object.id}`;
 
@@ -110,6 +105,8 @@ const checkOriginConflict = async (
     page: 1,
     perPage: 10,
     fields: ['title'],
+    sortField: 'updated_at',
+    sortOrder: 'desc',
     ...(namespace && { namespaces: [namespace] }),
   };
   const findResult = await savedObjectsClient.find<{ title?: string }>(findOptions);

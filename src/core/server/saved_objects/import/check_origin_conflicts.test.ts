@@ -156,13 +156,11 @@ describe('#checkOriginConflicts', () => {
 
   describe('results', () => {
     const getAmbiguousConflicts = (objects: SavedObjectType[]) =>
-      objects
-        .map(({ id, attributes, updated_at: updatedAt }) => ({
-          id,
-          title: attributes?.title,
-          updatedAt,
-        }))
-        .sort((a: { id: string }, b: { id: string }) => (a.id > b.id ? 1 : b.id > a.id ? -1 : 0));
+      objects.map(({ id, attributes, updated_at: updatedAt }) => ({
+        id,
+        title: attributes?.title,
+        updatedAt,
+      }));
     const createAmbiguousConflictError = (
       object: SavedObjectType,
       destinations: SavedObjectType[]
