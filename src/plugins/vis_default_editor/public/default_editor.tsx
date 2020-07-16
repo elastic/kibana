@@ -56,6 +56,7 @@ function DefaultEditor({
     if (!visRef.current) {
       return;
     }
+
     embeddableHandler.render(visRef.current);
     setTimeout(() => {
       eventEmitter.emit('embeddableRendered');
@@ -84,7 +85,6 @@ function DefaultEditor({
           ...core,
         }}
       >
-        {' '}
         <PanelsContainer
           className="visEditor--default"
           resizerClassName={`visEditor__resizer ${
