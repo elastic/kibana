@@ -1170,8 +1170,6 @@ export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectError" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     error?: SavedObjectError;
     id: string;
@@ -1195,6 +1193,20 @@ export interface SavedObjectAttributes {
 
 // @public
 export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
+
+// Warning: (ae-missing-release-tag) "SavedObjectError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface SavedObjectError {
+    // (undocumented)
+    error: string;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    metadata?: Record<string, unknown>;
+    // (undocumented)
+    statusCode: number;
+}
 
 // @public
 export interface SavedObjectReference {

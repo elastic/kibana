@@ -140,6 +140,7 @@ export {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,

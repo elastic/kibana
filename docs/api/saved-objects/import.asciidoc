@@ -231,15 +231,16 @@ The API returns the following:
 }
 --------------------------------------------------
 
-This result indicates that the import was not successful because the index pattern, visualization, and dashboard each resulted in a conflict error:
+This result indicates that the import was not successful because the index pattern, visualization, and dashboard each resulted in a conflict
+error:
 
 * An index pattern with the same ID already exists, so this resulted in a conflict error. This can be resolved by overwriting the existing
 object, or skipping this object entirely.
 
 * A visualization with a different ID but the same "origin" already exists, so this resulted in a conflict error as well. The
-`destinationId` field describes to the other visualization which caused this conflict. This behavior was added to ensure that new objects
-which can be shared between <<xpack-spaces,spaces>> behave in a similar way as legacy non-shareable objects. When a shareable object is
-exported and then imported into a new space, it retains its origin so that it conflicts will be encountered as expected. This can be
+`destinationId` field contains the `id` of the other visualization which caused this conflict. This behavior was added to ensure that new
+objects which can be shared between <<xpack-spaces,spaces>> behave in a similar way as legacy non-shareable objects. When a shareable object
+is exported and then imported into a new space, it retains its origin so that its conflicts will be encountered as expected. This can be
 resolved by overwriting the specified destination object, or skipping this object entirely.
 
 * Two canvases with different IDs but the same "origin" already exist, so this resulted in an ambiguous conflict error. The `destinations`
@@ -247,7 +248,8 @@ array describes to the other canvases which caused this conflict. When a shareab
 and is _then_ shared to another space where an object of the same origin exists, this situation may occur. This can be resolved by picking
 one of the destination objects to overwrite, or skipping this object entirely.
 
-These errors need to be addressed using the <<saved-objects-api-resolve-import-errors-example-1,Resolve import errors API>>.
+No objects will be imported until this error is resolved using the <<saved-objects-api-resolve-import-errors-example-1,Resolve import errors
+API>>.
 
 [[saved-objects-api-import-example-4]]
 ===== 4. Failed import (with missing reference errors)
@@ -298,5 +300,5 @@ The API returns the following:
   ]
 --------------------------------------------------
 
-This result indicates that the import was not successful because the visualization resulted in a missing references error. This error needs
-to be addressed using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import errors API>>.
+This result indicates that the import was not successful because the visualization resulted in a missing references error. No objects will
+be imported until this error is resolved using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import errors API>>.

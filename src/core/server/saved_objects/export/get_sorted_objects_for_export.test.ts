@@ -684,14 +684,12 @@ describe('getSortedObjectsForExport()', () => {
       ],
     });
     const response = await readStreamToCompletion(exportStream);
-    expect(response).toEqual(
-      expect.arrayContaining([
-        expect.not.objectContaining({ id: '1', namespaces: expect.anything() }),
-        expect.not.objectContaining({ id: '2', namespaces: expect.anything() }),
-        expect.not.objectContaining({ id: '3', namespaces: expect.anything() }),
-        expect.objectContaining({ exportedCount: 3 }),
-      ])
-    );
+    expect(response).toEqual([
+      createSavedObject({ type: 'multi', id: '1' }),
+      createSavedObject({ type: 'multi', id: '2' }),
+      createSavedObject({ type: 'other', id: '3' }),
+      expect.objectContaining({ exportedCount: 3 }),
+    ]);
   });
 
   test('includes nested dependencies when passed in', async () => {

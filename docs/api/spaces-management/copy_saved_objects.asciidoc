@@ -317,9 +317,9 @@ index pattern, visualization, and dashboard each resulted in a conflict error:
 object, or skipping this object entirely.
 
 * A visualization with a different ID but the same "origin" already exists, so this resulted in a conflict error as well. The
-`destinationId` field describes to the other visualization which caused this conflict. This behavior was added to ensure that new objects
-which can be shared between spaces behave in a similar way as legacy non-shareable objects. When a shareable object is copied into a new
-space, it retains its origin so that it conflicts will be encountered as expected. This can be resolved by overwriting the specified
+`destinationId` field contains the `id` of the other visualization which caused this conflict. This behavior was added to ensure that new
+objects which can be shared between spaces behave in a similar way as legacy non-shareable objects. When a shareable object is copied into a
+new space, it retains its origin so that its conflicts will be encountered as expected. This can be resolved by overwriting the specified
 destination object, or skipping this object entirely.
 
 * Two canvases with different IDs but the same "origin" already exist, so this resulted in an ambiguous conflict error. The `destinations`
