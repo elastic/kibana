@@ -17,19 +17,15 @@
  * under the License.
  */
 
-export const COVERAGE_INDEX = process.env.COVERAGE_INDEX || 'kibana_code_coverage';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { fromNullable } from '../either';
 
-export const TOTALS_INDEX = process.env.TOTALS_INDEX || `kibana_total_code_coverage`;
+const ROOT = resolve(__dirname, '../../../../..');
+const resolveFromRoot = resolve.bind(null, ROOT);
+const path = `
+src/dev/code_coverage/ingest_coverage/team_assignment/ingestion_pipeline_painless.json`;
+const resolved = resolveFromRoot(path.trimStart());
+const getContents = (scriptPath) => readFileSync(scriptPath, 'utf8');
 
-export const RESEARCH_COVERAGE_INDEX =
-  process.env.RESEARCH_COVERAGE_INDEX || 'qa_research_code_coverage';
-
-export const RESEARCH_TOTALS_INDEX =
-  process.env.RESEARCH_TOTALS_INDEX || `qa_research_total_code_coverage`;
-
-export const TEAM_ASSIGNMENT_PIPELINE_NAME = process.env.PIPELINE_NAME || 'team_assignment';
-
-export const CODE_COVERAGE_CI_JOB_NAME = 'elastic+kibana+code-coverage';
-export const RESEARCH_CI_JOB_NAME = 'elastic+kibana+qa-research';
-export const CI_JOB_NAME = process.env.COVERAGE_JOB_NAME || RESEARCH_CI_JOB_NAME;
-export const RESEARCH_CLUSTER_ES_HOST = process.env.ES_HOST || 'http://localhost:9200';
+export const fetch = () => fromNullable(resolved).map(getContents);
