@@ -35,6 +35,8 @@ interface Entry {
   stats: Fs.Stats;
 }
 
+const IGNORED_EXTNAME = ['.map', '.br', '.gz'];
+
 const getFiles = (dir: string, parent?: string) =>
   flatten(
     Fs.readdirSync(dir).map((name): Entry | Entry[] => {
@@ -51,7 +53,19 @@ const getFiles = (dir: string, parent?: string) =>
         stats,
       };
     })
-  );
+  ).filter((file) => {
+    const filename = Path.basename(file.relPath);
+    if (filename.startsWith('.')) {
+      return false;
+    }
+
+    const ext = Path.extname(filename);
+    if (IGNORED_EXTNAME.includes(ext)) {
+      return false;
+    }
+
+    return true;
+  });
 
 export function reportOptimizerStats(reporter: CiStatsReporter, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
@@ -70,10 +84,7 @@ export function reportOptimizerStats(reporter: CiStatsReporter, config: Optimize
                 // make the cache read from the cache file since it was likely updated by the worker
                 bundle.cache.refresh();
 
-                const outputFiles = getFiles(bundle.outputDir).filter(
-                  (file) => !(file.relPath.startsWith('.') || file.relPath.endsWith('.map'))
-                );
-
+                const outputFiles = getFiles(bundle.outputDir);
                 const entryName = `${bundle.id}.${bundle.type}.js`;
                 const entry = outputFiles.find((f) => f.relPath === entryName);
                 if (!entry) {
