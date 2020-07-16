@@ -51,11 +51,20 @@ export const ConnectorEditFlyout = ({
     consumer,
   } = useActionsConnectorsContext();
   const canSave = hasSaveActionsCapability(capabilities);
-  const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
+
   const [{ connector }, dispatch] = useReducer(connectorReducer, {
     connector: { ...initialConnector, secrets: {} },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const setConnector = (key: string, value: any) => {
+    dispatch({ command: { type: 'setConnector' }, payload: { key, value } });
+  };
+
+  const closeFlyout = useCallback(() => {
+    setEditFlyoutVisibility(false);
+    setConnector('connector', { ...initialConnector, secrets: {} });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setEditFlyoutVisibility]);
 
   if (!editFlyoutVisible) {
     return null;
@@ -213,7 +222,7 @@ export const ConnectorEditFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout}>
+            <EuiButtonEmpty onClick={closeFlyout} data-test-subj="cancelSaveEditedConnectorButton">
               {i18n.translate(
                 'xpack.triggersActionsUI.sections.editConnectorForm.cancelButtonLabel',
                 {
