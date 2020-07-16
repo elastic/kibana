@@ -75,16 +75,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Uses the Lens visualization switcher to switch visualizations.
-     *
-     * @param dataTestSubj - the data-test-subj of the visualization to switch to
-     */
-    async switchToVisualization(dataTestSubj: string) {
-      await testSubjects.click('lnsChartSwitchPopover');
-      await testSubjects.click(dataTestSubj);
-    },
-
-    /**
      * Clicks a visualize list item's title (in the visualize app).
      *
      * @param title - the title of the list item to be clicked
@@ -101,12 +91,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param opts.field - the desired field for the dimension
      */
     async configureDimension(opts: { dimension: string; operation: string; field: string }) {
-      await find.clickByCssSelector(opts.dimension);
+      await retry.try(async () => {
+        await testSubjects.click(opts.dimension);
+        await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
+      });
 
-      await find.clickByCssSelector(
-        `[data-test-subj="lns-indexPatternDimensionIncompatible-${opts.operation}"],
-          [data-test-subj="lns-indexPatternDimension-${opts.operation}"]`
-      );
+      await testSubjects.click(`lns-indexPatternDimension-${opts.operation}`);
 
       const target = await testSubjects.find('indexPattern-dimension-field');
       await comboBox.openOptionsList(target);
@@ -117,9 +107,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Removes the dimension matching a specific test subject
      */
     async removeDimension(dimensionTestSubj: string) {
-      await find.clickByCssSelector(
-        `[data-test-subj="${dimensionTestSubj}"] [data-test-subj="indexPattern-dimensionPopover-remove"]`
-      );
+      await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimensionPopover-remove`);
     },
 
     /**
@@ -157,6 +145,27 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     getTitle() {
       return testSubjects.getVisibleText('lns_ChartTitle');
+    },
+
+    /**
+     * Uses the Lens visualization switcher to switch visualizations.
+     *
+     * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
+     * lnsDatatable or bar_stacked
+     */
+    async switchToVisualization(subVisualizationId: string) {
+      await this.openChartSwitchPopover();
+      await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
+    },
+
+    async openChartSwitchPopover() {
+      if (await testSubjects.exists('visTypeTitle')) {
+        return;
+      }
+      await retry.try(async () => {
+        await testSubjects.click('lnsChartSwitchPopover');
+        await testSubjects.existOrFail('visTypeTitle');
+      });
     },
   });
 }
