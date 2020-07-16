@@ -30,7 +30,7 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
-import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { ExceptionBuilder } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
@@ -93,7 +93,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
@@ -102,15 +102,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onError = useCallback(
     (error) => {
-      errorToToaster({ title: i18n.EDIT_EXCEPTION_ERROR, error, dispatchToaster });
+      toasts.addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
       onCancel();
     },
-    [dispatchToaster, onCancel]
+    [onCancel, toasts]
   );
   const onSuccess = useCallback(() => {
-    displaySuccessToast(i18n.EDIT_EXCEPTION_SUCCESS, dispatchToaster);
+    toasts.addSuccess(i18n.EDIT_EXCEPTION_SUCCESS);
     onConfirm();
-  }, [dispatchToaster, onConfirm]);
+  }, [onConfirm, toasts]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {
