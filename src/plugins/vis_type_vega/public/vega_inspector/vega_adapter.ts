@@ -56,15 +56,14 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
 
   return columns.reduce((row: Record<string, string>, column) => {
     try {
-      row[column] = JSON.stringify(item[column]);
+      const cell = item[column];
+      row[column] = typeof cell === 'object' ? JSON.stringify(cell) : `${cell}`;
     } catch (e) {
       row[column] = nonSerializableFieldLabel;
     }
     return row;
   }, {});
 };
-
-const mapColumns = (columns: string[]) => columns.map((column) => ({ id: column, schema: 'json' }));
 
 export class VegaAdapter {
   private debugValuesSubject = new ReplaySubject<DebugValues>();
@@ -86,7 +85,7 @@ export class VegaAdapter {
             const columns = Object.keys(value[0]);
             acc.push({
               id: key,
-              columns: mapColumns(columns),
+              columns: columns.map((column) => ({ id: column, schema: 'json' })),
               data: value.map((item: Record<string, unknown>) => serializeColumns(item, columns)),
             });
           }
@@ -120,17 +119,19 @@ export class VegaAdapter {
       filter((debugValues) => Boolean(debugValues)),
       map((debugValues) => {
         const runtimeScope = getVegaRuntimeScope(debugValues);
-        const columns = [vegaAdapterSignalLabel, vegaAdapterValueLabel];
 
         return {
-          columns: mapColumns(columns),
+          columns: [
+            { id: vegaAdapterSignalLabel, schema: 'text' },
+            { id: vegaAdapterValueLabel, schema: 'json' },
+          ],
           data: Object.keys(runtimeScope.signals).map((key: string) =>
             serializeColumns(
               {
-                [columns[0]]: key,
-                [columns[1]]: runtimeScope.signals[key].value,
+                [vegaAdapterSignalLabel]: key,
+                [vegaAdapterValueLabel]: runtimeScope.signals[key].value,
               },
-              columns
+              [vegaAdapterSignalLabel, vegaAdapterValueLabel]
             )
           ),
         };
