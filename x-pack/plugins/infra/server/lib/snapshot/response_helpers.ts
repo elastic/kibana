@@ -56,6 +56,7 @@ export interface InfraSnapshotNodeGroupByBucket {
     name: string;
     [groupByField: string]: string;
   };
+  doc_count: number;
   ip: {
     hits: {
       total: { value: number };
@@ -119,15 +120,17 @@ export const getNodeMetricsForLookup = (
 // value contains the value from the last bucket spanning a full interval
 // max and avg are calculated from all buckets returned for the timerange
 export const getNodeMetrics = (
-  nodeBuckets: InfraSnapshotMetricsBucket[],
+  node: InfraSnapshotNodeGroupByBucket,
   options: InfraSnapshotRequestOptions
 ): SnapshotNodeMetric[] => {
+  const nodeBuckets = node.histogram.buckets;
   if (!nodeBuckets) {
     return options.metrics.map((metric) => ({
       name: metric.type,
       value: null,
       max: null,
       avg: null,
+      count: 0,
     }));
   }
   const lastBucket = findLastFullBucket(nodeBuckets, options) as any;
@@ -137,10 +140,12 @@ export const getNodeMetrics = (
       value: getMetricValueFromBucket(metric.type, lastBucket, index),
       max: calculateMax(nodeBuckets, metric.type, index),
       avg: calculateAvg(nodeBuckets, metric.type, index),
+      count: 0,
     };
     if (options.includeTimeseries) {
       metricResult.timeseries = getTimeseriesData(nodeBuckets, metric.type, index);
     }
+    metricResult.count = node.doc_count;
     return metricResult;
   });
 };
@@ -165,7 +170,7 @@ export const getMetricValueFromBucket = (
   type: SnapshotMetricType,
   bucket: InfraSnapshotMetricsBucket,
   index: number
-) => {
+): number | null => {
   const key = type === 'custom' ? `custom_${index}` : type;
   const metric = bucket[key];
   const value = metric && (metric.normalized_value || metric.value);

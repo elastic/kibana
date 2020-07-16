@@ -23,6 +23,7 @@ const SnapshotNodeMetricOptionalRT = rt.partial({
   avg: rt.union([rt.number, rt.null]),
   max: rt.union([rt.number, rt.null]),
   timeseries: metricsExplorerSeriesRT,
+  count: rt.union([rt.number, rt.null]),
 });
 
 const SnapshotNodeMetricRequiredRT = rt.type({

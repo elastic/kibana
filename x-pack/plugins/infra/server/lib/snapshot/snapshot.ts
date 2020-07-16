@@ -19,6 +19,7 @@ import { findInventoryModel } from '../../../common/inventory_models';
 import { InfraSnapshotRequestOptions } from './types';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { SnapshotNode } from '../../../common/http_api/snapshot_api';
+import { copyMissingMetrics } from './copy_missing_metrics';
 
 export type ESSearchClient = <Hit = {}, Aggregation = undefined>(
   options: CallWithRequestParams
@@ -35,9 +36,10 @@ export class InfraSnapshot {
     const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(client, options);
     const optionsWithTimerange = { ...options, timerange: timeRangeWithIntervalApplied };
     const nodeBuckets = await requestNodes(client, optionsWithTimerange);
-
+    const nodesWithoutMissingMetrics = mapNodeBuckets(nodeBuckets, options);
+    const nodes = copyMissingMetrics(nodesWithoutMissingMetrics);
     return {
-      nodes: mapNodeBuckets(nodeBuckets, options),
+      nodes,
       interval: timeRangeWithIntervalApplied.interval,
     };
   }
@@ -140,7 +142,7 @@ const mapNodeBuckets = (
   return nodeGroupByBuckets.map((node) => {
     return {
       path: getNodePath(node, options),
-      metrics: getNodeMetrics(node.histogram.buckets, options),
+      metrics: getNodeMetrics(node, options),
     };
   });
 };
