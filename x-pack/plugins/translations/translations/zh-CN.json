@@ -14074,7 +14074,6 @@
     "xpack.securitySolution.header.editableTitle.editButtonAria": "通过单击，可以编辑 {title}",
     "xpack.securitySolution.header.editableTitle.save": "保存",
     "xpack.securitySolution.headerGlobal.buttonAddData": "添加数据",
-    "xpack.securitySolution.headerGlobal.siem": "Security",
     "xpack.securitySolution.headerPage.pageSubtitle": "最后事件：{beat}",
     "xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage": "已将 {fieldOrValue} 添加到时间线",
     "xpack.securitySolution.host.details.architectureLabel": "架构",
