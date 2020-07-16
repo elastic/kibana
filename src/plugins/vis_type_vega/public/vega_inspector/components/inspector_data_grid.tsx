@@ -26,8 +26,10 @@ const inspectorDataGridAriaLabel = i18n.translate('visTypeVega.inspector.dataGri
   defaultMessage: 'Data grid',
 });
 
+const DEFAULT_PAGE_SIZE = 15;
+
 export const InspectorDataGrid = ({ columns, data }: VegaRuntimeData) => {
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
   const onChangeItemsPerPage = useCallback(
     (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
     [setPagination]
@@ -106,7 +108,7 @@ export const InspectorDataGrid = ({ columns, data }: VegaRuntimeData) => {
       }}
       pagination={{
         ...pagination,
-        pageSizeOptions: [10, 50, 100],
+        pageSizeOptions: [DEFAULT_PAGE_SIZE, 25, 50],
         onChangeItemsPerPage,
         onChangePage,
       }}

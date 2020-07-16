@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Observable, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, ReplaySubject, fromEventPattern, merge, timer } from 'rxjs';
+import { map, switchMap, filter, debounce } from 'rxjs/operators';
 import { View, Runtime, Spec } from 'vega';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
@@ -36,6 +36,14 @@ export interface VegaRuntimeData {
 
 export type InspectDataSets = Assign<VegaRuntimeData, { id: string }>;
 export type InspectSignalsSets = VegaRuntimeData;
+
+const vegaAdapterSignalLabel = i18n.translate('visTypeVega.inspector.vegaAdapter.signal', {
+  defaultMessage: 'Signal',
+});
+
+const vegaAdapterValueLabel = i18n.translate('visTypeVega.inspector.vegaAdapter.value', {
+  defaultMessage: 'Value',
+});
 
 /** Get Runtime Scope for Vega View
  * @link https://vega.github.io/vega/docs/api/debugging/#scope
@@ -59,7 +67,7 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
 const mapColumns = (columns: string[]) => columns.map((column) => ({ id: column, schema: 'json' }));
 
 export class VegaAdapter {
-  private debugValuesSubject = new BehaviorSubject<DebugValues | null>(null);
+  private debugValuesSubject = new ReplaySubject<DebugValues>();
 
   bindInspectValues(debugValues: DebugValues) {
     this.debugValuesSubject.next(debugValues);
@@ -67,11 +75,8 @@ export class VegaAdapter {
 
   getDataSetsSubscription(): Observable<InspectDataSets[]> {
     return this.debugValuesSubject.pipe(
+      filter((debugValues) => Boolean(debugValues)),
       map((debugValues) => {
-        if (!debugValues) {
-          return [];
-        }
-
         const runtimeScope = getVegaRuntimeScope(debugValues);
 
         return Object.keys(runtimeScope.data || []).reduce((acc: InspectDataSets[], key) => {
@@ -91,47 +96,52 @@ export class VegaAdapter {
     );
   }
 
-  getSignalsSetsSubscription(): Observable<InspectSignalsSets | undefined> {
-    return this.debugValuesSubject.pipe(
-      map((debugValues) => {
-        if (!debugValues) {
-          return undefined;
-        }
-
+  getSignalsSetsSubscription(): Observable<InspectSignalsSets> {
+    const signalsListener = this.debugValuesSubject.pipe(
+      filter((debugValues) => Boolean(debugValues)),
+      switchMap((debugValues) => {
         const runtimeScope = getVegaRuntimeScope(debugValues);
-        const columns = [
-          i18n.translate('visTypeVega.inspector.vegaAdapter.signal', {
-            defaultMessage: 'Signal',
-          }),
-          i18n.translate('visTypeVega.inspector.vegaAdapter.value', {
-            defaultMessage: 'Value',
-          }),
-        ];
+
+        return merge(
+          ...Object.keys(runtimeScope.signals).map((key: string) =>
+            fromEventPattern(
+              (handler) => debugValues.view.addSignalListener(key, handler),
+              (handler) => debugValues.view.removeSignalListener(key, handler)
+            )
+          )
+        ).pipe(
+          debounce((val) => timer(350)),
+          map(() => debugValues)
+        );
+      })
+    );
+
+    return merge(this.debugValuesSubject, signalsListener).pipe(
+      filter((debugValues) => Boolean(debugValues)),
+      map((debugValues) => {
+        const runtimeScope = getVegaRuntimeScope(debugValues);
+        const columns = [vegaAdapterSignalLabel, vegaAdapterValueLabel];
 
         return {
           columns: mapColumns(columns),
-          data: Object.keys(runtimeScope.signals).map((key: string) => {
-            return serializeColumns(
+          data: Object.keys(runtimeScope.signals).map((key: string) =>
+            serializeColumns(
               {
                 [columns[0]]: key,
                 [columns[1]]: runtimeScope.signals[key].value,
               },
               columns
-            );
-          }),
+            )
+          ),
         };
       })
     );
   }
 
-  getSpecSubscription(): Observable<string | undefined> {
+  getSpecSubscription(): Observable<string> {
     return this.debugValuesSubject.pipe(
-      map((debugValues) => {
-        if (!debugValues) {
-          return undefined;
-        }
-        return JSON.stringify(debugValues.spec, null, 2);
-      })
+      filter((debugValues) => Boolean(debugValues)),
+      map((debugValues) => JSON.stringify(debugValues.spec, null, 2))
     );
   }
 }

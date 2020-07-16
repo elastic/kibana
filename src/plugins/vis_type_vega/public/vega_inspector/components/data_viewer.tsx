@@ -59,7 +59,7 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
     }
   }, [selectedView, inspectDataSets]);
 
-  if (!selectedView || !inspectDataSets) {
+  if (!selectedView) {
     return null;
   }
 
