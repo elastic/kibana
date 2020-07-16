@@ -262,7 +262,7 @@ function getBaseTemplate(
         index: {
           // ILM Policy must be added here, for now point to the default global ILM policy name
           lifecycle: {
-            name: `${type}-default`,
+            name: type,
           },
           // What should be our default for the compression?
           codec: 'best_compression',
