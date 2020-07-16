@@ -91,7 +91,7 @@ export const searchAfterAndBulkCreate = async ({
   };
 
   let sortId; // tells us where to start our next search_after query
-  let signalsCreatedCount = 0;
+  let searchResultSize = 0;
 
   /*
     The purpose of `maxResults` is to ensure we do not perform
@@ -127,8 +127,8 @@ export const searchAfterAndBulkCreate = async ({
       toReturn.success = false;
       return toReturn;
     }
-    signalsCreatedCount = 0;
-    while (signalsCreatedCount < tuple.maxSignals) {
+    searchResultSize = 0;
+    while (searchResultSize < tuple.maxSignals) {
       try {
         logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
         const {
@@ -167,6 +167,7 @@ export const searchAfterAndBulkCreate = async ({
                 searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp']
               )
             : null;
+        searchResultSize += searchResult.hits.hits.length;
 
         // filter out the search results that match with the values found in the list.
         // the resulting set are valid signals that are not on the allowlist.
@@ -184,14 +185,6 @@ export const searchAfterAndBulkCreate = async ({
           // everything in the events were allowed, so no need to generate signals
           toReturn.success = true;
           break;
-        }
-
-        // make sure we are not going to create more signals than maxSignals allows
-        if (signalsCreatedCount + filteredEvents.hits.hits.length > tuple.maxSignals) {
-          filteredEvents.hits.hits = filteredEvents.hits.hits.slice(
-            0,
-            tuple.maxSignals - signalsCreatedCount
-          );
         }
 
         const {
@@ -218,7 +211,6 @@ export const searchAfterAndBulkCreate = async ({
         });
         logger.debug(buildRuleMessage(`created ${createdCount} signals`));
         toReturn.createdSignalsCount += createdCount;
-        signalsCreatedCount += createdCount;
         if (bulkDuration) {
           toReturn.bulkCreateTimes.push(bulkDuration);
         }
