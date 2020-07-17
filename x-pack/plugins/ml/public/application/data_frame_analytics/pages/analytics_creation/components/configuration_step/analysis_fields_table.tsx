@@ -172,6 +172,7 @@ export const AnalysisFieldsTable: FC<{
   return (
     <Fragment>
       <EuiFormRow
+        data-test-subj="mlAnalyticsCreateJobWizardIncludesTable"
         label={i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsLabel', {
           defaultMessage: 'Included fields',
         })}

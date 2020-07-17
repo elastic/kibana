@@ -40,7 +40,7 @@ export const IngestManagerPanel = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiLink href="https://www.elastic.co/blog/introducing-elastic-agent-and-ingest-manager">
+          <EuiLink href="https://ela.st/ingest-manager-announcement">
             {i18n.translate('xpack.observability.ingestManafer.button', {
               defaultMessage: 'Try Ingest Manager Beta',
             })}

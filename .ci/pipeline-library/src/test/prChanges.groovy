@@ -84,4 +84,17 @@ class PrChangesTest extends KibanaBasePipelineTest {
 
     assertFalse(prChanges.areChangesSkippable())
   }
+
+  @Test
+  void 'areChangesSkippable() with skippable changes that are in notSkippablePaths'() {
+    props([
+      githubPrs: [
+        getChanges: { [
+          [filename: 'docs/developer/architecture/code-exploration.asciidoc'],
+        ] },
+      ],
+    ])
+
+    assertFalse(prChanges.areChangesSkippable())
+  }
 }
