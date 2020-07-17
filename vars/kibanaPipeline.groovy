@@ -2,9 +2,10 @@ def withPostBuildReporting(Closure closure) {
   try {
     closure()
   } finally {
-    catchErrors {
-      runErrorReporter()
-    }
+    // disabled in 6.8
+    // catchErrors {
+    //   runErrorReporter()
+    // }
 
     catchErrors {
       runbld.junit()
@@ -25,6 +26,7 @@ def functionalTestProcess(String name, Closure closure) {
 
     withEnv([
       "CI_PARALLEL_PROCESS_NUMBER=${processNumber}",
+      "PARALLEL_PIPELINE_WORKER_INDEX=${processNumber}",
       "TEST_KIBANA_HOST=localhost",
       "TEST_KIBANA_PORT=${kibanaPort}",
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
@@ -203,17 +205,13 @@ def buildXpack() {
 }
 
 def runErrorReporter() {
-  def status = buildUtils.getBuildStatus()
-
-  if (status != "ABORTED") {
-    bash(
-      """
-        source src/dev/ci_setup/setup_env.sh
-        node src/dev/failed_tests/cli
-      """,
-      "Report failed tests, if necessary"
-    )
-  }
+  bash(
+    """
+      source src/dev/ci_setup/setup_env.sh
+      node src/dev/failed_tests/cli
+    """,
+    "Report failed tests, if necessary"
+  )
 }
 
 def call(Map params = [:], Closure closure) {
