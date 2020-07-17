@@ -67,6 +67,7 @@ test('redirects to app using state transfer with by value mode', async () => {
     state: {
       byValueMode: true,
       originatingApp: 'superCoolCurrentApp',
+      embeddableId: '123',
       valueInput: {
         id: '123',
         viewMode: ViewMode.EDIT,
@@ -88,7 +89,12 @@ test('redirects to app using state transfer without by value mode', async () => 
   await action.execute({ embeddable });
   expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
     path: '/123',
-    state: { originatingApp: 'superCoolCurrentApp', byValueMode: false, valueInput: undefined },
+    state: {
+      originatingApp: 'superCoolCurrentApp',
+      byValueMode: false,
+      embeddableId: '123',
+      valueInput: undefined,
+    },
   });
 });
 

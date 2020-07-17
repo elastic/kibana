@@ -322,6 +322,12 @@ export function App({
         }
       : lastKnownDoc;
 
+    if (saveProps.newCopyOnSave) {
+      if (embeddableEditorIncomingState?.embeddableId) {
+        embeddableEditorIncomingState.embeddableId = undefined;
+      }
+    }
+
     const doc: Document = {
       ...lastDocWithoutPinned,
       description: saveProps.newDescription,
@@ -353,9 +359,9 @@ export function App({
       );
       docStorage
         .save(doc)
-        .then(({ id }) => {
+        .then(({ savedObjectId: newSavedObjectId }) => {
           // Prevents unnecessary network request and disables save button
-          const newDoc: Document = { ...doc, savedObjectId: id };
+          const newDoc: Document = { ...doc, savedObjectId: newSavedObjectId };
           const addedToLibrary = state.byValueMode && saveToLibrary;
           setState((s) => ({
             ...s,
@@ -364,9 +370,9 @@ export function App({
             persistedDoc: newDoc,
             lastKnownDoc: newDoc,
           }));
-          if (savedObjectId !== id || saveProps.returnToOrigin) {
+          if (savedObjectId !== newSavedObjectId || saveProps.returnToOrigin) {
             redirectTo(
-              id,
+              newSavedObjectId,
               undefined,
               saveProps.returnToOrigin,
               saveProps.newCopyOnSave || addedToLibrary

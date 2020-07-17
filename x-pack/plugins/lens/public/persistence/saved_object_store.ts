@@ -43,7 +43,7 @@ interface SavedObjectClient {
 }
 
 export interface DocumentSaver {
-  save: (vis: Document) => Promise<{ id: string }>;
+  save: (vis: Document) => Promise<{ savedObjectId: string }>;
 }
 
 export interface DocumentLoader {
@@ -68,7 +68,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
       ? this.client.update(DOC_TYPE, savedObjectId, attributes)
       : this.client.create(DOC_TYPE, attributes));
 
-    return { ...vis, id: result.id };
+    return { ...vis, savedObjectId: result.id };
   }
 
   async load(savedObjectId: string): Promise<Document> {

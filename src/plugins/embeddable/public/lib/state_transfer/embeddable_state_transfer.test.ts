@@ -142,7 +142,7 @@ describe('embeddable state transfer', () => {
     stateTransfer.getIncomingEmbeddablePackage();
     expect(historyMock.location.state).toEqual({
       type: 'skisEmbeddable',
-      id: '123',
+      input: { savedObjectId: '123' },
       test1: 'test1',
       test2: 'test2',
     });
