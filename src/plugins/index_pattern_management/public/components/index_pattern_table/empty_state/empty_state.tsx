@@ -193,10 +193,11 @@ export const EmptyState = ({
     </EuiPageContent>
     <EuiSpacer />
     <EuiText color="subdued" textAlign="center" size="xs">
-      {/* TODO: Hook up link below */}
       <p>
         Some indices may be hidden. Try to{' '}
-        <EuiLink {...reactRouterNavigate(useHistory(), 'create')}>create an index pattern</EuiLink>{' '}
+        <EuiLink {...reactRouterNavigate(useHistory(), 'create')} data-test-subj="createAnyway">
+          create an index pattern
+        </EuiLink>{' '}
         anyway.
       </p>
     </EuiText>

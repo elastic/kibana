@@ -45,7 +45,6 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   onChangeIndexPatternId,
 }) => (
   <div>
-    <EuiHorizontalRule />
     <EuiButtonEmpty
       iconType={isVisible ? 'arrowDown' : 'arrowRight'}
       onClick={toggleAdvancedOptions}

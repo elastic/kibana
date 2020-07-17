@@ -76,7 +76,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`index pattern listing shows create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.existOrFail('emptyState');
+        await testSubjects.click('createAnyway');
+        await testSubjects.existOrFail('createIndexPatternButton');
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -130,6 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`index pattern listing doesn't show create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
+        await testSubjects.click('createAnyway');
         await testSubjects.existOrFail('indexPatternTable');
         await testSubjects.missingOrFail('createIndexPatternButton');
       });
