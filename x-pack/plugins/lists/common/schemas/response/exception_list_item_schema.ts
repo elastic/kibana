@@ -27,7 +27,6 @@ import {
 } from '../common/schemas';
 import { commentsArray, entriesArray } from '../types';
 
-// TODO: Should we use a partial here to reflect that this can JSON serialize meta, comment as non existent?
 export const exceptionListItemSchema = t.exact(
   t.type({
     _tags,
