@@ -46,7 +46,7 @@ describe('FieldName', () => {
         <FieldName {...defaultProps} />
       </TestProviders>
     );
-    wrapper.find('div').at(1).simulate('mouseenter');
+    wrapper.find('[data-test-subj="withHoverActionsButton"]').at(0).simulate('mouseenter');
     wrapper.update();
     expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
   });
