@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
@@ -51,6 +51,10 @@ export interface LensPluginStartDependencies {
   embeddable?: EmbeddableStart;
 }
 
+export interface FeatureFlagConfig {
+  showNewLensFlow: boolean;
+}
+
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
@@ -60,7 +64,7 @@ export class LensPlugin {
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
 
-  constructor() {
+  constructor(private initializerContext: PluginInitializerContext) {
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
     this.indexpatternDatasource = new IndexPatternDatasource();
@@ -112,7 +116,12 @@ export class LensPlugin {
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const { mountApp } = await import('./app_plugin/mounter');
-        return mountApp(core, params, this.createEditorFrame!);
+        return mountApp(
+          core,
+          params,
+          this.createEditorFrame!,
+          this.initializerContext.config.get<FeatureFlagConfig>()
+        );
       },
     });
 

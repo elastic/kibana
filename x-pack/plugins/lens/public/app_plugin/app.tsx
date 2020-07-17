@@ -40,6 +40,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
 import { LensByValueInput } from '../editor_frame_service/embeddable/embeddable';
+import { FeatureFlagConfig } from '../plugin';
 
 interface State {
   indicateNoData: boolean;
@@ -77,6 +78,7 @@ interface LensAppProps {
   embeddableEditorIncomingState?: EmbeddableEditorState;
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
+  featureFlagConfig: FeatureFlagConfig;
 }
 
 export function App({
@@ -91,6 +93,7 @@ export function App({
   navigation,
   onAppLeave,
   history,
+  featureFlagConfig,
 }: LensAppProps) {
   const language =
     storage.get('kibana.userQueryLanguage') ||

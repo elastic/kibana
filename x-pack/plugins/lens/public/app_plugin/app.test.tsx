@@ -32,6 +32,7 @@ const dataStartMock = dataPluginMock.createStartContract();
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
+import { FeatureFlagConfig } from '../plugin';
 
 jest.mock('../persistence');
 jest.mock('src/core/public');
@@ -134,6 +135,7 @@ describe('Lens App', () => {
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
     history: History;
+    featureFlagConfig: FeatureFlagConfig;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -179,6 +181,7 @@ describe('Lens App', () => {
       ),
       onAppLeave: jest.fn(),
       history: createMemoryHistory(),
+      featureFlagConfig: { showNewLensFlow: true },
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
       editorFrame: EditorFrameInstance;
@@ -196,6 +199,7 @@ describe('Lens App', () => {
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
       history: History;
+      featureFlagConfig: FeatureFlagConfig;
     }>;
   }
 
@@ -443,7 +447,7 @@ describe('Lens App', () => {
           },
         });
         (args.docStorage.save as jest.Mock).mockImplementation(async ({ savedObjectId }) => ({
-          id: savedObjectId || 'aaa',
+          savedObjectId: savedObjectId || 'aaa',
           expression: 'kibana 2',
         }));
 

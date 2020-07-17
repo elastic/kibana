@@ -19,13 +19,14 @@ import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { Document, SavedObjectIndexStore } from '../persistence';
-import { LensPluginStartDependencies } from '../plugin';
+import { LensPluginStartDependencies, FeatureFlagConfig } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE } from '../../common';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
   params: AppMountParameters,
-  createEditorFrame: EditorFrameStart['createInstance']
+  createEditorFrame: EditorFrameStart['createInstance'],
+  featureFlagConfig: FeatureFlagConfig
 ) {
   const [coreStart, startDependencies] = await core.getStartServices();
   const { data: dataStart, navigation, embeddable } = startDependencies;
@@ -91,6 +92,7 @@ export async function mountApp(
         storage={new Storage(localStorage)}
         savedObjectId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
+        featureFlagConfig={featureFlagConfig}
         redirectTo={(savedObjectId, documentByValue, returnToOrigin, newlyCreated) =>
           redirectTo(routeProps, savedObjectId, documentByValue, returnToOrigin, newlyCreated)
         }

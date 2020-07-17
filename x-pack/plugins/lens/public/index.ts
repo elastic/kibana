@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializerContext } from 'kibana/public';
 import { LensPlugin } from './plugin';
 
 export * from './types';
 
-export const plugin = () => new LensPlugin();
+export const plugin = (context: PluginInitializerContext) => {
+  return new LensPlugin(context);
+};
