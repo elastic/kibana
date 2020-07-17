@@ -9,8 +9,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCode } from '@elastic/eui';
 
-import { FormSchema, fieldValidators, ValidationFuncArg } from '../../../../../shared_imports';
-import { parseJson, stringifyJson } from '../../../../lib';
+import { FormSchema, fieldValidators, ValidationFuncArg } from '../../../../../../shared_imports';
+import { parseJson, stringifyJson } from '../../../../../lib';
 
 const { emptyField, isJsonField } = fieldValidators;
 

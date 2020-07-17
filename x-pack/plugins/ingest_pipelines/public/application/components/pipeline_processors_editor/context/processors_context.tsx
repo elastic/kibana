@@ -15,7 +15,10 @@ import React, {
   useRef,
 } from 'react';
 
-import { Processor } from '../../../../common/types';
+import { NotificationsSetup } from 'src/core/public';
+
+import { Processor } from '../../../../../common/types';
+import { ApiService } from '../../../services';
 
 import {
   EditorMode,
@@ -25,26 +28,28 @@ import {
   ContextValue,
   ContextValueState,
   Links,
-} from './types';
+} from '../types';
 
-import { useProcessorsState, isOnFailureSelector } from './processors_reducer';
+import { useProcessorsState, isOnFailureSelector } from '../processors_reducer';
 
-import { deserialize } from './deserialize';
+import { deserialize } from '../deserialize';
 
-import { serialize } from './serialize';
+import { serialize } from '../serialize';
 
-import { OnSubmitHandler, ProcessorSettingsForm } from './components/processor_settings_form';
+import { OnSubmitHandler, ProcessorSettingsForm } from '../components/processor_settings_form';
 
-import { OnActionHandler } from './components/processors_tree';
+import { OnActionHandler } from '../components/processors_tree';
 
-import { ProcessorRemoveModal } from './components';
+import { ProcessorRemoveModal } from '../components';
 
-import { getValue } from './utils';
+import { getValue } from '../utils';
 
 const PipelineProcessorsContext = createContext<ContextValue>({} as any);
 
 export interface Props {
   links: Links;
+  api: ApiService;
+  toasts: NotificationsSetup['toasts'];
   value: {
     processors: Processor[];
     onFailure?: Processor[];
@@ -58,6 +63,8 @@ export interface Props {
 
 export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   links,
+  api,
+  toasts,
   value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
   onUpdate,
   onFlyoutOpen,
@@ -200,6 +207,8 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     <PipelineProcessorsContext.Provider
       value={{
         links,
+        api,
+        toasts,
         onTreeAction,
         state,
       }}

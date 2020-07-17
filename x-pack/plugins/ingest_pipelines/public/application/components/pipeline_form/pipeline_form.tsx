@@ -16,7 +16,6 @@ import './pipeline_form.scss';
 import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_processors_editor';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
-import { PipelineTestFlyout } from './pipeline_test_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
@@ -48,8 +47,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
-  const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
-
   const {
     processors: initialProcessors,
     on_failure: initialOnFailureProcessors,
@@ -79,10 +76,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     }
   };
 
-  const handleTestPipelineClick = () => {
-    setIsTestingPipeline(true);
-  };
-
   const { form } = useForm<IPipelineForm>({
     schema: pipelineFormSchema,
     defaultValue: defaultFormValues,
@@ -90,7 +83,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   });
 
   const onEditorFlyoutOpen = useCallback(() => {
-    setIsTestingPipeline(false);
     setIsRequestVisible(false);
   }, [setIsRequestVisible]);
 
@@ -137,8 +129,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           onFailure={processorsState.onFailure}
           onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
-          isTestButtonDisabled={isTestingPipeline || form.isValid === false}
-          onTestPipelineClick={handleTestPipelineClick}
           isEditing={isEditing}
         />
 
@@ -196,18 +186,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
               processorStateRef.current?.getData() || { processors: [], on_failure: [] }
             }
             closeFlyout={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
-          />
-        ) : null}
-
-        {/* Test pipeline flyout */}
-        {isTestingPipeline ? (
-          <PipelineTestFlyout
-            readProcessors={() =>
-              processorStateRef.current?.getData() || { processors: [], on_failure: [] }
-            }
-            closeFlyout={() => {
-              setIsTestingPipeline((prevIsTestingPipeline) => !prevIsTestingPipeline);
-            }}
           />
         ) : null}
       </Form>

@@ -16,7 +16,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useTestConfigContext } from '../../test_config_context';
+
+import { useTestConfigContext } from '../../../context';
 
 interface Props {
   executeOutput?: { docs: object[] };
