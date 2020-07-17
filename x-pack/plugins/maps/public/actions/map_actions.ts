@@ -237,7 +237,7 @@ export function setQuery({
       // setQuery can be triggered before async data fetching completes
       // Only continue execution path if setQuery has not been re-triggered.
       if (localSetQueryCallId === lastSetQueryCallId) {
-        dispatch(fitToDataBounds());
+        dispatch<any>(fitToDataBounds());
       }
     } else {
       await dispatch<any>(syncDataForAllLayers());

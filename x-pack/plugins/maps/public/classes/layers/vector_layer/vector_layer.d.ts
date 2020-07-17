@@ -82,4 +82,5 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getStyle(): IVectorStyle;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  hasJoins(): boolean;
 }
