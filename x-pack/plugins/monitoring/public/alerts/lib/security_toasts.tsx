@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiLink, EuiCode, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiLink } from '@elastic/eui';
 import { Legacy } from '../../legacy_shims';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -49,7 +49,6 @@ const showTlsAndEncryptionError = () => {
 };
 
 export const showSecurityToast = (alertingHealth: AlertingFrameworkHealth) => {
-  const { isSufficientlySecure, hasPermanentEncryptionKey } = alertingHealth;
   if (
     Array.isArray(alertingHealth) ||
     (!alertingHealth.hasOwnProperty('isSufficientlySecure') &&
