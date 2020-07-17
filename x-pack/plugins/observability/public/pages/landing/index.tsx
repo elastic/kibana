@@ -68,7 +68,6 @@ export const LandingPage = () => {
                     <EuiCardWithoutPadding
                       display="plain"
                       layout="horizontal"
-                      icon={<EuiIcon size="l" type={app.icon} />}
                       title={
                         <EuiTitle size="xs" className="title">
                           <h3>{app.title}</h3>
