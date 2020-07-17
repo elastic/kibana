@@ -244,9 +244,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
         isActive: false,
         size: 's',
         className: 'lnsIndexPatternDimensionEditor__operation',
-        'data-test-subj': `lns-indexPatternDimension${
-          compatibleWithCurrentField ? '' : 'Incompatible'
-        }-${operationType}`,
+        'data-test-subj': `lns-indexPatternDimension-${operationType}${
+          compatibleWithCurrentField ? '' : ' incompatible'
+        }`,
         onClick() {
           if (!cursor) {
             const possibleFields = fieldByOperation[operationType] || [];
