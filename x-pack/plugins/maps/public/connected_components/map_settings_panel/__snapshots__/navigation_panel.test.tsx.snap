@@ -16,6 +16,24 @@ exports[`should render 1`] = `
   <EuiSpacer
     size="m"
   />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      compressed={true}
+      label="Auto fit map to data bounds"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <ValidatedDualRange
     allowEmptyRange={false}
     compressed={true}
@@ -34,6 +52,9 @@ exports[`should render 1`] = `
         24,
       ]
     }
+  />
+  <EuiSpacer
+    size="m"
   />
   <EuiFormRow
     describedByIds={Array []}
@@ -84,6 +105,24 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
   <EuiSpacer
     size="m"
   />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      compressed={true}
+      label="Auto fit map to data bounds"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <ValidatedDualRange
     allowEmptyRange={false}
     compressed={true}
@@ -102,6 +141,9 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
         24,
       ]
     }
+  />
+  <EuiSpacer
+    size="m"
   />
   <EuiFormRow
     describedByIds={Array []}
@@ -172,6 +214,24 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
   <EuiSpacer
     size="m"
   />
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    labelType="label"
+  >
+    <EuiSwitch
+      checked={false}
+      compressed={true}
+      label="Auto fit map to data bounds"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <ValidatedDualRange
     allowEmptyRange={false}
     compressed={true}
@@ -190,6 +250,9 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
         24,
       ]
     }
+  />
+  <EuiSpacer
+    size="m"
   />
   <EuiFormRow
     describedByIds={Array []}
