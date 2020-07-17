@@ -55,12 +55,10 @@ interface IOverviewLogic extends IKeaLogic, IListenerParams {
 
 export const OverviewLogic = kea({
   actions: (): IOverviewActions => ({
-    setServerData: (serverData: IOverviewServerData) => serverData,
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({
-      flashMessages,
-    }),
-    setHasErrorConnecting: (hasErrorConnecting: boolean) => ({ hasErrorConnecting }),
-    initializeOverview: ({ http }: { http: HttpSetup }) => ({ http }),
+    setServerData: (serverData) => serverData,
+    setFlashMessages: (flashMessages) => ({ flashMessages }),
+    setHasErrorConnecting: (hasErrorConnecting) => ({ hasErrorConnecting }),
+    initializeOverview: ({ http }) => ({ http }),
   }),
   reducers: () => ({
     organization: [
