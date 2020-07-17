@@ -83,13 +83,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
       });
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
-      const changeHandler: React.ChangeEventHandler<any> = (event) => {
-        if (!isMovingThisProcessor) {
-          onMove();
-        } else {
-          onCancelMove();
-        }
-      };
       const moveButton = (
         <EuiButtonToggle
           isEmpty={!isMovingThisProcessor}
@@ -101,7 +94,13 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           disabled={isDisabled && !isMovingThisProcessor}
           label={label}
           aria-label={label}
-          onChange={changeHandler}
+          onChange={() => {
+            if (!isMovingThisProcessor) {
+              onMove();
+            } else {
+              onCancelMove();
+            }
+          }}
         />
       );
       // Remove the tooltip from the DOM to prevent it from lingering if the mouse leave event
