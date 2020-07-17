@@ -262,8 +262,8 @@ export function XYChart({
   );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
-  const showXAxisTitle = args.showXAxisTitle || true;
-  const showYAxisTitle = args.showYAxisTitle || true;
+  const showXAxisTitle = args.showXAxisTitle ?? true;
+  const showYAxisTitle = args.showYAxisTitle ?? true;
   const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || { x: true, y: true };
 
   function calculateMinInterval() {
