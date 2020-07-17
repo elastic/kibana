@@ -32,6 +32,7 @@ export const persistTimelineMutation = gql`
           enabled
           excluded
           kqlQuery
+          type
           queryMatch {
             field
             displayField
@@ -45,6 +46,7 @@ export const persistTimelineMutation = gql`
             enabled
             excluded
             kqlQuery
+            type
             queryMatch {
               field
               displayField

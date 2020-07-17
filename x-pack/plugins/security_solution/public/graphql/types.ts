@@ -5654,6 +5654,8 @@ export namespace GetOneTimeline {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<_QueryMatch>;
   };
 
@@ -5932,6 +5934,8 @@ export namespace PersistTimelineMutation {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<QueryMatch>;
 
     and: Maybe<And[]>;
@@ -5963,6 +5967,8 @@ export namespace PersistTimelineMutation {
     excluded: Maybe<boolean>;
 
     kqlQuery: Maybe<string>;
+
+    type: Maybe<DataProviderType>;
 
     queryMatch: Maybe<_QueryMatch>;
   };

@@ -188,14 +188,20 @@ const getTemplateTimelineId = (
   return uuid.v4();
 };
 
-const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) =>
-  deepMerge(dataProvider, {
-    type: DataProviderType.default,
-    queryMatch: {
-      value:
-        dataProvider.queryMatch!.operator === IS_OPERATOR ? '' : dataProvider.queryMatch!.value,
-    },
-  });
+const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) => {
+  if (dataProvider.type === DataProviderType.template) {
+    return deepMerge(dataProvider, {
+      type: DataProviderType.default,
+      enabled: dataProvider.queryMatch!.operator !== IS_OPERATOR,
+      queryMatch: {
+        value:
+          dataProvider.queryMatch!.operator === IS_OPERATOR ? '' : dataProvider.queryMatch!.value,
+      },
+    });
+  }
+
+  return dataProvider;
+};
 
 const getDataProviders = (
   duplicate: boolean,
