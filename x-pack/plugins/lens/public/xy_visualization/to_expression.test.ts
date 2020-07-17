@@ -163,8 +163,8 @@ describe('#toExpression', () => {
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('c');
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('d');
-    expect(expression.chain[0].arguments.xTitle).toEqual(['col_a']);
-    expect(expression.chain[0].arguments.yTitle).toEqual(['col_b']);
+    expect(expression.chain[0].arguments.xTitle).toEqual(['']);
+    expect(expression.chain[0].arguments.yTitle).toEqual(['']);
     expect(
       (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.columnToLabel
     ).toEqual([

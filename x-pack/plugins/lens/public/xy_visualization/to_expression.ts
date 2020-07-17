@@ -13,28 +13,6 @@ interface ValidLayer extends LayerConfig {
   xAccessor: NonNullable<LayerConfig['xAccessor']>;
 }
 
-function xyTitles(layer: LayerConfig, frame: FramePublicAPI) {
-  const defaults = {
-    xTitle: 'x',
-    yTitle: 'y',
-  };
-
-  if (!layer || !layer.accessors.length) {
-    return defaults;
-  }
-  const datasource = frame.datasourceLayers[layer.layerId];
-  if (!datasource) {
-    return defaults;
-  }
-  const x = layer.xAccessor ? datasource.getOperationForColumnId(layer.xAccessor) : null;
-  const y = layer.accessors[0] ? datasource.getOperationForColumnId(layer.accessors[0]) : null;
-
-  return {
-    xTitle: x ? x.label : defaults.xTitle,
-    yTitle: y ? y.label : defaults.yTitle,
-  };
-}
-
 export const toExpression = (state: State, frame: FramePublicAPI): Ast | null => {
   if (!state || !state.layers.length) {
     return null;
@@ -52,7 +30,7 @@ export const toExpression = (state: State, frame: FramePublicAPI): Ast | null =>
     });
   });
 
-  return buildExpression(state, metadata, frame, xyTitles(state.layers[0], frame));
+  return buildExpression(state, metadata, frame);
 };
 
 export function toPreviewExpression(state: State, frame: FramePublicAPI) {
@@ -99,8 +77,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  frame?: FramePublicAPI,
-  { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
+  frame?: FramePublicAPI
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
     Boolean(layer.xAccessor && layer.accessors.length)
@@ -116,8 +93,8 @@ export const buildExpression = (
         type: 'function',
         function: 'lens_xy_chart',
         arguments: {
-          xTitle: [state.xTitle || xTitle],
-          yTitle: [state.yTitle || yTitle],
+          xTitle: [state.xTitle || ''],
+          yTitle: [state.yTitle || ''],
           legend: [
             {
               type: 'expression',

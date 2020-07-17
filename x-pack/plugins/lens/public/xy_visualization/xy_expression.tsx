@@ -311,6 +311,19 @@ export function XYChart({
       }
     : undefined;
 
+  const getYAxesTitles = (axisSeries, index) => {
+    if (index > 0 && args.yTitle) return;
+    return (
+      args.yTitle ||
+      axisSeries
+        .map(
+          (series) =>
+            data.tables[series.layer].columns.find((column) => column.id === series.accessor)?.name
+        )
+        .filter((name) => Boolean(name))[0]
+    );
+  };
+
   return (
     <Chart>
       <Settings
@@ -410,7 +423,7 @@ export function XYChart({
         gridLineStyle={{ strokeWidth: 2 }}
         hide={filteredLayers[0].hide}
         // @ts-ignore, temporary solution for not displaying the ticks
-        tickFormat={tickLabelsVisibilitySettings.x ? (d) => xAxisFormatter.convert(d) : () => {}}
+        tickFormat={tickLabelsVisibilitySettings?.x ? (d) => xAxisFormatter.convert(d) : () => {}}
       />
 
       {yAxesConfiguration.map((axis, index) => (
@@ -419,23 +432,11 @@ export function XYChart({
           id={axis.groupId}
           groupId={axis.groupId}
           position={axis.position}
-          title={
-            showYAxisTitle
-              ? args.yTitle ||
-                axis.series
-                  .map(
-                    (series) =>
-                      data.tables[series.layer].columns.find(
-                        (column) => column.id === series.accessor
-                      )?.name
-                  )
-                  .filter((name) => Boolean(name))[0]
-              : undefined
-          }
+          title={showYAxisTitle ? getYAxesTitles(axis.series, index) : undefined}
           showGridLines={gridlinesVisibilitySettings?.y}
           hide={filteredLayers[0].hide}
           // @ts-ignore, temporary solution for not displaying the ticks
-          tickFormat={tickLabelsVisibilitySettings.y ? (d) => xAxisFormatter.convert(d) : () => {}}
+          tickFormat={tickLabelsVisibilitySettings?.y ? (d) => xAxisFormatter.convert(d) : () => {}}
         />
       ))}
 

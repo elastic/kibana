@@ -117,10 +117,10 @@ Object {
           },
         ],
         "xTitle": Array [
-          "col_a",
+          "",
         ],
         "yTitle": Array [
-          "col_b",
+          "",
         ],
       },
       "function": "lens_xy_chart",
