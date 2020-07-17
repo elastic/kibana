@@ -9,7 +9,7 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: false, setCommitStatus: true
       error "Test Error"
     }
     githubPr.sendComment()
-    sleeep 3
+    sleep 3
     githubPr.sendComment()
     sleep 30
   }

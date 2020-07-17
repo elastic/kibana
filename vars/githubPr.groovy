@@ -41,7 +41,7 @@ def sendComment(isFinal = false) { // TODO
 
   // Need to re-factor above code to get the full comment objects back, instead of just the text
 
-  def message = getNextCommentMessage(info)
+  def message = getNextCommentMessage(info, isFinal)
 
   if (shouldUpdateComment) {
     updateComment(lastComment.id, message)
@@ -150,7 +150,7 @@ def getTestFailuresMessage() {
   return messages.join("\n")
 }
 
-def getNextCommentMessage(previousCommentInfo = [:]) {
+def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
   def info = previousCommentInfo ?: [:]
   info.builds = previousCommentInfo.builds ?: []
 
@@ -160,7 +160,15 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
   def messages = []
   def status = buildUtils.getBuildStatus()
 
-  if (status == 'SUCCESS') {
+  if (!isFinal) {
+    def failuresPart = status != 'SUCCESS' ? ', with failures' : ''
+    messages << """
+      ## :hourglass_flowing_sand: Build in-progress${failuresPart}
+      * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
+      * Commit: ${getCommitHash()}
+      * This comment will update when the build is complete
+    """
+  } else if (status == 'SUCCESS') {
     messages << """
       ## :green_heart: Build Succeeded
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
@@ -188,7 +196,9 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
       * [Pipeline Steps](${env.BUILD_URL}flowGraphTable) (look for red circles / failed steps)
       * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
     """
+  }
 
+  if (status != 'SUCCESS' && status != 'UNSTABLE') {
     try {
       def steps = getFailedSteps()
       if (steps?.size() > 0) {
@@ -202,7 +212,10 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
   }
 
   messages << getTestFailuresMessage()
-  messages << ciStats.getMetricsReport()
+
+  if (!isFinal) {
+    messages << ciStats.getMetricsReport()
+  }
 
   if (info.builds && info.builds.size() > 0) {
     messages << getHistoryText(info.builds)
