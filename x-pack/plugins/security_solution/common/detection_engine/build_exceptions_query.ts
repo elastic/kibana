@@ -151,33 +151,6 @@ export const evaluateValues = ({
   }
 };
 
-export const formatQuery = ({
-  exceptions,
-  language,
-  exclude,
-}: {
-  exceptions: string[];
-  language: Language;
-  exclude: boolean;
-}): string => {
-  if (exceptions == null || (exceptions != null && exceptions.length === 0)) {
-    return '';
-  }
-
-  const or = getLanguageBooleanOperator({ language, value: 'or' });
-  const not = getLanguageBooleanOperator({ language, value: 'not' });
-  const formattedExceptionItems = exceptions.map((exceptionItem, index) => {
-    if (index === 0) {
-      return `(${exceptionItem})`;
-    }
-
-    return `${or} (${exceptionItem})`;
-  });
-
-  const exceptionItemsQuery = formattedExceptionItems.join(' ');
-  return exclude ? `${not} (${exceptionItemsQuery})` : exceptionItemsQuery;
-};
-
 export const buildExceptionItemEntries = ({
   entries,
   language,
@@ -197,7 +170,6 @@ export const buildExceptionItemEntries = ({
 export const buildQueryExceptions = ({
   language,
   lists,
-  exclude = true,
 }: {
   language: Language;
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> | undefined;
@@ -220,12 +192,11 @@ export const buildQueryExceptions = ({
   if (exceptionItems.length === 0) {
     return [];
   } else {
-    const formattedQuery = formatQuery({ exceptions: exceptionItems, language, exclude });
-    return [
-      {
-        query: formattedQuery,
+    return exceptionItems.map((exceptionItem) => {
+      return {
+        query: exceptionItem,
         language,
-      },
-    ];
+      };
+    });
   }
 };

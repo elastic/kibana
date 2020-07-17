@@ -10,6 +10,7 @@ import {
   isFilterDisabled,
   buildEsQuery,
   Query as DataQuery,
+  EsQueryConfig,
 } from '../../../../../src/plugins/data/common';
 import {
   ExceptionListItemSchema,
@@ -31,18 +32,7 @@ export const getQueryFilter = (
     title: index.join(),
   };
 
-  const initialQuery = [{ query, language }];
-  /*
-   * Pinning exceptions to 'kuery' because lucene
-   * does not support nested queries, while our exceptions
-   * UI does, since we can pass both lucene and kql into
-   * buildEsQuery, this allows us to offer nested queries
-   * regardless
-   */
-  const exceptions = buildQueryExceptions({ language: 'kuery', lists, exclude: excludeExceptions });
-  const queries: DataQuery[] = [...initialQuery, ...exceptions];
-
-  const config = {
+  const config: EsQueryConfig = {
     allowLeadingWildcards: true,
     queryStringOptions: { analyze_wildcard: true },
     ignoreFilterIfFieldNotInIndex: false,
@@ -50,5 +40,36 @@ export const getQueryFilter = (
   };
 
   const enabledFilters = ((filters as unknown) as Filter[]).filter((f) => !isFilterDisabled(f));
-  return buildEsQuery(indexPattern, queries, enabledFilters, config);
+  /*
+   * Pinning exceptions to 'kuery' because lucene
+   * does not support nested queries, while our exceptions
+   * UI does, since we can pass both lucene and kql into
+   * buildEsQuery, this allows us to offer nested queries
+   * regardless
+   */
+  const exceptions = buildQueryExceptions({ language: 'kuery', lists });
+  if (exceptions.length > 0) {
+    // Here we build a query with only the exceptions: it will put them all in the `filter` array
+    // of the resulting object, which would AND the exceptions together. When creating exceptionFilter,
+    // we move the `filter` array to `should` so they are OR'd together instead.
+    // This gets around the problem with buildEsQuery not allowing callers to specify whether queries passed in
+    // should be ANDed or ORed together.
+    const exceptionQuery = buildEsQuery(indexPattern, exceptions, [], config);
+    const exceptionFilter: Filter = {
+      meta: {
+        alias: null,
+        negate: excludeExceptions,
+        disabled: false,
+      },
+      query: {
+        bool: {
+          should: exceptionQuery.bool.filter,
+        },
+      },
+    };
+    enabledFilters.push(exceptionFilter);
+  }
+  const initialQuery = { query, language };
+
+  return buildEsQuery(indexPattern, initialQuery, enabledFilters, config);
 };
