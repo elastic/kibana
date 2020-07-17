@@ -80,8 +80,8 @@ monitoring cluster prevents production cluster outages from impacting your
 ability to access your monitoring data. It also prevents monitoring activities
 from impacting the performance of your production cluster.
 
-If {security} is enabled on the production cluster, use an HTTPS URL such
-as `https://<your_production_cluster>:9200` in this setting.
+If {stack-security-features} are enabled on the production cluster, use an HTTPS
+URL such as `https://<your_production_cluster>:9200` in this setting.
 ===============================
 
 --

@@ -5,8 +5,8 @@
 Reporting operates by creating and updating documents in {es} in response to
 user actions in {kib}.
 
-To use {reporting} with {security} enabled, you need to
-<<using-kibana-with-security,set up {kib} to work with {security}>>.
+To use {reporting} with {stack-security-features} enabled, you need to
+<<using-kibana-with-security,configure security in {kib}>>.
 If you are automatically generating reports with
 {ref}/xpack-alerting.html[{watcher}], you also need to configure {watcher}
 to trust the {kib} server's certificate.
@@ -120,8 +120,8 @@ reporting_user:
 In a production environment, you should restrict access to
 the {reporting} endpoints to authorized users. This requires that you:
 
-. Enable {security} on your {es} cluster. For more information,
-see {ref}/security-getting-started.html[Getting Started with Security].
+. Enable {stack-security-features} on your {es} cluster. For more information,
+see {ref}/security-getting-started.html[Getting started with security].
 . Configure TLS/SSL encryption for the {kib} server. For more information, see
 <<configuring-tls>>.
 . Specify the {kib} server's CA certificate chain in `elasticsearch.yml`:
