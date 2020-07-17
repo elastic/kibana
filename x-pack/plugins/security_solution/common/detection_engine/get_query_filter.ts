@@ -15,7 +15,7 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../lists/common/schemas';
-import { buildExceptionQueries } from './build_exceptions_query';
+import { buildExceptionListQueries } from './build_exceptions_query';
 import { Query, Language, Index } from './schemas/common/schemas';
 
 export const getQueryFilter = (
@@ -46,7 +46,7 @@ export const getQueryFilter = (
    * buildEsQuery, this allows us to offer nested queries
    * regardless
    */
-  const exceptionQueries = buildExceptionQueries({ language: 'kuery', lists });
+  const exceptionQueries = buildExceptionListQueries({ language: 'kuery', lists });
   if (exceptionQueries.length > 0) {
     // Here we build a query with only the exceptions: it will put them all in the `filter` array
     // of the resulting object, which would AND the exceptions together. When creating exceptionFilter,

@@ -131,7 +131,7 @@ export const buildNested = ({
   return `${field}:{ ${values.join(` ${and} `)} }`;
 };
 
-export const evaluateEntry = ({
+export const buildEntry = ({
   entry,
   language,
 }: {
@@ -160,19 +160,18 @@ export const buildExceptionItem = ({
 }): string => {
   const and = getLanguageBooleanOperator({ language, value: 'and' });
   const exceptionItemEntries = entries.map((entry) => {
-    return evaluateEntry({ entry, language });
+    return buildEntry({ entry, language });
   });
 
   return exceptionItemEntries.join(` ${and} `);
 };
 
-export const buildExceptionQueries = ({
+export const buildExceptionListQueries = ({
   language,
   lists,
 }: {
   language: Language;
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> | undefined;
-  exclude?: boolean;
 }): DataQuery[] => {
   if (lists == null || (lists != null && lists.length === 0)) {
     return [];

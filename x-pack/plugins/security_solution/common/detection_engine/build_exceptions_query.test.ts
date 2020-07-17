@@ -5,13 +5,13 @@
  */
 
 import {
-  buildExceptionQueries,
+  buildExceptionListQueries,
   buildExceptionItem,
   operatorBuilder,
   buildExists,
   buildMatch,
   buildMatchAny,
-  evaluateEntry,
+  buildEntry,
   getLanguageBooleanOperator,
   buildNested,
 } from './build_exceptions_query';
@@ -317,10 +317,10 @@ describe('build_exceptions_query', () => {
     });
   });
 
-  describe('evaluateEntry', () => {
+  describe('buildEntry', () => {
     describe('kuery', () => {
       test('it returns formatted wildcard string when "type" is "exists"', () => {
-        const result = evaluateEntry({
+        const result = buildEntry({
           entry: existsEntryWithIncluded,
           language: 'kuery',
         });
@@ -328,7 +328,7 @@ describe('build_exceptions_query', () => {
       });
 
       test('it returns formatted string when "type" is "match"', () => {
-        const result = evaluateEntry({
+        const result = buildEntry({
           entry: matchEntryWithIncluded,
           language: 'kuery',
         });
@@ -336,7 +336,7 @@ describe('build_exceptions_query', () => {
       });
 
       test('it returns formatted string when "type" is "match_any"', () => {
-        const result = evaluateEntry({
+        const result = buildEntry({
           entry: matchAnyEntryWithIncludedAndTwoValues,
           language: 'kuery',
         });
@@ -346,7 +346,7 @@ describe('build_exceptions_query', () => {
 
     describe('lucene', () => {
       test('it returns formatted wildcard string when "type" is "exists"', () => {
-        const result = evaluateEntry({
+        const result = buildEntry({
           entry: existsEntryWithIncluded,
           language: 'lucene',
         });
@@ -354,7 +354,7 @@ describe('build_exceptions_query', () => {
       });
 
       test('it returns formatted string when "type" is "match"', () => {
-        const result = evaluateEntry({
+        const result = buildEntry({
           entry: matchEntryWithIncluded,
           language: 'lucene',
         });
@@ -362,7 +362,7 @@ describe('build_exceptions_query', () => {
       });
 
       test('it returns formatted string when "type" is "match_any"', () => {
-        const result = evaluateEntry({
+        const result = buildEntry({
           entry: matchAnyEntryWithIncludedAndTwoValues,
           language: 'lucene',
         });
@@ -644,15 +644,15 @@ describe('build_exceptions_query', () => {
     });
   });
 
-  describe('buildExceptionQueries', () => {
+  describe('buildExceptionListQueries', () => {
     test('it returns empty array if lists is empty array', () => {
-      const query = buildExceptionQueries({ language: 'kuery', lists: [] });
+      const query = buildExceptionListQueries({ language: 'kuery', lists: [] });
 
       expect(query).toEqual([]);
     });
 
     test('it returns empty array if lists is undefined', () => {
-      const query = buildExceptionQueries({ language: 'kuery', lists: undefined });
+      const query = buildExceptionListQueries({ language: 'kuery', lists: undefined });
 
       expect(query).toEqual([]);
     });
@@ -672,7 +672,7 @@ describe('build_exceptions_query', () => {
         },
         makeMatchAnyEntry({ field: 'e', operator: 'excluded' }),
       ];
-      const queries = buildExceptionQueries({
+      const queries = buildExceptionListQueries({
         language: 'kuery',
         lists: [payload, payload2],
       });
@@ -697,7 +697,7 @@ describe('build_exceptions_query', () => {
       payload.entries = [makeMatchAnyEntry({ field: 'a' }), makeMatchAnyEntry({ field: 'b' })];
       const payload2 = getExceptionListItemSchemaMock();
       payload2.entries = [makeMatchAnyEntry({ field: 'c' }), makeMatchAnyEntry({ field: 'd' })];
-      const queries = buildExceptionQueries({
+      const queries = buildExceptionListQueries({
         language: 'lucene',
         lists: [payload, payload2],
       });
@@ -721,17 +721,16 @@ describe('build_exceptions_query', () => {
       });
 
       test('it returns empty array if lists is empty array', () => {
-        const query = buildExceptionQueries({
+        const query = buildExceptionListQueries({
           language: 'kuery',
           lists: [],
-          exclude,
         });
 
         expect(query).toEqual([]);
       });
 
       test('it returns empty array if lists is undefined', () => {
-        const query = buildExceptionQueries({ language: 'kuery', lists: undefined, exclude });
+        const query = buildExceptionListQueries({ language: 'kuery', lists: undefined });
 
         expect(query).toEqual([]);
       });
@@ -751,10 +750,9 @@ describe('build_exceptions_query', () => {
           },
           makeMatchAnyEntry({ field: 'e' }),
         ];
-        const queries = buildExceptionQueries({
+        const queries = buildExceptionListQueries({
           language: 'kuery',
           lists: [payload, payload2],
-          exclude,
         });
         const expectedQueries = [
           {
@@ -777,10 +775,9 @@ describe('build_exceptions_query', () => {
         payload.entries = [makeMatchAnyEntry({ field: 'a' }), makeMatchAnyEntry({ field: 'b' })];
         const payload2 = getExceptionListItemSchemaMock();
         payload2.entries = [makeMatchAnyEntry({ field: 'c' }), makeMatchAnyEntry({ field: 'd' })];
-        const queries = buildExceptionQueries({
+        const queries = buildExceptionListQueries({
           language: 'lucene',
           lists: [payload, payload2],
-          exclude,
         });
         const expectedQueries = [
           {
