@@ -22,7 +22,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -33,8 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover histogram', function describeIndexTests() {
-    before(async function () {
-      await PageObjects.common.navigateToApp('settings');
+    before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
         'test_logstash_reader',
@@ -44,16 +42,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load('long_window_logstash');
       await esArchiver.load('visualize');
       await esArchiver.load('discover');
-
+      await PageObjects.common.navigateToApp('settings');
       // NOTE: long_window_logstash load does NOT create index pattern
       await PageObjects.settings.createIndexPattern('long-window-logstash-*');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await browser.refresh();
-
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
-      // NOTE: For some reason without setting this relative time, the abs times will not fetch data.
-      await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
     });
     after(async () => {
       await esArchiver.unload('long_window_logstash');
@@ -62,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    async function prepareTest(fromTime, toTime, interval) {
+    async function prepareTest(fromTime: string, toTime: string, interval: string) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.setChartInterval(interval);
