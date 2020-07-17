@@ -9,7 +9,12 @@ import { HttpSetup } from 'src/core/public';
 import { kea } from 'kea';
 
 import { IAccount, IOrganization, IUser } from '../../types';
-import { IFlashMessagesProps, IKeaLogic } from '../../../shared/types';
+import {
+  IFlashMessagesProps,
+  IKeaLogic,
+  IKeaSelectors,
+  IKeaListeners,
+} from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
 
@@ -43,14 +48,6 @@ export interface IOverviewValues extends IOverviewServerData {
   statsColumns: 'halves' | 'fourths';
   hasErrorConnecting: boolean;
   flashMessages: IFlashMessagesProps;
-}
-
-interface IListenerParams {
-  actions: IOverviewActions;
-}
-
-interface IOverviewLogic extends IKeaLogic, IListenerParams {
-  values: IOverviewValues;
 }
 
 export const OverviewLogic = kea({
@@ -173,7 +170,7 @@ export const OverviewLogic = kea({
       },
     ],
   }),
-  selectors: ({ selectors }: { selectors: IOverviewValues }) => ({
+  selectors: ({ selectors }: IKeaSelectors<IOverviewValues>) => ({
     hideOnboarding: [
       () => [
         selectors.hasUsers,
@@ -189,7 +186,7 @@ export const OverviewLogic = kea({
       (isFederatedAuth: boolean) => (isFederatedAuth ? 'halves' : 'fourths'),
     ],
   }),
-  listeners: ({ actions }: IListenerParams) => ({
+  listeners: ({ actions }: IKeaListeners<IOverviewActions>) => ({
     initializeOverview: async ({ http }: { http: HttpSetup }) => {
       try {
         const response = await http.get('/api/workplace_search/overview');
@@ -199,4 +196,4 @@ export const OverviewLogic = kea({
       }
     },
   }),
-}) as IOverviewLogic;
+}) as IKeaLogic<IOverviewValues, IOverviewActions>;

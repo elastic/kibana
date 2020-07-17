@@ -13,10 +13,19 @@ export interface IFlashMessagesProps {
   children?: React.ReactNode;
 }
 
-export interface IKeaLogic {
+export interface IKeaLogic<IKeaValues, IKeaActions> {
   mount(): void;
-  values: object;
+  values: IKeaValues;
+  actions: IKeaActions;
   reducers(): object;
   selectors?(): object;
   listeners?(): object;
+}
+
+export interface IKeaSelectors<IKeaValues> {
+  selectors: IKeaValues;
+}
+
+export interface IKeaListeners<IKeaActions> {
+  actions: IKeaActions;
 }
