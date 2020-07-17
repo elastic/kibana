@@ -3,6 +3,7 @@
 source test/scripts/jenkins_test_setup.sh
 
 if [[ -z "$CODE_COVERAGE" ]] ; then
+  exit 1
   "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
 else
   echo " -> Running jest tests with coverage"
