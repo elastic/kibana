@@ -43,6 +43,7 @@ interface VisualizeTopNavProps {
   savedVisInstance: SavedVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
+  embeddableId?: string;
 }
 
 const TopNav = ({
@@ -56,6 +57,7 @@ const TopNav = ({
   savedVisInstance,
   stateContainer,
   visualizationIdFromUrl,
+  embeddableId,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
@@ -89,6 +91,7 @@ const TopNav = ({
           savedVisInstance,
           stateContainer,
           visualizationIdFromUrl,
+          embeddableId,
         },
         services
       );

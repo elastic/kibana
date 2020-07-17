@@ -62,7 +62,8 @@ export const visStateToEditorState = (
 ) => {
   const savedVisState = services.visualizations.convertFromSerializedVis(vis.serialize());
   return {
-    uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : vis.uiState.toJSON(),
+    uiState:
+      savedVis && savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : vis.uiState.toJSON(),
     query: vis.data.searchSource?.getOwnField('query') || getDefaultQuery(services),
     filters: (vis.data.searchSource?.getOwnField('filter') as Filter[]) || [],
     vis: { ...savedVisState.visState, title: vis.title },
