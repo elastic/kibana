@@ -9,11 +9,11 @@ import {
   DESCRIPTION,
   ENDPOINT_TYPE,
   META,
-  NAMESPACE_TYPE,
   TIE_BREAKER,
   USER,
   _VERSION,
 } from '../../constants.mock';
+import { ENDPOINT_LIST_ID } from '../..';
 
 import { ExceptionListSchema } from './exception_list_schema';
 export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
@@ -23,10 +23,10 @@ export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   created_by: USER,
   description: DESCRIPTION,
   id: '1',
-  list_id: 'endpoint_list',
+  list_id: ENDPOINT_LIST_ID,
   meta: META,
   name: 'Sample Endpoint Exception List',
-  namespace_type: NAMESPACE_TYPE,
+  namespace_type: 'agnostic',
   tags: ['user added string for a tag', 'malware'],
   tie_breaker_id: TIE_BREAKER,
   type: ENDPOINT_TYPE,
