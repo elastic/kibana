@@ -33,6 +33,11 @@
         "winlogbeatMWSysmonOperational": 30,
         "__typename": "OverviewHostData"
       },
+      "status": {
+        "indicesExist": true,
+        "indexFields": [],
+        "__typename": "SourceStatus"
+      },
       "__typename": "Source"
     }
   }

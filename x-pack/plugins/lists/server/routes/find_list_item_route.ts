@@ -9,7 +9,11 @@ import { IRouter } from 'kibana/server';
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/siem_common_deps';
-import { findListItemSchema, foundListItemSchema } from '../../common/schemas';
+import {
+  FindListItemSchemaPartialDecoded,
+  findListItemSchema,
+  foundListItemSchema,
+} from '../../common/schemas';
 import { decodeCursor } from '../services/utils';
 
 import { getListClient } from './utils';
@@ -22,7 +26,9 @@ export const findListItemRoute = (router: IRouter): void => {
       },
       path: `${LIST_ITEM_URL}/_find`,
       validate: {
-        query: buildRouteValidation(findListItemSchema),
+        query: buildRouteValidation<typeof findListItemSchema, FindListItemSchemaPartialDecoded>(
+          findListItemSchema
+        ),
       },
     },
     async (context, request, response) => {

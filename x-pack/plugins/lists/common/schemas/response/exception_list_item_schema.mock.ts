@@ -16,7 +16,7 @@ export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
   entries: ENTRIES,
   id: '1',
   item_id: 'endpoint_list_item',
-  list_id: 'endpoint_list',
+  list_id: 'endpoint_list_id',
   meta: {},
   name: 'Sample Endpoint Exception List',
   namespace_type: 'single',

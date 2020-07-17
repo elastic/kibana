@@ -6,6 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import Boom from 'boom';
+import semver from 'semver';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
@@ -95,8 +96,7 @@ export async function installPackage(options: {
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-
-  if (pkgVersion < latestPackage.version)
+  if (semver.lt(pkgVersion, latestPackage.version))
     throw Boom.badRequest('Cannot install or update to an out-of-date package');
 
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
