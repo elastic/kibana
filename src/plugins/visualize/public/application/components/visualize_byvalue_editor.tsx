@@ -28,7 +28,7 @@ import {
   useVisByValue,
   useVisualizeAppState,
   useEditorUpdates,
-  useLinkedSearchUpdates
+  useLinkedSearchUpdates,
 } from '../utils';
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';

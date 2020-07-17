@@ -438,7 +438,6 @@ export class DashboardAppController {
                   savedObjectId: incomingState.id,
                 });
               } else if ('input' in incomingState) {
-                debugger;
                 const { input, type, embeddableId } = incomingState;
                 delete input.id;
                 const explicitInput = {
