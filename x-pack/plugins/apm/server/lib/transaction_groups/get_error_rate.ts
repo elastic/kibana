@@ -90,5 +90,6 @@ export async function getErrorRate({
       .map((errorRate) => errorRate.y)
       .filter((y) => isFinite(y))
   );
+
   return { noHits, erroneousTransactionsRate, average };
 }
