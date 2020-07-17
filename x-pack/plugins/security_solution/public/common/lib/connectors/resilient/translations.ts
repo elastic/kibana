@@ -11,7 +11,7 @@ export * from '../translations';
 export const RESILIENT_DESC = i18n.translate(
   'xpack.securitySolution.case.connectors.resilient.selectMessageText',
   {
-    defaultMessage: 'Push or update SIEM case data to a new issue in resilient',
+    defaultMessage: 'Push or update Security case data to a new issue in Resilient',
   }
 );
 
