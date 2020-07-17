@@ -12,6 +12,7 @@ import { validate } from '../../../../common/validate';
 import { Entry, EntryNested } from '../../../../../lists/common/schemas/types/entries';
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
+import { ENDPOINT_LIST_ID } from '../../../../common/shared_imports';
 import {
   InternalArtifactSchema,
   TranslatedEntry,
@@ -82,7 +83,7 @@ export async function getFullEndpointExceptionList(
 
   do {
     const response = await eClient.findExceptionListItem({
-      listId: 'endpoint_list',
+      listId: ENDPOINT_LIST_ID,
       namespaceType: 'agnostic',
       filter: `exception-list-agnostic.attributes._tags:\"os:${os}\"`,
       perPage: 100,
