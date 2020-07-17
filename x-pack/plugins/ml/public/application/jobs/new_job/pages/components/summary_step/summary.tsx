@@ -40,7 +40,7 @@ import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const {
-    services: { notifications },
+    services: { application, notifications },
   } = useMlKibana();
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
     JobCreatorContext
@@ -87,7 +87,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     try {
       await jobCreator.createJob();
       await jobCreator.createDatafeed();
-      advancedStartDatafeed(jobCreator);
+      advancedStartDatafeed(jobCreator, application);
     } catch (error) {
       // catch and display all job creation errors
       const { toasts } = notifications;
@@ -112,11 +112,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   function clickResetJob() {
-    resetJob(jobCreator);
+    resetJob(jobCreator, application);
   }
 
   const convertToAdvanced = () => {
-    convertToAdvancedJob(jobCreator);
+    convertToAdvancedJob(jobCreator, application);
   };
 
   useEffect(() => {
