@@ -223,15 +223,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const {
-    legend,
-    layers,
-    fittingFunction,
-    tickLabelsVisibilitySettings,
-    gridlinesVisibilitySettings,
-    showXAxisTitle,
-    showYAxisTitle,
-  } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -270,6 +262,9 @@ export function XYChart({
   );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
+  const showXAxisTitle = args.showXAxisTitle || true;
+  const showYAxisTitle = args.showYAxisTitle || true;
+  const tickLabelsVisibilitySettings = args.tickLabelsVisibilitySettings || { x: true, y: true };
 
   function calculateMinInterval() {
     // check all the tables to see if all of the rows have the same timestamp
@@ -311,7 +306,10 @@ export function XYChart({
       }
     : undefined;
 
-  const getYAxesTitles = (axisSeries, index) => {
+  const getYAxesTitles = (
+    axisSeries: Array<{ layer: string; accessor: string }>,
+    index: number
+  ) => {
     if (index > 0 && args.yTitle) return;
     return (
       args.yTitle ||
