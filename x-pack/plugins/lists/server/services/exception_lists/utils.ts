@@ -72,6 +72,7 @@ export const transformSavedObjectToExceptionList = ({
 }): ExceptionListSchema => {
   const dateNow = new Date().toISOString();
   const {
+    version: _version,
     attributes: {
       _tags,
       created_at,
@@ -93,6 +94,7 @@ export const transformSavedObjectToExceptionList = ({
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
     _tags,
+    _version,
     created_at,
     created_by,
     description,
@@ -118,6 +120,7 @@ export const transformSavedObjectUpdateToExceptionList = ({
 }): ExceptionListSchema => {
   const dateNow = new Date().toISOString();
   const {
+    version: _version,
     attributes: { _tags, description, meta, name, tags, type, updated_by: updatedBy },
     id,
     updated_at: updatedAt,
@@ -127,6 +130,7 @@ export const transformSavedObjectUpdateToExceptionList = ({
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
     _tags: _tags ?? exceptionList._tags,
+    _version,
     created_at: exceptionList.created_at,
     created_by: exceptionList.created_by,
     description: description ?? exceptionList.description,

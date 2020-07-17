@@ -20,7 +20,7 @@ import {
   namespace_type,
   tags,
 } from '../common/schemas';
-import { Identity, RequiredKeepUndefined } from '../../types';
+import { RequiredKeepUndefined } from '../../types';
 import {
   DefaultEntryArray,
   DefaultUpdateCommentsArray,
@@ -51,23 +51,16 @@ export const updateExceptionListItemSchema = t.intersection([
   ),
 ]);
 
-export type UpdateExceptionListItemSchemaPartial = Identity<
-  t.TypeOf<typeof updateExceptionListItemSchema>
->;
-export type UpdateExceptionListItemSchema = RequiredKeepUndefined<
-  t.TypeOf<typeof updateExceptionListItemSchema>
->;
+export type UpdateExceptionListItemSchema = t.OutputOf<typeof updateExceptionListItemSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type UpdateExceptionListItemSchemaDecoded = Identity<
-  Omit<
-    UpdateExceptionListItemSchema,
-    '_tags' | 'tags' | 'entries' | 'namespace_type' | 'comments'
-  > & {
-    _tags: _Tags;
-    comments: UpdateCommentsArray;
-    tags: Tags;
-    entries: EntriesArray;
-    namespace_type: NamespaceType;
-  }
->;
+export type UpdateExceptionListItemSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof updateExceptionListItemSchema>>,
+  '_tags' | 'tags' | 'entries' | 'namespace_type' | 'comments'
+> & {
+  _tags: _Tags;
+  comments: UpdateCommentsArray;
+  tags: Tags;
+  entries: EntriesArray;
+  namespace_type: NamespaceType;
+};
