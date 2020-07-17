@@ -293,7 +293,6 @@ export class ManifestManager {
 
       if (version == null) {
         await manifestClient.createManifest(manifestSo);
-        this.logger.info('Committed initial manifest.');
       } else {
         await manifestClient.updateManifest(manifestSo, {
           version,
