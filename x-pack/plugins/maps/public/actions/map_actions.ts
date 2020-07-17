@@ -52,6 +52,7 @@ import {
   MapExtent,
   MapRefreshConfig,
 } from '../../common/descriptor_types';
+import { scaleBounds } from '../elasticsearch_geo_utils';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -135,15 +136,7 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
       }
 
       if (!doesBufferContainExtent || currentZoom !== newZoom) {
-        const scaleFactor = 0.5; // TODO put scale factor in store and fetch with selector
-        const width = extent.maxLon - extent.minLon;
-        const height = extent.maxLat - extent.minLat;
-        dataFilters.buffer = {
-          minLon: extent.minLon - width * scaleFactor,
-          minLat: extent.minLat - height * scaleFactor,
-          maxLon: extent.maxLon + width * scaleFactor,
-          maxLat: extent.maxLat + height * scaleFactor,
-        };
+        dataFilters.buffer = scaleBounds(extent, 0.5);
       }
     }
 

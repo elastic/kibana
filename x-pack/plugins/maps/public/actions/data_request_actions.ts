@@ -39,6 +39,9 @@ import {
 import { ILayer } from '../classes/layers/layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
+import { scaleBounds } from '../elasticsearch_geo_utils';
+
+const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
 export type DataRequestContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
@@ -284,7 +287,7 @@ export function fitToLayerExtent(layerId: string) {
           getDataRequestContext(dispatch, getState, layerId)
         );
         if (bounds) {
-          await dispatch(setGotoWithBounds(bounds));
+          await dispatch(setGotoWithBounds(scaleBounds(bounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
         }
       } catch (error) {
         if (!(error instanceof DataRequestAbortError)) {
@@ -359,7 +362,7 @@ export function fitToDataBounds() {
       maxLat: turfUnionBbox[3],
     };
 
-    dispatch(setGotoWithBounds(dataBounds));
+    dispatch(setGotoWithBounds(scaleBounds(dataBounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
   };
 }
 
