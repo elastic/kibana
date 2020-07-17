@@ -12,6 +12,7 @@ import { IAccount, IOrganization, IUser } from '../../types';
 import {
   IFlashMessagesProps,
   IKeaLogic,
+  IKeaReducers,
   IKeaSelectors,
   IKeaListeners,
 } from '../../../shared/types';
@@ -57,102 +58,95 @@ export const OverviewLogic = kea({
     setHasErrorConnecting: (hasErrorConnecting) => ({ hasErrorConnecting }),
     initializeOverview: ({ http }) => ({ http }),
   }),
-  reducers: () => ({
+  reducers: (): IKeaReducers<IOverviewValues> => ({
     organization: [
       {},
       {
-        setServerData: (_: IOverviewValues, { organization }: IOverviewValues) => organization,
+        setServerData: (_, { organization }) => organization,
       },
     ],
     isFederatedAuth: [
       true,
       {
-        setServerData: (_: IOverviewValues, { isFederatedAuth }: IOverviewValues) =>
-          isFederatedAuth,
+        setServerData: (_, { isFederatedAuth }) => isFederatedAuth,
       },
     ],
     currentUser: [
       {},
       {
-        setServerData: (_: IOverviewValues, { currentUser }: IOverviewValues) => currentUser,
+        setServerData: (_, { currentUser }) => currentUser,
       },
     ],
     fpAccount: [
       {},
       {
-        setServerData: (_: IOverviewValues, { fpAccount }: IOverviewValues) => fpAccount,
+        setServerData: (_, { fpAccount }) => fpAccount,
       },
     ],
     canCreateInvitations: [
       false,
       {
-        setServerData: (_: IOverviewValues, { canCreateInvitations }: IOverviewValues) =>
-          canCreateInvitations,
+        setServerData: (_, { canCreateInvitations }) => canCreateInvitations,
       },
     ],
     flashMessages: [
       {},
       {
-        setFlashMessages: (_: IOverviewValues, { flashMessages }: IOverviewValues) => flashMessages,
+        setFlashMessages: (_, { flashMessages }) => flashMessages,
       },
     ],
     hasUsers: [
       false,
       {
-        setServerData: (_: IOverviewServerData, { hasUsers }: IOverviewValues) => hasUsers,
+        setServerData: (_, { hasUsers }) => hasUsers,
       },
     ],
     hasOrgSources: [
       false,
       {
-        setServerData: (_: IOverviewServerData, { hasOrgSources }: IOverviewValues) =>
-          hasOrgSources,
+        setServerData: (_, { hasOrgSources }) => hasOrgSources,
       },
     ],
     canCreateContentSources: [
       false,
       {
-        setServerData: (_: IOverviewServerData, { canCreateContentSources }: IOverviewValues) =>
-          canCreateContentSources,
+        setServerData: (_, { canCreateContentSources }) => canCreateContentSources,
       },
     ],
     isOldAccount: [
       false,
       {
-        setServerData: (_: IOverviewServerData, { isOldAccount }: IOverviewValues) => isOldAccount,
+        setServerData: (_, { isOldAccount }) => isOldAccount,
       },
     ],
     sourcesCount: [
       0,
       {
-        setServerData: (_: IOverviewServerData, { sourcesCount }: IOverviewValues) => sourcesCount,
+        setServerData: (_, { sourcesCount }) => sourcesCount,
       },
     ],
     pendingInvitationsCount: [
       0,
       {
-        setServerData: (_: IOverviewServerData, { pendingInvitationsCount }: IOverviewValues) =>
-          pendingInvitationsCount,
+        setServerData: (_, { pendingInvitationsCount }) => pendingInvitationsCount,
       },
     ],
     accountsCount: [
       0,
       {
-        setServerData: (_: IOverviewServerData, { accountsCount }: IOverviewValues) =>
-          accountsCount,
+        setServerData: (_, { accountsCount }) => accountsCount,
       },
     ],
     personalSourcesCount: [
       0,
       {
-        setServerData: (_: IOverviewServerData, { personalSourcesCount }: IOverviewValues) =>
-          personalSourcesCount,
+        setServerData: (_, { personalSourcesCount }) => personalSourcesCount,
       },
     ],
     activityFeed: [
       [],
       {
-        setServerData: (_: IOverviewServerData, { activityFeed }: IOverviewValues) => activityFeed,
+        setServerData: (_, { activityFeed }) => activityFeed,
       },
     ],
     dataLoading: [
@@ -165,8 +159,7 @@ export const OverviewLogic = kea({
     hasErrorConnecting: [
       false,
       {
-        setHasErrorConnecting: (_: IOverviewServerData, { hasErrorConnecting }: IOverviewValues) =>
-          hasErrorConnecting,
+        setHasErrorConnecting: (_, { hasErrorConnecting }) => hasErrorConnecting,
       },
     ],
   }),

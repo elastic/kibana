@@ -29,3 +29,13 @@ export interface IKeaSelectors<IKeaValues> {
 export interface IKeaListeners<IKeaActions> {
   actions: IKeaActions;
 }
+
+export interface IKeaReducers<IKeaValues> {
+  [value: string]: [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any, // The default state for the value - can be anything
+    {
+      [action: string]: (state: IKeaValues, payload: IKeaValues) => void; // Returns new state
+    }
+  ];
+}
