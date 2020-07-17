@@ -80,14 +80,14 @@ export const tickLabelsConfig: ExpressionFunctionDefinition<
   args: {
     x: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.tickLabels.help', {
-        defaultMessage: 'Specifies whether or not the tick labels are visible.',
+      help: i18n.translate('xpack.lens.xyChart.xAxisTickLabels.help', {
+        defaultMessage: 'Specifies whether or not the tick labels of the x-axis are visible.',
       }),
     },
     y: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.tickLabels.help', {
-        defaultMessage: 'Specifies whether or not the tick labels are visible.',
+      help: i18n.translate('xpack.lens.xyChart.yAxisTickLabels.help', {
+        defaultMessage: 'Specifies whether or not the tick labels of the y-axis are visible.',
       }),
     },
   },
@@ -115,14 +115,14 @@ export const gridlinesConfig: ExpressionFunctionDefinition<
   args: {
     x: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.gridlines.help', {
-        defaultMessage: 'Specifies whether or not the gridlines are visible.',
+      help: i18n.translate('xpack.lens.xyChart.xAxisGridlines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines of the x-axis are visible.',
       }),
     },
     y: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.xyChart.gridlines.help', {
-        defaultMessage: 'Specifies whether or not the gridlines are visible.',
+      help: i18n.translate('xpack.lens.xyChart.yAxisgridlines.help', {
+        defaultMessage: 'Specifies whether or not the gridlines of the y-axis are visible.',
       }),
     },
   },

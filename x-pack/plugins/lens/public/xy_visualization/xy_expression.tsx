@@ -104,19 +104,27 @@ export const xyChart: ExpressionFunctionDefinition<
     },
     tickLabelsVisibilitySettings: {
       types: ['lens_xy_tickLabelsConfig'],
-      help: 'Show x and y axes tick labels',
+      help: i18n.translate('xpack.lens.xyChart.tickLabelsSettings.help', {
+        defaultMessage: 'Show x and y axes tick labels',
+      }),
     },
     gridlinesVisibilitySettings: {
       types: ['lens_xy_gridlinesConfig'],
-      help: 'Show x and y gridlines',
+      help: i18n.translate('xpack.lens.xyChart.gridlinesSettings.help', {
+        defaultMessage: 'Show x and y axes gridlines',
+      }),
     },
     showXAxisTitle: {
       types: ['boolean'],
-      help: 'Hide X-axis title',
+      help: i18n.translate('xpack.lens.xyChart.showXAxisTitle.help', {
+        defaultMessage: 'Show x axis title',
+      }),
     },
     showYAxisTitle: {
       types: ['boolean'],
-      help: 'Hide Y-axis title',
+      help: i18n.translate('xpack.lens.xyChart.showYAxisTitle.help', {
+        defaultMessage: 'Show y axis title',
+      }),
     },
     layers: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

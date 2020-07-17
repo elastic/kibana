@@ -264,7 +264,9 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           </EuiFormRow>
           <EuiHorizontalRule margin="s" />
           <EuiTitle size="xxs">
-            <span>Axis Titles</span>
+            <span>
+              {i18n.translate('xpack.lens.xyChart.axisTitles', { defaultMessage: 'Axis titles' })}
+            </span>
           </EuiTitle>
           <EuiFormRow
             display="columnCompressed"
@@ -290,13 +292,17 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             <EuiFieldText
               data-test-subj="lnsXAxisTitle"
               compressed
-              placeholder="Overwrite X-axis title"
+              placeholder={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
+                defaultMessage: 'Overwrite X-axis title',
+              })}
               value={xtitle}
               disabled={
                 props.state && 'showXAxisTitle' in props.state ? !props.state.showXAxisTitle : false
               }
               onChange={({ target }) => onXTitleChange(target.value)}
-              aria-label="Overwrite X-axis title"
+              aria-label={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
+                defaultMessage: 'Overwrite X-axis title',
+              })}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -323,13 +329,17 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             <EuiFieldText
               data-test-subj="lnsYAxisTitle"
               compressed
-              placeholder="Overwrite Y-axis title"
+              placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
+                defaultMessage: 'Overwrite Y-axis title',
+              })}
               value={ytitle}
               disabled={
                 props.state && 'showYAxisTitle' in props.state ? !props.state.showYAxisTitle : false
               }
               onChange={({ target }) => onYTitleChange(target.value)}
-              aria-label="Overwrite Y-axis title"
+              aria-label={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
+                defaultMessage: 'Overwrite Y-axis title',
+              })}
             />
           </EuiFormRow>
         </EuiPopover>
