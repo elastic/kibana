@@ -17,7 +17,7 @@ export const updateListRoute = (router: IRouter): void => {
   router.put(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_URL,
       validate: {

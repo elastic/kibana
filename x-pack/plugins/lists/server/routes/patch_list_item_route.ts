@@ -17,7 +17,7 @@ export const patchListItemRoute = (router: IRouter): void => {
   router.patch(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
       validate: {

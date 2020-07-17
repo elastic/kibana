@@ -173,7 +173,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             'actions-all',
             'alerting-read',
             'alerting-all',
-            'lists',
+            'lists-all',
           ],
           savedObject: {
             all: [
@@ -208,7 +208,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             'actions-all',
             'alerting-read',
             'alerting-all',
-            'lists',
+            'lists-read',
           ],
           savedObject: {
             all: ['alert', 'action', 'action_task_params'],
