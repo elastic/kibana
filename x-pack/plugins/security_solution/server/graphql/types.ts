@@ -630,7 +630,7 @@ export interface IndexField {
 
   format?: Maybe<string>;
   /** the elastic type as mapped in the index */
-  esTypes?: Maybe<string[]>;
+  esTypes: string[];
 
   subType?: Maybe<IFieldSubType>;
 }
@@ -3598,7 +3598,7 @@ export namespace IndexFieldResolvers {
 
     format?: FormatResolver<Maybe<string>, TypeParent, TContext>;
     /** the elastic type as mapped in the index */
-    esTypes?: EsTypesResolver<Maybe<string[]>, TypeParent, TContext>;
+    esTypes?: EsTypesResolver<string[], TypeParent, TContext>;
 
     subType?: SubTypeResolver<Maybe<IFieldSubType>, TypeParent, TContext>;
   }
@@ -3648,11 +3648,11 @@ export namespace IndexFieldResolvers {
     Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type EsTypesResolver<
-    R = Maybe<string[]>,
-    Parent = IndexField,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
+  export type EsTypesResolver<R = string[], Parent = IndexField, TContext = SiemContext> = Resolver<
+    R,
+    Parent,
+    TContext
+  >;
   export type SubTypeResolver<
     R = Maybe<IFieldSubType>,
     Parent = IndexField,

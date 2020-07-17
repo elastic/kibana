@@ -628,7 +628,7 @@ export interface IndexField {
 
   format?: Maybe<string>;
   /** the elastic type as mapped in the index */
-  esTypes?: Maybe<string[]>;
+  esTypes: string[];
 
   subType?: Maybe<IFieldSubType>;
 }
@@ -2799,7 +2799,7 @@ export namespace SourceQuery {
 
     format: Maybe<string>;
 
-    esTypes: Maybe<string[]>;
+    esTypes: string[];
 
     subType: Maybe<SubType>;
   };

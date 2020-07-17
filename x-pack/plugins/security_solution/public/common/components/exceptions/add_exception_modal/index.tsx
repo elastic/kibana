@@ -45,7 +45,7 @@ import {
 } from '../helpers';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 
-export interface AddExceptionModalProps {
+export interface AddExceptionModalBaseProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
@@ -54,6 +54,9 @@ export interface AddExceptionModalProps {
     ecsData: Ecs;
     nonEcsData: TimelineNonEcsData[];
   };
+}
+
+export interface AddExceptionModalProps extends AddExceptionModalBaseProps {
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean) => void;
 }

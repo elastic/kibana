@@ -38,7 +38,7 @@ export const sourceStatusSchema = gql`
     description: String
     format: String
     "the elastic type as mapped in the index"
-    esTypes: [String!]
+    esTypes: [String!]!
     subType: IFieldSubType
   }
 
