@@ -33,7 +33,6 @@ import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
-// import { EmptyState } from './components/empty_state';
 
 import { context as contextType } from '../../../../kibana_react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
@@ -211,56 +210,20 @@ export class CreateIndexPatternWizard extends Component<
     this.setState({ step: 1 });
   };
 
-  /*
-  onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
-    this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchData());
-  };
-  */
-
   renderHeader() {
-    const { docLinks } = this.state;
-    //  const { isIncludingSystemIndices, docLinks } = this.state;
-
+    const { docLinks, indexPatternCreationType } = this.state;
     return (
       <Header
-        prompt={this.state.indexPatternCreationType.renderPrompt()}
-        /*
-        showSystemIndices={
-          this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
-        }
-
-        isIncludingSystemIndices={isIncludingSystemIndices}'
-
-        onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
-        */
-        indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
-        isBeta={this.state.indexPatternCreationType.getIsBeta()}
+        prompt={indexPatternCreationType.renderPrompt()}
+        indexPatternName={indexPatternCreationType.getIndexPatternName()}
+        isBeta={indexPatternCreationType.getIsBeta()}
         docLinks={docLinks}
       />
     );
   }
 
-  /*
-  =======
-  renderHeader() {
-    return (
-      <Header
-        prompt={this.state.indexPatternCreationType.renderPrompt()}
-        indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
-        isBeta={this.state.indexPatternCreationType.getIsBeta()}
-        docLinks={this.state.docLinks}
->>>>>>> master
-*/
-
   renderContent() {
-    const {
-      allIndices,
-      isInitiallyLoadingIndices,
-      step,
-      indexPattern,
-      // remoteClustersExist,
-      // docLinks,
-    } = this.state;
+    const { allIndices, isInitiallyLoadingIndices, step, indexPattern } = this.state;
 
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;

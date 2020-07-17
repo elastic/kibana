@@ -157,7 +157,10 @@ export const EmptyState = ({
                     ),
                     description: (
                       <EuiLink href={docLinks.links.addData} target="_blank" external>
-                        Read documentation
+                        <FormattedMessage
+                          id="indexPatternManagement.createIndexPattern.emptyState.readDocs"
+                          defaultMessage="Read documentation"
+                        />
                       </EuiLink>
                     ),
                   },
@@ -193,13 +196,20 @@ export const EmptyState = ({
     </EuiPageContent>
     <EuiSpacer />
     <EuiText color="subdued" textAlign="center" size="xs">
-      <p>
-        Some indices may be hidden. Try to{' '}
-        <EuiLink {...reactRouterNavigate(useHistory(), 'create')} data-test-subj="createAnyway">
-          create an index pattern
-        </EuiLink>{' '}
-        anyway.
-      </p>
+      <FormattedMessage
+        id="indexPatternManagement.createIndexPattern.emptyState.createAnyway"
+        defaultMessage="Some indices may be hidden. Try to {link} anyway."
+        values={{
+          link: (
+            <EuiLink {...reactRouterNavigate(useHistory(), 'create')} data-test-subj="createAnyway">
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.emptyState.createAnywayLink"
+                defaultMessage="create an index pattern"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
     </EuiText>
   </>
 );

@@ -107,11 +107,11 @@ export const Header: React.FC<HeaderProps> = ({
                   defaultMessage: 'index-name-*',
                 }
               )}
-              fullWidth
               value={query}
               isInvalid={isInputInvalid}
               onChange={onQueryChanged}
               data-test-subj="createIndexPatternNameInput"
+              fullWidth
             />
           </EuiFormRow>
 

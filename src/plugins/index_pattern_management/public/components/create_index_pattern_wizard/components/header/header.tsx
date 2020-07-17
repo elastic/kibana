@@ -96,24 +96,3 @@ export const Header = ({
     </div>
   );
 };
-
-/*
-
-{showSystemIndices ? (
-        <>
-          <EuiSpacer />
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
-                defaultMessage="Include system and hidden indices"
-              />
-            }
-            id="checkboxShowSystemIndices"
-            checked={isIncludingSystemIndices}
-            onChange={onChangeIncludingSystemIndices}
-          />
-        </>
-      ) : null}
-
-      */
