@@ -15,7 +15,11 @@ import {
   ObjectRemover,
   AlertUtils,
   TaskManagerUtils,
+  getEventLog,
 } from '../../../common/lib';
+import { IValidatedEvent } from '../../../../../plugins/event_log/server';
+
+const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -26,7 +30,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
 
-  describe('alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/72207
+  describe.skip('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
     const objectRemover = new ObjectRemover(supertest);
 
@@ -159,6 +164,13 @@ instanceStateValue: true
               });
 
               await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+
+              await validateEventLog({
+                spaceId: space.id,
+                alertId,
+                outcome: 'success',
+                message: `alert executed: test.always-firing:${alertId}: 'abc'`,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -927,4 +939,66 @@ instanceStateValue: true
       });
     }
   });
+
+  interface ValidateEventLogParams {
+    spaceId: string;
+    alertId: string;
+    outcome: string;
+    message: string;
+    errorMessage?: string;
+  }
+
+  async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
+    const { spaceId, alertId, outcome, message, errorMessage } = params;
+
+    const events: IValidatedEvent[] = await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId,
+        type: 'alert',
+        id: alertId,
+        provider: 'alerting',
+        actions: ['execute'],
+      });
+    });
+
+    expect(events.length).to.be.greaterThan(0);
+
+    const event = events[0];
+
+    const duration = event?.event?.duration;
+    const eventStart = Date.parse(event?.event?.start || 'undefined');
+    const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    const dateNow = Date.now();
+
+    expect(typeof duration).to.be('number');
+    expect(eventStart).to.be.ok();
+    expect(eventEnd).to.be.ok();
+
+    const durationDiff = Math.abs(
+      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+    );
+
+    // account for rounding errors
+    expect(durationDiff < 1).to.equal(true);
+    expect(eventStart <= eventEnd).to.equal(true);
+    expect(eventEnd <= dateNow).to.equal(true);
+
+    expect(event?.event?.outcome).to.equal(outcome);
+
+    expect(event?.kibana?.saved_objects).to.eql([
+      {
+        rel: 'primary',
+        type: 'alert',
+        id: alertId,
+        namespace: spaceId,
+      },
+    ]);
+
+    expect(event?.message).to.eql(message);
+
+    if (errorMessage) {
+      expect(event?.error?.message).to.eql(errorMessage);
+    }
+  }
 }

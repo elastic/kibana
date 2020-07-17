@@ -220,8 +220,8 @@ it('prepares assets for distribution', async () => {
 
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
   expectFileMatchesSnapshotWithCompression(
-    'plugins/foo/target/public/1.plugin.js',
-    '1 async bundle'
+    'plugins/foo/target/public/foo.chunk.1.js',
+    'foo async bundle'
   );
   expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 });

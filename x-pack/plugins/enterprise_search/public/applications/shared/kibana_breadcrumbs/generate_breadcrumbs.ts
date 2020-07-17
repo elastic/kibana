@@ -52,3 +52,6 @@ export const enterpriseSearchBreadcrumbs = (history: History) => (
 
 export const appSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
   enterpriseSearchBreadcrumbs(history)([{ text: 'App Search', path: '/' }, ...breadcrumbs]);
+
+export const workplaceSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
+  enterpriseSearchBreadcrumbs(history)([{ text: 'Workplace Search', path: '/' }, ...breadcrumbs]);

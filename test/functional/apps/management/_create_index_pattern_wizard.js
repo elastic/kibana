@@ -25,7 +25,8 @@ export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const PageObjects = getPageObjects(['settings', 'common']);
 
-  describe('"Create Index Pattern" wizard', function () {
+  // Flaky: https://github.com/elastic/kibana/issues/71501
+  describe.skip('"Create Index Pattern" wizard', function () {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
@@ -47,42 +48,6 @@ export default function ({ getService, getPageObjects }) {
         const btn = await PageObjects.settings.getCreateIndexPatternGoToStep2Button();
         const isEnabled = await btn.isEnabled();
         expect(isEnabled).to.be.ok();
-      });
-    });
-
-    describe('data streams', () => {
-      it('can be an index pattern', async () => {
-        await es.transport.request({
-          path: '/_index_template/generic-logs',
-          method: 'PUT',
-          body: {
-            index_patterns: ['logs-*', 'test_data_stream'],
-            template: {
-              mappings: {
-                properties: {
-                  '@timestamp': {
-                    type: 'date',
-                  },
-                },
-              },
-            },
-            data_stream: {
-              timestamp_field: '@timestamp',
-            },
-          },
-        });
-
-        await es.transport.request({
-          path: '/_data_stream/test_data_stream',
-          method: 'PUT',
-        });
-
-        await PageObjects.settings.createIndexPattern('test_data_stream', false);
-
-        await es.transport.request({
-          path: '/_data_stream/test_data_stream',
-          method: 'DELETE',
-        });
       });
     });
 

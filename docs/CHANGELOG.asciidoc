@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.8.1>>
 * <<release-notes-7.8.0>>
 * <<release-notes-7.7.1>>
 * <<release-notes-7.7.0>>
@@ -38,6 +39,62 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.8.1]]
+== {kib} 7.8.1
+
+coming::[7.8.1]
+
+See also <<breaking-changes-7.8,breaking changes in 7.8>>.
+
+[float]
+[[bug-v7.8.1]]
+=== Bug fixes
+Alerting::
+* Disables multiple select for preconfigured connectors to avoid requesting bulk delete on them {pull}69459[#69459]
+* Fixes adding an extra space character on selecting alert variable in action text fields {pull}70028[#70028]
+APM::
+* Fixes service maps not loading when there are no APM ML jobs {pull}69240[#69240]
+* Fixes service maps load failure when user doesn't have ML permissions {pull}70138[#70138]
+Discover::
+* Sorts filter fields by items that start with typed characters {pull}68585[#68585]
+* Adds error and warning statuses to FilterBar filters, according to the following scenarios {pull}66979[#66979]
+Lens and visualizations::
+* Fixes Date Histogram error when index does not have a time field {pull}69934[#69934]
+Logs::
+* Avoids CCS-incompatible index name resolution {pull}70179[#70179]
+Machine Learning::
+* Fixes expanded row bug when job has no datafeed {pull}68074[#68074]
+* Fixes forever loading indicators in expanded data frame analytics list {pull}69422[#69422]
+Management::
+* Updates the "Learn about timing" documentation link when creating a policy in Index Lifecycle Management {pull}68923[#68923]
+* Adds AggConfig.toSerializedFieldFormat {pull}69114[#69114]
+* Fixes a bug in Cross-Cluster Replication where the "Status" column in the follower indices table did not update after pausing or resuming a follower index {pull}69228[#69228]
+* Fixes a bug in Index Lifecycle Management where it was not possible to clear the index priority value when saving a policy {pull}70154[#70154]
+* Fixes a bug in Cross-Cluster Replication where the user was prompted with an error message when attempting to use the UI with missing cluster privileges. The user should now be prompted 
+with a message indicating what privileges are missing {pull}70158[#70158]
+* Ignores url.url fields above 2048 characters {pull}69863[#69863]
+Maps::
+* Fixes mb-style interpolate style rule {pull}68413[#68413]
+* Fixes unable to edit heatmap metric {pull}70606[#70606]
+Metrics::
+* Fixes fatal error when no data is available for Metric Threshold Alerts {pull}68678[#68678]
+* Fixes EuiTheme type issue {pull}69735[#69735]
+Monitoring::
+* Addresses a few longstanding issues with APM Stack Monitoring {pull}69052[#69052]
+* Makes sure we fetch all collection status {pull}67172[#67172]
+* Adds Cloud as an optional dependency {pull}69050[#69050]
+* Fixes links missing a hash {pull}69861[#69861]
+Operations::
+* Adds spaces settings {pull}69019[#69019]
+Platform::
+* Don't allow empty string for server.basePath config {pull}69377[#69377]
+Reporting::
+* Don't set a min-length on encryption key for reporting {pull}69827[#69827]
+SIEM::
+* Eliminates Superfluous Untitled Timelines {pull}65783[#65783]
+* Fixes 7.8 upgrade issue within rules where you can get the error "params invalid: [lists]: definition for this key is missing" {pull}69434[#69434]
+* Excludes glob-only (*) Index Pattern from map layers {pull}69736[#69736]
+
 [[release-notes-7.8.0]]
 == {kib} 7.8.0
 

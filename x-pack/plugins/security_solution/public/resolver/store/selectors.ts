@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState } from '../types';
+import { ResolverState, IsometricTaxiLayout } from '../types';
+import { uniquePidForProcess } from '../models/process_event';
+import { ResolverEvent } from '../../../common/endpoint/types';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -51,9 +53,24 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
  */
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
-export const processNodePositionsAndEdgeLineSegments = composeSelectors(
+/**
+ * Given a nodeID (aka entity_id) get the indexed process event.
+ * Legacy functions take process events instead of nodeID, use this to get
+ * process events for them.
+ */
+export const processEventForID: (
+  state: ResolverState
+) => (nodeID: string) => ResolverEvent | null = composeSelectors(
   dataStateSelector,
-  dataSelectors.processNodePositionsAndEdgeLineSegments
+  dataSelectors.processEventForID
+);
+
+/**
+ * The position of nodes and edges.
+ */
+export const layout: (state: ResolverState) => IsometricTaxiLayout = composeSelectors(
+  dataStateSelector,
+  dataSelectors.layout
 );
 
 /**
@@ -69,9 +86,9 @@ export const databaseDocumentIDToAbort = composeSelectors(
   dataSelectors.databaseDocumentIDToAbort
 );
 
-export const processAdjacencies = composeSelectors(
+export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,
-  dataSelectors.processAdjacencies
+  dataSelectors.resolverComponentInstanceID
 );
 
 export const terminatedProcesses = composeSelectors(
@@ -96,11 +113,30 @@ export const relatedEventsByEntityId = composeSelectors(
 );
 
 /**
+ * Returns a function that returns a function (when supplied with an entity id for a node)
+ * that returns related events for a node that match an event.category (when supplied with the category)
+ */
+export const relatedEventsByCategory = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventsByCategory
+);
+
+/**
  * Entity ids to booleans for waiting status
  */
 export const relatedEventsReady = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsReady
+);
+
+/**
+ * Business logic lookup functions by ECS category by entity id.
+ * Example usage:
+ * const numberOfFileEvents = infoByEntityId.get(`someEntityId`)?.getAggregateTotalForCategory(`file`);
+ */
+export const relatedEventInfoByEntityId = composeSelectors(
+  dataStateSelector,
+  dataSelectors.relatedEventInfoByEntityId
 );
 
 /**
@@ -159,6 +195,16 @@ export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoa
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
 
 /**
+ * True if the children cursor is not null
+ */
+export const hasMoreChildren = composeSelectors(dataStateSelector, dataSelectors.hasMoreChildren);
+
+/**
+ * True if the ancestor cursor is not null
+ */
+export const hasMoreAncestors = composeSelectors(dataStateSelector, dataSelectors.hasMoreAncestors);
+
+/**
  * An array containing all the processes currently in the Resolver than can be graphed
  */
 export const graphableProcesses = composeSelectors(
@@ -178,10 +224,8 @@ function composeSelectors<OuterState, InnerState, ReturnValue>(
 }
 
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
-const indexedProcessNodesAndEdgeLineSegments = composeSelectors(
-  dataStateSelector,
-  dataSelectors.visibleProcessNodePositionsAndEdgeLineSegments
-);
+
+const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.nodesAndEdgelines);
 
 /**
  * Total count of related events for a process.
@@ -196,15 +240,50 @@ export const relatedEventTotalForProcess = composeSelectors(
  * The bounding box represents what the camera can see. The camera position is a function of time because it can be
  * animated. So in order to get the currently visible entities, we need to pass in time.
  */
-export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
-  indexedProcessNodesAndEdgeLineSegments,
-  boundingBox,
-  function (
-    /* eslint-disable no-shadow */
-    indexedProcessNodesAndEdgeLineSegments,
-    boundingBox
-    /* eslint-enable no-shadow */
-  ) {
-    return (time: number) => indexedProcessNodesAndEdgeLineSegments(boundingBox(time));
+export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundingBox, function (
+  /* eslint-disable no-shadow */
+  nodesAndEdgelines,
+  boundingBox
+  /* eslint-enable no-shadow */
+) {
+  return (time: number) => nodesAndEdgelines(boundingBox(time));
+});
+
+/**
+ * Takes a nodeID (aka entity_id) and returns the associated aria level as a number or null if the node ID isn't in the tree.
+ */
+export const ariaLevel: (
+  state: ResolverState
+) => (nodeID: string) => number | null = composeSelectors(
+  dataStateSelector,
+  dataSelectors.ariaLevel
+);
+
+/**
+ * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
+ * If the node has a following sibling that is currently visible, that will be returned, otherwise null.
+ */
+export const ariaFlowtoNodeID: (
+  state: ResolverState
+) => (time: number) => (nodeID: string) => string | null = createSelector(
+  visibleNodesAndEdgeLines,
+  composeSelectors(dataStateSelector, dataSelectors.followingSibling),
+  (visibleNodesAndEdgeLinesAtTime, followingSibling) => {
+    return defaultMemoize((time: number) => {
+      // get the visible nodes at `time`
+      const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
+
+      // get a `Set` containing their node IDs
+      const nodesVisibleAtTime: Set<string> = new Set(
+        [...processNodePositions.keys()].map(uniquePidForProcess)
+      );
+
+      // return the ID of `nodeID`'s following sibling, if it is visible
+      return (nodeID: string): string | null => {
+        const sibling: string | null = followingSibling(nodeID);
+
+        return sibling === null || nodesVisibleAtTime.has(sibling) === false ? null : sibling;
+      };
+    });
   }
 );

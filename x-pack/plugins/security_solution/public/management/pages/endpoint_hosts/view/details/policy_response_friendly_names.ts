@@ -6,7 +6,209 @@
 
 import { i18n } from '@kbn/i18n';
 
-const responseMap = new Map();
+const policyResponses: Array<[string, string]> = [
+  [
+    'configure_dns_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_dns_events',
+      { defaultMessage: 'Configure DNS Events' }
+    ),
+  ],
+  [
+    'configure_elasticsearch_connection',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_elasticsearch_connection',
+      { defaultMessage: 'Configure Elastic Search Connection' }
+    ),
+  ],
+  [
+    'configure_file_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_file_events',
+      { defaultMessage: 'Configure File Events' }
+    ),
+  ],
+  [
+    'configure_imageload_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_imageload_events',
+      { defaultMessage: 'Configure Image Load Events' }
+    ),
+  ],
+  [
+    'configure_kernel',
+    i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_kernel', {
+      defaultMessage: 'Configure Kernel',
+    }),
+  ],
+  [
+    'configure_logging',
+    i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_logging', {
+      defaultMessage: 'Configure Logging',
+    }),
+  ],
+  [
+    'configure_malware',
+    i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_malware', {
+      defaultMessage: 'Configure Malware',
+    }),
+  ],
+  [
+    'configure_network_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_network_events',
+      { defaultMessage: 'Configure Network Events' }
+    ),
+  ],
+  [
+    'configure_process_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_process_events',
+      { defaultMessage: 'Configure Process Events' }
+    ),
+  ],
+  [
+    'configure_registry_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_registry_events',
+      { defaultMessage: 'Configure Registry Events' }
+    ),
+  ],
+  [
+    'configure_security_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.configure_security_events',
+      { defaultMessage: 'Configure Security Events' }
+    ),
+  ],
+  [
+    'connect_kernel',
+    i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.connect_kernel', {
+      defaultMessage: 'Connect Kernel',
+    }),
+  ],
+  [
+    'detect_async_image_load_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.detect_async_image_load_events',
+      { defaultMessage: 'Detect Async Image Load Events' }
+    ),
+  ],
+  [
+    'detect_file_open_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.detect_file_open_events',
+      { defaultMessage: 'Detect File Open Events' }
+    ),
+  ],
+  [
+    'detect_file_write_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.detect_file_write_events',
+      { defaultMessage: 'Detect File Write Events' }
+    ),
+  ],
+  [
+    'detect_network_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.detect_network_events',
+      { defaultMessage: 'Detect Network Events' }
+    ),
+  ],
+  [
+    'detect_process_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.detect_process_events',
+      { defaultMessage: 'Detect Process Events' }
+    ),
+  ],
+  [
+    'detect_registry_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.detect_registry_events',
+      { defaultMessage: 'Detect Registry Events' }
+    ),
+  ],
+  [
+    'detect_sync_image_load_events',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.detect_sync_image_load_events',
+      { defaultMessage: 'Detect Sync Image Load Events' }
+    ),
+  ],
+  [
+    'download_global_artifacts',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.download_global_artifacts',
+      { defaultMessage: 'Download Global Artifacts' }
+    ),
+  ],
+  [
+    'download_user_artifacts',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.download_user_artifacts',
+      { defaultMessage: 'Download User Artifacts' }
+    ),
+  ],
+  [
+    'load_config',
+    i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.load_config', {
+      defaultMessage: 'Load Config',
+    }),
+  ],
+  [
+    'load_malware_model',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.load_malware_model',
+      { defaultMessage: 'Load Malware Model' }
+    ),
+  ],
+  [
+    'read_elasticsearch_config',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.read_elasticsearch_config',
+      { defaultMessage: 'Read ElasticSearch Config' }
+    ),
+  ],
+  [
+    'read_events_config',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.read_events_config',
+      { defaultMessage: 'Read Events Config' }
+    ),
+  ],
+  [
+    'read_kernel_config',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.read_kernel_config',
+      { defaultMessage: 'Read Kernel Config' }
+    ),
+  ],
+  [
+    'read_logging_config',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.read_logging_config',
+      { defaultMessage: 'Read Logging Config' }
+    ),
+  ],
+  [
+    'read_malware_config',
+    i18n.translate(
+      'xpack.securitySolution.endpoint.hostDetails.policyResponse.read_malware_config',
+      { defaultMessage: 'Read Malware Config' }
+    ),
+  ],
+  [
+    'workflow',
+    i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.workflow', {
+      defaultMessage: 'Workflow',
+    }),
+  ],
+];
+
+const responseMap = new Map<string, string>(policyResponses);
+
+// Additional values used in the Policy Response UI
 responseMap.set(
   'success',
   i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.success', {
@@ -49,144 +251,6 @@ responseMap.set(
     defaultMessage: 'Events',
   })
 );
-responseMap.set(
-  'configure_elasticsearch_connection',
-  i18n.translate(
-    'xpack.securitySolution.endpoint.hostDetails.policyResponse.configureElasticSearchConnection',
-    {
-      defaultMessage: 'Configure Elastic Search Connection',
-    }
-  )
-);
-responseMap.set(
-  'configure_logging',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.configureLogging', {
-    defaultMessage: 'Configure Logging',
-  })
-);
-responseMap.set(
-  'configure_kernel',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.configureKernel', {
-    defaultMessage: 'Configure Kernel',
-  })
-);
-responseMap.set(
-  'configure_malware',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.configureMalware', {
-    defaultMessage: 'Configure Malware',
-  })
-);
-responseMap.set(
-  'connect_kernel',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.connectKernel', {
-    defaultMessage: 'Connect Kernel',
-  })
-);
-responseMap.set(
-  'detect_file_open_events',
-  i18n.translate(
-    'xpack.securitySolution.endpoint.hostDetails.policyResponse.detectFileOpenEvents',
-    {
-      defaultMessage: 'Detect File Open Events',
-    }
-  )
-);
-responseMap.set(
-  'detect_file_write_events',
-  i18n.translate(
-    'xpack.securitySolution.endpoint.hostDetails.policyResponse.detectFileWriteEvents',
-    {
-      defaultMessage: 'Detect File Write Events',
-    }
-  )
-);
-responseMap.set(
-  'detect_image_load_events',
-  i18n.translate(
-    'xpack.securitySolution.endpoint.hostDetails.policyResponse.detectImageLoadEvents',
-    {
-      defaultMessage: 'Detect Image Load Events',
-    }
-  )
-);
-responseMap.set(
-  'detect_process_events',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.detectProcessEvents', {
-    defaultMessage: 'Detect Process Events',
-  })
-);
-responseMap.set(
-  'download_global_artifacts',
-  i18n.translate(
-    'xpack.securitySolution.endpoint.hostDetails.policyResponse.downloadGlobalArtifacts',
-    {
-      defaultMessage: 'Download Global Artifacts',
-    }
-  )
-);
-responseMap.set(
-  'load_config',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.loadConfig', {
-    defaultMessage: 'Load Config',
-  })
-);
-responseMap.set(
-  'load_malware_model',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.loadMalwareModel', {
-    defaultMessage: 'Load Malware Model',
-  })
-);
-responseMap.set(
-  'read_elasticsearch_config',
-  i18n.translate(
-    'xpack.securitySolution.endpoint.hostDetails.policyResponse.readElasticSearchConfig',
-    {
-      defaultMessage: 'Read ElasticSearch Config',
-    }
-  )
-);
-responseMap.set(
-  'read_events_config',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.readEventsConfig', {
-    defaultMessage: 'Read Events Config',
-  })
-);
-responseMap.set(
-  'read_kernel_config',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.readKernelConfig', {
-    defaultMessage: 'Read Kernel Config',
-  })
-);
-responseMap.set(
-  'read_logging_config',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.readLoggingConfig', {
-    defaultMessage: 'Read Logging Config',
-  })
-);
-responseMap.set(
-  'read_malware_config',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.readMalwareConfig', {
-    defaultMessage: 'Read Malware Config',
-  })
-);
-responseMap.set(
-  'workflow',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.workflow', {
-    defaultMessage: 'Workflow',
-  })
-);
-responseMap.set(
-  'download_model',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.downloadModel', {
-    defaultMessage: 'Download Model',
-  })
-);
-responseMap.set(
-  'ingest_events_config',
-  i18n.translate('xpack.securitySolution.endpoint.hostDetails.policyResponse.injestEventsConfig', {
-    defaultMessage: 'Injest Events Config',
-  })
-);
 
 /**
  * Maps a server provided value to corresponding i18n'd string.
@@ -195,5 +259,13 @@ export function formatResponse(responseString: string) {
   if (responseMap.has(responseString)) {
     return responseMap.get(responseString);
   }
-  return responseString;
+
+  // Its possible for the UI to receive an Action name that it does not yet have a translation,
+  // thus we generate a label for it here by making it more user fiendly
+  responseMap.set(
+    responseString,
+    responseString.replace(/_/g, ' ').replace(/\b(\w)/g, (m) => m.toUpperCase())
+  );
+
+  return responseMap.get(responseString);
 }

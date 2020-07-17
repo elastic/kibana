@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { get } from 'lodash';
 import {
   EuiPage,
   EuiPageContent,
@@ -18,8 +19,33 @@ import { NodeDetailStatus } from '../node_detail_status';
 import { Logs } from '../../logs/';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
+import { AlertsCallout } from '../../../alerts/callout';
 
-export const Node = ({ nodeSummary, metrics, logs, nodeId, clusterUuid, scope, ...props }) => {
+export const Node = ({
+  nodeSummary,
+  metrics,
+  logs,
+  alerts,
+  nodeId,
+  clusterUuid,
+  scope,
+  ...props
+}) => {
+  if (alerts) {
+    for (const alertTypeId of Object.keys(alerts)) {
+      const alertInstance = alerts[alertTypeId];
+      for (const { meta } of alertInstance.states) {
+        const metricList = get(meta, 'metrics', []);
+        for (const metric of metricList) {
+          if (metrics[metric]) {
+            metrics[metric].alerts = metrics[metric].alerts || {};
+            metrics[metric].alerts[alertTypeId] = alertInstance;
+          }
+        }
+      }
+    }
+  }
+
   const metricsToShow = [
     metrics.node_jvm_mem,
     metrics.node_mem,
@@ -34,9 +60,10 @@ export const Node = ({ nodeSummary, metrics, logs, nodeId, clusterUuid, scope, .
     <EuiPage>
       <EuiPageBody>
         <EuiPanel>
-          <NodeDetailStatus stats={nodeSummary} />
+          <NodeDetailStatus stats={nodeSummary} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
+        <AlertsCallout alerts={alerts} />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (

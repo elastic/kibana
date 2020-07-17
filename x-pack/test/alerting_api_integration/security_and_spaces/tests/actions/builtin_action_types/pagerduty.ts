@@ -16,7 +16,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('pagerduty action', () => {
@@ -29,8 +28,6 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
       );
     });
-
-    after(() => esArchiver.unload('empty_kibana'));
 
     it('should return successfully when passed valid create parameters', async () => {
       const { body: createdAction } = await supertest

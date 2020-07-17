@@ -157,7 +157,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -170,7 +169,7 @@ import {
   TruncateFormat,
 } from '../common/field_formats';
 
-import { DateFormat } from './field_formats';
+import { DateNanosFormat, DateFormat } from './field_formats';
 export { baseFormattersPublic } from './field_formats';
 
 // Field formats helpers namespace:
@@ -437,6 +436,8 @@ export {
 } from '../common';
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+
+export { ApplyGlobalFilterActionContext } from './actions';
 
 export * from '../common/field_mapping';
 
