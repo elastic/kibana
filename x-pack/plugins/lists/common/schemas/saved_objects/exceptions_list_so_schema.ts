@@ -46,4 +46,4 @@ export const exceptionListSoSchema = t.exact(
   })
 );
 
-export type ExceptionListSoSchema = t.TypeOf<typeof exceptionListSoSchema>;
+export type ExceptionListSoSchema = t.OutputOf<typeof exceptionListSoSchema>;
