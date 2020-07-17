@@ -13556,7 +13556,6 @@
     "xpack.snapshotRestore.repositoryForm.typeReadonly.urlLabel": "路径（必填）",
     "xpack.snapshotRestore.repositoryForm.typeReadonly.urlSchemeLabel": "方案",
     "xpack.snapshotRestore.repositoryForm.typeReadonly.urlTitle": "URL",
-    "xpack.snapshotRestore.repositoryForm.typeReadonly.urlWhitelistDescription": "必须在 {settingKey} 设置中注册此 URL。",
     "xpack.snapshotRestore.repositoryForm.typeS3.basePathDescription": "存储库数据的存储桶路径。",
     "xpack.snapshotRestore.repositoryForm.typeS3.basePathLabel": "基路径",
     "xpack.snapshotRestore.repositoryForm.typeS3.basePathTitle": "基路径",
