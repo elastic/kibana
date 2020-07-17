@@ -15,25 +15,38 @@
 */
 def withDefaultPrComments(closure) {
   catchErrors {
+    buildState.set('PR_COMMENTS_ENABLED', true)
     catchErrors {
       closure()
     }
+    sendComment()
+  }
+}
 
-    if (!params.ENABLE_GITHUB_PR_COMMENTS || !isPr()) {
-      return
-    }
+def sendComment() {
+  if (!params.ENABLE_GITHUB_PR_COMMENTS || !isPr() || !buildState.get('PR_COMMENTS_ENABLED')) {
+    return
+  }
 
-    def status = buildUtils.getBuildStatus()
-    if (status == "ABORTED") {
-      return;
-    }
+  def status = buildUtils.getBuildStatus()
+  if (status == "ABORTED") {
+    return;
+  }
 
-    def lastComment = getLatestBuildComment()
-    def info = getLatestBuildInfo(lastComment) ?: [:]
-    info.builds = (info.builds ?: []).takeRight(5) // Rotate out old builds
+  def lastComment = getLatestBuildComment()
+  def info = getLatestBuildInfo(lastComment) ?: [:]
+  info.builds = (info.builds ?: []).takeRight(5) // Rotate out old builds
 
-    def message = getNextCommentMessage(info)
-    postComment(message)
+  def shouldUpdateComment = !!info.builds.find { it.number == env.BUILD_NUMBER }
+
+  // Need to re-factor above code to get the full comment objects back, instead of just the text
+
+  def message = getNextCommentMessage(info)
+
+  if (shouldUpdateComment) {
+    updateComment(lastComment.id, message)
+  } else {
+    createComment(message)
 
     if (lastComment && lastComment.user.login == 'kibanamachine') {
       deleteComment(lastComment.id)
@@ -66,7 +79,7 @@ def getLatestBuildInfo() {
 }
 
 def getLatestBuildInfo(comment) {
-  return comment ? getBuildInfoFromComment(comment) : null
+  return comment ? getBuildInfoFromComment(comment.body) : null
 }
 
 def createBuildInfo() {
@@ -141,6 +154,9 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
   def info = previousCommentInfo ?: [:]
   info.builds = previousCommentInfo.builds ?: []
 
+  // When we update an in-progress comment, we need to remove the old version from the history
+  info.builds = info.builds.filter { it.number != env.BUILD_NUMBER }
+
   def messages = []
   def status = buildUtils.getBuildStatus()
 
@@ -208,7 +224,7 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
     .join("\n\n")
 }
 
-def postComment(message) {
+def createComment(message) {
   if (!isPr()) {
     error "Trying to post a GitHub PR comment on a non-PR or non-elastic PR build"
   }
@@ -221,6 +237,20 @@ def postComment(message) {
 def getComments() {
   withGithubCredentials {
     return githubIssues.getComments(env.ghprbPullId)
+  }
+}
+
+def updateComment(commentId, message) {
+  if (!isPr()) {
+    error "Trying to post a GitHub PR comment on a non-PR or non-elastic PR build"
+  }
+
+  withGithubCredentials {
+    def path = "repos/elastic/kibana/issues/comments/${commentId}"
+    def json = toJSON([ body: message ]).toString()
+
+    def resp = githubApi([ path: path ], [ method: "PATCH", data: json ])
+    return toJSON(resp)
   }
 }
 
