@@ -194,7 +194,7 @@ export const searchAfterAndBulkCreate = async ({
         // if there isn't anything after going through the value list filter
         // skip the call to bulk create and proceed to the next search_after,
         // if there is a sort id to continue the search_after with.
-        if (filteredEvents.hits.total !== 0 && filteredEvents.hits.hits.length !== 0) {
+        if (filteredEvents.hits.hits.length !== 0) {
           // make sure we are not going to create more signals than maxSignals allows
           if (signalsCreatedCount + filteredEvents.hits.hits.length > tuple.maxSignals) {
             filteredEvents.hits.hits = filteredEvents.hits.hits.slice(
@@ -237,7 +237,6 @@ export const searchAfterAndBulkCreate = async ({
           );
 
           if (
-            filteredEvents.hits.hits != null &&
             filteredEvents.hits.hits[0].sort != null &&
             filteredEvents.hits.hits[0].sort.length !== 0
           ) {
@@ -254,7 +253,6 @@ export const searchAfterAndBulkCreate = async ({
           // because we check before if the totalHits or
           // searchResult.hits.hits.length is 0
           if (
-            searchResult.hits.hits != null &&
             searchResult.hits.hits[0].sort != null &&
             searchResult.hits.hits[0].sort.length !== 0
           ) {
