@@ -11,8 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/72053
-  describe.skip('fleet_setup', () => {
+  describe('fleet_setup', () => {
     beforeEach(async () => {
       try {
         await es.security.deleteUser({
