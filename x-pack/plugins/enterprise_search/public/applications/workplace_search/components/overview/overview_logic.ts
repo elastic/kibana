@@ -8,7 +8,7 @@ import { HttpSetup } from 'src/core/public';
 
 import { kea } from 'kea';
 
-import { IAccount, IOrganization } from '../../types';
+import { IAccount, IOrganization, IUser } from '../../types';
 import { IFlashMessagesProps, IKeaLogic } from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
