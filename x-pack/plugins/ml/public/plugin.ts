@@ -18,6 +18,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
 import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
@@ -50,6 +51,7 @@ export interface MlSetupDependencies {
   uiActions: UiActionsSetup;
   kibanaVersion: string;
   share: SharePluginSetup;
+  indexPatternManagement: IndexPatternManagementSetup;
 }
 
 declare module '../../../../src/plugins/share/public' {
@@ -113,6 +115,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     registerFeature(pluginsSetup.home);
+    // register ML for the index pattern management no data screen.
+    // so the file data visualizer appears to allow people to import data
+    pluginsSetup.indexPatternManagement.environment.update({ ml: true });
 
     initManagementSection(pluginsSetup, core);
     registerEmbeddables(pluginsSetup.embeddable, core);

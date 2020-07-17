@@ -2,7 +2,6 @@
 
 exports[`AdvancedOptions should hide if not showing 1`] = `
 <div>
-  <EuiHorizontalRule />
   <EuiButtonEmpty
     iconType="arrowRight"
     onClick={[Function]}
@@ -21,7 +20,6 @@ exports[`AdvancedOptions should hide if not showing 1`] = `
 
 exports[`AdvancedOptions should render normally 1`] = `
 <div>
-  <EuiHorizontalRule />
   <EuiButtonEmpty
     iconType="arrowDown"
     onClick={[Function]}

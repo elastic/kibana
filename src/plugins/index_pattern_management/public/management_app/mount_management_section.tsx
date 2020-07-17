@@ -48,7 +48,8 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  isMlAvailable: () => boolean
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
@@ -73,6 +74,7 @@ export async function mountManagementSection(
     data,
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
+    isMlAvailable,
   };
 
   ReactDOM.render(

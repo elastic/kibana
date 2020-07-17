@@ -39,6 +39,9 @@ const createSetupContract = (): IndexPatternManagementSetup => ({
     getAll: jest.fn(),
     getById: jest.fn(),
   } as any,
+  environment: {
+    update: jest.fn(),
+  },
 });
 
 const createStartContract = (): IndexPatternManagementStart => ({

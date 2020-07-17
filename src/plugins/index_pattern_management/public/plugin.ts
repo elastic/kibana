@@ -86,7 +86,11 @@ export class IndexPatternManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params);
+        return mountManagementSection(
+          core.getStartServices,
+          params,
+          () => this.indexPatternManagementService.environmentService.getEnvironment().ml
+        );
       },
     });
 

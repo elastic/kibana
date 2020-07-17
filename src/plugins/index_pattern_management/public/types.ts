@@ -44,6 +44,7 @@ export interface IndexPatternManagmentContext {
   data: DataPublicPluginStart;
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  isMlAvailable: () => boolean;
 }
 
 export type IndexPatternManagmentContextValue = KibanaReactContextValue<

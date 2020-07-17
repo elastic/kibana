@@ -44,10 +44,12 @@ export const EmptyState = ({
   onRefresh,
   navigateToApp,
   docLinks,
+  isMlAvailable,
 }: {
   onRefresh: () => void;
   navigateToApp: ApplicationStart['navigateToApp'];
   docLinks: DocLinksStart;
+  isMlAvailable: () => boolean;
 }) => (
   <>
     <EuiPageContent
@@ -106,7 +108,7 @@ export const EmptyState = ({
                   defaultMessage: 'This feature requires a Basic license.',
                 }
               )}
-              isDisabled
+              isDisabled={!isMlAvailable()}
               icon={<EuiIcon size="xl" type="document" color="subdued" />}
               title={
                 <FormattedMessage

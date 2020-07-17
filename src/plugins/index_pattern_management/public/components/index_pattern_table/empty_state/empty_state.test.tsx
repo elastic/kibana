@@ -37,7 +37,12 @@ jest.mock('react-router-dom', () => ({
 describe('EmptyState', () => {
   it('should render normally', () => {
     const component = shallow(
-      <EmptyState docLinks={docLinks} onRefresh={() => {}} navigateToApp={async () => {}} />
+      <EmptyState
+        docLinks={docLinks}
+        onRefresh={() => {}}
+        navigateToApp={async () => {}}
+        isMlAvailable={() => true}
+      />
     );
 
     expect(component).toMatchSnapshot();
@@ -53,6 +58,7 @@ describe('EmptyState', () => {
             docLinks={docLinks}
             onRefresh={onRefreshHandler}
             navigateToApp={async () => {}}
+            isMlAvailable={() => true}
           />
         );
 
