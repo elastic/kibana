@@ -18,9 +18,7 @@ import { ActionTypeModel, AlertTypeModel } from './types';
 import { TypeRegistry } from './application/type_registry';
 import {
   ManagementSetup,
-  ManagementSectionId,
   ManagementAppMountParams,
-  ManagementApp,
 } from '../../../../src/plugins/management/public';
 import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
@@ -58,7 +56,6 @@ export class Plugin
     > {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  private managementApp?: ManagementApp;
 
   constructor(initializerContext: PluginInitializerContext) {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -72,7 +69,7 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const alertTypeRegistry = this.alertTypeRegistry;
 
-    this.managementApp = plugins.management.sections.section.insightsAndAlerting.registerApp({
+    plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: 'triggersActions',
       title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
         defaultMessage: 'Alerts and Actions',
