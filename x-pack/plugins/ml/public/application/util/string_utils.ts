@@ -9,6 +9,7 @@
  */
 import _ from 'lodash';
 import d3 from 'd3';
+import he from 'he';
 
 import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
@@ -90,7 +91,10 @@ function quoteField(field: string): string {
 
 // add commas to large numbers
 // Number.toLocaleString is not supported on safari
-export function toLocaleString(x: number): string {
+export function toLocaleString(x: number | undefined | null): string {
+  if (x === undefined || x === null) {
+    return '';
+  }
   let result = x.toString();
   if (x && typeof x === 'number') {
     const parts = x.toString().split('.');
@@ -102,15 +106,17 @@ export function toLocaleString(x: number): string {
 
 // escape html characters
 export function mlEscape(str: string): string {
-  const entityMap: { [escapeChar: string]: string } = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-    '/': '&#x2F;',
-  };
-  return String(str).replace(/[&<>"'\/]/g, (s) => entityMap[s]);
+  // It's not possible to use "he" encoding directly
+  // because \ and / characters are not going to be replaced without
+  // encodeEverything option. But with this option enabled
+  // each word character is encoded as well.
+  return String(str).replace(/\W/g, (s) =>
+    he.encode(s, {
+      useNamedReferences: true,
+      encodeEverything: true,
+      allowUnsafeSymbols: false,
+    })
+  );
 }
 
 // Escapes reserved characters for use in Elasticsearch query terms.
