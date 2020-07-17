@@ -217,30 +217,26 @@ describe('Point Series Config Type Class Test Suite', function () {
   });
 
   describe('line chart', function () {
-    function prepareData(percentileTestdata) {
+    function prepareData({ cfg, data }) {
       const percentileDataObj = {
         get: (prop) => {
           return maxBucketData[prop] || maxBucketData.data[prop] || null;
         },
         getLabels: () => [],
-        data: percentileTestdata.data,
+        data: data,
       };
-      return (parsedConfig = vislibPointSeriesTypes.line(
-        percentileTestdata.cfg,
-        percentileDataObj
-      ));
+      const parsedConfig = vislibPointSeriesTypes.line(cfg, percentileDataObj);
+      return parsedConfig;
     }
 
     it('should render a percentile line chart', function () {
       const parsedConfig = prepareData(percentileTestdata);
-      expect(JSON.stringify(parsedConfig)).toEqual(JSON.stringify(percentileTestdataResult));
+      expect(parsedConfig).toMatchObject(percentileTestdataResult);
     });
 
     it('should render a percentile line chart when value is float', function () {
       const parsedConfig = prepareData(percentileTestdataFloatValue);
-      expect(JSON.stringify(parsedConfig)).toEqual(
-        JSON.stringify(percentileTestdataFloatValueResult)
-      );
+      expect(parsedConfig).toMatchObject(percentileTestdataFloatValueResult);
     });
   });
 });
