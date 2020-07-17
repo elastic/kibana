@@ -79,7 +79,7 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
   });
   const { lists } = useKibana().services;
   const http = useHttp();
-  const { addError, addSuccess } = useAppToasts();
+  const { addError } = useAppToasts();
   const { loading, start: readListPrivileges, ...readState } = useReadListPrivileges();
 
   const readPrivileges = useCallback(() => {

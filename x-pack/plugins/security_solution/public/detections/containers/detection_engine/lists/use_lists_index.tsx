@@ -24,7 +24,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
   const [error, setError] = useState<unknown>(null);
   const { lists } = useKibana().services;
   const http = useHttp();
-  const { addError, addSucess } = useAppToasts();
+  const { addError } = useAppToasts();
   const { loading: readLoading, start: readListIndex, ...readListIndexState } = useReadListIndex();
   const {
     loading: createLoading,
