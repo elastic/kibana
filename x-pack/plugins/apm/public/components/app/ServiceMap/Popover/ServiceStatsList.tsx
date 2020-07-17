@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { ServiceNodeMetrics } from '../../../../../common/service_map';
+import { ServiceNodeStats } from '../../../../../common/service_map';
 import { asDuration, asPercent, tpmUnit } from '../../../../utils/formatters';
 
 export const ItemRow = styled('tr')`
@@ -24,18 +24,18 @@ export const ItemDescription = styled('td')`
   text-align: right;
 `;
 
-type ServiceMetricListProps = ServiceNodeMetrics;
+type ServiceStatsListProps = ServiceNodeStats;
 
-export function ServiceMetricList({
-  avgErrorsPerMinute,
+export function ServiceStatsList({
+  transactionStats,
+  avgErrorRate,
   avgCpuUsage,
   avgMemoryUsage,
-  transactionStats,
-}: ServiceMetricListProps) {
+}: ServiceStatsListProps) {
   const listItems = [
     {
       title: i18n.translate(
-        'xpack.apm.serviceMap.avgTransDurationPopoverMetric',
+        'xpack.apm.serviceMap.avgTransDurationPopoverStat',
         {
           defaultMessage: 'Trans. duration (avg.)',
         }
@@ -64,18 +64,15 @@ export function ServiceMetricList({
       description: isNumber(avgErrorRate) ? asPercent(avgErrorRate, 1) : null,
     },
     {
-      title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverMetric', {
+      title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverStat', {
         defaultMessage: 'CPU usage (avg.)',
       }),
       description: isNumber(avgCpuUsage) ? asPercent(avgCpuUsage, 1) : null,
     },
     {
-      title: i18n.translate(
-        'xpack.apm.serviceMap.avgMemoryUsagePopoverMetric',
-        {
-          defaultMessage: 'Memory usage (avg.)',
-        }
-      ),
+      title: i18n.translate('xpack.apm.serviceMap.avgMemoryUsagePopoverStat', {
+        defaultMessage: 'Memory usage (avg.)',
+      }),
       description: isNumber(avgMemoryUsage)
         ? asPercent(avgMemoryUsage, 1)
         : null,

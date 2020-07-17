@@ -30,6 +30,7 @@ export interface MlSummaryJob {
   isSingleMetricViewerJob: boolean;
   deleting?: boolean;
   latestTimestampSortValue?: number;
+  earliestStartTimestampMs?: number;
 }
 
 export interface AuditMessage {
