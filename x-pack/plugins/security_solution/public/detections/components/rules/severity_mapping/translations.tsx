@@ -51,7 +51,8 @@ export const SEVERITY_DESCRIPTION = i18n.translate(
 export const SEVERITY_MAPPING_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alerts.severityMapping.mappingDescriptionLabel',
   {
-    defaultMessage: 'Map a value from the source event to a specific severity.',
+    defaultMessage:
+      'Override the default severity at left with a value derived from the source event.',
   }
 );
 
