@@ -1236,8 +1236,8 @@ describe('SystemGenericFileDetails', () => {
       });
     });
 
-    test('it does NOT render the text "via" when eventAction is not a allowlisted action', () => {
-      const eventAction = 'a_non_allowlisted_event_action';
+    test('it does NOT render the text "via" when eventAction is not a whitelisted action', () => {
+      const eventAction = 'a_non_whitelisted_event_action';
 
       const wrapper = mount(
         <TestProviders>
