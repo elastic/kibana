@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState, useCallback, useEffect } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiFlexGroup, EuiComboBoxProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { VegaAdapter, InspectDataSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
@@ -26,15 +26,25 @@ interface DataViewerProps {
   vegaAdapter: VegaAdapter;
 }
 
+const getDataGridArealabel = (view: InspectDataSets) =>
+  i18n.translate('visTypeVega.inspector.dataViewer.gridAreaLabel', {
+    defaultMessage: '{name} data grid',
+    values: {
+      name: view.id,
+    },
+  });
+
 export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
   const [inspectDataSets, setInspectDataSets] = useState<InspectDataSets[]>([]);
   const [selectedView, setSelectedView] = useState<InspectDataSets>();
+  const [dataGridAriaLabel, setDataGridAriaLabel] = useState<string>('');
 
   const onViewChange: EuiComboBoxProps<unknown>['onChange'] = useCallback(
     (selectedOptions) => {
       const newView = inspectDataSets!.find((view) => view.id === selectedOptions[0].label);
 
       if (newView) {
+        setDataGridAriaLabel(getDataGridArealabel(newView));
         setSelectedView(newView);
       }
     },
@@ -53,9 +63,11 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
 
   useEffect(() => {
     if (inspectDataSets) {
-      setSelectedView(
-        selectedView ? inspectDataSets.find(({ id }) => id === selectedView.id) : inspectDataSets[0]
-      );
+      if (!selectedView) {
+        setSelectedView(inspectDataSets[0]);
+      } else {
+        setDataGridAriaLabel(getDataGridArealabel(selectedView));
+      }
     }
   }, [selectedView, inspectDataSets]);
 
@@ -85,7 +97,11 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        <InspectorDataGrid columns={selectedView.columns} data={selectedView.data} />
+        <InspectorDataGrid
+          columns={selectedView.columns}
+          data={selectedView.data}
+          dataGridAriaLabel={dataGridAriaLabel}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

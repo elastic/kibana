@@ -93,7 +93,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       serviceSettings: mapsLegacy.serviceSettings,
     };
 
-    inspector.registerView(getVegaInspectorView());
+    inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
 

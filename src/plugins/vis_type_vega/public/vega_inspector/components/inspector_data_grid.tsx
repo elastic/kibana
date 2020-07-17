@@ -18,19 +18,15 @@
  */
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiDataGrid, EuiDataGridSorting, EuiDataGridProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-
 import { VegaRuntimeData } from '../vega_adapter';
-
-const inspectorDataGridAriaLabel = i18n.translate('visTypeVega.inspector.dataGrid.areaLabel', {
-  defaultMessage: 'Data grid',
-});
 
 const DEFAULT_PAGE_SIZE = 15;
 
-type InspectorDataGridProps = VegaRuntimeData;
+interface InspectorDataGridProps extends VegaRuntimeData {
+  dataGridAriaLabel: string;
+}
 
-export const InspectorDataGrid = ({ columns, data }: InspectorDataGridProps) => {
+export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: InspectorDataGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
   const onChangeItemsPerPage = useCallback(
     (pageSize) => setPagination((p) => ({ ...p, pageSize, pageIndex: 0 })),
@@ -44,9 +40,13 @@ export const InspectorDataGrid = ({ columns, data }: InspectorDataGridProps) => 
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
 
-  useEffect(() => {
-    setVisibleColumns(columns.map((column) => column.id));
-  }, [columns]);
+  useEffect(
+    () => {
+      setVisibleColumns(columns.map((column) => column.id));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataGridAriaLabel]
+  );
 
   // Sorting
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
@@ -68,7 +68,6 @@ export const InspectorDataGrid = ({ columns, data }: InspectorDataGridProps) => 
         if (aValue < bValue) return column.direction === 'asc' ? -1 : 1;
         if (aValue > bValue) return column.direction === 'asc' ? 1 : -1;
       }
-
       return 0;
     });
   }, [data, sortingColumns]);
@@ -109,7 +108,7 @@ export const InspectorDataGrid = ({ columns, data }: InspectorDataGridProps) => 
 
   return (
     <EuiDataGrid
-      aria-label={inspectorDataGridAriaLabel}
+      aria-label={dataGridAriaLabel}
       columns={columns.map((column) => {
         if (columnsWidth[column.id]) {
           return {

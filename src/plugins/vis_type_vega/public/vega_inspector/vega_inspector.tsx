@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { VegaAdapter } from './vega_adapter';
 import { VegaDataInspector } from './vega_data_inspector';
+import { KibanaContextProvider } from '../../../kibana_react/public';
 import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../inspector/public';
 
 import './vega_inspector.scss';
@@ -32,13 +35,21 @@ const vegaDebugLabel = i18n.translate('visTypeVega.inspector.vegaDebugLabel', {
   defaultMessage: 'Vega Debug',
 });
 
-export const getVegaInspectorView = () =>
+interface VegaInspectorViewDependencies {
+  uiSettings: IUiSettingsClient;
+}
+
+export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies) =>
   ({
     title: vegaDebugLabel,
-    shouldShow(adapters) {
+    shouldShow(adapters: VegaInspectorAdapters) {
       return Boolean(adapters.vega);
     },
-    component: VegaDataInspector,
+    component: ({ adapters }: VegaInspectorAdapters) => (
+      <KibanaContextProvider services={dependencies}>
+        <VegaDataInspector adapters={adapters}> </VegaDataInspector>
+      </KibanaContextProvider>
+    ),
   } as InspectorViewDescription);
 
 export const createInspectorAdapters = (): VegaInspectorAdapters => ({

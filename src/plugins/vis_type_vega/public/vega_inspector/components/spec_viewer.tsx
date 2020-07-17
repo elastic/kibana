@@ -27,10 +27,10 @@ import {
   EuiCopy,
   EuiButtonIcon,
   EuiSpacer,
-  EuiCodeEditor,
   EuiToolTip,
 } from '@elastic/eui';
 import { VegaAdapter } from '../vega_adapter';
+import { CodeEditor } from '../../../../kibana_react/public';
 
 interface SpecViewerProps {
   vegaAdapter: VegaAdapter;
@@ -80,16 +80,22 @@ export const SpecViewer = ({ vegaAdapter }: SpecViewerProps) => {
         </EuiCopy>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        <EuiCodeEditor
-          mode="json"
-          width="100%"
-          height="100%"
+        <CodeEditor
+          languageId="json"
           value={spec}
-          setOptions={{
-            showLineNumbers: false,
-            tabSize: 2,
+          onChange={() => {}}
+          options={{
+            readOnly: true,
+            lineNumbers: 'off',
+            fontSize: 12,
+            minimap: {
+              enabled: false,
+            },
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            automaticLayout: true,
           }}
-          isReadOnly
         />
       </EuiFlexItem>
     </EuiFlexGroup>

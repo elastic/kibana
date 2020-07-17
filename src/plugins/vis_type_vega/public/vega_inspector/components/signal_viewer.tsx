@@ -19,6 +19,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { VegaAdapter, InspectSignalsSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
 
@@ -27,6 +28,10 @@ interface SignalViewerProps {
 }
 
 const initialSignalColumnWidth = 150;
+
+const signalDataGridAriaLabel = i18n.translate('visTypeVega.inspector.signalViewer.gridAreaLabel', {
+  defaultMessage: 'Signal Values data grid',
+});
 
 export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {
   const [inspectSignalsSets, setInspectSignalsSets] = useState<InspectSignalsSets>();
@@ -37,7 +42,6 @@ export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {
         setInspectSignalsSets(signalSets);
       }
     });
-
     return () => {
       subscription.unsubscribe();
     };
@@ -61,6 +65,7 @@ export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {
           return column;
         })}
         data={inspectSignalsSets.data}
+        dataGridAriaLabel={signalDataGridAriaLabel}
       />
     </>
   );
