@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexField, IFieldSubType } from '../../graphql/types';
+import { IndexField } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
+import { IFieldSubType } from '../../../../../../src/plugins/data/common';
 
 export interface FieldsAdapter {
   getIndexFields(req: FrameworkRequest, indices: string[]): Promise<IndexField[]>;
