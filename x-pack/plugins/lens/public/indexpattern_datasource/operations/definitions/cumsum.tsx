@@ -72,7 +72,8 @@ export const cumsumOperation: OperationDefinition<MathIndexPatternColumn> = {
       const currentBucket = getBucket(row);
       const previous = table.rows.slice(0, index).reverse();
       const veryPreviousRow = previous.find((r) => getBucket(r) === currentBucket);
-      row[column.id] = (veryPreviousRow ? veryPreviousRow[column.id] : 0) + row[column.children![0].id];
+      row[column.id] =
+        (veryPreviousRow ? veryPreviousRow[column.id] : 0) + row[column.children![0].id];
       return row;
     });
     return table;

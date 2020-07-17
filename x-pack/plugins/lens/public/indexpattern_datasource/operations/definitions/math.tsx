@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { EuiFieldText } from '@elastic/eui';
+import { evaluate } from 'tinymath';
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
-import React from 'react';
-import { EuiFieldText } from '@elastic/eui';
 
 const mathLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Math',
@@ -21,6 +22,8 @@ export type MathIndexPatternColumn = FormattedIndexPatternColumn & {
     tinyMathExpression: string;
   };
 };
+
+const varnames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
 
 export const mathOperation: OperationDefinition<MathIndexPatternColumn> = {
   type: 'math',
@@ -62,9 +65,15 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn> = {
     };
   },
   clientSideExecution(column, table) {
-    // TODO for each row,  execute column.params.tinyMathExpression, pass in all children columns as params A-Z
     table.columns.push({ id: column.id, name: 'Math' });
-    table.rows = table.rows.map((row) => ({ ...row, [column.id]: 0 }));
+    table.rows = table.rows.map((row) => {
+      const params: Record<string, number> = {};
+      column.children.forEach((child, index) => {
+        params[varnames[index]] = row[child.id];
+      });
+      const result = evaluate(column.params.tinyMathExpression, params);
+      return { ...row, [column.id]: result };
+    });
     return table;
   },
   isTransferable: () => {

@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiListGroupItemProps,
   EuiButton,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
@@ -36,6 +37,8 @@ import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 import uuid from 'uuid';
+
+const varnames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
 
 const operationPanels = getOperationDisplay();
 
@@ -285,7 +288,14 @@ export function PopoverEditor(props: PopoverEditorProps) {
             if (!cursor.children) {
               cursor.children = [];
             }
-            cursor.children.push(newColumn);
+            if (
+              operationDefinitionMap[cursor.operationType].canAcceptChild &&
+              operationDefinitionMap[cursor.operationType].canAcceptChild!(cursor, newColumn)
+            ) {
+              cursor.children.push(newColumn);
+            } else {
+              cursor.children = [newColumn];
+            }
 
             // TODO this is super dirty - as we mutated the original tree, we just set it back to itself. Should make a copy
             const newEditState = { ...editState };
@@ -365,7 +375,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   });
                 }
 
-                // TODO make sure it's put into the right place in the tree
                 setState(
                   changeColumn({
                     state,
@@ -514,125 +523,149 @@ export function PopoverEditor(props: PopoverEditorProps) {
       column && operationDefinitionMap[column.operationType].builderParamEditor;
     return (
       <React.Fragment key={column.id}>
-        <p>Selected operation: {column.operationType}</p>
-        {!operationDefinitionMap[column.operationType].nonLeaveNode && (
-          <FieldSelect
-            currentIndexPattern={currentIndexPattern}
-            existingFields={state.existingFields}
-            fieldMap={fieldMap}
-            incompatibleSelectedOperationType={null}
-            operationFieldSupportMatrix={operationFieldSupportMatrix}
-            selectedColumnOperationType={editState && editState.operationType}
-            selectedColumnSourceField={hasField(column) ? column.sourceField : undefined}
-            onDeleteColumn={() => {}}
-            onChoose={(choice) => {
-              const newColumn = changeField(column, currentIndexPattern, fieldMap[choice.field]);
-
-              const nodeQueue = [editState];
-
-              while (nodeQueue.length > 0) {
-                const currentNode = nodeQueue.shift();
-                if (currentNode === column) {
-                  // eslint-disable-next-line guard-for-in
-                  for (const key in newColumn) {
-                    currentNode[key] = newColumn[key];
-                  }
-                  break;
-                }
-                nodeQueue.push(...(currentNode.children || []));
-              }
-
-              // TODO this is super dirty - as we mutated the original tree, we just set it back to itself. Should make a copy
-              const newEditState = { ...editState };
-              setEditState(newEditState);
-              if (cursor === editState) {
-                setCursor(newEditState);
-              }
-            }}
-          />
-        )}
-        {cursor !== column && operationDefinitionMap[column.operationType].nonLeaveNode && (
-          <EuiButton
-            onClick={() => {
-              setCursor(column);
-            }}
+        <EuiFlexGroup gutterSize="s" direction="row">
+          <EuiFlexItem
+            grow={operationDefinitionMap[column.operationType].nonLeaveNode && !BuilderParamEditor}
           >
-            Edit here
-          </EuiButton>
-        )}
-        <EuiButton
-          onClick={() => {
-            if (editState === column) {
-              setEditState(undefined);
-              setCursor(undefined);
-              return;
-            }
-            const nodeQueue = [editState];
+            {column.operationType === 'math' ? 'Calculate ' : `${column.operationType} of`}
+          </EuiFlexItem>
+          {!operationDefinitionMap[column.operationType].nonLeaveNode && (
+            <EuiFlexItem grow={true}>
+              <FieldSelect
+                currentIndexPattern={currentIndexPattern}
+                existingFields={state.existingFields}
+                fieldMap={fieldMap}
+                incompatibleSelectedOperationType={null}
+                operationFieldSupportMatrix={operationFieldSupportMatrix}
+                selectedColumnOperationType={editState && editState.operationType}
+                selectedColumnSourceField={hasField(column) ? column.sourceField : undefined}
+                onDeleteColumn={() => {}}
+                onChoose={(choice) => {
+                  const newColumn = changeField(
+                    column,
+                    currentIndexPattern,
+                    fieldMap[choice.field]
+                  );
 
-            while (nodeQueue.length > 0) {
-              const currentNode = nodeQueue.shift();
-              for (const index in currentNode.children || []) {
-                if (currentNode.children![index] === column) {
-                  currentNode.children = currentNode.children!.filter((child) => child !== column);
+                  const nodeQueue = [editState];
+
+                  while (nodeQueue.length > 0) {
+                    const currentNode = nodeQueue.shift();
+                    if (currentNode === column) {
+                      // eslint-disable-next-line guard-for-in
+                      for (const key in newColumn) {
+                        currentNode[key] = newColumn[key];
+                      }
+                      break;
+                    }
+                    nodeQueue.push(...(currentNode.children || []));
+                  }
+
+                  // TODO this is super dirty - as we mutated the original tree, we just set it back to itself. Should make a copy
+                  const newEditState = { ...editState };
+                  setEditState(newEditState);
+                  if (cursor === editState) {
+                    setCursor(newEditState);
+                  }
+                }}
+              />
+            </EuiFlexItem>
+          )}
+          {BuilderParamEditor && (
+            <EuiFlexItem grow={true}>
+              <BuilderParamEditor
+                setColumn={(newColumn) => {
+                  const nodeQueue = [editState];
+
+                  while (nodeQueue.length > 0) {
+                    const currentNode = nodeQueue.shift();
+                    if (currentNode.id === column.id) {
+                      // eslint-disable-next-line guard-for-in
+                      for (const key in newColumn) {
+                        currentNode[key] = newColumn[key];
+                      }
+                      break;
+                    }
+                    nodeQueue.push(...(currentNode.children || []));
+                  }
+
+                  // TODO this is super dirty - as we mutated the original tree, we just set it back to itself. Should make a copy
+                  const newEditState = { ...editState };
+                  setEditState(newEditState);
+                  if (cursor === editState) {
+                    setCursor(newEditState);
+                  }
+                }}
+                columnId={column.id}
+                currentColumn={column}
+                storage={props.storage}
+                uiSettings={props.uiSettings}
+                savedObjectsClient={props.savedObjectsClient}
+                layerId={layerId}
+                http={props.http}
+                dateRange={props.dateRange}
+                data={props.data}
+              />
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+          )}
+          {column.operationType === 'math' && <EuiFlexItem>based on</EuiFlexItem>}
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="trash"
+              onClick={() => {
+                if (editState === column) {
+                  setEditState(undefined);
+                  setCursor(undefined);
+                  return;
                 }
-              }
-              nodeQueue.push(...(currentNode.children || []));
-            }
-
-            // TODO this is super dirty - as we mutated the original tree, we just set it back to itself. Should make a copy
-            const newEditState = { ...editState };
-            setEditState({ ...editState });
-            // reset cursor to the root, can be smarter
-            setCursor(newEditState);
-          }}
-        >
-          Delete
-        </EuiButton>
-        {BuilderParamEditor && (
-          <>
-            <BuilderParamEditor
-              setColumn={(newColumn) => {
                 const nodeQueue = [editState];
 
                 while (nodeQueue.length > 0) {
                   const currentNode = nodeQueue.shift();
-                  if (currentNode === column) {
-                    // eslint-disable-next-line guard-for-in
-                    for (const key in newColumn) {
-                      currentNode[key] = newColumn[key];
+                  for (const index in currentNode.children || []) {
+                    if (currentNode.children![index] === column) {
+                      currentNode.children = currentNode.children!.filter(
+                        (child) => child !== column
+                      );
                     }
-                    break;
                   }
                   nodeQueue.push(...(currentNode.children || []));
                 }
 
                 // TODO this is super dirty - as we mutated the original tree, we just set it back to itself. Should make a copy
                 const newEditState = { ...editState };
-                setEditState(newEditState);
-                if (cursor === editState) {
-                  setCursor(newEditState);
-                }
+                setEditState({ ...editState });
+                // reset cursor to the root, can be smarter
+                setCursor(newEditState);
               }}
-              columnId={column.id}
-              currentColumn={column}
-              storage={props.storage}
-              uiSettings={props.uiSettings}
-              savedObjectsClient={props.savedObjectsClient}
-              layerId={layerId}
-              http={props.http}
-              dateRange={props.dateRange}
-              data={props.data}
             />
-            <EuiSpacer size="m" />
-          </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {cursor !== column && operationDefinitionMap[column.operationType].nonLeaveNode && (
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+          <div
+            onClick={() => {
+              setCursor(column);
+            }}
+            style={{ height: 2, margin: '7px 0', backgroundColor: 'grey' }}
+          ></div>
         )}
-        {cursor === column && <p>The cursor is here</p>}
+
+        {cursor === column && (
+          <div style={{ height: 1, margin: '7px 0', backgroundColor: '#017D73' }}></div>
+        )}
         {column.children &&
           column.children.length === 1 &&
           column.children.map((childColumn) => renderBuilderNode(childColumn))}
         {column.children && column.children.length > 1 && (
-          <div style={{ marginLeft: 50 }}>
-            {column.children.map((childColumn) => renderBuilderNode(childColumn))}
+          <div style={{ marginLeft: 10 }}>
+            {column.children.map((childColumn, index) => (
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>{varnames[index]}:</EuiFlexItem>
+                <EuiFlexItem>{renderBuilderNode(childColumn)}</EuiFlexItem>
+              </EuiFlexGroup>
+            ))}
           </div>
         )}
       </React.Fragment>
@@ -640,7 +673,11 @@ export function PopoverEditor(props: PopoverEditorProps) {
   }
 
   return (
-    <div id={columnId} className="lnsIndexPatternDimensionEditor">
+    <div
+      id={columnId}
+      className="lnsIndexPatternDimensionEditor"
+      style={{ width: builderMode ? 670 : undefined }}
+    >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={null} className={classNames('lnsIndexPatternDimensionEditor__left')}>
           <EuiListGroup gutterSize="none" listItems={getBuilderSideNavItems()} />
@@ -649,22 +686,25 @@ export function PopoverEditor(props: PopoverEditorProps) {
           {editState && renderBuilderNode(editState)}
 
           {editState && (
-            <EuiButton
-              onClick={() => {
-                console.log(editState);
-                setState(
-                  changeColumn({
-                    state,
-                    layerId,
-                    columnId,
-                    newColumn: editState,
-                  })
-                );
-                // TODO flush it into the actual state
-              }}
-            >
-              Apply
-            </EuiButton>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => {
+                    setState(
+                      changeColumn({
+                        state,
+                        layerId,
+                        columnId,
+                        newColumn: editState,
+                        keepParams: false,
+                      })
+                    );
+                  }}
+                >
+                  Apply
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )}
 
           {selectedColumn && selectedColumn.dataType === 'number' ? (

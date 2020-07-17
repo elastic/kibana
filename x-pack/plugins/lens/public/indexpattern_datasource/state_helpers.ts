@@ -114,7 +114,11 @@ export function changeColumn<C extends IndexPatternColumn>({
     if (!currentNode.children) {
       currentNode.children = [];
     }
-    currentNode.children.push(col);
+    if (!currentNode.children.find((c) => c.id === col.id)) {
+      currentNode.children.push(col);
+    } else {
+      currentNode.children = currentNode.children.map((c) => (c.id === col.id ? col : c));
+    }
   });
 
   return {
