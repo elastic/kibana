@@ -72,7 +72,11 @@ export const SpecViewer = ({ vegaAdapter }: SpecViewerProps) => {
         <EuiCopy textToCopy={spec}>
           {(copy) => (
             <EuiToolTip content={copyToClipboardLabel} delay="long">
-              <EuiButtonIcon iconType="copyClipboard" onClick={copy} />
+              <EuiButtonIcon
+                iconType="copyClipboard"
+                onClick={copy}
+                aria-label={copyToClipboardLabel}
+              />
             </EuiToolTip>
           )}
         </EuiCopy>
