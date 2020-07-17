@@ -249,7 +249,7 @@ def updateComment(commentId, message) {
     def path = "repos/elastic/kibana/issues/comments/${commentId}"
     def json = toJSON([ body: message ]).toString()
 
-    def resp = githubApi([ path: path ], [ method: "PATCH", data: json ])
+    def resp = githubApi([ path: path ], [ method: "POST", data: json, headers: [ "X-HTTP-Method-Override": "PATCH" ] ])
     return toJSON(resp)
   }
 }
