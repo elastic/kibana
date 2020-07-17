@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import expectedErrorRate from './expectations/error_rate.json';
+import expectedErrorRate from './expectation/error_rate.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import expectedTransactionCharts from './expectations/transaction_charts.json';
+import expectedTransactionCharts from './expectation/transaction_charts.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
