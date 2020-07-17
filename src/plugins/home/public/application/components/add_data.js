@@ -226,7 +226,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               >
                 <FormattedMessage
                   id="home.addData.securitySolution.addSecurityEventsButtonLabel"
-                  defaultMessage="Add events"
+                  defaultMessage="Add Security"
                 />
               </EuiButton>
             }
