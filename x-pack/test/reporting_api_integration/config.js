@@ -16,6 +16,7 @@ export default async function ({ readConfigFile }) {
     { allow: true, protocol: 'http:' },
     { allow: false, host: 'via.placeholder.com' },
     { allow: true, protocol: 'https:' },
+    { allow: true, protocol: 'data:' },
     { allow: false },
   ];
 
