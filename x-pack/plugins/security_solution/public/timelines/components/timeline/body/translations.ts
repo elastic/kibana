@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 export const NOTES_TOOLTIP = i18n.translate(
   'xpack.securitySolution.timeline.body.notes.addOrViewNotesForThisEventTooltip',
   {
-    defaultMessage: 'Add or view notes for this event',
+    defaultMessage: 'Add notes for this event',
   }
 );
 
 export const NOTES_DISABLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.timeline.body.notes.disableEventTooltip',
   {
-    defaultMessage: 'Add notes for event filtered by a timeline template is not allowed',
+    defaultMessage: 'Notes may not be added here while editing a template timeline',
   }
 );
 
@@ -45,10 +45,24 @@ export const PINNED_WITH_NOTES = i18n.translate(
   }
 );
 
+export const SORTED_ASCENDING = i18n.translate(
+  'xpack.securitySolution.timeline.body.sort.sortedAscendingTooltip',
+  {
+    defaultMessage: 'Sorted ascending',
+  }
+);
+
+export const SORTED_DESCENDING = i18n.translate(
+  'xpack.securitySolution.timeline.body.sort.sortedDescendingTooltip',
+  {
+    defaultMessage: 'Sorted descending',
+  }
+);
+
 export const DISABLE_PIN = i18n.translate(
   'xpack.securitySolution.timeline.body.pinning.disablePinnnedTooltip',
   {
-    defaultMessage: 'This event cannot be pinned because it is filtered by a timeline template',
+    defaultMessage: 'This event may not be pinned while editing a template timeline',
   }
 );
 
@@ -63,6 +77,13 @@ export const COLLAPSE = i18n.translate(
   'xpack.securitySolution.timeline.body.actions.collapseAriaLabel',
   {
     defaultMessage: 'Collapse',
+  }
+);
+
+export const COLLAPSE_EVENT = i18n.translate(
+  'xpack.securitySolution.timeline.body.actions.collapseEventTooltip',
+  {
+    defaultMessage: 'Collapse event',
   }
 );
 

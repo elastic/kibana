@@ -5,11 +5,20 @@ source "$KIBANA_DIR/src/dev/ci_setup/setup_percy.sh"
 
 echo " -> building and extracting default Kibana distributable"
 cd "$KIBANA_DIR"
-node scripts/build --debug
+node scripts/build --debug --no-oss
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$PARENT_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+
+# cd "$KIBANA_DIR"
+# source "test/scripts/jenkins_xpack_page_load_metrics.sh"
+
+cd "$KIBANA_DIR"
+source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
+
+cd "$KIBANA_DIR"
+source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
 
 echo " -> running visual regression tests from x-pack directory"
 cd "$XPACK_DIR"
@@ -18,9 +27,3 @@ yarn percy exec -t 10000 -- -- \
     --debug --bail \
     --kibana-install-dir "$installDir" \
     --config test/visual_regression/config.ts;
-
-# cd "$KIBANA_DIR"
-# source "test/scripts/jenkins_xpack_page_load_metrics.sh"
-
-cd "$XPACK_DIR"
-source "$KIBANA_DIR/test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"

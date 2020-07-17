@@ -18,12 +18,13 @@
  */
 
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
-import { finalize, filter } from 'rxjs/operators';
+import { finalize, filter, tap } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
 import { ISearchOptions } from './types';
 import { getLongQueryNotification } from './long_query_notification';
+import { SearchUsageCollector } from './collectors';
 
 const LONG_QUERY_NOTIFICATION_DELAY = 10000;
 
@@ -32,6 +33,7 @@ export interface SearchInterceptorDeps {
   application: ApplicationStart;
   http: CoreStart['http'];
   uiSettings: CoreStart['uiSettings'];
+  usageCollector?: SearchUsageCollector;
 }
 
 export class SearchInterceptor {
@@ -121,6 +123,13 @@ export class SearchInterceptor {
       this.pendingCount$.next(++this.pendingCount);
 
       return this.runSearch(request, combinedSignal).pipe(
+        tap({
+          next: (e) => {
+            if (this.deps.usageCollector) {
+              this.deps.usageCollector.trackSuccess(e.rawResponse.took);
+            }
+          },
+        }),
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           cleanup();
@@ -185,6 +194,9 @@ export class SearchInterceptor {
     if (this.longRunningToast) {
       this.deps.toasts.remove(this.longRunningToast);
       delete this.longRunningToast;
+      if (this.deps.usageCollector) {
+        this.deps.usageCollector.trackLongQueryDialogDismissed();
+      }
     }
   };
 }

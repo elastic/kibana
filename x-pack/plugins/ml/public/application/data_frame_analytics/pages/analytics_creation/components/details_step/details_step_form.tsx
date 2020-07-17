@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useRef } from 'react';
+import React, { FC, Fragment, useRef, useEffect } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -21,6 +22,8 @@ import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/us
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
+import { ml } from '../../../../../services/ml_api_service';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
@@ -28,7 +31,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   setCurrentStep,
 }) => {
   const {
-    services: { docLinks },
+    services: { docLinks, notifications },
   } = useMlKibana();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
@@ -47,6 +50,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     jobIdExists,
     jobIdInvalidMaxLength,
     jobIdValid,
+    resultsField,
   } = form;
   const forceInput = useRef<HTMLInputElement | null>(null);
 
@@ -57,6 +61,32 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     destinationIndexNameEmpty === true ||
     destinationIndexNameValid === false ||
     (destinationIndexPatternTitleExists === true && createIndexPattern === true);
+
+  const debouncedIndexCheck = debounce(async () => {
+    try {
+      const { exists } = await ml.checkIndexExists({ index: destinationIndex });
+      setFormState({ destinationIndexNameExists: exists });
+    } catch (e) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.ml.dataframe.analytics.create.errorCheckingIndexExists', {
+          defaultMessage: 'The following error occurred getting the existing index names: {error}',
+          values: { error: extractErrorMessage(e) },
+        })
+      );
+    }
+  }, 400);
+
+  useEffect(() => {
+    if (destinationIndexNameValid === true) {
+      debouncedIndexCheck();
+    } else if (destinationIndex.trim() === '' && destinationIndexNameExists === true) {
+      setFormState({ destinationIndexNameExists: false });
+    }
+
+    return () => {
+      debouncedIndexCheck.cancel();
+    };
+  }, [destinationIndex]);
 
   return (
     <Fragment>
@@ -193,6 +223,22 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           )}
           isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
           data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldLabel', {
+          defaultMessage: 'Results field',
+        })}
+        helpText={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldHelpText', {
+          defaultMessage:
+            'Defines the name of the field in which to store the results of the analysis. Defaults to ml.',
+        })}
+      >
+        <EuiFieldText
+          disabled={isJobCreated}
+          value={resultsField}
+          onChange={(e) => setFormState({ resultsField: e.target.value })}
+          data-test-subj="mlAnalyticsCreateJobWizardResultsFieldInput"
         />
       </EuiFormRow>
       <EuiFormRow

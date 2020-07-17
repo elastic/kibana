@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { MetricAggType, IMetricAggConfig } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { GetInternalStartServicesFn } from '../../../types';
 import { BaseAggParams } from '../types';
 
 const uniqueCountTitle = i18n.translate('data.search.aggs.metrics.uniqueCountTitle', {
@@ -32,39 +31,28 @@ export interface AggParamsCardinality extends BaseAggParams {
   field: string;
 }
 
-export interface CardinalityMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
-}
-
-export const getCardinalityMetricAgg = ({
-  getInternalStartServices,
-}: CardinalityMetricAggDependencies) =>
-  new MetricAggType(
-    {
-      name: METRIC_TYPES.CARDINALITY,
-      title: uniqueCountTitle,
-      makeLabel(aggConfig: IMetricAggConfig) {
-        return i18n.translate('data.search.aggs.metrics.uniqueCountLabel', {
-          defaultMessage: 'Unique count of {field}',
-          values: { field: aggConfig.getFieldDisplayName() },
-        });
-      },
-      getSerializedFormat(agg) {
-        return {
-          id: 'number',
-        };
-      },
-      params: [
-        {
-          name: 'field',
-          type: 'field',
-          filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-            (type) => type !== KBN_FIELD_TYPES.HISTOGRAM
-          ),
-        },
-      ],
+export const getCardinalityMetricAgg = () =>
+  new MetricAggType({
+    name: METRIC_TYPES.CARDINALITY,
+    title: uniqueCountTitle,
+    makeLabel(aggConfig: IMetricAggConfig) {
+      return i18n.translate('data.search.aggs.metrics.uniqueCountLabel', {
+        defaultMessage: 'Unique count of {field}',
+        values: { field: aggConfig.getFieldDisplayName() },
+      });
     },
-    {
-      getInternalStartServices,
-    }
-  );
+    getSerializedFormat(agg) {
+      return {
+        id: 'number',
+      };
+    },
+    params: [
+      {
+        name: 'field',
+        type: 'field',
+        filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
+          (type) => type !== KBN_FIELD_TYPES.HISTOGRAM
+        ),
+      },
+    ],
+  });

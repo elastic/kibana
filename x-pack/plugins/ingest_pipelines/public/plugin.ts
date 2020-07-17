@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from 'src/core/public';
 
-import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
 import { Dependencies } from './types';
@@ -25,7 +24,7 @@ export class IngestPipelinesPlugin implements Plugin {
       defaultMessage: 'Ingest Node Pipelines',
     });
 
-    management.sections.getSection(ManagementSectionId.Ingest).registerApp({
+    management.sections.section.ingest.registerApp({
       id: PLUGIN_ID,
       order: 1,
       title: pluginName,

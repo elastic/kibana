@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { CloudSetup } from '../../cloud/public';
-import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 import { NEXT_MAJOR_VERSION } from '../common/version';
 import { Config } from '../common/config';
@@ -26,7 +27,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
       return;
     }
 
-    const appRegistrar = management.sections.getSection(ManagementSectionId.Stack);
+    const appRegistrar = management.sections.section.stack;
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
     const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {

@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-source test/scripts/jenkins_test_setup_xpack.sh
+source test/scripts/jenkins_test_setup.sh
+
+installDir="$PARENT_DIR/install/kibana"
+destDir="${installDir}-${CI_WORKER_NUMBER}"
+cp -R "$installDir" "$destDir"
+
+export KIBANA_INSTALL_DIR="$destDir"
 
 echo " -> Running security solution cypress tests"
 cd "$XPACK_DIR"

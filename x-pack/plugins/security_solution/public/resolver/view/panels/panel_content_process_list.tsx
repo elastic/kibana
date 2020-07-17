@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 import * as event from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { CrumbInfo, formatter, StyledBreadcrumbs } from './panel_content_utilities';
@@ -20,6 +21,27 @@ import { useResolverDispatch } from '../use_resolver_dispatch';
 import { SideEffectContext } from '../side_effect_context';
 import { CubeForProcess } from './process_cube_icon';
 import { ResolverEvent } from '../../../../common/endpoint/types';
+import { LimitWarning } from '../limit_warnings';
+
+const StyledLimitWarning = styled(LimitWarning)`
+  flex-flow: row wrap;
+  display: block;
+  align-items: baseline;
+  margin-top: 1em;
+
+  & .euiCallOutHeader {
+    display: inline;
+    margin-right: 0.25em;
+  }
+
+  & .euiText {
+    display: inline;
+  }
+
+  & .euiText p {
+    display: inline;
+  }
+`;
 
 /**
  * The "default" view for the panel: A list of all the processes currently in the graph.
@@ -124,7 +146,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     [pushToQueryParams, handleBringIntoViewClick, isProcessOrigin, isProcessTerminated]
   );
 
-  const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
+  const { processNodePositions } = useSelector(selectors.layout);
   const processTableView: ProcessTableView[] = useMemo(
     () =>
       [...processNodePositions.keys()].map((processEvent) => {
@@ -145,6 +167,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
       }),
     [processNodePositions]
   );
+  const numberOfProcesses = processTableView.length;
 
   const crumbs = useMemo(() => {
     return [
@@ -160,9 +183,13 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     ];
   }, []);
 
+  const children = useSelector(selectors.hasMoreChildren);
+  const ancestors = useSelector(selectors.hasMoreAncestors);
+  const showWarning = children === true || ancestors === true;
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
+      {showWarning && <StyledLimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />
     </>

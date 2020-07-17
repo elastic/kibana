@@ -16,7 +16,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
 // @ts-ignore
@@ -79,7 +79,7 @@ export class RollupPlugin implements Plugin {
       defaultMessage: 'Rollup Jobs',
     });
 
-    management.sections.getSection(ManagementSectionId.Data).registerApp({
+    management.sections.section.data.registerApp({
       id: 'rollup_jobs',
       title: pluginName,
       order: 4,

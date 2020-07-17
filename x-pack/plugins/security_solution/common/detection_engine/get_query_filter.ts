@@ -11,7 +11,10 @@ import {
   buildEsQuery,
   Query as DataQuery,
 } from '../../../../../src/plugins/data/common';
-import { ExceptionListItemSchema } from '../../../lists/common/schemas';
+import {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '../../../lists/common/schemas';
 import { buildQueryExceptions } from './build_exceptions_query';
 import { Query, Language, Index } from './schemas/common/schemas';
 
@@ -20,14 +23,24 @@ export const getQueryFilter = (
   language: Language,
   filters: Array<Partial<Filter>>,
   index: Index,
-  lists: ExceptionListItemSchema[]
+  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  excludeExceptions: boolean = true
 ) => {
   const indexPattern: IIndexPattern = {
     fields: [],
     title: index.join(),
   };
 
-  const queries: DataQuery[] = buildQueryExceptions({ query, language, lists });
+  const initialQuery = [{ query, language }];
+  /*
+   * Pinning exceptions to 'kuery' because lucene
+   * does not support nested queries, while our exceptions
+   * UI does, since we can pass both lucene and kql into
+   * buildEsQuery, this allows us to offer nested queries
+   * regardless
+   */
+  const exceptions = buildQueryExceptions({ language: 'kuery', lists, exclude: excludeExceptions });
+  const queries: DataQuery[] = [...initialQuery, ...exceptions];
 
   const config = {
     allowLeadingWildcards: true,

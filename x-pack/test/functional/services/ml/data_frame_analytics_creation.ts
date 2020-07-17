@@ -128,8 +128,64 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreationDataGrid loaded', { timeout: 5000 });
     },
 
+    async assertIndexPreviewHistogramChartButtonExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreationDataGridHistogramButton');
+    },
+
+    async enableSourceDataPreviewHistogramCharts() {
+      await this.assertSourceDataPreviewHistogramChartButtonCheckState(false);
+      await testSubjects.click('mlAnalyticsCreationDataGridHistogramButton');
+      await this.assertSourceDataPreviewHistogramChartButtonCheckState(true);
+    },
+
+    async assertSourceDataPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute(
+          'mlAnalyticsCreationDataGridHistogramButton',
+          'aria-checked'
+        )) === 'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertSourceDataPreviewHistogramCharts(
+      expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
+    ) {
+      // For each chart, get the content of each header cell and assert
+      // the legend text and column id and if the chart should be present or not.
+      await retry.tryForTime(5000, async () => {
+        for (const [index, expected] of expectedHistogramCharts.entries()) {
+          await testSubjects.existOrFail(`mlDataGridChart-${index}`);
+
+          if (expected.chartAvailable) {
+            await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
+          } else {
+            await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
+          }
+
+          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
+          expect(actualLegend).to.eql(
+            expected.legend,
+            `Legend text for column '${index}' should be '${expected.legend}' (got '${actualLegend}')`
+          );
+
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
+          expect(actualId).to.eql(
+            expected.id,
+            `Id text for column '${index}' should be '${expected.id}' (got '${actualId}')`
+          );
+        }
+      });
+    },
+
     async assertIncludeFieldsSelectionExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect', { timeout: 5000 });
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesTable', { timeout: 8000 });
+
+      await retry.tryForTime(8000, async () => {
+        await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect');
+      });
     },
 
     // async assertIncludedFieldsSelection(expectedSelection: string[]) {
@@ -304,6 +360,15 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         expectedValue,
         `Model memory limit should be '${expectedValue}' (got '${actualModelMemory}')`
       );
+    },
+
+    async assertModelMemoryInputPopulated() {
+      const actualModelMemory = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardModelMemoryInput',
+        'value'
+      );
+
+      expect(actualModelMemory).not.to.be('');
     },
 
     async assertPredictionFieldNameValue(expectedValue: string) {

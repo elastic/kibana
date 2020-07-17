@@ -9,7 +9,6 @@ import { get } from 'lodash';
 import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
-import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { PLUGIN, MANAGEMENT_ID } from '../common/constants';
 import { init as initUiMetric } from './app/services/track_ui_metric';
 import { init as initNotification } from './app/services/notifications';
@@ -23,7 +22,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
   public setup(coreSetup: CoreSetup, plugins: PluginDependencies) {
     const { licensing, remoteClusters, usageCollection, management, indexManagement } = plugins;
-    const esSection = management.sections.getSection(ManagementSectionId.Data);
+    const esSection = management.sections.section.data;
 
     const {
       http,

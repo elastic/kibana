@@ -26,21 +26,21 @@ const DOWNLOAD_DIRECTORY = '.native_modules';
 const packages = [
   {
     name: 're2',
-    version: '1.14.0',
+    version: '1.15.4',
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
       darwin: {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/darwin-x64-64.gz',
-        sha256: '54c8386cb7cd53895cf379522114bfe82378e300e127e58d392ddd40a77e396f',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-64.gz',
+        sha256: '595c6653d796493ddb288fc0732a0d1df8560099796f55a1dd242357d96bb8d6',
       },
       linux: {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/linux-x64-64.gz',
-        sha256: 'f54f059035e71a7ccb3fa201080e260c41d228d13a8247974b4bb157691b6757',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-64.gz',
+        sha256: 'e743587bc96314edf10c3e659c03168bc374a5cd9a6623ee99d989251e331f28',
       },
-      windows: {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.14.0/win32-x64-64.gz',
-        sha256: 'de708446a8b802f4634c2cfef097c2625a2811fdcd8133dfd7b7c485f966caa9',
+      win32: {
+        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-64.gz',
+        sha256: 'b33de62cda24fb02dc80a19fb79977d686468ac746e97cd211059d2d4c75d529',
       },
     },
   },

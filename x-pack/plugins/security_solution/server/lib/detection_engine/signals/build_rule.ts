@@ -8,6 +8,10 @@ import { pickBy } from 'lodash/fp';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams } from '../types';
+import { buildRiskScoreFromMapping } from './mappings/build_risk_score_from_mapping';
+import { SignalSourceHit } from './types';
+import { buildSeverityFromMapping } from './mappings/build_severity_from_mapping';
+import { buildRuleNameFromMapping } from './mappings/build_rule_name_from_mapping';
 
 interface BuildRuleParams {
   ruleParams: RuleTypeParams;
@@ -17,6 +21,7 @@ interface BuildRuleParams {
   enabled: boolean;
   createdAt: string;
   createdBy: string;
+  doc: SignalSourceHit;
   updatedAt: string;
   updatedBy: string;
   interval: string;
@@ -32,12 +37,33 @@ export const buildRule = ({
   enabled,
   createdAt,
   createdBy,
+  doc,
   updatedAt,
   updatedBy,
   interval,
   tags,
   throttle,
 }: BuildRuleParams): Partial<RulesSchema> => {
+  const { riskScore, riskScoreMeta } = buildRiskScoreFromMapping({
+    doc,
+    riskScore: ruleParams.riskScore,
+    riskScoreMapping: ruleParams.riskScoreMapping,
+  });
+
+  const { severity, severityMeta } = buildSeverityFromMapping({
+    doc,
+    severity: ruleParams.severity,
+    severityMapping: ruleParams.severityMapping,
+  });
+
+  const { ruleName, ruleNameMeta } = buildRuleNameFromMapping({
+    doc,
+    ruleName: name,
+    ruleNameMapping: ruleParams.ruleNameOverride,
+  });
+
+  const meta = { ...ruleParams.meta, ...riskScoreMeta, ...severityMeta, ...ruleNameMeta };
+
   return pickBy<RulesSchema>((value: unknown) => value != null, {
     id,
     rule_id: ruleParams.ruleId ?? '(unknown rule_id)',
@@ -48,9 +74,9 @@ export const buildRule = ({
     saved_id: ruleParams.savedId,
     timeline_id: ruleParams.timelineId,
     timeline_title: ruleParams.timelineTitle,
-    meta: ruleParams.meta,
+    meta: Object.keys(meta).length > 0 ? meta : undefined,
     max_signals: ruleParams.maxSignals,
-    risk_score: ruleParams.riskScore, // TODO: Risk Score Override via risk_score_mapping
+    risk_score: riskScore,
     risk_score_mapping: ruleParams.riskScoreMapping ?? [],
     output_index: ruleParams.outputIndex,
     description: ruleParams.description,
@@ -61,11 +87,11 @@ export const buildRule = ({
     interval,
     language: ruleParams.language,
     license: ruleParams.license,
-    name, // TODO: Rule Name Override via rule_name_override
+    name: ruleName,
     query: ruleParams.query,
     references: ruleParams.references,
     rule_name_override: ruleParams.ruleNameOverride,
-    severity: ruleParams.severity, // TODO: Severity Override via severity_mapping
+    severity,
     severity_mapping: ruleParams.severityMapping ?? [],
     tags,
     type: ruleParams.type,
@@ -83,5 +109,6 @@ export const buildRule = ({
     exceptions_list: ruleParams.exceptionsList ?? [],
     machine_learning_job_id: ruleParams.machineLearningJobId,
     anomaly_threshold: ruleParams.anomalyThreshold,
+    threshold: ruleParams.threshold,
   });
 };
