@@ -6,14 +6,14 @@
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "plugins/*": ["src/legacy/core_plugins/*/public/"],
+      "plugins/*": ["src/plugins/*"],
       "ui/*": [
         "src/legacy/ui/public/*"
       ],
       "test_utils/*": [
         "src/test_utils/public/*"
       ],
-      "fixtures/*": ["src/fixtures/*"]
+      "fixtures/*": ["src/fixtures/*"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
