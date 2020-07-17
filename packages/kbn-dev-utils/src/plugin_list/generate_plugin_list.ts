@@ -24,11 +24,18 @@ import normalizePath from 'normalize-path';
 import { REPO_ROOT } from '../repo_root';
 import { Plugins } from './discover_plugins';
 
-function* printPlugins(plugins: Plugins) {
+function* printPlugins(plugins: Plugins, includes: string[]) {
   for (const plugin of plugins) {
     const path = plugin.relativeReadmePath || plugin.relativeDir;
     yield '';
-    yield `- {kib-repo}blob/{branch}/${path}[${plugin.id}]`;
+
+    if (plugin.readmeAsciidocAnchor) {
+      yield `- <<${plugin.readmeAsciidocAnchor}>>`;
+
+      includes.push(`include::{kibana-root}/${path}[leveloffset=+1]`);
+    } else {
+      yield `- {kib-repo}blob/{branch}/${path}[${plugin.id}]`;
+    }
 
     if (!plugin.relativeReadmePath || plugin.readmeSnippet) {
       yield '';
@@ -39,6 +46,8 @@ function* printPlugins(plugins: Plugins) {
 }
 
 export function generatePluginList(ossPlugins: Plugins, xpackPlugins: Plugins) {
+  const includes: string[] = [];
+
   return `////
 
 NOTE:
@@ -75,10 +84,12 @@ To that aim, we strive to:
 
 [discrete]
 ==== src/plugins
-${Array.from(printPlugins(ossPlugins)).join('\n')}
+${Array.from(printPlugins(ossPlugins, includes)).join('\n')}
 
 [discrete]
 ==== x-pack/plugins
-${Array.from(printPlugins(xpackPlugins)).join('\n')}
+${Array.from(printPlugins(xpackPlugins, includes)).join('\n')}
+
+${Array.from(includes).join('\n')}
 `;
 }

@@ -20,6 +20,7 @@
 import Path from 'path';
 import Fs from 'fs';
 
+import Asciidoc from 'asciidoctor';
 import MarkdownIt from 'markdown-it';
 import cheerio from 'cheerio';
 
@@ -31,6 +32,7 @@ export interface Plugin {
   relativeDir?: string;
   relativeReadmePath?: string;
   readmeSnippet?: string;
+  readmeAsciidocAnchor?: string;
 }
 
 export type Plugins = Plugin[];
@@ -38,14 +40,35 @@ export type Plugins = Plugin[];
 const getReadmeName = (directory: string) =>
   Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.md');
 
+const getReadmeAsciidocName = (directory: string) =>
+  Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.asciidoc');
+
 export const discoverPlugins = (pluginsRootDir: string): Plugins =>
   simpleKibanaPlatformPluginDiscovery([pluginsRootDir], []).map(
     ({ directory, manifest: { id } }): Plugin => {
       const readmeName = getReadmeName(directory);
+      const readmeAsciidocName = getReadmeAsciidocName(directory);
 
       let relativeReadmePath: string | undefined;
       let readmeSnippet: string | undefined;
-      if (readmeName) {
+      let readmeAsciidocAnchor: string | undefined;
+
+      if (readmeAsciidocName) {
+        const readmePath = Path.resolve(directory, readmeAsciidocName);
+        relativeReadmePath = Path.relative(REPO_ROOT, readmePath);
+
+        const asciidoc = Asciidoc().loadFile(relativeReadmePath);
+
+        const parsed = asciidoc.getContent();
+        const $ = cheerio.load(parsed);
+
+        const firstParagraph = $('p')[0];
+        if (firstParagraph) {
+          readmeSnippet = $(firstParagraph).text();
+        }
+
+        readmeAsciidocAnchor = $('h2')[0].attribs.id;
+      } else if (readmeName) {
         const readmePath = Path.resolve(directory, readmeName);
         relativeReadmePath = Path.relative(REPO_ROOT, readmePath);
 
@@ -64,6 +87,7 @@ export const discoverPlugins = (pluginsRootDir: string): Plugins =>
         relativeReadmePath,
         relativeDir: relativeReadmePath || Path.relative(REPO_ROOT, directory),
         readmeSnippet,
+        readmeAsciidocAnchor,
       };
     }
   );

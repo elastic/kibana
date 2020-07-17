@@ -58,9 +58,9 @@ The Charts plugin is a way to create easier integration of shared colors, themes
 WARNING: Missing README.
 
 
-- {kib-repo}blob/{branch}/src/plugins/dashboard[dashboard]
+- <<kibana-dashboard-plugin>>
 
-WARNING: Missing README.
+Registers the dashboard application.
 
 
 - {kib-repo}blob/{branch}/src/plugins/data/README.md[data]
@@ -360,9 +360,10 @@ WARNING: Missing README.
 WARNING: Missing README.
 
 
-- {kib-repo}blob/{branch}/x-pack/plugins/embeddable_enhanced[embeddableEnhanced]
+- <<enhanced-embeddables-plugin>>
 
-WARNING: Missing README.
+Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
+adds dynamic actions to every embeddables state, in order to support drilldowns.
 
 
 - {kib-repo}blob/{branch}/x-pack/plugins/encrypted_saved_objects/README.md[encryptedSavedObjects]
@@ -582,3 +583,6 @@ in their infrastructure.
 
 This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation):
 
+
+include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]

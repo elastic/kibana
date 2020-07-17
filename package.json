@@ -404,6 +404,7 @@
     "@typescript-eslint/parser": "^2.34.0",
     "angular-mocks": "^1.7.9",
     "archiver": "^3.1.1",
+    "asciidoctor": "^2.2.0",
     "axe-core": "^3.4.1",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^25.5.1",
