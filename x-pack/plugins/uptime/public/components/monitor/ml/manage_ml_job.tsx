@@ -6,7 +6,7 @@
 
 import React, { useContext, useState } from 'react';
 
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants';
 import {
@@ -60,6 +60,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
       disabled={hasMLJob && !canDeleteMLJob}
       isLoading={isMLJobCreating || isMLJobLoading}
+      size="s"
     >
       {hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION}
     </EuiButton>
@@ -72,6 +73,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       items: [
         {
           name: labels.EXPLORE_IN_ML_APP,
+          icon: <EuiIcon type="dataVisualizer" size="m" />,
           href: getMLJobLinkHref({
             basePath,
             monitorId,
@@ -84,6 +86,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
           'data-test-subj': anomalyAlert
             ? 'uptimeDisableAnomalyAlertBtn'
             : 'uptimeEnableAnomalyAlertBtn',
+          icon: <EuiIcon type={anomalyAlert ? 'bellSlash' : 'bell'} size="m" />,
           onClick: () => {
             if (anomalyAlert) {
               setIsConfirmAlertDeleteOpen(true);
@@ -96,6 +99,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         {
           name: labels.DISABLE_ANOMALY_DETECTION,
           'data-test-subj': 'uptimeDeleteMLJobBtn',
+          icon: <EuiIcon type="trash" size="m" />,
           onClick: () => {
             setIsPopOverOpen(false);
             onJobDelete();
@@ -111,6 +115,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         button={button}
         isOpen={isPopOverOpen}
         closePopover={() => setIsPopOverOpen(false)}
+        panelPaddingSize="none"
       >
         <EuiContextMenu
           initialPanelId={0}
