@@ -24,7 +24,7 @@ export const getChromiumDisconnectedError = () =>
     })
   );
 
-export const getDisallowedOutgoingUrlError = () =>
+export const getDisallowedOutgoingUrlError = (interceptedUrl: string) =>
   new Error(
     i18n.translate('xpack.reporting.chromiumDriver.disallowedOutgoingUrl', {
       defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}". Failing the request and closing the browser.`,
