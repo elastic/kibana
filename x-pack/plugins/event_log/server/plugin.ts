@@ -17,6 +17,7 @@ import {
   IContextProvider,
   RequestHandler,
 } from 'src/core/server';
+import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 
 import {
   IEventLogConfig,
@@ -39,14 +40,19 @@ const ACTIONS = {
   stopping: 'stopping',
 };
 
+interface PluginSetupDeps {
+  spaces?: SpacesPluginSetup;
+}
+
 export class Plugin implements CorePlugin<IEventLogService, IEventLogClientService> {
   private readonly config$: IEventLogConfig$;
   private systemLogger: Logger;
-  private eventLogService?: IEventLogService;
+  private eventLogService?: EventLogService;
   private esContext?: EsContext;
   private eventLogger?: IEventLogger;
   private globalConfig$: Observable<SharedGlobalConfig>;
   private eventLogClientService?: EventLogClientService;
+  private spacesService?: SpacesServiceSetup;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
@@ -54,13 +60,14 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     this.globalConfig$ = this.context.config.legacy.globalConfig$;
   }
 
-  async setup(core: CoreSetup): Promise<IEventLogService> {
+  async setup(core: CoreSetup, { spaces }: PluginSetupDeps): Promise<IEventLogService> {
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const kibanaIndex = globalConfig.kibana.index;
 
     this.systemLogger.debug('setting up plugin');
 
     const config = await this.config$.pipe(first()).toPromise();
+    this.spacesService = spaces?.spacesService;
 
     this.esContext = createEsContext({
       logger: this.systemLogger,
@@ -89,7 +96,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     // Routes
     const router = core.http.createRouter();
     // Register routes
-    findRoute(router);
+    findRoute(router, this.systemLogger);
 
     return this.eventLogService;
   }
@@ -115,6 +122,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     this.eventLogClientService = new EventLogClientService({
       esContext: this.esContext,
       savedObjectsService: core.savedObjects,
+      spacesService: this.spacesService,
     });
     return this.eventLogClientService;
   }
@@ -125,8 +133,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   > => {
     return async (context, request) => {
       return {
-        getEventLogClient: () =>
-          this.eventLogClientService!.getClient(request, context.core.savedObjects.client),
+        getEventLogClient: () => this.eventLogClientService!.getClient(request),
       };
     };
   };
