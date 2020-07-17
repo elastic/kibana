@@ -30,8 +30,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('dashboard filter bar', () => {
+  describe('dashboard filter bar', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
