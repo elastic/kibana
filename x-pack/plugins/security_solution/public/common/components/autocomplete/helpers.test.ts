@@ -55,49 +55,37 @@ describe('helpers', () => {
 
   describe('#validateParams', () => {
     test('returns true if value is undefined', () => {
-      const isValid = validateParams(undefined, 'date');
+      const isValid = validateParams(undefined, getField('@timestamp'));
 
       expect(isValid).toBeTruthy();
     });
 
     test('returns true if value is empty string', () => {
-      const isValid = validateParams('', 'date');
+      const isValid = validateParams('', getField('@timestamp'));
 
       expect(isValid).toBeTruthy();
     });
 
     test('returns true if type is "date" and value is valid', () => {
-      const isValid = validateParams('1994-11-05T08:15:30-05:00', 'date');
+      const isValid = validateParams('1994-11-05T08:15:30-05:00', getField('@timestamp'));
 
       expect(isValid).toBeTruthy();
     });
 
     test('returns false if type is "date" and value is not valid', () => {
-      const isValid = validateParams('1593478826', 'date');
+      const isValid = validateParams('1593478826', getField('@timestamp'));
 
       expect(isValid).toBeFalsy();
     });
 
     test('returns true if type is "ip" and value is valid', () => {
-      const isValid = validateParams('126.45.211.34', 'ip');
+      const isValid = validateParams('126.45.211.34', getField('ip'));
 
       expect(isValid).toBeTruthy();
     });
 
     test('returns false if type is "ip" and value is not valid', () => {
-      const isValid = validateParams('hellooo', 'ip');
-
-      expect(isValid).toBeFalsy();
-    });
-
-    test('returns true if type is "number" and value is valid', () => {
-      const isValid = validateParams('123', 'number');
-
-      expect(isValid).toBeTruthy();
-    });
-
-    test('returns false if type is "number" and value is not valid', () => {
-      const isValid = validateParams('not a number', 'number');
+      const isValid = validateParams('hellooo', getField('ip'));
 
       expect(isValid).toBeFalsy();
     });

@@ -23,14 +23,7 @@ export const sourceQuery = gql`
           aggregatable
           format
           esTypes
-          subType {
-            multi {
-              parent
-            }
-            nested {
-              path
-            }
-          }
+          subType
         }
       }
     }

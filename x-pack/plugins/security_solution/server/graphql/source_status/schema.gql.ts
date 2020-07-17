@@ -7,16 +7,7 @@
 import gql from 'graphql-tag';
 
 export const sourceStatusSchema = gql`
-  type IFieldSubTypeMulti {
-    parent: String
-  }
-  type IFieldSubTypeNested {
-    path: String
-  }
-  type IFieldSubType {
-    multi: IFieldSubTypeMulti
-    nested: IFieldSubTypeNested
-  }
+  scalar ToIFieldSubTypeNonNullable
 
   "A descriptor of a field in an index"
   type IndexField {
@@ -38,8 +29,8 @@ export const sourceStatusSchema = gql`
     description: String
     format: String
     "the elastic type as mapped in the index"
-    esTypes: [String!]!
-    subType: IFieldSubType
+    esTypes: ToStringArrayNoNullable
+    subType: ToIFieldSubTypeNonNullable
   }
 
   extend type SourceStatus {

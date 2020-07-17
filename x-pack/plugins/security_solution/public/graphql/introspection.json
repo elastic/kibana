@@ -2674,19 +2674,7 @@
             "name": "esTypes",
             "description": "the elastic type as mapped in the index",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-                }
-              }
-            },
+            "type": { "kind": "SCALAR", "name": "ToStringArrayNoNullable", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2694,7 +2682,7 @@
             "name": "subType",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "IFieldSubType", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToIFieldSubTypeNonNullable", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -2705,67 +2693,22 @@
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
-        "name": "IFieldSubType",
+        "kind": "SCALAR",
+        "name": "ToStringArrayNoNullable",
         "description": "",
-        "fields": [
-          {
-            "name": "multi",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "IFieldSubTypeMulti", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "nested",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "IFieldSubTypeNested", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
+        "fields": null,
         "inputFields": null,
-        "interfaces": [],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
-        "name": "IFieldSubTypeMulti",
+        "kind": "SCALAR",
+        "name": "ToIFieldSubTypeNonNullable",
         "description": "",
-        "fields": [
-          {
-            "name": "parent",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
+        "fields": null,
         "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
-        "name": "IFieldSubTypeNested",
-        "description": "",
-        "fields": [
-          {
-            "name": "path",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },

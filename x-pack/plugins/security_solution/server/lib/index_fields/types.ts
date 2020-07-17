@@ -16,6 +16,6 @@ export interface IndexFieldDescriptor {
   type: string;
   searchable: boolean;
   aggregatable: boolean;
-  esTypes?: string[] | null;
-  subType?: IFieldSubType | null;
+  esTypes?: string[];
+  subType?: IFieldSubType;
 }

@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ExceptionListItemComponent } from './exception_item';
+import { ExceptionListItemComponent } from './builder_exception_item';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
   ExceptionListItemSchema,

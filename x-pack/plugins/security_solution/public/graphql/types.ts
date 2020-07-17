@@ -428,6 +428,10 @@ export enum FlowDirection {
   biDirectional = 'biDirectional',
 }
 
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
+
 export type ToStringArray = string[];
 
 export type Date = string;
@@ -628,23 +632,9 @@ export interface IndexField {
 
   format?: Maybe<string>;
   /** the elastic type as mapped in the index */
-  esTypes: string[];
+  esTypes?: Maybe<ToStringArrayNoNullable>;
 
-  subType?: Maybe<IFieldSubType>;
-}
-
-export interface IFieldSubType {
-  multi?: Maybe<IFieldSubTypeMulti>;
-
-  nested?: Maybe<IFieldSubTypeNested>;
-}
-
-export interface IFieldSubTypeMulti {
-  parent?: Maybe<string>;
-}
-
-export interface IFieldSubTypeNested {
-  path?: Maybe<string>;
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 export interface AuthenticationsData {
@@ -2799,29 +2789,9 @@ export namespace SourceQuery {
 
     format: Maybe<string>;
 
-    esTypes: string[];
+    esTypes: Maybe<ToStringArrayNoNullable>;
 
-    subType: Maybe<SubType>;
-  };
-
-  export type SubType = {
-    __typename?: 'IFieldSubType';
-
-    multi: Maybe<Multi>;
-
-    nested: Maybe<Nested>;
-  };
-
-  export type Multi = {
-    __typename?: 'IFieldSubTypeMulti';
-
-    parent: Maybe<string>;
-  };
-
-  export type Nested = {
-    __typename?: 'IFieldSubTypeNested';
-
-    path: Maybe<string>;
+    subType: Maybe<ToIFieldSubTypeNonNullable>;
   };
 }
 

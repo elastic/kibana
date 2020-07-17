@@ -430,6 +430,10 @@ export enum FlowDirection {
   biDirectional = 'biDirectional',
 }
 
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
+
 export type ToStringArray = string[] | string;
 
 export type Date = string;
@@ -630,23 +634,9 @@ export interface IndexField {
 
   format?: Maybe<string>;
   /** the elastic type as mapped in the index */
-  esTypes: string[];
+  esTypes?: Maybe<ToStringArrayNoNullable>;
 
-  subType?: Maybe<IFieldSubType>;
-}
-
-export interface IFieldSubType {
-  multi?: Maybe<IFieldSubTypeMulti>;
-
-  nested?: Maybe<IFieldSubTypeNested>;
-}
-
-export interface IFieldSubTypeMulti {
-  parent?: Maybe<string>;
-}
-
-export interface IFieldSubTypeNested {
-  path?: Maybe<string>;
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 export interface AuthenticationsData {
@@ -3598,9 +3588,9 @@ export namespace IndexFieldResolvers {
 
     format?: FormatResolver<Maybe<string>, TypeParent, TContext>;
     /** the elastic type as mapped in the index */
-    esTypes?: EsTypesResolver<string[], TypeParent, TContext>;
+    esTypes?: EsTypesResolver<Maybe<ToStringArrayNoNullable>, TypeParent, TContext>;
 
-    subType?: SubTypeResolver<Maybe<IFieldSubType>, TypeParent, TContext>;
+    subType?: SubTypeResolver<Maybe<ToIFieldSubTypeNonNullable>, TypeParent, TContext>;
   }
 
   export type CategoryResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
@@ -3648,57 +3638,14 @@ export namespace IndexFieldResolvers {
     Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-  export type EsTypesResolver<R = string[], Parent = IndexField, TContext = SiemContext> = Resolver<
-    R,
-    Parent,
-    TContext
-  >;
-  export type SubTypeResolver<
-    R = Maybe<IFieldSubType>,
+  export type EsTypesResolver<
+    R = Maybe<ToStringArrayNoNullable>,
     Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
-}
-
-export namespace IFieldSubTypeResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = IFieldSubType> {
-    multi?: MultiResolver<Maybe<IFieldSubTypeMulti>, TypeParent, TContext>;
-
-    nested?: NestedResolver<Maybe<IFieldSubTypeNested>, TypeParent, TContext>;
-  }
-
-  export type MultiResolver<
-    R = Maybe<IFieldSubTypeMulti>,
-    Parent = IFieldSubType,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type NestedResolver<
-    R = Maybe<IFieldSubTypeNested>,
-    Parent = IFieldSubType,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace IFieldSubTypeMultiResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = IFieldSubTypeMulti> {
-    parent?: ParentResolver<Maybe<string>, TypeParent, TContext>;
-  }
-
-  export type ParentResolver<
-    R = Maybe<string>,
-    Parent = IFieldSubTypeMulti,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
-export namespace IFieldSubTypeNestedResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = IFieldSubTypeNested> {
-    path?: PathResolver<Maybe<string>, TypeParent, TContext>;
-  }
-
-  export type PathResolver<
-    R = Maybe<string>,
-    Parent = IFieldSubTypeNested,
+  export type SubTypeResolver<
+    R = Maybe<ToIFieldSubTypeNonNullable>,
+    Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -9392,6 +9339,14 @@ export interface DeprecatedDirectiveArgs {
   reason?: string;
 }
 
+export interface ToStringArrayNoNullableScalarConfig
+  extends GraphQLScalarTypeConfig<ToStringArrayNoNullable, any> {
+  name: 'ToStringArrayNoNullable';
+}
+export interface ToIFieldSubTypeNonNullableScalarConfig
+  extends GraphQLScalarTypeConfig<ToIFieldSubTypeNonNullable, any> {
+  name: 'ToIFieldSubTypeNonNullable';
+}
 export interface ToStringArrayScalarConfig extends GraphQLScalarTypeConfig<ToStringArray, any> {
   name: 'ToStringArray';
 }
@@ -9424,9 +9379,6 @@ export type IResolvers<TContext = SiemContext> = {
   SourceFields?: SourceFieldsResolvers.Resolvers<TContext>;
   SourceStatus?: SourceStatusResolvers.Resolvers<TContext>;
   IndexField?: IndexFieldResolvers.Resolvers<TContext>;
-  IFieldSubType?: IFieldSubTypeResolvers.Resolvers<TContext>;
-  IFieldSubTypeMulti?: IFieldSubTypeMultiResolvers.Resolvers<TContext>;
-  IFieldSubTypeNested?: IFieldSubTypeNestedResolvers.Resolvers<TContext>;
   AuthenticationsData?: AuthenticationsDataResolvers.Resolvers<TContext>;
   AuthenticationsEdges?: AuthenticationsEdgesResolvers.Resolvers<TContext>;
   AuthenticationItem?: AuthenticationItemResolvers.Resolvers<TContext>;
@@ -9568,6 +9520,8 @@ export type IResolvers<TContext = SiemContext> = {
   EventsTimelineData?: EventsTimelineDataResolvers.Resolvers<TContext>;
   OsFields?: OsFieldsResolvers.Resolvers<TContext>;
   HostFields?: HostFieldsResolvers.Resolvers<TContext>;
+  ToStringArrayNoNullable?: GraphQLScalarType;
+  ToIFieldSubTypeNonNullable?: GraphQLScalarType;
   ToStringArray?: GraphQLScalarType;
   Date?: GraphQLScalarType;
   ToNumberArray?: GraphQLScalarType;
