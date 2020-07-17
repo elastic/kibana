@@ -57,7 +57,7 @@ export class Manifest {
     schemaVersion: string,
     oldManifest: Manifest
   ): Manifest {
-    const manifest = new Manifest(schemaVersion, oldManifest.getVersion());
+    const manifest = new Manifest(schemaVersion, oldManifest.getSoVersion());
     artifacts.forEach((artifact) => {
       const id = getArtifactId(artifact);
       const existingArtifact = oldManifest.getArtifact(id);
@@ -129,11 +129,11 @@ export class Manifest {
     return this.schemaVersion;
   }
 
-  public getVersion(): string | undefined {
+  public getSoVersion(): string | undefined {
     return this.version;
   }
 
-  public setVersion(version: string) {
+  public setSoVersion(version: string) {
     this.version = version;
   }
 

@@ -257,7 +257,7 @@ export class ManifestManager {
             try {
               await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
               this.logger.debug(
-                `Updated package config ${id} with manifest version ${manifest.getVersion()}`
+                `Updated package config ${id} with manifest version ${manifest.getSha256()}`
               );
             } catch (err) {
               errors.push(err);
@@ -289,7 +289,7 @@ export class ManifestManager {
 
       // Commit the new manifest
       const manifestSo = manifest.toSavedObject();
-      const version = manifest.getVersion();
+      const version = manifest.getSoVersion();
 
       if (version == null) {
         await manifestClient.createManifest(manifestSo);
