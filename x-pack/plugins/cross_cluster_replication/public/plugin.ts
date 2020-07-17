@@ -65,7 +65,6 @@ export class CrossClusterReplicationPlugin implements Plugin {
         });
 
         return () => {
-          // Change tab label back to Kibana.
           docTitle.reset();
           unmountAppCallback();
         };

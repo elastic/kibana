@@ -62,7 +62,6 @@ export class IndexLifecycleManagementPlugin {
           const unmountAppCallback = renderApp(element, I18nContext, history, navigateToApp);
 
           return () => {
-            // Change tab label back to Kibana.
             docTitle.reset();
             unmountAppCallback();
           };

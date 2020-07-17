@@ -65,7 +65,6 @@ export async function mountManagementSection(
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });
 
   return () => {
-    // Change tab label back to Kibana.
     docTitle.reset();
     unmountAppCallback();
   };

@@ -97,7 +97,6 @@ export class RollupPlugin implements Plugin {
         const unmountAppCallback = await renderApp(core, params);
 
         return () => {
-          // Change tab label back to Kibana.
           docTitle.reset();
           unmountAppCallback();
         };

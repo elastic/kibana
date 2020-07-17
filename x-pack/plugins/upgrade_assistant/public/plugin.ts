@@ -50,7 +50,6 @@ export class UpgradeAssistantUIPlugin implements Plugin {
         const unmountAppCallback = await mountManagementSection(coreSetup, isCloudEnabled, params);
 
         return () => {
-          // Change tab label back to Kibana.
           docTitle.reset();
           unmountAppCallback();
         };

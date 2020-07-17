@@ -42,7 +42,6 @@ export class IngestPipelinesPlugin implements Plugin {
         const unmountAppCallback = await mountManagementSection(coreSetup, params);
 
         return () => {
-          // Change tab label back to Kibana.
           docTitle.reset();
           unmountAppCallback();
         };

@@ -71,7 +71,6 @@ export class RemoteClustersUIPlugin
           );
 
           return () => {
-            // Change tab label back to Kibana.
             docTitle.reset();
             unmountAppCallback();
           };
