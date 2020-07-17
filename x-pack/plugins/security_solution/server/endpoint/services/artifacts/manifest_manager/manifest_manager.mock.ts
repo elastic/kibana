@@ -6,7 +6,10 @@
 
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
-import { createPackageConfigMock } from '../../../../../../ingest_manager/common/mocks';
+import {
+  createPackageConfigWithManifestMock,
+  createPackageConfigWithInitialManifestMock,
+} from '../../../../../../ingest_manager/common/mocks';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import { listMock } from '../../../../../../lists/server/mocks';
@@ -42,7 +45,11 @@ export const getManifestManagerMock = (opts?: {
   }
   packageConfigService.list = jest.fn().mockResolvedValue({
     total: 1,
-    items: [{ version: 'abcd', ...createPackageConfigMock() }],
+    items: [
+      { version: 'policy-1-version', ...createPackageConfigWithManifestMock() },
+      { version: 'policy-2-version', ...createPackageConfigWithInitialManifestMock() },
+      { version: 'policy-3-version', ...createPackageConfigWithInitialManifestMock() },
+    ],
   });
 
   let savedObjectsClient = savedObjectsClientMock.create();

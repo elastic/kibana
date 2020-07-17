@@ -111,7 +111,7 @@ describe('ingest_integration tests ', () => {
         ManifestConstants.SCHEMA_VERSION
       );
 
-      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(lastComputed);
+      manifestManager.buildNewManifest = jest.fn().mockResolvedValue(lastComputed); // no diffs
       const callback = getPackageConfigCreateCallback(logger, manifestManager);
       const policyConfig = createNewPackageConfigMock();
       const newPolicyConfig = await callback(policyConfig);

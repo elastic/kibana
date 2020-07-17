@@ -19,9 +19,9 @@ describe('manifest_manager', () => {
       );
       const newManifest = await manifestManager.buildNewManifest(
         ManifestConstants.SCHEMA_VERSION,
-        oldManifest
+        oldManifest!
       );
-      expect(newManifest.diff(oldManifest)).toEqual([
+      expect(newManifest.diff(oldManifest!)).toEqual([
         {
           id:
             'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
@@ -43,9 +43,9 @@ describe('manifest_manager', () => {
       );
       const newManifest = await manifestManager.buildNewManifest(
         ManifestConstants.SCHEMA_VERSION,
-        oldManifest
+        oldManifest!
       );
-      const diffs = newManifest.diff(oldManifest);
+      const diffs = newManifest.diff(oldManifest!);
       expect(diffs).toEqual([
         {
           id:
@@ -94,7 +94,18 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager cannot dispatch incomplete (uncompressed) artifact', async () => {
-      // TODO
+      const packageConfigService = createPackageConfigServiceMock();
+      const manifestManager = getManifestManagerMock({ packageConfigService });
+      const oldManifest = await manifestManager.getLastComputedManifest(
+        ManifestConstants.SCHEMA_VERSION
+      );
+      const newManifest = await manifestManager.buildNewManifest(
+        ManifestConstants.SCHEMA_VERSION,
+        oldManifest!
+      );
+      const dispatchErrors = await manifestManager.tryDispatch(newManifest);
+      expect(dispatchErrors.length).toEqual(1);
+      expect(dispatchErrors[0].message).toEqual('Invalid manifest');
     });
 
     test('ManifestManager can dispatch manifest', async () => {
@@ -105,15 +116,19 @@ describe('manifest_manager', () => {
       );
       const newManifest = await manifestManager.buildNewManifest(
         ManifestConstants.SCHEMA_VERSION,
-        oldManifest
+        oldManifest!
       );
-      const diffs = newManifest.diff(oldManifest);
+      const diffs = newManifest.diff(oldManifest!);
       const newArtifactId = diffs[1].id;
       await newManifest.compressArtifact(newArtifactId);
 
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
 
       expect(dispatchErrors).toEqual([]);
+
+      // 2 policies updated... 1 is already up-to-date
+      expect(packageConfigService.update.mock.calls.length).toEqual(2);
+
       expect(
         packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
       ).toEqual({
@@ -162,13 +177,13 @@ describe('manifest_manager', () => {
       );
       const newManifest = await manifestManager.buildNewManifest(
         ManifestConstants.SCHEMA_VERSION,
-        oldManifest
+        oldManifest!
       );
-      const diffs = newManifest.diff(oldManifest);
+      const diffs = newManifest.diff(oldManifest!);
       const newArtifactId = diffs[1].id;
       await newManifest.compressArtifact(newArtifactId);
 
-      packageConfigService.update.mockRejectedValue({ status: 409 });
+      packageConfigService.update.mockRejectedValueOnce({ status: 409 });
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
       expect(dispatchErrors).toEqual([{ status: 409 }]);
     });
@@ -184,9 +199,9 @@ describe('manifest_manager', () => {
       );
       const newManifest = await manifestManager.buildNewManifest(
         ManifestConstants.SCHEMA_VERSION,
-        oldManifest
+        oldManifest!
       );
-      const diffs = newManifest.diff(oldManifest);
+      const diffs = newManifest.diff(oldManifest!);
       const oldArtifactId = diffs[0].id;
       const newArtifactId = diffs[1].id;
       await newManifest.compressArtifact(newArtifactId);

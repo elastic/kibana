@@ -12,6 +12,7 @@ import { ManifestManager } from './services/artifacts';
 import { Manifest } from './lib/artifacts';
 import { reportErrors, ManifestConstants } from './lib/artifacts/common';
 import { InternalArtifactSchema } from './schemas/artifacts';
+import { manifestDispatchSchema } from '../../common/endpoint/schema/manifest';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;
@@ -84,8 +85,14 @@ export const getPackageConfigCreateCallback = (
     // follow the types/schema expected
     let updatedPackageConfig = newPackageConfig as NewPolicyData;
 
-    // get current manifest from SO (last dispatched)
+    // Get most recent manifest
     const manifest = await getManifest(logger, manifestManager);
+    const serializedManifest = manifest.toEndpointFormat();
+    if (!manifestDispatchSchema.is(serializedManifest)) {
+      // This should not happen.
+      // But if it does, we log it and return it anyway.
+      logger.error('Invalid manifest');
+    }
 
     // Until we get the Default Policy Configuration in the Endpoint package,
     // we will add it here manually at creation time.
@@ -98,7 +105,7 @@ export const getPackageConfigCreateCallback = (
           streams: [],
           config: {
             artifact_manifest: {
-              value: manifest.toEndpointFormat(),
+              value: serializedManifest,
             },
             policy: {
               value: policyConfigFactory(),

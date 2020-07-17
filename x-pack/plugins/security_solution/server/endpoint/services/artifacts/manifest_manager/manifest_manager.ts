@@ -8,6 +8,8 @@ import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
+import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
+
 import {
   ArtifactConstants,
   ManifestConstants,
@@ -221,6 +223,11 @@ export class ManifestManager {
    * @returns {Promise<Error[]>} Any errors encountered.
    */
   public async tryDispatch(manifest: Manifest): Promise<Error[]> {
+    const serializedManifest = manifest.toEndpointFormat();
+    if (!manifestDispatchSchema.is(serializedManifest)) {
+      return [new Error('Invalid manifest')];
+    }
+
     let paging = true;
     let page = 1;
     const errors: Error[] = [];
@@ -244,7 +251,7 @@ export class ManifestManager {
             Manifest.getDefault(ManifestConstants.SCHEMA_VERSION);
           if (!manifest.equals(oldManifest)) {
             newPackageConfig.inputs[0].config.artifact_manifest = {
-              value: manifest.toEndpointFormat(),
+              value: serializedManifest,
             };
 
             try {
