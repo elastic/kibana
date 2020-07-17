@@ -365,7 +365,10 @@ WARNING: Missing README.
 WARNING: Missing README.
 
 
-- {kib-repo}blob/{branch}/x-pack/plugins/embeddable_enhanced/README.md[embeddableEnhanced]
+- {kib-repo}blob/{branch}/x-pack/plugins/embeddable_enhanced[embeddableEnhanced]
+
+WARNING: Missing README.
+
 
 - {kib-repo}blob/{branch}/x-pack/plugins/encrypted_saved_objects/README.md[encryptedSavedObjects]
 
