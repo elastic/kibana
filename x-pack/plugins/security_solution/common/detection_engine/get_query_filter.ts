@@ -9,14 +9,13 @@ import {
   IIndexPattern,
   isFilterDisabled,
   buildEsQuery,
-  Query as DataQuery,
   EsQueryConfig,
 } from '../../../../../src/plugins/data/common';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../lists/common/schemas';
-import { buildQueryExceptions } from './build_exceptions_query';
+import { buildExceptionQueries } from './build_exceptions_query';
 import { Query, Language, Index } from './schemas/common/schemas';
 
 export const getQueryFilter = (
@@ -47,14 +46,14 @@ export const getQueryFilter = (
    * buildEsQuery, this allows us to offer nested queries
    * regardless
    */
-  const exceptions = buildQueryExceptions({ language: 'kuery', lists });
-  if (exceptions.length > 0) {
+  const exceptionQueries = buildExceptionQueries({ language: 'kuery', lists });
+  if (exceptionQueries.length > 0) {
     // Here we build a query with only the exceptions: it will put them all in the `filter` array
     // of the resulting object, which would AND the exceptions together. When creating exceptionFilter,
     // we move the `filter` array to `should` so they are OR'd together instead.
     // This gets around the problem with buildEsQuery not allowing callers to specify whether queries passed in
     // should be ANDed or ORed together.
-    const exceptionQuery = buildEsQuery(indexPattern, exceptions, [], config);
+    const exceptionQuery = buildEsQuery(indexPattern, exceptionQueries, [], config);
     const exceptionFilter: Filter = {
       meta: {
         alias: null,
