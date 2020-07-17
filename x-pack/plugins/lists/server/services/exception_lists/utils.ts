@@ -154,6 +154,7 @@ export const transformSavedObjectToExceptionListItem = ({
 }): ExceptionListItemSchema => {
   const dateNow = new Date().toISOString();
   const {
+    version: _version,
     attributes: {
       _tags,
       comments,
@@ -178,6 +179,7 @@ export const transformSavedObjectToExceptionListItem = ({
   // TODO: Do a throw if item_id or entries is not defined.
   return {
     _tags,
+    _version,
     comments: comments ?? [],
     created_at,
     created_by,
@@ -206,6 +208,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
 }): ExceptionListItemSchema => {
   const dateNow = new Date().toISOString();
   const {
+    version: _version,
     attributes: {
       _tags,
       comments,
@@ -227,6 +230,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   // defaulting
   return {
     _tags: _tags ?? exceptionListItem._tags,
+    _version,
     comments: comments ?? exceptionListItem.comments,
     created_at: exceptionListItem.created_at,
     created_by: exceptionListItem.created_by,

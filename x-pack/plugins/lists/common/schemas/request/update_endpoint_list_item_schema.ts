@@ -12,6 +12,7 @@ import {
   Tags,
   _Tags,
   _tags,
+  _version,
   description,
   exceptionListItemType,
   id,
@@ -38,6 +39,7 @@ export const updateEndpointListItemSchema = t.intersection([
   t.exact(
     t.partial({
       _tags, // defaults to empty array if not set during decode
+      _version, // defaults to undefined if not set during decode
       comments: DefaultUpdateCommentsArray, // defaults to empty array if not set during decode
       entries: DefaultEntryArray, // defaults to empty array if not set during decode
       id, // defaults to undefined if not set during decode

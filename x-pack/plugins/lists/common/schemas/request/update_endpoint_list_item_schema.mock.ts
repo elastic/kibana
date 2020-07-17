@@ -15,12 +15,14 @@ import {
   NAME,
   TAGS,
   _TAGS,
+  _VERSION,
 } from '../../constants.mock';
 
 import { UpdateEndpointListItemSchema } from './update_endpoint_list_item_schema';
 
 export const getUpdateEndpointListItemSchemaMock = (): UpdateEndpointListItemSchema => ({
   _tags: _TAGS,
+  _version: _VERSION,
   comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,
