@@ -30,11 +30,10 @@ const showTlsAndEncryptionError = () => {
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionError', {
-            defaultMessage: `You must enable Transport Layer Security between Kibana and Elasticsearch 
-              and configure an encryption key in your kibana.yml file to use the Alerting feature.`,
+            defaultMessage: `Stack monitoring alerts require Transport Layer Security between Kibana and Elasticsearch and an encryption key in your kibana.yml file.`,
           })}
         </p>
-        <EuiSpacer />
+        <EuiSpacer size="xs" />
         <EuiLink
           href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`}
           external
@@ -42,74 +41,6 @@ const showTlsAndEncryptionError = () => {
         >
           {i18n.translate('xpack.monitoring.healthCheck.encryptionErrorAction', {
             defaultMessage: 'Learn how.',
-          })}
-        </EuiLink>
-      </div>
-    ),
-  });
-};
-
-const showEncryptionError = () => {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
-
-  Legacy.shims.toastNotifications.addWarning(
-    {
-      title: toMountPoint(
-        <FormattedMessage
-          id="xpack.monitoring.healthCheck.encryptionErrorTitle"
-          defaultMessage="You must set an encryption key"
-        />
-      ),
-      text: toMountPoint(
-        <div role="banner">
-          {i18n.translate('xpack.monitoring.healthCheck.encryptionErrorBeforeKey', {
-            defaultMessage: 'To create an alert, set a value for ',
-          })}
-          <EuiText size="xs">
-            <EuiCode>{'xpack.encryptedSavedObjects.encryptionKey'}</EuiCode>
-          </EuiText>
-          {i18n.translate('xpack.monitoring.healthCheck.encryptionErrorAfterKey', {
-            defaultMessage: ' in your kibana.yml file. ',
-          })}
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`}
-            external
-            target="_blank"
-          >
-            {i18n.translate('xpack.monitoring.healthCheck.encryptionErrorAction', {
-              defaultMessage: 'Learn how.',
-            })}
-          </EuiLink>
-        </div>
-      ),
-    },
-    {}
-  );
-};
-
-const showTlsError = () => {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
-
-  Legacy.shims.toastNotifications.addWarning({
-    title: toMountPoint(
-      <FormattedMessage
-        id="xpack.monitoring.healthCheck.tlsErrorTitle"
-        defaultMessage="You must enable Transport Layer Security"
-      />
-    ),
-    text: toMountPoint(
-      <div role="banner">
-        {i18n.translate('xpack.monitoring.healthCheck.tlsError', {
-          defaultMessage:
-            'Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. ',
-        })}
-        <EuiLink
-          href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`}
-          external
-          target="_blank"
-        >
-          {i18n.translate('xpack.monitoring.healthCheck.tlsErrorAction', {
-            defaultMessage: 'Learn how to enable TLS.',
           })}
         </EuiLink>
       </div>
@@ -127,11 +58,5 @@ export const showSecurityToast = (alertingHealth: AlertingFrameworkHealth) => {
     return;
   }
 
-  if (!isSufficientlySecure && !hasPermanentEncryptionKey) {
-    showTlsAndEncryptionError();
-  } else if (!isSufficientlySecure) {
-    showTlsError();
-  } else if (!hasPermanentEncryptionKey) {
-    showEncryptionError();
-  }
+  showTlsAndEncryptionError();
 };
