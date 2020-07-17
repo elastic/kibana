@@ -62,7 +62,17 @@ def getTestFailures() {
   def messages = []
   messages << "*Test Failures*"
 
-  def list = failures.collect { "• <${it.url}|${it.fullDisplayName.split(/\./, 2)[-1]}>" }.join("\n")
+  def list = failures.collect {
+    def name = it
+      .fullDisplayName
+      .split(/\./, 2)[-1]
+      // Only the following three characters need to be escaped for link text, per Slack's docs
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+
+    return "• <${it.url}|${name}>"
+  }.join("\n")
   return "*Test Failures*\n${list}"
 }
 
@@ -100,6 +110,7 @@ def sendFailedBuild(Map params = [:]) {
   ] + params
 
   def title = "${getStatusIcon()} ${config.title}"
+  def message = "${getStatusIcon()} ${config.message}"
 
   def blocks = [markdownBlock(title)]
   getFailedBuildBlocks().each { blocks << it }
@@ -111,7 +122,7 @@ def sendFailedBuild(Map params = [:]) {
     username: config.username,
     iconEmoji: config.icon,
     color: config.color,
-    message: config.message,
+    message: message,
     blocks: blocks
   )
 }
