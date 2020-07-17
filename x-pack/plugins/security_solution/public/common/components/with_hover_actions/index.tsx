@@ -17,10 +17,6 @@ const WithHoverActionsPopover = (styled(EuiPopover as any)`
   }
 ` as unknown) as typeof EuiPopover;
 
-const Container = styled.div`
-  width: fit-content;
-`;
-
 interface Props {
   /**
    * Always show the hover menu contents (default: false)
@@ -68,7 +64,10 @@ export const WithHoverActions = React.memo<Props>(
       setShowHoverContent(false);
     }, []);
 
-    const content = useMemo(() => <>{render(showHoverContent)}</>, [render, showHoverContent]);
+    const content = useMemo(
+      () => <div onMouseEnter={onMouseEnter}>{render(showHoverContent)}</div>,
+      [onMouseEnter, render, showHoverContent]
+    );
 
     useEffect(() => {
       setIsOpen(hoverContent != null && (showHoverContent || alwaysShow));
@@ -79,7 +78,7 @@ export const WithHoverActions = React.memo<Props>(
     }, [closePopOverTrigger]);
 
     return (
-      <Container onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      <div onMouseLeave={onMouseLeave}>
         <WithHoverActionsPopover
           anchorPosition={'downCenter'}
           button={content}
@@ -90,7 +89,7 @@ export const WithHoverActions = React.memo<Props>(
         >
           {isOpen ? <>{hoverContent}</> : null}
         </WithHoverActionsPopover>
-      </Container>
+      </div>
     );
   }
 );
