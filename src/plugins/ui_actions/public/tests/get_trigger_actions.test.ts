@@ -47,6 +47,7 @@ test('returns actions set on trigger', () => {
 
   expect(list0).toHaveLength(0);
 
+  // @ts-expect-error TODO:TS-REFS
   setup.addTriggerAction('trigger' as TriggerId, action1);
   const list1 = start.getTriggerActions('trigger' as TriggerId);
 
@@ -54,6 +55,7 @@ test('returns actions set on trigger', () => {
   expect(list1[0]).toBeInstanceOf(ActionInternal);
   expect(list1[0].id).toBe(action1.id);
 
+  // @ts-expect-error TODO:TS-REFS
   setup.addTriggerAction('trigger' as TriggerId, action2);
   const list2 = start.getTriggerActions('trigger' as TriggerId);
 

@@ -69,6 +69,7 @@ test('executes a single action mapped to a trigger', async () => {
   const action = createTestAction('test1', () => true);
 
   setup.registerTrigger(trigger);
+  // @ts-expect-error TODO:TS-REFS
   setup.addTriggerAction(trigger.id, action);
 
   const context = {};
@@ -109,6 +110,7 @@ test('does not execute an incompatible action', async () => {
   );
 
   setup.registerTrigger(trigger);
+  // @ts-expect-error TODO:TS-REFS
   setup.addTriggerAction(trigger.id, action);
 
   const start = doStart();
@@ -130,7 +132,9 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   const action2 = createTestAction('test2', () => true);
 
   setup.registerTrigger(trigger);
+  // @ts-expect-error TODO:TS-REFS
   setup.addTriggerAction(trigger.id, action1);
+  // @ts-expect-error TODO:TS-REFS
   setup.addTriggerAction(trigger.id, action2);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
@@ -155,6 +159,7 @@ test('passes whole action context to isCompatible()', async () => {
   });
 
   setup.registerTrigger(trigger);
+  // @ts-expect-error TODO:TS-REFS
   setup.addTriggerAction(trigger.id, action);
 
   const start = doStart();

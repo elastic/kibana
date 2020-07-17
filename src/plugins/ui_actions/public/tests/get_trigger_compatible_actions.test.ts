@@ -37,13 +37,15 @@ beforeEach(() => {
     id: 'trigger' as TriggerId,
     title: 'trigger',
   });
-  uiActions.setup.addTriggerAction('trigger' as TriggerId, action);
+  // @ts-expect-error TODO:TS-REFS
+  uiActions.setup.addTriggerAction('' as TriggerId, action);
 });
 
 test('can register action', async () => {
   const { setup } = uiActions;
   const helloWorldAction = createHelloWorldAction({} as any);
 
+  // @ts-expect-error TODO:TS-REFS
   setup.registerAction(helloWorldAction);
 });
 
@@ -51,6 +53,7 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = uiActions;
   const helloWorldAction = createHelloWorldAction({} as any);
 
+  // @ts-expect-error TODO:TS-REFS
   setup.registerAction(helloWorldAction);
 
   const testTrigger: Trigger = {
@@ -58,6 +61,7 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
     title: 'My trigger',
   };
   setup.registerTrigger(testTrigger);
+  // @ts-expect-error TODO:TS-REFS
   setup.addTriggerAction('MY-TRIGGER' as TriggerId, helloWorldAction);
 
   const start = doStart();
@@ -84,6 +88,7 @@ test('filters out actions not applicable based on the context', async () => {
 
   setup.registerTrigger(testTrigger);
   setup.registerAction(action1);
+  // @ts-expect-error TODO:TS-REFS
   setup.addTriggerAction(testTrigger.id, action1);
 
   const start = doStart();

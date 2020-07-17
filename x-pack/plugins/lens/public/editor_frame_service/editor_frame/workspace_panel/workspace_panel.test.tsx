@@ -49,7 +49,8 @@ describe('workspace_panel', () => {
     trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract<TriggerId>>;
     uiActionsMock = uiActionsPluginMock.createStartContract();
     dataMock = dataPluginMock.createStartContract();
-    uiActionsMock.getTrigger.mockReturnValue(trigger);
+    // @ts-expect-error TODO:TS-REFS
+    uiActionsMock.getTrigger.mockReturnValue(trigger as TriggerContract<TriggerId>);
     mockVisualization = createMockVisualization();
     mockVisualization2 = createMockVisualization();
 

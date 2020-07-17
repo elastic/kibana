@@ -18,10 +18,7 @@
   ],
   "exclude": [
     "src/**/__fixtures__/**/*",
-    "src/plugins/ui_actions/public/**/*.test.ts",
-    "src/plugins/embeddable/public/lib/panel/embeddable_panel.test.tsx",
-    "src/plugins/dashboard/public/application/tests/dashboard_container.test.tsx",
-    "src/core/server/utils/crypto/pkcs12.test.ts",
+    "src/core/server/utils/crypto/pkcs12.test.ts", // TODO:TS-REFS
   ],
   "references": [{"path": "./tsconfig.oss.json"}, {"path": "./examples/embeddable_examples"}]
 }

@@ -46,6 +46,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const uiActionsSetup = uiActionsPluginMock.createSetupContract();
 
   const editModeAction = createEditModeAction();
+  // @ts-expect-error TODO:TS-REFS
   uiActionsSetup.registerAction(editModeAction);
   uiActionsSetup.addTriggerAction(CONTEXT_MENU_TRIGGER, editModeAction);
   setup.registerEmbeddableFactory(

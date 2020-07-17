@@ -58,6 +58,7 @@ const trigger: Trigger = {
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 const applicationMock = applicationServiceMock.createStartContract();
 
+// @ts-expect-error TODO:TS-REFS
 actionRegistry.set(editModeAction.id, editModeAction);
 triggerRegistry.set(trigger.id, trigger);
 setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
@@ -234,6 +235,7 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
     {
       firstName: 'Bob',
     },
+    // @ts-expect-error TODO:TS-REFS
     getActions
   );
   const { component: component2 } = await renderInEditModeAndOpenContextMenu(
@@ -241,6 +243,7 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
       firstName: 'Bob',
       disabledActions: ['FOO'],
     },
+    // @ts-expect-error TODO:TS-REFS
     getActions
   );
 
@@ -270,6 +273,7 @@ test('HelloWorldContainer hides disabled badges', async () => {
     {
       firstName: 'Bob',
     },
+    // @ts-expect-error TODO:TS-REFS
     getActions
   );
   const { component: component2 } = await renderInEditModeAndOpenContextMenu(
@@ -277,6 +281,7 @@ test('HelloWorldContainer hides disabled badges', async () => {
       firstName: 'Bob',
       disabledActions: ['BAR'],
     },
+    // @ts-expect-error TODO:TS-REFS
     getActions
   );
 

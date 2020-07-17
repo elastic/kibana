@@ -154,6 +154,7 @@ describe('UiActionsService', () => {
 
       expect(list0).toHaveLength(0);
 
+      // @ts-expect-error TODO:TS-REFS
       service.addTriggerAction(FOO_TRIGGER, action1);
       const list1 = service.getTriggerActions(FOO_TRIGGER);
 
@@ -161,6 +162,7 @@ describe('UiActionsService', () => {
       expect(list1[0]).toBeInstanceOf(ActionInternal);
       expect(list1[0].id).toBe(action1.id);
 
+      // @ts-expect-error TODO:TS-REFS
       service.addTriggerAction(FOO_TRIGGER, action2);
       const list2 = service.getTriggerActions(FOO_TRIGGER);
 
@@ -177,6 +179,7 @@ describe('UiActionsService', () => {
       const helloWorldAction = createHelloWorldAction({} as any);
       const length = actions.size;
 
+      // @ts-expect-error TODO:TS-REFS
       service.registerAction(helloWorldAction);
 
       expect(actions.size - length).toBe(1);
@@ -187,6 +190,7 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
       const helloWorldAction = createHelloWorldAction({} as any);
 
+      // @ts-expect-error TODO:TS-REFS
       service.registerAction(helloWorldAction);
 
       const testTrigger: Trigger = {
@@ -194,6 +198,7 @@ describe('UiActionsService', () => {
         title: 'My trigger',
       };
       service.registerTrigger(testTrigger);
+      // @ts-expect-error TODO:TS-REFS
       service.addTriggerAction(MY_TRIGGER, helloWorldAction);
 
       const compatibleActions = await service.getTriggerCompatibleActions(MY_TRIGGER, {
@@ -220,6 +225,7 @@ describe('UiActionsService', () => {
       };
 
       service.registerTrigger(testTrigger);
+      // @ts-expect-error TODO:TS-REFS
       service.addTriggerAction(testTrigger.id, action);
 
       const compatibleActions1 = await service.getTriggerCompatibleActions(testTrigger.id, {
@@ -304,6 +310,7 @@ describe('UiActionsService', () => {
         id: FOO_TRIGGER,
       });
       service1.registerAction(testAction1);
+      // @ts-expect-error TODO:TS-REFS
       service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
@@ -325,6 +332,7 @@ describe('UiActionsService', () => {
       });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
+      // @ts-expect-error TODO:TS-REFS
       service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
@@ -332,6 +340,7 @@ describe('UiActionsService', () => {
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
+      // @ts-expect-error TODO:TS-REFS
       service2.addTriggerAction(FOO_TRIGGER, testAction2);
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
@@ -346,6 +355,7 @@ describe('UiActionsService', () => {
       });
       service1.registerAction(testAction1);
       service1.registerAction(testAction2);
+      // @ts-expect-error TODO:TS-REFS
       service1.addTriggerAction(FOO_TRIGGER, testAction1);
 
       const service2 = service1.fork();
@@ -353,6 +363,7 @@ describe('UiActionsService', () => {
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
       expect(service2.getTriggerActions(FOO_TRIGGER)).toHaveLength(1);
 
+      // @ts-expect-error TODO:TS-REFS
       service1.addTriggerAction(FOO_TRIGGER, testAction2);
 
       expect(service1.getTriggerActions(FOO_TRIGGER)).toHaveLength(2);
