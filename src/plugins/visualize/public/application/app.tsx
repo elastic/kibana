@@ -53,7 +53,7 @@ export const VisualizeApp = () => {
 
   return (
     <Switch>
-      <Route exact path={`${VisualizeConstants.EDIT_PATH}/value`}>
+      <Route exact path={`${VisualizeConstants.EDIT_BY_VALUE_PATH}`}>
         <VisualizeByValueEditor />
       </Route>
       <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>

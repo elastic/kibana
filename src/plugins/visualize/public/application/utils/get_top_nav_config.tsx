@@ -34,7 +34,6 @@ import { unhashUrl } from '../../../../kibana_utils/public';
 import { SavedVisInstance, VisualizeServices, VisualizeAppStateContainer } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
-import { useSavedVisInstance } from './use';
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
@@ -144,9 +143,27 @@ export const getTopNavConfig = (
       return { error };
     }
   }
-  debugger;
+
+  const createVisReference = () => {
+    if (!originatingApp) {
+      return;
+    }
+    const state = {
+      input: {
+        ...vis.serialize(),
+        id: embeddableId ? embeddableId : uuid.v4(),
+      },
+      type: VISUALIZE_EMBEDDABLE_TYPE,
+      embeddableId: '',
+    };
+    if (embeddableId) {
+      state.embeddableId = embeddableId;
+    }
+    embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, { state });
+  };
+
   const topNavMenu: TopNavMenuData[] = [
-    ...(originatingApp && savedVis && savedVis.id
+    ...(originatingApp && ((savedVis && savedVis.id) || embeddableId)
       ? [
           {
             id: 'saveAndReturn',
@@ -178,12 +195,15 @@ export const getTopNavConfig = (
                 confirmOverwrite: false,
                 returnToOrigin: true,
               };
+              if (originatingApp === 'dashboards' && featureFlagConfig.showNewVisualizeFlow) {
+                return createVisReference();
+              }
               return doSave(saveOptions);
             },
           },
         ]
       : []),
-    ...(visualizeCapabilities.save
+    ...(visualizeCapabilities.save && !embeddableId
       ? [
           {
             id: 'save',
@@ -237,27 +257,6 @@ export const getTopNavConfig = (
                 }
                 return response;
               };
-
-              const createVisReference = () => {
-                if (!originatingApp) {
-                  return;
-                }
-                const state = {
-                  input: {
-                    ...vis.serialize(),
-                    id: embeddableId ? embeddableId : uuid.v4(),
-                  },
-                  type: VISUALIZE_EMBEDDABLE_TYPE,
-                  embeddableId: '',
-                };
-                if (embeddableId) {
-                  state.embeddableId = embeddableId;
-                }
-                embeddable
-                  .getStateTransfer()
-                  .navigateToWithEmbeddablePackage(originatingApp, { state });
-              };
-
               const saveModal = (
                 <SavedObjectSaveModalOrigin
                   documentInfo={savedVis}
@@ -302,7 +301,7 @@ export const getTopNavConfig = (
         }
       },
       // disable the Share button if no action specified
-      disableButton: !share,
+      disableButton: !share || embeddableId,
     },
     {
       id: 'inspector',

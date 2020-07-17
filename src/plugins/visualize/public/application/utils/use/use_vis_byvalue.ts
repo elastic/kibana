@@ -29,7 +29,6 @@ export const useVisByValue = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
-  visualizationIdFromUrl: string | undefined,
   valueInput?: VisualizeInput
 ) => {
   const [state, setState] = useState<{
@@ -54,16 +53,16 @@ export const useVisByValue = (
         embeddableHandler
       );
 
+      if (chrome) {
+        chrome.setBreadcrumbs(getEditBreadcrumbs());
+      }
+
       loaded.current = true;
       setState({
         savedVisInstance,
         visEditorController,
       });
     };
-
-    if (chrome) {
-      chrome.setBreadcrumbs(getEditBreadcrumbs());
-    }
 
     getVisInstance();
   }, [
@@ -72,7 +71,6 @@ export const useVisByValue = (
     services,
     state.savedVisInstance,
     state.visEditorController,
-    visualizationIdFromUrl,
     valueInput,
   ]);
 

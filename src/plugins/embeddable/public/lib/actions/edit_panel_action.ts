@@ -79,12 +79,12 @@ export class EditPanelAction implements Action<ActionContext> {
   }
 
   public async isCompatible({ embeddable }: ActionContext) {
-    const canEditEmbeddable = true; /* Boolean(
+    const canEditEmbeddable = Boolean(
       embeddable &&
         embeddable.getOutput().editable &&
         (embeddable.getOutput().editUrl ||
           (embeddable.getOutput().editApp && embeddable.getOutput().editPath))
-    );*/
+    );
     const inDashboardEditMode = embeddable.getInput().viewMode === ViewMode.EDIT;
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
@@ -115,7 +115,6 @@ export class EditPanelAction implements Action<ActionContext> {
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
       if (this.currentAppId) {
-        debugger;
         const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
         const state: EmbeddableEditorState = {
           originatingApp: this.currentAppId,

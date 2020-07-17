@@ -76,8 +76,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
 
 export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
-  input?: VisualizeInput,
-  opts?: Record<string, unknown> | string
+  input?: VisualizeInput
 ) => {
   if (!input) {
     return;
