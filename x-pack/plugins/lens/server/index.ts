@@ -13,6 +13,9 @@ import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
+  exposeToBrowser: {
+    showNewLensFlow: true,
+  },
 };
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

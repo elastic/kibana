@@ -109,6 +109,7 @@ export function App({
       isLoading: !!savedObjectId || !!embeddableEditorIncomingState?.valueInput,
       isSaveModalVisible: false,
       byValueMode:
+        featureFlagConfig.showNewLensFlow &&
         !!embeddableEditorIncomingState?.originatingApp &&
         (!!embeddableEditorIncomingState?.valueInput ||
           !!embeddableEditorIncomingState?.byValueMode),
@@ -325,7 +326,7 @@ export function App({
         }
       : lastKnownDoc;
 
-    if (saveProps.newCopyOnSave) {
+    if (saveProps.newCopyOnSave && !state.byValueMode) {
       if (embeddableEditorIncomingState?.embeddableId) {
         embeddableEditorIncomingState.embeddableId = undefined;
       }
@@ -338,9 +339,13 @@ export function App({
       title: saveProps.newTitle,
     };
 
+    const addedToLibrary = state.byValueMode && saveToLibrary;
+    const newlyCreated =
+      saveProps.newCopyOnSave || addedToLibrary || (!savedObjectId && !state.byValueMode);
+
     if (state.byValueMode && !saveToLibrary) {
       await setState((s: State) => ({ ...s, persistedDoc: doc }));
-      redirectTo(doc.savedObjectId, doc, saveProps.returnToOrigin, saveProps.newCopyOnSave);
+      redirectTo(doc.savedObjectId, doc, saveProps.returnToOrigin, newlyCreated);
     } else {
       await checkForDuplicateTitle(
         {
@@ -365,7 +370,6 @@ export function App({
         .then(({ savedObjectId: newSavedObjectId }) => {
           // Prevents unnecessary network request and disables save button
           const newDoc: Document = { ...doc, savedObjectId: newSavedObjectId };
-          const addedToLibrary = state.byValueMode && saveToLibrary;
           setState((s) => ({
             ...s,
             byValueMode: false,
@@ -374,12 +378,7 @@ export function App({
             lastKnownDoc: newDoc,
           }));
           if (savedObjectId !== newSavedObjectId || saveProps.returnToOrigin) {
-            redirectTo(
-              newSavedObjectId,
-              undefined,
-              saveProps.returnToOrigin,
-              saveProps.newCopyOnSave || addedToLibrary
-            );
+            redirectTo(newSavedObjectId, undefined, saveProps.returnToOrigin, newlyCreated);
           }
         })
         .catch((e) => {
