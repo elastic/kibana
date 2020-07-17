@@ -37,6 +37,7 @@ import {
   UPDATE_SOURCE_DATA_REQUEST,
 } from './map_action_constants';
 import { ILayer } from '../classes/layers/layer';
+import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds } from '../elasticsearch_geo_utils';
@@ -125,9 +126,22 @@ function getDataRequestContext(
 
 export function syncDataForAllLayers() {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const syncPromises = getLayerList(getState()).map(async (layer) => {
+    const syncPromises = getLayerList(getState()).map((layer) => {
       return dispatch<any>(syncDataForLayer(layer));
     });
+    await Promise.all(syncPromises);
+  };
+}
+
+export function syncDataForAllJoinLayers() {
+  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const syncPromises = getLayerList(getState())
+      .filter((layer) => {
+        return 'hasJoins' in layer ? (layer as IVectorLayer).hasJoins() : false;
+      })
+      .map((layer) => {
+        return dispatch<any>(syncDataForLayer(layer));
+      });
     await Promise.all(syncPromises);
   };
 }

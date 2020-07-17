@@ -8,6 +8,7 @@
 import { Dispatch } from 'redux';
 // @ts-ignore
 import turf from 'turf';
+import uuid from 'uuid/v4';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
@@ -43,7 +44,11 @@ import {
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
-import { fitToDataBounds, syncDataForAllLayers } from './data_request_actions';
+import {
+  fitToDataBounds,
+  syncDataForAllJoinLayers,
+  syncDataForAllLayers,
+} from './data_request_actions';
 import { addLayer } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
@@ -191,6 +196,7 @@ function generateQueryTimestamp() {
   return new Date().toISOString();
 }
 
+let lastCalledId: string = '';
 export function setQuery({
   query,
   timeFilters,
@@ -221,7 +227,18 @@ export function setQuery({
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {
-      dispatch(fitToDataBounds());
+      // Joins are performed on the client.
+      // As a result, bounds for join layers must also be performed on the client.
+      // Therefore join layers need to fetch data prior to auto fitting bounds.
+      const currentCallId = uuid();
+      lastCalledId = currentCallId;
+      await dispatch<any>(syncDataForAllJoinLayers());
+
+      // setQuery can be triggered before async syncing completes
+      // Only continue execution path if setQuery has not been re-triggered.
+      if (currentCallId === lastCalledId) {
+        dispatch(fitToDataBounds());
+      }
     } else {
       await dispatch<any>(syncDataForAllLayers());
     }
