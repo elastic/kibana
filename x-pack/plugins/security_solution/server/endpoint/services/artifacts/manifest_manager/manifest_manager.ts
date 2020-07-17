@@ -150,7 +150,7 @@ export class ManifestManager {
    *
    * The artifact may still remain in the cache.
    *
-   * @param artifactId The ID of the artifact to delete..
+   * @param artifactIds The IDs of the artifact to delete..
    * @returns {Promise<Error[]>} Any errors encountered.
    */
   public async deleteArtifacts(artifactIds: string[]): Promise<Error[]> {
@@ -198,6 +198,13 @@ export class ManifestManager {
     }
   }
 
+  /**
+   * Builds a new manifest based on the current user exception list.
+   *
+   * @param schemaVersion The schema version of the manifest.
+   * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
+   * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
+   */
   public async buildNewManifest(
     schemaVersion: string,
     baselineManifest?: Manifest
