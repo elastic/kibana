@@ -34,6 +34,10 @@ const getDataGridArealabel = (view: InspectDataSets) =>
     },
   });
 
+const dataSetAreaLabel = i18n.translate('visTypeVega.inspector.dataViewer.dataSetAreaLabel', {
+  defaultMessage: 'Data Set',
+});
+
 export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
   const [inspectDataSets, setInspectDataSets] = useState<InspectDataSets[]>([]);
   const [selectedView, setSelectedView] = useState<InspectDataSets>();
@@ -89,6 +93,7 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
           options={inspectDataSets.map((item: any) => ({
             label: item.id,
           }))}
+          aria-label={dataSetAreaLabel}
           onChange={onViewChange}
           isClearable={false}
           singleSelection={{ asPlainText: true }}
