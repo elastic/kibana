@@ -44,6 +44,25 @@ describe('filterEventsAgainstList', () => {
     expect(res.hits.hits.length).toEqual(4);
   });
 
+  it('should respond with eventSearchResult if exceptionList does not contain value list exceptions', async () => {
+    const res = await filterEventsAgainstList({
+      logger: mockLogger,
+      listClient,
+      exceptionsList: [getExceptionListItemSchemaMock()],
+      eventSearchResult: repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
+        '1.1.1.1',
+        '2.2.2.2',
+        '3.3.3.3',
+        '7.7.7.7',
+      ]),
+      buildRuleMessage,
+    });
+    expect(res.hits.hits.length).toEqual(4);
+    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[0][0]).toContain(
+      'no exception items of type list found - returning original search result'
+    );
+  });
+
   describe('operator_type is included', () => {
     it('should respond with same list if no items match value list', async () => {
       const exceptionItem = getExceptionListItemSchemaMock();

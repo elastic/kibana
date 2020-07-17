@@ -51,7 +51,9 @@ export const filterEventsAgainstList = async ({
     );
 
     if (exceptionItemsWithLargeValueLists.length === 0) {
-      logger.debug(buildRuleMessage('about to return original search result'));
+      logger.debug(
+        buildRuleMessage('no exception items of type list found - returning original search result')
+      );
       return eventSearchResult;
     }
 
