@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import expectedTransactionCharts from './expectations/transaction_charts.json';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import expectedErrorRate from './expectations/error_rate.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -16,39 +16,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
   const uiFilters = encodeURIComponent(JSON.stringify({}));
 
-  describe('Transaction charts', () => {
-    describe('when data is not loaded ', () => {
+  describe('Error rate', () => {
+    describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transaction_groups/error_rate?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
-
         expect(response.status).to.be(200);
         expect(response.body).to.eql({
-          apmTimeseries: {
-            overallAvgDuration: null,
-            responseTimes: {
-              avg: [],
-              p95: [],
-              p99: [],
-            },
-            tpmBuckets: [],
-          },
+          noHits: true,
+          erroneousTransactionsRate: [],
+          average: null,
         });
       });
     });
-
     describe('when data is loaded', () => {
       before(() => esArchiver.load('8.0.0'));
       after(() => esArchiver.unload('8.0.0'));
 
-      it('returns the transaction charts', async () => {
+      it('returns the transaction error rate', async () => {
         const response = await supertest.get(
-          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transaction_groups/error_rate?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedTransactionCharts);
+        expect(response.body).to.eql(expectedErrorRate);
       });
     });
   });

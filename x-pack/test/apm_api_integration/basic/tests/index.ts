@@ -9,22 +9,22 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
   describe('APM specs (basic)', function () {
     this.tags('ciGroup1');
 
-    loadTestFile(require.resolve('./annotations'));
+    // feature_controls
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./agent_configuration'));
-    loadTestFile(require.resolve('./custom_link'));
-    loadTestFile(require.resolve('./service_maps'));
 
-    // traces
-    loadTestFile(require.resolve('./traces/top_traces'));
+    // service_maps
+    loadTestFile(require.resolve('./service_maps/service_maps'));
 
     // services
-    loadTestFile(require.resolve('./services/top_services'));
+    loadTestFile(require.resolve('./services/'));
 
-    // services/transaction
-    loadTestFile(require.resolve('./services/transactions/top_transaction_groups'));
-    loadTestFile(require.resolve('./services/transactions/transaction_charts'));
-    loadTestFile(require.resolve('./services/transactions/agent_name'));
-    loadTestFile(require.resolve('./services/transactions/transaction_types'));
+    // settings
+    loadTestFile(require.resolve('./settings/'));
+
+    // traces
+    loadTestFile(require.resolve('./traces/'));
+
+    // transaction_group
+    loadTestFile(require.resolve('./transaction_groups/'));
   });
 }
