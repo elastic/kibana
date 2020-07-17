@@ -7,7 +7,7 @@
 import React, { FC, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import {
   createCapabilityFailureMessage,
@@ -25,7 +25,7 @@ export const CloneButton: FC<CloneActionProps> = ({ itemId }) => {
 
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
-  const buttonCloneText = i18n.translate('xpack.transform.transformList.cloneActionName', {
+  const buttonText = i18n.translate('xpack.transform.transformList.cloneActionName', {
     defaultMessage: 'Clone',
   });
 
@@ -33,27 +33,30 @@ export const CloneButton: FC<CloneActionProps> = ({ itemId }) => {
     history.push(`/${SECTION_SLUG.CLONE_TRANSFORM}/${itemId}`);
   }
 
-  const cloneButton = (
-    <EuiLink
+  const buttonDisabled = !canCreateTransform;
+
+  const button = (
+    <EuiButtonEmpty
+      aria-label={buttonText}
+      color="text"
       data-test-subj="transformActionClone"
-      color={!canCreateTransform ? 'subdued' : 'text'}
-      disabled={!canCreateTransform}
-      onClick={!canCreateTransform ? undefined : clickHandler}
-      aria-label={buttonCloneText}
+      flush="left"
+      iconType="copy"
+      isDisabled={buttonDisabled}
+      onClick={clickHandler}
+      size="s"
     >
-      <EuiIcon type="copy" /> {buttonCloneText}
-    </EuiLink>
+      {buttonText}
+    </EuiButtonEmpty>
   );
 
-  if (!canCreateTransform) {
-    const content = createCapabilityFailureMessage('canStartStopTransform');
-
+  if (buttonDisabled) {
     return (
-      <EuiToolTip position="top" content={content}>
-        {cloneButton}
+      <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
+        {button}
       </EuiToolTip>
     );
   }
 
-  return <>{cloneButton}</>;
+  return button;
 };

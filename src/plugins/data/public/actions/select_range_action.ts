@@ -17,60 +17,39 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
-  createAction,
-  IncompatibleActionError,
   ActionByType,
+  APPLY_FILTER_TRIGGER,
+  createAction,
+  UiActionsStart,
 } from '../../../../plugins/ui_actions/public';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
-import { RangeSelectContext } from '../../../embeddable/public';
-import { FilterManager, TimefilterContract, esFilters } from '..';
-
-export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
+import type { RangeSelectContext } from '../../../embeddable/public';
 
 export type SelectRangeActionContext = RangeSelectContext;
 
-async function isCompatible(context: SelectRangeActionContext) {
-  try {
-    return Boolean(await createFiltersFromRangeSelectAction(context.data));
-  } catch {
-    return false;
-  }
-}
+export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
-export function selectRangeAction(
-  filterManager: FilterManager,
-  timeFilter: TimefilterContract
+export function createSelectRangeAction(
+  getStartServices: () => { uiActions: UiActionsStart }
 ): ActionByType<typeof ACTION_SELECT_RANGE> {
   return createAction<typeof ACTION_SELECT_RANGE>({
     type: ACTION_SELECT_RANGE,
     id: ACTION_SELECT_RANGE,
-    getIconType: () => 'filter',
-    getDisplayName: () => {
-      return i18n.translate('data.filter.applyFilterActionTitle', {
-        defaultMessage: 'Apply filter to current view',
-      });
-    },
-    isCompatible,
-    execute: async ({ data }: SelectRangeActionContext) => {
-      if (!(await isCompatible({ data }))) {
-        throw new IncompatibleActionError();
-      }
-
-      const selectedFilters = await createFiltersFromRangeSelectAction(data);
-
-      if (data.timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-          data.timeFieldName,
-          selectedFilters
-        );
-        filterManager.addFilters(restOfFilters);
-        if (timeRangeFilter) {
-          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
+    shouldAutoExecute: async () => true,
+    execute: async (context: SelectRangeActionContext) => {
+      try {
+        const filters = await createFiltersFromRangeSelectAction(context.data);
+        if (filters.length > 0) {
+          await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
+            filters,
+            embeddable: context.embeddable,
+            timeFieldName: context.data.timeFieldName,
+          });
         }
-      } else {
-        filterManager.addFilters(selectedFilters);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn(`Error [ACTION_SELECT_RANGE]: can\'t extract filters from action context`);
       }
     },
   });

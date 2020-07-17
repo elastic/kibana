@@ -101,8 +101,8 @@ export interface TimelineModel {
   pinnedEventsSaveObject: Record<string, PinnedEvent>;
   /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
   dateRange: {
-    start: number;
-    end: number;
+    start: string;
+    end: string;
   };
   savedQueryId?: string | null;
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/

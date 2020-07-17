@@ -17,17 +17,19 @@ import { MlPopover } from '../ml_popover/ml_popover';
 import { SiemNavigation } from '../navigation';
 import * as i18n from './translations';
 import { useWithSource } from '../../containers/source';
+import { useFullScreen } from '../../containers/use_full_screen';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { useKibana } from '../../lib/kibana';
 import { APP_ID, ADD_DATA_PATH, APP_DETECTIONS_PATH } from '../../../../common/constants';
 import { LinkAnchor } from '../links';
 
-const Wrapper = styled.header`
-  ${({ theme }) => css`
+const Wrapper = styled.header<{ show: boolean }>`
+  ${({ show, theme }) => css`
     background: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderThin};
     padding: ${theme.eui.paddingSizes.m} ${gutterTimeline} ${theme.eui.paddingSizes.m}
       ${theme.eui.paddingSizes.l};
+    ${show ? '' : 'display: none;'};
   `}
 `;
 Wrapper.displayName = 'Wrapper';
@@ -42,6 +44,7 @@ interface HeaderGlobalProps {
 }
 export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = false }) => {
   const { indicesExist } = useWithSource();
+  const { globalFullScreen } = useFullScreen();
   const search = useGetUrlSearch(navTabs.overview);
   const { navigateToApp } = useKibana().services.application;
   const goToOverview = useCallback(
@@ -53,7 +56,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
   );
 
   return (
-    <Wrapper className="siemHeaderGlobal">
+    <Wrapper className="siemHeaderGlobal" show={!globalFullScreen}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
         <>
           <FlexItem>

@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import '../../mock/match_media';
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
 
@@ -29,6 +30,7 @@ describe('EventDetails', () => {
           data={mockDetailItemData}
           id={mockDetailItemDataId}
           view="table-view"
+          onEventToggled={jest.fn()}
           onUpdateColumns={jest.fn()}
           onViewSelected={jest.fn()}
           timelineId="test"
@@ -50,6 +52,7 @@ describe('EventDetails', () => {
               data={mockDetailItemData}
               id={mockDetailItemDataId}
               view="table-view"
+              onEventToggled={jest.fn()}
               onUpdateColumns={jest.fn()}
               onViewSelected={jest.fn()}
               timelineId="test"
@@ -76,6 +79,7 @@ describe('EventDetails', () => {
             data={mockDetailItemData}
             id={mockDetailItemDataId}
             view="table-view"
+            onEventToggled={jest.fn()}
             onUpdateColumns={jest.fn()}
             onViewSelected={jest.fn()}
             timelineId="test"
@@ -87,6 +91,32 @@ describe('EventDetails', () => {
       expect(
         wrapper.find('[data-test-subj="eventDetails"]').find('.euiTab-isSelected').first().text()
       ).toEqual('Table');
+    });
+
+    test('it invokes `onEventToggled` when the collapse button is clicked', () => {
+      const onEventToggled = jest.fn();
+
+      const wrapper = mount(
+        <TestProviders>
+          <EventDetails
+            browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
+            data={mockDetailItemData}
+            id={mockDetailItemDataId}
+            view="table-view"
+            onEventToggled={onEventToggled}
+            onUpdateColumns={jest.fn()}
+            onViewSelected={jest.fn()}
+            timelineId="test"
+            toggleColumn={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      wrapper.find('[data-test-subj="collapse"]').first().simulate('click');
+      wrapper.update();
+
+      expect(onEventToggled).toHaveBeenCalled();
     });
   });
 });
