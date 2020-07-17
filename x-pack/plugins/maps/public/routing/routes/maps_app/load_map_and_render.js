@@ -7,7 +7,7 @@
 import React from 'react';
 import { MapsAppView } from '.';
 import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
-import { getToasts } from '../../../kibana_services';
+import { getCoreChrome, getToasts } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 
@@ -30,6 +30,10 @@ export const LoadMapAndRender = class extends React.Component {
     try {
       const savedMap = await getMapsSavedObjectLoader().get(this.props.savedMapId);
       if (this._isMounted) {
+        getCoreChrome().docTitle.change(savedMap.title);
+        if (this.props.savedMapId) {
+          getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap.id);
+        }
         this.setState({ savedMap });
       }
     } catch (err) {
