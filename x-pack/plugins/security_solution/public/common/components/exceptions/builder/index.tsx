@@ -230,7 +230,7 @@ export const ExceptionBuilder = ({
                 andLogicIncluded={andLogicIncluded}
                 isOnlyItem={exceptions.length === 1}
                 onDeleteExceptionItem={handleDeleteExceptionItem}
-                onExceptionItemChange={handleExceptionItemChange}
+                onChangeExceptionItem={handleExceptionItemChange}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
