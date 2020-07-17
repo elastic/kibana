@@ -10,6 +10,7 @@ import {
   InternalArtifactSchema,
   InternalManifestSchema,
   internalArtifactCompleteSchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
 import {
   manifestSchemaVersion,
@@ -53,7 +54,7 @@ export class Manifest {
   }
 
   public static fromArtifacts(
-    artifacts: InternalArtifactSchema[],
+    artifacts: InternalArtifactCompleteSchema[],
     schemaVersion: string,
     oldManifest: Manifest
   ): Manifest {

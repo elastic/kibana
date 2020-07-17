@@ -12,7 +12,7 @@ import {
 } from '../../../../../task_manager/server';
 import { EndpointAppContext } from '../../types';
 import { reportErrors, ManifestConstants } from './common';
-import { InternalArtifactSchema } from '../../schemas/artifacts';
+import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -119,7 +119,7 @@ export class ManifestTask {
       // Persist new artifacts
       const artifacts = adds
         .map((artifactId) => newManifest.getArtifact(artifactId))
-        .filter((artifact) => artifact !== undefined) as InternalArtifactSchema[];
+        .filter((artifact): artifact is InternalArtifactCompleteSchema => artifact !== undefined);
       if (artifacts.length !== adds.length) {
         throw new Error('Invalid artifact encountered.');
       }

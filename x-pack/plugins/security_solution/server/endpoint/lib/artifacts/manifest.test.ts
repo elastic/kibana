@@ -5,7 +5,7 @@
  */
 
 import { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
-import { InternalArtifactSchema } from '../../schemas';
+import { InternalArtifactCompleteSchema } from '../../schemas';
 import { ManifestConstants, getArtifactId } from './common';
 import { Manifest } from './manifest';
 import {
@@ -17,7 +17,7 @@ import {
 
 describe('manifest', () => {
   describe('Manifest object sanity checks', () => {
-    let artifacts: InternalArtifactSchema[] = [];
+    let artifacts: InternalArtifactCompleteSchema[] = [];
     let manifest1: Manifest;
     let manifest2: Manifest;
     let emptyManifest: Manifest;

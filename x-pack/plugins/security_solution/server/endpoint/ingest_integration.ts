@@ -11,7 +11,7 @@ import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
 import { Manifest } from './lib/artifacts';
 import { reportErrors, ManifestConstants } from './lib/artifacts/common';
-import { InternalArtifactSchema } from './schemas/artifacts';
+import { InternalArtifactCompleteSchema } from './schemas/artifacts';
 import { manifestDispatchSchema } from '../../common/endpoint/schema/manifest';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
@@ -39,7 +39,7 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
       // Persist new artifacts
       const artifacts = adds
         .map((artifactId) => newManifest.getArtifact(artifactId))
-        .filter((artifact) => artifact !== undefined) as InternalArtifactSchema[];
+        .filter((artifact): artifact is InternalArtifactCompleteSchema => artifact !== undefined);
       if (artifacts.length !== adds.length) {
         throw new Error('Invalid artifact encountered.');
       }

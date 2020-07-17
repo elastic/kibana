@@ -21,7 +21,6 @@ import {
   getArtifactId,
 } from '../../../lib/artifacts';
 import {
-  InternalArtifactSchema,
   InternalArtifactCompleteSchema,
   internalArtifactCompleteSchema,
 } from '../../../schemas/artifacts';
@@ -78,25 +77,24 @@ export class ManifestManager {
    * state of exception-list-agnostic SOs.
    *
    * @param schemaVersion The schema version of the artifact
-   * @returns {Promise<InternalArtifactSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
+   * @returns {Promise<InternalArtifactCompleteSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
    * @throws Throws/rejects if there are errors building the list.
    */
   protected async buildExceptionListArtifacts(
     schemaVersion: string
-  ): Promise<InternalArtifactSchema[]> {
-    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce<Promise<InternalArtifactSchema[]>>(
-      async (acc, os) => {
-        const exceptionList = await getFullEndpointExceptionList(
-          this.exceptionListClient,
-          os,
-          schemaVersion
-        );
-        const artifacts = await acc;
-        const artifact = await buildArtifact(exceptionList, os, schemaVersion);
-        return Promise.resolve([...artifacts, artifact]);
-      },
-      Promise.resolve([])
-    );
+  ): Promise<InternalArtifactCompleteSchema[]> {
+    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce<
+      Promise<InternalArtifactCompleteSchema[]>
+    >(async (acc, os) => {
+      const exceptionList = await getFullEndpointExceptionList(
+        this.exceptionListClient,
+        os,
+        schemaVersion
+      );
+      const artifacts = await acc;
+      const artifact = await buildArtifact(exceptionList, os, schemaVersion);
+      return Promise.resolve([...artifacts, artifact]);
+    }, Promise.resolve([]));
   }
 
   /**
@@ -130,7 +128,7 @@ export class ManifestManager {
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  public async pushArtifacts(artifacts: InternalArtifactSchema[]): Promise<Error[]> {
+  public async pushArtifacts(artifacts: InternalArtifactCompleteSchema[]): Promise<Error[]> {
     const errors: Error[] = [];
     for (const artifact of artifacts) {
       if (internalArtifactCompleteSchema.is(artifact)) {

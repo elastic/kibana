@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InternalArtifactSchema } from '../../schemas/artifacts';
+import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import {
   getInternalArtifactMock,
   getInternalArtifactMockWithDiffs,
@@ -15,7 +15,7 @@ import { Manifest } from './manifest';
 
 export const getMockArtifacts = async (opts?: { compress: boolean }) => {
   return Promise.all(
-    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactSchema>>(
+    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
         return getInternalArtifactMock(os, 'v1', opts);
       }
@@ -25,7 +25,7 @@ export const getMockArtifacts = async (opts?: { compress: boolean }) => {
 
 export const getMockArtifactsWithDiff = async (opts?: { compress: boolean }) => {
   return Promise.all(
-    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactSchema>>(
+    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
         if (os === 'linux') {
           return getInternalArtifactMockWithDiffs(os, 'v1');
@@ -38,7 +38,7 @@ export const getMockArtifactsWithDiff = async (opts?: { compress: boolean }) => 
 
 export const getEmptyMockArtifacts = async (opts?: { compress: boolean }) => {
   return Promise.all(
-    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactSchema>>(
+    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
         return getEmptyInternalArtifactMock(os, 'v1', opts);
       }

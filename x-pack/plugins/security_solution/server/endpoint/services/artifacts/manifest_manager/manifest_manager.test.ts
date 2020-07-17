@@ -7,7 +7,12 @@
 import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
-import { ArtifactConstants, ManifestConstants, ExceptionsCache } from '../../../lib/artifacts';
+import {
+  ArtifactConstants,
+  ManifestConstants,
+  ExceptionsCache,
+  isCompleteArtifact,
+} from '../../../lib/artifacts';
 import { getManifestManagerMock } from './manifest_manager.mock';
 
 describe('manifest_manager', () => {
@@ -61,7 +66,13 @@ describe('manifest_manager', () => {
 
       const newArtifactId = diffs[1].id;
       await newManifest.compressArtifact(newArtifactId);
-      await manifestManager.pushArtifacts([newManifest.getArtifact(newArtifactId)!]); // caches the artifact
+      const artifact = newManifest.getArtifact(newArtifactId)!;
+
+      if (isCompleteArtifact(artifact)) {
+        await manifestManager.pushArtifacts([artifact]); // caches the artifact
+      } else {
+        throw new Error('Artifact is missing a body.');
+      }
 
       const entry = JSON.parse(inflateSync(cache.get(newArtifactId)! as Buffer).toString());
       expect(entry).toEqual({
@@ -205,7 +216,14 @@ describe('manifest_manager', () => {
       const oldArtifactId = diffs[0].id;
       const newArtifactId = diffs[1].id;
       await newManifest.compressArtifact(newArtifactId);
-      await manifestManager.pushArtifacts([newManifest.getArtifact(newArtifactId)!]);
+
+      const artifact = newManifest.getArtifact(newArtifactId)!;
+      if (isCompleteArtifact(artifact)) {
+        await manifestManager.pushArtifacts([artifact]);
+      } else {
+        throw new Error('Artifact is missing a body.');
+      }
+
       await manifestManager.commit(newManifest);
       await manifestManager.deleteArtifacts([oldArtifactId]);
 
