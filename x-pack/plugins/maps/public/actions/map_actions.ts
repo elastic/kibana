@@ -196,7 +196,7 @@ function generateQueryTimestamp() {
   return new Date().toISOString();
 }
 
-let lastCalledId: string = '';
+let lastSetQueryCallId: string = '';
 export function setQuery({
   query,
   timeFilters,
@@ -230,13 +230,13 @@ export function setQuery({
       // Joins are performed on the client.
       // As a result, bounds for join layers must also be performed on the client.
       // Therefore join layers need to fetch data prior to auto fitting bounds.
-      const currentCallId = uuid();
-      lastCalledId = currentCallId;
+      const localSetQueryCallId = uuid();
+      lastSetQueryCallId = localSetQueryCallId;
       await dispatch<any>(syncDataForAllJoinLayers());
 
       // setQuery can be triggered before async data fetching completes
       // Only continue execution path if setQuery has not been re-triggered.
-      if (currentCallId === lastCalledId) {
+      if (localSetQueryCallId === lastSetQueryCallId) {
         dispatch(fitToDataBounds());
       }
     } else {
