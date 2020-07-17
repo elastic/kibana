@@ -18,7 +18,6 @@ export function enableAlertsRoute(server: any, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alerts/enable',
-      options: { tags: ['access:monitoring'] },
       validate: false,
     },
     async (context, request, response) => {

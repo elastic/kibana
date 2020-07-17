@@ -1,10 +1,10 @@
 [[development-tests]]
-=== Testing
+== Testing
 
 To ensure that your changes will not break other functionality, please run the test suite and build (<<building-kibana>>) before submitting your Pull Request.
 
-[float]
-==== Running specific {kib} tests
+[discrete]
+=== Running specific {kib} tests
 
 The following table outlines possible test file locations and how to
 invoke them:
@@ -47,8 +47,8 @@ Examples: - Run the entire elasticsearch_service test suite:
 string: ``` yarn test:ftr:server –config test/api_integration/config.js
 yarn test:ftr:runner –config test/api_integration/config
 
-[float]
-==== Cross-browser compatibility
+[discrete]
+=== Cross-browser compatibility
 
 **Testing IE on OS X**
 
@@ -71,8 +71,8 @@ your computer name).
 `http://computer.local:5601` to test {kib}.
 * Alternatively you can use browserstack
 
-[float]
-==== Running browser automation tests
+[discrete]
+=== Running browser automation tests
 
 Check out <<development-functional-tests>> to learn more about how you can run
 and develop functional tests for {kib} core and plugins.
@@ -80,17 +80,17 @@ and develop functional tests for {kib} core and plugins.
 You can also look into the {kib-repo}tree/{branch}/scripts/README.md[Scripts README.md]
 to learn more about using the node scripts we provide for building
 {kib}, running integration tests, and starting up {kib} and
-Elasticsearch while you develop.
+{es} while you develop.
 
-[float]
+[discrete]
 ==== More testing information:
 
 * <<development-functional-tests>>
 * <<development-unit-tests>>
 * <<development-accessibility-tests>>
 
-include::development-functional-tests.asciidoc[]
+include::development-functional-tests.asciidoc[leveloffset=+1]
 
-include::development-unit-tests.asciidoc[]
+include::development-unit-tests.asciidoc[leveloffset=+1]
 
-include::development-accessibility-tests.asciidoc[]
+include::development-accessibility-tests.asciidoc[leveloffset=+1]
