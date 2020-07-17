@@ -54,6 +54,19 @@ def sendComment(isFinal = false) {
   }
 }
 
+def sendCommentOnError(Closure closure) {
+  try {
+    closure()
+  } catch (ex) {
+    catchErrors {
+      if (isPR()) {
+        sendComment(false)
+      }
+    }
+    throw ex
+  }
+}
+
 // Checks whether or not this currently executing build was triggered via a PR in the elastic/kibana repo
 def isPr() {
   return !!(env.ghprbPullId && env.ghprbPullLink && env.ghprbPullLink =~ /\/elastic\/kibana\//)
