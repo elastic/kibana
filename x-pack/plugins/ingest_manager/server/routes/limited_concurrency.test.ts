@@ -5,7 +5,11 @@
  */
 
 import { coreMock, httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import { registerLimitedConcurrencyRoutes } from './limited_concurrency';
+import {
+  createLimitedPreAuthHandler,
+  isLimitedRoute,
+  registerLimitedConcurrencyRoutes,
+} from './limited_concurrency';
 import { IngestManagerConfigType } from '../index';
 
 describe('registerLimitedConcurrencyRoutes', () => {
@@ -35,70 +39,184 @@ describe('registerLimitedConcurrencyRoutes', () => {
 });
 
 describe('preAuthHandler', () => {
-  test(`it ignores routes which don't have the correct tag`, async () => {
-    const routerMock = coreMock.createSetup().http.createRouter();
-    const handlerMock = jest.fn();
-    routerMock.get(
-      {
-        path: '/api/foo',
-        validate: false,
-        // options: { tags: ['ingest:limited-concurrency'] },
-      },
-      handlerMock
-    );
-
-    const mockSetup = coreMock.createSetup();
-    const mockConfig = { fleet: { maxConcurrentConnections: 1 } } as IngestManagerConfigType;
-    registerLimitedConcurrencyRoutes(mockSetup, mockConfig);
-
-    const [[preAuthHandler]] = mockSetup.http.registerOnPreAuth.mock.calls;
+  test(`ignores routes when !isMatch`, async () => {
+    const mockMaxCounter = {
+      increase: jest.fn(),
+      decrease: jest.fn(),
+      lessThanMax: jest.fn(),
+    };
+    const preAuthHandler = createLimitedPreAuthHandler({
+      isMatch: jest.fn().mockImplementation(() => false),
+      maxCounter: mockMaxCounter,
+    });
 
     const mockRequest = httpServerMock.createKibanaRequest({
-      method: 'get',
-      path: '/api/foo',
-      // routeTags: ['ingest:limited-concurrency'],
+      path: '/no/match',
     });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPreAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
 
     // @ts-ignore error re: mockPreAuthToolkit return type
     await preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit);
-    const [routeConfig, routeHandler] = routerMock.get.mock.calls[0];
-    // @ts-ignore error re: missing iterator
-    // const [routeConfig, routeHandler] = routerMock.get.mock.calls.find(
-    //   ([{ path }]) => path === '/api/foo'
-    // );
-    console.log({ routeConfig, routeHandler });
-    expect(mockResponse.notFound).not.toHaveBeenCalled();
-    expect(mockPreAuthToolkit.next).toHaveBeenCalledTimes(1);
 
-    expect(handlerMock).toHaveBeenCalled();
+    expect(mockMaxCounter.increase).not.toHaveBeenCalled();
+    expect(mockMaxCounter.decrease).not.toHaveBeenCalled();
+    expect(mockMaxCounter.lessThanMax).not.toHaveBeenCalled();
+    expect(mockPreAuthToolkit.next).toHaveBeenCalledTimes(1);
   });
 
-  // test(`it processes routes which have the correct tag`, async () => {
-  //   const mockSetup = coreMock.createSetup();
-  //   const mockConfig = { fleet: { maxConcurrentConnections: 1 } } as IngestManagerConfigType;
-  //   registerLimitedConcurrencyRoutes(mockSetup, mockConfig);
+  test(`ignores routes which don't have the correct tag`, async () => {
+    const mockMaxCounter = {
+      increase: jest.fn(),
+      decrease: jest.fn(),
+      lessThanMax: jest.fn(),
+    };
+    const preAuthHandler = createLimitedPreAuthHandler({
+      isMatch: isLimitedRoute,
+      maxCounter: mockMaxCounter,
+    });
 
-  //   const [[preAuthHandler]] = mockSetup.http.registerOnPreAuth.mock.calls;
+    const mockRequest = httpServerMock.createKibanaRequest({
+      path: '/no/match',
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockPreAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
 
-  //   const mockRequest = httpServerMock.createKibanaRequest({
-  //     method: 'get',
-  //     path: '/api/foo',
-  //     routeTags: ['ingest:limited-concurrency'],
-  //   });
-  //   const mockResponse = httpServerMock.createResponseFactory();
-  //   const mockPreAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
+    // @ts-ignore error re: mockPreAuthToolkit return type
+    await preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit);
 
-  //   const responses = await Promise.all([
-  //     preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit),
-  //     preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit),
-  //     preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit),
-  //     preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit),
-  //   ]);
-  //   console.log('first res', responses[0]);
-  //   console.log('last res', responses[3]);
-  //   expect(mockResponse.notFound).not.toHaveBeenCalled();
-  //   expect(mockPreAuthToolkit.next).toHaveBeenCalledTimes(1);
-  // });
+    expect(mockMaxCounter.increase).not.toHaveBeenCalled();
+    expect(mockMaxCounter.decrease).not.toHaveBeenCalled();
+    expect(mockMaxCounter.lessThanMax).not.toHaveBeenCalled();
+    expect(mockPreAuthToolkit.next).toHaveBeenCalledTimes(1);
+  });
+
+  test(`processes routes which have the correct tag`, async () => {
+    const mockMaxCounter = {
+      increase: jest.fn(),
+      decrease: jest.fn(),
+      lessThanMax: jest.fn().mockImplementation(() => true),
+    };
+    const preAuthHandler = createLimitedPreAuthHandler({
+      isMatch: isLimitedRoute,
+      maxCounter: mockMaxCounter,
+    });
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      path: '/should/match',
+      routeTags: ['ingest:limited-concurrency'],
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockPreAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
+
+    // @ts-ignore error re: mockPreAuthToolkit return type
+    await preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit);
+
+    // will call lessThanMax because isMatch succeeds
+    expect(mockMaxCounter.lessThanMax).toHaveBeenCalledTimes(1);
+    // will not error because lessThanMax is true
+    expect(mockResponse.customError).not.toHaveBeenCalled();
+    expect(mockPreAuthToolkit.next).toHaveBeenCalledTimes(1);
+  });
+
+  test(`updates the counter when isMatch & lessThanMax`, async () => {
+    const mockMaxCounter = {
+      increase: jest.fn(),
+      decrease: jest.fn(),
+      lessThanMax: jest.fn().mockImplementation(() => true),
+    };
+    const preAuthHandler = createLimitedPreAuthHandler({
+      isMatch: jest.fn().mockImplementation(() => true),
+      maxCounter: mockMaxCounter,
+    });
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockPreAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
+
+    // @ts-ignore error re: mockPreAuthToolkit return type
+    await preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit);
+
+    expect(mockMaxCounter.increase).toHaveBeenCalled();
+    // expect(mockMaxCounter.decrease).toHaveBeenCalled();
+    expect(mockPreAuthToolkit.next).toHaveBeenCalledTimes(1);
+  });
+
+  test(`lessThanMax ? next : error`, async () => {
+    const mockMaxCounter = {
+      increase: jest.fn(),
+      decrease: jest.fn(),
+      lessThanMax: jest
+        .fn()
+        // call 1
+        .mockImplementationOnce(() => true)
+        // calls 2, 3, 4
+        .mockImplementationOnce(() => false)
+        .mockImplementationOnce(() => false)
+        .mockImplementationOnce(() => false)
+        // calls 5+
+        .mockImplementationOnce(() => true)
+        .mockImplementation(() => true),
+    };
+
+    const preAuthHandler = createLimitedPreAuthHandler({
+      isMatch: isLimitedRoute,
+      maxCounter: mockMaxCounter,
+    });
+
+    function makeRequestExpectNext() {
+      const request = httpServerMock.createKibanaRequest({
+        path: '/should/match/',
+        routeTags: ['ingest:limited-concurrency'],
+      });
+      const response = httpServerMock.createResponseFactory();
+      const toolkit = httpServiceMock.createOnPreAuthToolkit();
+
+      // @ts-ignore error re: mockPreAuthToolkit return type
+      preAuthHandler(request, response, toolkit);
+      expect(toolkit.next).toHaveBeenCalledTimes(1);
+      expect(response.customError).not.toHaveBeenCalled();
+    }
+
+    function makeRequestExpectError() {
+      const request = httpServerMock.createKibanaRequest({
+        path: '/should/match/',
+        routeTags: ['ingest:limited-concurrency'],
+      });
+      const response = httpServerMock.createResponseFactory();
+      const toolkit = httpServiceMock.createOnPreAuthToolkit();
+
+      // @ts-ignore error re: mockPreAuthToolkit return type
+      preAuthHandler(request, response, toolkit);
+      expect(toolkit.next).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledTimes(1);
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 429,
+        body: 'Too Many Requests',
+      });
+    }
+
+    // request 1 succeeds
+    makeRequestExpectNext();
+    expect(mockMaxCounter.increase).toHaveBeenCalledTimes(1);
+    // expect(mockMaxCounter.decrease).toHaveBeenCalledTimes(1);
+
+    // requests 2, 3, 4 fail
+    makeRequestExpectError();
+    makeRequestExpectError();
+    makeRequestExpectError();
+
+    // requests 5+ succeed
+    makeRequestExpectNext();
+    expect(mockMaxCounter.increase).toHaveBeenCalledTimes(2);
+    // expect(mockMaxCounter.decrease).toHaveBeenCalledTimes(2);
+
+    makeRequestExpectNext();
+    expect(mockMaxCounter.increase).toHaveBeenCalledTimes(3);
+    // expect(mockMaxCounter.decrease).toHaveBeenCalledTimes(3);
+
+    makeRequestExpectNext();
+    expect(mockMaxCounter.increase).toHaveBeenCalledTimes(4);
+    // expect(mockMaxCounter.decrease).toHaveBeenCalledTimes(4);
+  });
 });
