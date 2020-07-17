@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   createSavedObjectClass,
   SavedObject,
@@ -81,7 +82,9 @@ export function createSavedGisMapClass(services: SavedObjectKibanaServices) {
 
         // default values that will get assigned if the doc is new
         defaults: {
-          title: 'New Map',
+          title: i18n.translate('xpack.maps.newMapTitle', {
+            defaultMessage: 'New Map',
+          }),
           description: '',
         },
       });
