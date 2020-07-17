@@ -61,6 +61,7 @@ import { createDiscoverSidebarDirective } from './application/components/sidebar
 import { createHitsCounterDirective } from '././application/components/hits_counter';
 import { createLoadingSpinnerDirective } from '././application/components/loading_spinner/loading_spinner';
 import { createTimechartHeaderDirective } from './application/components/timechart_header';
+import { createContextErrorMessageDirective } from './application/components/context_error_message';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
 import { createSkipBottomButtonDirective } from './application/components/skip_bottom_button';
@@ -160,6 +161,7 @@ export function initializeInnerAngularModule(
     .directive('hitsCounter', createHitsCounterDirective)
     .directive('loadingSpinner', createLoadingSpinnerDirective)
     .directive('timechartHeader', createTimechartHeaderDirective)
+    .directive('contextErrorMessage', createContextErrorMessageDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }
 

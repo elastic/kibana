@@ -10,8 +10,8 @@ import { coreMock } from '../../../../../../src/core/public/mocks';
 import { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
 import {
   EmbeddableStart,
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
+  RangeSelectContext,
+  ValueClickContext,
   ChartActionContext,
 } from '../../../../../../src/plugins/embeddable/public';
 import { i18n } from '@kbn/i18n';
@@ -85,8 +85,8 @@ const setup = ({ useRangeEvent = false }: { useRangeEvent?: boolean } = {}) => {
 
   const data: ChartActionContext<typeof embeddable>['data'] = {
     ...(useRangeEvent
-      ? ({ range: {} } as RangeSelectTriggerContext['data'])
-      : ({ data: [] } as ValueClickTriggerContext['data'])),
+      ? ({ range: {} } as RangeSelectContext['data'])
+      : ({ data: [] } as ValueClickContext['data'])),
     timeFieldName: 'order_date',
   };
 
@@ -139,9 +139,16 @@ describe('"Explore underlying data" panel action', () => {
       expect(isCompatible).toBe(false);
     });
 
-    test('returns false if embeddable is not Visualize embeddable', async () => {
-      const { action, embeddable, context } = setup();
-      (embeddable as any).type = 'NOT_VISUALIZE_EMBEDDABLE';
+    test('returns false if embeddable has more than one index pattern', async () => {
+      const { action, output, context } = setup();
+      output.indexPatterns = [
+        {
+          id: 'index-ptr-foo',
+        },
+        {
+          id: 'index-ptr-bar',
+        },
+      ];
 
       const isCompatible = await action.isCompatible(context);
 

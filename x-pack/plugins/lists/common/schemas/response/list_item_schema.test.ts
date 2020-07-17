@@ -58,6 +58,28 @@ describe('list_item_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should accept an undefined for "serializer"', () => {
+    const payload = getListItemResponseMock();
+    delete payload.serializer;
+    const decoded = listItemSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should accept an undefined for "deserializer"', () => {
+    const payload = getListItemResponseMock();
+    delete payload.deserializer;
+    const decoded = listItemSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('it should NOT accept an undefined for "created_at"', () => {
     const payload = getListItemResponseMock();
     delete payload.created_at;

@@ -59,54 +59,49 @@ const getValueProps = (getInternalStartServices: GetInternalStartServicesFn) => 
 export const getPercentileRanksMetricAgg = ({
   getInternalStartServices,
 }: PercentileRanksMetricAggDependencies) => {
-  return new MetricAggType<IPercentileRanksAggConfig>(
-    {
-      name: METRIC_TYPES.PERCENTILE_RANKS,
-      title: i18n.translate('data.search.aggs.metrics.percentileRanksTitle', {
-        defaultMessage: 'Percentile Ranks',
-      }),
-      makeLabel(agg) {
-        return i18n.translate('data.search.aggs.metrics.percentileRanksLabel', {
-          defaultMessage: 'Percentile ranks of {field}',
-          values: { field: agg.getFieldDisplayName() },
-        });
-      },
-      params: [
-        {
-          name: 'field',
-          type: 'field',
-          filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM],
-        },
-        {
-          name: 'values',
-          default: [],
-        },
-        {
-          write(agg, output) {
-            output.params.keyed = false;
-          },
-        },
-      ],
-      getResponseAggs(agg) {
-        const ValueAggConfig = getResponseAggConfigClass(
-          agg,
-          getValueProps(getInternalStartServices)
-        );
-        const values = agg.getParam('values');
-
-        return values.map((value: any) => new ValueAggConfig(value));
-      },
-      getSerializedFormat(agg) {
-        return {
-          id: 'percent',
-        };
-      },
-      getValue(agg, bucket) {
-        return getPercentileValue(agg, bucket) / 100;
-      },
+  return new MetricAggType<IPercentileRanksAggConfig>({
+    name: METRIC_TYPES.PERCENTILE_RANKS,
+    title: i18n.translate('data.search.aggs.metrics.percentileRanksTitle', {
+      defaultMessage: 'Percentile Ranks',
+    }),
+    makeLabel(agg) {
+      return i18n.translate('data.search.aggs.metrics.percentileRanksLabel', {
+        defaultMessage: 'Percentile ranks of {field}',
+        values: { field: agg.getFieldDisplayName() },
+      });
     },
-    {
-      getInternalStartServices,
-    }
-  );
+    params: [
+      {
+        name: 'field',
+        type: 'field',
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM],
+      },
+      {
+        name: 'values',
+        default: [],
+      },
+      {
+        write(agg, output) {
+          output.params.keyed = false;
+        },
+      },
+    ],
+    getResponseAggs(agg) {
+      const ValueAggConfig = getResponseAggConfigClass(
+        agg,
+        getValueProps(getInternalStartServices)
+      );
+      const values = agg.getParam('values');
+
+      return values.map((value: any) => new ValueAggConfig(value));
+    },
+    getSerializedFormat(agg) {
+      return {
+        id: 'percent',
+      };
+    },
+    getValue(agg, bucket) {
+      return getPercentileValue(agg, bucket) / 100;
+    },
+  });
 };

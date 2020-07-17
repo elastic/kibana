@@ -6,6 +6,13 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { HttpSetup } from 'src/core/public/http';
+import {
+  UseRequestConfig,
+  useRequest as _useRequest,
+  Error,
+} from '../../../../../../src/plugins/es_ui_shared/public';
+
+let _httpClient: any;
 
 let _httpClient: HttpSetup;
 
@@ -27,10 +34,14 @@ export function sendPost(path: string, payload: any) {
   return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload) });
 }
 
-export function sendGet(path: string, query?: any) {
+export function sendGet(path: string, query?: any): any {
   return _httpClient.get(getFullPath(path), { query });
 }
 
 export function sendDelete(path: string) {
   return _httpClient.delete(getFullPath(path));
 }
+
+export const useRequest = (config: UseRequestConfig) => {
+  return _useRequest<any, Error>(_httpClient, { ...config, path: getFullPath(config.path) });
+};

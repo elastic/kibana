@@ -5,12 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { map, trunc } from 'lodash';
+import { map, truncate } from 'lodash';
 import open from 'opn';
 import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
-import { ViewZoomWidthHeight } from '../../../export_types/common/layouts/layout';
 import { LevelLogger } from '../../../lib';
+import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ConditionalHeaders, ElementPosition } from '../../../types';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
@@ -70,7 +70,7 @@ export class HeadlessChromiumDriver {
   }
 
   private truncateUrl(url: string) {
-    return trunc(url, {
+    return truncate(url, {
       length: 100,
       omission: '[truncated]',
     });

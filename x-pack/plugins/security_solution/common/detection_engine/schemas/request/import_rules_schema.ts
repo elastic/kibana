@@ -27,6 +27,7 @@ import {
   To,
   type,
   Threat,
+  threshold,
   ThrottleOrNull,
   note,
   Version,
@@ -44,6 +45,13 @@ import {
   updated_at,
   created_by,
   updated_by,
+  building_block_type,
+  license,
+  rule_name_override,
+  timestamp_override,
+  Author,
+  RiskScoreMapping,
+  SeverityMapping,
 } from '../common/schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
@@ -62,6 +70,8 @@ import {
   DefaultStringBooleanFalse,
   DefaultListArray,
   ListArray,
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
 } from '../types';
 
 /**
@@ -90,6 +100,8 @@ export const importRulesSchema = t.intersection([
       id, // defaults to undefined if not set during decode
       actions: DefaultActionsArray, // defaults to empty actions array if not set during decode
       anomaly_threshold, // defaults to undefined if not set during decode
+      author: DefaultStringArray, // defaults to empty array of strings if not set during decode
+      building_block_type, // defaults to undefined if not set during decode
       enabled: DefaultBooleanTrue, // defaults to true if not set during decode
       false_positives: DefaultStringArray, // defaults to empty string array if not set during decode
       filters, // defaults to undefined if not set during decode
@@ -99,6 +111,7 @@ export const importRulesSchema = t.intersection([
       interval: DefaultIntervalString, // defaults to "5m" if not set during decode
       query, // defaults to undefined if not set during decode
       language, // defaults to undefined if not set during decode
+      license, // defaults to "undefined" if not set during decode
       // TODO: output_index: This should be removed eventually
       output_index, // defaults to "undefined" if not set during decode
       saved_id, // defaults to "undefined" if not set during decode
@@ -107,10 +120,15 @@ export const importRulesSchema = t.intersection([
       meta, // defaults to "undefined" if not set during decode
       machine_learning_job_id, // defaults to "undefined" if not set during decode
       max_signals: DefaultMaxSignalsNumber, // defaults to DEFAULT_MAX_SIGNALS (100) if not set during decode
+      risk_score_mapping: DefaultRiskScoreMappingArray, // defaults to empty risk score mapping array if not set during decode
+      rule_name_override, // defaults to "undefined" if not set during decode
+      severity_mapping: DefaultSeverityMappingArray, // defaults to empty actions array if not set during decode
       tags: DefaultStringArray, // defaults to empty string array if not set during decode
       to: DefaultToString, // defaults to "now" if not set during decode
       threat: DefaultThreatArray, // defaults to empty array if not set during decode
+      threshold, // defaults to "undefined" if not set during decode
       throttle: DefaultThrottleNull, // defaults to "null" if not set during decode
+      timestamp_override, // defaults to "undefined" if not set during decode
       references: DefaultStringArray, // defaults to empty array of strings if not set during decode
       note, // defaults to "undefined" if not set during decode
       version: DefaultVersionNumber, // defaults to 1 if not set during decode
@@ -128,6 +146,7 @@ export type ImportRulesSchema = t.TypeOf<typeof importRulesSchema>;
 // This type is used after a decode since some things are defaults after a decode.
 export type ImportRulesSchemaDecoded = Omit<
   ImportRulesSchema,
+  | 'author'
   | 'references'
   | 'actions'
   | 'enabled'
@@ -135,6 +154,8 @@ export type ImportRulesSchemaDecoded = Omit<
   | 'from'
   | 'interval'
   | 'max_signals'
+  | 'risk_score_mapping'
+  | 'severity_mapping'
   | 'tags'
   | 'to'
   | 'threat'
@@ -144,6 +165,7 @@ export type ImportRulesSchemaDecoded = Omit<
   | 'rule_id'
   | 'immutable'
 > & {
+  author: Author;
   references: References;
   actions: Actions;
   enabled: Enabled;
@@ -151,6 +173,8 @@ export type ImportRulesSchemaDecoded = Omit<
   from: From;
   interval: Interval;
   max_signals: MaxSignals;
+  risk_score_mapping: RiskScoreMapping;
+  severity_mapping: SeverityMapping;
   tags: Tags;
   to: To;
   threat: Threat;

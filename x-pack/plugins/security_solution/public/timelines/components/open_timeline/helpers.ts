@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable complexity */
+
 import ApolloClient from 'apollo-client';
-import { getOr, set, isEmpty } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
+import deepMerge from 'deepmerge';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
 import {
   TimelineResult,
@@ -17,9 +21,10 @@ import {
   FilterTimelineResult,
   ColumnHeaderResult,
   PinnedEvent,
+  DataProviderResult,
 } from '../../../graphql/types';
 
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 import {
   addNotes as dispatchAddNotes,
@@ -45,8 +50,9 @@ import {
 } from '../timeline/body/constants';
 
 import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
-import { getTimeRangeSettings } from '../../../common/utils/default_date_settings';
 import { createNote } from '../notes/helpers';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -162,15 +168,61 @@ const setPinnedEventIds = (duplicate: boolean, pinnedEventIds: string[] | null |
     ? pinnedEventIds.reduce((acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }), {})
     : {};
 
+const getTemplateTimelineId = (
+  timeline: TimelineResult,
+  duplicate: boolean,
+  targetTimelineType?: TimelineType
+) => {
+  if (!duplicate) {
+    return timeline.templateTimelineId;
+  }
+
+  if (
+    targetTimelineType === TimelineType.default &&
+    timeline.timelineType === TimelineType.template
+  ) {
+    return timeline.templateTimelineId;
+  }
+
+  // TODO: MOVE TO BACKEND
+  return uuid.v4();
+};
+
+const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) =>
+  deepMerge(dataProvider, {
+    type: DataProviderType.default,
+    queryMatch: {
+      value:
+        dataProvider.queryMatch!.operator === IS_OPERATOR ? '' : dataProvider.queryMatch!.value,
+    },
+  });
+
+const getDataProviders = (
+  duplicate: boolean,
+  dataProviders: TimelineResult['dataProviders'],
+  timelineType?: TimelineType
+) => {
+  if (duplicate && dataProviders && timelineType === TimelineType.default) {
+    return dataProviders.map((dataProvider) => ({
+      ...convertToDefaultField(dataProvider),
+      and: dataProvider.and?.map(convertToDefaultField) ?? [],
+    }));
+  }
+
+  return dataProviders;
+};
+
 // eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
-  duplicate: boolean
+  duplicate: boolean,
+  timelineType?: TimelineType
 ): TimelineModel => {
   const isTemplate = timeline.timelineType === TimelineType.template;
   const timelineEntries = {
     ...timeline,
     columns: timeline.columns != null ? timeline.columns.map(setTimelineColumn) : defaultHeaders,
+    dataProviders: getDataProviders(duplicate, timeline.dataProviders, timelineType),
     eventIdToNoteIds: setEventIdToNoteIds(duplicate, timeline.eventIdToNoteIds),
     filters: timeline.filters != null ? timeline.filters.map(setTimelineFilters) : [],
     isFavorite: duplicate
@@ -185,8 +237,9 @@ export const defaultTimelineToTimelineModel = (
     status: duplicate ? TimelineStatus.active : timeline.status,
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
+    timelineType: timelineType ?? timeline.timelineType,
     title: duplicate ? `${timeline.title} - Duplicate` : timeline.title || '',
-    templateTimelineId: duplicate && isTemplate ? uuid.v4() : timeline.templateTimelineId,
+    templateTimelineId: getTemplateTimelineId(timeline, duplicate, timelineType),
     templateTimelineVersion: duplicate && isTemplate ? 1 : timeline.templateTimelineVersion,
   };
   return Object.entries(timelineEntries).reduce(
@@ -200,12 +253,13 @@ export const defaultTimelineToTimelineModel = (
 
 export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
-  duplicate: boolean = false
+  duplicate: boolean = false,
+  timelineType?: TimelineType
 ): { notes: NoteResult[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
-    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate),
+    timeline: defaultTimelineToTimelineModel(timelineModel, duplicate, timelineType),
   };
 };
 
@@ -214,6 +268,7 @@ export interface QueryTimelineById<TCache> {
   duplicate?: boolean;
   graphEventId?: string;
   timelineId: string;
+  timelineType?: TimelineType;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
   updateIsLoading: ({
@@ -231,6 +286,7 @@ export const queryTimelineById = <TCache>({
   duplicate = false,
   graphEventId = '',
   timelineId,
+  timelineType,
   onOpenTimeline,
   openTimeline = true,
   updateIsLoading,
@@ -250,14 +306,21 @@ export const queryTimelineById = <TCache>({
           getOr({}, 'data.getOneTimeline', result)
         );
 
-        const { timeline, notes } = formatTimelineResultToModel(timelineToOpen, duplicate);
+        const { timeline, notes } = formatTimelineResultToModel(
+          timelineToOpen,
+          duplicate,
+          timelineType
+        );
         if (onOpenTimeline != null) {
           onOpenTimeline(timeline);
         } else if (updateTimeline) {
-          const { from, to } = getTimeRangeSettings();
+          const { from, to } = normalizeTimeRange({
+            from: getOr(null, 'dateRange.start', timeline),
+            to: getOr(null, 'dateRange.end', timeline),
+          });
           updateTimeline({
             duplicate,
-            from: getOr(from, 'dateRange.start', timeline),
+            from,
             id: 'timeline-1',
             notes,
             timeline: {
@@ -265,7 +328,7 @@ export const queryTimelineById = <TCache>({
               graphEventId,
               show: openTimeline,
             },
-            to: getOr(to, 'dateRange.end', timeline),
+            to,
           })();
         }
       })

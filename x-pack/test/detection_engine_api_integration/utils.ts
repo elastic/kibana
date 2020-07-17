@@ -179,6 +179,7 @@ export const binaryToString = (res: any, callback: any): void => {
  */
 export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   created_by: 'elastic',
   description: 'Simple Rule Query',
   enabled: true,
@@ -192,10 +193,12 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => 
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 1,
+  risk_score_mapping: [],
   name: 'Simple Rule Query',
   query: 'user.name: root or user.name: admin',
   references: [],
   severity: 'high',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   to: 'now',
@@ -232,12 +235,38 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =
 
 /**
  * Remove all alerts from the .kibana index
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllAlerts = async (es: Client): Promise<void> => {
+export const deleteAllAlerts = async (es: Client, retryCount = 20): Promise<void> => {
+  if (retryCount > 0) {
+    try {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: 'type:alert',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Failure trying to deleteAllAlerts, retries left are: ${retryCount - 1}`, err);
+      await deleteAllAlerts(es, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteAllAlerts, no retries are left');
+  }
+};
+
+/**
+ * Remove all timelines from the .kibana index
+ * @param es The ElasticSearch handle
+ */
+export const deleteAllTimelines = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    q: 'type:alert',
+    q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,
     body: {},
@@ -246,26 +275,57 @@ export const deleteAllAlerts = async (es: Client): Promise<void> => {
 
 /**
  * Remove all rules statuses from the .kibana index
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: '.kibana',
-    q: 'type:siem-detection-engine-rule-status',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
-  });
+export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promise<void> => {
+  if (retryCount > 0) {
+    try {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: 'type:siem-detection-engine-rule-status',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Failure trying to deleteAllRulesStatuses, retries left are: ${retryCount - 1}`,
+        err
+      );
+      await deleteAllRulesStatuses(es, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteAllRulesStatuses, no retries are left');
+  }
 };
 
 /**
  * Creates the signals index for use inside of beforeEach blocks of tests
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  retryCount = 20
 ): Promise<void> => {
-  await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
+  if (retryCount > 0) {
+    try {
+      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Failure trying to create the signals index, retries left are: ${retryCount - 1}`,
+        err
+      );
+      await createSignalsIndex(supertest, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not createSignalsIndex, no retries are left');
+  }
 };
 
 /**
@@ -273,9 +333,21 @@ export const createSignalsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  retryCount = 20
 ): Promise<void> => {
-  await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send().expect(200);
+  if (retryCount > 0) {
+    try {
+      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Failure trying to deleteSignalsIndex, retries left are: ${retryCount - 1}`, err);
+      await deleteSignalsIndex(supertest, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteSignalsIndex, no retries are left');
+  }
 };
 
 /**
@@ -307,6 +379,7 @@ export const ruleToNdjson = (rule: Partial<CreateRulesSchema>): Buffer => {
  */
 export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
   false_positives: [
@@ -314,6 +387,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
     'some text string about why another condition could be a false positive',
   ],
   risk_score: 1,
+  risk_score_mapping: [],
   rule_id: ruleId,
   filters: [
     {
@@ -340,6 +414,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   to: 'now',
   from: 'now-6m',
   severity: 'high',
+  severity_mapping: [],
   language: 'kuery',
   type: 'query',
   threat: [
@@ -391,6 +466,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
  */
 export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   created_by: 'elastic',
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
@@ -399,6 +475,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
     'some text string about why another condition could be a false positive',
   ],
   risk_score: 1,
+  risk_score_mapping: [],
   rule_id: ruleId,
   filters: [
     {
@@ -426,6 +503,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   to: 'now',
   from: 'now-6m',
   severity: 'high',
+  severity_mapping: [],
   language: 'kuery',
   type: 'query',
   threat: [

@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
-  const usageAPI = getService('usageAPI' as any); // NOTE Usage API service is not Typescript
+  const usageAPI = getService('usageAPI');
 
   describe('reporting usage', () => {
     before(async () => {

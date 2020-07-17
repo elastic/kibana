@@ -37,13 +37,22 @@ const DEFAULT_IGNORE_ABOVE = 1024;
  *
  * @param indexPattern String with the index pattern
  */
-export function getTemplate(
-  type: string,
-  templateName: string,
-  mappings: IndexTemplateMappings,
-  pipelineName?: string | undefined
-): IndexTemplate {
-  const template = getBaseTemplate(type, templateName, mappings);
+export function getTemplate({
+  type,
+  templateName,
+  mappings,
+  pipelineName,
+  packageName,
+  composedOfTemplates,
+}: {
+  type: string;
+  templateName: string;
+  mappings: IndexTemplateMappings;
+  pipelineName?: string | undefined;
+  packageName: string;
+  composedOfTemplates: string[];
+}): IndexTemplate {
+  const template = getBaseTemplate(type, templateName, mappings, packageName, composedOfTemplates);
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
@@ -236,11 +245,16 @@ export function generateESIndexPatterns(datasets: Dataset[] | undefined): Record
 function getBaseTemplate(
   type: string,
   templateName: string,
-  mappings: IndexTemplateMappings
+  mappings: IndexTemplateMappings,
+  packageName: string,
+  composedOfTemplates: string[]
 ): IndexTemplate {
   return {
-    // This takes precedence over all index templates installed with the 'base' package
-    priority: 1,
+    // This takes precedence over all index templates installed by ES by default (logs-*-* and metrics-*-*)
+    // if this number is lower than the ES value (which is 100) this template will never be applied when a data stream
+    // is created. I'm using 200 here to give some room for users to create their own template and fit it between the
+    // default and the one the ingest manager uses.
+    priority: 200,
     // To be completed with the correct index patterns
     index_patterns: [`${templateName}-*`],
     template: {
@@ -248,7 +262,7 @@ function getBaseTemplate(
         index: {
           // ILM Policy must be added here, for now point to the default global ILM policy name
           lifecycle: {
-            name: `${type}-default`,
+            name: type,
           },
           // What should be our default for the compression?
           codec: 'best_compression',
@@ -294,8 +308,14 @@ function getBaseTemplate(
       // To be filled with the aliases that we need
       aliases: {},
     },
-    data_stream: {
-      timestamp_field: '@timestamp',
+    data_stream: {},
+    composed_of: composedOfTemplates,
+    _meta: {
+      package: {
+        name: packageName,
+      },
+      managed_by: 'ingest-manager',
+      managed: true,
     },
   };
 }
@@ -304,9 +324,10 @@ export const updateCurrentWriteIndices = async (
   callCluster: CallESAsCurrentUser,
   templates: TemplateRef[]
 ): Promise<void> => {
-  if (!templates) return;
+  if (!templates.length) return;
 
   const allIndices = await queryIndicesFromTemplates(callCluster, templates);
+  if (!allIndices.length) return;
   return updateAllIndices(allIndices, callCluster);
 };
 
@@ -336,12 +357,12 @@ const getIndices = async (
     method: 'GET',
     path: `/_data_stream/${templateName}-*`,
   });
-  if (res.length) {
-    return res.map((datastream: any) => ({
-      indexName: datastream.indices[datastream.indices.length - 1].index_name,
-      indexTemplate,
-    }));
-  }
+  const dataStreams = res.data_streams;
+  if (!dataStreams.length) return;
+  return dataStreams.map((dataStream: any) => ({
+    indexName: dataStream.indices[dataStream.indices.length - 1].index_name,
+    indexTemplate,
+  }));
 };
 
 const updateAllIndices = async (

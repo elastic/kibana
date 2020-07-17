@@ -13,6 +13,8 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
+
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const esClient = getService('es');
 
@@ -26,7 +28,10 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should work', async () => {
-      // 1. Get enrollment token
+      const kibanaVersionAccessor = kibanaServer.version;
+      const kibanaVersion = await kibanaVersionAccessor.get();
+
+      // Get enrollment token
       const { body: enrollmentApiKeysResponse } = await supertest
         .get(`/api/ingest_manager/fleet/enrollment-api-keys`)
         .expect(200);
@@ -40,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(enrollmentApiKeyResponse.item).to.have.key('api_key');
       const enrollmentAPIToken = enrollmentApiKeyResponse.item.api_key;
-      // 2. Enroll agent
+      // Enroll agent
       const { body: enrollmentResponse } = await supertestWithoutAuth
         .post(`/api/ingest_manager/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
@@ -48,7 +53,9 @@ export default function (providerContext: FtrProviderContext) {
         .send({
           type: 'PERMANENT',
           metadata: {
-            local: {},
+            local: {
+              elastic: { agent: { version: kibanaVersion } },
+            },
             user_provided: {},
           },
         })
@@ -57,7 +64,7 @@ export default function (providerContext: FtrProviderContext) {
 
       const agentAccessAPIKey = enrollmentResponse.item.access_api_key;
 
-      // 3. agent checkin
+      // Agent checkin
       const { body: checkinApiResponse } = await supertestWithoutAuth
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
@@ -73,7 +80,7 @@ export default function (providerContext: FtrProviderContext) {
       const configChangeAction = checkinApiResponse.actions[0];
       const defaultOutputApiKey = configChangeAction.data.config.outputs.default.api_key;
 
-      // 4. ack actions
+      // Ack actions
       const { body: ackApiResponse } = await supertestWithoutAuth
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/acks`)
         .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
@@ -83,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
           events: [
             {
               type: 'ACTION_RESULT',
-              subtype: 'CONFIG',
+              subtype: 'ACKNOWLEDGED',
               timestamp: '2019-01-04T14:32:03.36764-05:00',
               action_id: configChangeAction.id,
               agent_id: enrollmentResponse.item.id,
@@ -95,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       expect(ackApiResponse.success).to.eql(true);
 
-      // 4. second agent checkin
+      // Second agent checkin
       const { body: secondCheckinApiResponse } = await supertestWithoutAuth
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')
@@ -107,14 +114,61 @@ export default function (providerContext: FtrProviderContext) {
       expect(secondCheckinApiResponse.success).to.eql(true);
       expect(secondCheckinApiResponse.actions).length(0);
 
-      // 5. unenroll agent
+      // Get agent
+      const { body: getAgentApiResponse } = await supertest
+        .get(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}`)
+        .expect(200);
+
+      expect(getAgentApiResponse.success).to.eql(true);
+      expect(getAgentApiResponse.item.packages).to.contain(
+        'system',
+        "Agent should run the 'system' package"
+      );
+
+      // Unenroll agent
       const { body: unenrollResponse } = await supertest
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/unenroll`)
         .set('kbn-xsrf', 'xx')
         .expect(200);
       expect(unenrollResponse.success).to.eql(true);
 
-      // 6. Checkin after unenrollment
+      //  Checkin after unenrollment
+      const { body: checkinAfterUnenrollResponse } = await supertestWithoutAuth
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
+        .set('kbn-xsrf', 'xx')
+        .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
+        .send({
+          events: [],
+        })
+        .expect(200);
+
+      expect(checkinAfterUnenrollResponse.success).to.eql(true);
+      expect(checkinAfterUnenrollResponse.actions).length(1);
+      expect(checkinAfterUnenrollResponse.actions[0].type).be('UNENROLL');
+      const unenrollAction = checkinAfterUnenrollResponse.actions[0];
+
+      //  ack unenroll actions
+      const { body: ackUnenrollApiResponse } = await supertestWithoutAuth
+        .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/acks`)
+        .set('Authorization', `ApiKey ${agentAccessAPIKey}`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          events: [
+            {
+              type: 'ACTION_RESULT',
+              subtype: 'ACKNOWLEDGED',
+              timestamp: '2019-01-04T14:32:03.36764-05:00',
+              action_id: unenrollAction.id,
+              agent_id: enrollmentResponse.item.id,
+              message: 'hello',
+              payload: 'payload',
+            },
+          ],
+        })
+        .expect(200);
+      expect(ackUnenrollApiResponse.success).to.eql(true);
+
+      // Checkin after unenrollment acknowledged
       await supertestWithoutAuth
         .post(`/api/ingest_manager/fleet/agents/${enrollmentResponse.item.id}/checkin`)
         .set('kbn-xsrf', 'xx')

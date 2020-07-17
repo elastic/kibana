@@ -25,10 +25,12 @@ describe('Index Fields & Browser Fields', () => {
 
     return expect(initialResult).toEqual({
       browserFields: {},
+      docValueFields: [],
       errorMessage: null,
       indexPattern: {
         fields: [],
-        title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+        title:
+          'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
       },
       indicesExist: true,
       loading: true,
@@ -55,9 +57,20 @@ describe('Index Fields & Browser Fields', () => {
       current: {
         indicesExist: true,
         browserFields: mockBrowserFields,
+        docValueFields: [
+          {
+            field: '@timestamp',
+            format: 'date_time',
+          },
+          {
+            field: 'event.end',
+            format: 'date_time',
+          },
+        ],
         indexPattern: {
           fields: mockIndexFields,
-          title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+          title:
+            'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
         },
         loading: false,
         errorMessage: null,

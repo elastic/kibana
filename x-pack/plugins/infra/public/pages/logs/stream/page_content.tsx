@@ -18,14 +18,14 @@ export const StreamPageContent: React.FunctionComponent = () => {
     isUninitialized,
     loadSource,
     loadSourceFailureMessage,
-    logIndicesExist,
+    sourceStatus,
   } = useLogSourceContext();
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoadingSource) {
     return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
-  } else if (logIndicesExist) {
+  } else if (sourceStatus?.logIndicesExist) {
     return <LogsPageLogsContent />;
   } else {
     return <LogsPageNoIndicesContent />;

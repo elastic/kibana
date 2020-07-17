@@ -10,11 +10,13 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { Resizable, ResizeCallback } from 're-resizable';
 
-import { TimelineResizeHandle } from './timeline_resize_handle';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
+import { useFullScreen } from '../../../../common/containers/use_full_screen';
+import { timelineActions } from '../../../store/timeline';
+
+import { TimelineResizeHandle } from './timeline_resize_handle';
 
 import * as i18n from './translations';
-import { timelineActions } from '../../../store/timeline';
 
 const minWidthPixels = 550; // do not allow the flyout to shrink below this width (pixels)
 const maxWidthPercent = 95; // do not allow the flyout to grow past this percentage of the view
@@ -28,8 +30,10 @@ interface FlyoutPaneComponentProps {
 
 const EuiFlyoutContainer = styled.div`
   .timeline-flyout {
+    z-index: 4001;
     min-width: 150px;
     width: auto;
+    animation: none;
   }
 `;
 
@@ -42,12 +46,12 @@ const RESIZABLE_ENABLE = { left: true };
 
 const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   children,
-  flyoutHeight,
   onClose,
   timelineId,
   width,
 }) => {
   const dispatch = useDispatch();
+  const { timelineFullScreen } = useFullScreen();
 
   const onResizeStop: ResizeCallback = useCallback(
     (_e, _direction, _ref, delta) => {
@@ -78,9 +82,9 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   );
   const resizableHandleComponent = useMemo(
     () => ({
-      left: <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />,
+      left: <TimelineResizeHandle data-test-subj="flyout-resize-handle" />,
     }),
-    [flyoutHeight]
+    []
   );
 
   return (
@@ -96,8 +100,8 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         <StyledResizable
           enable={RESIZABLE_ENABLE}
           defaultSize={resizableDefaultSize}
-          minWidth={minWidthPixels}
-          maxWidth={`${maxWidthPercent}vw`}
+          minWidth={timelineFullScreen ? '100vw' : minWidthPixels}
+          maxWidth={timelineFullScreen ? '100vw' : `${maxWidthPercent}vw`}
           handleComponent={resizableHandleComponent}
           onResizeStop={onResizeStop}
         >

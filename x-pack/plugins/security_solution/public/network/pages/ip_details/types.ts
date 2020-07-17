@@ -8,35 +8,24 @@ import { IIndexPattern } from 'src/plugins/data/public';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { NetworkType } from '../../store/model';
-import { InspectQuery, Refetch } from '../../../common/store/inputs/model';
 import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
-import { GlobalTimeArgs } from '../../../common/containers/global_time';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export const type = NetworkType.details;
 
-export type IPDetailsComponentProps = GlobalTimeArgs & {
+export interface IPDetailsComponentProps {
   detailName: string;
   flowTarget: FlowTarget;
-};
+}
 
 export interface OwnProps {
   type: NetworkType;
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   filterQuery: string | ESTermQuery;
   ip: string;
   skip: boolean;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: InspectQuery | null;
-    loading: boolean;
-    refetch: Refetch;
-  }) => void;
+  setQuery: GlobalTimeArgs['setQuery'];
 }
 
 export type NetworkComponentsQueryProps = OwnProps & {

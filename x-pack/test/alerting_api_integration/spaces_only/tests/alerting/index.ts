@@ -17,6 +17,7 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./get_alert_state'));
     loadTestFile(require.resolve('./list_alert_types'));
+    loadTestFile(require.resolve('./event_log'));
     loadTestFile(require.resolve('./mute_all'));
     loadTestFile(require.resolve('./mute_instance'));
     loadTestFile(require.resolve('./unmute_all'));
@@ -26,6 +27,8 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./alerts_space1'));
     loadTestFile(require.resolve('./alerts_default_space'));
     loadTestFile(require.resolve('./builtin_alert_types'));
+
+    // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./migrations'));
   });
 }

@@ -16,50 +16,42 @@ import { ClientMetrics } from './ClientMetrics';
 import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { VisitorBreakdown } from './VisitorBreakdown';
 
-export function RumDashboard() {
-  const { urlParams } = useUrlParams();
-
-  const { environment } = urlParams;
-
-  let environmentLabel = environment || 'all environments';
-
-  if (environment === 'ENVIRONMENT_NOT_DEFINED') {
-    environmentLabel = 'undefined environment';
-  }
-
+export const RumDashboard = () => {
   return (
-    <>
-      <EuiTitle>
-        <h2>{I18LABELS.getWhatIsGoingOn(environmentLabel)}</h2>
-      </EuiTitle>
-      <EuiSpacer />
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiPanel>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={1} data-cy={`client-metrics`}>
-                <EuiTitle size="xs">
-                  <h3>{I18LABELS.pageLoadTimes}</h3>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <ClientMetrics />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={3}>
-                <PageLoadDistribution />
-                <PageViewsTrend />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={1} data-cy={`client-metrics`}>
+              <EuiTitle size="xs">
+                <h3>{I18LABELS.pageLoadTimes}</h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <ClientMetrics />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={3}>
+              <PageLoadDistribution />
+              <PageViewsTrend />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <EuiSpacer size="s" />
+        <EuiPanel>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={3}>
+              <VisitorBreakdown />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
-}
+};

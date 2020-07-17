@@ -24,6 +24,7 @@ import { BaseStateContainer } from '../../../../kibana_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
+import { validateTimeRange } from '../timefilter';
 
 /**
  * Helper to setup two-way syncing of global data and a state container
@@ -159,9 +160,9 @@ export const connectToQueryState = <S extends QueryState>(
       // cloneDeep is required because services are mutating passed objects
       // and state in state container is frozen
       if (syncConfig.time) {
-        const time = state.time || timefilter.getTimeDefaults();
+        const time = validateTimeRange(state.time) ? state.time : timefilter.getTimeDefaults();
         if (!_.isEqual(time, timefilter.getTime())) {
-          timefilter.setTime(_.cloneDeep(time));
+          timefilter.setTime(_.cloneDeep(time!));
         }
       }
 

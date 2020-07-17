@@ -20,9 +20,7 @@
 const { relative, resolve } = require('path');
 const fs = require('fs');
 
-const startCase = require('lodash.startcase');
-const camelCase = require('lodash.camelcase');
-const snakeCase = require('lodash.snakecase');
+const { camelCase, startCase, snakeCase } = require('lodash');
 const chalk = require('chalk');
 const execa = require('execa');
 

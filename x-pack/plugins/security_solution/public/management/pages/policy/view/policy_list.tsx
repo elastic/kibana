@@ -8,6 +8,8 @@ import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 
 import {
   EuiBasicTable,
   EuiText,
+  EuiTitle,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTableFieldDataColumnType,
@@ -20,8 +22,9 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
-  EuiSpacer,
   EuiButton,
+  EuiBetaBadge,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -45,7 +48,8 @@ import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
+import { CreatePackageConfigRouteState } from '../../../../../../ingest_manager/public';
+import { MANAGEMENT_APP_ID } from '../../../common/constants';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -91,6 +95,7 @@ export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['ite
         }
         isOpen={isOpen}
         closePopover={handleCloseMenu}
+        repositionOnScroll
       >
         <EuiContextMenuPanel items={items} data-test-subj="policyActionsMenu" />
       </EuiPopover>
@@ -122,7 +127,7 @@ export const PolicyList = React.memo(() => {
   const { services, notifications } = useKibana();
   const history = useHistory();
   const location = useLocation();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
@@ -141,21 +146,21 @@ export const PolicyList = React.memo(() => {
     endpointPackageVersion,
   } = usePolicyListSelector(selector);
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
     'ingestManager',
     {
       // We redirect to Ingest's Integaration page if we can't get the package version, and
-      // to the Integration Endpoint Package Add Datasource if we have package information.
+      // to the Integration Endpoint Package Add Integration if we have package information.
       // Also,
       // We pass along soem state information so that the Ingest page can change the behaviour
       // of the cancel and submit buttons and redirect the user back to endpoint policy
       path: `#/integrations${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-datasource` : ''
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-integration` : ''
       }`,
       state: {
-        onCancelNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onCancelNavigateTo: [MANAGEMENT_APP_ID, { path: getPoliciesPath() }],
         onCancelUrl: formatUrl(getPoliciesPath()),
-        onSaveNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onSaveNavigateTo: [MANAGEMENT_APP_ID, { path: getPoliciesPath() }],
       },
     }
   );
@@ -389,9 +394,38 @@ export const PolicyList = React.memo(() => {
       <ManagementPageView
         viewType="list"
         data-test-subj="policyListPage"
-        headerLeft={i18n.translate('xpack.securitySolution.endpoint.policyList.viewTitle', {
-          defaultMessage: 'Policies',
-        })}
+        headerLeft={
+          <>
+            <EuiFlexGroup alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1 data-test-subj="pageViewHeaderLeftTitle">
+                    <FormattedMessage
+                      id="xpack.securitySolution.policyList.pageTitle"
+                      defaultMessage="Policies"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.securitySolution.endpoint.policyList.beta', {
+                    defaultMessage: 'Beta',
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.policyList.pageSubTitle"
+                  defaultMessage="View and configure protections"
+                />
+              </p>
+            </EuiText>
+          </>
+        }
         headerRight={
           <EuiButton
             iconType="plusInCircle"
@@ -404,19 +438,19 @@ export const PolicyList = React.memo(() => {
             />
           </EuiButton>
         }
-        bodyHeader={
-          policyItems &&
-          policyItems.length > 0 && (
-            <EuiText color="subdued" data-test-subj="policyTotalCount">
+      >
+        {policyItems && policyItems.length > 0 && (
+          <>
+            <EuiText color="subdued" data-test-subj="policyTotalCount" size="xs">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
                 defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
                 values={{ totalItemCount }}
               />
             </EuiText>
-          )
-        }
-      >
+            <EuiHorizontalRule margin="xs" />
+          </>
+        )}
         {useMemo(() => {
           return (
             <>
@@ -443,7 +477,7 @@ export const PolicyList = React.memo(() => {
           handleTableChange,
           paginationSetup,
         ])}
-        <SpyRoute pageName={SecurityPageName.management} />
+        <SpyRoute pageName={SecurityPageName.administration} />
       </ManagementPageView>
     </>
   );

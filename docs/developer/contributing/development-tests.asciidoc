@@ -1,0 +1,96 @@
+[[development-tests]]
+== Testing
+
+To ensure that your changes will not break other functionality, please run the test suite and build (<<building-kibana>>) before submitting your Pull Request.
+
+[discrete]
+=== Running specific {kib} tests
+
+The following table outlines possible test file locations and how to
+invoke them:
+
+[width="100%",cols="7%,59%,34%",options="header",]
+|===
+|Test runner |Test location |Runner command (working directory is {kib}
+root)
+|Jest |`src/**/*.test.js` `src/**/*.test.ts`
+|`yarn test:jest -t regexp [test path]`
+
+|Jest (integration) |`**/integration_tests/**/*.test.js`
+|`yarn test:jest_integration -t regexp [test path]`
+
+|Mocha
+|`src/**/__tests__/**/*.js` `!src/**/public/__tests__/*.js``packages/kbn-datemath/test/**/*.js` `packages/kbn-dev-utils/src/**/__tests__/**/*.js` `tasks/**/__tests__/**/*.js`
+|`node scripts/mocha --grep=regexp [test path]`
+
+|Functional
+|`test/*integration/**/config.js` `test/*functional/**/config.js` `test/accessibility/config.js`
+|`yarn test:ftr:server --config test/[directory]/config.js``yarn test:ftr:runner --config test/[directory]/config.js --grep=regexp`
+
+|Karma |`src/**/public/__tests__/*.js` |`yarn test:karma:debug`
+|===
+
+For X-Pack tests located in `x-pack/` see
+link:{kib-repo}tree/{branch}/x-pack/README.md#testing[X-Pack Testing]
+
+Test runner arguments: - Where applicable, the optional arguments
+`-t=regexp` or `--grep=regexp` will only run tests or test suites
+whose descriptions matches the regular expression. - `[test path]` is
+the relative path to the test file.
+
+Examples: - Run the entire elasticsearch_service test suite:
+`yarn test:jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
+- Run the jest test case whose description matches
+`stops both admin and data clients`:
+`yarn test:jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
+- Run the api integration test case whose description matches the given
+string: ``` yarn test:ftr:server –config test/api_integration/config.js
+yarn test:ftr:runner –config test/api_integration/config
+
+[discrete]
+=== Cross-browser compatibility
+
+**Testing IE on OS X**
+
+* http://www.vmware.com/products/fusion/fusion-evaluation.html[Download
+VMWare Fusion].
+* https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/#downloads[Download
+IE virtual machines] for VMWare.
+* Open VMWare and go to Window > Virtual Machine Library. Unzip the
+virtual machine and drag the .vmx file into your Virtual Machine
+Library.
+* Right-click on the virtual machine you just added to your library and
+select "`Snapshots…`", and then click the "`Take`" button in the modal
+that opens. You can roll back to this snapshot when the VM expires in 90
+days.
+* In System Preferences > Sharing, change your computer name to be
+something simple, e.g. "`computer`".
+* Run {kib} with `yarn start --host=computer.local` (substituting
+your computer name).
+* Now you can run your VM, open the browser, and navigate to
+`http://computer.local:5601` to test {kib}.
+* Alternatively you can use browserstack
+
+[discrete]
+=== Running browser automation tests
+
+Check out <<development-functional-tests>> to learn more about how you can run
+and develop functional tests for {kib} core and plugins.
+
+You can also look into the {kib-repo}tree/{branch}/scripts/README.md[Scripts README.md]
+to learn more about using the node scripts we provide for building
+{kib}, running integration tests, and starting up {kib} and
+{es} while you develop.
+
+[discrete]
+==== More testing information:
+
+* <<development-functional-tests>>
+* <<development-unit-tests>>
+* <<development-accessibility-tests>>
+
+include::development-functional-tests.asciidoc[leveloffset=+1]
+
+include::development-unit-tests.asciidoc[leveloffset=+1]
+
+include::development-accessibility-tests.asciidoc[leveloffset=+1]

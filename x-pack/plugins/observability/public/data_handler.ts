@@ -4,28 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ObservabilityFetchDataResponse, FetchDataResponse } from './typings/fetch_data_response';
+import { DataHandler } from './typings/fetch_overview_data';
 import { ObservabilityApp } from '../typings/common';
-
-export interface FetchDataParams {
-  // The start timestamp in milliseconds of the queried time interval
-  startTime: string;
-  // The end timestamp in milliseconds of the queried time interval
-  endTime: string;
-  // The aggregation bucket size in milliseconds if applicable to the data source
-  bucketSize: string;
-}
-
-export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
-  fetchDataParams: FetchDataParams
-) => Promise<T>;
-
-export type HasData = () => Promise<boolean>;
-
-interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
-  fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
-  hasData: HasData;
-}
 
 const dataHandlers: Partial<Record<ObservabilityApp, DataHandler>> = {};
 
@@ -37,9 +17,38 @@ export function registerDataHandler<T extends ObservabilityApp>({
   dataHandlers[appName] = { fetchData, hasData };
 }
 
+export function unregisterDataHandler<T extends ObservabilityApp>({ appName }: { appName: T }) {
+  delete dataHandlers[appName];
+}
+
 export function getDataHandler<T extends ObservabilityApp>(appName: T) {
   const dataHandler = dataHandlers[appName];
   if (dataHandler) {
     return dataHandler as DataHandler<T>;
   }
+}
+
+export async function fetchHasData(): Promise<Record<ObservabilityApp, boolean>> {
+  const apps: ObservabilityApp[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics'];
+
+  const promises = apps.map(async (app) => getDataHandler(app)?.hasData() || false);
+
+  const results = await Promise.allSettled(promises);
+
+  const [apm, uptime, logs, metrics] = results.map((result) => {
+    if (result.status === 'fulfilled') {
+      return result.value;
+    }
+
+    // eslint-disable-next-line no-console
+    console.error('Error while fetching has data', result.reason);
+    return false;
+  });
+
+  return {
+    apm,
+    uptime,
+    infra_logs: logs,
+    infra_metrics: metrics,
+  };
 }

@@ -39,3 +39,5 @@ export { KbnClient } from './kbn_client';
 export * from './axios';
 export * from './stdio';
 export * from './ci_stats_reporter';
+export * from './plugin_list';
+export * from './simple_kibana_platform_plugin_discovery';

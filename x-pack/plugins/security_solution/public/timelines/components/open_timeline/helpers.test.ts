@@ -39,6 +39,7 @@ import sinon from 'sinon';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/store/inputs/actions');
+jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 jest.mock('../../store/timeline/actions');
 jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
@@ -262,14 +263,12 @@ describe('helpers', () => {
           },
         ],
         dataProviders: [],
-        dateRange: {
-          end: 0,
-          start: 0,
-        },
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -294,7 +293,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -360,14 +358,12 @@ describe('helpers', () => {
           },
         ],
         dataProviders: [],
-        dateRange: {
-          end: 0,
-          start: 0,
-        },
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -392,7 +388,6 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -498,10 +493,12 @@ describe('helpers', () => {
         ],
         version: '1',
         dataProviders: [],
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -525,14 +522,9 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
-        dateRange: {
-          start: 0,
-          end: 0,
-        },
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -623,11 +615,13 @@ describe('helpers', () => {
           },
         ],
         version: '1',
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         dataProviders: [],
         description: '',
         deletedEventIds: [],
         eventIdToNoteIds: {},
         eventType: 'all',
+        excludedRowRendererIds: [],
         filters: [
           {
             $state: {
@@ -694,14 +688,9 @@ describe('helpers', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
-        dateRange: {
-          start: 0,
-          end: 0,
-        },
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        showRowRenderers: true,
         sort: {
           columnId: '@timestamp',
           sortDirection: 'desc',
@@ -757,15 +746,15 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
       })();
 
       expect(dispatchSetTimelineRangeDatePicker).toHaveBeenCalledWith({
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
       });
     });
 
@@ -773,8 +762,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
       })();
@@ -789,8 +778,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
       })();
@@ -803,8 +792,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
       })();
@@ -826,8 +815,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimeline,
       })();
@@ -850,8 +839,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimeline,
       })();
@@ -879,8 +868,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: false,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [
           {
             created: 1585233356356,
@@ -913,8 +902,8 @@ describe('helpers', () => {
       timelineDispatch({
         duplicate: true,
         id: 'timeline-1',
-        from: 1585233356356,
-        to: 1585233716356,
+        from: '2020-03-26T14:35:56.356Z',
+        to: '2020-03-26T14:41:56.356Z',
         notes: [],
         timeline: mockTimelineModel,
         ruleNote: '# this would be some markdown',

@@ -40,8 +40,6 @@
 |  [IIndexPattern](./kibana-plugin-plugins-data-server.iindexpattern.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Use data plugin interface instead |
 |  [IndexPatternFieldDescriptor](./kibana-plugin-plugins-data-server.indexpatternfielddescriptor.md) |  |
-|  [IRequestTypesMap](./kibana-plugin-plugins-data-server.irequesttypesmap.md) | The map of search strategy IDs to the corresponding request type definitions. |
-|  [IResponseTypesMap](./kibana-plugin-plugins-data-server.iresponsetypesmap.md) | The map of search strategy IDs to the corresponding response type definitions. |
 |  [ISearchOptions](./kibana-plugin-plugins-data-server.isearchoptions.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
@@ -71,10 +69,8 @@
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.esaggsexpressionfunctiondefinition.md) |  |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-server.fieldformatsgetconfigfn.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
-|  [ISearch](./kibana-plugin-plugins-data-server.isearch.md) |  |
-|  [ISearchCancel](./kibana-plugin-plugins-data-server.isearchcancel.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
-|  [TStrategyTypes](./kibana-plugin-plugins-data-server.tstrategytypes.md) | Contains all known strategy type identifiers that will be used to map to request and response shapes. Plugins that wish to add their own custom search strategies should extend this type via:<!-- -->const MY\_STRATEGY = 'MY\_STRATEGY';<!-- -->declare module 'src/plugins/search/server' { export interface IRequestTypesMap { \[MY\_STRATEGY\]: IMySearchRequest; }<!-- -->export interface IResponseTypesMap { \[MY\_STRATEGY\]: IMySearchResponse } } |
 

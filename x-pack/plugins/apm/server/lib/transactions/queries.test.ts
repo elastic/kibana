@@ -12,6 +12,8 @@ import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../../public/utils/testHelpers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { loggerMock } from '../../../../../../src/core/server/logging/logger.mock';
 
 describe('transaction queries', () => {
   let mock: SearchParamsMock;
@@ -52,6 +54,8 @@ describe('transaction queries', () => {
         transactionName: undefined,
         transactionType: undefined,
         setup,
+        logger: loggerMock.create(),
+        uiFilters: {},
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -64,6 +68,8 @@ describe('transaction queries', () => {
         transactionName: 'bar',
         transactionType: undefined,
         setup,
+        logger: loggerMock.create(),
+        uiFilters: {},
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -76,6 +82,8 @@ describe('transaction queries', () => {
         transactionName: 'bar',
         transactionType: 'baz',
         setup,
+        logger: loggerMock.create(),
+        uiFilters: {},
       })
     );
 

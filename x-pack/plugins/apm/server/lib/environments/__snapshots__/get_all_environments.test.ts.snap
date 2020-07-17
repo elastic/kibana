@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getAllEnvironments fetches all environments 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing": undefined,
+          "size": 100,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+                "error",
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.name": "test",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": Array [
+    "myIndex",
+    "myIndex",
+    "myIndex",
+  ],
+}
+`;
+
+exports[`getAllEnvironments fetches all environments with includeMissing 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing": "ENVIRONMENT_NOT_DEFINED",
+          "size": 100,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+                "error",
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.name": "test",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": Array [
+    "myIndex",
+    "myIndex",
+    "myIndex",
+  ],
+}
+`;

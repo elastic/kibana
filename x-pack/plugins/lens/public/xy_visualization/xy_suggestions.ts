@@ -14,7 +14,7 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState, visualizationTypes } from './types';
+import { State, SeriesType, XYState, visualizationTypes, LayerConfig } from './types';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -379,25 +379,40 @@ function buildSuggestion({
   changeType: TableChangeType;
   keptLayerIds: string[];
 }) {
+  const existingLayer: LayerConfig | {} = getExistingLayer(currentState, layerId) || {};
+  const accessors = yValues.map((col) => col.columnId);
   const newLayer = {
-    ...(getExistingLayer(currentState, layerId) || {}),
+    ...existingLayer,
     layerId,
     seriesType,
     xAccessor: xValue.columnId,
     splitAccessor: splitBy?.columnId,
-    accessors: yValues.map((col) => col.columnId),
+    accessors,
+    yConfig:
+      'yConfig' in existingLayer && existingLayer.yConfig
+        ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
+        : undefined,
   };
 
+  // Maintain consistent order for any layers that were saved
   const keptLayers = currentState
-    ? currentState.layers.filter(
-        (layer) => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
-      )
+    ? currentState.layers
+        // Remove layers that aren't being suggested
+        .filter((layer) => keptLayerIds.includes(layer.layerId))
+        // Update in place
+        .map((layer) => (layer.layerId === layerId ? newLayer : layer))
+        // Replace the seriesType on all previous layers
+        .map((layer) => ({
+          ...layer,
+          seriesType,
+        }))
     : [];
 
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
+    fittingFunction: currentState?.fittingFunction || 'None',
     preferredSeriesType: seriesType,
-    layers: [...keptLayers, newLayer],
+    layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
   };
 
   return {

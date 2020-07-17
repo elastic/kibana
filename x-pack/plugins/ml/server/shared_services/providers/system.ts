@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
+import { ILegacyScopedClusterClient, KibanaRequest } from 'kibana/server';
 import { SearchResponse, SearchParams } from 'elasticsearch';
 import { MlServerLicense } from '../../lib/license';
 import { CloudSetup } from '../../../../cloud/server';
-import { LicenseCheck } from '../license_checks';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
 import { capabilitiesProvider } from '../../lib/capabilities';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
+import { SharedServicesChecks } from '../shared_services';
 
 export interface MlSystemProvider {
   mlSystemProvider(
-    callAsCurrentUser: LegacyAPICaller,
+    mlClusterClient: ILegacyScopedClusterClient,
     request: KibanaRequest
   ): {
     mlCapabilities(): Promise<MlCapabilitiesResponse>;
@@ -28,15 +28,16 @@ export interface MlSystemProvider {
 }
 
 export function getMlSystemProvider(
-  isMinimumLicense: LicenseCheck,
-  isFullLicense: LicenseCheck,
+  { isMinimumLicense, isFullLicense, getHasMlCapabilities }: SharedServicesChecks,
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup | undefined,
   resolveMlCapabilities: ResolveMlCapabilities
 ): MlSystemProvider {
   return {
-    mlSystemProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
+    mlSystemProvider(mlClusterClient: ILegacyScopedClusterClient, request: KibanaRequest) {
+      // const hasMlCapabilities = getHasMlCapabilities(request);
+      const { callAsCurrentUser, callAsInternalUser } = mlClusterClient;
       return {
         async mlCapabilities() {
           isMinimumLicense();
@@ -48,11 +49,11 @@ export function getMlSystemProvider(
 
           const mlCapabilities = await resolveMlCapabilities(request);
           if (mlCapabilities === null) {
-            throw new Error('resolveMlCapabilities is not defined');
+            throw new Error('mlCapabilities is not defined');
           }
 
           const { getCapabilities } = capabilitiesProvider(
-            callAsCurrentUser,
+            mlClusterClient,
             mlCapabilities,
             mlLicense,
             isMlEnabledInSpace
@@ -61,7 +62,8 @@ export function getMlSystemProvider(
         },
         async mlInfo(): Promise<MlInfoResponse> {
           isMinimumLicense();
-          const info = await callAsCurrentUser('ml.info');
+
+          const info = await callAsInternalUser('ml.info');
           const cloudId = cloud && cloud.cloudId;
           return {
             ...info,
@@ -70,6 +72,11 @@ export function getMlSystemProvider(
         },
         async mlAnomalySearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>> {
           isFullLicense();
+          // Removed while https://github.com/elastic/kibana/issues/64588 exists.
+          // SIEM are calling this endpoint with a dummy request object from their alerting
+          // integration and currently alerting does not supply a request object.
+          // await hasMlCapabilities(['canAccessML']);
+
           return callAsCurrentUser('search', {
             ...searchParams,
             index: ML_RESULTS_INDEX_PATTERN,
