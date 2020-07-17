@@ -26,12 +26,7 @@ export interface IOverviewServerData {
   activityFeed: IFeedActivity[];
   organization: IOrganization;
   isFederatedAuth: boolean;
-  currentUser: {
-    firstName: string;
-    email: string;
-    name: string;
-    color: string;
-  };
+  currentUser: IUser;
   fpAccount: IAccount;
 }
 
