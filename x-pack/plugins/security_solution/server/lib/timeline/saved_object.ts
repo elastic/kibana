@@ -125,9 +125,7 @@ const getTimelineTypeFilter = (
   status: TimelineStatusLiteralWithNull
 ) => {
   const typeFilter =
-    timelineType == null
-      ? null
-      : timelineType === TimelineType.template
+    timelineType === TimelineType.template
       ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
       : /** Show me every timeline whose timelineType is not "template".
          * which includes timelineType === 'default' and
