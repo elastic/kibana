@@ -235,9 +235,10 @@ export const saveInstalledKibanaRefs = async (
   pkgName: string,
   installedAssets: KibanaAssetReference[]
 ) => {
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_kibana: installedAssets,
   });
+  return installedAssets;
 };
 
 export const saveInstalledEsRefs = async (
