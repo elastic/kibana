@@ -42,10 +42,8 @@ jest.mock('kea', () => ({
 import { useValues } from 'kea';
 
 export const setMockValues = (values: object) => {
-  (useValues as jest.Mock).mockImplementationOnce(() => {
-    return {
-      ...useValues(),
-      ...values,
-    };
-  });
+  (useValues as jest.Mock).mockImplementationOnce(() => ({
+    ...mockLogicValues,
+    ...values,
+  }));
 };
