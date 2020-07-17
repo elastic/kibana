@@ -2172,10 +2172,10 @@
     redux-immutable-state-invariant "^2.1.0"
     redux-logger "^3.0.6"
 
-"@elastic/elasticsearch@7.8.0":
-  version "7.8.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.8.0.tgz#3f9ee54fe8ef79874ebd231db03825fa500a7111"
-  integrity sha512-rUOTNN1At0KoN0Fcjd6+J7efghuURnoMTB/od9EMK6Mcdebi6N3z5ulShTsKRn6OanS9Eq3l/OmheQY1Y+WLcg==
+"@elastic/elasticsearch@7.9.0-rc.1":
+  version "7.9.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.9.0-rc.1.tgz#50205507ec84ccb95cb7a6d36e5570808749fee9"
+  integrity sha512-rVjiVj7VPLCusJPfywpb3gvcaA99uylYSum1Frcq4vi2Iqg118KXgYW6GOis2Y70oDZ6w6XRlT0ze5NA6SBa+g==
   dependencies:
     debug "^4.1.1"
     decompress-response "^4.2.0"
