@@ -20,9 +20,11 @@
   },
   "include": [
     "mocks.ts",
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "src/**/__fixtures__/**/*",
+    "**/*.test.ts",
+    "**/*.mocks.ts",
+    "**/*.test.tsx",
+    "**/__fixtures__/**/*",
+    "**/__mocks__/**/*",
   ],
   "exclude": [
     "test/**/*",
@@ -30,13 +32,15 @@
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
     "**/typespec_tests.ts",
-    "plugins/ui_actions_enhanced/public/plugin.ts",
-    "plugins/dashboard_enhanced/public/services/drilldowns/dashboard_to_dashboard_drilldown/drilldown.tsx",
-    "plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.test.ts",
     "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.test.ts",
     "x-pack/plugins/lens/public/editor_frame_service/editor_frame/workspace_panel/workspace_panel.test.tsx",
     "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.test.ts",
     "x-pack/plugins/lens/public/editor_frame_service/editor_frame/workspace_panel/workspace_panel.test.tsx"
   ],
-  "references": [{"path": "../tsconfig.oss.json"}, {"path": "../examples/embeddable_examples/tsconfig.json"}, {"path": "./tsconfig.oss.json"}]
+  "references": [
+    {"path": "./tsconfig.src.json"},
+    {"path": "../tsconfig.src.json"},
+    {"path": "../tsconfig.test.json"},
+    {"path": "../examples/embeddable_examples/tsconfig.json"},
+  ]
 }

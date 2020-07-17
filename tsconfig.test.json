@@ -23,5 +23,5 @@
     "src/plugins/dashboard/public/application/tests/dashboard_container.test.tsx",
     "src/core/server/utils/crypto/pkcs12.test.ts",
   ],
-  "references": [{"path": "./tsconfig.oss.json"}, {"path": "./examples/embeddable_examples"}]
+  "references": [{"path": "./tsconfig.src.json"}, {"path": "./examples/embeddable_examples"}]
 }

@@ -15,5 +15,5 @@
     "../../typings/**/*"
   ],
   "exclude": [],
-  "references": [{"path": "../../tsconfig.oss.json"}]
+  "references": [{"path": "../../tsconfig.src.json"}]
 }

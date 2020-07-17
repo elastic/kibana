@@ -3,7 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "incremental": true,
-    "tsBuildInfoFile": "./build/tsconfig.oss.tsbuildinfo",
+    "tsBuildInfoFile": "./build/tsconfig.src.tsbuildinfo",
     "noEmit": false,
     "outDir": "./build",
     "emitDeclarationOnly": true,
