@@ -515,6 +515,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
               <ExceptionsViewer
                 ruleId={ruleId ?? ''}
                 ruleName={rule?.name ?? ''}
+                ruleIndices={rule?.index ?? []}
                 availableListTypes={exceptionLists.allowedExceptionListTypes}
                 commentsAccordionId={'ruleDetailsTabExceptions'}
                 exceptionListsMeta={exceptionLists.lists}

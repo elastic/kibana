@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { ExceptionListItemComponent } from './exception_item';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules/fetch_index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
   ExceptionListItemSchema,
   NamespaceType,
@@ -51,7 +51,7 @@ interface ExceptionBuilderProps {
   listId: string;
   listNamespaceType: NamespaceType;
   ruleName: string;
-  indexPatternConfig: string[];
+  indexPatterns: IIndexPattern;
   isLoading: boolean;
   isOrDisabled: boolean;
   isAndDisabled: boolean;
@@ -64,7 +64,7 @@ export const ExceptionBuilder = ({
   listId,
   listNamespaceType,
   ruleName,
-  indexPatternConfig,
+  indexPatterns,
   isLoading,
   isOrDisabled,
   isAndDisabled,
@@ -75,9 +75,6 @@ export const ExceptionBuilder = ({
     exceptionListItems
   );
   const [exceptionsToDelete, setExceptionsToDelete] = useState<ExceptionListItemSchema[]>([]);
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    indexPatternConfig ?? []
-  );
 
   const handleCheckAndLogic = (items: ExceptionsBuilderExceptionItem[]): void => {
     setAndLogicIncluded((includesAnd: boolean): boolean => {
@@ -175,7 +172,7 @@ export const ExceptionBuilder = ({
   }, [exceptions]);
 
   // Filters index pattern fields by exceptionable fields if list type is endpoint
-  const filterIndexPatterns = useCallback(() => {
+  const filterIndexPatterns = useMemo((): IIndexPattern => {
     if (listType === 'endpoint') {
       return {
         ...indexPatterns,
@@ -201,7 +198,7 @@ export const ExceptionBuilder = ({
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
-      {(isLoading || indexPatternLoading) && (
+      {(isLoading || indexPatterns == null) && (
         <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
       )}
       {exceptions.map((exceptionListItem, index) => (
@@ -229,8 +226,8 @@ export const ExceptionBuilder = ({
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
-                indexPattern={filterIndexPatterns()}
-                isLoading={indexPatternLoading}
+                indexPattern={filterIndexPatterns}
+                isLoading={indexPatterns.fields.length === 0}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}
                 onCheckAndLogic={handleCheckAndLogic}

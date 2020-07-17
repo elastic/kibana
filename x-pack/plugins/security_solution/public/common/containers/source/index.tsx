@@ -60,7 +60,7 @@ export const getIndexFields = memoizeOne(
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
-            pick(['name', 'searchable', 'type', 'aggregatable'], field)
+            pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
           ),
           title,
         }

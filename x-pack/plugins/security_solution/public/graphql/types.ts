@@ -627,6 +627,24 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<string[]>;
+
+  subType?: Maybe<IFieldSubType>;
+}
+
+export interface IFieldSubType {
+  multi?: Maybe<IFieldSubTypeMulti>;
+
+  nested?: Maybe<IFieldSubTypeNested>;
+}
+
+export interface IFieldSubTypeMulti {
+  parent?: Maybe<string>;
+}
+
+export interface IFieldSubTypeNested {
+  path?: Maybe<string>;
 }
 
 export interface AuthenticationsData {
@@ -2780,6 +2798,30 @@ export namespace SourceQuery {
     aggregatable: boolean;
 
     format: Maybe<string>;
+
+    esTypes: Maybe<string[]>;
+
+    subType: Maybe<SubType>;
+  };
+
+  export type SubType = {
+    __typename?: 'IFieldSubType';
+
+    multi: Maybe<Multi>;
+
+    nested: Maybe<Nested>;
+  };
+
+  export type Multi = {
+    __typename?: 'IFieldSubTypeMulti';
+
+    parent: Maybe<string>;
+  };
+
+  export type Nested = {
+    __typename?: 'IFieldSubTypeNested';
+
+    path: Maybe<string>;
   };
 }
 

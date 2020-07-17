@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexField } from '../../graphql/types';
+import { IndexField, IFieldSubType } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 
 export interface FieldsAdapter {
@@ -16,4 +16,6 @@ export interface IndexFieldDescriptor {
   type: string;
   searchable: boolean;
   aggregatable: boolean;
+  esTypes?: string[] | null;
+  subType?: IFieldSubType | null;
 }

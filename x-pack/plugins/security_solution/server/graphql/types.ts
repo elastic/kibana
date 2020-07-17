@@ -629,6 +629,24 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<string[]>;
+
+  subType?: Maybe<IFieldSubType>;
+}
+
+export interface IFieldSubType {
+  multi?: Maybe<IFieldSubTypeMulti>;
+
+  nested?: Maybe<IFieldSubTypeNested>;
+}
+
+export interface IFieldSubTypeMulti {
+  parent?: Maybe<string>;
+}
+
+export interface IFieldSubTypeNested {
+  path?: Maybe<string>;
 }
 
 export interface AuthenticationsData {
@@ -3579,6 +3597,10 @@ export namespace IndexFieldResolvers {
     description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
 
     format?: FormatResolver<Maybe<string>, TypeParent, TContext>;
+    /** the elastic type as mapped in the index */
+    esTypes?: EsTypesResolver<Maybe<string[]>, TypeParent, TContext>;
+
+    subType?: SubTypeResolver<Maybe<IFieldSubType>, TypeParent, TContext>;
   }
 
   export type CategoryResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
@@ -3624,6 +3646,59 @@ export namespace IndexFieldResolvers {
   export type FormatResolver<
     R = Maybe<string>,
     Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EsTypesResolver<
+    R = Maybe<string[]>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SubTypeResolver<
+    R = Maybe<IFieldSubType>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace IFieldSubTypeResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = IFieldSubType> {
+    multi?: MultiResolver<Maybe<IFieldSubTypeMulti>, TypeParent, TContext>;
+
+    nested?: NestedResolver<Maybe<IFieldSubTypeNested>, TypeParent, TContext>;
+  }
+
+  export type MultiResolver<
+    R = Maybe<IFieldSubTypeMulti>,
+    Parent = IFieldSubType,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type NestedResolver<
+    R = Maybe<IFieldSubTypeNested>,
+    Parent = IFieldSubType,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace IFieldSubTypeMultiResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = IFieldSubTypeMulti> {
+    parent?: ParentResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type ParentResolver<
+    R = Maybe<string>,
+    Parent = IFieldSubTypeMulti,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace IFieldSubTypeNestedResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = IFieldSubTypeNested> {
+    path?: PathResolver<Maybe<string>, TypeParent, TContext>;
+  }
+
+  export type PathResolver<
+    R = Maybe<string>,
+    Parent = IFieldSubTypeNested,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -9349,6 +9424,9 @@ export type IResolvers<TContext = SiemContext> = {
   SourceFields?: SourceFieldsResolvers.Resolvers<TContext>;
   SourceStatus?: SourceStatusResolvers.Resolvers<TContext>;
   IndexField?: IndexFieldResolvers.Resolvers<TContext>;
+  IFieldSubType?: IFieldSubTypeResolvers.Resolvers<TContext>;
+  IFieldSubTypeMulti?: IFieldSubTypeMultiResolvers.Resolvers<TContext>;
+  IFieldSubTypeNested?: IFieldSubTypeNestedResolvers.Resolvers<TContext>;
   AuthenticationsData?: AuthenticationsDataResolvers.Resolvers<TContext>;
   AuthenticationsEdges?: AuthenticationsEdgesResolvers.Resolvers<TContext>;
   AuthenticationItem?: AuthenticationItemResolvers.Resolvers<TContext>;
