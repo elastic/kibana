@@ -42,6 +42,10 @@ export const InspectorDataGrid = ({ columns, data, dataGridAriaLabel }: Inspecto
 
   useEffect(
     () => {
+      setPagination({
+        ...pagination,
+        pageIndex: 0,
+      });
       setVisibleColumns(columns.map((column) => column.id));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
