@@ -47,6 +47,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
+      alerting: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
       privileges: {
         all: {
           alerting: {

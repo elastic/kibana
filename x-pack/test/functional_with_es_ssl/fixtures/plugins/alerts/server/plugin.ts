@@ -25,6 +25,7 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
       id: 'alerting_fixture',
       name: 'alerting_fixture',
       app: [],
+      alerting: ['test.always-firing', 'test.noop'],
       privileges: {
         all: {
           alerting: {

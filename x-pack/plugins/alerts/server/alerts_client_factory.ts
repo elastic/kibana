@@ -15,6 +15,7 @@ import { TaskManagerStartContract } from '../../task_manager/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { AlertsAuthorization } from './authorization/alerts_authorization';
 import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
+import { Space } from '../../spaces/server';
 
 export interface AlertsClientFactoryOpts {
   logger: Logger;
@@ -22,6 +23,7 @@ export interface AlertsClientFactoryOpts {
   alertTypeRegistry: AlertTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   getSpaceId: (request: KibanaRequest) => string | undefined;
+  getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actions: ActionsPluginStartContract;
@@ -35,6 +37,7 @@ export class AlertsClientFactory {
   private alertTypeRegistry!: AlertTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
+  private getSpace!: (request: KibanaRequest) => Promise<Space | undefined>;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsClient!: EncryptedSavedObjectsClient;
   private actions!: ActionsPluginStartContract;
@@ -47,6 +50,7 @@ export class AlertsClientFactory {
     this.isInitialized = true;
     this.logger = options.logger;
     this.getSpaceId = options.getSpaceId;
+    this.getSpace = options.getSpace;
     this.taskManager = options.taskManager;
     this.alertTypeRegistry = options.alertTypeRegistry;
     this.securityPluginSetup = options.securityPluginSetup;
@@ -63,6 +67,7 @@ export class AlertsClientFactory {
       authorization: securityPluginSetup?.authz,
       securityLicense: securityPluginSetup?.license,
       request,
+      getSpace: this.getSpace,
       alertTypeRegistry: this.alertTypeRegistry,
       features: features!,
       auditLogger: new AlertsAuthorizationAuditLogger(

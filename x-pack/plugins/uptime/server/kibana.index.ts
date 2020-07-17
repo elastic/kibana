@@ -38,6 +38,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
     management: {
       insightsAndAlerting: ['triggersActions'],
     },
+    alerting: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
     privileges: {
       all: {
         app: ['uptime', 'kibana'],

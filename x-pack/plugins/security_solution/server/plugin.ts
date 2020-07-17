@@ -173,6 +173,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
+      alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
       privileges: {
         all: {
           app: [...securitySubPlugins, 'kibana'],

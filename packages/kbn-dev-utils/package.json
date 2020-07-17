@@ -17,6 +17,7 @@
     "exit-hook": "^2.2.0",
     "getopts": "^2.2.5",
     "load-json-file": "^6.2.0",
+    "normalize-path": "^3.0.0",
     "moment": "^2.24.0",
     "rxjs": "^6.5.5",
     "tree-kill": "^1.2.2",

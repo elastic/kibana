@@ -26,6 +26,7 @@ const managementSchema = Joi.object().pattern(
   Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
+const alertingSchema = Joi.array().items(Joi.string());
 
 const privilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
@@ -34,8 +35,8 @@ const privilegeSchema = Joi.object({
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
   alerting: Joi.object({
-    all: Joi.array().items(Joi.string()),
-    read: Joi.array().items(Joi.string()),
+    all: alertingSchema,
+    read: alertingSchema,
   }),
   savedObject: Joi.object({
     all: Joi.array().items(Joi.string()).required(),
@@ -86,6 +87,7 @@ const schema = Joi.object({
   app: Joi.array().items(Joi.string()).required(),
   management: managementSchema,
   catalogue: catalogueSchema,
+  alerting: alertingSchema,
   privileges: Joi.object({
     all: privilegeSchema,
     read: privilegeSchema,

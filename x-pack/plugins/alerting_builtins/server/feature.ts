@@ -18,6 +18,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
+  alerting: [IndexThreshold],
   privileges: {
     all: {
       app: [],
