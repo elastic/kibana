@@ -72,6 +72,7 @@ export class IngestManagerPlugin
       id: PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
       title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
+      order: 9020,
       euiIconType: 'savedObjectsApp',
       async mount(params: AppMountParameters) {
         const [coreStart, startDeps] = (await core.getStartServices()) as [

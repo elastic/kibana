@@ -94,7 +94,6 @@ export interface State {
     trainingPercent: number;
   };
   disabled: boolean;
-  indexNames: EsIndexName[];
   indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isAdvancedEditorValidJson: boolean;
@@ -165,7 +164,6 @@ export const getInitialState = (): State => ({
     !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics'),
-  indexNames: [],
   indexPatternsMap: {},
   isAdvancedEditorEnabled: false,
   isAdvancedEditorValidJson: true,
