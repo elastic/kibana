@@ -217,8 +217,8 @@ export const getTimelineTitle = (
   duplicate: boolean,
   timelineType?: TimelineType
 ) => {
-  const isCreateFromAction = timeline.timelineType !== timelineType;
-  if (isCreateFromAction) return '';
+  const isCreateTimelineFromAction = timelineType && timeline.timelineType !== timelineType;
+  if (isCreateTimelineFromAction) return '';
 
   return duplicate ? `${timeline.title} - Duplicate` : timeline.title || '';
 };
@@ -228,7 +228,7 @@ export const getTimelineStatus = (
   duplicate: boolean,
   timelineType?: TimelineType
 ) => {
-  const isCreateTimelineFromAction = timeline.timelineType !== timelineType;
+  const isCreateTimelineFromAction = timelineType && timeline.timelineType !== timelineType;
   if (isCreateTimelineFromAction) return TimelineStatus.draft;
 
   return duplicate ? TimelineStatus.active : timeline.status;
