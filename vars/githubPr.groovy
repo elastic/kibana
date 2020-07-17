@@ -39,8 +39,6 @@ def sendComment(isFinal = false) {
 
   def shouldUpdateComment = !!info.builds.find { it.number == env.BUILD_NUMBER }
 
-  // Need to re-factor above code to get the full comment objects back, instead of just the text
-
   def message = getNextCommentMessage(info, isFinal)
 
   if (shouldUpdateComment) {
@@ -59,9 +57,7 @@ def sendCommentOnError(Closure closure) {
     closure()
   } catch (ex) {
     catchErrors {
-      if (isPR()) {
-        sendComment(false)
-      }
+      sendComment(false)
     }
     throw ex
   }
