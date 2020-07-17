@@ -4,5 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ProgressBar, mlInMemoryTableFactory } from './ml_in_memory_table';
-export * from './types';
+import { ID } from '../../constants.mock';
+
+import { DeleteEndpointListItemSchema } from './delete_endpoint_list_item_schema';
+
+export const getDeleteEndpointListItemSchemaMock = (): DeleteEndpointListItemSchema => ({
+  id: ID,
+});

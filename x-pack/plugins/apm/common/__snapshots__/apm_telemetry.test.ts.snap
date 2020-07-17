@@ -527,6 +527,70 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         }
                       }
                     },
+                    "aggregated_transactions": {
+                      "properties": {
+                        "current_implementation": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "no_observer_name": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "no_rum": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "no_rum_no_observer_name": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "only_rum": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "only_rum_no_observer_name": {
+                          "properties": {
+                            "expected_metric_document_count": {
+                              "type": "long"
+                            },
+                            "transaction_count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
                     "cloud": {
                       "properties": {
                         "availability_zone": {
@@ -647,12 +711,14 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         "client": {
                           "properties": {
                             "geo": {
-                              "properites": {
+                              "properties": {
                                 "country_iso_code": {
-                                  "rum": {
-                                    "properties": {
-                                      "1d": {
-                                        "type": "long"
+                                  "properties": {
+                                    "rum": {
+                                      "properties": {
+                                        "1d": {
+                                          "type": "long"
+                                        }
                                       }
                                     }
                                   }
@@ -831,6 +897,17 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                     },
                     "tasks": {
                       "properties": {
+                        "aggregated_transactions": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
                         "agent_configuration": {
                           "properties": {
                             "took": {
