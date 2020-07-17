@@ -234,7 +234,7 @@ export function setQuery({
       lastCalledId = currentCallId;
       await dispatch<any>(syncDataForAllJoinLayers());
 
-      // setQuery can be triggered before async syncing completes
+      // setQuery can be triggered before async data fetching completes
       // Only continue execution path if setQuery has not been re-triggered.
       if (currentCallId === lastCalledId) {
         dispatch(fitToDataBounds());
