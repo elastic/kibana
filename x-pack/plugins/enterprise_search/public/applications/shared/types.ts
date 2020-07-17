@@ -30,12 +30,19 @@ export interface IKeaListeners<IKeaActions> {
   actions: IKeaActions;
 }
 
-export interface IKeaReducers<IKeaValues> {
-  [value: string]: [
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any, // The default state for the value - can be anything
+/**
+ * This reducers() type checks that:
+ *
+ * 1. The value object keys are defined within IKeaValues
+ * 2. The default state (array[0]) matches the type definition within IKeaValues
+ * 3. The action object keys (array[1]) are defined within IKeaActions
+ * 3. The new state returned by the action matches the type definition within IKeaValues
+ */
+export type TKeaReducers<IKeaValues, IKeaActions> = {
+  [Value in keyof IKeaValues]?: [
+    IKeaValues[Value],
     {
-      [action: string]: (state: IKeaValues, payload: IKeaValues) => void; // Returns new state
+      [Action in keyof IKeaActions]?: (state: IKeaValues, payload: IKeaValues) => IKeaValues[Value];
     }
   ];
-}
+};

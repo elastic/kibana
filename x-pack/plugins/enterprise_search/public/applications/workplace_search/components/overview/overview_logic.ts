@@ -12,7 +12,7 @@ import { IAccount, IOrganization, IUser } from '../../types';
 import {
   IFlashMessagesProps,
   IKeaLogic,
-  IKeaReducers,
+  TKeaReducers,
   IKeaSelectors,
   IKeaListeners,
 } from '../../../shared/types';
@@ -58,9 +58,9 @@ export const OverviewLogic = kea({
     setHasErrorConnecting: (hasErrorConnecting) => ({ hasErrorConnecting }),
     initializeOverview: ({ http }) => ({ http }),
   }),
-  reducers: (): IKeaReducers<IOverviewValues> => ({
+  reducers: (): TKeaReducers<IOverviewValues, IOverviewActions> => ({
     organization: [
-      {},
+      {} as IOrganization,
       {
         setServerData: (_, { organization }) => organization,
       },
@@ -72,13 +72,13 @@ export const OverviewLogic = kea({
       },
     ],
     currentUser: [
-      {},
+      {} as IUser,
       {
         setServerData: (_, { currentUser }) => currentUser,
       },
     ],
     fpAccount: [
-      {},
+      {} as IAccount,
       {
         setServerData: (_, { fpAccount }) => fpAccount,
       },
