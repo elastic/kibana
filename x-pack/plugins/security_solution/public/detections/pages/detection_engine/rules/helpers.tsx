@@ -14,9 +14,8 @@ import { RuleAlertAction, RuleType } from '../../../../../common/detection_engin
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
-import { ENDPOINT_LIST_ID } from '../../../../shared_imports';
+import { ENDPOINT_LIST_ID, FormData, FormHook, FormSchema } from '../../../../shared_imports';
 import { Rule } from '../../../containers/detection_engine/rules';
-import { FormData, FormHook, FormSchema } from '../../../../shared_imports';
 import {
   AboutStepRule,
   AboutStepRuleDetails,
