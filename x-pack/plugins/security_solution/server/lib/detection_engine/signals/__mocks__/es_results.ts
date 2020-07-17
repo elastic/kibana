@@ -123,6 +123,8 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
 
 export const sampleDocWithAncestors = (): SignalSearchResponse => {
   const sampleDoc = sampleDocNoSortId();
+  delete sampleDoc.sort;
+  delete sampleDoc._source.source;
   sampleDoc._source.signal = {
     parent: {
       rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
