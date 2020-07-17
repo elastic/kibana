@@ -16,12 +16,14 @@ import { useLicense } from '../../../../hooks/useLicense';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
 export type AnomalyDetectionApiResponse = APIReturnType<
-  '/api/apm/settings/anomaly-detection'
+  '/api/apm/settings/anomaly-detection',
+  'GET'
 >;
 
 const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],
   hasLegacyJobs: false,
+  error: undefined,
 };
 
 export const AnomalyDetection = () => {
@@ -84,6 +86,7 @@ export const AnomalyDetection = () => {
       ) : (
         <JobsList
           status={status}
+          errorMessage={data.error}
           jobs={data.jobs}
           hasLegacyJobs={data.hasLegacyJobs}
           onAddEnvironments={() => {

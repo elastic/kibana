@@ -61,17 +61,19 @@ interface Props {
   onAddEnvironments: () => void;
   jobs: Jobs;
   hasLegacyJobs: boolean;
+  errorMessage?: string;
 }
 export const JobsList = ({
   status,
   onAddEnvironments,
   jobs,
   hasLegacyJobs,
+  errorMessage,
 }: Props) => {
   const isLoading =
     status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
 
-  const hasFetchFailure = status === FETCH_STATUS.FAILURE;
+  const hasFetchFailure = status === FETCH_STATUS.FAILURE || errorMessage;
 
   return (
     <EuiPanel>
@@ -121,11 +123,17 @@ export const JobsList = ({
       <EuiSpacer size="l" />
       <ManagedTable
         noItemsMessage={
+          // loading state
           isLoading ? (
             <LoadingStatePrompt />
-          ) : hasFetchFailure ? (
+          ) : // Handled error
+          errorMessage ? (
+            errorMessage
+          ) : // Unhandled error
+          hasFetchFailure ? (
             <FailureStatePrompt />
           ) : (
+            // empty state
             <EmptyStatePrompt />
           )
         }
@@ -152,7 +160,7 @@ function EmptyStatePrompt() {
   );
 }
 
-function FailureStatePrompt() {
+function FailureStatePrompt({ errorMessage: string }) {
   return (
     <>
       {i18n.translate(

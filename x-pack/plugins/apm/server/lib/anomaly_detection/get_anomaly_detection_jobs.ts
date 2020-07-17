@@ -5,6 +5,7 @@
  */
 
 import { Logger } from 'kibana/server';
+import Boom from 'boom';
 import { Setup } from '../helpers/setup_request';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
@@ -15,14 +16,14 @@ export async function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
   }
 
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
-  if (
-    !(
-      mlCapabilities.mlFeatureEnabledInSpace &&
-      mlCapabilities.isPlatinumOrTrialLicense
-    )
-  ) {
-    logger.warn('Anomaly detection integration is not availble for this user.');
-    return [];
+  if (!mlCapabilities.mlFeatureEnabledInSpace) {
+    throw Boom.internal(
+      'Machine learning is not available in the selected space'
+    );
+  }
+
+  if (!mlCapabilities.isPlatinumOrTrialLicense) {
+    throw Boom.internal('You must have a platinum license to use ML anomalies');
   }
 
   const response = await getMlJobsWithAPMGroup(ml);

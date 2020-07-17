@@ -7,6 +7,7 @@
 import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
 import { snakeCase } from 'lodash';
+import Boom from 'boom';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import {
@@ -25,21 +26,23 @@ export async function createAnomalyDetectionJobs(
   logger: Logger
 ) {
   const { ml, indices } = setup;
+
   if (!ml) {
-    logger.warn('Anomaly detection plugin is not available.');
-    return [];
+    throw Boom.internal('Machine learning is not available');
   }
+
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    logger.warn('Anomaly detection feature is not enabled for the space.');
-    return [];
+    throw Boom.internal(
+      'Anomaly detection feature is not enabled for the space.'
+    );
   }
   if (!mlCapabilities.isPlatinumOrTrialLicense) {
-    logger.warn(
+    throw Boom.internal(
       'Unable to create anomaly detection jobs due to insufficient license.'
     );
-    return [];
   }
+
   logger.info(
     `Creating ML anomaly detection jobs for environments: [${environments}].`
   );
@@ -59,7 +62,7 @@ export async function createAnomalyDetectionJobs(
       `Failed to create anomaly detection ML jobs for: [${failedJobIds}]:`
     );
     failedJobs.forEach(({ error }) => logger.error(JSON.stringify(error)));
-    throw new Error(
+    throw Boom.internal(
       `Failed to create anomaly detection ML jobs for: [${failedJobIds}].`
     );
   }
@@ -70,11 +73,11 @@ export async function createAnomalyDetectionJobs(
 async function createAnomalyDetectionJob({
   ml,
   environment,
-  indexPatternName = 'apm-*-transaction-*',
+  indexPatternName,
 }: {
   ml: Required<Setup>['ml'];
   environment: string;
-  indexPatternName?: string | undefined;
+  indexPatternName: string;
 }) {
   const randomToken = uuid().substr(-4);
 
