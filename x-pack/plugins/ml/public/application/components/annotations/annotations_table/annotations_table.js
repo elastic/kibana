@@ -438,7 +438,7 @@ export class AnnotationsTable extends Component {
         name: i18n.translate('xpack.ml.annotationsTable.labelColumnName', {
           defaultMessage: 'Label',
         }),
-        sortable: true,
+        sortable: (key) => +key,
         width: '60px',
         render: (key) => {
           return <EuiBadge color="default">{key}</EuiBadge>;
