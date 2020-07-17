@@ -19,8 +19,9 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from 'kibana/public';
 import { VegaAdapter } from './vega_adapter';
-import { VegaDataInspector } from './vega_data_inspector';
+import { VegaDataInspector, VegaDataInspectorProps } from './vega_data_inspector';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../inspector/public';
 
@@ -42,12 +43,12 @@ interface VegaInspectorViewDependencies {
 export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies) =>
   ({
     title: vegaDebugLabel,
-    shouldShow(adapters: VegaInspectorAdapters) {
+    shouldShow(adapters) {
       return Boolean(adapters.vega);
     },
-    component: ({ adapters }: VegaInspectorAdapters) => (
+    component: (props) => (
       <KibanaContextProvider services={dependencies}>
-        <VegaDataInspector adapters={adapters}> </VegaDataInspector>
+        <VegaDataInspector {...(props as VegaDataInspectorProps)}> </VegaDataInspector>
       </KibanaContextProvider>
     ),
   } as InspectorViewDescription);

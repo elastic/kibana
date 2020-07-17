@@ -25,9 +25,7 @@ import { VegaInspectorAdapters } from './vega_inspector';
 import { DataViewer, SignalViewer, SpecViewer } from './components';
 import { InspectorViewProps } from '../../../inspector/public';
 
-interface VegaDataInspectorProps extends InspectorViewProps<VegaInspectorAdapters> {
-  adapters: VegaInspectorAdapters;
-}
+export type VegaDataInspectorProps = InspectorViewProps<VegaInspectorAdapters>;
 
 const dataSetsLabel = i18n.translate('visTypeVega.inspector.dataSetsLabel', {
   defaultMessage: 'Data Sets',
