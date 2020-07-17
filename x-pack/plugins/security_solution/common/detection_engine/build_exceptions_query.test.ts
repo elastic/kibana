@@ -715,82 +715,40 @@ describe('build_exceptions_query', () => {
       expect(queries).toEqual(expectedQueries);
     });
 
-    describe('when "exclude" is false', () => {
-      beforeEach(() => {
-        exclude = false;
+    test('it builds correct queries for nested excluded fields', () => {
+      const payload = getExceptionListItemSchemaMock();
+      const payload2 = getExceptionListItemSchemaMock();
+      payload2.entries = [
+        makeMatchAnyEntry({ field: 'b' }),
+        {
+          field: 'parent',
+          type: 'nested',
+          entries: [
+            // TODO: these operators are not being respected. buildNested needs to be updated
+            makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' }),
+            makeMatchEntry({ field: 'd', operator: 'excluded', value: 'valueD' }),
+          ],
+        },
+        makeMatchAnyEntry({ field: 'e' }),
+      ];
+      const queries = buildExceptionListQueries({
+        language: 'kuery',
+        lists: [payload, payload2],
       });
-
-      test('it returns empty array if lists is empty array', () => {
-        const query = buildExceptionListQueries({
+      const expectedQueries = [
+        {
+          query:
+            'some.parentField:{ nested.field:"some value" } and some.not.nested.field:"some value"',
           language: 'kuery',
-          lists: [],
-        });
-
-        expect(query).toEqual([]);
-      });
-
-      test('it returns empty array if lists is undefined', () => {
-        const query = buildExceptionListQueries({ language: 'kuery', lists: undefined });
-
-        expect(query).toEqual([]);
-      });
-
-      test('it returns expected query when lists exist and language is "kuery"', () => {
-        const payload = getExceptionListItemSchemaMock();
-        const payload2 = getExceptionListItemSchemaMock();
-        payload2.entries = [
-          makeMatchAnyEntry({ field: 'b' }),
-          {
-            field: 'parent',
-            type: 'nested',
-            entries: [
-              makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' }),
-              makeMatchEntry({ field: 'd', operator: 'excluded', value: 'valueD' }),
-            ],
-          },
-          makeMatchAnyEntry({ field: 'e' }),
-        ];
-        const queries = buildExceptionListQueries({
+        },
+        {
+          query:
+            'b:("value-1" or "value-2") and parent:{ c:"valueC" and d:"valueD" } and e:("value-1" or "value-2")',
           language: 'kuery',
-          lists: [payload, payload2],
-        });
-        const expectedQueries = [
-          {
-            query:
-              'some.parentField:{ nested.field:"some value" } and some.not.nested.field:"some value"',
-            language: 'kuery',
-          },
-          {
-            query:
-              'b:("value-1" or "value-2") and parent:{ c:"valueC" and d:"valueD" } and e:("value-1" or "value-2")',
-            language: 'kuery',
-          },
-        ];
+        },
+      ];
 
-        expect(queries).toEqual(expectedQueries);
-      });
-
-      test('it returns expected query when lists exist and language is "lucene"', () => {
-        const payload = getExceptionListItemSchemaMock();
-        payload.entries = [makeMatchAnyEntry({ field: 'a' }), makeMatchAnyEntry({ field: 'b' })];
-        const payload2 = getExceptionListItemSchemaMock();
-        payload2.entries = [makeMatchAnyEntry({ field: 'c' }), makeMatchAnyEntry({ field: 'd' })];
-        const queries = buildExceptionListQueries({
-          language: 'lucene',
-          lists: [payload, payload2],
-        });
-        const expectedQueries = [
-          {
-            query: 'a:("value-1" OR "value-2") AND b:("value-1" OR "value-2")',
-            language: 'lucene',
-          },
-          {
-            query: 'c:("value-1" OR "value-2") AND d:("value-1" OR "value-2")',
-            language: 'lucene',
-          },
-        ];
-        expect(queries).toEqual(expectedQueries);
-      });
+      expect(queries).toEqual(expectedQueries);
     });
   });
 });
