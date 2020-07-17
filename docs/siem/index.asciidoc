@@ -19,7 +19,7 @@ image::siem/images/overview-ui.png[SIEM Overview in Kibana]
 == Add data
 
 Kibana provides step-by-step instructions to help you add data. The
-{siem-guide}[SIEM Guide] is a good source for more
+{security-guide}[Security Guide] is a good source for more
 detailed information and instructions.
 
 [float]

@@ -31,14 +31,16 @@ const HTTP_VERBS = ['post', 'put'];
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   WebhookActionConnector
 >> = ({ action, editActionConfig, editActionSecrets, errors }) => {
+  const { user, password } = action.secrets;
+  const { method, url, headers } = action.config;
+
   const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
   const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
   const [hasHeaders, setHasHeaders] = useState<boolean>(false);
 
-  const { user, password } = action.secrets;
-  const { method, url, headers } = action.config;
-
-  editActionConfig('method', 'post'); // set method to POST by default
+  if (!method) {
+    editActionConfig('method', 'post'); // set method to POST by default
+  }
 
   const headerErrors = {
     keyHeader: new Array<string>(),
@@ -80,7 +82,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
   function viewHeaders() {
     setHasHeaders(!hasHeaders);
-    if (!hasHeaders) {
+    if (!hasHeaders && !headers) {
       editActionConfig('headers', {});
     }
   }
@@ -338,8 +340,8 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
       <EuiSpacer size="m" />
       <div>
-        {hasHeaders && Object.keys(headers || {}).length > 0 ? (
-          <Fragment>
+        {Object.keys(headers || {}).length > 0 ? (
+          <>
             <EuiSpacer size="m" />
             <EuiTitle size="xxs">
               <h5>
@@ -351,10 +353,10 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             </EuiTitle>
             <EuiSpacer size="s" />
             {headersList}
-          </Fragment>
+          </>
         ) : null}
         <EuiSpacer size="m" />
-        {headerControl}
+        {hasHeaders && headerControl}
         <EuiSpacer size="m" />
       </div>
     </Fragment>

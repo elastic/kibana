@@ -58,3 +58,5 @@ export const ITEM_TYPE = 'simple';
 export const _TAGS = [];
 export const TAGS = [];
 export const COMMENTS = [];
+export const FILTER = 'name:Nicolas Bourbaki';
+export const CURSOR = 'c29tZXN0cmluZ2ZvcnlvdQ==';
