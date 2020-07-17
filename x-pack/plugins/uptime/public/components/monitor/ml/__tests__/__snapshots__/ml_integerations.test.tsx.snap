@@ -8,7 +8,7 @@ exports[`ML Integrations renders without errors 1`] = `
     class="euiPopover__anchor"
   >
     <button
-      class="euiButton euiButton--primary"
+      class="euiButton euiButton--primary euiButton--small"
       data-test-subj="uptimeEnableAnomalyBtn"
       type="button"
     >
