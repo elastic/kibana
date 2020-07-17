@@ -90,7 +90,10 @@ function quoteField(field: string): string {
 
 // add commas to large numbers
 // Number.toLocaleString is not supported on safari
-export function toLocaleString(x: number): string {
+export function toLocaleString(x: number | undefined | null): string {
+  if (x === undefined || x === null) {
+    return '';
+  }
   let result = x.toString();
   if (x && typeof x === 'number') {
     const parts = x.toString().split('.');
