@@ -29,6 +29,18 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       id: 'alertsFixture',
       name: 'Alerts',
       app: ['alerts', 'kibana'],
+      alerting: [
+        'test.always-firing',
+        'test.cumulative-firing',
+        'test.never-firing',
+        'test.failing',
+        'test.authorization',
+        'test.validation',
+        'test.onlyContextVariables',
+        'test.onlyStateVariables',
+        'test.noop',
+        'test.unrestricted-noop',
+      ],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],

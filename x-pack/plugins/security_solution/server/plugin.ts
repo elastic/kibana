@@ -170,6 +170,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
+      alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
       privileges: {
         all: {
           app: [...securitySubPlugins, 'kibana'],

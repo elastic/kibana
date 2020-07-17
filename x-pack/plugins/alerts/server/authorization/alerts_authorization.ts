@@ -7,15 +7,14 @@
 import Boom from 'boom';
 import { map, mapValues, remove, fromPairs, has } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { RecursiveReadonly } from '@kbn/utility-types';
 import { ALERTS_FEATURE_ID } from '../../common';
 import { AlertTypeRegistry } from '../types';
 import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
-import { FeatureKibanaPrivileges, SubFeaturePrivilegeConfig } from '../../../features/common';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
 import { SecurityLicense } from '../../../security/common/licensing';
+import { Space } from '../../../spaces/server';
 
 export enum ReadOperations {
   Get = 'get',
@@ -51,6 +50,7 @@ export interface ConstructorOptions {
   alertTypeRegistry: AlertTypeRegistry;
   request: KibanaRequest;
   features: FeaturesPluginStart;
+  getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   auditLogger: AlertsAuthorizationAuditLogger;
   authorization?: SecurityPluginSetup['authz'];
   securityLicense?: SecurityLicense;
@@ -62,8 +62,8 @@ export class AlertsAuthorization {
   private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly securityLicense?: SecurityLicense;
   private readonly auditLogger: AlertsAuthorizationAuditLogger;
-  private readonly featuresIds: string[];
-  private readonly allPossibleConsumers: AuthorizedConsumers;
+  private readonly featuresIds: Promise<Set<string>>;
+  private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
 
   constructor({
     alertTypeRegistry,
@@ -72,6 +72,7 @@ export class AlertsAuthorization {
     securityLicense,
     features,
     auditLogger,
+    getSpace,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
@@ -79,28 +80,37 @@ export class AlertsAuthorization {
     this.alertTypeRegistry = alertTypeRegistry;
     this.auditLogger = auditLogger;
 
-    this.featuresIds = features
-      .getFeatures()
-      // ignore features which don't grant privileges to alerting
-      .filter(({ privileges, subFeatures }) => {
-        return (
-          hasAnyAlertingPrivileges(privileges?.all) ||
-          hasAnyAlertingPrivileges(privileges?.read) ||
-          subFeatures.some((subFeature) =>
-            subFeature.privilegeGroups.some((privilegeGroup) =>
-              privilegeGroup.privileges.some((subPrivileges) =>
-                hasAnyAlertingPrivileges(subPrivileges)
+    this.featuresIds = getSpace(request)
+      .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
+      .then(
+        (disabledFeatures) =>
+          new Set(
+            features
+              .getFeatures()
+              .filter(
+                ({ id, alerting }) =>
+                  // ignore features which are disabled in the user's space
+                  !disabledFeatures.has(id) &&
+                  // ignore features which don't grant privileges to alerting
+                  (alerting?.length ?? 0 > 0)
               )
-            )
+              .map((feature) => feature.id)
           )
-        );
-      })
-      .map((feature) => feature.id);
+      )
+      .catch(() => {
+        // failing to fetch the space means the user is likely not privileged in the
+        // active space at all, which means that their list of features should be empty
+        return new Set();
+      });
 
-    this.allPossibleConsumers = asAuthorizedConsumers([ALERTS_FEATURE_ID, ...this.featuresIds], {
-      read: true,
-      all: true,
-    });
+    this.allPossibleConsumers = this.featuresIds.then((featuresIds) =>
+      featuresIds.size
+        ? asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
+            read: true,
+            all: true,
+          })
+        : {}
+    );
   }
 
   private shouldCheckAuthorization(): boolean {
@@ -115,7 +125,7 @@ export class AlertsAuthorization {
   ) {
     const { authorization } = this;
 
-    const isKnownConsumer = has(this.allPossibleConsumers, consumer);
+    const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
       const alertType = this.alertTypeRegistry.get(alertTypeId);
       const requiredPrivilegesByScope = {
@@ -143,7 +153,7 @@ export class AlertsAuthorization {
             ]
       );
 
-      if (!isKnownConsumer) {
+      if (!isAvailableConsumer) {
         /**
          * Under most circumstances this would have been caught by `checkPrivileges` as
          * a user can't have Privileges to an unknown consumer, but super users
@@ -195,7 +205,7 @@ export class AlertsAuthorization {
           )
         );
       }
-    } else if (!isKnownConsumer) {
+    } else if (!isAvailableConsumer) {
       throw Boom.forbidden(
         this.auditLogger.alertsAuthorizationFailure(
           '',
@@ -303,6 +313,7 @@ export class AlertsAuthorization {
     hasAllRequested: boolean;
     authorizedAlertTypes: Set<RegistryAlertTypeWithAuth>;
   }> {
+    const featuresIds = await this.featuresIds;
     if (this.authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
         this.request
@@ -320,7 +331,7 @@ export class AlertsAuthorization {
       // as we can't ask ES for the user's individual privileges we need to ask for each feature
       // and alertType in the system whether this user has this privilege
       for (const alertType of alertTypesWithAuthorization) {
-        for (const feature of this.featuresIds) {
+        for (const feature of featuresIds) {
           for (const operation of operations) {
             privilegeToAlertType.set(
               this.authorization!.actions.alerting.get(alertType.id, feature, operation),
@@ -344,7 +355,7 @@ export class AlertsAuthorization {
         hasAllRequested,
         authorizedAlertTypes: hasAllRequested
           ? // has access to all features
-            this.augmentWithAuthorizedConsumers(alertTypes, this.allPossibleConsumers)
+            this.augmentWithAuthorizedConsumers(alertTypes, await this.allPossibleConsumers)
           : // only has some of the required privileges
             privileges.reduce((authorizedAlertTypes, { authorized, privilege }) => {
               if (authorized && privilegeToAlertType.has(privilege)) {
@@ -375,8 +386,8 @@ export class AlertsAuthorization {
       return {
         hasAllRequested: true,
         authorizedAlertTypes: this.augmentWithAuthorizedConsumers(
-          alertTypes,
-          this.allPossibleConsumers
+          new Set([...alertTypes].filter((alertType) => featuresIds.has(alertType.producer))),
+          await this.allPossibleConsumers
         ),
       };
     }
@@ -426,16 +437,6 @@ export function ensureFieldIsSafeForQuery(field: string, value: string): boolean
     throw new Error(`expected ${field} not to include ${errors.join(' and ')}`);
   }
   return true;
-}
-
-function hasAnyAlertingPrivileges(
-  privileges?:
-    | RecursiveReadonly<FeatureKibanaPrivileges>
-    | RecursiveReadonly<SubFeaturePrivilegeConfig>
-): boolean {
-  return (
-    ((privileges?.alerting?.all?.length ?? 0) || (privileges?.alerting?.read?.length ?? 0)) > 0
-  );
 }
 
 function mergeHasPrivileges(left: HasPrivileges, right?: HasPrivileges): HasPrivileges {

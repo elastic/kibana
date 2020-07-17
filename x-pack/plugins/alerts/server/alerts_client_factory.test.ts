@@ -37,6 +37,7 @@ const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   taskManager: taskManagerMock.start(),
   alertTypeRegistry: alertTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
+  getSpace: jest.fn(),
   spaceIdToNamespace: jest.fn(),
   encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
   actions: actionsMock.createStart(),
@@ -98,6 +99,7 @@ test('creates an alerts client with proper constructor arguments when security i
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
     features: alertsClientFactoryParams.features,
     auditLogger: expect.any(AlertsAuthorizationAuditLogger),
+    getSpace: expect.any(Function),
   });
 
   expect(AlertsAuthorizationAuditLogger).toHaveBeenCalledWith(logger);
@@ -146,6 +148,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     alertTypeRegistry: alertsClientFactoryParams.alertTypeRegistry,
     features: alertsClientFactoryParams.features,
     auditLogger: expect.any(AlertsAuthorizationAuditLogger),
+    getSpace: expect.any(Function),
   });
 
   expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({

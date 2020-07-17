@@ -15,6 +15,7 @@ export const BUILT_IN_ALERTS_FEATURE = {
   }),
   icon: 'bell',
   app: [],
+  alerting: [IndexThreshold],
   privileges: {
     all: {
       app: [],

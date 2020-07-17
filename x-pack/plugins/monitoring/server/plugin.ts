@@ -25,6 +25,7 @@ import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
+  ALERTS,
 } from '../common/constants';
 import { MonitoringConfig, createConfig, configSchema } from './config';
 // @ts-ignore
@@ -241,6 +242,7 @@ export class Plugin {
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
+      alerting: ALERTS,
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
@@ -254,6 +256,9 @@ export class Plugin {
               savedObject: {
                 all: [],
                 read: [],
+              },
+              alerting: {
+                all: ALERTS,
               },
               ui: [],
             },

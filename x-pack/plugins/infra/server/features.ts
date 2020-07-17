@@ -19,6 +19,7 @@ export const METRICS_FEATURE = {
   navLinkId: 'metrics',
   app: ['infra', 'kibana'],
   catalogue: ['infraops'],
+  alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
   privileges: {
     all: {
       app: ['infra', 'kibana'],
@@ -59,6 +60,7 @@ export const LOGS_FEATURE = {
   navLinkId: 'logs',
   app: ['infra', 'kibana'],
   catalogue: ['infralogging'],
+  alerting: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
   privileges: {
     all: {
       app: ['infra', 'kibana'],

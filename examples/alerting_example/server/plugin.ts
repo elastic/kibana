@@ -44,6 +44,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         defaultMessage: 'Alerts Example',
       }),
       app: [],
+      alerting: [alwaysFiringAlert.id, peopleInSpaceAlert.id, INDEX_THRESHOLD_ID],
       privileges: {
         all: {
           alerting: {

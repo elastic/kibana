@@ -17,6 +17,7 @@ export const APM_FEATURE = {
   navLinkId: 'apm',
   app: ['apm', 'kibana'],
   catalogue: ['apm'],
+  alerting: Object.values(AlertType),
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
