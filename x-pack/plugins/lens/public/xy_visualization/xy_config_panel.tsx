@@ -149,25 +149,26 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           }}
           anchorPosition="downRight"
         >
-          <EuiToolTip
-            anchorClassName="eui-displayBlock"
-            content={
-              !hasNonBarSeries &&
-              i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
-                defaultMessage:
-                  'This setting only applies to line charts and unstacked area charts.',
-              })
-            }
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
+              defaultMessage: 'Fill missing values',
+            })}
           >
-            <EuiFormRow
-              display="columnCompressed"
-              label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
-                defaultMessage: 'Fill missing values',
-              })}
+            <EuiToolTip
+              anchorClassName="eui-displayBlock"
+              content={
+                !hasNonBarSeries &&
+                i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
+                  defaultMessage:
+                    'This setting only applies to line charts and unstacked area charts.',
+                })
+              }
             >
               <EuiSuperSelect
                 compressed
                 disabled={!hasNonBarSeries}
+                className="eui-displayInlineBlock"
                 options={fittingFunctionDefinitions.map(({ id, title, description }) => {
                   return {
                     value: id,
@@ -187,68 +188,68 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                 itemLayoutAlign="top"
                 hasDividers
               />
-            </EuiFormRow>
-            <EuiFormRow
-              display="columnCompressed"
-              label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+            </EuiToolTip>
+          </EuiFormRow>
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+              defaultMessage: 'Legend display',
+            })}
+          >
+            <EuiButtonGroup
+              legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
                 defaultMessage: 'Legend display',
               })}
-            >
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
-                  defaultMessage: 'Legend display',
-                })}
-                name="legendDisplay"
-                buttonSize="compressed"
-                className="eui-displayInlineBlock"
-                options={legendOptions}
-                idSelected={legendOptions.find(({ value }) => value === legendMode)!.id}
-                onChange={(optionId) => {
-                  const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
-                  if (newMode === 'auto') {
-                    props.setState({
-                      ...props.state,
-                      legend: { ...props.state.legend, isVisible: true, showSingleSeries: false },
-                    });
-                  } else if (newMode === 'show') {
-                    props.setState({
-                      ...props.state,
-                      legend: { ...props.state.legend, isVisible: true, showSingleSeries: true },
-                    });
-                  } else if (newMode === 'hide') {
-                    props.setState({
-                      ...props.state,
-                      legend: { ...props.state.legend, isVisible: false, showSingleSeries: false },
-                    });
-                  }
-                }}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              display="columnCompressed"
-              label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
-                defaultMessage: 'Legend position',
-              })}
-            >
-              <EuiSelect
-                disabled={legendMode === 'hide'}
-                compressed
-                options={[
-                  { value: Position.Top, text: 'Top' },
-                  { value: Position.Left, text: 'Left' },
-                  { value: Position.Right, text: 'Right' },
-                  { value: Position.Bottom, text: 'Bottom' },
-                ]}
-                value={props.state?.legend.position}
-                onChange={(e) => {
+              name="legendDisplay"
+              buttonSize="compressed"
+              className="eui-displayInlineBlock"
+              options={legendOptions}
+              idSelected={legendOptions.find(({ value }) => value === legendMode)!.id}
+              onChange={(optionId) => {
+                const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+                if (newMode === 'auto') {
                   props.setState({
                     ...props.state,
-                    legend: { ...props.state.legend, position: e.target.value as Position },
+                    legend: { ...props.state.legend, isVisible: true, showSingleSeries: false },
                   });
-                }}
-              />
-            </EuiFormRow>
-          </EuiToolTip>
+                } else if (newMode === 'show') {
+                  props.setState({
+                    ...props.state,
+                    legend: { ...props.state.legend, isVisible: true, showSingleSeries: true },
+                  });
+                } else if (newMode === 'hide') {
+                  props.setState({
+                    ...props.state,
+                    legend: { ...props.state.legend, isVisible: false, showSingleSeries: false },
+                  });
+                }
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
+              defaultMessage: 'Legend position',
+            })}
+          >
+            <EuiSelect
+              disabled={legendMode === 'hide'}
+              compressed
+              options={[
+                { value: Position.Top, text: 'Top' },
+                { value: Position.Left, text: 'Left' },
+                { value: Position.Right, text: 'Right' },
+                { value: Position.Bottom, text: 'Bottom' },
+              ]}
+              value={props.state?.legend.position}
+              onChange={(e) => {
+                props.setState({
+                  ...props.state,
+                  legend: { ...props.state.legend, position: e.target.value as Position },
+                });
+              }}
+            />
+          </EuiFormRow>
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
