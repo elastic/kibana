@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
-import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
@@ -89,6 +88,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         const isCore = !app;
 
         const uiSettings = request.getUiSettingsService();
+
         const darkMode =
           !authEnabled || request.auth.isAuthenticated
             ? await uiSettings.get('theme:darkMode')
@@ -99,21 +99,14 @@ export function uiRenderMixin(kbnServer, server, config) {
             ? await uiSettings.get('theme:version')
             : 'v7';
 
+        const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
+
         const buildHash = server.newPlatform.env.packageInfo.buildNum;
         const basePath = config.get('server.basePath');
 
         const regularBundlePath = `${basePath}/${buildHash}/bundles`;
-        const dllBundlePath = `${basePath}/${buildHash}/built_assets/dlls`;
-
-        const dllStyleChunks = DllCompiler.getRawDllConfig().chunks.map(
-          (chunk) => `${dllBundlePath}/vendors${chunk}.style.dll.css`
-        );
-        const dllJsChunks = DllCompiler.getRawDllConfig().chunks.map(
-          (chunk) => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
-        );
 
         const styleSheetPaths = [
-          ...(isCore ? [] : dllStyleChunks),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
           ...(darkMode
             ? [
@@ -147,19 +140,32 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
         ];
 
-        const kpPluginIds = Array.from(kbnServer.newPlatform.__internals.uiPlugins.public.keys());
+        const kpUiPlugins = kbnServer.newPlatform.__internals.uiPlugins;
+        const kpPluginPublicPaths = new Map();
+        const kpPluginBundlePaths = new Set();
+
+        // recursively iterate over the kpUiPlugin ids and their required bundles
+        // to populate kpPluginPublicPaths and kpPluginBundlePaths
+        (function readKpPlugins(ids) {
+          for (const id of ids) {
+            if (kpPluginPublicPaths.has(id)) {
+              continue;
+            }
+
+            kpPluginPublicPaths.set(id, `${regularBundlePath}/plugin/${id}/`);
+            kpPluginBundlePaths.add(`${regularBundlePath}/plugin/${id}/${id}.plugin.js`);
+            readKpPlugins(kpUiPlugins.internal.get(id).requiredBundles);
+          }
+        })(kpUiPlugins.public.keys());
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
             (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
-          ...(isCore ? [] : [`${dllBundlePath}/vendors_runtime.bundle.dll.js`, ...dllJsChunks]),
 
           `${regularBundlePath}/core/core.entry.js`,
-          ...kpPluginIds.map(
-            (pluginId) => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
-          ),
+          ...kpPluginBundlePaths,
         ];
 
         // These paths should align with the bundle routes configured in
@@ -167,19 +173,12 @@ export function uiRenderMixin(kbnServer, server, config) {
         const publicPathMap = JSON.stringify({
           core: `${regularBundlePath}/core/`,
           'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
-          ...kpPluginIds.reduce(
-            (acc, pluginId) => ({
-              ...acc,
-              [pluginId]: `${regularBundlePath}/plugin/${pluginId}/`,
-            }),
-            {}
-          ),
+          ...Object.fromEntries(kpPluginPublicPaths),
         });
 
         const bootstrap = new AppBootstrap({
           templateData: {
-            darkMode,
-            themeVersion,
+            themeTag,
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,

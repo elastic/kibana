@@ -8,187 +8,18 @@
 
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
-// eslint-disable-next-line import/no-nodejs-modules
-import querystring from 'querystring';
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
-import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
+import { Vector2, Matrix3 } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
+import * as processEventModel from '../models/process_event';
 import * as selectors from '../store/selectors';
-import { CrumbInfo } from './panels/panel_content_utilities';
-
-/**
- * A record of all known event types (in schema format) to translations
- */
-export const displayNameRecord = {
-  application: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.applicationEventTypeDisplayName',
-    {
-      defaultMessage: 'Application',
-    }
-  ),
-  apm: i18n.translate('xpack.securitySolution.endpoint.resolver.apmEventTypeDisplayName', {
-    defaultMessage: 'APM',
-  }),
-  audit: i18n.translate('xpack.securitySolution.endpoint.resolver.auditEventTypeDisplayName', {
-    defaultMessage: 'Audit',
-  }),
-  authentication: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.authenticationEventTypeDisplayName',
-    {
-      defaultMessage: 'Authentication',
-    }
-  ),
-  certificate: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.certificateEventTypeDisplayName',
-    {
-      defaultMessage: 'Certificate',
-    }
-  ),
-  cloud: i18n.translate('xpack.securitySolution.endpoint.resolver.cloudEventTypeDisplayName', {
-    defaultMessage: 'Cloud',
-  }),
-  database: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.databaseEventTypeDisplayName',
-    {
-      defaultMessage: 'Database',
-    }
-  ),
-  driver: i18n.translate('xpack.securitySolution.endpoint.resolver.driverEventTypeDisplayName', {
-    defaultMessage: 'Driver',
-  }),
-  email: i18n.translate('xpack.securitySolution.endpoint.resolver.emailEventTypeDisplayName', {
-    defaultMessage: 'Email',
-  }),
-  file: i18n.translate('xpack.securitySolution.endpoint.resolver.fileEventTypeDisplayName', {
-    defaultMessage: 'File',
-  }),
-  host: i18n.translate('xpack.securitySolution.endpoint.resolver.hostEventTypeDisplayName', {
-    defaultMessage: 'Host',
-  }),
-  iam: i18n.translate('xpack.securitySolution.endpoint.resolver.iamEventTypeDisplayName', {
-    defaultMessage: 'IAM',
-  }),
-  iam_group: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.iam_groupEventTypeDisplayName',
-    {
-      defaultMessage: 'IAM Group',
-    }
-  ),
-  intrusion_detection: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.intrusion_detectionEventTypeDisplayName',
-    {
-      defaultMessage: 'Intrusion Detection',
-    }
-  ),
-  malware: i18n.translate('xpack.securitySolution.endpoint.resolver.malwareEventTypeDisplayName', {
-    defaultMessage: 'Malware',
-  }),
-  network_flow: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.network_flowEventTypeDisplayName',
-    {
-      defaultMessage: 'Network Flow',
-    }
-  ),
-  network: i18n.translate('xpack.securitySolution.endpoint.resolver.networkEventTypeDisplayName', {
-    defaultMessage: 'Network',
-  }),
-  package: i18n.translate('xpack.securitySolution.endpoint.resolver.packageEventTypeDisplayName', {
-    defaultMessage: 'Package',
-  }),
-  process: i18n.translate('xpack.securitySolution.endpoint.resolver.processEventTypeDisplayName', {
-    defaultMessage: 'Process',
-  }),
-  registry: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.registryEventTypeDisplayName',
-    {
-      defaultMessage: 'Registry',
-    }
-  ),
-  session: i18n.translate('xpack.securitySolution.endpoint.resolver.sessionEventTypeDisplayName', {
-    defaultMessage: 'Session',
-  }),
-  service: i18n.translate('xpack.securitySolution.endpoint.resolver.serviceEventTypeDisplayName', {
-    defaultMessage: 'Service',
-  }),
-  socket: i18n.translate('xpack.securitySolution.endpoint.resolver.socketEventTypeDisplayName', {
-    defaultMessage: 'Socket',
-  }),
-  vulnerability: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.vulnerabilityEventTypeDisplayName',
-    {
-      defaultMessage: 'Vulnerability',
-    }
-  ),
-  web: i18n.translate('xpack.securitySolution.endpoint.resolver.webEventTypeDisplayName', {
-    defaultMessage: 'Web',
-  }),
-  alert: i18n.translate('xpack.securitySolution.endpoint.resolver.alertEventTypeDisplayName', {
-    defaultMessage: 'Alert',
-  }),
-  security: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.securityEventTypeDisplayName',
-    {
-      defaultMessage: 'Security',
-    }
-  ),
-  dns: i18n.translate('xpack.securitySolution.endpoint.resolver.dnsEventTypeDisplayName', {
-    defaultMessage: 'DNS',
-  }),
-  clr: i18n.translate('xpack.securitySolution.endpoint.resolver.clrEventTypeDisplayName', {
-    defaultMessage: 'CLR',
-  }),
-  image_load: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.image_loadEventTypeDisplayName',
-    {
-      defaultMessage: 'Image Load',
-    }
-  ),
-  powershell: i18n.translate(
-    'xpack.securitySolution.endpoint.resolver.powershellEventTypeDisplayName',
-    {
-      defaultMessage: 'Powershell',
-    }
-  ),
-  wmi: i18n.translate('xpack.securitySolution.endpoint.resolver.wmiEventTypeDisplayName', {
-    defaultMessage: 'WMI',
-  }),
-  api: i18n.translate('xpack.securitySolution.endpoint.resolver.apiEventTypeDisplayName', {
-    defaultMessage: 'API',
-  }),
-  user: i18n.translate('xpack.securitySolution.endpoint.resolver.userEventTypeDisplayName', {
-    defaultMessage: 'User',
-  }),
-} as const;
-
-const unknownEventTypeMessage = i18n.translate(
-  'xpack.securitySolution.endpoint.resolver.userEventTypeDisplayUnknown',
-  {
-    defaultMessage: 'Unknown',
-  }
-);
-
-type EventDisplayName = typeof displayNameRecord[keyof typeof displayNameRecord] &
-  typeof unknownEventTypeMessage;
-
-/**
- * Take a `schemaName` and return a translation.
- */
-const schemaNameTranslation: (
-  schemaName: string
-) => EventDisplayName = function nameInSchemaToDisplayName(schemaName) {
-  if (schemaName in displayNameRecord) {
-    return displayNameRecord[schemaName as keyof typeof displayNameRecord];
-  }
-  return unknownEventTypeMessage;
-};
+import { useResolverQueryParams } from './use_resolver_query_params';
 
 interface StyledActionsContainer {
   readonly color: string;
@@ -240,10 +71,10 @@ const UnstyledProcessEventDot = React.memo(
     position,
     event,
     projectionMatrix,
-    adjacentNodeMap,
     isProcessTerminated,
     isProcessOrigin,
     relatedEventsStatsForProcess,
+    timeAtRender,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -262,10 +93,6 @@ const UnstyledProcessEventDot = React.memo(
      */
     projectionMatrix: Matrix3;
     /**
-     * map of what nodes are "adjacent" to this one in "up, down, previous, next" directions
-     */
-    adjacentNodeMap: AdjacentProcessMap;
-    /**
      * Whether or not to show the process as terminated.
      */
     isProcessTerminated: boolean;
@@ -279,7 +106,16 @@ const UnstyledProcessEventDot = React.memo(
      * Statistics for the number of related events and alerts for this process node
      */
     relatedEventsStatsForProcess?: ResolverNodeStats;
+
+    /**
+     * The time (unix epoch) at render.
+     */
+    timeAtRender: number;
   }) => {
+    const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
+    // This should be unique to each instance of Resolver
+    const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
+
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
      */
@@ -288,12 +124,22 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const selfId = adjacentNodeMap.self;
     const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
     const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+    const nodeID = processEventModel.uniquePidForProcess(event);
 
-    // Entity ID of self
-    const selfEntityId = eventModel.entityId(event);
+    // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
+    // this is used to link nodes via aria attributes
+    const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), [
+      htmlIDPrefix,
+    ]);
+
+    const ariaLevel: number | null = useSelector(selectors.ariaLevel)(nodeID);
+
+    // the node ID to 'flowto'
+    const ariaFlowtoNodeID: string | null = useSelector(selectors.ariaFlowtoNodeID)(timeAtRender)(
+      nodeID
+    );
 
     const isShowingEventActions = xScale > 0.8;
     const isShowingDescriptionText = xScale >= 0.55;
@@ -374,16 +220,10 @@ const UnstyledProcessEventDot = React.memo(
       strokeColor,
     } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
 
-    const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
+    const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
-      resolverNodeIdGenerator,
-      selfId,
-    ]);
-    const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
-    const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
-    const isActiveDescendant = nodeId === activeDescendantId;
-    const isSelectedDescendant = nodeId === selectedDescendantId;
+    const isAriaCurrent = nodeID === activeDescendantId;
+    const isAriaSelected = nodeID === selectedDescendantId;
 
     const dispatch = useResolverDispatch();
 
@@ -391,62 +231,35 @@ const UnstyledProcessEventDot = React.memo(
       dispatch({
         type: 'userFocusedOnResolverNode',
         payload: {
-          nodeId,
+          nodeId: nodeHTMLID(nodeID),
         },
       });
-    }, [dispatch, nodeId]);
+    }, [dispatch, nodeHTMLID, nodeID]);
 
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
         type: 'userRequestedRelatedEventData',
-        payload: selfId,
+        payload: nodeID,
       });
-    }, [dispatch, selfId]);
+    }, [dispatch, nodeID]);
 
-    const history = useHistory();
-    const urlSearch = history.location.search;
-
-    /**
-     * This updates the breadcrumb nav, the table view
-     */
-    const pushToQueryParams = useCallback(
-      (newCrumbs: CrumbInfo) => {
-        // Construct a new set of params from the current set (minus empty params)
-        // by assigning the new set of params provided in `newCrumbs`
-        const crumbsToPass = {
-          ...querystring.parse(urlSearch.slice(1)),
-          ...newCrumbs,
-        };
-
-        // If either was passed in as empty, remove it from the record
-        if (crumbsToPass.crumbId === '') {
-          delete crumbsToPass.crumbId;
-        }
-        if (crumbsToPass.crumbEvent === '') {
-          delete crumbsToPass.crumbEvent;
-        }
-
-        const relativeURL = { search: querystring.stringify(crumbsToPass) };
-
-        return history.replace(relativeURL);
-      },
-      [history, urlSearch]
-    );
+    const { pushToQueryParams } = useResolverQueryParams();
 
     const handleClick = useCallback(() => {
       if (animationTarget.current !== null) {
+        // This works but the types are missing in the typescript DOM lib
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (animationTarget.current as any).beginElement();
       }
       dispatch({
         type: 'userSelectedResolverNode',
         payload: {
-          nodeId,
-          selectedProcessId: selfId,
+          nodeId: nodeHTMLID(nodeID),
+          selectedProcessId: nodeID,
         },
       });
-      pushToQueryParams({ crumbId: selfEntityId, crumbEvent: 'all' });
-    }, [animationTarget, dispatch, nodeId, selfEntityId, pushToQueryParams, selfId]);
+      pushToQueryParams({ crumbId: nodeID, crumbEvent: 'all' });
+    }, [animationTarget, dispatch, pushToQueryParams, nodeID, nodeHTMLID]);
 
     /**
      * Enumerates the stats for related events to display with the node as options,
@@ -468,7 +281,7 @@ const UnstyledProcessEventDot = React.memo(
       )) {
         relatedStatsList.push({
           prefix: <EuiI18nNumber value={total || 0} />,
-          optionTitle: schemaNameTranslation(category),
+          optionTitle: category,
           action: () => {
             dispatch({
               type: 'userSelectedRelatedEventCategory',
@@ -478,12 +291,12 @@ const UnstyledProcessEventDot = React.memo(
               },
             });
 
-            pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
+            pushToQueryParams({ crumbId: nodeID, crumbEvent: category });
           },
         });
       }
       return relatedStatsList;
-    }, [relatedEventsStatsForProcess, dispatch, event, pushToQueryParams, selfEntityId]);
+    }, [relatedEventsStatsForProcess, dispatch, event, pushToQueryParams, nodeID]);
 
     const relatedEventStatusOrOptions = !relatedEventsStatsForProcess
       ? subMenuAssets.initialMenuStatus
@@ -500,15 +313,14 @@ const UnstyledProcessEventDot = React.memo(
         data-test-subj={'resolverNode'}
         className={`${className} kbn-resetFocusState`}
         role="treeitem"
-        aria-level={adjacentNodeMap.level}
-        aria-flowto={adjacentNodeMap.nextSibling === null ? undefined : adjacentNodeMap.nextSibling}
-        aria-labelledby={labelId}
-        aria-describedby={descriptionId}
-        aria-haspopup={'true'}
-        aria-current={isActiveDescendant ? 'true' : undefined}
-        aria-selected={isSelectedDescendant ? 'true' : undefined}
+        aria-level={ariaLevel === null ? undefined : ariaLevel}
+        aria-flowto={ariaFlowtoNodeID === null ? undefined : nodeHTMLID(ariaFlowtoNodeID)}
+        aria-labelledby={labelHTMLID}
+        aria-haspopup="true"
+        aria-current={isAriaCurrent ? 'true' : undefined}
+        aria-selected={isAriaSelected ? 'true' : undefined}
         style={nodeViewportStyle}
-        id={nodeId}
+        id={nodeHTMLID(nodeID)}
         tabIndex={-1}
       >
         <svg
@@ -571,8 +383,7 @@ const UnstyledProcessEventDot = React.memo(
           </StyledDescriptionText>
           <div
             className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
-            data-test-subject="nodeLabel"
-            id={labelId}
+            id={labelHTMLID}
             onClick={handleClick}
             onFocus={handleFocus}
             tabIndex={-1}
@@ -584,9 +395,7 @@ const UnstyledProcessEventDot = React.memo(
           >
             <EuiButton
               color={labelButtonFill}
-              data-test-subject="nodeLabel"
               fill={isLabelFilled}
-              id={labelId}
               size="s"
               style={{
                 maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,

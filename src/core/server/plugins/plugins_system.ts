@@ -178,6 +178,7 @@ export class PluginsSystem {
             optionalPlugins: plugin.manifest.optionalPlugins.filter((p) =>
               uiPluginNames.includes(p)
             ),
+            requiredBundles: plugin.manifest.requiredBundles,
           },
         ];
       })

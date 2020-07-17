@@ -12,3 +12,5 @@ export {
   StepSettingsContainer,
   CommonWizardSteps,
 } from './wizard_steps';
+
+export { TemplateContentIndicator } from './template_content_indicator';

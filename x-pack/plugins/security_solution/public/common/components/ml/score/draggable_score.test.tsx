@@ -5,10 +5,12 @@
  */
 
 import React from 'react';
-import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
 import { shallow } from 'enzyme';
+
+import '../../../mock/match_media';
 import { DraggableScoreComponent } from './draggable_score';
+import { mockAnomalies } from '../mock';
 
 describe('draggable_score', () => {
   let anomalies = cloneDeep(mockAnomalies);

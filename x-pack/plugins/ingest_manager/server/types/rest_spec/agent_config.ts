@@ -8,7 +8,9 @@ import { NewAgentConfigSchema } from '../models';
 import { ListWithKuerySchema } from './index';
 
 export const GetAgentConfigsRequestSchema = {
-  query: ListWithKuerySchema,
+  query: ListWithKuerySchema.extends({
+    full: schema.maybe(schema.boolean()),
+  }),
 };
 
 export const GetOneAgentConfigRequestSchema = {
@@ -49,5 +51,6 @@ export const GetFullAgentConfigRequestSchema = {
   }),
   query: schema.object({
     download: schema.maybe(schema.boolean()),
+    standalone: schema.maybe(schema.boolean()),
   }),
 };

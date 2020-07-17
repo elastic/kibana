@@ -36,7 +36,10 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
     agent.config_id
   );
 
-  const agentConfigsRequest = useGetAgentConfigs();
+  const agentConfigsRequest = useGetAgentConfigs({
+    page: 1,
+    perPage: 1000,
+  });
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
 
   const [isSubmitting, setIsSubmitting] = useState(false);

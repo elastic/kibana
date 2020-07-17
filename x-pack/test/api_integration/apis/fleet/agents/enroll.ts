@@ -21,11 +21,12 @@ export default function (providerContext: FtrProviderContext) {
   let apiKey: { id: string; api_key: string };
   let kibanaVersion: string;
 
-  describe('fleet_agents_enroll', () => {
+  // Flaky: https://github.com/elastic/kibana/issues/60865
+  describe.skip('fleet_agents_enroll', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
-      const { body: apiKeyBody } = await esClient.security.createApiKey({
+      const { body: apiKeyBody } = await esClient.security.createApiKey<typeof apiKey>({
         body: {
           name: `test access api key: ${uuid.v4()}`,
         },

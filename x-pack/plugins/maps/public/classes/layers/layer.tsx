@@ -76,6 +76,10 @@ export interface ILayer {
   getPrevRequestToken(dataId: string): symbol | undefined;
   destroy: () => void;
   isPreviewLayer: () => boolean;
+  areLabelsOnTop: () => boolean;
+  supportsLabelsOnTop: () => boolean;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -139,13 +143,12 @@ export class AbstractLayer implements ILayer {
   }
 
   static getBoundDataForSource(mbMap: unknown, sourceId: string): FeatureCollection {
-    // @ts-ignore
+    // @ts-expect-error
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
-    // @ts-ignore
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
     clonedDescriptor.id = uuid();
@@ -153,14 +156,10 @@ export class AbstractLayer implements ILayer {
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
 
-    // todo: remove this
-    // This should not be in AbstractLayer. It relies on knowledge of VectorLayerDescriptor
-    // @ts-ignore
     if (clonedDescriptor.joins) {
-      // @ts-ignore
+      // @ts-expect-error
       clonedDescriptor.joins.forEach((joinDescriptor) => {
         // right.id is uuid used to track requests in inspector
-        // @ts-ignore
         joinDescriptor.right.id = uuid();
       });
     }
@@ -171,8 +170,12 @@ export class AbstractLayer implements ILayer {
     return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
   }
 
-  isJoinable(): boolean {
-    return this.getSource().isJoinable();
+  showJoinEditor(): boolean {
+    return this.getSource().showJoinEditor();
+  }
+
+  getJoinsDisabledReason() {
+    return this.getSource().getJoinsDisabledReason();
   }
 
   isPreviewLayer(): boolean {
@@ -392,7 +395,6 @@ export class AbstractLayer implements ILayer {
     const requestTokens = this._dataRequests.map((dataRequest) => dataRequest.getRequestToken());
 
     // Compact removes all the undefineds
-    // @ts-ignore
     return _.compact(requestTokens);
   }
 
@@ -476,11 +478,19 @@ export class AbstractLayer implements ILayer {
   }
 
   syncVisibilityWithMb(mbMap: unknown, mbLayerId: string) {
-    // @ts-ignore
+    // @ts-expect-error
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
   getType(): string | undefined {
     return this._descriptor.type;
+  }
+
+  areLabelsOnTop(): boolean {
+    return false;
+  }
+
+  supportsLabelsOnTop(): boolean {
+    return false;
   }
 }

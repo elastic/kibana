@@ -7,6 +7,10 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+import { VarConfig } from '../var_config';
+
+import { CanvasVariable } from '../../../types';
 import { ComponentStrings } from '../../../i18n';
 import { WorkpadSize } from './workpad_size';
 import { WorkpadCSS } from './workpad_css';
@@ -16,10 +20,12 @@ const { WorkpadConfig: strings } = ComponentStrings;
 interface Props {
   name: string;
   setName: (name: string) => void;
+  setWorkpadVariables: (vars: CanvasVariable[]) => void;
+  variables: CanvasVariable[];
 }
 
 export const WorkpadConfig: FC<Props> = (props) => {
-  const { name, setName } = props;
+  const { name, setName, variables, setWorkpadVariables } = props;
 
   return (
     <div>
@@ -35,6 +41,7 @@ export const WorkpadConfig: FC<Props> = (props) => {
       <EuiSpacer size="s" />
       <WorkpadSize />
       <EuiSpacer size="m" />
+      <VarConfig variables={variables} setVariables={setWorkpadVariables} />
       <WorkpadCSS />
     </div>
   );
@@ -43,4 +50,6 @@ export const WorkpadConfig: FC<Props> = (props) => {
 WorkpadConfig.propTypes = {
   name: PropTypes.string.isRequired,
   setName: PropTypes.func.isRequired,
+  variables: PropTypes.array,
+  setWorkpadVariables: PropTypes.func.isRequired,
 };

@@ -5,7 +5,7 @@
  */
 
 import { EuiPopover } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { IS_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
@@ -22,6 +22,7 @@ interface Props {
    * Always show the hover menu contents (default: false)
    */
   alwaysShow?: boolean;
+  closePopOverTrigger?: boolean;
   /**
    * The contents of the hover menu. It is highly recommended you wrap this
    * content in a `div` with `position: absolute` to prevent it from effecting
@@ -47,7 +48,8 @@ interface Props {
  * provides a signal to the content that the user is in a hover state.
  */
 export const WithHoverActions = React.memo<Props>(
-  ({ alwaysShow = false, hoverContent, render }) => {
+  ({ alwaysShow = false, closePopOverTrigger, hoverContent, render }) => {
+    const [isOpen, setIsOpen] = useState(hoverContent != null && alwaysShow);
     const [showHoverContent, setShowHoverContent] = useState(false);
     const onMouseEnter = useCallback(() => {
       // NOTE: the following read from the DOM is expensive, but not as
@@ -62,12 +64,25 @@ export const WithHoverActions = React.memo<Props>(
       setShowHoverContent(false);
     }, []);
 
-    const content = useMemo(() => <>{render(showHoverContent)}</>, [render, showHoverContent]);
+    const content = useMemo(
+      () => (
+        <div data-test-subj="withHoverActionsButton" onMouseEnter={onMouseEnter}>
+          {render(showHoverContent)}
+        </div>
+      ),
+      [onMouseEnter, render, showHoverContent]
+    );
 
-    const isOpen = hoverContent != null && (showHoverContent || alwaysShow);
+    useEffect(() => {
+      setIsOpen(hoverContent != null && (showHoverContent || alwaysShow));
+    }, [hoverContent, showHoverContent, alwaysShow]);
 
-    const popover = useMemo(() => {
-      return (
+    useEffect(() => {
+      setShowHoverContent(false);
+    }, [closePopOverTrigger]);
+
+    return (
+      <div onMouseLeave={onMouseLeave}>
         <WithHoverActionsPopover
           anchorPosition={'downCenter'}
           button={content}
@@ -76,14 +91,8 @@ export const WithHoverActions = React.memo<Props>(
           isOpen={isOpen}
           panelPaddingSize={!alwaysShow ? 's' : 'none'}
         >
-          {isOpen ? hoverContent : null}
+          {isOpen ? <>{hoverContent}</> : null}
         </WithHoverActionsPopover>
-      );
-    }, [content, onMouseLeave, isOpen, alwaysShow, hoverContent]);
-
-    return (
-      <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-        {popover}
       </div>
     );
   }

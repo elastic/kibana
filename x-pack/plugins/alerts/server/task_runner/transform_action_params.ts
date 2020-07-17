@@ -5,7 +5,7 @@
  */
 
 import Mustache from 'mustache';
-import { isString, cloneDeep } from 'lodash';
+import { isString, cloneDeepWith } from 'lodash';
 import { AlertActionParams, State, Context } from '../types';
 
 interface TransformActionParamsOptions {
@@ -29,7 +29,7 @@ export function transformActionParams({
   actionParams,
   state,
 }: TransformActionParamsOptions): AlertActionParams {
-  const result = cloneDeep(actionParams, (value: unknown) => {
+  const result = cloneDeepWith(actionParams, (value: unknown) => {
     if (!isString(value)) return;
 
     // when the list of variables we pass in here changes,

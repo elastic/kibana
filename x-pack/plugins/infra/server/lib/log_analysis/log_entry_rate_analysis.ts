@@ -7,16 +7,16 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { getJobId } from '../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
-import { NoLogAnalysisResultsIndexError } from './errors';
 import {
   logRateModelPlotResponseRT,
   createLogEntryRateQuery,
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
-import { MlSystem } from '../../types';
+import { getJobId } from '../../../common/log_analysis';
+import { NoLogAnalysisResultsIndexError } from './errors';
+import type { MlSystem } from '../../types';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -30,7 +30,8 @@ export async function getLogEntryRateBuckets(
   sourceId: string,
   startTime: number,
   endTime: number,
-  bucketDuration: number
+  bucketDuration: number,
+  datasets?: string[]
 ) {
   const logRateJobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
   let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
@@ -44,7 +45,8 @@ export async function getLogEntryRateBuckets(
         endTime,
         bucketDuration,
         COMPOSITE_AGGREGATION_BATCH_SIZE,
-        afterLatestBatchKey
+        afterLatestBatchKey,
+        datasets
       )
     );
 
@@ -73,6 +75,7 @@ export async function getLogEntryRateBuckets(
       partitions: Array<{
         analysisBucketCount: number;
         anomalies: Array<{
+          id: string;
           actualLogEntryRate: number;
           anomalyScore: number;
           duration: number;
@@ -91,7 +94,8 @@ export async function getLogEntryRateBuckets(
     const partition = {
       analysisBucketCount: timestampPartitionBucket.filter_model_plot.doc_count,
       anomalies: timestampPartitionBucket.filter_records.top_hits_record.hits.hits.map(
-        ({ _source: record }) => ({
+        ({ _id, _source: record }) => ({
+          id: _id,
           actualLogEntryRate: record.actual[0],
           anomalyScore: record.record_score,
           duration: record.bucket_span * 1000,
