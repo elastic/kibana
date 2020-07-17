@@ -19,11 +19,11 @@ def withDefaultPrComments(closure) {
     catchErrors {
       closure()
     }
-    sendComment()
+    sendComment(true)
   }
 }
 
-def sendComment(isFinal = false) { // TODO
+def sendComment(isFinal = false) {
   if (!params.ENABLE_GITHUB_PR_COMMENTS || !isPr() || !buildState.get('PR_COMMENTS_ENABLED')) {
     return
   }
@@ -213,7 +213,7 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
 
   messages << getTestFailuresMessage()
 
-  if (!isFinal) {
+  if (isFinal) {
     messages << ciStats.getMetricsReport()
   }
 
