@@ -51,7 +51,7 @@ export const RISK_SCORE_DESCRIPTION = i18n.translate(
 export const RISK_SCORE_MAPPING_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alerts.riskScoreMapping.mappingDescriptionLabel',
   {
-    defaultMessage: 'Map a field from the source event (scaled 1-100) to risk score.',
+    defaultMessage: 'Override the default risk score at left with a value from the source event.',
   }
 );
 
