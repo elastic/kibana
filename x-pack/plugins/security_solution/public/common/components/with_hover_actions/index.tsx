@@ -65,7 +65,11 @@ export const WithHoverActions = React.memo<Props>(
     }, []);
 
     const content = useMemo(
-      () => <div onMouseEnter={onMouseEnter}>{render(showHoverContent)}</div>,
+      () => (
+        <div data-test-subj="withHoverActionsButton" onMouseEnter={onMouseEnter}>
+          {render(showHoverContent)}
+        </div>
+      ),
       [onMouseEnter, render, showHoverContent]
     );
 
