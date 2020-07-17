@@ -310,4 +310,4 @@ export type DeserializerOrUndefined = t.TypeOf<typeof deserializerOrUndefined>;
 
 export const _version = t.string;
 export const _versionOrUndefined = t.union([_version, t.undefined]);
-export type _versionOrUndefined = t.TypeOf<typeof _versionOrUndefined>;
+export type _VersionOrUndefined = t.TypeOf<typeof _versionOrUndefined>;
