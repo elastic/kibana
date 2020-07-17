@@ -103,7 +103,7 @@ export function Header({
   const isVisible = useObservable(observables.isVisible$, true);
   const navType = useObservable(observables.navType$, 'modern');
   const isLocked = useObservable(observables.isLocked$, false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} />;
@@ -125,6 +125,42 @@ export function Header({
     <>
       <LoadingIndicator loadingCount$={observables.loadingCount$} />
       <header className={className} data-test-subj="headerGlobalNav">
+        <EuiHeader
+          theme="dark"
+          position="fixed"
+          sections={[
+            {
+              items: [
+                <HeaderLogo
+                  href={homeHref}
+                  forceNavigation$={observables.forceAppSwitcherNavigation$}
+                  navLinks$={observables.navLinks$}
+                  navigateToApp={application.navigateToApp}
+                />,
+              ],
+              borders: 'none',
+            },
+            {
+              ...(observables.navControlsCenter$ && {
+                items: [<HeaderNavControls navControls$={observables.navControlsCenter$} />],
+              }),
+              borders: 'none',
+            },
+            {
+              items: [
+                <HeaderHelpMenu
+                  helpExtension$={observables.helpExtension$}
+                  helpSupportUrl$={observables.helpSupportUrl$}
+                  kibanaDocLink={kibanaDocLink}
+                  kibanaVersion={kibanaVersion}
+                />,
+                <HeaderNavControls navControls$={observables.navControlsRight$} />,
+              ],
+              borders: 'none',
+            },
+          ]}
+        />
+
         <EuiHeader position="fixed">
           <EuiHeaderSection grow={false}>
             {navType === 'modern' ? (
@@ -134,9 +170,9 @@ export function Header({
                   aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
                     defaultMessage: 'Toggle primary navigation',
                   })}
-                  onClick={() => setIsOpen(!isOpen)}
-                  aria-expanded={isOpen}
-                  aria-pressed={isOpen}
+                  onClick={() => setIsNavOpen(!isNavOpen)}
+                  aria-expanded={isNavOpen}
+                  aria-pressed={isNavOpen}
                   aria-controls={navId}
                   ref={toggleCollapsibleNavRef}
                 >
@@ -153,14 +189,7 @@ export function Header({
               </EuiShowFor>
             )}
 
-            <EuiHeaderSectionItem border="right">
-              <HeaderLogo
-                href={homeHref}
-                forceNavigation$={observables.forceAppSwitcherNavigation$}
-                navLinks$={observables.navLinks$}
-                navigateToApp={application.navigateToApp}
-              />
-            </EuiHeaderSectionItem>
+            <EuiHeaderSectionItem border="right" />
 
             <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
           </EuiHeaderSection>
@@ -171,19 +200,6 @@ export function Header({
           />
 
           <HeaderBadge badge$={observables.badge$} />
-
-          <EuiHeaderSection side="right">
-            <EuiHeaderSectionItem>
-              <HeaderHelpMenu
-                helpExtension$={observables.helpExtension$}
-                helpSupportUrl$={observables.helpSupportUrl$}
-                kibanaDocLink={kibanaDocLink}
-                kibanaVersion={kibanaVersion}
-              />
-            </EuiHeaderSectionItem>
-
-            <HeaderNavControls side="right" navControls$={observables.navControlsRight$} />
-          </EuiHeaderSection>
         </EuiHeader>
         {navType === 'modern' ? (
           <CollapsibleNav
@@ -192,14 +208,14 @@ export function Header({
             isLocked={isLocked}
             navLinks$={observables.navLinks$}
             recentlyAccessed$={observables.recentlyAccessed$}
-            isOpen={isOpen}
+            isNavOpen={isNavOpen}
             homeHref={homeHref}
             basePath={basePath}
             legacyMode={legacyMode}
             navigateToApp={application.navigateToApp}
             onIsLockedUpdate={onIsLockedUpdate}
             closeNav={() => {
-              setIsOpen(false);
+              setIsNavOpen(false);
               if (toggleCollapsibleNavRef.current) {
                 toggleCollapsibleNavRef.current.focus();
               }

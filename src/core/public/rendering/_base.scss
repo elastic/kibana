@@ -1,5 +1,8 @@
 @import '@elastic/eui/src/global_styling/variables/header';
 @import '@elastic/eui/src/components/nav_drawer/variables';
+@include euiHeaderAffordForFixed($euiHeaderHeightCompensation * 2);
+
+$headerOffset: $euiHeaderHeightCompensation * 2;
 
 /**
  * stretch the root element of the Kibana application to set the base-size that
@@ -26,14 +29,14 @@
   margin: 0 auto;
 
   &:not(.hidden-chrome) {
-    top: $euiHeaderChildSize;
-    left: $euiHeaderChildSize;
+    top: $headerOffset;
+    left: $headerOffset;
 
     // HOTFIX: Temporary fix for flyouts not inside portals
     // SASSTODO: Find an actual solution
     .euiFlyout {
-      top: $euiHeaderChildSize;
-      height: calc(100% - #{$euiHeaderChildSize});
+      top: $headerOffset;
+      height: calc(100% - #{$headerOffset});
     }
 
     @include euiBreakpoint('xs', 's') {
@@ -73,12 +76,12 @@
   display: flex;
   flex-flow: column nowrap;
   margin: 0 auto;
-  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
+  min-height: calc(100vh - #{$headerOffset});
 
   @include internetExplorerOnly {
     // IE specific bug with min-height in flex container, described in the next link
     // https://github.com/philipwalton/flexbugs#3-min-height-on-a-flex-container-wont-apply-to-its-flex-items
-    height: calc(100vh - #{$euiHeaderHeightCompensation});
+    height: calc(100vh - #{$headerOffset});
   }
 
   &.hidden-chrome {
