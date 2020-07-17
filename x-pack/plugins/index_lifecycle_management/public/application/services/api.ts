@@ -15,7 +15,11 @@ import {
 } from '../constants';
 
 import { trackUiMetric } from './ui_metric';
-import { sendGet, sendPost, sendDelete } from './http';
+import { sendGet, sendPost, sendDelete, useRequest } from './http';
+
+interface GenericObject {
+  [key: string]: any;
+}
 
 export async function loadNodes() {
   return await sendGet(`nodes/list`);
@@ -33,7 +37,7 @@ export async function loadPolicies(withIndices: boolean) {
   return await sendGet('policies', { withIndices });
 }
 
-export async function savePolicy(policy: any) {
+export async function savePolicy(policy: GenericObject) {
   return await sendPost(`policies`, policy);
 }
 
@@ -58,16 +62,24 @@ export const removeLifecycleForIndex = async (indexNames: string[]) => {
   return response;
 };
 
-export const addLifecyclePolicyToIndex = async (body: any) => {
+export const addLifecyclePolicyToIndex = async (body: GenericObject) => {
   const response = await sendPost(`index/add`, body);
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX);
   return response;
 };
 
-export const addLifecyclePolicyToTemplate = async (body: any) => {
+export const addLifecyclePolicyToTemplate = async (body: GenericObject) => {
   const response = await sendPost(`template`, body);
   // Only track successful actions.
   trackUiMetric(METRIC_TYPE.COUNT, UIM_POLICY_ATTACH_INDEX_TEMPLATE);
   return response;
+};
+
+export const useLoadSnapshotPolicies = () => {
+  return useRequest({
+    path: `snapshot_policies`,
+    method: 'get',
+    initialData: [],
+  });
 };

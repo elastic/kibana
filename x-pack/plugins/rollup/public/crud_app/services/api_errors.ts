@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IHttpFetchError } from 'src/core/public/http';
+import { IHttpFetchError } from 'src/core/public';
 import { getNotifications, getFatalErrors } from '../../kibana_services';
 
 function createToastConfig(error: IHttpFetchError, errorTitle: string) {

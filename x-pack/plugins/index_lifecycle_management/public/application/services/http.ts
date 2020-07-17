@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { HttpSetup } from 'src/core/public/http';
+import { HttpSetup } from 'src/core/public';
 import {
   UseRequestConfig,
   useRequest as _useRequest,
   Error,
 } from '../../../../../../src/plugins/es_ui_shared/public';
 
-let _httpClient: any;
+interface GenericObject {
+  [key: string]: any;
+}
 
 let _httpClient: HttpSetup;
 
@@ -30,11 +31,11 @@ function getFullPath(path: string): string {
   return apiPrefix;
 }
 
-export function sendPost(path: string, payload: any) {
+export function sendPost(path: string, payload: GenericObject) {
   return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload) });
 }
 
-export function sendGet(path: string, query?: any): any {
+export function sendGet(path: string, query?: GenericObject): any {
   return _httpClient.get(getFullPath(path), { query });
 }
 
