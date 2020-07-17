@@ -3,7 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "incremental": true,
-    "tsBuildInfoFile": "./build/tsconfig.x-pack.tsbuildinfo",
+    "tsBuildInfoFile": "./build/x-pack_tsconfig.src.tsbuildinfo",
     "noEmit": false,
     "outDir": "../build/x-pack",
     "emitDeclarationOnly": true,
@@ -30,7 +30,9 @@
   "exclude": [
     "**/*.test.ts",
     "**/*.test.tsx",
+    "**/*.test.ts",
     "**/__fixtures__/**/*",
+    "**/__mocks__/**/*",
     "**/__jest__/**/*",
     "plugins/security_solution/server/endpoint/mocks.ts",
     "test/**/*",
@@ -38,8 +40,6 @@
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
     "**/typespec_tests.ts",
-    //"plugins/ui_actions_enhanced/public/plugin.ts",
-    //"plugins/dashboard_enhanced/public/services/drilldowns/dashboard_to_dashboard_drilldown/drilldown.tsx",
   ],
-  "references": [{"path": "../tsconfig.oss.json"}, {"path": "../examples/embeddable_examples/tsconfig.json"}]
+  "references": [{"path": "../tsconfig.src.json"}]
 }

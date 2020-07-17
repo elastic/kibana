@@ -20,5 +20,5 @@
     "src/**/__fixtures__/**/*",
     "src/core/server/utils/crypto/pkcs12.test.ts", // TODO:TS-REFS
   ],
-  "references": [{"path": "./tsconfig.oss.json"}, {"path": "./examples/embeddable_examples"}]
+  "references": [{"path": "./tsconfig.src.json"}, {"path": "./examples/embeddable_examples"}]
 }
