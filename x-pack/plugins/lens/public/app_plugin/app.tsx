@@ -44,6 +44,7 @@ import { LensByValueInput } from '../editor_frame_service/embeddable/embeddable'
 interface State {
   indicateNoData: boolean;
   isLoading: boolean;
+  byValueMode: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
   persistedDoc?: Document;
@@ -95,11 +96,19 @@ export function App({
     storage.get('kibana.userQueryLanguage') ||
     core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
 
+  const editFromDashMode =
+    !!embeddableEditorIncomingState?.originatingApp &&
+    (!!savedObjectId || !!embeddableEditorIncomingState?.valueInput);
+
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
-      isLoading: !!savedObjectId,
+      isLoading: !!savedObjectId || !!embeddableEditorIncomingState?.valueInput,
       isSaveModalVisible: false,
+      byValueMode:
+        !!embeddableEditorIncomingState?.originatingApp &&
+        (!!embeddableEditorIncomingState?.valueInput ||
+          !!embeddableEditorIncomingState?.byValueMode),
       indexPatternsForTopNav: [],
       query: { query: '', language },
       dateRange: {
@@ -182,7 +191,6 @@ export function App({
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
       if (
-        !embeddableEditorIncomingState?.valueInput &&
         core.application.capabilities.visualize.save &&
         (state.persistedDoc?.expression
           ? !_.isEqual(lastKnownDoc?.expression, state.persistedDoc.expression)
@@ -217,7 +225,7 @@ export function App({
       },
       {
         text: state.persistedDoc
-          ? embeddableEditorIncomingState?.valueInput
+          ? state.byValueMode
             ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'By Value' })
             : state.persistedDoc.title
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
@@ -245,7 +253,7 @@ export function App({
 
           redirectTo();
         });
-    } else if (!!embeddableEditorIncomingState?.valueInput) {
+    } else if (state.byValueMode && !!embeddableEditorIncomingState?.valueInput) {
       const doc: Document = {
         ...(embeddableEditorIncomingState?.valueInput as LensByValueInput).attributes,
       };
@@ -293,7 +301,8 @@ export function App({
       returnToOrigin: boolean;
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
-    }
+    },
+    saveToLibrary: boolean = false
   ) => {
     if (!lastKnownDoc) {
       return;
@@ -320,10 +329,9 @@ export function App({
       title: saveProps.newTitle,
     };
 
-    const newlyCreated = saveProps.newCopyOnSave || !lastKnownDoc?.savedObjectId;
-
-    if (!!embeddableEditorIncomingState?.valueInput && !saveProps.newCopyOnSave) {
-      redirectTo(doc.savedObjectId, doc, saveProps.returnToOrigin, newlyCreated);
+    if (state.byValueMode && !saveToLibrary) {
+      await setState((s: State) => ({ ...s, persistedDoc: doc }));
+      redirectTo(doc.savedObjectId, doc, saveProps.returnToOrigin, saveProps.newCopyOnSave);
     } else {
       await checkForDuplicateTitle(
         {
@@ -348,14 +356,21 @@ export function App({
         .then(({ id }) => {
           // Prevents unnecessary network request and disables save button
           const newDoc: Document = { ...doc, savedObjectId: id };
+          const addedToLibrary = state.byValueMode && saveToLibrary;
           setState((s) => ({
             ...s,
+            byValueMode: false,
             isSaveModalVisible: false,
             persistedDoc: newDoc,
             lastKnownDoc: newDoc,
           }));
           if (savedObjectId !== id || saveProps.returnToOrigin) {
-            redirectTo(id, undefined, saveProps.returnToOrigin, newlyCreated);
+            redirectTo(
+              id,
+              undefined,
+              saveProps.returnToOrigin,
+              saveProps.newCopyOnSave || addedToLibrary
+            );
           }
         })
         .catch((e) => {
@@ -396,9 +411,7 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...((!!embeddableEditorIncomingState?.originatingApp &&
-                  lastKnownDoc?.savedObjectId) ||
-                embeddableEditorIncomingState?.valueInput
+                ...(editFromDashMode || state.byValueMode
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -410,7 +423,7 @@ export function App({
                           if (isSaveable && lastKnownDoc) {
                             runSave({
                               newTitle: lastKnownDoc.title,
-                              newCopyOnSave: false,
+                              newCopyOnSave: !editFromDashMode || state.byValueMode,
                               isTitleDuplicateConfirmed: false,
                               returnToOrigin: true,
                             });
@@ -423,16 +436,14 @@ export function App({
                   : []),
                 {
                   label:
-                    lastKnownDoc?.savedObjectId ||
-                    (embeddableEditorIncomingState?.valueInput &&
-                      !!embeddableEditorIncomingState?.originatingApp)
+                    editFromDashMode || state.byValueMode
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !embeddableEditorIncomingState?.originatingApp,
+                  emphasize: !editFromDashMode && !state.byValueMode,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
@@ -441,6 +452,19 @@ export function App({
                   testId: 'lnsApp_saveButton',
                   disableButton: !isSaveable,
                 },
+                ...(editFromDashMode || state.byValueMode
+                  ? [
+                      {
+                        label: i18n.translate('xpack.lens.app.cancel', {
+                          defaultMessage: 'cancel',
+                        }),
+                        run: () => {
+                          redirectTo(undefined, undefined, true, false);
+                        },
+                        testId: 'lnsApp_saveAndReturnButton',
+                      },
+                    ]
+                  : []),
               ]}
               data-test-subj="lnsApp_topNav"
               screenTitle={'lens'}
@@ -559,9 +583,7 @@ export function App({
             onSave={(props) => runSave(props, true)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
-              id: embeddableEditorIncomingState?.valueInput
-                ? undefined
-                : lastKnownDoc.savedObjectId,
+              id: state.byValueMode ? undefined : lastKnownDoc.savedObjectId,
               title: lastKnownDoc.title || '',
               description: lastKnownDoc.description || '',
             }}

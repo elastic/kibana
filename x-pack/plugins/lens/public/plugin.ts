@@ -48,7 +48,7 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
-  embeddable: EmbeddableStart;
+  embeddable?: EmbeddableStart;
 }
 
 export class LensPlugin {

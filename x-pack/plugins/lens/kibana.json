@@ -11,10 +11,9 @@
     "kibanaLegacy",
     "visualizations",
     "dashboard",
-    "charts",
-    "embeddable"
+    "charts"
   ],
-  "optionalPlugins": ["usageCollection", "taskManager", "uiActions"],
+  "optionalPlugins": ["usageCollection", "taskManager", "uiActions", "embeddable"],
   "configPath": ["xpack", "lens"],
   "extraPublicDirs": ["common/constants"],
   "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable"]

@@ -106,7 +106,7 @@ export const getTopNavConfig = (
 
           if (newlyCreated && embeddable) {
             embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
-              state: { id, type: VISUALIZE_EMBEDDABLE_TYPE },
+              state: { type: VISUALIZE_EMBEDDABLE_TYPE, input: { savedObjectId: id } },
             });
           } else {
             application.navigateToApp(originatingApp);

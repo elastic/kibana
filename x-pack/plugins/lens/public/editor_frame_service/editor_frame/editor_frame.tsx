@@ -97,7 +97,6 @@ export function EditorFrame(props: EditorFrameProps) {
     .forEach((id) => {
       const datasourceState = state.datasourceStates[id].state;
       const datasource = props.datasourceMap[id];
-
       const layers = datasource.getLayers(datasourceState);
       layers.forEach((layer) => {
         datasourceLayers[layer] = props.datasourceMap[id].getPublicAPI({

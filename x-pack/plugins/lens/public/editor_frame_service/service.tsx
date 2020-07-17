@@ -36,7 +36,7 @@ export interface EditorFrameSetupPlugins {
 
 export interface EditorFrameStartPlugins {
   data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
+  embeddable?: EmbeddableStart;
   expressions: ExpressionsStart;
   uiActions?: UiActionsStart;
 }

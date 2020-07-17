@@ -300,7 +300,7 @@ export class DashboardAppController {
       return emptyScreenProps;
     };
 
-    const incomingEmbeddable = embeddable
+    let incomingEmbeddable = embeddable
       .getStateTransfer(scopedHistory())
       .getIncomingEmbeddablePackage({ keysToRemoveAfterFetch: ['id', 'type', 'input'] });
 
@@ -313,16 +313,17 @@ export class DashboardAppController {
       });
 
       // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
-      if (incomingEmbeddable?.id && embeddablesMap[incomingEmbeddable.id]) {
-        const originalPanelState = { ...embeddablesMap[incomingEmbeddable.id] };
-        embeddablesMap[incomingEmbeddable.id] = {
+      if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
+        const originalPanelState = { ...embeddablesMap[incomingEmbeddable.embeddableId] };
+        embeddablesMap[incomingEmbeddable.embeddableId] = {
           gridData: originalPanelState.gridData,
           type: incomingEmbeddable.type,
           explicitInput: {
             ...incomingEmbeddable.input,
-            id: incomingEmbeddable.id,
+            id: incomingEmbeddable.embeddableId,
           },
         };
+        incomingEmbeddable = undefined;
       }
 
       let expandedPanelId;
@@ -448,7 +449,8 @@ export class DashboardAppController {
             // If the incomingEmbeddable does not yet exist in the panels listing, create a new panel using the container's addEmbeddable method.
             if (
               incomingEmbeddable &&
-              (!incomingEmbeddable.id || !container.getInput().panels[incomingEmbeddable.id])
+              (!incomingEmbeddable.embeddableId ||
+                !container.getInput().panels[incomingEmbeddable.embeddableId])
             ) {
               // TODO: Get rid of this, maybe by making the visualize embeddable also use the attributeService
               const explicitInput =

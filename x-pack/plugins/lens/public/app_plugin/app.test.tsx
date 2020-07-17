@@ -122,7 +122,7 @@ describe('Lens App', () => {
     navigation: typeof navigationStartMock;
     core: typeof core;
     storage: Storage;
-    docId?: string;
+    savedObjectId?: string;
     docStorage: SavedObjectStore;
     redirectTo: (
       id?: string,
@@ -171,11 +171,10 @@ describe('Lens App', () => {
       },
       redirectTo: jest.fn(
         (
-          id?: string,
+          savedObjectId?: string,
           documentByValue?: Document,
           returnToOrigin?: boolean,
-          newlyCreated?: boolean,
-          embeddableIdToReplace?: string
+          newlyCreated?: boolean
         ) => {}
       ),
       onAppLeave: jest.fn(),
@@ -186,14 +185,13 @@ describe('Lens App', () => {
       data: typeof dataStartMock;
       core: typeof core;
       storage: Storage;
-      docId?: string;
+      savedObjectId?: string;
       docStorage: SavedObjectStore;
       redirectTo: (
         id?: string,
         documentByValue?: Document,
         returnToOrigin?: boolean,
-        newlyCreated?: boolean,
-        embeddableIdToReplace?: string
+        newlyCreated?: boolean
       ) => void;
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
@@ -279,7 +277,7 @@ describe('Lens App', () => {
       },
     });
     await act(async () => {
-      instance.setProps({ docId: '1234' });
+      instance.setProps({ savedObjectId: '1234' });
     });
 
     expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
@@ -313,7 +311,7 @@ describe('Lens App', () => {
       instance = mount(<App {...args} />);
 
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        instance.setProps({ savedObjectId: '1234' });
       });
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
@@ -351,17 +349,17 @@ describe('Lens App', () => {
 
       instance = mount(<App {...args} />);
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        instance.setProps({ savedObjectId: '1234' });
       });
 
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        instance.setProps({ savedObjectId: '1234' });
       });
 
       expect(args.docStorage.load).toHaveBeenCalledTimes(1);
 
       await act(async () => {
-        instance.setProps({ docId: '9876' });
+        instance.setProps({ savedObjectId: '9876' });
       });
 
       expect(args.docStorage.load).toHaveBeenCalledTimes(2);
@@ -375,7 +373,7 @@ describe('Lens App', () => {
       instance = mount(<App {...args} />);
 
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        instance.setProps({ savedObjectId: '1234' });
       });
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
@@ -432,7 +430,7 @@ describe('Lens App', () => {
       }) {
         const args = {
           ...defaultArgs,
-          docId: initialDocId,
+          savedObjectId: initialDocId,
         };
         args.editorFrame = frame;
         (args.docStorage.load as jest.Mock).mockResolvedValue({
@@ -444,8 +442,8 @@ describe('Lens App', () => {
             filters: [],
           },
         });
-        (args.docStorage.save as jest.Mock).mockImplementation(async ({ id }) => ({
-          id: id || 'aaa',
+        (args.docStorage.save as jest.Mock).mockImplementation(async ({ savedObjectId }) => ({
+          id: savedObjectId || 'aaa',
           expression: 'kibana 2',
         }));
 
@@ -537,9 +535,9 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true, undefined);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, false);
 
-        inst.setProps({ docId: 'aaa' });
+        inst.setProps({ savedObjectId: 'aaa' });
 
         expect(args.docStorage.load).not.toHaveBeenCalled();
       });
@@ -557,9 +555,9 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true, undefined);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
 
-        inst.setProps({ docId: 'aaa' });
+        inst.setProps({ savedObjectId: 'aaa' });
 
         expect(args.docStorage.load).toHaveBeenCalledTimes(1);
       });
@@ -572,14 +570,14 @@ describe('Lens App', () => {
         });
 
         expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: '1234',
+          savedObjectId: '1234',
           title: 'hello there',
           expression: 'kibana 3',
         });
 
         expect(args.redirectTo).not.toHaveBeenCalled();
 
-        inst.setProps({ docId: '1234' });
+        inst.setProps({ savedObjectId: '1234' });
 
         expect(args.docStorage.load).toHaveBeenCalledTimes(1);
       });
@@ -625,7 +623,7 @@ describe('Lens App', () => {
           title: 'hello there',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true, true, undefined);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true, false);
       });
 
       it('saves app filters and does not save pinned filters', async () => {
@@ -653,7 +651,7 @@ describe('Lens App', () => {
         });
 
         expect(args.docStorage.save).toHaveBeenCalledWith({
-          id: '1234',
+          savedObjectId: '1234',
           title: 'hello there2',
           expression: 'kibana 3',
           state: {
@@ -1108,7 +1106,7 @@ describe('Lens App', () => {
       defaultArgs.editorFrame = frame;
       instance = mount(<App {...defaultArgs} />);
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        instance.setProps({ savedObjectId: '1234' });
       });
 
       const onChange = frame.mount.mock.calls[0][1].onChange;
@@ -1132,7 +1130,7 @@ describe('Lens App', () => {
       defaultArgs.editorFrame = frame;
       instance = mount(<App {...defaultArgs} />);
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        instance.setProps({ savedObjectId: '1234' });
       });
 
       const onChange = frame.mount.mock.calls[0][1].onChange;
@@ -1156,7 +1154,7 @@ describe('Lens App', () => {
       defaultArgs.editorFrame = frame;
       instance = mount(<App {...defaultArgs} />);
       await act(async () => {
-        instance.setProps({ docId: '1234' });
+        instance.setProps({ savedObjectId: '1234' });
       });
 
       const onChange = frame.mount.mock.calls[0][1].onChange;

@@ -15,7 +15,6 @@ import { ReactExpressionRendererType } from '../../../../../../src/plugins/expre
 import {
   EmbeddableFactoryDefinition,
   IContainer,
-  AttributeService,
   EmbeddableStart,
 } from '../../../../../../src/plugins/embeddable/public';
 import {
@@ -35,7 +34,7 @@ interface StartServices {
   savedObjectsClient: SavedObjectsClientContract;
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
-  embeddable: EmbeddableStart;
+  embeddable?: EmbeddableStart;
   uiActions?: UiActionsStart;
 }
 
@@ -85,7 +84,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     } = await this.getStartServices();
     return new Embeddable(
       {
-        attributeService: embeddable.getAttributeService<
+        attributeService: embeddable!.getAttributeService<
           LensSavedObjectAttributes,
           LensByValueInput,
           LensByReferenceInput

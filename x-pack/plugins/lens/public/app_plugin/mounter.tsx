@@ -5,8 +5,6 @@
  */
 import React from 'react';
 
-import uuid from 'uuid';
-
 import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
@@ -22,7 +20,7 @@ import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { Document, SavedObjectIndexStore } from '../persistence';
 import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE } from '../../common';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -56,20 +54,23 @@ export async function mountApp(
     returnToOrigin?: boolean,
     newlyCreated?: boolean
   ) => {
-    if (!savedObjectId && !embeddableEditorIncomingState?.valueInput) {
+    if (!savedObjectId && !newlyCreated && !returnToOrigin) {
       routeProps.history.push('/');
-    } else if (!embeddableEditorIncomingState?.originatingApp) {
+    } else if (savedObjectId && !embeddableEditorIncomingState?.originatingApp && !returnToOrigin) {
       routeProps.history.push(`/edit/${savedObjectId}`);
     } else if (!!embeddableEditorIncomingState?.originatingApp && returnToOrigin) {
-      routeProps.history.push(`/edit/${savedObjectId}`);
-      if (newlyCreated && savedObjectId) {
+      if (savedObjectId) {
+        routeProps.history.push(`/edit/${savedObjectId}`);
+      }
+      if (newlyCreated && stateTransfer) {
+        const input = savedObjectId ? { savedObjectId } : { attributes: document };
         stateTransfer.navigateToWithEmbeddablePackage(
           embeddableEditorIncomingState?.originatingApp,
           {
             state: {
               embeddableId: embeddableEditorIncomingState.embeddableId,
               type: LENS_EMBEDDABLE_TYPE,
-              input: { savedObjectId },
+              input,
             },
           }
         );
@@ -111,7 +112,7 @@ export async function mountApp(
       <HashRouter>
         <Switch>
           <Route exact path="/edit/:id" render={renderEditor} />
-          <Route exact path="/by_value" render={renderEditor} />
+          <Route exact path={`/${LENS_EDIT_BY_VALUE}`} render={renderEditor} />
           <Route exact path="/" render={renderEditor} />
           <Route path="/" component={NotFound} />
         </Switch>

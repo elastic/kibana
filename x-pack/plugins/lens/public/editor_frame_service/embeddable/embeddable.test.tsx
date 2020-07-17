@@ -23,9 +23,9 @@ import {
 import { Document } from '../../persistence';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
-import { AttributeService } from './attribute_service';
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
+import { AttributeService } from '../../../../../../src/plugins/embeddable/public';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -47,7 +47,6 @@ const savedVis: Document = {
   visualizationType: '',
 };
 
-// TODO: After #68719 is merged, use a mock from the embeddable plugin for this.
 const attributeServiceMockFromSavedVis = (
   document: Document
 ): AttributeService<LensSavedObjectAttributes, LensByValueInput, LensByReferenceInput> => {
