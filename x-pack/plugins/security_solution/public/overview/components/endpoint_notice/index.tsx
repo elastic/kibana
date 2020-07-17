@@ -42,7 +42,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
         <p>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.message"
-            defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
+            defaultMessage="Protect your hosts with threat prevention, detection, and deep security data visibility."
           />
         </p>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}

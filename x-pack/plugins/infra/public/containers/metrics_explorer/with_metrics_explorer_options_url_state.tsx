@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set, values } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { values } from 'lodash';
 import React, { useContext, useMemo } from 'react';
 import * as t from 'io-ts';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';

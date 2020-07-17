@@ -20,7 +20,7 @@ import { useSelectedCells } from '../../explorer/hooks/use_selected_cells';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
-import { explorerService } from '../../explorer/explorer_dashboard_service';
+import { ExplorerAppState, explorerService } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useShowCharts } from '../../components/controls/checkbox_showcharts';
@@ -72,7 +72,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [lastRefresh, setLastRefresh] = useState(0);
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
-  const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
+  const { jobIds } = useJobSelection(jobsWithTimeRange);
 
   const refresh = useRefresh();
   useEffect(() => {
@@ -110,6 +110,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }, [globalState?.time?.from, globalState?.time?.to]);
 
   useEffect(() => {
+    if (jobIds.length > 0) {
+      explorerService.updateJobSelection(jobIds);
+    } else {
+      explorerService.clearJobs();
+    }
+  }, [JSON.stringify(jobIds)]);
+
+  useEffect(() => {
     const viewByFieldName = appState?.mlExplorerSwimlane?.viewByFieldName;
     if (viewByFieldName !== undefined) {
       explorerService.setViewBySwimlaneFieldName(viewByFieldName);
@@ -119,15 +127,17 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     if (filterData !== undefined) {
       explorerService.setFilterData(filterData);
     }
-  }, []);
 
-  useEffect(() => {
-    if (jobIds.length > 0) {
-      explorerService.updateJobSelection(jobIds);
-    } else {
-      explorerService.clearJobs();
+    const viewByPerPage = (appState as ExplorerAppState)?.mlExplorerSwimlane?.viewByPerPage;
+    if (viewByPerPage) {
+      explorerService.setViewByPerPage(viewByPerPage);
     }
-  }, [JSON.stringify(jobIds)]);
+
+    const viewByFromPage = (appState as ExplorerAppState)?.mlExplorerSwimlane?.viewByFromPage;
+    if (viewByFromPage) {
+      explorerService.setViewByFromPage(viewByFromPage);
+    }
+  }, []);
 
   const [explorerData, loadExplorerData] = useExplorerData();
   useEffect(() => {
@@ -147,7 +157,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }, [explorerAppState]);
 
   const explorerState = useObservable(explorerService.state$);
-
   const [showCharts] = useShowCharts();
   const [tableInterval] = useTableInterval();
   const [tableSeverity] = useTableSeverity();

@@ -156,7 +156,13 @@ export const mockGlobalState: State = {
   },
   inputs: {
     global: {
-      timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
+      timerange: {
+        kind: 'relative',
+        fromStr: DEFAULT_FROM,
+        toStr: DEFAULT_TO,
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
+      },
       linkTo: ['timeline'],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
@@ -167,7 +173,13 @@ export const mockGlobalState: State = {
       filters: [],
     },
     timeline: {
-      timerange: { kind: 'relative', fromStr: DEFAULT_FROM, toStr: DEFAULT_TO, from: 0, to: 1 },
+      timerange: {
+        kind: 'relative',
+        fromStr: DEFAULT_FROM,
+        toStr: DEFAULT_TO,
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
+      },
       linkTo: ['global'],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
@@ -211,8 +223,8 @@ export const mockGlobalState: State = {
         templateTimelineVersion: null,
         noteIds: [],
         dateRange: {
-          start: 0,
-          end: 0,
+          start: '2020-07-07T08:20:18.966Z',
+          end: '2020-07-08T08:20:18.966Z',
         },
         selectedEventIds: {},
         show: false,
