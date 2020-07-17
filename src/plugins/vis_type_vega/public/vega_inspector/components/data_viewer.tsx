@@ -91,7 +91,6 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
           }))}
           onChange={onViewChange}
           isClearable={false}
-          fullWidth={true}
           singleSelection={{ asPlainText: true }}
           selectedOptions={[{ label: selectedView.id }]}
         />
