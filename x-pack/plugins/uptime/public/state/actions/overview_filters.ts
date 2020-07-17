@@ -22,22 +22,22 @@ export interface GetOverviewFiltersPayload {
   tags: string[];
 }
 
-interface GetOverviewFiltersFetchAction {
+export interface GetOverviewFiltersFetchAction {
   type: typeof FETCH_OVERVIEW_FILTERS;
   payload: GetOverviewFiltersPayload;
 }
 
-interface GetOverviewFiltersSuccessAction {
+export interface GetOverviewFiltersSuccessAction {
   type: typeof FETCH_OVERVIEW_FILTERS_SUCCESS;
   payload: OverviewFilters;
 }
 
-interface GetOverviewFiltersFailAction {
+export interface GetOverviewFiltersFailAction {
   type: typeof FETCH_OVERVIEW_FILTERS_FAIL;
   payload: Error;
 }
 
-interface SetOverviewFiltersAction {
+export interface SetOverviewFiltersAction {
   type: typeof SET_OVERVIEW_FILTERS;
   payload: OverviewFilters;
 }

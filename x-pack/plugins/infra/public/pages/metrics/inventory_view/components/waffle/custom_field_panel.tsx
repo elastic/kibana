@@ -10,7 +10,7 @@ import React from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 import { InfraGroupByOptions } from '../../../../../lib/lib';
 
-interface Props {
+export interface Props {
   onSubmit: (field: string) => void;
   fields: IFieldType[];
   currentOptions: InfraGroupByOptions[];
@@ -78,11 +78,11 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
       </div>
     );
   }
-  private handleSubmit = () => {
+  public handleSubmit = () => {
     this.props.onSubmit(this.state.selectedOptions[0].label);
   };
 
-  private handleFieldSelection = (selectedOptions: SelectedOption[]) => {
+  public handleFieldSelection = (selectedOptions: SelectedOption[]) => {
     this.setState({ selectedOptions });
   };
 };

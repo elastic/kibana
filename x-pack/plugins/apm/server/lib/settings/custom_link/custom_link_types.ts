@@ -11,6 +11,13 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 
+export {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+};
+
 export interface CustomLinkES {
   id?: string;
   '@timestamp'?: number;

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 import { hexToRgb } from '../../../common/lib/hex_to_rgb';
 
-interface Props {
+export interface Props {
   animated?: boolean;
   backgroundColor?: string;
   text?: string;

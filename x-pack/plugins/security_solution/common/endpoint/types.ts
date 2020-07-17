@@ -57,7 +57,7 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
 export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
 type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
-type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
 export interface EventStats {
   /**

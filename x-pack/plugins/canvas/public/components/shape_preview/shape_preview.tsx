@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-interface Props {
+export interface Props {
   shape?: string;
 }
 

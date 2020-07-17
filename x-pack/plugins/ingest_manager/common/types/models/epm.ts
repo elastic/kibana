@@ -68,7 +68,7 @@ export interface RegistryPackage {
   path: string;
 }
 
-interface RegistryImage {
+export interface RegistryImage {
   // https://github.com/elastic/package-registry/blob/master/util/package.go#L74
   // says src is potentially missing but I couldn't find any examples
   // it seems like src should be required. How can you have an image with no reference to the content?

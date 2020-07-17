@@ -15,7 +15,7 @@ import { Datatable, ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from './';
 
-interface Arguments {
+export interface Arguments {
   query: string;
   interval: string;
   from: string;

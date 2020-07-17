@@ -5,7 +5,7 @@
  */
 
 import { ESResponse } from './fetcher';
-import { transactionGroupsResponse } from './mock_responses/transaction_groups_response';
+import { transactionGroupsResponse } from './mock_responses/transaction_groups_response.mock';
 import { transactionGroupsTransformer } from './transform';
 
 describe('transactionGroupsTransformer', () => {

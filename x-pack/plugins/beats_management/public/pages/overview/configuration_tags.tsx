@@ -14,7 +14,7 @@ import { tagListActions } from '../../components/table/action_schema';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AppPageProps } from '../../frontend_types';
 
-interface PageProps extends AppPageProps {
+export interface PageProps extends AppPageProps {
   renderAction: (area: () => JSX.Element) => void;
   intl: InjectedIntl;
 }

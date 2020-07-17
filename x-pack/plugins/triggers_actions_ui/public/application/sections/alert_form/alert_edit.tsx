@@ -29,7 +29,7 @@ import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { PLUGIN } from '../../constants/plugin';
 
-interface AlertEditProps {
+export interface AlertEditProps {
   initialAlert: Alert;
   onClose(): void;
 }

@@ -17,6 +17,13 @@ import { getTransaction } from '../../lib/settings/custom_link/get_transaction';
 import { listCustomLinks } from '../../lib/settings/custom_link/list_custom_links';
 import { createRoute } from '../create_route';
 
+export {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../lib/settings/custom_link/custom_link_types';
+
 export const customLinkTransactionRoute = createRoute(() => ({
   path: '/api/apm/settings/custom_links/transaction',
   params: {

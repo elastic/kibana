@@ -13,64 +13,64 @@ import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
 
-interface ServerReturnedHostList {
+export interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
   payload: HostResultList;
 }
 
-interface ServerFailedToReturnHostList {
+export interface ServerFailedToReturnHostList {
   type: 'serverFailedToReturnHostList';
   payload: ServerApiError;
 }
 
-interface ServerReturnedHostDetails {
+export interface ServerReturnedHostDetails {
   type: 'serverReturnedHostDetails';
   payload: HostInfo;
 }
 
-interface ServerFailedToReturnHostDetails {
+export interface ServerFailedToReturnHostDetails {
   type: 'serverFailedToReturnHostDetails';
   payload: ServerApiError;
 }
 
-interface ServerReturnedHostPolicyResponse {
+export interface ServerReturnedHostPolicyResponse {
   type: 'serverReturnedHostPolicyResponse';
   payload: GetHostPolicyResponse;
 }
 
-interface ServerFailedToReturnHostPolicyResponse {
+export interface ServerFailedToReturnHostPolicyResponse {
   type: 'serverFailedToReturnHostPolicyResponse';
   payload: ServerApiError;
 }
 
-interface ServerReturnedPoliciesForOnboarding {
+export interface ServerReturnedPoliciesForOnboarding {
   type: 'serverReturnedPoliciesForOnboarding';
   payload: {
     policyItems: GetPolicyListResponse['items'];
   };
 }
 
-interface ServerFailedToReturnPoliciesForOnboarding {
+export interface ServerFailedToReturnPoliciesForOnboarding {
   type: 'serverFailedToReturnPoliciesForOnboarding';
   payload: ServerApiError;
 }
 
-interface UserSelectedEndpointPolicy {
+export interface UserSelectedEndpointPolicy {
   type: 'userSelectedEndpointPolicy';
   payload: {
     selectedPolicyId: string;
   };
 }
 
-interface ServerCancelledHostListLoading {
+export interface ServerCancelledHostListLoading {
   type: 'serverCancelledHostListLoading';
 }
 
-interface ServerCancelledPolicyItemsLoading {
+export interface ServerCancelledPolicyItemsLoading {
   type: 'serverCancelledPolicyItemsLoading';
 }
 
-interface ServerReturnedEndpointPackageInfo {
+export interface ServerReturnedEndpointPackageInfo {
   type: 'serverReturnedEndpointPackageInfo';
   payload: GetPackagesResponse['response'][0];
 }

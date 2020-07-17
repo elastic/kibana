@@ -28,7 +28,7 @@ import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { PLUGIN } from '../../constants/plugin';
 
-interface AlertAddProps {
+export interface AlertAddProps {
   consumer: string;
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;

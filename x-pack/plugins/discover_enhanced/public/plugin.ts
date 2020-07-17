@@ -29,7 +29,7 @@ import {
   ExploreDataChartActionContext,
 } from './actions';
 
-declare module '../../../../src/plugins/ui_actions/public' {
+declare module 'src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_EXPLORE_DATA]: EmbeddableContext;
     [ACTION_EXPLORE_DATA_CHART]: ExploreDataChartActionContext;
@@ -70,11 +70,14 @@ export class DiscoverEnhancedPlugin
       const params = { start };
 
       const exploreDataAction = new ExploreDataContextMenuAction(params);
+      // @ts-expect-error TODO:TS-REFS
       uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, exploreDataAction);
 
       if (this.config.actions.exploreDataInChart.enabled) {
         const exploreDataChartAction = new ExploreDataChartAction(params);
+        // @ts-expect-error TODO:TS-REFS
         uiActions.addTriggerAction(SELECT_RANGE_TRIGGER, exploreDataChartAction);
+        // @ts-expect-error TODO:TS-REFS
         uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, exploreDataChartAction);
       }
     }

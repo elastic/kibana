@@ -10,7 +10,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../classes/layers/layer';
 
-interface Props {
+export interface Props {
   layerList: ILayer[];
   fitToBounds: () => void;
 }

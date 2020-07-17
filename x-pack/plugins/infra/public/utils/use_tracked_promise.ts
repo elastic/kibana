@@ -209,22 +209,22 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
   return [promiseState, execute] as [typeof promiseState, typeof execute];
 };
 
-interface UninitializedPromiseState {
+export interface UninitializedPromiseState {
   state: 'uninitialized';
 }
 
-interface PendingPromiseState<ResolvedValue> {
+export interface PendingPromiseState<ResolvedValue> {
   state: 'pending';
   promise: Promise<ResolvedValue>;
 }
 
-interface ResolvedPromiseState<ResolvedValue> {
+export interface ResolvedPromiseState<ResolvedValue> {
   state: 'resolved';
   promise: Promise<ResolvedValue>;
   value: ResolvedValue;
 }
 
-interface RejectedPromiseState<ResolvedValue, RejectedValue> {
+export interface RejectedPromiseState<ResolvedValue, RejectedValue> {
   state: 'rejected';
   promise: Promise<ResolvedValue>;
   value: RejectedValue;
@@ -239,7 +239,7 @@ type PromiseState<ResolvedValue, RejectedValue = unknown> =
   | PendingPromiseState<ResolvedValue>
   | SettledPromise<ResolvedValue, RejectedValue>;
 
-interface CancelablePromise<ResolvedValue> {
+export interface CancelablePromise<ResolvedValue> {
   // reject the promise prematurely with a CanceledPromiseError
   cancel: () => void;
   // reject the promise prematurely with a SilentCanceledPromiseError

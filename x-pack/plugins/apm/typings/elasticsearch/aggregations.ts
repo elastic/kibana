@@ -32,7 +32,7 @@ type MetricsAggregationOptions =
       script?: Script;
     };
 
-interface MetricsAggregationResponsePart {
+export interface MetricsAggregationResponsePart {
   value: number | null;
 }
 interface DateHistogramBucket {

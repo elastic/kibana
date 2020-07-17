@@ -23,7 +23,7 @@ import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ChildRoutes } from '../../components/navigation/child_routes';
 import { AppPageProps } from '../../frontend_types';
 
-interface PageProps extends AppPageProps {
+export interface PageProps extends AppPageProps {
   intl: InjectedIntl;
 }
 interface PageState {

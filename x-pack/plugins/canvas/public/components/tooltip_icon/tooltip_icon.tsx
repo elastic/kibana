@@ -17,7 +17,7 @@ export enum IconType {
 
 type EuiIconTipProps = PropsOf<typeof EuiIconTip>;
 
-interface Props extends Omit<EuiIconTipProps, 'type' | 'color'> {
+export interface Props extends Omit<EuiIconTipProps, 'type' | 'color'> {
   icon: IconType;
 }
 

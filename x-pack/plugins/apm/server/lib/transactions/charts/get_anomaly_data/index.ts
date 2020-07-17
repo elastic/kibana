@@ -11,7 +11,7 @@ import {
 } from '../../../helpers/setup_request';
 import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
 
-interface AnomalyTimeseries {
+export interface AnomalyTimeseries {
   anomalyBoundaries: Coordinate[];
   anomalyScore: RectCoordinate[];
 }

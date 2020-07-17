@@ -57,7 +57,7 @@ export interface StartContract
   FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
 }
 
-declare module '../../../../src/plugins/ui_actions/public' {
+declare module 'src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [CUSTOM_TIME_RANGE]: TimeRangeActionContext;
     [CUSTOM_TIME_RANGE_BADGE]: TimeBadgeActionContext;
@@ -102,6 +102,7 @@ export class AdvancedUiActionsPublicPlugin
       dateFormat,
       commonlyUsedRanges,
     });
+    // @ts-expect-error TODO:TS-REFS
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
 
     const timeRangeBadge = new CustomTimeRangeBadge({
@@ -109,6 +110,7 @@ export class AdvancedUiActionsPublicPlugin
       dateFormat,
       commonlyUsedRanges,
     });
+    // @ts-expect-error TODO:TS-REFS
     uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     return {

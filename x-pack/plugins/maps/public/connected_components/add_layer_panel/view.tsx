@@ -26,7 +26,7 @@ const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer',
 });
 const SELECT_WIZARD_LABEL = ADD_LAYER_STEP_LABEL;
 
-interface Props {
+export interface Props {
   addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => void;
   closeFlyout: () => void;
   hasPreviewLayers: boolean;

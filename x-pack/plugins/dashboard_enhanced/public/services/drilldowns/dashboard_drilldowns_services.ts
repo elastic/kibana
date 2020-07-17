@@ -17,7 +17,7 @@ import {
 import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
 import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 
-declare module '../../../../../../src/plugins/ui_actions/public' {
+declare module 'src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [OPEN_FLYOUT_ADD_DRILLDOWN]: EnhancedEmbeddableContext;
     [OPEN_FLYOUT_EDIT_DRILLDOWN]: EnhancedEmbeddableContext;
@@ -52,9 +52,11 @@ export class DashboardDrilldownsService {
     };
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ start });
+    // @ts-expect-error TODO:TS-REFS
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
 
     const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ start });
+    // @ts-expect-error TODO:TS-REFS
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
 
     const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({

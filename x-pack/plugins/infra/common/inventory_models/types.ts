@@ -267,7 +267,7 @@ export const SnapshotModelSumBucketRT = rt.type({
   }),
 });
 
-interface SnapshotTermsWithAggregation {
+export interface SnapshotTermsWithAggregation {
   terms: { field: string };
   aggregations: SnapshotModel;
 }

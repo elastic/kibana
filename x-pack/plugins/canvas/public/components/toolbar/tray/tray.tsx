@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { ComponentStrings } from '../../../../i18n';
 const { ToolbarTray: strings } = ComponentStrings;
 
-interface Props {
+export interface Props {
   children: ReactNode;
   done: MouseEventHandler<HTMLAnchorElement>;
 }

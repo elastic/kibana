@@ -11,7 +11,7 @@ import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
 
-interface Props {
+export interface Props {
   shapes: {
     [key: string]: string;
   };

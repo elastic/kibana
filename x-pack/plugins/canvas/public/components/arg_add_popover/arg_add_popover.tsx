@@ -23,7 +23,7 @@ interface ArgOptions {
   onValueAdd: () => void;
 }
 
-interface Props {
+export interface Props {
   options: ArgOptions[];
 }
 

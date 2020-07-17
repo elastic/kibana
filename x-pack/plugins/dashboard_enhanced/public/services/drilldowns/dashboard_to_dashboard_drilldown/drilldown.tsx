@@ -27,7 +27,9 @@ export interface Params {
 }
 
 export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, ActionContext<VisualizeEmbeddableContract>> {
+  implements
+    // @ts-expect-error TODO:TS-REFS
+    Drilldown<Config, ActionContext<VisualizeEmbeddableContract>> {
   constructor(protected readonly params: Params) {}
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
@@ -57,6 +59,7 @@ export class DashboardToDashboardDrilldown
 
   public readonly getHref = async (
     config: Config,
+    // @ts-expect-error TODO:TS-REFS
     context: ActionContext<VisualizeEmbeddableContract>
   ): Promise<string> => {
     return this.getDestinationUrl(config, context);
@@ -64,6 +67,7 @@ export class DashboardToDashboardDrilldown
 
   public readonly execute = async (
     config: Config,
+    // @ts-expect-error TODO:TS-REFS
     context: ActionContext<VisualizeEmbeddableContract>
   ) => {
     const dashboardPath = await this.getDestinationUrl(config, context);
@@ -76,6 +80,7 @@ export class DashboardToDashboardDrilldown
 
   private getDestinationUrl = async (
     config: Config,
+    // @ts-expect-error TODO:TS-REFS
     context: ActionContext<VisualizeEmbeddableContract>
   ): Promise<string> => {
     const {
@@ -101,8 +106,10 @@ export class DashboardToDashboardDrilldown
     let timeRange = config.useCurrentDateRange ? currentTimeRange : undefined;
     let filtersFromEvent = await (async () => {
       try {
+        // @ts-expect-error TODO:TS-REFS
         if (isRangeSelectTriggerContext(context))
           return await createFiltersFromRangeSelectAction(context.data);
+        // @ts-expect-error TODO:TS-REFS
         if (isValueClickTriggerContext(context))
           return await createFiltersFromValueClickAction(context.data);
 

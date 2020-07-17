@@ -47,7 +47,7 @@ import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_en
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { ServiceNowConnectorConfiguration } from '../../../common';
 
-interface ActionAccordionFormProps {
+export interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
   setActionIdByIndex: (id: string, index: number) => void;

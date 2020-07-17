@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiPopover, EuiContextMenu, EuiIcon, EuiToolTip } from 
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
 
-interface Props {
+export interface Props {
   cloneLayer: (layerId: string) => void;
   displayName: string;
   editLayer: () => void;

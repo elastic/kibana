@@ -7,7 +7,7 @@
 import { CanvasServiceFactory } from '.';
 import { CoreStart, CoreSetup, CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 
-interface PlatformService {
+export interface PlatformService {
   coreSetup: CoreSetup;
   coreStart: CoreStart;
   setupPlugins: CanvasSetupDeps;

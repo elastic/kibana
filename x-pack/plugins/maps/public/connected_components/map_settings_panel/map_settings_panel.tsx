@@ -22,7 +22,7 @@ import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
 import { MapCenter } from '../../../common/descriptor_types';
 
-interface Props {
+export interface Props {
   cancelChanges: () => void;
   center: MapCenter;
   hasMapSettingsChanges: boolean;
