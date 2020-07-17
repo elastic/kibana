@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   /**
    * Common test suite for testing exception scenarious within dashboard
    */
-  describe('dashboard error handling', () => {
+  // Flaky: https://github.com/elastic/kibana/issues/72146
+  describe.skip('dashboard error handling', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('dashboard/current/kibana');
       await PageObjects.common.navigateToApp('dashboard');
