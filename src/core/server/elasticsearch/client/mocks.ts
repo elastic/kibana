@@ -45,7 +45,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
       .forEach((key) => {
         const propType = typeof obj[key];
         if (propType === 'function') {
-          obj[key] = jest.fn();
+          obj[key] = jest.fn(() => createMockedClientResponse({}));
         } else if (propType === 'object' && obj[key] != null) {
           mockify(obj[key]);
         }
@@ -63,6 +63,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   return (client as unknown) as DeeplyMockedKeys<Client>;
 };
 
+// TODO fix naming ElasticsearchClientMock
 export type ElasticSearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 
 const createClientMock = (): ElasticSearchClientMock =>
@@ -117,10 +118,13 @@ export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
   abort: jest.MockedFunction<() => undefined>;
 };
 
-const createMockedClientResponse = <T>(body: T): MockedTransportRequestPromise<ApiResponse<T>> => {
+const createMockedClientResponse = <T>(
+  body: T,
+  { statusCode = 200 }: { statusCode?: number } = {}
+): MockedTransportRequestPromise<ApiResponse<T>> => {
   const response: ApiResponse<T> = {
     body,
-    statusCode: 200,
+    statusCode,
     warnings: [],
     headers: {},
     meta: {} as any,

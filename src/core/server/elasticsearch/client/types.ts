@@ -40,3 +40,69 @@ export type ElasticsearchClient = Omit<
     ): Promise<ApiResponse>;
   };
 };
+
+interface ShardsResponse {
+  total: number;
+  successful: number;
+  failed: number;
+  skipped: number;
+}
+
+interface Explanation {
+  value: number;
+  description: string;
+  details: Explanation[];
+}
+
+/**
+ * Maintained until elasticsearch provides response typings out of the box
+ * https://github.com/elastic/elasticsearch-js/pull/970
+ */
+export interface SearchResponse<T = unknown> {
+  took: number;
+  timed_out: boolean;
+  _scroll_id?: string;
+  _shards: ShardsResponse;
+  hits: {
+    total: number;
+    max_score: number;
+    hits: Array<{
+      _index: string;
+      _type: string;
+      _id: string;
+      _score: number;
+      _source: T;
+      _version?: number;
+      _explanation?: Explanation;
+      fields?: any;
+      highlight?: any;
+      inner_hits?: any;
+      matched_queries?: string[];
+      sort?: string[];
+    }>;
+  };
+  aggregations?: any;
+}
+
+export interface GetResponse<T> {
+  _index: string;
+  _type: string;
+  _id: string;
+  _version: number;
+  _routing?: string;
+  found: boolean;
+  _source: T;
+}
+
+export interface DeleteDocumentResponse {
+  _shards: ShardsResponse;
+  found: boolean;
+  _index: string;
+  _type: string;
+  _id: string;
+  _version: number;
+  result: string;
+  error?: {
+    type: string;
+  };
+}

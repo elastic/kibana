@@ -36,4 +36,7 @@ export {
   ElasticsearchClientConfig,
   ElasticsearchClient,
   IScopedClusterClient,
+  SearchResponse,
+  GetResponse,
+  DeleteDocumentResponse,
 } from './client';
