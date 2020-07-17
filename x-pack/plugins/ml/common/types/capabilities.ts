@@ -7,6 +7,10 @@
 import { KibanaRequest } from 'kibana/server';
 import { PLUGIN_ID } from '../constants/app';
 
+export const apmUserMlCapabilities = {
+  canGetJobs: false,
+};
+
 export const userMlCapabilities = {
   canAccessML: false,
   // Anomaly Detection
@@ -68,6 +72,7 @@ export function getDefaultCapabilities(): MlCapabilities {
 }
 
 export function getPluginPrivileges() {
+  const apmUserMlCapabilitiesKeys = Object.keys(apmUserMlCapabilities);
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
   const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
@@ -95,6 +100,17 @@ export function getPluginPrivileges() {
       ...privilege,
       api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: userMlCapabilitiesKeys,
+    },
+    apmUser: {
+      excludeFromBasePrivileges: true,
+      app: [],
+      catalogue: [],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      ui: apmUserMlCapabilitiesKeys,
     },
   };
 }

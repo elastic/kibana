@@ -187,19 +187,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.not.contain('Logs');
       });
 
-      it(`logs app is inaccessible and Application Not Found message is rendered`, async () => {
-        await PageObjects.common.navigateToApp('infraLogs');
-        await testSubjects.existOrFail('~appNotFoundPageContent');
-        await PageObjects.common.navigateToUrlWithBrowserHistory(
-          'infraLogs',
-          '/stream',
-          undefined,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
+      it(`logs app is inaccessible and returns a 404`, async () => {
+        await PageObjects.common.navigateToActualUrl('infraLogs', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        let messageText = await PageObjects.common.getBodyText();
+        expect(messageText).to.eql(
+          JSON.stringify({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Not Found',
+          })
         );
-        await testSubjects.existOrFail('~appNotFoundPageContent');
+        await PageObjects.common.navigateToActualUrl('infraLogs', 'stream', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        messageText = await PageObjects.common.getBodyText();
+        expect(messageText).to.eql(
+          JSON.stringify({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Not Found',
+          })
+        );
       });
     });
   });

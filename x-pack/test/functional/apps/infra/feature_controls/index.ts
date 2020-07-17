@@ -10,8 +10,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('feature controls', function () {
     this.tags('skipFirefox');
     loadTestFile(require.resolve('./infrastructure_security'));
-    loadTestFile(require.resolve('./infrastructure_spaces'));
-    loadTestFile(require.resolve('./logs_security'));
-    loadTestFile(require.resolve('./logs_spaces'));
+    // loadTestFile(require.resolve('./infrastructure_spaces'));
+    // loadTestFile(require.resolve('./logs_security'));
+    // loadTestFile(require.resolve('./logs_spaces'));
   });
 }

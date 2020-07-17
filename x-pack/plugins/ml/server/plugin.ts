@@ -75,7 +75,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
-    const { admin, user } = getPluginPrivileges();
+    const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerFeature({
       id: PLUGIN_ID,
@@ -107,6 +107,10 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
           {
             id: 'ml_admin',
             privilege: admin,
+          },
+          {
+            id: 'ml_apm_user',
+            privilege: apmUser,
           },
         ],
       },

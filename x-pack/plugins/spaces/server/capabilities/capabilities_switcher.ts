@@ -83,8 +83,7 @@ function toggleDisabledFeatures(
 
   for (const feature of disabledFeatures) {
     // Disable associated navLink, if one exists
-    const featureNavLinks = feature.navLinkId ? [feature.navLinkId, ...feature.app] : feature.app;
-    featureNavLinks.forEach((app) => {
+    feature.app.forEach((app) => {
       if (navLinks.hasOwnProperty(app) && !enabledAppEntries.has(app)) {
         navLinks[app] = false;
       }
