@@ -32,7 +32,13 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Session Idle cleanup', () => {
     beforeEach(async () => {
-      await es.deleteByQuery({ index: '.kibana_security_session', q: '*', refresh: true });
+      await es.deleteByQuery({
+        index: '.kibana_security_session',
+        q: '*',
+        wait_for_completion: true,
+        refresh: true,
+        ignore: [404],
+      });
     });
 
     it('should properly clean up session expired because of idle timeout', async function () {

@@ -32,12 +32,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--xpack.security.session.lifespan=20s',
         '--xpack.security.session.cleanupInterval=60s',
-        `--config=/projects/elastic/master/kibana/config/kibana.dev.test.yml`,
       ],
     },
 
     junit: {
-      reportName: 'Chrome X-Pack Security API Integration Tests',
+      reportName: 'X-Pack Security API Integration Tests',
     },
   };
 }
