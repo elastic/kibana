@@ -169,5 +169,35 @@ describe('XY Config panels', () => {
       expect(component.find('[data-test-subj="lnsXAxisTitle"]').prop('disabled')).toBe(true);
       expect(component.find('[data-test-subj="lnsYAxisTitle"]').prop('disabled')).toBe(true);
     });
+
+    it('has the tick labels buttons enabled', () => {
+      const state = testState();
+
+      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
+
+      const options = component
+        .find('[data-test-subj="lnsTickLabelsSettings"]')
+        .prop('options') as EuiButtonGroupProps['options'];
+
+      expect(options!.map(({ label }) => label)).toEqual(['X-axis', 'Y-axis']);
+
+      const selections = component
+        .find('[data-test-subj="lnsTickLabelsSettings"]')
+        .prop('idToSelectedMap');
+
+      expect(selections!).toEqual({ x: true, y: true });
+    });
+
+    it('has the gridlines buttons disabled', () => {
+      const state = testState();
+
+      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
+
+      const selections = component
+        .find('[data-test-subj="lnsGridlinesSettings"]')
+        .prop('idToSelectedMap');
+
+      expect(selections!).toEqual({ x: false, y: false });
+    });
   });
 });

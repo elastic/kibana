@@ -112,21 +112,13 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   );
   const [xtitle, setXtitle] = useState<string>(props.state?.xTitle || '');
   const [ytitle, setYtitle] = useState<string>(props.state?.yTitle || '');
-  const [tickLabelsVisibilitySettings, setTickLabelsVisibilitySettings] = useState<
-    AxesSettingsConfig
-  >({
-    ['x']: props.state?.tickLabelsVisibilitySettings
-      ? props.state.tickLabelsVisibilitySettings.x
-      : true,
-    ['y']: props.state?.tickLabelsVisibilitySettings
-      ? props.state.tickLabelsVisibilitySettings.y
-      : true,
+  const [tickLabelsVisibilitySettings, setTickLabelsVisibilitySettings] = useState({
+    x: props.state?.tickLabelsVisibilitySettings?.x ?? true,
+    y: props.state?.tickLabelsVisibilitySettings?.y ?? true,
   });
-  const [gridlinesVisibilitySettings, setGridlinesVisibilitySettings] = useState<
-    AxesSettingsConfig
-  >({
-    ['x']: props.state?.gridlinesVisibilitySettings?.x,
-    ['y']: props.state?.gridlinesVisibilitySettings?.y,
+  const [gridlinesVisibilitySettings, setGridlinesVisibilitySettings] = useState({
+    x: props.state?.gridlinesVisibilitySettings?.x || false,
+    y: props.state?.gridlinesVisibilitySettings?.y || false,
   });
 
   const onXTitleChange = (value: string): void => {
@@ -139,11 +131,14 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     props.setState({ ...props.state, yTitle: value });
   };
 
-  const onTickLabelsVisibilitySettingsChange = (optionId) => {
+  type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
+
+  const onTickLabelsVisibilitySettingsChange = (optionId: string): void => {
+    const id = optionId as AxesSettingsConfigKeys;
     const newTickLabelsVisibilitySettings = {
       ...tickLabelsVisibilitySettings,
       ...{
-        [optionId]: !tickLabelsVisibilitySettings[optionId],
+        [id]: !tickLabelsVisibilitySettings[id],
       },
     };
     setTickLabelsVisibilitySettings(newTickLabelsVisibilitySettings);
@@ -153,11 +148,12 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     });
   };
 
-  const onGridlinesVisibilitySettingsChange = (optionId) => {
+  const onGridlinesVisibilitySettingsChange = (optionId: string): void => {
+    const id = optionId as AxesSettingsConfigKeys;
     const newGridlinesVisibilitySettings = {
       ...gridlinesVisibilitySettings,
       ...{
-        [optionId]: !gridlinesVisibilitySettings[optionId],
+        [id]: !gridlinesVisibilitySettings[id],
       },
     };
     setGridlinesVisibilitySettings(newGridlinesVisibilitySettings);
@@ -238,6 +234,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           >
             <EuiButtonGroup
               name="lnsTickLabels"
+              data-test-subj="lnsTickLabelsSettings"
               legend="Group of Tick Labels Visibility Settings"
               options={axes}
               idToSelectedMap={tickLabelsVisibilitySettings}
@@ -254,7 +251,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             })}
           >
             <EuiButtonGroup
-              name="lndGridlines"
+              name="lnsGridlines"
+              data-test-subj="lnsGridlinesSettings"
               legend="Group of Gridlines Visibility Settings"
               options={axes}
               idToSelectedMap={gridlinesVisibilitySettings}

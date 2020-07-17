@@ -30,6 +30,7 @@ import {
   LayerArgs,
   AxesSettingsConfig,
   tickLabelsConfig,
+  gridlinesConfig,
 } from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -220,7 +221,7 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     position: Position.Top,
   },
   showXAxisTitle: true,
-  showyAxisTitle: true,
+  showYAxisTitle: true,
   tickLabelsVisibilitySettings: {
     type: 'lens_xy_tickLabelsConfig',
     x: true,
@@ -297,6 +298,20 @@ describe('xy_expression', () => {
 
     expect(result).toEqual({
       type: 'lens_xy_tickLabelsConfig',
+      ...args,
+    });
+  });
+
+  test('gridlinesConfig produces the correct arguments', () => {
+    const args: AxesSettingsConfig = {
+      x: true,
+      y: false,
+    };
+
+    const result = gridlinesConfig.fn(null, args, createMockExecutionContext());
+
+    expect(result).toEqual({
+      type: 'lens_xy_gridlinesConfig',
       ...args,
     });
   });
@@ -1402,7 +1417,7 @@ describe('xy_expression', () => {
     test('it should not pass the formatter function to the x axis if the visibility of the tick labels is off', () => {
       const { data, args } = sampleArgs();
 
-      args.tickLabelsVisibilitySettings.x = false;
+      args.tickLabelsVisibilitySettings = { x: false, y: true, type: 'lens_xy_tickLabelsConfig' };
 
       const instance = shallow(
         <XYChart
@@ -1731,7 +1746,7 @@ describe('xy_expression', () => {
       expect(component.find(Axis).at(0).prop('title')).toEqual('My custom x-axis title');
     });
 
-    test('it should hide the X axis title if the corresponding switch is on', () => {
+    test('it should hide the X axis title if the corresponding switch is off', () => {
       const { data, args } = sampleArgs();
 
       args.showXAxisTitle = false;
@@ -1752,10 +1767,10 @@ describe('xy_expression', () => {
       expect(component.find(Axis).at(0).prop('title')).toEqual(undefined);
     });
 
-    test('it should show the X axis gridlines if the corresponding switch is on', () => {
+    test('it should show the X axis gridlines if the setting is on', () => {
       const { data, args } = sampleArgs();
 
-      args.showXAxisGridlines = true;
+      args.gridlinesVisibilitySettings = { x: true, y: false, type: 'lens_xy_gridlinesConfig' };
 
       const component = shallow(
         <XYChart

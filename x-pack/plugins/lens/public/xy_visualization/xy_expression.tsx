@@ -398,7 +398,7 @@ export function XYChart({
         id="x"
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={showXAxisTitle ? xTitle : undefined}
-        showGridLines={gridlinesVisibilitySettings.x}
+        showGridLines={gridlinesVisibilitySettings?.x}
         gridLineStyle={{ strokeWidth: 2 }}
         hide={filteredLayers[0].hide}
         // @ts-ignore, temporary solution for not displaying the ticks
@@ -424,7 +424,7 @@ export function XYChart({
                   .filter((name) => Boolean(name))[0]
               : undefined
           }
-          showGridLines={gridlinesVisibilitySettings.y}
+          showGridLines={gridlinesVisibilitySettings?.y}
           hide={filteredLayers[0].hide}
           // @ts-ignore, temporary solution for not displaying the ticks
           tickFormat={tickLabelsVisibilitySettings.y ? (d) => xAxisFormatter.convert(d) : () => {}}

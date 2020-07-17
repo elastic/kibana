@@ -91,7 +91,7 @@ export const tickLabelsConfig: ExpressionFunctionDefinition<
       }),
     },
   },
-  fn: function fn(input: unknown, args: TickLabelsConfig) {
+  fn: function fn(input: unknown, args: AxesSettingsConfig) {
     return {
       type: 'lens_xy_tickLabelsConfig',
       ...args,
@@ -126,7 +126,7 @@ export const gridlinesConfig: ExpressionFunctionDefinition<
       }),
     },
   },
-  fn: function fn(input: unknown, args: gridlinesConfig) {
+  fn: function fn(input: unknown, args: AxesSettingsConfig) {
     return {
       type: 'lens_xy_gridlinesConfig',
       ...args,
@@ -304,8 +304,8 @@ export interface XYArgs {
   fittingFunction?: FittingFunction;
   showXAxisTitle?: boolean;
   showYAxisTitle?: boolean;
-  tickLabelsVisibilitySettings: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
-  gridlinesVisibilitySettings: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
+  tickLabelsVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
+  gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
 }
 
 // Persisted parts of the state
@@ -315,10 +315,11 @@ export interface XYState {
   fittingFunction?: FittingFunction;
   layers: LayerConfig[];
   xTitle?: string;
+  yTitle?: string;
   showXAxisTitle?: boolean;
   showYAxisTitle?: boolean;
-  tickLabelsVisibilitySettings: AxesSettingsConfig;
-  gridlinesVisibilitySettings: AxesSettingsConfig;
+  tickLabelsVisibilitySettings?: AxesSettingsConfig;
+  gridlinesVisibilitySettings?: AxesSettingsConfig;
 }
 
 export type State = XYState;

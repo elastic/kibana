@@ -144,16 +144,8 @@ export const buildExpression = (
                   type: 'function',
                   function: 'lens_xy_tickLabelsConfig',
                   arguments: {
-                    x: [
-                      state?.tickLabelsVisibilitySettings
-                        ? state.tickLabelsVisibilitySettings.x
-                        : true,
-                    ],
-                    y: [
-                      state?.tickLabelsVisibilitySettings
-                        ? state.tickLabelsVisibilitySettings.y
-                        : true,
-                    ],
+                    x: [state?.tickLabelsVisibilitySettings?.x ?? true],
+                    y: [state?.tickLabelsVisibilitySettings?.y ?? true],
                   },
                 },
               ],
@@ -167,8 +159,8 @@ export const buildExpression = (
                   type: 'function',
                   function: 'lens_xy_gridlinesConfig',
                   arguments: {
-                    x: [state?.gridlinesVisibilitySettings?.x],
-                    y: [state?.gridlinesVisibilitySettings?.y],
+                    x: [state?.gridlinesVisibilitySettings?.x || false],
+                    y: [state?.gridlinesVisibilitySettings?.y || false],
                   },
                 },
               ],
