@@ -46,7 +46,7 @@ export const indexOrSearchRouteFactory = (navigateToPath: NavigateToPath): MlRou
   render: (props, deps) => (
     <PageWrapper
       {...props}
-      nextStepPath="#/jobs/new_job/step/job_type"
+      nextStepPath="/jobs/new_job/step/job_type"
       deps={deps}
       mode={MODE.NEW_JOB}
     />
@@ -59,7 +59,7 @@ export const dataVizIndexOrSearchRouteFactory = (navigateToPath: NavigateToPath)
   render: (props, deps) => (
     <PageWrapper
       {...props}
-      nextStepPath="#jobs/new_job/datavisualizer"
+      nextStepPath="/jobs/new_job/datavisualizer"
       deps={deps}
       mode={MODE.DATAVISUALIZER}
     />
