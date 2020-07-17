@@ -42,9 +42,8 @@ const App = () => {
             const breadcrumb = [observabilityLabelBreadcrumb, ...route.breadcrumb];
             useEffect(() => {
               core.chrome.setBreadcrumbs(breadcrumb);
+              document.title = getTitleFromBreadCrumbs(breadcrumb);
             }, [core, breadcrumb]);
-
-            document.title = getTitleFromBreadCrumbs(breadcrumb);
 
             const { query, path: pathParams } = useRouteParams(route.params);
             return route.handler({ query, path: pathParams });
