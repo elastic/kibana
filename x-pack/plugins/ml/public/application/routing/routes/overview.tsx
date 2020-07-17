@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Redirect } from 'react-router-dom';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
@@ -22,16 +22,16 @@ import { loadMlServerInfo } from '../../services/ml_server_info';
 import { useTimefilter } from '../../contexts/kibana';
 import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
-export const overviewRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const overviewRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/overview',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.overview.overviewLabel', {
         defaultMessage: 'Overview',
       }),
-      onClick: breadcrumbOnClickFactory('/overview', application),
+      onClick: breadcrumbOnClickFactory('/overview', navigateToPath),
     },
   ],
 });

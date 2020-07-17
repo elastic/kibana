@@ -6,10 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
-
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { NavigateToPath } from '../../../../../contexts/kibana';
 import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
@@ -261,10 +260,7 @@ export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
   );
 }
 
-export function convertToAdvancedJob(
-  jobCreator: JobCreatorType,
-  { getUrlForApp, navigateToUrl }: ApplicationStart
-) {
+export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashCombinedJob(jobCreator, true, true);
 
@@ -277,27 +273,18 @@ export function convertToAdvancedJob(
     jobType = JOB_TYPE.CATEGORIZATION;
   }
 
-  navigateToUrl(
-    getUrlForApp('ml', { path: window.location.href.replace(jobType, JOB_TYPE.ADVANCED) })
-  );
+  navigateToPath(window.location.href.replace(jobType, JOB_TYPE.ADVANCED));
 }
 
-export function resetJob(
-  jobCreator: JobCreatorType,
-  { getUrlForApp, navigateToUrl }: ApplicationStart
-) {
+export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.jobId = '';
   stashCombinedJob(jobCreator, true, true);
-
-  navigateToUrl(getUrlForApp('ml', { path: '/jobs/new_job' }));
+  navigateToPath('/jobs/new_job');
 }
 
-export function advancedStartDatafeed(
-  jobCreator: JobCreatorType,
-  { getUrlForApp, navigateToUrl }: ApplicationStart
-) {
+export function advancedStartDatafeed(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   stashCombinedJob(jobCreator, false, false);
-  navigateToUrl(getUrlForApp('ml', { path: '/jobs' }));
+  navigateToPath('/jobs');
 }
 
 export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {

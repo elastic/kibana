@@ -9,7 +9,7 @@ import { parse } from 'query-string';
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -17,16 +17,16 @@ import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_creation';
 import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const analyticsJobsCreationRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const analyticsJobsCreationRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/data_frame_analytics/new_job',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameManagementLabel', {
         defaultMessage: 'Data Frame Analytics',
       }),
-      onClick: breadcrumbOnClickFactory('/data_frame_analytics', application),
+      onClick: breadcrumbOnClickFactory('/data_frame_analytics', navigateToPath),
     },
   ],
 });

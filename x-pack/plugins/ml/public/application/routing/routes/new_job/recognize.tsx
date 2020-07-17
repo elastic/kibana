@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -19,13 +19,13 @@ import { checkViewOrCreateJobs } from '../../../jobs/new_job/recognize/resolvers
 import { mlJobService } from '../../../services/job_service';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const recognizeRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const recognizeRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/jobs/new_job/recognize',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('CREATE_JOB_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('CREATE_JOB_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabelRecognize', {
         defaultMessage: 'Recognized index',

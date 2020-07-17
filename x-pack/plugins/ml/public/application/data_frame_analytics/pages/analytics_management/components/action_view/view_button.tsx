@@ -14,21 +14,16 @@ import {
   isOutlierAnalysis,
   isClassificationAnalysis,
 } from '../../../../common/analytics';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useNavigateToPath } from '../../../../../contexts/kibana';
 
 import { getResultsUrl, DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 interface ViewButtonProps {
   item: DataFrameAnalyticsListRow;
-  isManagementTable: boolean;
 }
 
-export const ViewButton: FC<ViewButtonProps> = ({ item, isManagementTable }) => {
-  const {
-    services: {
-      application: { navigateToUrl, navigateToApp },
-    },
-  } = useMlKibana();
+export const ViewButton: FC<ViewButtonProps> = ({ item }) => {
+  const navigateToPath = useNavigateToPath();
 
   const analysisType = getAnalysisType(item.config.analysis);
   const buttonDisabled =
@@ -36,10 +31,7 @@ export const ViewButton: FC<ViewButtonProps> = ({ item, isManagementTable }) => 
     !isOutlierAnalysis(item.config.analysis) &&
     !isClassificationAnalysis(item.config.analysis);
 
-  const url = getResultsUrl(item.id, analysisType);
-  const navigator = isManagementTable
-    ? () => navigateToApp('ml', { path: url })
-    : () => navigateToUrl(url);
+  const onClickHandler = () => navigateToPath(getResultsUrl(item.id, analysisType));
 
   const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
     defaultMessage: 'View',
@@ -53,7 +45,7 @@ export const ViewButton: FC<ViewButtonProps> = ({ item, isManagementTable }) => 
       flush="left"
       iconType="visTable"
       isDisabled={buttonDisabled}
-      onClick={navigator}
+      onClick={onClickHandler}
       size="s"
     >
       {buttonText}

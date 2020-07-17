@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -30,9 +30,9 @@ interface IndexOrSearchPageProps extends PageProps {
   mode: MODE;
 }
 
-const getBreadcrumbs = (application: ApplicationStart) => [
-  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
+const getBreadcrumbs = (navigateToPath: NavigateToPath) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
       defaultMessage: 'Create job',
@@ -41,7 +41,7 @@ const getBreadcrumbs = (application: ApplicationStart) => [
   },
 ];
 
-export const indexOrSearchRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const indexOrSearchRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/jobs/new_job/step/index_or_search',
   render: (props, deps) => (
     <PageWrapper
@@ -51,10 +51,10 @@ export const indexOrSearchRouteFactory = (application: ApplicationStart): MlRout
       mode={MODE.NEW_JOB}
     />
   ),
-  breadcrumbs: getBreadcrumbs(application),
+  breadcrumbs: getBreadcrumbs(navigateToPath),
 });
 
-export const dataVizIndexOrSearchRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const dataVizIndexOrSearchRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/datavisualizer_index_select',
   render: (props, deps) => (
     <PageWrapper
@@ -64,7 +64,7 @@ export const dataVizIndexOrSearchRouteFactory = (application: ApplicationStart):
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getBreadcrumbs(application),
+  breadcrumbs: getBreadcrumbs(navigateToPath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {

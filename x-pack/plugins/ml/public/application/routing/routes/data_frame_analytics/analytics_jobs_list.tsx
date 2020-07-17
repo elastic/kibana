@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -15,12 +15,12 @@ import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_management';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const analyticsJobsListRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const analyticsJobsListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/data_frame_analytics',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('DATA_FRAME_ANALYTICS_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataFrameListLabel', {
         defaultMessage: 'Job Management',

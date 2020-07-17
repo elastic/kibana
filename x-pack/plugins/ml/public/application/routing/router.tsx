@@ -12,7 +12,7 @@ import { AppMountParameters, IUiSettingsClient, ChromeStart } from 'kibana/publi
 import { ChromeBreadcrumb } from 'kibana/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 
-import { useMlKibana } from '../contexts/kibana';
+import { useNavigateToPath } from '../contexts/kibana';
 import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
@@ -60,8 +60,7 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
 
   useEffect(() => {
     if (location.hash.startsWith('#/')) {
-      const newHash = location.hash.replace('#', '');
-      history.push(newHash);
+      history.push(location.hash.replace('#', ''));
     }
   }, [location.hash]);
 
@@ -77,9 +76,7 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
 export const MlRouter: FC<{
   pageDeps: PageDependencies;
 }> = ({ pageDeps }) => {
-  const {
-    services: { application },
-  } = useMlKibana();
+  const navigateToPath = useNavigateToPath();
 
   return (
     <Router history={pageDeps.history}>
@@ -87,7 +84,7 @@ export const MlRouter: FC<{
         <UrlStateProvider>
           <div className="ml-app">
             {Object.entries(routes).map(([name, routeFactory]) => {
-              const route = routeFactory(application);
+              const route = routeFactory(navigateToPath);
 
               return (
                 <Route

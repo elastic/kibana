@@ -8,7 +8,9 @@ import { EuiBreadcrumb } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart, ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from 'kibana/public';
+
+import { NavigateToPath } from '../contexts/kibana';
 
 export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {
@@ -64,20 +66,20 @@ type Breadcrumb = keyof typeof breadcrumbs;
 
 export const breadcrumbOnClickFactory = (
   path: string | undefined,
-  { getUrlForApp, navigateToUrl }: ApplicationStart
+  navigateToPath: NavigateToPath
 ): EuiBreadcrumb['onClick'] => {
   return (e) => {
     e.preventDefault();
-    navigateToUrl(getUrlForApp('ml', { path }));
+    navigateToPath(path);
   };
 };
 
 export const getBreadcrumbWithUrlForApp = (
   breadcrumbName: Breadcrumb,
-  application: ApplicationStart
+  navigateToPath: NavigateToPath
 ): EuiBreadcrumb => {
   return {
     ...breadcrumbs[breadcrumbName],
-    onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, application),
+    onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, navigateToPath),
   };
 };

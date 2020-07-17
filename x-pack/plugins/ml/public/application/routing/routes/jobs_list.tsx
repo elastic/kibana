@@ -8,7 +8,7 @@ import React, { useEffect, FC } from 'react';
 import { useObservable } from 'react-use';
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../contexts/kibana';
 
 import { DEFAULT_REFRESH_INTERVAL_MS } from '../../../../common/constants/jobs_list';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
@@ -20,12 +20,12 @@ import { JobsPage } from '../../jobs/jobs_list';
 import { useTimefilter } from '../../contexts/kibana';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 
-export const jobListRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const jobListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/jobs',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.jobManagementLabel', {
         defaultMessage: 'Job Management',

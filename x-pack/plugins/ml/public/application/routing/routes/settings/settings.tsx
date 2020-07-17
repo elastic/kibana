@@ -11,7 +11,7 @@
 
 import React, { FC } from 'react';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -26,12 +26,12 @@ import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { AnomalyDetectionSettingsContext, Settings } from '../../../settings';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const settingsRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const settingsRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/settings',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
   ],
 });
 

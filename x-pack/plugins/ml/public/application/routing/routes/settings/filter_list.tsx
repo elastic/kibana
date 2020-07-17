@@ -12,7 +12,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -28,17 +28,17 @@ import { FilterLists } from '../../../settings/filter_lists';
 
 import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const filterListRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const filterListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/settings/filter_lists',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
         defaultMessage: 'Filter lists',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/filter_lists', application),
+      onClick: breadcrumbOnClickFactory('/settings/filter_lists', navigateToPath),
     },
   ],
 });

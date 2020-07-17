@@ -9,7 +9,7 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -33,12 +33,12 @@ import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 
-export const explorerRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const explorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/explorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
         defaultMessage: 'Anomaly Explorer',

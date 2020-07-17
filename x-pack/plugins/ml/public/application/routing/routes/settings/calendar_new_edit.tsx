@@ -12,7 +12,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -36,32 +36,32 @@ interface NewCalendarPageProps extends PageProps {
   mode: MODE;
 }
 
-export const newCalendarRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const newCalendarRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/settings/calendars_list/new_calendar',
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
         defaultMessage: 'Create',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list/new_calendar', application),
+      onClick: breadcrumbOnClickFactory('/settings/calendars_list/new_calendar', navigateToPath),
     },
   ],
 });
 
-export const editCalendarRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const editCalendarRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/settings/calendars_list/edit_calendar/:calendarId',
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
         defaultMessage: 'Edit',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/calendars_list/edit_calendar', application),
+      onClick: breadcrumbOnClickFactory('/settings/calendars_list/edit_calendar', navigateToPath),
     },
   ],
 });

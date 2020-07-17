@@ -9,7 +9,7 @@ import { parse } from 'query-string';
 
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -17,12 +17,12 @@ import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../jobs/new_job/pages/job_type';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-export const jobTypeRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const jobTypeRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/jobs/new_job/step/job_type',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectJobType', {
         defaultMessage: 'Create job',

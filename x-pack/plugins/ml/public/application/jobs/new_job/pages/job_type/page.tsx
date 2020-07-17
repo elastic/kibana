@@ -18,7 +18,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useNavigateToPath } from '../../../../contexts/kibana';
 import { useMlContext } from '../../../../contexts/ml';
 import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { DataRecognizer } from '../../../../components/data_recognizer';
@@ -28,12 +28,9 @@ import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
 import { CategorizationIcon } from './categorization_job_icon';
 
 export const Page: FC = () => {
-  const {
-    services: {
-      application: { getUrlForApp, navigateToUrl },
-    },
-  } = useMlKibana();
   const mlContext = useMlContext();
+  const navigateToPath = useNavigateToPath();
+
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
   const { currentSavedSearch, currentIndexPattern } = mlContext;
@@ -80,16 +77,12 @@ export const Page: FC = () => {
       : `?savedSearchId=${currentSavedSearch.id}`;
   };
 
-  const navigateToPath = (path: string | undefined) =>
-    navigateToUrl(getUrlForApp('ml', { path: `${path}${getUrlParams()}` }));
-
   const addSelectionToRecentlyAccessed = () => {
     const title = !isSavedSearchSavedObject(currentSavedSearch)
       ? currentIndexPattern.title
       : (currentSavedSearch.attributes.title as string);
-    const url = getUrlForApp('ml', { path: '' });
-    addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, url);
-    navigateToPath('/jobs/new_job/datavisualizer');
+    addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, '');
+    navigateToPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
   };
 
   const jobTypes = [

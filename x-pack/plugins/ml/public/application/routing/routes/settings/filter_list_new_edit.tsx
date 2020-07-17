@@ -12,7 +12,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ApplicationStart } from 'kibana/public';
+import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -37,32 +37,32 @@ interface NewFilterPageProps extends PageProps {
   mode: MODE;
 }
 
-export const newFilterListRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const newFilterListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/settings/filter_lists/new_filter_list',
   render: (props, deps) => <PageWrapper {...props} mode={MODE.NEW} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
         defaultMessage: 'Create',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/filter_lists/new', application),
+      onClick: breadcrumbOnClickFactory('/settings/filter_lists/new', navigateToPath),
     },
   ],
 });
 
-export const editFilterListRouteFactory = (application: ApplicationStart): MlRoute => ({
+export const editFilterListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/settings/filter_lists/edit_filter_list/:filterId',
   render: (props, deps) => <PageWrapper {...props} mode={MODE.EDIT} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', application),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', application),
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
         defaultMessage: 'Edit',
       }),
-      onClick: breadcrumbOnClickFactory('/settings/filter_lists/edit', application),
+      onClick: breadcrumbOnClickFactory('/settings/filter_lists/edit', navigateToPath),
     },
   ],
 });
