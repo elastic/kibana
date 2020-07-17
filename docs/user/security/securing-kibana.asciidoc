@@ -53,7 +53,7 @@ as the encryption key.
 xpack.security.encryptionKey: "something_at_least_32_characters"
 --------------------------------------------------------------------------------
 
-For more information, see <<security-settings-kb,Security Settings in {kib}>>.
+For more information, see <<security-settings-kb,Security settings in {kib}>>.
 --
 
 . Optional: Set a timeout to expire idle sessions. By default, a session stays
