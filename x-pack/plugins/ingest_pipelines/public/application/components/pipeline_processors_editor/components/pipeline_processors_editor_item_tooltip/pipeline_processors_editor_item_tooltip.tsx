@@ -19,16 +19,14 @@ export interface Position {
 
 interface Props {
   processor: ProcessorInternal;
-  initialPosition: Position;
 }
 
 const PORTAL_HTML_ELEMENT_ID = 'pipelineProcessorsEditorTooltipPortal';
+const MOUSE_PADDING_RIGHT = 20;
+const MOUSE_PADDING_BOTTOM = 20;
 
-export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({
-  processor,
-  initialPosition,
-}) => {
-  const [{ x, y }, setPosition] = useState<Position>(initialPosition);
+export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({ processor }) => {
+  const [position, setPosition] = useState<Position | undefined>();
   const mountRef = useRef<HTMLDivElement | undefined>();
 
   useEffect(() => {
@@ -47,18 +45,29 @@ export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({
     };
   }, []);
 
-  if (!mountRef.current) {
+  if (!mountRef.current || !position) {
     return null;
   }
 
   return (
+    /**
+     * To get around issues with parent elements potentially being position: relative or
+     * overflow: hidden we use a portal to render this tooltip in the document body so
+     * that we can render it anywhere the cursor can go.
+     */
     <EuiPortal
       insert={{
         sibling: mountRef.current,
         position: 'after',
       }}
     >
-      <div className="pipelineProcessorsEditor__itemTooltip" style={{ left: x + 20, top: y + 20 }}>
+      <div
+        className="pipelineProcessorsEditor__itemTooltip"
+        style={{
+          left: position.x + MOUSE_PADDING_RIGHT,
+          top: position.y + MOUSE_PADDING_BOTTOM,
+        }}
+      >
         <ProcessorInformation processor={processor} />
       </div>
     </EuiPortal>

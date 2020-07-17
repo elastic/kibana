@@ -26,7 +26,6 @@ import {
   ContextValueState,
   Links,
   ProcessorInternal,
-  OnUpdateToolTipInitPositionHandler,
 } from './types';
 
 import { useProcessorsState, isOnFailureSelector } from './processors_reducer';
@@ -38,7 +37,6 @@ import { serialize } from './serialize';
 import { OnActionHandler } from './components/processors_tree';
 
 import {
-  Position,
   ProcessorRemoveModal,
   PipelineProcessorsItemTooltip,
   ProcessorSettingsForm,
@@ -70,7 +68,6 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   children,
 }) => {
   const initRef = useRef(false);
-  const tooltipInitPosition = useRef<Position | undefined>();
 
   const [mode, setMode] = useState<EditorMode>(() => ({
     id: 'idle',
@@ -180,23 +177,17 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             type: 'moveProcessor',
             payload: action.payload,
           });
-          tooltipInitPosition.current = undefined;
           break;
         case 'selectToMove':
           setMode({ id: 'movingProcessor', arg: action.payload.info });
           break;
         case 'cancelMove':
           setMode({ id: 'idle' });
-          tooltipInitPosition.current = undefined;
           break;
       }
     },
     [processorsDispatch, setMode]
   );
-
-  const onUpdateTooltipInitPosition = useCallback<OnUpdateToolTipInitPositionHandler>((pos) => {
-    tooltipInitPosition.current = pos;
-  }, []);
 
   // Memoize the state object to ensure we do not trigger unnecessary re-renders and so
   // this object can be used safely further down the tree component tree.
@@ -215,19 +206,17 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       value={{
         links,
         onTreeAction,
-        onUpdateTooltipInitPosition,
         state,
       }}
     >
       {children}
 
-      {mode.id === 'movingProcessor' && tooltipInitPosition.current && (
+      {mode.id === 'movingProcessor' && (
         <PipelineProcessorsItemTooltip
           processor={getValue<ProcessorInternal>(mode.arg.selector, {
             processors,
             onFailure: onFailureProcessors,
           })}
-          initialPosition={tooltipInitPosition.current}
         />
       )}
 
