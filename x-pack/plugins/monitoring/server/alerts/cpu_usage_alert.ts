@@ -39,7 +39,7 @@ const FIRING = i18n.translate('xpack.monitoring.alerts.cpuUsage.firing', {
   defaultMessage: 'firing',
 });
 
-const DEFAULT_THRESHOLD = 90;
+const DEFAULT_THRESHOLD = 85;
 const DEFAULT_DURATION = '5m';
 
 interface CpuUsageParams {
@@ -393,7 +393,16 @@ export class CpuUsageAlert extends BaseAlert {
         continue;
       }
 
-      const instance = services.alertInstanceFactory(`${this.type}:${cluster.clusterUuid}`);
+      const firingNodeUuids = nodes.reduce((list: string[], node) => {
+        const stat = node.meta as AlertCpuUsageNodeStats;
+        if (node.shouldFire) {
+          list.push(stat.nodeId);
+        }
+        return list;
+      }, [] as string[]);
+      firingNodeUuids.sort(); // It doesn't matter how we sort, but keep the order consistent
+      const instanceId = `${this.type}:${cluster.clusterUuid}:${firingNodeUuids.join(',')}`;
+      const instance = services.alertInstanceFactory(instanceId);
       const state = (instance.getState() as unknown) as AlertInstanceState;
       const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
       let shouldExecuteActions = false;

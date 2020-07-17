@@ -181,7 +181,11 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertIncludeFieldsSelectionExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect', { timeout: 5000 });
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesTable', { timeout: 8000 });
+
+      await retry.tryForTime(8000, async () => {
+        await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect');
+      });
     },
 
     // async assertIncludedFieldsSelection(expectedSelection: string[]) {

@@ -43,7 +43,7 @@ for creating signals. The SIEM app comes with prebuilt rules that search for
 suspicious activity on your network and hosts. Additionally, you can
 create your own rules.
 
-See {siem-guide}/detection-engine-overview.html[Detections] in the SIEM 
+See {security-guide}/detection-engine-overview.html[Detections] in the SIEM 
 Guide for information on managing detection rules and signals via the UI 
 or the Detections API.
 
@@ -61,7 +61,7 @@ saved Timelines. Additionally, you can send cases to external systems from
 within SIEM (currently ServiceNow and Jira).
 
 For information about opening, updating, and closing cases, see
-{siem-guide}/cases-overview.html[Cases] in the SIEM Guide.
+{security-guide}/cases-overview.html[Cases] in the SIEM Guide.
 
 [role="screenshot"]
 image::siem/images/cases-ui.png[]
@@ -82,7 +82,7 @@ Hosts and Network pages, or even from within Timeline itself.
 A timeline is responsive and persists as you move through the SIEM app
 collecting data. 
 
-See the {siem-guide}[SIEM Guide] for more details on data sources and an
+See the {security-guide}[Security Guide] for more details on data sources and an
 overview of UI elements and capabilities.
 
 [float]

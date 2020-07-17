@@ -22,7 +22,7 @@ describe('ElasticsearchVersionMismatchAlert', () => {
     const alert = new ElasticsearchVersionMismatchAlert();
     expect(alert.type).toBe(ALERT_ELASTICSEARCH_VERSION_MISMATCH);
     expect(alert.label).toBe('Elasticsearch version mismatch');
-    expect(alert.defaultThrottle).toBe('1m');
+    expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       {
