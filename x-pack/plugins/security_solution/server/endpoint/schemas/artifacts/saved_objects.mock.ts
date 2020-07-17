@@ -7,12 +7,12 @@
 import { buildArtifact, maybeCompressArtifact, isCompressed } from '../../lib/artifacts';
 import { getTranslatedExceptionListMock } from './lists.mock';
 import {
-  InternalArtifactSchema,
   InternalManifestSchema,
   internalArtifactCompleteSchema,
+  InternalArtifactCompleteSchema,
 } from './saved_objects';
 
-const compressArtifact = async (artifact: InternalArtifactSchema) => {
+const compressArtifact = async (artifact: InternalArtifactCompleteSchema) => {
   const compressedArtifact = await maybeCompressArtifact(artifact);
   if (!isCompressed(compressedArtifact)) {
     throw new Error(`Unable to compress artifact: ${artifact.identifier}`);
@@ -26,7 +26,7 @@ export const getInternalArtifactMock = async (
   os: string,
   schemaVersion: string,
   opts?: { compress: boolean }
-): Promise<InternalArtifactSchema> => {
+): Promise<InternalArtifactCompleteSchema> => {
   const artifact = await buildArtifact(getTranslatedExceptionListMock(), os, schemaVersion);
   return opts?.compress ? compressArtifact(artifact) : artifact;
 };
@@ -35,7 +35,7 @@ export const getEmptyInternalArtifactMock = async (
   os: string,
   schemaVersion: string,
   opts?: { compress: boolean }
-): Promise<InternalArtifactSchema> => {
+): Promise<InternalArtifactCompleteSchema> => {
   const artifact = await buildArtifact({ entries: [] }, os, schemaVersion);
   return opts?.compress ? compressArtifact(artifact) : artifact;
 };
@@ -44,7 +44,7 @@ export const getInternalArtifactMockWithDiffs = async (
   os: string,
   schemaVersion: string,
   opts?: { compress: boolean }
-): Promise<InternalArtifactSchema> => {
+): Promise<InternalArtifactCompleteSchema> => {
   const mock = getTranslatedExceptionListMock();
   mock.entries.pop();
   const artifact = await buildArtifact(mock, os, schemaVersion);

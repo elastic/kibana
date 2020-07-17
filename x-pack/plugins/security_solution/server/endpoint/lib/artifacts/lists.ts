@@ -26,6 +26,7 @@ import {
   translatedEntryMatchAnyMatcher,
   TranslatedExceptionListItem,
   internalArtifactCompleteSchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas';
 import { ArtifactConstants } from './common';
 
@@ -33,7 +34,7 @@ export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
   os: string,
   schemaVersion: string
-): Promise<InternalArtifactSchema> {
+): Promise<InternalArtifactCompleteSchema> {
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 

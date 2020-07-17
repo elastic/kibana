@@ -9,7 +9,6 @@ import { ArtifactConstants, getArtifactId } from '../../lib/artifacts';
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { getArtifactClientMock } from './artifact_client.mock';
 import { ArtifactClient } from './artifact_client';
-import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 
 describe('artifact_client', () => {
   describe('ArtifactClient sanity checks', () => {
@@ -29,7 +28,7 @@ describe('artifact_client', () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const artifactClient = getArtifactClientMock(savedObjectsClient);
       const artifact = await getInternalArtifactMock('linux', 'v1');
-      await artifactClient.createArtifact(artifact as InternalArtifactCompleteSchema);
+      await artifactClient.createArtifact(artifact);
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         ArtifactConstants.SAVED_OBJECT_TYPE,
         {
