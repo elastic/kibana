@@ -4,7 +4,7 @@
     {"path": "./tsconfig.test.json"},
     {"path": "./examples/embeddable_examples"},
     {"path": "./x-pack/tsconfig.src.json"},
-    {"path": "./x-pack/tsconfig.test.json"}
+    {"path": "./x-pack/tsconfig.test.json"},
   ],
   "files": [],
   "include": []

@@ -4,11 +4,11 @@
     "composite": true,
     "incremental": true,
     "tsBuildInfoFile": "./build/tsconfig.test.tsbuildinfo",
-    "noEmit": false,
+    "noEmit": true,
     "outDir": "./build",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
+    //"emitDeclarationOnly": true,
+    //"declaration": true,
+    //"declarationMap": true,
     "skipLibCheck": true, // Don't typecheck .d.ts files
   },
   "include": [
