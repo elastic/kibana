@@ -78,7 +78,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage('enable', 'test.noop', 'alerts'),
+                message: getConsumerUnauthorizedErrorMessage(
+                  'enable',
+                  'test.noop',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
