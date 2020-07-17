@@ -12,6 +12,7 @@ import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/const
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import { RuleType } from '../../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
 import { NewRule } from '../../../../containers/detection_engine/rules';
 
 import {
@@ -167,7 +168,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
     ...(isAssociatedToEndpointList
       ? {
           exceptions_list: [
-            { id: 'endpoint_list', namespace_type: 'agnostic', type: 'endpoint' },
+            { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
           ] as AboutStepRuleJson['exceptions_list'],
         }
       : {}),
