@@ -140,7 +140,9 @@ describe('get_prepackaged_rule_status_route', () => {
 
     test('0 timelines installed, 3 timelines not installed, 0 timelines not updated', async () => {
       clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-      checkTimelinesStatus.mockResolvedValue(mockCheckTimelinesStatusBeforeInstallResult);
+      (checkTimelinesStatus as jest.Mock).mockResolvedValue(
+        mockCheckTimelinesStatusBeforeInstallResult
+      );
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, context);
 
@@ -158,7 +160,9 @@ describe('get_prepackaged_rule_status_route', () => {
 
     test('3 timelines installed, 0 timelines not installed, 0 timelines not updated', async () => {
       clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-      checkTimelinesStatus.mockResolvedValue(mockCheckTimelinesStatusAfterInstallResult);
+      (checkTimelinesStatus as jest.Mock).mockResolvedValue(
+        mockCheckTimelinesStatusAfterInstallResult
+      );
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, context);
 

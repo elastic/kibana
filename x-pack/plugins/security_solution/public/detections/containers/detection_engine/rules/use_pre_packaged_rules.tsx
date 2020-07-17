@@ -171,7 +171,7 @@ export const usePrePackagedRules = ({
                     ((prePackagedRuleStatusResponse.rules_not_installed === 0 &&
                       prePackagedRuleStatusResponse.rules_not_updated === 0 &&
                       prePackagedRuleStatusResponse.timelines_not_installed === 0 &&
-                      prePackagedRuleStatusResponse.timelines_not_updated) ||
+                      prePackagedRuleStatusResponse.timelines_not_updated === 0) ||
                       iterationTryOfFetchingPrePackagedCount > 100)
                   ) {
                     setLoadingCreatePrePackagedRules(false);
