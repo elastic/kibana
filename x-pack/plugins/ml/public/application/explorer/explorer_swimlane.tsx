@@ -10,7 +10,7 @@
 
 import React from 'react';
 import './_explorer.scss';
-import _, { isEqual, throttle } from 'lodash';
+import _, { isEqual } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 import DragSelect from 'dragselect';
@@ -737,16 +737,14 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     }
   }
 
-  throttledSetSwimLaneActive = throttle(this.setSwimlaneSelectActive, 500);
-
   render() {
     const { swimlaneType } = this.props;
 
     return (
       <div
         className="mlExplorerSwimlane"
-        onMouseEnter={this.throttledSetSwimLaneActive.bind(this, true)}
-        onMouseLeave={this.throttledSetSwimLaneActive.bind(this, false)}
+        onMouseEnter={this.setSwimlaneSelectActive.bind(this, true)}
+        onMouseLeave={this.setSwimlaneSelectActive.bind(this, false)}
         data-test-subj={this.props['data-test-subj'] ?? null}
       >
         <div
