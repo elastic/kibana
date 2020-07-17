@@ -17,5 +17,4 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/es-archiver').runCli();
+export * from '../../../../src/legacy/utils/streams';

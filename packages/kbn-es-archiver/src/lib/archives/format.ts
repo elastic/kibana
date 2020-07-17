@@ -17,5 +17,17 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/es-archiver').runCli();
+import { createGzip, Z_BEST_COMPRESSION } from 'zlib';
+import { PassThrough } from 'stream';
+import stringify from 'json-stable-stringify';
+
+import { createMapStream, createIntersperseStream } from '../streams';
+import { RECORD_SEPARATOR } from './constants';
+
+export function createFormatArchiveStreams({ gzip = false }: { gzip?: boolean } = {}) {
+  return [
+    createMapStream((record) => stringify(record, { space: '  ' })),
+    createIntersperseStream(RECORD_SEPARATOR),
+    gzip ? createGzip({ level: Z_BEST_COMPRESSION }) : new PassThrough(),
+  ];
+}
