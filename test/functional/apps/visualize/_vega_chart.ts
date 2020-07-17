@@ -84,31 +84,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.vegaChart.typeInSpec('"config": { "kibana": {"renderer": "svg"} },');
           await PageObjects.visEditor.clickGo();
           await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-          expect(await PageObjects.vegaChart.getYAxisLabels()).to.eql([
-            '0',
-            '200',
-            '400',
-            '600',
-            '800',
-            '1,000',
-            '1,200',
-            '1,400',
-            '1,600',
-          ]);
+          const fullDataLabels = await PageObjects.vegaChart.getYAxisLabels();
+          expect(fullDataLabels[0]).to.eql('0');
+          expect(fullDataLabels[fullDataLabels.length - 1]).to.eql('1,600');
           await filterBar.addFilter('@tags.raw', 'is', 'error');
           await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-          expect(await PageObjects.vegaChart.getYAxisLabels()).to.eql([
-            '0',
-            '10',
-            '20',
-            '30',
-            '40',
-            '50',
-            '60',
-            '70',
-            '80',
-            '90',
-          ]);
+          const filteredDataLabels = await PageObjects.vegaChart.getYAxisLabels();
+          expect(filteredDataLabels[0]).to.eql('0');
+          expect(filteredDataLabels[filteredDataLabels.length - 1]).to.eql('90');
         });
       });
     });

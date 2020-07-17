@@ -17,22 +17,17 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { pageObjects } from '.';
 
 export function VegaChartPageProvider({
   getService,
   getPageObjects,
-  updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const screenshot = getService('screenshots');
-  const log = getService('log');
-  const { visEditor, visChart, common } = getPageObjects(['common', 'visEditor', 'visChart']);
+  const { common } = getPageObjects(['common']);
 
   class VegaChartPage {
     public async getSpec() {
