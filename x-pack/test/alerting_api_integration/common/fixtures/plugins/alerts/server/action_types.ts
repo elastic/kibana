@@ -24,6 +24,14 @@ export function defineActionTypes(
       return { status: 'ok', actionId: '' };
     },
   };
+  const throwActionType: ActionType = {
+    id: 'test.throw',
+    name: 'Test: Throw',
+    minimumLicenseRequired: 'gold',
+    async executor() {
+      throw new Error('this action is intended to fail');
+    },
+  };
   const indexRecordActionType: ActionType = {
     id: 'test.index-record',
     name: 'Test: Index Record',
@@ -193,6 +201,7 @@ export function defineActionTypes(
     },
   };
   actions.registerType(noopActionType);
+  actions.registerType(throwActionType);
   actions.registerType(indexRecordActionType);
   actions.registerType(failingActionType);
   actions.registerType(rateLimitedActionType);
