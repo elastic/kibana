@@ -1,7 +1,24 @@
 {
   "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./build/tsconfig.x-pack.tsbuildinfo",
+    "noEmit": false,
+    "outDir": "../build/x-pack",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "skipLibCheck": true,
+    "types": [
+      "node",
+      "jest",
+      "flot",
+      "jest-styled-components",
+      "@testing-library/jest-dom"
+    ]
+  },
   "include": [
-    "mocks.ts",
     "typings/**/*",
     "legacy/common/**/*",
     "legacy/server/**/*",
@@ -11,10 +28,18 @@
     "tasks/**/*"
   ],
   "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__fixtures__/**/*",
+    "**/__jest__/**/*",
+    "plugins/security_solution/server/endpoint/mocks.ts",
     "test/**/*",
     "plugins/security_solution/cypress/**/*",
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
-    "**/typespec_tests.ts"
+    "**/typespec_tests.ts",
+    //"plugins/ui_actions_enhanced/public/plugin.ts",
+    //"plugins/dashboard_enhanced/public/services/drilldowns/dashboard_to_dashboard_drilldown/drilldown.tsx",
   ],
+  "references": [{"path": "../tsconfig.oss.json"}, {"path": "../examples/embeddable_examples/tsconfig.json"}]
 }
