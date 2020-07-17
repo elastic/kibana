@@ -206,6 +206,7 @@ export class Plugin {
       requireUIRoutes(this.monitoringCore, {
         router,
         licenseService: this.licenseService,
+        encryptedSavedObjects: plugins.encryptedSavedObjects,
       });
       initInfraSource(config, plugins.infra);
     }
