@@ -34,7 +34,6 @@ const mapping = [
 // eslint-disable-next-line import/no-default-export
 export default function resilientTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   const mockResilient = {
@@ -81,8 +80,6 @@ export default function resilientTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT)
       );
     });
-
-    after(() => esArchiver.unload('empty_kibana'));
 
     describe('IBM Resilient - Action Creation', () => {
       it('should return 200 when creating a ibm resilient action successfully', async () => {
