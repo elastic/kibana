@@ -26,7 +26,6 @@ import {
 import { getExceptionListItemSchemaMock } from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 describe('build_exceptions_query', () => {
-  let exclude: boolean;
   const makeMatchEntry = ({
     field,
     value = 'value-1',
@@ -91,10 +90,6 @@ describe('build_exceptions_query', () => {
   const existsEntryWithExcluded: EntryExists = makeExistsEntry({
     field: 'host.name',
     operator: 'excluded',
-  });
-
-  beforeEach(() => {
-    exclude = true;
   });
 
   describe('getLanguageBooleanOperator', () => {
