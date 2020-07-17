@@ -9,6 +9,9 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeNavlinkBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
-    return feature.navLinkId ? [this.actions.ui.get('navLinks', feature.navLinkId)] : [];
+    const appNavLinks = feature.app.map((app) => this.actions.ui.get('navLinks', app));
+    return feature.navLinkId
+      ? [this.actions.ui.get('navLinks', feature.navLinkId), ...appNavLinks]
+      : appNavLinks;
   }
 }
