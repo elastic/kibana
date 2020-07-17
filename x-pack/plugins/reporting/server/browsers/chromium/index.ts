@@ -23,3 +23,11 @@ export const getChromiumDisconnectedError = () =>
       defaultMessage: 'Browser was closed unexpectedly! Check the server logs for more info.',
     })
   );
+
+export const getDisallowedOutgoingUrlError = () =>
+  new Error(
+    i18n.translate('xpack.reporting.chromiumDriver.disallowedOutgoingUrl', {
+      defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}". Failing the request and closing the browser.`,
+      values: { interceptedUrl },
+    })
+  );

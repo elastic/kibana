@@ -12,6 +12,7 @@ import { parse as parseUrl } from 'url';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ConditionalHeaders, ElementPosition } from '../../../types';
+import { getDisallowedOutgoingUrlError } from '../../';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
@@ -238,12 +239,7 @@ export class HeadlessChromiumDriver {
           requestId,
         });
         this.page.browser().close();
-        logger.error(
-          i18n.translate('xpack.reporting.chromiumDriver.disallowedOutgoingUrl', {
-            defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}". Failing the request and closing the browser.`,
-            values: { interceptedUrl },
-          })
-        );
+        logger.error(getDisallowedOutgoingUrlError());
         return;
       }
 
@@ -306,12 +302,7 @@ export class HeadlessChromiumDriver {
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         this.page.browser().close();
-        logger.error(
-          i18n.translate('xpack.reporting.chromiumDriver.disallowedOutgoingUrl', {
-            defaultMessage: `Received disallowed URL in response: "{interceptedUrl}". Closing the browser.`,
-            values: { interceptedUrl },
-          })
-        );
+        logger.error(getDisallowedOutgoingUrlError());
       }
     });
 
