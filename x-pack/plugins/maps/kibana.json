@@ -16,7 +16,8 @@
     "visualizations",
     "embeddable",
     "mapsLegacy",
-    "usageCollection"
+    "usageCollection",
+    "triggers_actions_ui"
   ],
   "ui": true,
   "server": true,

@@ -32,7 +32,7 @@ import {
   setKibanaVersion,
   setLicenseId,
   setMapAppConfig,
-  setMapsCapabilities,
+  setCapabilities,
   setNavigation,
   setSavedObjectsClient,
   setSearchService,
@@ -41,6 +41,7 @@ import {
   setUiActions,
   setUiSettings,
   setVisualizations,
+  setTriggersActionsUi,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -56,6 +57,9 @@ import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors } from './api/create_security_layer_descriptors';
+import {getAlertType as getPeopleInSpaceAlertType} from './alert_types/astros';
+import {TriggersAndActionsUIPublicPluginSetup} from "../../triggers_actions_ui/public";
+import { getAlertMenuAction } from './components/alerts/alerts_top_nav_handling';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -63,6 +67,7 @@ export interface MapsPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   mapsLegacy: { config: unknown };
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
@@ -73,11 +78,23 @@ export const bindSetupCoreAndPlugins = (
   config: MapsConfigType,
   kibanaVersion: string
 ) => {
-  const { licensing, mapsLegacy } = plugins;
+  const { licensing, mapsLegacy, navigation, triggers_actions_ui } = plugins;
   const { uiSettings, http, notifications } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
+
+  const mapsAlertsTopNavExtension = {
+    id: 'registered-maps-alerts-prop',
+    label: 'Create alert',
+    description: 'Maps alerts',
+    run: getAlertMenuAction,
+    testId: 'mapsAlertsRegisteredNewButton',
+    appName: 'maps',
+  };
+
+  navigation.registerMenuItem(mapsAlertsTopNavExtension);
+
   setHttp(http);
   setToasts(notifications.toasts);
   setVisualizations(plugins.visualizations);
@@ -85,6 +102,7 @@ export const bindSetupCoreAndPlugins = (
   setKibanaCommonConfig(mapsLegacy.config);
   setMapAppConfig(config);
   setKibanaVersion(kibanaVersion);
+  setTriggersActionsUi(triggers_actions_ui);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
@@ -107,7 +125,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setSavedObjectsClient(core.savedObjects.client);
   setCoreChrome(core.chrome);
   setCoreOverlays(core.overlays);
-  setMapsCapabilities(core.application.capabilities.maps);
+  setCapabilities(core.application.capabilities);
   setDocLinks(core.docLinks);
   setData(plugins.data);
   setUiActions(plugins.uiActions);
@@ -141,8 +159,10 @@ export class MapsPlugin
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
     const config = this._initializerContext.config.get<MapsConfigType>();
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
-    const { inspector, home, visualizations, embeddable } = plugins;
+    const { inspector, home, visualizations, embeddable, triggers_actions_ui } = plugins;
     bindSetupCoreAndPlugins(core, plugins, config, kibanaVersion);
+
+    triggers_actions_ui.alertTypeRegistry.register(getPeopleInSpaceAlertType());
 
     inspector.registerView(MapView);
     home.featureCatalogue.register(featureCatalogueEntry);

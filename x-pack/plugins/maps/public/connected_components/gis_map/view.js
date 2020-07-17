@@ -23,6 +23,7 @@ import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import {CreateAlert} from "../../components/alerts";
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -208,6 +209,7 @@ export class GisMap extends Component {
             <ToolbarOverlay addFilters={addFilters} geoFields={this.state.geoFields} />
           )}
           <WidgetOverlay />
+          <CreateAlert />
         </EuiFlexItem>
 
         <EuiFlexItem

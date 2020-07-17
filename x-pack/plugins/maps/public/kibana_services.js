@@ -95,10 +95,11 @@ let chrome;
 export const setCoreChrome = (coreChrome) => (chrome = coreChrome);
 export const getCoreChrome = () => chrome;
 
-let mapsCapabilities;
-export const setMapsCapabilities = (coreAppMapsCapabilities) =>
-  (mapsCapabilities = coreAppMapsCapabilities);
-export const getMapsCapabilities = () => mapsCapabilities;
+let capabilities;
+export const setCapabilities = (coreAppCapabilities) =>
+  (capabilities = coreAppCapabilities);
+export const getCapabilities = () => capabilities;
+export const getMapsCapabilities = () => getCapabilities().maps;
 
 let visualizations;
 export const setVisualizations = (visPlugin) => (visualizations = visPlugin);
@@ -175,3 +176,8 @@ export const setIsGoldPlus = (igp) => {
 export const getIsGoldPlus = () => {
   return isGoldPlus;
 };
+
+
+let triggersActionsUi;
+export const setTriggersActionsUi = (pluginTriggersActionsUi) => (triggersActionsUi = pluginTriggersActionsUi);
+export const getTriggersActionsUi = () => triggersActionsUi;
