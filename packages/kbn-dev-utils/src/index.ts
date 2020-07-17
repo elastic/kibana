@@ -33,9 +33,9 @@ export {
   KBN_P12_PATH,
   KBN_P12_PASSWORD,
 } from './certs';
-export { run, createFailError, createFlagError, combineErrors, isFailError, Flags } from './run';
 export { REPO_ROOT } from './repo_root';
 export { KbnClient } from './kbn_client';
+export * from './run';
 export * from './axios';
 export * from './stdio';
 export * from './ci_stats_reporter';
