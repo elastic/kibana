@@ -12,19 +12,19 @@ import { mockKibanaContext } from '../../../__mocks__';
 import { mockLogicValues } from './__mocks__';
 import { OverviewLogic } from './overview_logic';
 
-let unmount: any;
-
-beforeEach(() => {
-  resetContext();
-  unmount = OverviewLogic.mount() as any;
-  jest.clearAllMocks();
-});
-
-afterEach(() => {
-  unmount();
-});
-
 describe('OverviewLogic', () => {
+  let unmount: any;
+
+  beforeEach(() => {
+    resetContext({});
+    unmount = OverviewLogic.mount() as any;
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    unmount();
+  });
+
   it('has expected default values', () => {
     expect(OverviewLogic.values).toEqual(mockLogicValues);
   });
