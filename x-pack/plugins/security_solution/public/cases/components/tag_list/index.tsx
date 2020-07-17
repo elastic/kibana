@@ -42,20 +42,23 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 
 export const TagList = React.memo(
   ({ disabled = false, isLoading, onSubmit, tags }: TagListProps) => {
+    const initialState = { tags };
     const { form } = useForm({
-      defaultValue: { tags },
+      defaultValue: initialState,
       options: { stripEmptyFields: false },
       schema,
     });
+    const { submit } = form;
     const [isEditTags, setIsEditTags] = useState(false);
 
     const onSubmitTags = useCallback(async () => {
-      const { isValid, data: newData } = await form.submit();
+      const { isValid, data: newData } = await submit();
       if (isValid && newData.tags) {
         onSubmit(newData.tags);
         setIsEditTags(false);
       }
-    }, [form, onSubmit]);
+    }, [onSubmit, submit]);
+
     const { tags: tagOptions } = useGetTags();
     const [options, setOptions] = useState(
       tagOptions.map((label) => ({

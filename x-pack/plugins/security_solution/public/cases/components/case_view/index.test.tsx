@@ -7,6 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import '../../../common/mock/match_media';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { CaseComponent, CaseProps, CaseView } from '.';
 import { basicCase, basicCaseClosed, caseUserActions } from '../../containers/mock';
@@ -407,5 +408,33 @@ describe('CaseView ', () => {
     expect(
       wrapper.find('button[data-test-subj="push-to-external-service"]').first().prop('disabled')
     ).toBeTruthy();
+  });
+
+  it('should revert to the initial connector in case of failure', async () => {
+    updateCaseProperty.mockImplementation(({ onError }) => {
+      onError();
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent
+            {...caseProps}
+            caseData={{ ...caseProps.caseData, connectorId: 'servicenow-1' }}
+          />
+        </Router>
+      </TestProviders>
+    );
+    await wait();
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.update();
+    wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
+    wrapper.update();
+    await wait();
+    wrapper.update();
+    expect(
+      wrapper.find('[data-test-subj="dropdown-connectors"]').at(0).prop('valueOfSelected')
+    ).toBe('servicenow-1');
   });
 });

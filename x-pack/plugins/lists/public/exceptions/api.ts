@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  ENDPOINT_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   EXCEPTION_LIST_URL,
 } from '../../common/constants';
 import {
+  CreateEndpointListSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
+  createEndpointListSchema,
   createExceptionListItemSchema,
   createExceptionListSchema,
   deleteExceptionListItemSchema,
@@ -29,6 +32,7 @@ import {
 import { validate } from '../../common/siem_common_deps';
 
 import {
+  AddEndpointExceptionListProps,
   AddExceptionListItemProps,
   AddExceptionListProps,
   ApiCallByIdProps,
@@ -438,5 +442,36 @@ export const deleteExceptionListItemById = async ({
     }
   } else {
     return Promise.reject(errorsRequest);
+  }
+};
+
+/**
+ * Add new Endpoint ExceptionList
+ *
+ * @param http Kibana http service
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ *
+ */
+export const addEndpointExceptionList = async ({
+  http,
+  signal,
+}: AddEndpointExceptionListProps): Promise<CreateEndpointListSchema> => {
+  try {
+    const response = await http.fetch<ExceptionListItemSchema>(ENDPOINT_LIST_URL, {
+      method: 'POST',
+      signal,
+    });
+
+    const [validatedResponse, errorsResponse] = validate(response, createEndpointListSchema);
+
+    if (errorsResponse != null || validatedResponse == null) {
+      return Promise.reject(errorsResponse);
+    } else {
+      return Promise.resolve(validatedResponse);
+    }
+  } catch (error) {
+    return Promise.reject(error);
   }
 };
