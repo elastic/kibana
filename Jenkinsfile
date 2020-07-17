@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
+kibanaPipeline(timeoutMinutes: 155, checkPrChanges: false, setCommitStatus: true) {
   githubPr.withDefaultPrComments {
     catchErrors {
       error "Test Error"

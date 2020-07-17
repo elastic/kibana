@@ -23,7 +23,7 @@ def withDefaultPrComments(closure) {
   }
 }
 
-def sendComment() {
+def sendComment(isFinal = false) { // TODO
   if (!params.ENABLE_GITHUB_PR_COMMENTS || !isPr() || !buildState.get('PR_COMMENTS_ENABLED')) {
     return
   }
@@ -155,7 +155,7 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
   info.builds = previousCommentInfo.builds ?: []
 
   // When we update an in-progress comment, we need to remove the old version from the history
-  info.builds = info.builds.filter { it.number != env.BUILD_NUMBER }
+  info.builds = info.builds.findAll { it.number != env.BUILD_NUMBER }
 
   def messages = []
   def status = buildUtils.getBuildStatus()
