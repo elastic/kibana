@@ -419,6 +419,14 @@
         ],
       },
       {
+        groupSlug: 'he',
+        groupName: 'he related packages',
+        packageNames: [
+          'he',
+          '@types/he',
+        ],
+      },
+      {
         groupSlug: 'history',
         groupName: 'history related packages',
         packageNames: [
