@@ -80,26 +80,6 @@ export function parent(
 }
 
 /**
- * Returns the following sibling
- */
-export function siblings(tree: IndexedProcessTree, node: ResolverEvent): ResolverEvent[] {
-  // this can be undefined, since a node may have no parent.
-  const parentID: string | undefined = uniqueParentPidForProcess(node);
-
-  // nodes with the same parent ID.
-  // if `node` has no parent ID, this is nodes with no parent ID.
-  const childrenWithTheSameParent: undefined | ResolverEvent[] = tree.idToChildren.get(parentID);
-
-  // this shouldn't happen if the node was in `tree`.
-  if (!childrenWithTheSameParent) {
-    return [];
-  }
-
-  // Return all children with the same parent as `node`, except `node` itself.
-  return [...childrenWithTheSameParent.filter((child) => child !== node)];
-}
-
-/**
  * Number of processes in the tree
  */
 export function size(tree: IndexedProcessTree) {
