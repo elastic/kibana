@@ -10,6 +10,7 @@ import React from 'react';
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { mockEndgameCreationEvent } from '../../../../../mock/mock_endgame_ecs_data';
 import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
 import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
@@ -46,6 +47,23 @@ describe('SystemGenericFileDetails', () => {
       );
       expect(wrapper.text()).toEqual(
         'Evan@zeek-london[generic-text-123](6278)with resultfailureSource128.199.212.120'
+      );
+    });
+
+    test('it passes string value for processHashSha256', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SystemGenericFileDetails
+            contextId="[contextid-123]"
+            text="[generic-text-123]"
+            browserFields={mockBrowserFields}
+            data={mockEndgameCreationEvent}
+            timelineId="test"
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find('SystemGenericFileLine').prop('processHashSha256')).toEqual(
+        'd4c97ed46046893141652e2ec0056a698f6445109949d7fcabbce331146889ee'
       );
     });
   });

@@ -105,6 +105,9 @@ export function runFtrCli() {
       }
     },
     {
+      log: {
+        defaultLevel: 'debug',
+      },
       flags: {
         string: [
           'config',
@@ -118,7 +121,6 @@ export function runFtrCli() {
         boolean: ['bail', 'invert', 'test-stats', 'updateBaselines'],
         default: {
           config: 'test/functional/config.js',
-          debug: true,
         },
         help: `
         --config=path      path to a config file
