@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
-  const security = getService('security');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'long-window-logstash-*',
@@ -33,26 +32,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover histogram', function describeIndexTests() {
     before(async () => {
-      await security.testUser.setRoles([
-        'kibana_admin',
-        'test_logstash_reader',
-        'long_window_logstash',
-      ]);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('long_window_logstash');
-      await esArchiver.load('visualize');
-      await esArchiver.load('discover');
-      await PageObjects.common.navigateToApp('settings');
-      // NOTE: long_window_logstash load does NOT create index pattern
-      await PageObjects.settings.createIndexPattern('long-window-logstash-*');
+      await esArchiver.load('long_window_logstash_index_pattern');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
       await esArchiver.unload('long_window_logstash');
-      await esArchiver.unload('visualize');
-      await esArchiver.unload('discover');
-      await security.testUser.restoreDefaults();
+      await esArchiver.unload('long_window_logstash_index_pattern');
     });
 
     async function prepareTest(fromTime: string, toTime: string, interval: string) {
