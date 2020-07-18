@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
+  const es = getService('legacyEs');
 
   describe('security', () => {
     before(async () => {
@@ -74,10 +75,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Stack Management']);
       });
 
-      it(`index pattern listing shows create button`, async () => {
+      it(`index pattern empty shows create anyway link`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.click('createAnyway');
+        await testSubjects.existOrFail('createAnyway');
+        await es.transport.request({
+          path: '/blogs/_doc',
+          method: 'POST',
+          body: { user: 'matt', message: 20 },
+        });
+        await testSubjects.click('refreshIndicesButton');
         await testSubjects.existOrFail('createIndexPatternButton');
+        // test when there's an existing pattern
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -129,11 +137,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Stack Management']);
       });
 
-      it(`index pattern listing doesn't show create button`, async () => {
+      it(`index pattern empty page show create anyway link`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.click('createAnyway');
-        await testSubjects.existOrFail('indexPatternTable');
+        await testSubjects.missingOrFail('createAnyway');
+        await es.transport.request({
+          path: '/blogs/_doc',
+          method: 'POST',
+          body: { user: 'matt', message: 20 },
+        });
+        await testSubjects.click('refreshIndicesButton');
         await testSubjects.missingOrFail('createIndexPatternButton');
+        // test when there's an existing pattern
       });
 
       it(`shows read-only badge`, async () => {

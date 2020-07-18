@@ -127,6 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
                 id="checkboxShowSystemIndices"
                 checked={isIncludingSystemIndices}
                 onChange={onChangeIncludingSystemIndices}
+                data-test-subj="showSystemAndHiddenIndices"
               />
             </EuiFormRow>
           ) : null}

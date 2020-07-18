@@ -200,6 +200,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           docLinks={docLinks}
           navigateToApp={application.navigateToApp}
           isMlAvailable={isMlAvailable}
+          canSave={canSave}
         />
       );
     } else {
