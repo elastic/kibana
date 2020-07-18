@@ -212,17 +212,6 @@ export const graphableProcesses = composeSelectors(
   dataSelectors.graphableProcesses
 );
 
-/**
- * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
- * concern-specific selector. `selector` should return the concern-specific state.
- */
-function composeSelectors<OuterState, InnerState, ReturnValue>(
-  selector: (state: OuterState) => InnerState,
-  secondSelector: (state: InnerState) => ReturnValue
-): (state: OuterState) => ReturnValue {
-  return (state) => secondSelector(selector(state));
-}
-
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 
 const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.nodesAndEdgelines);
@@ -246,6 +235,7 @@ export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundi
   boundingBox
   /* eslint-enable no-shadow */
 ) {
+  // `boundingBox` and `nodesAndEdgelines` are each memoized.
   return (time: number) => nodesAndEdgelines(boundingBox(time));
 });
 
@@ -287,3 +277,14 @@ export const ariaFlowtoNodeID: (
     });
   }
 );
+
+/**
+ * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
+ * concern-specific selector. `selector` should return the concern-specific state.
+ */
+function composeSelectors<OuterState, InnerState, ReturnValue>(
+  selector: (state: OuterState) => InnerState,
+  secondSelector: (state: InnerState) => ReturnValue
+): (state: OuterState) => ReturnValue {
+  return (state) => secondSelector(selector(state));
+}

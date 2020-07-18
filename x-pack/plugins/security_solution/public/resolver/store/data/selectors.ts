@@ -5,7 +5,11 @@
  */
 
 import rbush from 'rbush';
-import { createSelector, defaultMemoize } from 'reselect';
+import {
+  createSelector,
+  defaultMemoize as defaultMemoizeWithOriginalType,
+  defaultMemoize,
+} from 'reselect';
 import {
   DataState,
   Vector2,
@@ -133,7 +137,9 @@ export function relatedEventsByEntityId(data: DataState): Map<string, ResolverRe
  * Returns a function that returns a function (when supplied with an entity id for a node)
  * that returns related events for a node that match an event.category (when supplied with the category)
  */
-export const relatedEventsByCategory = createSelector(
+export const relatedEventsByCategory: (
+  state: DataState
+) => (entityID: string) => (ecsCategory: string) => ResolverEvent[] = createSelector(
   relatedEventsByEntityId,
   function provideGettersByCategory(
     /* eslint-disable no-shadow */
@@ -248,7 +254,7 @@ export const relatedEventInfoByEntityId: (
         });
       };
 
-      const matchingEventsForCategory = defaultMemoize(unmemoizedMatchingEventsForCategory);
+      const matchingEventsForCategory = unmemoizedMatchingEventsForCategory;
 
       /**
        * The number of events that occurred before the API limit was reached.
@@ -426,45 +432,44 @@ const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = creat
   }
 );
 
+/**
+ * Returns nodes and edge lines that could be visible in the `query`.
+ */
 export const nodesAndEdgelines: (
   state: DataState
-) => (query: AABB) => VisibleEntites = createSelector(spatiallyIndexedLayout, function (tree) {
-  // memoize the results of this call to avoid unnecessarily rerunning
-  let lastBoundingBox: AABB | null = null;
-  let currentlyVisible: VisibleEntites = {
-    processNodePositions: new Map<ResolverEvent, Vector2>(),
-    connectingEdgeLineSegments: [],
-  };
-  return (boundingBox: AABB) => {
-    if (lastBoundingBox !== null && isEqual(lastBoundingBox, boundingBox)) {
-      return currentlyVisible;
-    } else {
-      const {
-        minimum: [minX, minY],
-        maximum: [maxX, maxY],
-      } = boundingBox;
-      const entities = tree.search({
-        minX,
-        minY,
-        maxX,
-        maxY,
-      });
-      const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
-        entities
-          .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
-          .map((node) => [node.entity, node.position])
-      );
-      const connectingEdgeLineSegments = entities
-        .filter((entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine')
-        .map((node) => node.entity);
-      currentlyVisible = {
-        processNodePositions: visibleProcessNodePositions,
-        connectingEdgeLineSegments,
-      };
-      lastBoundingBox = boundingBox;
-      return currentlyVisible;
-    }
-  };
+) => (
+  /**
+   * An axis aligned bounding box (in world corrdinates) to search in. Any entities that might collide with this box will be returned.
+   */
+  query: AABB
+) => VisibleEntites = createSelector(spatiallyIndexedLayout, function (tree) {
+  /**
+   * Memoized for performance and object reference equality.
+   */
+  return defaultMemoize((boundingBox: AABB) => {
+    const {
+      minimum: [minX, minY],
+      maximum: [maxX, maxY],
+    } = boundingBox;
+    const entities = tree.search({
+      minX,
+      minY,
+      maxX,
+      maxY,
+    });
+    const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
+      entities
+        .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
+        .map((node) => [node.entity, node.position])
+    );
+    const connectingEdgeLineSegments = entities
+      .filter((entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine')
+      .map((node) => node.entity);
+    return {
+      processNodePositions: visibleProcessNodePositions,
+      connectingEdgeLineSegments,
+    };
+  });
 });
 
 /**
