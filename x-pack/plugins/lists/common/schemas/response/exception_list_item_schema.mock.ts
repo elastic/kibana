@@ -14,14 +14,13 @@ import {
   NAMESPACE_TYPE,
   TIE_BREAKER,
   USER,
-  _VERSION,
 } from '../../constants.mock';
 
 import { ExceptionListItemSchema } from './exception_list_item_schema';
 
 export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
   _tags: ['endpoint', 'process', 'malware', 'os:linux'],
-  _version: _VERSION,
+  _version: undefined,
   comments: COMMENTS,
   created_at: DATE_NOW,
   created_by: USER,

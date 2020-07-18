@@ -16,14 +16,13 @@ import {
   NAMESPACE_TYPE,
   TAGS,
   _TAGS,
-  _VERSION,
 } from '../../constants.mock';
 
 import { UpdateExceptionListItemSchema } from './update_exception_list_item_schema';
 
 export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
   _tags: _TAGS,
-  _version: _VERSION,
+  _version: undefined,
   comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,
