@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { reindexOperationWithLargeErrorMessage } from './reindex_operation_with_large_error_message';
 
 export default function ({ getService }: FtrProviderContext) {
