@@ -63,18 +63,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should edit a connector', async () => {
       const connectorName = generateUniqueKey();
       const updatedConnectorName = `${connectorName}updated`;
-
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-      await testSubjects.click('.slack-card');
-
-      await testSubjects.setValue('nameInput', connectorName);
-
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
-
-      await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
-
-      await pageObjects.common.closeToast();
+      await createConnector(connectorName);
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -103,19 +92,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
+    it('should reset connector when canceling an edit', async () => {
+      const connectorName = generateUniqueKey();
+      await createConnector(connectorName);
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+
+      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeEdit.length).to.eql(1);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      await testSubjects.setValue('nameInput', 'some test name to cancel');
+      await testSubjects.click('cancelSaveEditedConnectorButton');
+
+      await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedConnectorButton"]');
+
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+      const nameInputAfterCancel = await testSubjects.find('nameInput');
+      const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
+      expect(textAfterCancel).to.eql(connectorName);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
     it('should delete a connector', async () => {
-      async function createConnector(connectorName: string) {
-        await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-        await testSubjects.click('.slack-card');
-
-        await testSubjects.setValue('nameInput', connectorName);
-
-        await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
-
-        await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
-        await pageObjects.common.closeToast();
-      }
       const connectorName = generateUniqueKey();
       await createConnector(connectorName);
 
@@ -141,19 +142,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should bulk delete connectors', async () => {
-      async function createConnector(connectorName: string) {
-        await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-        await testSubjects.click('.slack-card');
-
-        await testSubjects.setValue('nameInput', connectorName);
-
-        await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
-
-        await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
-        await pageObjects.common.closeToast();
-      }
-
       const connectorName = generateUniqueKey();
       await createConnector(connectorName);
 
@@ -208,4 +196,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.exists('saveEditedActionButton')).to.be(false);
     });
   });
+
+  async function createConnector(connectorName: string) {
+    await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+    await testSubjects.click('.slack-card');
+
+    await testSubjects.setValue('nameInput', connectorName);
+
+    await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+
+    await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
+    await pageObjects.common.closeToast();
+  }
 };
