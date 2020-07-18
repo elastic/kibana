@@ -17,17 +17,22 @@ export interface IKeaLogic<IKeaValues, IKeaActions> {
   mount(): void;
   values: IKeaValues;
   actions: IKeaActions;
-  reducers(): object;
-  selectors?(): object;
-  listeners?(): object;
 }
 
-export interface IKeaSelectors<IKeaValues> {
-  selectors: IKeaValues;
-}
-
-export interface IKeaListeners<IKeaActions> {
-  actions: IKeaActions;
+/**
+ * This reusable interface mostly saves us a few characters / allows us to skip
+ * defining params inline. Unfortunately, the return values *do not work* as
+ * expected (hence the voids).  While I can tell selectors to use TKeaSelectors,
+ * the return value is *not* properly type checked if it's not declared inline. :/
+ *
+ * Also note that if you switch to Kea 2.1's plain object notation -
+ * `selectors: {}` vs. `selectors: () => ({})`
+ * - type checking also stops working and type errors become significantly less
+ * helpful - showing less specific error messages and highlighting. 👎
+ */
+export interface IKeaParams<IKeaValues, IKeaActions> {
+  selectors?(params: { selectors: IKeaValues }): void;
+  listeners?(params: { actions: IKeaActions; values: IKeaValues }): void;
 }
 
 /**

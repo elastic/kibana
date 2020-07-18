@@ -14,8 +14,7 @@ import {
   IKeaLogic,
   TKeaReducers,
   TKeaSelectors,
-  IKeaSelectors,
-  IKeaListeners,
+  IKeaParams,
 } from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
@@ -164,7 +163,7 @@ export const OverviewLogic = kea({
       },
     ],
   }),
-  selectors: ({ selectors }: IKeaSelectors<IOverviewValues>): TKeaSelectors<IOverviewValues> => ({
+  selectors: ({ selectors }): TKeaSelectors<IOverviewValues> => ({
     hideOnboarding: [
       () => [
         selectors.hasUsers,
@@ -180,7 +179,7 @@ export const OverviewLogic = kea({
       (isFederatedAuth: boolean) => (isFederatedAuth ? 'halves' : 'fourths'),
     ],
   }),
-  listeners: ({ actions }: IKeaListeners<IOverviewActions>): Partial<IOverviewActions> => ({
+  listeners: ({ actions }): Partial<IOverviewActions> => ({
     initializeOverview: async ({ http }: { http: HttpSetup }) => {
       try {
         const response = await http.get('/api/workplace_search/overview');
@@ -190,4 +189,4 @@ export const OverviewLogic = kea({
       }
     },
   }),
-}) as IKeaLogic<IOverviewValues, IOverviewActions>;
+} as IKeaParams<IOverviewValues, IOverviewActions>) as IKeaLogic<IOverviewValues, IOverviewActions>;
