@@ -18,13 +18,13 @@
  */
 
 import { ExpressionAstExpression } from './types';
-import { parse } from './parse';
+import { format } from './format';
 
 /**
- * Given expression pipeline string, returns parsed AST.
+ * Given expression pipeline AST, returns formatted string.
  *
- * @param expression Expression pipeline string.
+ * @param ast Expression pipeline AST.
  */
-export function parseExpression(expression: string): ExpressionAstExpression {
-  return parse(expression, 'expression');
+export function formatExpression(ast: ExpressionAstExpression): string {
+  return format(ast, 'expression');
 }
