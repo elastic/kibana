@@ -78,6 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`index pattern empty shows create anyway link`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('createAnyway');
+        // @ts-expect-error
         await es.transport.request({
           path: '/blogs/_doc',
           method: 'POST',
@@ -140,6 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`index pattern empty page show create anyway link`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await testSubjects.missingOrFail('createAnyway');
+        // @ts-expect-error
         await es.transport.request({
           path: '/blogs/_doc',
           method: 'POST',
