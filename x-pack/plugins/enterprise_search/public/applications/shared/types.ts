@@ -46,3 +46,20 @@ export type TKeaReducers<IKeaValues, IKeaActions> = {
     }
   ];
 };
+
+/**
+ * This selectors() type checks that:
+ *
+ * 1. The object keys are defined within IKeaValues
+ * 2. The selected values are defined within IKeaValues
+ * 3. The returned value match the type definition within IKeaValues
+ *
+ * The unknown[] and any[] are unfortunately because I have no idea how to
+ * assert for arbitrary type/values as an array
+ */
+export type TKeaSelectors<IKeaValues> = {
+  [Value in keyof IKeaValues]?: [
+    (selectors: IKeaValues) => unknown[],
+    (...args: any[]) => IKeaValues[Value] // eslint-disable-line @typescript-eslint/no-explicit-any
+  ];
+};

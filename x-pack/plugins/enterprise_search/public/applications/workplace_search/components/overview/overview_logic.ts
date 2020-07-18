@@ -13,6 +13,7 @@ import {
   IFlashMessagesProps,
   IKeaLogic,
   TKeaReducers,
+  TKeaSelectors,
   IKeaSelectors,
   IKeaListeners,
 } from '../../../shared/types';
@@ -163,7 +164,7 @@ export const OverviewLogic = kea({
       },
     ],
   }),
-  selectors: ({ selectors }: IKeaSelectors<IOverviewValues>) => ({
+  selectors: ({ selectors }: IKeaSelectors<IOverviewValues>): TKeaSelectors<IOverviewValues> => ({
     hideOnboarding: [
       () => [
         selectors.hasUsers,
@@ -179,7 +180,7 @@ export const OverviewLogic = kea({
       (isFederatedAuth: boolean) => (isFederatedAuth ? 'halves' : 'fourths'),
     ],
   }),
-  listeners: ({ actions }: IKeaListeners<IOverviewActions>) => ({
+  listeners: ({ actions }: IKeaListeners<IOverviewActions>): Partial<IOverviewActions> => ({
     initializeOverview: async ({ http }: { http: HttpSetup }) => {
       try {
         const response = await http.get('/api/workplace_search/overview');
