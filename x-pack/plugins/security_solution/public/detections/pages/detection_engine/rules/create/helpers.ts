@@ -12,6 +12,7 @@ import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/const
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import { RuleType } from '../../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
 import { NewRule } from '../../../../containers/detection_engine/rules';
 
 import {
@@ -153,6 +154,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
     riskScore,
     severity,
     threat,
+    isAssociatedToEndpointList,
     isBuildingBlock,
     isNew,
     note,
@@ -163,11 +165,18 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
     ...(isBuildingBlock ? { building_block_type: 'default' } : {}),
+    ...(isAssociatedToEndpointList
+      ? {
+          exceptions_list: [
+            { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
+          ] as AboutStepRuleJson['exceptions_list'],
+        }
+      : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore.value,
     risk_score_mapping: riskScore.mapping,
-    rule_name_override: ruleNameOverride,
+    rule_name_override: ruleNameOverride !== '' ? ruleNameOverride : undefined,
     severity: severity.value,
     severity_mapping: severity.mapping,
     threat: threat
@@ -180,7 +189,7 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
           return { id, name, reference };
         }),
       })),
-    timestamp_override: timestampOverride,
+    timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,
   };

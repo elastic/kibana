@@ -255,6 +255,7 @@ export const severity_mapping_item = t.exact(
     severity,
   })
 );
+export type SeverityMappingItem = t.TypeOf<typeof severity_mapping_item>;
 
 export const severity_mapping = t.array(severity_mapping_item);
 export type SeverityMapping = t.TypeOf<typeof severity_mapping>;
@@ -422,6 +423,11 @@ export const success_count = PositiveInteger;
 export const rules_custom_installed = PositiveInteger;
 export const rules_not_installed = PositiveInteger;
 export const rules_not_updated = PositiveInteger;
+
+export const timelines_installed = PositiveInteger;
+export const timelines_updated = PositiveInteger;
+export const timelines_not_installed = PositiveInteger;
+export const timelines_not_updated = PositiveInteger;
 
 export const note = t.string;
 export type Note = t.TypeOf<typeof note>;

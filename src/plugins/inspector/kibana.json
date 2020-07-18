@@ -4,5 +4,5 @@
   "server": false,
   "ui": true,
   "extraPublicDirs": ["common", "common/adapters/request"],
-  "requiredBundles": ["kibanaReact", "share"]
+  "requiredBundles": ["kibanaReact"]
 }

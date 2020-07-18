@@ -138,6 +138,7 @@ const reducerManageTimeline = (
 };
 
 interface UseTimelineManager {
+  getIndexToAddById: (id: string) => string[] | null;
   getManageTimelineById: (id: string) => ManageTimeline;
   getTimelineFilterManager: (id: string) => FilterManager | undefined;
   initializeTimeline: (newTimeline: ManageTimelineInit) => void;
@@ -216,9 +217,19 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     },
     [initializeTimeline, state]
   );
+  const getIndexToAddById = useCallback(
+    (id: string): string[] | null => {
+      if (state[id] != null) {
+        return state[id].indexToAdd;
+      }
+      return getTimelineDefaults(id).indexToAdd;
+    },
+    [state]
+  );
   const isManagedTimeline = useCallback((id: string): boolean => state[id] != null, [state]);
 
   return {
+    getIndexToAddById,
     getManageTimelineById,
     getTimelineFilterManager,
     initializeTimeline,
@@ -231,6 +242,7 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
 
 const init = {
   getManageTimelineById: (id: string) => getTimelineDefaults(id),
+  getIndexToAddById: (id: string) => null,
   getTimelineFilterManager: () => undefined,
   setIndexToAdd: () => undefined,
   isManagedTimeline: () => false,

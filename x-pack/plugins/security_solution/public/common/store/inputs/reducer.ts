@@ -12,6 +12,7 @@ import {
   deleteAllQuery,
   setAbsoluteRangeDatePicker,
   setDuration,
+  setFullScreen,
   setInspectionParameter,
   setQuery,
   setRelativeRangeDatePicker,
@@ -38,6 +39,7 @@ import {
   removeTimelineLink,
   addTimelineLink,
   deleteOneQuery as helperDeleteOneQuery,
+  updateInputFullScreen,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
 
@@ -57,6 +59,7 @@ export const initialInputsState: InputsState = {
       language: 'kuery',
     },
     filters: [],
+    fullScreen: false,
   },
   timeline: {
     timerange: {
@@ -71,6 +74,7 @@ export const initialInputsState: InputsState = {
       language: 'kuery',
     },
     filters: [],
+    fullScreen: false,
   },
 };
 
@@ -98,6 +102,7 @@ export const createInitialInputsState = (): InputsState => {
         language: 'kuery',
       },
       filters: [],
+      fullScreen: false,
     },
     timeline: {
       timerange: {
@@ -118,6 +123,7 @@ export const createInitialInputsState = (): InputsState => {
         language: 'kuery',
       },
       filters: [],
+      fullScreen: false,
     },
   };
 };
@@ -162,6 +168,9 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       to,
     };
     return updateInputTimerange(id, timerange, state);
+  })
+  .case(setFullScreen, (state, { id, fullScreen }) => {
+    return updateInputFullScreen(id, fullScreen, state);
   })
   .case(deleteAllQuery, (state, { id }) => ({
     ...state,

@@ -419,11 +419,27 @@
         ],
       },
       {
+        groupSlug: 'he',
+        groupName: 'he related packages',
+        packageNames: [
+          'he',
+          '@types/he',
+        ],
+      },
+      {
         groupSlug: 'history',
         groupName: 'history related packages',
         packageNames: [
           'history',
           '@types/history',
+        ],
+      },
+      {
+        groupSlug: 'hjson',
+        groupName: 'hjson related packages',
+        packageNames: [
+          'hjson',
+          '@types/hjson',
         ],
       },
       {

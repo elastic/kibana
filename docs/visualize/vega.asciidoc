@@ -3,71 +3,1287 @@
 
 experimental[]
 
-Build custom visualizations from multiple data sources using Vega
-and Vega-Lite.
+Build custom visualizations using Vega and Vega-Lite, backed by one or more
+data sources including {es}, Elastic Map Service, URL,
+or static data. Use the {kib} extensions to Vega to embed Vega into
+your dashboard, and to add interactivity to the visualizations.
 
-* *Vega* &mdash; A declarative format to create visualizations using JSON.
-  Generate interactive displays using D3.
-
-* *Vega-Lite* &mdash; An easier format to use than Vega that enables more rapid
-  data analysis. Compiles into Vega.
-
-For more information about Vega and Vega-Lite, refer to
-<<vega-useful-links, Resources and examples>>.
+Vega and Vega-Lite are both declarative formats to create visualizations
+using JSON. Both use a different syntax for declaring visualizations,
+and are not fully interchangeable.
 
 [float]
-[[create-vega-viz]]
-=== Create Vega visualizations
+[[when-to-vega]]
+=== When to use Vega
 
-You create Vega visualizations by using the text editor, which is
-preconfigured with the options you need.
+Vega and Vega-Lite are capable of building most of the visualizations
+that {kib} provides, but with higher complexity. The most common reason
+to use Vega in {kib} is that {kib} is missing support for the query or
+visualization, for example:
+
+* Aggregations using the `nested` or `parent/child` mapping
+* Aggregations without a {kib} index pattern
+* Queries using custom time filters
+* Complex calculations
+* Extracting data from _source instead of aggregation
+* Scatter charts
+* Sankey charts
+* Custom maps
+* Using a visual theme that {kib} does not provide
+
+[[vega-lite-tutorial]]
+=== Tutorial: First visualization in Vega-Lite
+
+In this tutorial, you will learn about how to edit Vega-Lite in {kib} to create
+a stacked area chart from an {es} search query. It will give you a starting point
+for a more comprehensive
+https://vega.github.io/vega-lite/tutorials/getting_started.html[introduction to Vega-Lite],
+while only covering the basics.
+
+In this tutorial, you will build a stacked area chart from one of the {kib} sample data
+sets.
 
 [role="screenshot"]
-image::images/vega_lite_default.png[]
+image::visualize/images/vega_lite_tutorial_1.png[]
+
+Before beginning this tutorial, install the <<add-sample-data, eCommerce sample data>>
+set.
+
+When you first open the Vega editor in {kib}, you will see a pre-populated
+line chart which shows the total number of documents across all your indices
+within the time range.
+
+[role="screenshot"]
+image::visualize/images/vega_lite_default.png[]
+
+The text editor contains a Vega-Lite spec written in https://hjson.github.io/[HJSON],
+which is similar to JSON but optimized for human editing. HJSON supports:
+
+* Comments using // or /* syntax
+* Object keys without quotes
+* String values without quotes
+* Optional commas
+* Double or single quotes
+* Multiline strings
 
 [float]
-[[vega-schema]]
-==== Change the Vega version
+==== Small steps
 
-The default visualization uses Vega-Lite version 2. To use Vega version 4, edit
-the `schema`.
+Always work on Vega in the smallest steps possible, and save your work frequently.
+Small changes will cause unexpected results. Click the "Save" button now.
 
-Go to `$schema`, enter `https://vega.github.io/schema/vega/v5.json`, then click
-*Update*.
+The first step is to change the index to one of the <<add-sample-data, sample data>>
+sets. Change
 
-[float]
-[[vega-type]]
-==== Change the visualization type
+```yaml
+index: _all
+```
 
-The default visualization is a line chart. To change the visualization type,
-change the `mark` value. The supported visualization types are listed in the
-text editor.
+to:
 
-Go to `mark`, change the value to a different visualization type, then click
-*Update*.
+```yaml
+index: kibana_sample_data_ecommerce
+```
 
-[float]
+Click "Update". The result is probably not what you expect. You should see a flat
+line with 0 results.
+
+You've only changed the index, so the difference must be the query is returning
+no results. You can try the <<vega-browser-debugging-console, Vega debugging process>>,
+but intuition may be faster for this particular problem.
+
+In this case, the problem is that you are querying the field `@timestamp`,
+which does not exist in the `kibana_sample_data_ecommerce` data. Find and replace
+`@timestamp` with `order_date`. This fixes the problem, leaving you with this spec:
+
+.Expand Vega-Lite spec
+[%collapsible%closed]
+====
+[source,yaml]
+----
+{
+  $schema: https://vega.github.io/schema/vega-lite/v4.json
+  title: Event counts from ecommerce
+  data: {
+    url: {
+      %context%: true
+      %timefield%: order_date
+      index: kibana_sample_data_ecommerce
+      body: {
+        aggs: {
+          time_buckets: {
+            date_histogram: {
+              field: order_date
+              interval: {%autointerval%: true}
+              extended_bounds: {
+                min: {%timefilter%: "min"}
+                max: {%timefilter%: "max"}
+              }
+              min_doc_count: 0
+            }
+          }
+        }
+        size: 0
+      }
+    }
+    format: {property: "aggregations.time_buckets.buckets" }
+  }
+
+  mark: line
+
+  encoding: {
+    x: {
+      field: key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+    }
+  }
+}
+----
+
+====
+
+Now, let's make the visualization more interesting by adding another aggregation
+to create a stacked area chart. To verify that you have constructed the right
+query, it is easiest to use the {kib} Dev Tools in a separate tab from the
+Vega editor. Open the Dev Tools from the Management section of the navigation.
+
+This query is roughly equivalent to the one that is used in the default
+Vega-Lite spec. Copy it into the Dev Tools:
+
+```js
+POST kibana_sample_data_ecommerce/_search
+{
+  "query": {
+    "range": {
+      "order_date": {
+        "gte": "now-7d"
+      }
+    }
+  },
+  "aggs": {
+    "time_buckets": {
+      "date_histogram": {
+        "field": "order_date",
+        "fixed_interval": "1d",
+        "extended_bounds": {
+          "min": "now-7d"
+        },
+        "min_doc_count": 0
+      }
+    }
+  },
+  "size": 0
+}
+```
+
+There's not enough data to create a stacked bar in the original query, so we
+will add a new
+{ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation]:
+
+```js
+POST kibana_sample_data_ecommerce/_search
+{
+  "query": {
+    "range": {
+      "order_date": {
+        "gte": "now-7d"
+      }
+    }
+  },
+  "aggs": {
+    "categories": {
+      "terms": { "field": "category.keyword" },
+      "aggs": {
+        "time_buckets": {
+          "date_histogram": {
+            "field": "order_date",
+            "fixed_interval": "1d",
+            "extended_bounds": {
+              "min": "now-7d"
+            },
+            "min_doc_count": 0
+          }
+        }
+      }
+    }
+  },
+  "size": 0
+}
+```
+
+You'll see that the response format looks different from the previous query:
+
+```json
+{
+  "aggregations" : {
+    "categories" : {
+      "doc_count_error_upper_bound" : 0,
+      "sum_other_doc_count" : 0,
+      "buckets" : [{
+        "key" : "Men's Clothing",
+        "doc_count" : 1661,
+        "time_buckets" : {
+          "buckets" : [{
+            "key_as_string" : "2020-06-30T00:00:00.000Z",
+            "key" : 1593475200000,
+            "doc_count" : 19
+          }, {
+            "key_as_string" : "2020-07-01T00:00:00.000Z",
+            "key" : 1593561600000,
+            "doc_count" : 71
+          }]
+        }
+      }]
+    }
+  }
+}
+```
+
+Now that we have data that we're happy with, it's time to convert from an
+isolated {es} query into a query with {kib} integration. Looking at the
+<<vega-queries, reference for writing {es} queries in Vega>>, you will
+see the full list of special tokens that are used in this query, such
+as `%context: true`. This query has also replaced `"fixed_interval": "1d"`
+with `interval: {%autointerval%: true}`. Copy the final query into
+your spec:
+
+```yaml
+  data: {
+    url: {
+      %context%: true
+      %timefield%: order_date
+      index: kibana_sample_data_ecommerce
+      body: {
+        aggs: {
+          categories: {
+            terms: { field: "category.keyword" }
+            aggs: {
+              time_buckets: {
+                date_histogram: {
+                  field: order_date
+                  interval: {%autointerval%: true}
+                  extended_bounds: {
+                    min: {%timefilter%: "min"}
+                    max: {%timefilter%: "max"}
+                  }
+                  min_doc_count: 0
+                }
+              }
+            }
+          }
+        }
+        size: 0
+      }
+    }
+    format: {property: "aggregations.categories.buckets" }
+  }
+```
+
+If you copy and paste that into your Vega-Lite spec, and click "Update",
+you will see a warning saying `Infinite extent for field "key": [Infinity, -Infinity]`.
+Let's use our <<vega-browser-debugging-console, Vega debugging skills>> to understand why.
+
+Vega-Lite generates data using the names `source_0` and `data_0`. `source_0` contains
+the results from the {es} query, and `data_0` contains the visually encoded results
+which are shown in the chart. To debug this problem, you need to compare both.
+
+To look at the source, open the browser dev tools console and type
+`VEGA_DEBUG.view.data('source_0')`. You will see:
+
+```js
+[{
+  doc_count: 454
+  key: "Men's Clothing"
+  time_buckets: {buckets: Array(57)}
+  Symbol(vega_id): 12822
+}, ...]
+```
+
+To compare to the visually encoded data, open the browser dev tools console and type
+`VEGA_DEBUG.view.data('data_0')`. You will see:
+
+```js
+[{
+  doc_count: 454
+  key: NaN
+  time_buckets: {buckets: Array(57)}
+  Symbol(vega_id): 13879
+}]
+```
+
+The issue seems to be that the `key` property is not being converted the right way,
+which makes sense because the `key` is now `Men's Clothing` instead of a timestamp.
+
+To fix this, try updating the `encoding` of your Vega-Lite spec to:
+
+```yaml
+  encoding: {
+    x: {
+      field: time_buckets.buckets.key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: time_buckets.buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+    }
+  }
+```
+
+This will show more errors, and you can inspect `VEGA_DEBUG.view.data('data_0')` to
+understand why. This now shows:
+
+```js
+[{
+  doc_count: 454
+  key: "Men's Clothing"
+  time_buckets: {buckets: Array(57)}
+  time_buckets.buckets.doc_count: undefined
+  time_buckets.buckets.key: null
+  Symbol(vega_id): 14094
+}]
+```
+
+It looks like the problem is that the `time_buckets` inner array is not being
+extracted by Vega. The solution is to use a Vega-lite
+https://vega.github.io/vega-lite/docs/flatten.html[flatten transformation], available in {kib} 7.9 and later.
+If using an older version of Kibana, the flatten transformation is available in Vega
+but not Vega-Lite.
+
+Add this section in between the `data` and `encoding` section:
+
+```yaml
+  transform: [{
+    flatten: ["time_buckets.buckets"]
+  }]
+```
+
+This does not yet produce the results you expect. Inspect the transformed data
+by typing `VEGA_DEBUG.view.data('data_0')` into the console again:
+
+```js
+[{
+  doc_count: 453
+  key: "Men's Clothing"
+  time_bucket.buckets.doc_count: undefined
+  time_buckets: {buckets: Array(57)}
+  time_buckets.buckets: {
+    key_as_string: "2020-06-30T15:00:00.000Z",
+    key: 1593529200000,
+    doc_count: 2
+  }
+  time_buckets.buckets.key: null
+  Symbol(vega_id): 21564
+}]
+```
+
+The debug view shows `undefined` values where you would expect to see numbers, and
+the cause is that there are duplicate names which are confusing Vega-Lite. This can
+be fixed by making this change to the `transform` and `encoding` blocks:
+
+```yaml
+  transform: [{
+    flatten: ["time_buckets.buckets"],
+    as: ["buckets"]
+  }]
+
+  mark: area
+
+  encoding: {
+    x: {
+      field: buckets.key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+    }
+    color: {
+      field: key
+      type: nominal
+    }
+  }
+```
+
+At this point, you have a stacked area chart that shows the top categories,
+but the chart is still missing some common features that we expect from a {kib}
+visualization. Let's add hover states and tooltips next.
+
+Hover states are handled differently in Vega-Lite and Vega. In Vega-Lite this is
+done using a concept called `selection`, which has many permutations that are not
+covered in this tutorial. We will be adding a simple tooltip and hover state.
+
+Because {kib} has enabled the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin],
+tooltips can be defined in several ways:
+
+* Automatic tooltip based on the data, via `{ content: "data" }`
+* Array of fields, like `[{ field: "key", type: "nominal" }]`
+* Defining a custom Javascript object using the `calculate` transform
+
+For the simple tooltip, add this to your encoding:
+
+```yaml
+  encoding: {
+    tooltip: [{
+      field: buckets.key
+      type: temporal
+      title: "Date"
+    }, {
+      field: key
+      type: nominal
+      title: "Category"
+    }, {
+      field: buckets.doc_count
+      type: quantitative
+      title: "Count"
+    }]
+  }
+```
+
+As you hover over the area series in your chart, a multi-line tooltip will
+appear, but it won't indicate the nearest point that it's pointing to. To
+indicate the nearest point, we need to add a second layer.
+
+The first step is to remove the `mark: area` from your visualization.
+Once you've removed the previous mark, add a composite mark at the end of
+the Vega-Lite spec:
+
+```yaml
+  layer: [{
+    mark: area
+  }, {
+    mark: point
+  }]
+```
+
+You'll see that the points are not appearing to line up with the area chart,
+and the reason is that the points are not being stacked. Change your Y encoding
+to this:
+
+```yaml
+    y: {
+      field: buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+      stack: true
+    }
+```
+
+Now, we will add a `selection` block inside the point mark:
+
+```yaml
+  layer: [{
+    mark: area
+  }, {
+    mark: point
+    
+    selection: {
+      pointhover: {
+        type: single
+        on: mouseover
+        clear: mouseout
+        empty: none
+        fields: ["buckets.key", "key"]
+        nearest: true
+      }
+    }
+
+    encoding: {
+      size: {
+        condition: {
+          selection: pointhover
+          value: 100
+        }
+        value: 5
+      }
+      fill: {
+        condition: {
+          selection: pointhover
+          value: white
+        }
+      }
+    }
+  }]
+```
+
+Now that you've enabled a selection, try moving the mouse around the visualization
+and seeing the points respond to the nearest position:
+
+[role="screenshot"]
+image::visualize/images/vega_lite_tutorial_2.png[]
+
+The final result of this tutorial is this spec:
+
+.Expand final Vega-Lite spec
+[%collapsible%closed]
+====
+[source,yaml]
+----
+{
+  $schema: https://vega.github.io/schema/vega-lite/v4.json
+  title: Event counts from ecommerce
+  data: {
+    url: {
+      %context%: true
+      %timefield%: order_date
+      index: kibana_sample_data_ecommerce
+      body: {
+        aggs: {
+          categories: {
+            terms: { field: "category.keyword" }
+            aggs: {
+              time_buckets: {
+                date_histogram: {
+                  field: order_date
+                  interval: {%autointerval%: true}
+                  extended_bounds: {
+                    min: {%timefilter%: "min"}
+                    max: {%timefilter%: "max"}
+                  }
+                  min_doc_count: 0
+                }
+              }
+            }
+          }
+        }
+        size: 0
+      }
+    }
+    format: {property: "aggregations.categories.buckets" }
+  }
+  
+  transform: [{
+    flatten: ["time_buckets.buckets"]
+    as: ["buckets"]
+  }]
+
+  encoding: {
+    x: {
+      field: buckets.key
+      type: temporal
+      axis: { title: null }
+    }
+    y: {
+      field: buckets.doc_count
+      type: quantitative
+      axis: { title: "Document count" }
+      stack: true
+    }
+    color: {
+      field: key
+      type: nominal
+      title: "Category"
+    }
+    tooltip: [{
+      field: buckets.key
+      type: temporal
+      title: "Date"
+    }, {
+      field: key
+      type: nominal
+      title: "Category"
+    }, {
+      field: buckets.doc_count
+      type: quantitative
+      title: "Count"
+    }]
+  }
+  
+  layer: [{
+    mark: area
+  }, {
+    mark: point
+    
+    selection: {
+      pointhover: {
+        type: single
+        on: mouseover
+        clear: mouseout
+        empty: none
+        fields: ["buckets.key", "key"]
+        nearest: true
+      }
+    }
+
+    encoding: {
+      size: {
+        condition: {
+          selection: pointhover
+          value: 100
+        }
+        value: 5
+      }
+      fill: {
+        condition: {
+          selection: pointhover
+          value: white
+        }
+      }
+    }
+  }]
+}
+----
+
+====
+
+[[vega-tutorial]]
+=== Tutorial: Updating {kib} filters from Vega
+
+In this tutorial you will build an area chart in Vega using an {es} search query,
+and add a click handler and drag handler to update {kib} filters.
+This tutorial is not a full https://vega.github.io/vega/tutorials/[Vega tutorial],
+but will cover the basics of creating Vega visualizations into {kib}.
+
+First, create an almost-blank Vega chart by pasting this into the editor:
+
+```yaml
+{
+  $schema: "https://vega.github.io/schema/vega/v5.json"
+  data: [{
+    name: source_0
+  }]
+  
+  scales: [{
+    name: x
+    type: time
+    range: width
+  }, {
+    name: y
+    type: linear
+    range: height
+  }]
+  
+  axes: [{
+    orient: bottom
+    scale: x
+  }, {
+    orient: left
+    scale: y
+  }]
+  
+  marks: [
+    {
+      type: area
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+        }
+      }
+    }
+  ]
+}
+```
+
+Despite being almost blank, this Vega spec still contains the minimum requirements:
+
+* Data
+* Scales
+* Marks
+* (optional) Axes
+
+Next, add a valid {es} search query in the `data` block:
+
+```yaml
+  data: [
+    {
+      name: source_0
+      url: {
+        %context%: true
+        %timefield%: order_date
+        index: kibana_sample_data_ecommerce
+        body: {
+          aggs: {
+            time_buckets: {
+              date_histogram: {
+                field: order_date
+                fixed_interval: "3h"
+                extended_bounds: {
+                  min: {%timefilter%: "min"}
+                  max: {%timefilter%: "max"}
+                }
+                min_doc_count: 0
+              }
+            }
+          }
+          size: 0
+        }
+      }
+      format: { property: "aggregations.time_buckets.buckets" }
+    }
+  ]
+```
+
+Click "Update", and nothing will change in the visualization. The first step
+is to change the X and Y scales based on the data:
+
+```yaml
+  scales: [{
+    name: x
+    type: time
+    range: width
+    domain: {
+      data: source_0
+      field: key
+    }
+  }, {
+    name: y
+    type: linear
+    range: height
+    domain: {
+      data: source_0
+      field: doc_count
+    }
+  }]
+```
+
+Click "Update", and you will see that the X and Y axes are now showing labels based
+on the real data.
+
+Next, encode the fields `key` and `doc_count` as the X and Y values:
+
+```yaml
+  marks: [
+    {
+      type: area
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+          x: {
+            scale: x
+            field: key
+          }
+          y: {
+            scale: y
+            value: 0
+          }
+          y2: {
+            scale: y
+            field: doc_count
+          }
+        }
+      }
+    }
+  ]
+```
+
+Click "Update" and you will get a basic area chart:
+
+[role="screenshot"]
+image::visualize/images/vega_tutorial_3.png[]
+
+Next, add a new block to the `marks` section. This will show clickable points to filter for a specific
+date:
+
+```yaml
+  {
+    name: point
+    type: symbol
+    style: ["point"]
+    from: {
+      data: source_0
+    }
+    encode: {
+      update: {
+        x: {
+          scale: x
+          field: key
+        }
+        y: {
+          scale: y
+          field: doc_count
+        }
+        size: {
+          value: 100
+        }
+        fill: {
+          value: black
+        }
+      }
+    }
+  }
+```
+
+Next, we will create a Vega signal to make the points clickable. You can access
+the clicked `datum` in the expression used to update. In this case, you want
+clicks on points to add a time filter with the 3-hour interval defined above.
+
+```yaml
+  signals: [
+    {
+      name: point_click
+      on: [{
+        events: {
+          source: scope
+          type: click
+          markname: point
+        }
+        update: '''kibanaSetTimeFilter(datum.key, datum.key + 3 * 60 * 60 * 1000)'''
+      }]
+    }
+  ]
+```
+
+This event is using the {kib} custom function `kibanaSetTimeFilter` to generate a filter that
+gets applied to the entire dashboard on click.
+
+The mouse cursor does not currently indicate that the chart is interactive. Find the `marks` section,
+and update the mark named `point` by adding `cursor: { value: "pointer" }` to
+the `encoding` section like this:
+
+```yaml
+  {
+    name: point
+    type: symbol
+    style: ["point"]
+    from: {
+      data: source_0
+    }
+    encode: {
+      update: {
+        ...
+        cursor: { value: "pointer" }
+      }
+    }
+  }
+```
+
+Next, we will add a drag interaction which will allow the user to narrow into
+a specific time range in the visualization. This will require adding more signals, and
+adding a rectangle overlay:
+
+[role="screenshot"]
+image::visualize/images/vega_tutorial_4.png[]
+
+The first step is to add a new `signal` to track the X position of the cursor:
+
+```yaml
+    {
+      name: currentX
+      value: -1
+      on: [{
+        events: {
+          type: mousemove
+          source: view
+        },
+        update: "clamp(x(), 0, width)"
+      }, {
+        events: {
+          type: mouseout
+          source: view
+        }
+        update: "-1"
+      }]
+    }
+```
+
+Now add a new `mark` to indicate the current cursor position:
+
+```yaml
+    {
+      type: rule
+      interactive: false
+      encode: {
+        update: {
+          y: {value: 0}
+          y2: {signal: "height"}
+          stroke: {value: "gray"}
+          strokeDash: {
+            value: [2, 1]
+          }
+          x: {signal: "max(currentX,0)"}
+          defined: {signal: "currentX > 0"}
+        }
+      }
+    }
+```
+
+Next, add a signal to track the current selected range, which will update
+until the user releases the mouse button or uses the escape key:
+
+
+```yaml
+    {
+      name: selected
+      value: [0, 0]
+      on: [{
+        events: {
+          type: mousedown
+          source: view
+        }
+        update: "[clamp(x(), 0, width), clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: mousemove
+          source: window
+          consume: true
+          between: [{
+            type: mousedown
+            source: view
+          }, {
+            merge: [{
+              type: mouseup
+              source: window
+            }, {
+              type: keydown
+              source: window
+              filter: "event.key === 'Escape'"
+            }]
+          }]
+        }
+        update: "[selected[0], clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: keydown
+          source: window
+          filter: "event.key === 'Escape'"
+        }
+        update: "[0, 0]"
+      }]
+    }
+```
+
+Now that there is a signal which tracks the time range from the user, we need to indicate
+the range visually by adding a new mark which only appears conditionally:
+
+```yaml
+    {
+      type: rect
+      name: selectedRect
+      encode: {
+        update: {
+          height: {signal: "height"}
+          fill: {value: "#333"}
+          fillOpacity: {value: 0.2}
+          x: {signal: "selected[0]"}
+          x2: {signal: "selected[1]"}
+          defined: {signal: "selected[0] !== selected[1]"}
+        }
+      }
+    }
+```
+
+Finally, add a new signal which will update the {kib} time filter when the mouse is released while
+dragging:
+
+```yaml
+    {
+      name: applyTimeFilter
+      value: null
+      on: [{
+        events: {
+          type: mouseup
+          source: view
+        }
+        update: '''selected[0] !== selected[1] ? kibanaSetTimeFilter(
+               invert('x',selected[0]),
+               invert('x',selected[1])) : null'''
+      }]
+    }
+```
+
+Putting this all together, your visualization now supports the main features of
+standard visualizations in {kib}, but with the potential to add even more control.
+The final Vega spec for this tutorial is here:
+
+.Expand final Vega spec
+[%collapsible%closed]
+====
+[source,yaml]
+----
+{
+  $schema: "https://vega.github.io/schema/vega/v5.json"
+  data: [
+    {
+      name: source_0
+      url: {
+        %context%: true
+        %timefield%: order_date
+        index: kibana_sample_data_ecommerce
+        body: {
+          aggs: {
+            time_buckets: {
+              date_histogram: {
+                field: order_date
+                fixed_interval: "3h"
+                extended_bounds: {
+                  min: {%timefilter%: "min"}
+                  max: {%timefilter%: "max"}
+                }
+                min_doc_count: 0
+              }
+            }
+          }
+          size: 0
+        }
+      }
+      format: { property: "aggregations.time_buckets.buckets" }
+    }
+  ]
+  
+  scales: [{
+    name: x
+    type: time
+    range: width
+    domain: {
+      data: source_0
+      field: key
+    }
+  }, {
+    name: y
+    type: linear
+    range: height
+    domain: {
+      data: source_0
+      field: doc_count
+    }
+  }]
+  
+  axes: [{
+    orient: bottom
+    scale: x
+  }, {
+    orient: left
+    scale: y
+  }]
+  
+  marks: [
+    {
+      type: area
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+          x: {
+            scale: x
+            field: key
+          }
+          y: {
+            scale: y
+            value: 0
+          }
+          y2: {
+            scale: y
+            field: doc_count
+          }
+        }
+      }
+    },
+    {
+      name: point
+      type: symbol
+      style: ["point"]
+      from: {
+        data: source_0
+      }
+      encode: {
+        update: {
+          x: {
+            scale: x
+            field: key
+          }
+          y: {
+            scale: y
+            field: doc_count
+          }
+          size: {
+            value: 100
+          }
+          fill: {
+            value: black
+          }
+          cursor: { value: "pointer" }
+        }
+      }
+    },
+    {
+      type: rule
+      interactive: false
+      encode: {
+        update: {
+          y: {value: 0}
+          y2: {signal: "height"}
+          stroke: {value: "gray"}
+          strokeDash: {
+            value: [2, 1]
+          }
+          x: {signal: "max(currentX,0)"}
+          defined: {signal: "currentX > 0"}
+        }
+      }
+    },
+    {
+      type: rect
+      name: selectedRect
+      encode: {
+        update: {
+          height: {signal: "height"}
+          fill: {value: "#333"}
+          fillOpacity: {value: 0.2}
+          x: {signal: "selected[0]"}
+          x2: {signal: "selected[1]"}
+          defined: {signal: "selected[0] !== selected[1]"}
+        }
+      }
+    }
+  ]
+  
+  signals: [
+    {
+      name: point_click
+      on: [{
+        events: {
+          source: scope
+          type: click
+          markname: point
+        }
+        update: '''kibanaSetTimeFilter(datum.key, datum.key + 3 * 60 * 60 * 1000)'''
+      }]
+    }
+    {
+      name: currentX
+      value: -1
+      on: [{
+        events: {
+          type: mousemove
+          source: view
+        },
+        update: "clamp(x(), 0, width)"
+      }, {
+        events: {
+          type: mouseout
+          source: view
+        }
+        update: "-1"
+      }]
+    }
+    {
+      name: selected
+      value: [0, 0]
+      on: [{
+        events: {
+          type: mousedown
+          source: view
+        }
+        update: "[clamp(x(), 0, width), clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: mousemove
+          source: window
+          consume: true
+          between: [{
+            type: mousedown
+            source: view
+          }, {
+            merge: [{
+              type: mouseup
+              source: window
+            }, {
+              type: keydown
+              source: window
+              filter: "event.key === 'Escape'"
+            }]
+          }]
+        }
+        update: "[selected[0], clamp(x(), 0, width)]"
+      }, {
+        events: {
+          type: keydown
+          source: window
+          filter: "event.key === 'Escape'"
+        }
+        update: "[0, 0]"
+      }]
+    }
+    {
+      name: applyTimeFilter
+      value: null
+      on: [{
+        events: {
+          type: mouseup
+          source: view
+        }
+        update: '''selected[0] !== selected[1] ? kibanaSetTimeFilter(
+               invert('x',selected[0]),
+               invert('x',selected[1])) : null'''
+      }]
+    }
+  ]
+}
+
+----
+====
+
+[[vega-reference]]
+=== Reference for {kib} extensions
+
+{kib} has extended Vega and Vega-Lite with extensions that support:
+
+* Default height and width
+* Default theme to match {kib}
+* Writing {es} queries using the time range and filters from dashboards
+* Using the Elastic Map Service in Vega maps
+* Additional tooltip styling
+* Advanced setting to enable URL loading from any domain
+* Limited debugging support using the browser dev tools
+* (Vega only) Expression functions which can update the time range and dashboard filters
+
 [[vega-sizing-and-positioning]]
-==== Change the layout
+==== Default height and width
 
 By default, Vega visualizations use the `autosize = { type: 'fit', contains: 'padding' }` layout.
 `fit` uses all available space, ignores `width` and `height` values,
 and respects the padding values. To override this behavior, change the
 `autosize` value.
 
-[[vega-querying-elasticsearch]]
-=== Query {es}
+[[vega-theme]]
+==== Default theme to match {kib}
 
-experimental[] Vega https://vega.github.io/vega/docs/data/[data] elements
-use embedded and external data with a `"url"` parameter. {kib} adds support for
-direct {es} queries by overloading
-the `"url"` value.
+{kib} registers a default https://vega.github.io/vega/docs/schemes/[Vega color scheme]
+with the id `elastic`, and sets a default color for each `mark` type.
+Override it by providing a different `stroke`, `fill`, or `color` (Vega-Lite) value.
 
-NOTE: With Vega, you dynamically load your data by setting signals as data URLs.
-Since {kib} is unable to support dynamically loaded data, all data is fetched
-before it's passed to the Vega renderer.
+[[vega-queries]]
+==== Writing {es} queries in Vega
 
-For example, count the number of documents in all indices:
+experimental[] {kib} extends the Vega https://vega.github.io/vega/docs/data/[data] elements
+with support for direct {es} queries specified as a `url`.
+
+Because of this, {kib} is **unable to support dynamically loaded data**,
+which would otherwise work in Vega. All data is fetched before it's passed to
+the Vega renderer.
+
+To define an {es} query in Vega, set the `url` to an object. {kib} will parse
+the object looking for special tokens that allow your query to integrate with {kib}.
+These tokens are:
+
+* `%context%: true`: Set at the top level, and replaces the `query` section with filters from dashboard
+* `%timefield%: <name>`: Set at the top level, integrates the query with the dashboard time filter
+* `{%timefilter%: true}`: Replaced by an {es} range query with upper and lower bounds
+* `{%timefilter%: "min" | "max"}`: Replaced only by the upper or lower bounds
+* `{%timefilter: true, shift: -1, unit: 'hour'}`: Generates a time range query one hour in the past
+* `{%autointerval%: true}`: Replaced by the string which contains the automatic {kib} time interval, such as `1h`
+* `{%autointerval%: 10}`: Replaced by a string which is approximately dividing the time into 10 ranges, allowing
+  you to influence the automatic interval
+* `"%dashboard_context-must_clause%"`: String replaced by object containing filters
+* `"%dashboard_context-filter_clause%"`: String replaced by an object containing filters
+* `"%dashboard_context-must_not_clause%"`: String replaced by an object containing filters
+
+Putting this together, an example query that counts the number of documents in 
+a specific index:
 
 [source,yaml]
 ----
@@ -80,8 +1296,8 @@ url: {
   %context%: true
 
   // Which indexes to search
-  index: _all
-  // The body element may contain "aggs" and "query" subfields
+  index: kibana_sample_data_logs
+  // The body element may contain "aggs" and "query" keys
   body: {
     aggs: {
       time_buckets: {
@@ -183,7 +1399,7 @@ except that the time range is shifted back by 10 minutes:
 }
 ----
 
-NOTE: When using `"%context%": true` or defining a value for "%timefield%"` the body cannot contain a query. To customize the query within the VEGA specification (e.g. add an additional filter, or shift the timefilter), define your query and use the placeholders as in the example above. The placeholders will be replaced by the actual context of the dashboard or visualization once parsed.
+NOTE: When using `"%context%": true` or defining a value for `"%timefield%"` the body cannot contain a query. To customize the query within the VEGA specification (e.g. add an additional filter, or shift the timefilter), define your query and use the placeholders as in the example above. The placeholders will be replaced by the actual context of the dashboard or visualization once parsed.
 
 The `"%timefilter%"` can also be used to specify a single min or max
 value. The date_histogram's `extended_bounds` can be set
@@ -194,6 +1410,7 @@ also supported. The `"interval"` can also be set dynamically, depending
 on the currently picked range: `"interval": {"%autointerval%": 10}` will
 try to get about 10-15 data points (buckets).
 
+[float]
 [[vega-esmfiles]]
 === Access Elastic Map Service files
 
@@ -260,21 +1477,44 @@ Additionally, you can use `latitude`, `longitude`, and `zoom` signals.
 These signals can be used in the graph, or can be updated to modify the
 position of the map.
 
-Vega visualization ignore the `autosize`, `width`, `height`, and `padding`
-values, using `fit` model with zero padding.
+[float]
+[[vega-tooltip]]
+==== Additional tooltip styling
 
-[[vega-debugging]]
-=== Debugging Vega
+{kib} has installed the https://vega.github.io/vega-lite/docs/tooltip.html[Vega tooltip plugin],
+so tooltips can be defined in the ways documented there. Beyond that, {kib} also supports
+a configuration option for changing the tooltip position and padding:
+
+```js
+{
+  config: {
+    kibana: {
+      tooltips: {
+        position: 'top',
+        padding: 15
+      }
+    }
+  }
+}
+```
+
+[[vega-url-loading]]
+==== Advanced setting to enable URL loading from any domain
+
+Vega can load data from any URL, but this is disabled by default in {kib}. 
+To change this, set `vis_type_vega.enableExternalUrls: true` in `kibana.yml`,
+then restart {kib}.
 
 [[vega-browser-debugging-console]]
 ==== Browser debugging console
 
 experimental[] Use browser debugging tools (for example, F12 or Ctrl+Shift+J in Chrome) to
 inspect the `VEGA_DEBUG` variable:
-+
+
 * `view` &mdash; Access to the Vega View object. See https://vega.github.io/vega/docs/api/debugging/[Vega Debugging Guide]
-on how to inspect data and signals at runtime. For Vega-Lite, `VEGA_DEBUG.view.data('source_0')` gets the main data set.
-For Vega, it uses the data name as defined in your Vega spec.
+on how to inspect data and signals at runtime. For Vega-Lite,
+`VEGA_DEBUG.view.data('source_0')` gets the pre-transformed data, and `VEGA_DEBUG.view.data('data_0')`
+gets the encoded data. For Vega, it uses the data name as defined in your Vega spec.
 
 * `vega_spec` &mdash; Vega JSON graph specification after some modifications by {kib}. In case
 of Vega-Lite, this is the output of the Vega-Lite compiler.
@@ -283,7 +1523,7 @@ of Vega-Lite, this is the output of the Vega-Lite compiler.
 Vega-Lite compilation.
 
 [[vega-data]]
-==== Data
+==== Debugging data
 
 experimental[] If you are using an {es} query, make sure your resulting data is
 what you expected. The easiest way to view it is by using the "networking"
@@ -294,19 +1534,77 @@ https://www.elastic.co/guide/en/kibana/current/console-kibana.html[Dev Tools]. P
 `GET <INDEX_NAME>/_search`, then add your query as the following lines
 (just the value of the `"query"` field).
 
-If you need to share your graph with someone, copy the
-raw data response to https://gist.github.com/[gist.github.com], possibly
-with a `.json` extension, use the `[raw]` button, and use that url
-directly in your graph.
+[[vega-getting-help]]
+==== Asking for help with a Vega spec
 
-To restrict Vega from using non-ES data sources, add `vega.enableExternalUrls: false`
-to your kibana.yml file.
+Because of the dynamic nature of the data in {es}, it is hard to help you with
+Vega specs unless you can share a dataset. To do this, use the browser developer
+tools and type:
+
+`JSON.stringify(VEGA_DEBUG.vegalite_spec, null, 2)`
+
+Copy the response to https://gist.github.com/[gist.github.com], possibly
+with a `.json` extension, use the `[raw]` button, and share that when
+asking for help.
+
+[float]
+[[vega-expression-functions]]
+==== (Vega only) Expression functions which can update the time range and dashboard filters
+
+{kib} has extended the Vega expression language with these functions:
+
+```js
+/**
+  * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+  * @param {string} [index] as defined in Kibana, or default if missing
+  */
+kibanaAddFilter(query, index)
+
+/**
+  * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+  * @param {string} [index] as defined in Kibana, or default if missing
+  */
+kibanaRemoveFilter(query, index)
+
+kibanaRemoveAllFilters()
+
+/**
+  * Update dashboard time filter to the new values
+  * @param {number|string|Date} start
+  * @param {number|string|Date} end
+  */
+kibanaSetTimeFilter(start, end)
+```
+
+[float]
+[[vega-additional-configuration-options]]
+==== Additional configuration options
+
+[source,yaml]
+----
+{
+  config: {
+    kibana: {
+      // Placement of the Vega-defined signal bindings.
+      // Can be `left`, `right`, `top`, or `bottom` (default).
+      controlsLocation: top
+      // Can be `vertical` or `horizontal` (default).
+      controlsDirection: vertical
+      // If true, hides most of Vega and Vega-Lite warnings
+      hideWarnings: true
+      // Vega renderer to use: `svg` or `canvas` (default)
+      renderer: canvas
+    }
+  }
+}
+----
+
 
 [[vega-notes]]
 [[vega-useful-links]]
 === Resources and examples
 
-experimental[] To learn more about Vega and Vega-List, refer to the resources and examples.
+experimental[] To learn more about Vega and Vega-Lite, refer to the resources and examples.
 
 ==== Vega editor
 The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any
@@ -322,33 +1620,7 @@ The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Veg
 * https://vega.github.io/vega/docs/[Docs]
 * https://vega.github.io/vega/examples/[Examples]
 
-TIP: When you use the examples, you may
+TIP: When you use the examples in {kib}, you may
 need to modify the "data" section to use absolute URL. For example,
 replace `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`.
-
-[[vega-additional-configuration-options]]
-==== Additional configuration options
-
-These options are specific to the {kib}. link:#vega-with-a-map[Map support] has
-additional configuration options.
-
-[source,yaml]
-----
-{
-  config: {
-    kibana: {
-      // Placement of the Vega-defined signal bindings.
-      // Can be `left`, `right`, `top`, or `bottom` (default).
-      controlsLocation: top
-      // Can be `vertical` or `horizontal` (default).
-      controlsDirection: vertical
-      // If true, hides most of Vega and VegaLite warnings
-      hideWarnings: true
-      // Vega renderer to use: `svg` or `canvas` (default)
-      renderer: canvas
-    }
-  }
-  /* the rest of Vega code */
-}
-----

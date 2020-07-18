@@ -12,6 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { TestProviders } from '../../mock';
+import '../../mock/match_media';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import { ChartSeriesData } from './common';

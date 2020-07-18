@@ -58,6 +58,7 @@ export const createEventsResolvers = (
     async LastEventTime(source, args, { req }) {
       const options: LastEventTimeRequestOptions = {
         defaultIndex: args.defaultIndex,
+        docValueFields: args.docValueFields,
         sourceConfiguration: source.configuration,
         indexKey: args.indexKey,
         details: args.details,
