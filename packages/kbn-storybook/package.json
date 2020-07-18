@@ -17,7 +17,7 @@
     "copy-webpack-plugin": "^6.0.2",
     "fast-glob": "2.2.7",
     "glob-watcher": "5.0.3",
-    "jest-specific-snapshot": "2.0.0",
+    "jest-specific-snapshot": "3.0.0",
     "jest-styled-components": "^7.0.2",
     "mkdirp": "0.5.1",
     "mini-css-extract-plugin": "0.7.0",

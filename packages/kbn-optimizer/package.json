@@ -31,7 +31,7 @@
     "execa": "^4.0.2",
     "file-loader": "^4.2.0",
     "istanbul-instrumenter-loader": "^3.0.1",
-    "jest-diff": "^25.5.0",
+    "jest-diff": "^26.1.0",
     "json-stable-stringify": "^1.0.1",
     "loader-utils": "^1.2.3",
     "node-sass": "^4.13.0",
