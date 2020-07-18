@@ -18,7 +18,8 @@
  */
 
 import { Transform, Readable } from 'stream';
-import { get, once } from 'lodash';
+import { inspect } from 'util';
+
 import { Client } from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
@@ -52,7 +53,7 @@ export function createCreateIndexStream({
   // If we're trying to import Kibana index docs, we need to ensure that
   // previous indices are removed so we're starting w/ a clean slate for
   // migrations. This only needs to be done once per archive load operation.
-  const deleteKibanaIndicesOnce = once(deleteKibanaIndices);
+  let kibanaIndexAlreadyDeleted = false;
 
   async function handleDoc(stream: Readable, record: DocRecord) {
     if (skipDocsFromIndices.has(record.value.index)) {
@@ -71,8 +72,9 @@ export function createCreateIndexStream({
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
-        if (isKibana) {
-          await deleteKibanaIndicesOnce({ client, stats, log });
+        if (isKibana && !kibanaIndexAlreadyDeleted) {
+          await deleteKibanaIndices({ client, stats, log });
+          kibanaIndexAlreadyDeleted = true;
         }
 
         await client.indices.create({
@@ -89,9 +91,19 @@ export function createCreateIndexStream({
         stats.createdIndex(index, { settings });
       } catch (err) {
         if (
-          get(err, 'body.error.type') !== 'resource_already_exists_exception' ||
-          attemptNumber >= 3
+          err?.body?.error?.reason?.includes('index exists with the same name as the alias') &&
+          attemptNumber < 3
         ) {
+          kibanaIndexAlreadyDeleted = false;
+          const aliasStr = inspect(aliases);
+          log.info(
+            `failed to create aliases [${aliasStr}] because ES indicated an index/alias already exists, trying again`
+          );
+          await attemptToCreate(attemptNumber + 1);
+          return;
+        }
+
+        if (err?.body?.error?.type !== 'resource_already_exists_exception' || attemptNumber >= 3) {
           throw err;
         }
 
