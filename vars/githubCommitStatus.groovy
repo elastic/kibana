@@ -6,7 +6,7 @@ def defaultCommit() {
 
 def onStart(commit = defaultCommit(), context = 'kibana-ci') {
   catchError {
-    if (githubPr.isPr() || !commit) {
+    if (!commit) {
       return
     }
 
@@ -16,7 +16,7 @@ def onStart(commit = defaultCommit(), context = 'kibana-ci') {
 
 def onFinish(commit = defaultCommit(), context = 'kibana-ci') {
   catchError {
-    if (githubPr.isPr() || !commit) {
+    if (!commit) {
       return
     }
 
