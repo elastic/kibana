@@ -85,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           body: { user: 'matt', message: 20 },
         });
         await testSubjects.click('refreshIndicesButton');
-        await testSubjects.existOrFail('createIndexPatternButton');
+        await testSubjects.existOrFail('createIndexPatternButton', { timeout: 5000 });
         // test when there's an existing pattern
       });
 
@@ -148,7 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           body: { user: 'matt', message: 20 },
         });
         await testSubjects.click('refreshIndicesButton');
-        await testSubjects.missingOrFail('createIndexPatternButton');
+        await testSubjects.missingOrFail('createIndexPatternButton', { timeout: 5000 });
         // test when there's an existing pattern
       });
 
