@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment, FC, useState, useContext, useEffect } from 'react';
-import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -27,7 +26,6 @@ import { isValidJson } from '../../../../../../../../common/util/validation_util
 import { JobCreatorContext } from '../../job_creator_context';
 import { DatafeedPreview } from '../datafeed_preview_flyout';
 
-const EDITOR_HEIGHT = '800px';
 export enum EDITOR_MODE {
   HIDDEN,
   READONLY,
@@ -61,12 +59,16 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       setJobConfigString(jobCreator.formattedJobJson);
       setDatafeedConfigString(jobCreator.formattedDatafeedJson);
       setShowChangedIndicesWarning(false);
-      debounceSetCombinedJob(jobCreator.formattedJobJson, jobCreator.formattedDatafeedJson, true);
+
+      setTempCombinedJob(null);
+      setTempCombinedJob({
+        ...JSON.parse(jobConfigString),
+        datafeed_config: JSON.parse(datafeedConfigString),
+      });
     }
   }, [showJsonFlyout]);
 
-  const editJsonMode = false;
-  // jobEditorMode === EDITOR_MODE.HIDDEN || datafeedEditorMode === EDITOR_MODE.HIDDEN;
+  const editJsonMode = datafeedEditorMode === EDITOR_MODE.HIDDEN;
   const flyOutSize = editJsonMode ? 'm' : 'l';
   const readOnlyMode =
     jobEditorMode === EDITOR_MODE.READONLY && datafeedEditorMode === EDITOR_MODE.READONLY;
@@ -79,6 +81,14 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   function onJobChange(json: string) {
     setJobConfigString(json);
     const valid = isValidJson(json);
+    setTempCombinedJob(
+      valid
+        ? {
+            ...JSON.parse(json),
+            datafeed_config: JSON.parse(datafeedConfigString),
+          }
+        : null
+    );
     setSaveable(valid);
   }
 
@@ -88,35 +98,24 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     let valid = isValidJson(jsonValue);
     if (valid) {
       // ensure that the user hasn't altered the indices list in the json.
-      const { indices }: Datafeed = JSON.parse(jsonValue);
+      const datafeed: Datafeed = JSON.parse(jsonValue);
       const originalIndices = jobCreator.indices.sort();
       valid =
-        originalIndices.length === indices.length &&
-        originalIndices.every((value, index) => value === indices[index]);
+        originalIndices.length === datafeed.indices.length &&
+        originalIndices.every((value, index) => value === datafeed.indices[index]);
       setShowChangedIndicesWarning(valid === false);
+
+      setTempCombinedJob({
+        ...JSON.parse(jobConfigString),
+        datafeed_config: datafeed,
+      });
     } else {
       setShowChangedIndicesWarning(false);
+      setTempCombinedJob(null);
     }
+
     setSaveable(valid);
   }
-
-  const debounceSetCombinedJob = debounce((job: string, datafeed: string, saveable2: boolean) => {
-    setTempCombinedJob(
-      saveable2
-        ? {
-            ...JSON.parse(job),
-            datafeed_config: JSON.parse(datafeed),
-          }
-        : null
-    );
-  }, 500);
-
-  useEffect(() => {
-    debounceSetCombinedJob(jobConfigString, datafeedConfigString, saveable);
-    return () => {
-      debounceSetCombinedJob.cancel();
-    };
-  }, [datafeedConfigString, saveable]);
 
   function onSave() {
     const jobConfig = JSON.parse(jobConfigString);
@@ -158,9 +157,11 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     })}
                     value={datafeedConfigString}
                   />
-                  <EuiFlexItem>
-                    <DatafeedPreview combinedJob={tempCombinedJob} />
-                  </EuiFlexItem>
+                  {datafeedEditorMode === EDITOR_MODE.EDITABLE && (
+                    <EuiFlexItem>
+                      <DatafeedPreview combinedJob={tempCombinedJob} />
+                    </EuiFlexItem>
+                  )}
                 </>
               )}
             </EuiFlexGroup>
@@ -245,6 +246,7 @@ const Contents: FC<{
   editJson: boolean;
   onChange(s: string): void;
 }> = ({ title, value, editJson, onChange }) => {
+  const [editorHeight] = useState(`${window.innerHeight - 230}px`);
   return (
     <EuiFlexItem>
       <EuiTitle size="s">
@@ -253,7 +255,7 @@ const Contents: FC<{
       <EuiSpacer size="s" />
       <MLJobEditor
         value={value}
-        height={EDITOR_HEIGHT}
+        height={editorHeight}
         mode={ML_EDITOR_MODE.XJSON}
         readOnly={editJson === false}
         onChange={onChange}

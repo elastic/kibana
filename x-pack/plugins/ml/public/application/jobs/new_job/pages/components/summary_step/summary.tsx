@@ -173,8 +173,8 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 <EuiFlexItem grow={false}>
                   <JsonEditorFlyout
                     isDisabled={progress > 0}
-                    jobEditorMode={EDITOR_MODE.READONLY}
-                    datafeedEditorMode={EDITOR_MODE.READONLY}
+                    jobEditorMode={EDITOR_MODE.EDITABLE}
+                    datafeedEditorMode={EDITOR_MODE.EDITABLE}
                   />
                 </EuiFlexItem>
                 {jobCreator.type === JOB_TYPE.ADVANCED ? (

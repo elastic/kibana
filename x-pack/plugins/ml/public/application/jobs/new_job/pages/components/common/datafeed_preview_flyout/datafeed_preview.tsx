@@ -7,29 +7,55 @@
 import React, { FC, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+  EuiLoadingSpinner,
+  EuiButton,
+} from '@elastic/eui';
 
 import { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { mlJobService } from '../../../../../../services/job_service';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../../../common/util/job_utils';
 
-const EDITOR_HEIGHT = '800px';
-
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
 }> = ({ combinedJob }) => {
+  const [editorHeight] = useState(`${window.innerHeight - 230}px`);
   const [loading, setLoading] = useState(false);
   const [previewJsonString, setPreviewJsonString] = useState('');
+  const [outOfDate, setOutOfDate] = useState(false);
+  const [combinedJobString, setCombinedJobString] = useState('');
+
+  // useEffect(() => {
+  //   try {
+  //     if (combinedJob !== null) {
+  //       setCombinedJobString(JSON.stringify(combinedJob));
+  //     }
+  //   } catch (error) {
+  //     // fail
+  //   }
+  //   loadDataPreview();
+  // }, []);
 
   useEffect(() => {
-    loadDataPreview();
-  }, []);
-
-  useEffect(() => {
-    loadDataPreview();
+    // loadDataPreview();
+    try {
+      if (combinedJob !== null) {
+        if (combinedJobString === '') {
+          // first time, set the string and load the preview
+          loadDataPreview();
+        } else {
+          setOutOfDate(JSON.stringify(combinedJob) !== combinedJobString);
+        }
+      }
+    } catch (error) {
+      // fail
+    }
   }, [combinedJob]);
-  // }, [JSON.stringify(combinedJob)]);
 
   async function loadDataPreview() {
     setPreviewJsonString('');
@@ -38,6 +64,7 @@ export const DatafeedPreview: FC<{
     }
 
     setLoading(true);
+    setCombinedJobString(JSON.stringify(combinedJob));
 
     if (combinedJob.datafeed_config && combinedJob.datafeed_config.indices.length) {
       try {
@@ -51,6 +78,7 @@ export const DatafeedPreview: FC<{
         setPreviewJsonString(JSON.stringify(error, null, 2));
       }
       setLoading(false);
+      setOutOfDate(false);
     } else {
       const errorText = i18n.translate(
         'xpack.ml.newJob.wizard.datafeedPreviewFlyout.datafeedDoesNotExistLabel',
@@ -64,14 +92,25 @@ export const DatafeedPreview: FC<{
 
   return (
     <EuiFlexItem>
-      <EuiTitle size="s">
-        <h5>
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.title"
-            defaultMessage="Datafeed preview"
-          />
-        </h5>
-      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h5>
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.title"
+                defaultMessage="Datafeed preview"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {outOfDate && (
+            <EuiButton size="s" onClick={loadDataPreview} iconType="refresh">
+              Refresh
+            </EuiButton>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       {loading === true ? (
         <EuiFlexGroup justifyContent="spaceAround">
@@ -81,7 +120,7 @@ export const DatafeedPreview: FC<{
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <MLJobEditor value={previewJsonString} height={EDITOR_HEIGHT} readOnly={true} />
+        <MLJobEditor value={previewJsonString} height={editorHeight} readOnly={true} />
       )}
     </EuiFlexItem>
   );
