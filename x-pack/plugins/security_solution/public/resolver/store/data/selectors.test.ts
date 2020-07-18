@@ -9,6 +9,10 @@ import { DataState } from '../../types';
 import { dataReducer } from './reducer';
 import { DataAction } from './action';
 import { createStore } from 'redux';
+import {
+  mockTreeWithNoAncestorsAnd2Children,
+  mockTreeWith2AncestorsAndNoChildren,
+} from '../mocks/resolver_tree';
 describe('data state', () => {
   let actions: DataAction[] = [];
 
@@ -261,6 +265,58 @@ describe('data state', () => {
           `);
         });
       });
+    });
+  });
+  describe('with a tree with no descendants and 2 ancestors', () => {
+    const originID = 'c';
+    const firstAncestorID = 'b';
+    const secondAncestorID = 'a';
+    beforeEach(() => {
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: mockTreeWith2AncestorsAndNoChildren({
+            originID,
+            firstAncestorID,
+            secondAncestorID,
+          }),
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should have no flowto candidate for the origin', () => {
+      expect(selectors.ariFlowtoCandidate(state())(originID)).toBe(null);
+    });
+    it('should have no flowto candidate for the first ancestor', () => {
+      expect(selectors.ariFlowtoCandidate(state())(firstAncestorID)).toBe(null);
+    });
+    it('should have no flowto candidate for the second ancestor ancestor', () => {
+      expect(selectors.ariFlowtoCandidate(state())(secondAncestorID)).toBe(null);
+    });
+  });
+  describe('with a tree with 2 children and no ancestors', () => {
+    const originID = 'c';
+    const firstChildID = 'd';
+    const secondChildID = 'e';
+    beforeEach(() => {
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should have no flowto candidate for the origin', () => {
+      expect(selectors.ariFlowtoCandidate(state())(originID)).toBe(null);
+    });
+    it('should use the second child as the flowto candidate for the first child', () => {
+      expect(selectors.ariFlowtoCandidate(state())(firstChildID)).toBe(secondChildID);
+    });
+    it('should have no flowto candidate for the second child', () => {
+      expect(selectors.ariFlowtoCandidate(state())(secondChildID)).toBe(null);
     });
   });
 });

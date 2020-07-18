@@ -5,11 +5,7 @@
  */
 
 import rbush from 'rbush';
-import {
-  createSelector,
-  defaultMemoize as defaultMemoizeWithOriginalType,
-  defaultMemoize,
-} from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect';
 import {
   DataState,
   Vector2,
@@ -23,9 +19,9 @@ import {
   isGraphableProcess,
   isTerminatedProcess,
   uniquePidForProcess,
+  uniqueParentPidForProcess,
 } from '../../models/process_event';
 import * as indexedProcessTreeModel from '../../models/indexed_process_tree';
-import { isEqual } from '../../models/aabb';
 
 import {
   ResolverEvent,
@@ -66,7 +62,7 @@ export function hasError(state: DataState): boolean {
  * The last ResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
-const resolverTree = (state: DataState): ResolverTree | undefined => {
+const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
   if (state.lastResponse && state.lastResponse.successful) {
     return state.lastResponse.result;
   } else {
@@ -77,7 +73,9 @@ const resolverTree = (state: DataState): ResolverTree | undefined => {
 /**
  * Process events that will be displayed as terminated.
  */
-export const terminatedProcesses = createSelector(resolverTree, function (tree?: ResolverTree) {
+export const terminatedProcesses = createSelector(resolverTreeResponse, function (
+  tree?: ResolverTree
+) {
   if (!tree) {
     return new Set();
   }
@@ -94,7 +92,7 @@ export const terminatedProcesses = createSelector(resolverTree, function (tree?:
 /**
  * Process events that will be graphed.
  */
-export const graphableProcesses = createSelector(resolverTree, function (tree?) {
+export const graphableProcesses = createSelector(resolverTreeResponse, function (tree?) {
   if (tree) {
     return resolverTreeModel.lifecycleEvents(tree).filter(isGraphableProcess);
   } else {
@@ -105,7 +103,7 @@ export const graphableProcesses = createSelector(resolverTree, function (tree?) 
 /**
  * The 'indexed process tree' contains the tree data, indexed in helpful ways. Used for O(1) access to stuff during graph layout.
  */
-export const indexedProcessTree = createSelector(graphableProcesses, function indexedTree(
+export const tree = createSelector(graphableProcesses, function indexedTree(
   /* eslint-disable no-shadow */
   graphableProcesses
   /* eslint-enable no-shadow */
@@ -118,13 +116,16 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
  */
 export const relatedEventsStats: (
   state: DataState
-) => Map<string, ResolverNodeStats> | null = createSelector(resolverTree, (tree?: ResolverTree) => {
-  if (tree) {
-    return resolverTreeModel.relatedEventsStats(tree);
-  } else {
-    return null;
+) => Map<string, ResolverNodeStats> | null = createSelector(
+  resolverTreeResponse,
+  (resolverTree?: ResolverTree) => {
+    if (resolverTree) {
+      return resolverTreeModel.relatedEventsStats(resolverTree);
+    } else {
+      return null;
+    }
   }
-});
+);
 
 /**
  * returns a map of entity_ids to related event data.
@@ -179,16 +180,16 @@ export function relatedEventsReady(data: DataState): Map<string, boolean> {
  * `true` if there were more children than we got in the last request.
  */
 export function hasMoreChildren(state: DataState): boolean {
-  const tree = resolverTree(state);
-  return tree ? resolverTreeModel.hasMoreChildren(tree) : false;
+  const resolverTree = resolverTreeResponse(state);
+  return resolverTree ? resolverTreeModel.hasMoreChildren(resolverTree) : false;
 }
 
 /**
  * `true` if there were more ancestors than we got in the last request.
  */
 export function hasMoreAncestors(state: DataState): boolean {
-  const tree = resolverTree(state);
-  return tree ? resolverTreeModel.hasMoreAncestors(tree) : false;
+  const resolverTree = resolverTreeResponse(state);
+  return resolverTree ? resolverTreeModel.hasMoreAncestors(resolverTree) : false;
 }
 
 interface RelatedInfoFunctions {
@@ -319,16 +320,13 @@ export function databaseDocumentIDToFetch(state: DataState): string | null {
   }
 }
 
-export const layout = createSelector(
-  indexedProcessTree,
-  function processNodePositionsAndEdgeLineSegments(
-    /* eslint-disable no-shadow */
-    indexedProcessTree
-    /* eslint-enable no-shadow */
-  ) {
-    return isometricTaxiLayout(indexedProcessTree);
-  }
-);
+export const layout = createSelector(tree, function processNodePositionsAndEdgeLineSegments(
+  /* eslint-disable no-shadow */
+  indexedProcessTree
+  /* eslint-enable no-shadow */
+) {
+  return isometricTaxiLayout(indexedProcessTree);
+});
 
 /**
  * Given a nodeID (aka entity_id) get the indexed process event.
@@ -338,8 +336,9 @@ export const layout = createSelector(
 export const processEventForID: (
   state: DataState
 ) => (nodeID: string) => ResolverEvent | null = createSelector(
-  indexedProcessTree,
-  (tree) => (nodeID: string) => indexedProcessTreeModel.processEvent(tree, nodeID)
+  tree,
+  (indexedProcessTree) => (nodeID: string) =>
+    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID)
 );
 
 /**
@@ -355,30 +354,67 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
 );
 
 /**
- * Returns the following sibling if there is one, or `null`.
+ * Returns the following sibling if there is one, or `null` if there isn't.
+ * For root nodes, other root nodes are treated as siblings.
+ * This is used to calculate the `aria-flowto` attribute.
  */
-export const followingSibling: (
+export const ariFlowtoCandidate: (
   state: DataState
 ) => (nodeID: string) => string | null = createSelector(
-  indexedProcessTree,
+  tree,
   processEventForID,
-  (tree, eventGetter) => {
-    return (nodeID: string) => {
-      const event = eventGetter(nodeID);
+  (indexedProcessTree, eventGetter) => {
+    // A map of preceding sibling IDs to following sibling IDs or `null`, if there is no following sibling
+    const memo: Map<string, string | null> = new Map();
 
-      // event not found
-      if (event === null) {
-        return null;
+    return function memoizedGetter(/** the unique ID of a node. **/ nodeID: string): string | null {
+      // Previous calculations are memoized. Check for a value in the memo.
+      const existingValue = memo.get(nodeID);
+
+      /**
+       * `undefined` means the key wasn't in the map.
+       * Note: the value may be null, meaning that we checked and there is no following sibling.
+       * If there is a value in the map, return it.
+       */
+      if (existingValue !== undefined) {
+        return existingValue;
       }
-      const nextSibling = indexedProcessTreeModel.nextSibling(tree, event);
 
-      // next sibling not found
-      if (nextSibling === undefined) {
-        return null;
+      /**
+       * Getting the following sibling of a node has an `O(n)` time complexity where `n` is the number of children the parent of the node has.
+       * For this reason, we calculate the following siblings of the node and all of its siblings at once and cache them.
+       */
+      const nodeEvent: ResolverEvent | null = eventGetter(nodeID);
+
+      if (!nodeEvent) {
+        // this should never happen.
+        throw new Error('could not find child event in process tree.');
       }
 
-      // return the node ID
-      return uniquePidForProcess(nextSibling);
+      // nodes with the same parent ID
+      const children = indexedProcessTreeModel.children(
+        indexedProcessTree,
+        uniqueParentPidForProcess(nodeEvent)
+      );
+
+      let previousChild: ResolverEvent | null = null;
+      // Loop over all nodes that have the same parent ID (even if the parent ID is undefined or points to a node that isn't in the tree.)
+      for (const child of children) {
+        if (previousChild !== null) {
+          // Set the `child` as the following sibling of `previousChild`.
+          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child));
+        }
+        // Set the child as the previous child.
+        previousChild = child;
+      }
+
+      if (previousChild) {
+        // if there is a previous child, it has no following sibling.
+        memo.set(uniquePidForProcess(previousChild), null);
+      }
+
+      // Recurse this function, it will find the cached result.
+      return memoizedGetter(nodeID);
     };
   }
 );
@@ -391,7 +427,7 @@ const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = creat
     edgeLineSegments,
     /* eslint-enable no-shadow */
   }) {
-    const tree: rbush<IndexedEntity> = new rbush();
+    const spatialIndex: rbush<IndexedEntity> = new rbush();
     const processesToIndex: IndexedProcessNode[] = [];
     const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
 
@@ -427,8 +463,8 @@ const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = creat
       };
       edgeLineSegmentsToIndex.push(indexedLineSegment);
     }
-    tree.load([...processesToIndex, ...edgeLineSegmentsToIndex]);
-    return tree;
+    spatialIndex.load([...processesToIndex, ...edgeLineSegmentsToIndex]);
+    return spatialIndex;
   }
 );
 
@@ -442,7 +478,7 @@ export const nodesAndEdgelines: (
    * An axis aligned bounding box (in world corrdinates) to search in. Any entities that might collide with this box will be returned.
    */
   query: AABB
-) => VisibleEntites = createSelector(spatiallyIndexedLayout, function (tree) {
+) => VisibleEntites = createSelector(spatiallyIndexedLayout, function (spatialIndex) {
   /**
    * Memoized for performance and object reference equality.
    */
@@ -451,7 +487,7 @@ export const nodesAndEdgelines: (
       minimum: [minX, minY],
       maximum: [maxX, maxY],
     } = boundingBox;
-    const entities = tree.search({
+    const entities = spatialIndex.search({
       minX,
       minY,
       maxX,

@@ -251,14 +251,14 @@ export const ariaLevel: (
 
 /**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
- * If the node has a following sibling that is currently visible, that will be returned, otherwise null.
+ * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
 export const ariaFlowtoNodeID: (
   state: ResolverState
 ) => (time: number) => (nodeID: string) => string | null = createSelector(
   visibleNodesAndEdgeLines,
-  composeSelectors(dataStateSelector, dataSelectors.followingSibling),
-  (visibleNodesAndEdgeLinesAtTime, followingSibling) => {
+  composeSelectors(dataStateSelector, dataSelectors.ariFlowtoCandidate),
+  (visibleNodesAndEdgeLinesAtTime, ariaFlowtoCandidate) => {
     return defaultMemoize((time: number) => {
       // get the visible nodes at `time`
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
@@ -270,9 +270,11 @@ export const ariaFlowtoNodeID: (
 
       // return the ID of `nodeID`'s following sibling, if it is visible
       return (nodeID: string): string | null => {
-        const sibling: string | null = followingSibling(nodeID);
+        const flowtoNode: string | null = ariaFlowtoCandidate(nodeID);
 
-        return sibling === null || nodesVisibleAtTime.has(sibling) === false ? null : sibling;
+        return flowtoNode === null || nodesVisibleAtTime.has(flowtoNode) === false
+          ? null
+          : flowtoNode;
       };
     });
   }
