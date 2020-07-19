@@ -252,6 +252,14 @@ export const ariaLevel: (
 );
 
 /**
+ * the node ID of the node representing the databaseDocumentID
+ */
+export const originID: (state: ResolverState) => string | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.originID
+);
+
+/**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */

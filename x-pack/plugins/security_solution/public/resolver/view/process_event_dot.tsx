@@ -72,7 +72,6 @@ const UnstyledProcessEventDot = React.memo(
     event,
     projectionMatrix,
     isProcessTerminated,
-    isProcessOrigin,
     timeAtRender,
   }: {
     /**
@@ -95,10 +94,6 @@ const UnstyledProcessEventDot = React.memo(
      * Whether or not to show the process as terminated.
      */
     isProcessTerminated: boolean;
-    /**
-     * Whether or not to show the process as the originating event.
-     */
-    isProcessOrigin: boolean;
 
     /**
      * The time (unix epoch) at render.
@@ -212,7 +207,7 @@ const UnstyledProcessEventDot = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+    } = cubeAssetsForNode(isProcessTerminated, false);
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 

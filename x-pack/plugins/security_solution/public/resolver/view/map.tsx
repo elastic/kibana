@@ -110,7 +110,6 @@ export const ResolverMap = React.memo(function ({
                 projectionMatrix={projectionMatrix}
                 event={processEvent}
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
-                isProcessOrigin={false}
                 timeAtRender={timeAtRender}
               />
             );
