@@ -39,7 +39,7 @@ jest.mock('../../../lists_plugin_deps', () => {
 });
 
 describe('AutocompleteFieldListsComponent', () => {
-  xtest('it renders disabled if "isDisabled" is true', async () => {
+  test('it renders disabled if "isDisabled" is true', async () => {
     await act(async () => {
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -63,7 +63,7 @@ describe('AutocompleteFieldListsComponent', () => {
     });
   });
 
-  xtest('it renders loading if "isLoading" is true', async () => {
+  test('it renders loading if "isLoading" is true', async () => {
     await act(async () => {
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
