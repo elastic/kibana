@@ -26,16 +26,15 @@ export function factory(
     const uniqueProcessPid = uniquePidForProcess(process);
     idToValue.set(uniqueProcessPid, process);
 
-    const uniqueParentPid = uniqueParentPidForProcess(process);
-    // if its defined and not ''
-    if (uniqueParentPid) {
-      let childrenWithTheSameParent = idToChildren.get(uniqueParentPid);
-      if (!childrenWithTheSameParent) {
-        childrenWithTheSameParent = [];
-        idToChildren.set(uniqueParentPid, childrenWithTheSameParent);
-      }
-      childrenWithTheSameParent.push(process);
+    // NB: If the value was null or undefined, use `undefined`
+    const uniqueParentPid: string | undefined = uniqueParentPidForProcess(process) ?? undefined;
+
+    let childrenWithTheSameParent = idToChildren.get(uniqueParentPid);
+    if (!childrenWithTheSameParent) {
+      childrenWithTheSameParent = [];
+      idToChildren.set(uniqueParentPid, childrenWithTheSameParent);
     }
+    childrenWithTheSameParent.push(process);
   }
 
   // sort the children of each node

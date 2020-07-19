@@ -13,6 +13,9 @@ import {
   mockTreeWithNoAncestorsAnd2Children,
   mockTreeWith2AncestorsAndNoChildren,
 } from '../mocks/resolver_tree';
+import { uniquePidForProcess } from '../../models/process_event';
+import { EndpointEvent } from '../../../../common/endpoint/types';
+
 describe('data state', () => {
   let actions: DataAction[] = [];
 
@@ -286,13 +289,13 @@ describe('data state', () => {
       });
     });
     it('should have no flowto candidate for the origin', () => {
-      expect(selectors.ariFlowtoCandidate(state())(originID)).toBe(null);
+      expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
     });
     it('should have no flowto candidate for the first ancestor', () => {
-      expect(selectors.ariFlowtoCandidate(state())(firstAncestorID)).toBe(null);
+      expect(selectors.ariaFlowtoCandidate(state())(firstAncestorID)).toBe(null);
     });
     it('should have no flowto candidate for the second ancestor ancestor', () => {
-      expect(selectors.ariFlowtoCandidate(state())(secondAncestorID)).toBe(null);
+      expect(selectors.ariaFlowtoCandidate(state())(secondAncestorID)).toBe(null);
     });
   });
   describe('with a tree with 2 children and no ancestors', () => {
@@ -310,13 +313,44 @@ describe('data state', () => {
       });
     });
     it('should have no flowto candidate for the origin', () => {
-      expect(selectors.ariFlowtoCandidate(state())(originID)).toBe(null);
+      expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
     });
     it('should use the second child as the flowto candidate for the first child', () => {
-      expect(selectors.ariFlowtoCandidate(state())(firstChildID)).toBe(secondChildID);
+      expect(selectors.ariaFlowtoCandidate(state())(firstChildID)).toBe(secondChildID);
     });
     it('should have no flowto candidate for the second child', () => {
-      expect(selectors.ariFlowtoCandidate(state())(secondChildID)).toBe(null);
+      expect(selectors.ariaFlowtoCandidate(state())(secondChildID)).toBe(null);
+    });
+  });
+  describe('with a tree where the root process has no parent info at all', () => {
+    const originID = 'c';
+    const firstChildID = 'd';
+    const secondChildID = 'e';
+    beforeEach(() => {
+      const tree = mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID });
+      for (const event of tree.lifecycle) {
+        // delete the process.parent key, if present
+        // cast as `EndpointEvent` because `ResolverEvent` can also be `LegacyEndpointEvent` which has no `process` field
+        delete (event as EndpointEvent).process?.parent;
+      }
+
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: tree,
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should be able to calculate the aria flowto candidates for all processes nodes', () => {
+      const graphables = selectors.graphableProcesses(state());
+      expect(graphables.length).toBe(3);
+      for (const event of graphables) {
+        expect(() => {
+          selectors.ariaFlowtoCandidate(state())(uniquePidForProcess(event));
+        }).not.toThrow();
+      }
     });
   });
 });

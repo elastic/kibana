@@ -358,7 +358,7 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
  * For root nodes, other root nodes are treated as siblings.
  * This is used to calculate the `aria-flowto` attribute.
  */
-export const ariFlowtoCandidate: (
+export const ariaFlowtoCandidate: (
   state: DataState
 ) => (nodeID: string) => string | null = createSelector(
   tree,
@@ -413,7 +413,6 @@ export const ariFlowtoCandidate: (
         memo.set(uniquePidForProcess(previousChild), null);
       }
 
-      // Recurse this function, it will find the cached result.
       return memoizedGetter(nodeID);
     };
   }

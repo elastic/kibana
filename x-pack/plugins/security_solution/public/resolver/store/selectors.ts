@@ -257,7 +257,7 @@ export const ariaFlowtoNodeID: (
   state: ResolverState
 ) => (time: number) => (nodeID: string) => string | null = createSelector(
   visibleNodesAndEdgeLines,
-  composeSelectors(dataStateSelector, dataSelectors.ariFlowtoCandidate),
+  composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate),
   (visibleNodesAndEdgeLinesAtTime, ariaFlowtoCandidate) => {
     return defaultMemoize((time: number) => {
       // get the visible nodes at `time`
