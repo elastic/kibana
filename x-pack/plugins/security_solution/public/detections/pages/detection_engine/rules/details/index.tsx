@@ -81,7 +81,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { FILTERS_GLOBAL_HEIGHT } from '../../../../../../common/constants';
+import { DEFAULT_INDEX_PATTERN, FILTERS_GLOBAL_HEIGHT } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../lists_plugin_deps';
@@ -515,7 +515,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
               <ExceptionsViewer
                 ruleId={ruleId ?? ''}
                 ruleName={rule?.name ?? ''}
-                ruleIndices={rule?.index ?? []}
+                ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
                 availableListTypes={exceptionLists.allowedExceptionListTypes}
                 commentsAccordionId={'ruleDetailsTabExceptions'}
                 exceptionListsMeta={exceptionLists.lists}

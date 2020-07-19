@@ -21,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -94,6 +95,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const { addError, addSuccess } = useAppToasts();
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
 
+  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const [
+    { isLoading: signalIndexPatternLoading, indexPatterns: signalIndexPatterns },
+  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : []);
+
   const onError = useCallback(
     (error) => {
       addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
@@ -115,13 +121,19 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   );
 
   useEffect(() => {
-    if (indexPatternLoading === false) {
+    if (signalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns)
       );
     }
-  }, [setShouldDisableBulkClose, exceptionItemsToAdd, indexPatternLoading, indexPatterns]);
+  }, [
+    setShouldDisableBulkClose,
+    exceptionItemsToAdd,
+    signalIndexPatternLoading,
+    signalIndexPatterns,
+    isSignalIndexLoading,
+  ]);
 
   useEffect(() => {
     if (shouldDisableBulkClose === true) {
@@ -170,10 +182,10 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const onEditExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
       const bulkCloseIndex =
-        shouldBulkCloseAlert && ruleIndices.length > 0 ? ruleIndices : undefined;
+        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(enrichExceptionItems(), undefined, bulkCloseIndex);
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, ruleIndices]);
+  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
 
   return (
     <EuiOverlayMask>
@@ -185,7 +197,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           </ModalHeaderSubtitle>
         </ModalHeader>
 
-        {!indexPatternLoading && (
+        {!indexPatternLoading && !isSignalIndexLoading && !signalIndexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>

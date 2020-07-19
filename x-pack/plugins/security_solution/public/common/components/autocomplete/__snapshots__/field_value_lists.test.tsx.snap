@@ -1,0 +1,237 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AutocompleteFieldListsComponent it correctly displays lists that match the selected "keyword" field esType 1`] = `
+<ThemeProvider
+  theme={[Function]}
+>
+  <AutocompleteFieldList
+    isClearable={false}
+    isDisabled={false}
+    isLoading={false}
+    onChange={[MockFunction]}
+    placeholder="Placeholder text"
+    selectedField={
+      Object {
+        "aggregatable": true,
+        "count": 0,
+        "esTypes": Array [
+          "keyword",
+        ],
+        "name": "@tags",
+        "readFromDocValues": true,
+        "scripted": false,
+        "searchable": true,
+        "type": "string",
+      }
+    }
+    selectedValue=""
+  >
+    <EuiComboBox
+      async={true}
+      compressed={false}
+      data-test-subj="valuesAutocompleteComboBox listsComboxBox"
+      fullWidth={true}
+      isClearable={false}
+      isDisabled={false}
+      isLoading={false}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "label": "keyword list",
+          },
+        ]
+      }
+      placeholder="Placeholder text"
+      selectedOptions={Array []}
+      singleSelection={
+        Object {
+          "asPlainText": true,
+        }
+      }
+      sortMatchesBy="startsWith"
+    >
+      <div
+        aria-expanded={false}
+        aria-haspopup="listbox"
+        className="euiComboBox euiComboBox--fullWidth"
+        data-test-subj="valuesAutocompleteComboBox listsComboxBox"
+        onKeyDown={[Function]}
+        role="combobox"
+      >
+        <EuiComboBoxInput
+          autoSizeInputRef={[Function]}
+          compressed={false}
+          fullWidth={true}
+          hasSelectedOptions={false}
+          inputRef={[Function]}
+          isDisabled={false}
+          isListOpen={false}
+          noIcon={false}
+          onChange={[Function]}
+          onClick={[Function]}
+          onCloseListClick={[Function]}
+          onFocus={[Function]}
+          onOpenListClick={[Function]}
+          onRemoveOption={[Function]}
+          placeholder="Placeholder text"
+          rootId={[Function]}
+          searchValue=""
+          selectedOptions={Array []}
+          singleSelection={
+            Object {
+              "asPlainText": true,
+            }
+          }
+          toggleButtonRef={[Function]}
+          updatePosition={[Function]}
+          value=""
+        >
+          <EuiFormControlLayout
+            compressed={false}
+            fullWidth={true}
+            icon={
+              Object {
+                "aria-label": "Open list of options",
+                "data-test-subj": "comboBoxToggleListButton",
+                "disabled": false,
+                "onClick": [Function],
+                "ref": [Function],
+                "side": "right",
+                "type": "arrowDown",
+              }
+            }
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--fullWidth"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <div
+                  className="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap"
+                  data-test-subj="comboBoxInput"
+                  onClick={[Function]}
+                  tabIndex={-1}
+                >
+                  <p
+                    className="euiComboBoxPlaceholder"
+                  >
+                    Placeholder text
+                  </p>
+                  <AutosizeInput
+                    aria-controls=""
+                    className="euiComboBox__input"
+                    data-test-subj="comboBoxSearchInput"
+                    disabled={false}
+                    injectStyles={true}
+                    inputRef={[Function]}
+                    minWidth={1}
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    role="textbox"
+                    style={
+                      Object {
+                        "fontSize": 14,
+                      }
+                    }
+                    value=""
+                  >
+                    <div
+                      className="euiComboBox__input"
+                      style={
+                        Object {
+                          "display": "inline-block",
+                          "fontSize": 14,
+                        }
+                      }
+                    >
+                      <input
+                        aria-controls=""
+                        data-test-subj="comboBoxSearchInput"
+                        disabled={false}
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        role="textbox"
+                        style={
+                          Object {
+                            "boxSizing": "content-box",
+                            "width": "2px",
+                          }
+                        }
+                        value=""
+                      />
+                      <div
+                        style={
+                          Object {
+                            "height": 0,
+                            "left": 0,
+                            "overflow": "scroll",
+                            "position": "absolute",
+                            "top": 0,
+                            "visibility": "hidden",
+                            "whiteSpace": "pre",
+                          }
+                        }
+                      />
+                    </div>
+                  </AutosizeInput>
+                </div>
+                <EuiFormControlLayoutIcons
+                  icon={
+                    Object {
+                      "aria-label": "Open list of options",
+                      "data-test-subj": "comboBoxToggleListButton",
+                      "disabled": false,
+                      "onClick": [Function],
+                      "ref": [Function],
+                      "side": "right",
+                      "type": "arrowDown",
+                    }
+                  }
+                >
+                  <div
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                  >
+                    <EuiFormControlLayoutCustomIcon
+                      aria-label="Open list of options"
+                      data-test-subj="comboBoxToggleListButton"
+                      disabled={false}
+                      iconRef={[Function]}
+                      onClick={[Function]}
+                      type="arrowDown"
+                    >
+                      <button
+                        aria-label="Open list of options"
+                        className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                        data-test-subj="comboBoxToggleListButton"
+                        disabled={false}
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        <EuiIcon
+                          aria-hidden="true"
+                          className="euiFormControlLayoutCustomIcon__icon"
+                          type="arrowDown"
+                        >
+                          <div
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="arrowDown"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiFormControlLayoutCustomIcon>
+                  </div>
+                </EuiFormControlLayoutIcons>
+              </div>
+            </div>
+          </EuiFormControlLayout>
+        </EuiComboBoxInput>
+      </div>
+    </EuiComboBox>
+  </AutocompleteFieldList>
+</ThemeProvider>
+`;

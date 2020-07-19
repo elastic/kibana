@@ -44,6 +44,7 @@ import {
   getMappedNonEcsValue,
 } from '../helpers';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 export interface AddExceptionModalBaseProps {
   ruleName: string;
@@ -106,8 +107,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
   const { addError, addSuccess } = useAppToasts();
+
+  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
+
+  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const [
+    { isLoading: signalIndexPatternLoading, indexPatterns: signalIndexPatterns },
+  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : []);
 
   const onError = useCallback(
     (error: Error) => {
@@ -167,13 +174,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
 
   useEffect(() => {
-    if (indexPatternLoading === false) {
+    if (signalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns)
       );
     }
-  }, [setShouldDisableBulkClose, exceptionItemsToAdd, indexPatternLoading, indexPatterns]);
+  }, [
+    setShouldDisableBulkClose,
+    exceptionItemsToAdd,
+    signalIndexPatternLoading,
+    signalIndexPatterns,
+    isSignalIndexLoading,
+  ]);
 
   useEffect(() => {
     if (shouldDisableBulkClose === true) {
@@ -233,7 +246,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const onAddExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
       const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
-      const bulkCloseIndex = shouldBulkCloseAlert && ruleIndices !== null ? ruleIndices : undefined;
+      const bulkCloseIndex =
+        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
   }, [
@@ -242,7 +256,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     shouldCloseAlert,
     shouldBulkCloseAlert,
     alertData,
-    ruleIndices,
+    signalIndexName,
   ]);
 
   const isSubmitButtonDisabled = useCallback(
@@ -269,6 +283,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
         )}
         {fetchOrCreateListError === false &&
+          !isSignalIndexLoading &&
+          !signalIndexPatternLoading &&
           !indexPatternLoading &&
           !isLoadingExceptionList &&
           ruleExceptionList && (
