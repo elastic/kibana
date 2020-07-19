@@ -110,18 +110,6 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.asset.thumbnailAltText', {
         defaultMessage: 'Asset thumbnail',
       }),
-    getConfirmModalButtonLabel: () =>
-      i18n.translate('xpack.canvas.asset.confirmModalButtonLabel', {
-        defaultMessage: 'Remove',
-      }),
-    getConfirmModalMessageText: () =>
-      i18n.translate('xpack.canvas.asset.confirmModalDetail', {
-        defaultMessage: 'Are you sure you want to remove this asset?',
-      }),
-    getConfirmModalTitle: () =>
-      i18n.translate('xpack.canvas.asset.confirmModalTitle', {
-        defaultMessage: 'Remove Asset',
-      }),
   },
   AssetManager: {
     getButtonLabel: () =>
