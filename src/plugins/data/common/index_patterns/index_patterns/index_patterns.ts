@@ -17,25 +17,26 @@
  * under the License.
  */
 
-import {
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-  IUiSettingsClient,
-  HttpStart,
-  CoreStart,
-} from 'src/core/public';
+import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
-import { IndexPatternsApiClient, GetFieldsOptions } from '.';
 import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
 import { getIndexPatternFieldListCreator, CreateIndexPatternFieldList, Field } from '../fields';
-import { IndexPatternSpec, FieldSpec } from '../types';
-import { OnNotification, OnError } from '../types';
+import {
+  OnNotification,
+  OnError,
+  UiSettingsCommon,
+  IIndexPatternsApiClient,
+  GetFieldsOptions,
+  FieldSpec,
+  IndexPatternSpec,
+} from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
+import { UI_SETTINGS, SavedObject } from '../../../common';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -46,20 +47,20 @@ export interface IndexPatternSavedObjectAttrs {
 }
 
 interface IndexPatternsServiceDeps {
-  uiSettings: CoreStart['uiSettings'];
-  savedObjectsClient: SavedObjectsClientContract;
-  http: HttpStart;
+  uiSettings: UiSettingsCommon;
+  savedObjectsClient: SavedObjectsClientCommon;
+  apiClient: IIndexPatternsApiClient;
   fieldFormats: FieldFormatsStartCommon;
   onNotification: OnNotification;
   onError: OnError;
-  onRedirectNoIndexPattern: () => void;
+  onRedirectNoIndexPattern?: () => void;
 }
 
 export class IndexPatternsService {
-  private config: IUiSettingsClient;
-  private savedObjectsClient: SavedObjectsClientContract;
-  private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
-  private apiClient: IndexPatternsApiClient;
+  private config: UiSettingsCommon;
+  private savedObjectsClient: SavedObjectsClientCommon;
+  private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
+  private apiClient: IIndexPatternsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
@@ -74,13 +75,13 @@ export class IndexPatternsService {
   constructor({
     uiSettings,
     savedObjectsClient,
-    http,
+    apiClient,
     fieldFormats,
     onNotification,
     onError,
-    onRedirectNoIndexPattern,
+    onRedirectNoIndexPattern = () => {},
   }: IndexPatternsServiceDeps) {
-    this.apiClient = new IndexPatternsApiClient(http);
+    this.apiClient = apiClient;
     this.config = uiSettings;
     this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
@@ -103,13 +104,11 @@ export class IndexPatternsService {
   }
 
   private async refreshSavedObjectsCache() {
-    this.savedObjectsCache = (
-      await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
-        type: 'index-pattern',
-        fields: ['title'],
-        perPage: 10000,
-      })
-    ).savedObjects;
+    this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000,
+    });
   }
 
   getIds = async (refresh: boolean = false) => {
@@ -172,7 +171,7 @@ export class IndexPatternsService {
   };
 
   getDefault = async () => {
-    const defaultIndexPatternId = this.config.get('defaultIndex');
+    const defaultIndexPatternId = await this.config.get('defaultIndex');
     if (defaultIndexPatternId) {
       return await this.get(defaultIndexPatternId);
     }
@@ -191,7 +190,11 @@ export class IndexPatternsService {
     return indexPatternCache.set(id, indexPattern);
   };
 
-  specToIndexPattern(spec: IndexPatternSpec) {
+  async specToIndexPattern(spec: IndexPatternSpec) {
+    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    const uiSettingsValues = await this.config.getAll();
+
     const indexPattern = new IndexPattern(spec.id, {
       getConfig: (cfg: any) => this.config.get(cfg),
       savedObjectsClient: this.savedObjectsClient,
@@ -200,13 +203,18 @@ export class IndexPatternsService {
       fieldFormats: this.fieldFormats,
       onNotification: this.onNotification,
       onError: this.onError,
+      uiSettingsValues: { ...uiSettingsValues, shortDotsEnable, metaFields },
     });
 
     indexPattern.initFromSpec(spec);
     return indexPattern;
   }
 
-  make = (id?: string): Promise<IndexPattern> => {
+  async make(id?: string): Promise<IndexPattern> {
+    const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    const uiSettingsValues = await this.config.getAll();
+
     const indexPattern = new IndexPattern(id, {
       getConfig: (cfg: any) => this.config.get(cfg),
       savedObjectsClient: this.savedObjectsClient,
@@ -215,10 +223,20 @@ export class IndexPatternsService {
       fieldFormats: this.fieldFormats,
       onNotification: this.onNotification,
       onError: this.onError,
+      uiSettingsValues: { ...uiSettingsValues, shortDotsEnable, metaFields },
     });
 
     return indexPattern.init();
-  };
+  }
+
+  /**
+   * Deletes an index pattern from .kibana index
+   * @param indexPatternId: Id of kibana Index Pattern to delete
+   */
+  async delete(indexPatternId: string) {
+    indexPatternCache.clear(indexPatternId);
+    return this.savedObjectsClient.delete('index-pattern', indexPatternId);
+  }
 }
 
 export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;

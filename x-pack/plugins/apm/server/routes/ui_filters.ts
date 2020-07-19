@@ -97,10 +97,7 @@ function createLocalFiltersRoute<
         query,
         setup: {
           ...setup,
-          uiFiltersES: getUiFiltersES(
-            setup.dynamicIndexPattern,
-            omit(parsedUiFilters, filterNames)
-          ),
+          uiFiltersES: getUiFiltersES(omit(parsedUiFilters, filterNames)),
         },
       });
 

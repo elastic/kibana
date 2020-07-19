@@ -60,6 +60,10 @@ export interface VisualizePluginSetupDependencies {
   data: DataPublicPluginSetup;
 }
 
+export interface FeatureFlagConfig {
+  showNewVisualizeFlow: boolean;
+}
+
 export class VisualizePlugin
   implements
     Plugin<void, void, VisualizePluginSetupDependencies, VisualizePluginStartDependencies> {
@@ -165,6 +169,7 @@ export class VisualizePlugin
           savedObjectsPublic: pluginsStart.savedObjects,
           scopedHistory: params.history,
           restorePreviousUrl,
+          featureFlagConfig: this.initializerContext.config.get<FeatureFlagConfig>(),
         };
 
         params.element.classList.add('visAppWrapper');

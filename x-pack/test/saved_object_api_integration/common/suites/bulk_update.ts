@@ -31,7 +31,7 @@ const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' }
 export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
 
 export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('bulk_update');
+  const expectForbidden = expectResponses.forbiddenTypes('bulk_update');
   const expectResponseBody = (
     testCases: BulkUpdateTestCase | BulkUpdateTestCase[],
     statusCode: 200 | 403

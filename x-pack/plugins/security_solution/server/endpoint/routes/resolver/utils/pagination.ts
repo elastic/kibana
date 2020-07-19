@@ -8,39 +8,9 @@ import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { eventId } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
-/**
- * Represents a single result bucket of an aggregation
- */
-export interface AggBucket {
-  key: string;
-  doc_count: number;
-}
-
-interface TotalsAggregation {
-  totals?: {
-    buckets?: AggBucket[];
-  };
-}
-
 interface PaginationCursor {
   timestamp: number;
   eventID: string;
-}
-
-/**
- * The result structure of a query that leverages pagination. This includes totals that can be used to determine if
- * additional nodes exist and additional queries need to be made to retrieve the nodes.
- */
-export interface PaginatedResults {
-  /**
-   * Resulting events returned from the query.
-   */
-  results: ResolverEvent[];
-  /**
-   * Mapping of unique ID to total number of events that exist in ES. The events this references is scoped to the events
-   * that the query is searching for.
-   */
-  totals: Record<string, number>;
 }
 
 /**
@@ -83,19 +53,28 @@ export class PaginationBuilder {
   }
 
   /**
-   * Constructs a cursor to use in subsequent queries to retrieve the next set of results.
+   * Construct a cursor to use in subsequent queries.
    *
-   * @param total the total events that exist in ES scoped for a particular query.
    * @param results the events that were returned by the ES query
    */
-  static buildCursor(total: number, results: ResolverEvent[]): string | null {
-    if (total > results.length && results.length > 0) {
-      const lastResult = results[results.length - 1];
-      const cursor = {
-        timestamp: lastResult['@timestamp'],
-        eventID: eventId(lastResult),
-      };
-      return PaginationBuilder.urlEncodeCursor(cursor);
+  static buildCursor(results: ResolverEvent[]): string | null {
+    const lastResult = results[results.length - 1];
+    const cursor = {
+      timestamp: lastResult['@timestamp'],
+      eventID: eventId(lastResult) === undefined ? '' : String(eventId(lastResult)),
+    };
+    return PaginationBuilder.urlEncodeCursor(cursor);
+  }
+
+  /**
+   * Constructs a cursor if the requested limit has not been met.
+   *
+   * @param requestLimit the request limit for a query.
+   * @param results the events that were returned by the ES query
+   */
+  static buildCursorRequestLimit(requestLimit: number, results: ResolverEvent[]): string | null {
+    if (requestLimit <= results.length && results.length > 0) {
+      return PaginationBuilder.buildCursor(results);
     }
     return null;
   }
@@ -124,45 +103,16 @@ export class PaginationBuilder {
   /**
    * Creates an object for adding the pagination fields to a query
    *
-   * @param numTerms number of unique IDs that are being search for in this query
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
-   * @param aggregator the field that specifies a unique ID per event (e.g. entity_id)
-   * @param aggs other aggregations being used with this query
    * @returns an object containing the pagination information
    */
-  buildQueryFields(
-    numTerms: number,
-    tiebreaker: string,
-    aggregator: string,
-    aggs: JsonObject = {}
-  ): JsonObject {
+  buildQueryFields(tiebreaker: string): JsonObject {
     const fields: JsonObject = {};
     fields.sort = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
-    fields.aggs = { ...aggs, totals: { terms: { field: aggregator, size: numTerms } } };
     fields.size = this.size;
     if (this.timestamp && this.eventID) {
       fields.search_after = [this.timestamp, this.eventID] as Array<number | string>;
     }
     return fields;
-  }
-
-  /**
-   * Returns the totals found for the specified query
-   *
-   * @param aggregations the aggregation field from the ES response
-   * @returns a mapping of unique ID (e.g. entity_ids) to totals found for those IDs
-   */
-  static getTotals(aggregations?: TotalsAggregation): Record<string, number> {
-    if (!aggregations?.totals?.buckets) {
-      return {};
-    }
-
-    return aggregations?.totals?.buckets?.reduce(
-      (cumulative: Record<string, number>, bucket: AggBucket) => ({
-        ...cumulative,
-        [bucket.key]: bucket.doc_count,
-      }),
-      {}
-    );
   }
 }

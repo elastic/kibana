@@ -35,7 +35,10 @@ describe('<PolicyEdit />', () => {
   describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setGetPolicyResponse({ policy: POLICY_EDIT });
-      httpRequestsMockHelpers.setLoadIndicesResponse({ indices: ['my_index'] });
+      httpRequestsMockHelpers.setLoadIndicesResponse({
+        indices: ['my_index'],
+        dataStreams: ['my_data_stream'],
+      });
       httpRequestsMockHelpers.setLoadRepositoriesResponse({
         repositories: [{ name: POLICY_EDIT.repository }],
       });

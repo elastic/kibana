@@ -46,6 +46,12 @@
               "rule_id": {
                 "type": "keyword"
               },
+              "author": {
+                "type": "keyword"
+              },
+              "building_block_type": {
+                "type": "keyword"
+              },
               "false_positives": {
                 "type": "keyword"
               },
@@ -62,7 +68,20 @@
                 "type": "keyword"
               },
               "risk_score": {
-                "type": "keyword"
+                "type": "float"
+              },
+              "risk_score_mapping": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "operator": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "keyword"
+                  }
+                }
               },
               "output_index": {
                 "type": "keyword"
@@ -85,7 +104,13 @@
               "language": {
                 "type": "keyword"
               },
+              "license": {
+                "type": "keyword"
+              },
               "name": {
+                "type": "keyword"
+              },
+              "rule_name_override": {
                 "type": "keyword"
               },
               "query": {
@@ -96,6 +121,22 @@
               },
               "severity": {
                 "type": "keyword"
+              },
+              "severity_mapping": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "operator": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "keyword"
+                  },
+                  "severity": {
+                    "type": "keyword"
+                  }
+                }
               },
               "tags": {
                 "type": "keyword"
@@ -133,8 +174,21 @@
                   }
                 }
               },
+              "threshold": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "float"
+                  }
+                }
+              },
               "note": {
                 "type": "text"
+              },
+              "timestamp_override": {
+                "type": "keyword"
               },
               "type": {
                 "type": "keyword"
@@ -242,6 +296,9 @@
           },
           "status": {
             "type": "keyword"
+          },
+          "threshold_count": {
+            "type": "float"
           }
         }
       }

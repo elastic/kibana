@@ -6,8 +6,8 @@
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import {
-  ValueClickTriggerContext,
-  RangeSelectTriggerContext,
+  ValueClickContext,
+  RangeSelectContext,
 } from '../../../../../../src/plugins/embeddable/public';
 import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
 import { isTimeRange, isQuery, isFilters } from '../../../../../../src/plugins/data/public';
@@ -15,7 +15,7 @@ import { KibanaURL } from './kibana_url';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
-export type ExploreDataChartActionContext = ValueClickTriggerContext | RangeSelectTriggerContext;
+export type ExploreDataChartActionContext = ValueClickContext | RangeSelectContext;
 
 export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
 
@@ -49,7 +49,7 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
     };
 
     if (embeddable) {
-      state.indexPatternId = shared.getIndexPattern(embeddable) || undefined;
+      state.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
 
       const input = embeddable.getInput();
 

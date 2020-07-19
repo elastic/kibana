@@ -10,6 +10,7 @@
 export const LIST_URL = '/api/lists';
 export const LIST_INDEX = `${LIST_URL}/index`;
 export const LIST_ITEM_URL = `${LIST_URL}/items`;
+export const LIST_PRIVILEGES_URL = `${LIST_URL}/privileges`;
 
 /**
  * Exception list routes
@@ -22,3 +23,28 @@ export const EXCEPTION_LIST_ITEM_URL = '/api/exception_lists/items';
  */
 export const EXCEPTION_LIST_NAMESPACE_AGNOSTIC = 'exception-list-agnostic';
 export const EXCEPTION_LIST_NAMESPACE = 'exception-list';
+
+/**
+ * Specific routes for the single global space agnostic endpoint list
+ */
+export const ENDPOINT_LIST_URL = '/api/endpoint_list';
+
+/**
+ * Specific routes for the single global space agnostic endpoint list. These are convenience
+ * routes where they are going to try and create the global space agnostic endpoint list if it
+ * does not exist yet or if it was deleted at some point and re-create it before adding items to
+ * the list
+ */
+export const ENDPOINT_LIST_ITEM_URL = '/api/endpoint_list/items';
+
+/**
+ * This ID is used for _both_ the Saved Object ID and for the list_id
+ * for the single global space agnostic endpoint list
+ */
+export const ENDPOINT_LIST_ID = 'endpoint_list';
+
+/** The name of the single global space agnostic endpoint list */
+export const ENDPOINT_LIST_NAME = 'Elastic Endpoint Exception List';
+
+/** The description of the single global space agnostic endpoint list */
+export const ENDPOINT_LIST_DESCRIPTION = 'Elastic Endpoint Exception List';

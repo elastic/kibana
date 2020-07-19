@@ -18,15 +18,16 @@ import {
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import * as i18n from '../translations';
-import { ExceptionListType, Filter } from '../types';
+import { Filter } from '../types';
+import { ExceptionListTypeEnum } from '../../../../../public/lists_plugin_deps';
 
 interface ExceptionsViewerHeaderProps {
   isInitLoading: boolean;
-  supportedListTypes: ExceptionListType[];
+  supportedListTypes: ExceptionListTypeEnum[];
   detectionsListItems: number;
   endpointListItems: number;
   onFilterChange: (arg: Filter) => void;
-  onAddExceptionClick: (type: ExceptionListType) => void;
+  onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
 }
 
 /**
@@ -85,7 +86,7 @@ const ExceptionsViewerHeaderComponent = ({
   );
 
   const onAddException = useCallback(
-    (type: ExceptionListType): void => {
+    (type: ExceptionListTypeEnum): void => {
       onAddExceptionClick(type);
       setAddExceptionMenuOpen(false);
     },
@@ -99,12 +100,12 @@ const ExceptionsViewerHeaderComponent = ({
         items: [
           {
             name: i18n.ADD_TO_ENDPOINT_LIST,
-            onClick: () => onAddException(ExceptionListType.ENDPOINT),
+            onClick: () => onAddException(ExceptionListTypeEnum.ENDPOINT),
             'data-test-subj': 'addEndpointExceptionBtn',
           },
           {
             name: i18n.ADD_TO_DETECTIONS_LIST,
-            onClick: () => onAddException(ExceptionListType.DETECTION_ENGINE),
+            onClick: () => onAddException(ExceptionListTypeEnum.DETECTION),
             'data-test-subj': 'addDetectionsExceptionBtn',
           },
         ],

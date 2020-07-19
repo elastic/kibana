@@ -58,6 +58,7 @@ export class Schemas implements ISchemas {
     >
   ) {
     _(schemas || [])
+      .chain()
       .map((schema) => {
         if (!schema.name) throw new Error('all schema must have a unique name');
 

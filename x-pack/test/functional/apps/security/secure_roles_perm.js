@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects([
     'security',
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
         roles: ['logstash_reader', 'kibana_admin'],
       });
       log.debug('After Add user: , userObj.userName');
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       log.debug('roles: ', users.Rashmi.roles);
       expect(users.Rashmi.roles).to.eql(['logstash_reader', 'kibana_admin']);

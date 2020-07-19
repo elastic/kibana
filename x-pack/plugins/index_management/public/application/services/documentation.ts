@@ -36,6 +36,10 @@ class DocumentationService {
     return `${this.esDocsBase}/mapping-routing-field.html`;
   }
 
+  public getDataStreamsDocumentationLink() {
+    return `${this.esDocsBase}/data-streams.html`;
+  }
+
   public getTemplatesDocumentationLink() {
     return `${this.esDocsBase}/indices-templates.html`;
   }

@@ -6,8 +6,9 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+import '../../../../common/mock/match_media';
 import { MapToolTipComponent } from './map_tool_tip';
-import { MapFeature } from '../types';
+import { TooltipFeature } from '../../../../../../maps/common/descriptor_types';
 
 describe('MapToolTip', () => {
   test('placeholder component renders correctly against snapshot', () => {
@@ -18,10 +19,11 @@ describe('MapToolTip', () => {
   test('full component renders correctly against snapshot', () => {
     const addFilters = jest.fn();
     const closeTooltip = jest.fn();
-    const features: MapFeature[] = [
+    const features: TooltipFeature[] = [
       {
         id: 1,
         layerId: 'layerId',
+        mbProperties: {},
       },
     ];
     const getLayerName = jest.fn();

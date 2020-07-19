@@ -9,7 +9,8 @@ import { useInterval } from 'react-use';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { convertIntervalToString } from '../../../../utils/convert_interval_to_string';
-import { NodesOverview, calculateBoundsFromNodes } from './nodes_overview';
+import { NodesOverview } from './nodes_overview';
+import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { PageContent } from '../../../../components/page';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
@@ -48,7 +49,7 @@ export const Layout = () => {
   const { filterQueryAsJson, applyFilterQuery } = useWaffleFiltersContext();
   const { loading, nodes, reload, interval } = useSnapshot(
     filterQueryAsJson,
-    metric,
+    [metric],
     groupBy,
     nodeType,
     sourceId,

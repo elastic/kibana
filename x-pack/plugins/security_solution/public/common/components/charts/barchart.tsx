@@ -117,6 +117,7 @@ interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
+  timelineId?: string;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -125,6 +126,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   barChart,
   configs,
   stackByField,
+  timelineId,
 }) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
   const legendItems: LegendItem[] = useMemo(
@@ -135,11 +137,12 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
             dataProviderId: escapeDataProviderId(
               `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
             ),
+            timelineId,
             field: stackByField,
             value: d.key,
           }))
         : NO_LEGEND_DATA,
-    [barChart, stackByField]
+    [barChart, stackByField, timelineId]
   );
 
   const customHeight = get('customHeight', configs);

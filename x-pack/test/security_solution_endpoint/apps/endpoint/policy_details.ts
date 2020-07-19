@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'endpoint',
     'policy',
     'endpointPageUtils',
-    'ingestManagerCreateDatasource',
+    'ingestManagerCreatePackageConfig',
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
         await testSubjects.existOrFail('policyDetailsIdNotFoundMessage');
         expect(await testSubjects.getVisibleText('policyDetailsIdNotFoundMessage')).to.equal(
-          'Saved object [ingest-datasources/invalid-id] not found'
+          'Saved object [ingest-package-configs/invalid-id] not found'
         );
       });
     });
@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       before(async () => {
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.datasource.id);
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
       });
 
       after(async () => {
@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should display policy view', async () => {
         expect(await testSubjects.getVisibleText('pageViewHeaderLeftTitle')).to.equal(
-          policyInfo.datasource.name
+          policyInfo.packageConfig.name
         );
       });
     });
@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.datasource.id);
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
       });
 
       afterEach(async () => {
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         expect(await testSubjects.getVisibleText('policyDetailsSuccessMessage')).to.equal(
-          `Policy ${policyInfo.datasource.name} has been updated.`
+          `Policy ${policyInfo.packageConfig.name} has been updated.`
         );
       });
       it('should persist update on the screen', async () => {
@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         await pageObjects.policy.navigateToPolicyList();
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.datasource.id);
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
 
         expect(await (await testSubjects.find('policyWindowsEvent_process')).isSelected()).to.equal(
           false
@@ -107,7 +107,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullConfig).to.eql({
           inputs: [
             {
-              id: policyInfo.datasource.id,
+              id: policyInfo.packageConfig.id,
               dataset: { namespace: 'default' },
               name: 'Protect East Coast',
               meta: {
@@ -116,47 +116,63 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   version: policyInfo.packageInfo.version,
                 },
               },
+              artifact_manifest: {
+                artifacts: {
+                  'endpoint-exceptionlist-linux-v1': {
+                    compression_algorithm: 'zlib',
+                    decoded_sha256:
+                      'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    decoded_size: 14,
+                    encoded_sha256:
+                      'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                    encoded_size: 22,
+                    encryption_algorithm: 'none',
+                    relative_url:
+                      '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  },
+                  'endpoint-exceptionlist-macos-v1': {
+                    compression_algorithm: 'zlib',
+                    decoded_sha256:
+                      'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    decoded_size: 14,
+                    encoded_sha256:
+                      'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                    encoded_size: 22,
+                    encryption_algorithm: 'none',
+                    relative_url:
+                      '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  },
+                  'endpoint-exceptionlist-windows-v1': {
+                    compression_algorithm: 'zlib',
+                    decoded_sha256:
+                      'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    decoded_size: 14,
+                    encoded_sha256:
+                      'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                    encoded_size: 22,
+                    encryption_algorithm: 'none',
+                    relative_url:
+                      '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  },
+                },
+                // The manifest version could have changed when the Policy was updated because the
+                // policy details page ensures that a save action applies the udpated policy on top
+                // of the latest Package Config. So we just ignore the check against this value by
+                // forcing it to be the same as the value returned in the full agent config.
+                manifest_version: agentFullConfig.inputs[0].artifact_manifest.manifest_version,
+                schema_version: 'v1',
+              },
               policy: {
                 linux: {
-                  advanced: {
-                    elasticsearch: {
-                      indices: {
-                        control: 'control-index',
-                        event: 'event-index',
-                        logging: 'logging-index',
-                      },
-                      kernel: { connect: true, process: true },
-                    },
-                  },
                   events: { file: false, network: true, process: true },
-                  logging: { file: 'info', stdout: 'debug' },
+                  logging: { file: 'info' },
                 },
                 mac: {
-                  advanced: {
-                    elasticsearch: {
-                      indices: {
-                        control: 'control-index',
-                        event: 'event-index',
-                        logging: 'logging-index',
-                      },
-                      kernel: { connect: true, process: true },
-                    },
-                  },
                   events: { file: false, network: true, process: true },
-                  logging: { file: 'info', stdout: 'debug' },
-                  malware: { mode: 'detect' },
+                  logging: { file: 'info' },
+                  malware: { mode: 'prevent' },
                 },
                 windows: {
-                  advanced: {
-                    elasticsearch: {
-                      indices: {
-                        control: 'control-index',
-                        event: 'event-index',
-                        logging: 'logging-index',
-                      },
-                      kernel: { connect: true, process: true },
-                    },
-                  },
                   events: {
                     dll_and_driver_load: true,
                     dns: true,
@@ -166,7 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                     registry: true,
                     security: true,
                   },
-                  logging: { file: 'info', stdout: 'debug' },
+                  logging: { file: 'info' },
                   malware: { mode: 'prevent' },
                 },
               },
@@ -183,7 +199,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
           },
           revision: 3,
-          settings: {
+          agent: {
             monitoring: {
               enabled: false,
               logs: false,
@@ -193,15 +209,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
     });
-
-    describe('when on Ingest Configurations Edit Datasource page', async () => {
+    describe('when on Ingest Configurations Edit Package Config page', async () => {
       let policyInfo: PolicyTestResourceInfo;
       beforeEach(async () => {
         // Create a policy and navigate to Ingest app
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.ingestManagerCreateDatasource.navigateToAgentConfigEditDatasource(
+        await pageObjects.ingestManagerCreatePackageConfig.navigateToAgentConfigEditPackageConfig(
           policyInfo.agentConfig.id,
-          policyInfo.datasource.id
+          policyInfo.packageConfig.id
         );
       });
       afterEach(async () => {
@@ -217,13 +232,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await linkToPolicy.click();
         await pageObjects.policy.ensureIsOnDetailsPage();
       });
-      it('should allow the user to navigate, edit and save Policy Details', async () => {
+      it('should allow the user to navigate, edit, save Policy Details and be redirected back to ingest', async () => {
         await (await testSubjects.find('editLinkToPolicyDetails')).click();
         await pageObjects.policy.ensureIsOnDetailsPage();
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        await pageObjects.ingestManagerCreatePackageConfig.ensureOnEditPageOrFail();
+      });
+      it('should navigate back to Ingest Configuration Edit package page on click of cancel button', async () => {
+        await (await testSubjects.find('editLinkToPolicyDetails')).click();
+        await (await pageObjects.policy.findCancelButton()).click();
+        await pageObjects.ingestManagerCreatePackageConfig.ensureOnEditPageOrFail();
       });
     });
   });

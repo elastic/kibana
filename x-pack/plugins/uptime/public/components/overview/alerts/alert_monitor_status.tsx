@@ -5,17 +5,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
-import {
-  DownNoExpressionSelect,
-  TimeExpressionSelect,
-  FiltersExpressionSelectContainer,
-} from './monitor_expressions';
+import { FiltersExpressionSelectContainer, StatusExpressionSelect } from './monitor_expressions';
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
+import { AvailabilityExpressionSelect } from './monitor_expressions/availability_expression_select';
 import { KueryBar } from '..';
 
 export interface AlertMonitorStatusProps {
@@ -69,21 +66,13 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
 
       <EuiSpacer size="s" />
 
-      <DownNoExpressionSelect
-        defaultNumTimes={alertParams.numTimes}
-        hasFilters={hasFilters}
-        setAlertParams={setAlertParams}
+      <AddFilterButton
+        alertFilters={alertParams.filters}
+        newFilters={newFilters}
+        onNewFilter={(newFilter) => {
+          setNewFilters([...newFilters, newFilter]);
+        }}
       />
-
-      <EuiSpacer size="xs" />
-
-      <TimeExpressionSelect
-        defaultTimerangeUnit={alertParams.timerangeUnit}
-        defaultTimerangeCount={alertParams.timerangeCount}
-        setAlertParams={setAlertParams}
-      />
-
-      <EuiSpacer size="xs" />
 
       <FiltersExpressionSelectContainer
         alertParams={alertParams}
@@ -97,17 +86,23 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
         shouldUpdateUrl={shouldUpdateUrl}
       />
 
-      <EuiSpacer size="xs" />
+      <EuiHorizontalRule />
 
-      <AddFilterButton
-        alertFilters={alertParams.filters}
-        newFilters={newFilters}
-        onNewFilter={(newFilter) => {
-          setNewFilters([...newFilters, newFilter]);
-        }}
+      <StatusExpressionSelect
+        alertParams={alertParams}
+        hasFilters={hasFilters}
+        setAlertParams={setAlertParams}
       />
 
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule />
+
+      <AvailabilityExpressionSelect
+        alertParams={alertParams}
+        isOldAlert={isOldAlert}
+        setAlertParams={setAlertParams}
+      />
+
+      <EuiSpacer size="l" />
 
       <EuiCallOut
         size="s"

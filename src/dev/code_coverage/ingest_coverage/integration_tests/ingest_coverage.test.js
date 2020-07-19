@@ -31,6 +31,7 @@ const env = {
   ES_HOST: 'https://super:changeme@some.fake.host:9243',
   NODE_ENV: 'integration_test',
   COVERAGE_INGESTION_KIBANA_ROOT: '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
+  FETCHED_PREVIOUS: 'FAKE_PREVIOUS_SHA',
 };
 
 describe('Ingesting coverage', () => {
@@ -47,7 +48,7 @@ describe('Ingesting coverage', () => {
 
   describe(`staticSiteUrl`, () => {
     let actualUrl = '';
-    const siteUrlRegex = /staticSiteUrl:\s*(.+,)/;
+    const siteUrlRegex = /"staticSiteUrl":\s*(.+,)/;
 
     beforeAll(async () => {
       const opts = [...verboseArgs, resolved];
@@ -68,27 +69,57 @@ describe('Ingesting coverage', () => {
       expect(folderStructure.test(actualUrl)).ok();
     });
   });
-
   describe(`vcsInfo`, () => {
-    let vcsInfo;
+    let stdOutWithVcsInfo = '';
     describe(`without a commit msg in the vcs info file`, () => {
-      const args = [
-        'scripts/ingest_coverage.js',
-        '--verbose',
-        '--vcsInfoPath',
-        'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO_missing_commit_msg.txt',
-        '--path',
-      ];
-
       beforeAll(async () => {
+        const args = [
+          'scripts/ingest_coverage.js',
+          '--verbose',
+          '--vcsInfoPath',
+          'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO_missing_commit_msg.txt',
+          '--path',
+        ];
         const opts = [...args, resolved];
         const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
-        vcsInfo = stdout;
+        stdOutWithVcsInfo = stdout;
       });
 
       it(`should be an obj w/o a commit msg`, () => {
         const commitMsgRE = /"commitMsg"/;
-        expect(commitMsgRE.test(vcsInfo)).to.not.be.ok();
+        expect(commitMsgRE.test(stdOutWithVcsInfo)).to.not.be.ok();
+      });
+    });
+    describe(`including previous sha`, () => {
+      let stdOutWithPrevious = '';
+      beforeAll(async () => {
+        const opts = [...verboseArgs, resolved];
+        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+        stdOutWithPrevious = stdout;
+      });
+
+      it(`should have a vcsCompareUrl`, () => {
+        const previousCompareUrlRe = /vcsCompareUrl.+\s*.*https.+compare\/FAKE_PREVIOUS_SHA\.\.\.f07b34f6206/;
+        expect(previousCompareUrlRe.test(stdOutWithPrevious)).to.be.ok();
+      });
+    });
+    describe(`with a commit msg in the vcs info file`, () => {
+      beforeAll(async () => {
+        const args = [
+          'scripts/ingest_coverage.js',
+          '--verbose',
+          '--vcsInfoPath',
+          'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/VCS_INFO.txt',
+          '--path',
+        ];
+        const opts = [...args, resolved];
+        const { stdout } = await execa(process.execPath, opts, { cwd: ROOT_DIR, env });
+        stdOutWithVcsInfo = stdout;
+      });
+
+      it(`should be an obj w/ a commit msg`, () => {
+        const commitMsgRE = /commitMsg/;
+        expect(commitMsgRE.test(stdOutWithVcsInfo)).to.be.ok();
       });
     });
   });
@@ -122,10 +153,12 @@ describe('Ingesting coverage', () => {
     });
 
     it(`should not occur when going to the totals index`, () => {
-      expect(teamAssignRE.test(shouldNotHavePipelineOut)).to.not.be.ok();
+      const actual = teamAssignRE.test(shouldNotHavePipelineOut);
+      expect(actual).to.not.be.ok();
     });
     it(`should indeed occur when going to the coverage index`, () => {
-      expect(teamAssignRE.test(shouldIndeedHavePipelineOut)).to.be.ok();
+      const actual = /ingest-pipe=>team_assignment/.test(shouldIndeedHavePipelineOut);
+      expect(actual).to.be.ok();
     });
   });
 });

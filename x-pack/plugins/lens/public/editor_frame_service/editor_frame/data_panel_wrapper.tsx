@@ -19,6 +19,7 @@ interface DataPanelWrapperProps {
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
   dispatch: (action: Action) => void;
+  showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
   query: Query;
   dateRange: FramePublicAPI['dateRange'];
@@ -46,6 +47,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     query: props.query,
     dateRange: props.dateRange,
     filters: props.filters,
+    showNoDataPopover: props.showNoDataPopover,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

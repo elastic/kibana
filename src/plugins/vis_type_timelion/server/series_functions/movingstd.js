@@ -61,7 +61,7 @@ export default new Chainable('movingstd', {
     return alter(args, function (eachSeries, _window, _position) {
       _position = _position || defaultPosition;
 
-      if (!_.contains(positions, _position)) {
+      if (!_.includes(positions, _position)) {
         throw new Error(
           i18n.translate(
             'timelion.serverSideErrors.movingstdFunction.notValidPositionErrorMessage',

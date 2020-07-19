@@ -27,6 +27,14 @@ import { OperationMetadata } from '../../types';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 const expectedIndexPatterns = {
   1: {
@@ -79,6 +87,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       indexPatternRefs: [],
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
+      isFirstExistenceFetch: false,
       existingFields: {
         'my-fake-index-pattern': {
           timestamp: true,
@@ -1257,6 +1266,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           myLayer: {
             indexPatternId: 'foo',

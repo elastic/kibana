@@ -10,9 +10,11 @@
     "navigation",
     "kibanaLegacy",
     "visualizations",
-    "dashboard"
+    "dashboard",
+    "charts"
   ],
   "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions"],
   "configPath": ["xpack", "lens"],
-  "extraPublicDirs": ["common/constants"]
+  "extraPublicDirs": ["common/constants"],
+  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable"]
 }

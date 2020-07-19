@@ -11,7 +11,6 @@ import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
 
 import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
-import { GlobalTime } from '../../common/containers/global_time';
 import { Hosts } from './hosts';
 import { hostsPagePath, hostDetailsPagePath } from './types';
 
@@ -36,72 +35,49 @@ type Props = Partial<RouteComponentProps<{}>> & { url: string };
 
 export const HostsContainer = React.memo<Props>(({ url }) => {
   const history = useHistory();
-  return (
-    <GlobalTime>
-      {({ to, from, setQuery, deleteQuery, isInitializing }) => (
-        <Switch>
-          <Route
-            path="/ml-hosts"
-            render={({ location, match }) => (
-              <MlHostConditionalContainer location={location} url={match.url} />
-            )}
-          />
-          <Route
-            path={getHostsTabPath()}
-            render={() => (
-              <Hosts
-                hostsPagePath={hostsPagePath}
-                from={from}
-                to={to}
-                setQuery={setQuery}
-                isInitializing={isInitializing}
-                deleteQuery={deleteQuery}
-              />
-            )}
-          />
-          <Route
-            path={getHostDetailsTabPath(hostsPagePath)}
-            render={({
-              match: {
-                params: { detailName },
-              },
-            }) => (
-              <HostDetails
-                hostDetailsPagePath={hostDetailsPagePath}
-                detailName={detailName}
-                from={from}
-                to={to}
-                setQuery={setQuery}
-                isInitializing={isInitializing}
-                deleteQuery={deleteQuery}
-              />
-            )}
-          />
-          <Route
-            path={hostDetailsPagePath}
-            render={({
-              match: {
-                params: { detailName },
-              },
-              location: { search = '' },
-            }) => {
-              history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
-              return null;
-            }}
-          />
 
-          <Route
-            exact
-            strict
-            path=""
-            render={({ location: { search = '' } }) => {
-              history.replace(`${HostsTableType.hosts}${search}`);
-              return null;
-            }}
-          />
-        </Switch>
-      )}
-    </GlobalTime>
+  return (
+    <Switch>
+      <Route
+        path="/ml-hosts"
+        render={({ location, match }) => (
+          <MlHostConditionalContainer location={location} url={match.url} />
+        )}
+      />
+      <Route path={getHostsTabPath()}>
+        <Hosts hostsPagePath={hostsPagePath} />
+      </Route>
+      <Route
+        path={getHostDetailsTabPath(hostsPagePath)}
+        render={({
+          match: {
+            params: { detailName },
+          },
+        }) => <HostDetails hostDetailsPagePath={hostDetailsPagePath} detailName={detailName} />}
+      />
+      <Route
+        path={hostDetailsPagePath}
+        render={({
+          match: {
+            params: { detailName },
+          },
+          location: { search = '' },
+        }) => {
+          history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
+          return null;
+        }}
+      />
+
+      <Route
+        exact
+        strict
+        path=""
+        render={({ location: { search = '' } }) => {
+          history.replace(`${HostsTableType.hosts}${search}`);
+          return null;
+        }}
+      />
+    </Switch>
   );
 });
 

@@ -19,10 +19,16 @@ import {
   TimeRangeBounds,
   OverallSwimlaneData,
   SwimlaneData,
+  ViewBySwimLaneData,
 } from '../../explorer_utils';
+import { Annotations, EsAggregationResult } from '../../../../../common/types/annotations';
+import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 
 export interface ExplorerState {
-  annotationsData: any[];
+  annotations: {
+    annotationsData: Annotations;
+    aggregations: EsAggregationResult;
+  };
   bounds: TimeRangeBounds | undefined;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
@@ -42,14 +48,16 @@ export interface ExplorerState {
   selectedJobs: ExplorerJob[] | null;
   swimlaneBucketInterval: any;
   swimlaneContainerWidth: number;
-  swimlaneLimit: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;
   viewByLoadedForTimeFormatted: string | null;
-  viewBySwimlaneData: SwimlaneData | OverallSwimlaneData;
+  viewBySwimlaneData: SwimlaneData | ViewBySwimLaneData;
   viewBySwimlaneDataLoading: boolean;
   viewBySwimlaneFieldName?: string;
+  viewByPerPage: number;
+  viewByFromPage: number;
   viewBySwimlaneOptions: string[];
+  swimlaneLimit?: number;
 }
 
 function getDefaultIndexPattern() {
@@ -58,7 +66,10 @@ function getDefaultIndexPattern() {
 
 export function getExplorerDefaultState(): ExplorerState {
   return {
-    annotationsData: [],
+    annotations: {
+      annotationsData: [],
+      aggregations: {},
+    },
     bounds: undefined,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
@@ -78,7 +89,6 @@ export function getExplorerDefaultState(): ExplorerState {
     selectedJobs: null,
     swimlaneBucketInterval: undefined,
     swimlaneContainerWidth: 0,
-    swimlaneLimit: 10,
     tableData: {
       anomalies: [],
       examplesByJobId: [''],
@@ -92,5 +102,8 @@ export function getExplorerDefaultState(): ExplorerState {
     viewBySwimlaneDataLoading: false,
     viewBySwimlaneFieldName: undefined,
     viewBySwimlaneOptions: [],
+    viewByPerPage: SWIM_LANE_DEFAULT_PAGE_SIZE,
+    viewByFromPage: 1,
+    swimlaneLimit: undefined,
   };
 }

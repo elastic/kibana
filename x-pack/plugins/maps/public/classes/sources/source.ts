@@ -17,7 +17,7 @@ import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
 
 export type SourceEditorArgs = {
-  onChange: (args: OnSourceChangeArgs) => void;
+  onChange: (...args: OnSourceChangeArgs[]) => void;
 };
 
 export type ImmutableSourceProperty = {
@@ -54,7 +54,8 @@ export interface ISource {
   isESSource(): boolean;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
-  isJoinable(): boolean;
+  showJoinEditor(): boolean;
+  getJoinsDisabledReason(): string | null;
   cloneDescriptor(): SourceDescriptor;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
@@ -80,7 +81,6 @@ export class AbstractSource implements ISource {
   destroy(): void {}
 
   cloneDescriptor(): SourceDescriptor {
-    // @ts-ignore
     return copyPersistentState(this._descriptor);
   }
 
@@ -133,7 +133,7 @@ export class AbstractSource implements ISource {
   }
 
   getApplyGlobalQuery(): boolean {
-    return !!this._descriptor.applyGlobalQuery;
+    return 'applyGlobalQuery' in this._descriptor ? !!this._descriptor.applyGlobalQuery : false;
   }
 
   getIndexPatternIds(): string[] {
@@ -148,8 +148,12 @@ export class AbstractSource implements ISource {
     return 0;
   }
 
-  isJoinable(): boolean {
+  showJoinEditor(): boolean {
     return false;
+  }
+
+  getJoinsDisabledReason() {
+    return null;
   }
 
   isESSource(): boolean {

@@ -11,7 +11,7 @@ export * from '../translations';
 export const JIRA_DESC = i18n.translate(
   'xpack.securitySolution.case.connectors.jira.selectMessageText',
   {
-    defaultMessage: 'Push or update SIEM case data to a new issue in Jira',
+    defaultMessage: 'Push or update Security case data to a new issue in Jira',
   }
 );
 

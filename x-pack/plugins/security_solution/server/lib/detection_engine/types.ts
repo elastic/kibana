@@ -9,6 +9,7 @@ import {
   Description,
   NoteOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   FalsePositives,
   From,
   Immutable,
@@ -28,6 +29,13 @@ import {
   Version,
   MetaOrUndefined,
   RuleId,
+  AuthorOrUndefined,
+  BuildingBlockTypeOrUndefined,
+  LicenseOrUndefined,
+  RiskScoreMappingOrUndefined,
+  RuleNameOverrideOrUndefined,
+  SeverityMappingOrUndefined,
+  TimestampOverrideOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
@@ -38,6 +46,8 @@ export type PartialFilter = Partial<Filter>;
 
 export interface RuleTypeParams {
   anomalyThreshold: AnomalyThresholdOrUndefined;
+  author: AuthorOrUndefined;
+  buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   note: NoteOrUndefined;
   falsePositives: FalsePositives;
@@ -46,6 +56,7 @@ export interface RuleTypeParams {
   immutable: Immutable;
   index: IndexOrUndefined;
   language: LanguageOrUndefined;
+  license: LicenseOrUndefined;
   outputIndex: OutputIndex;
   savedId: SavedIdOrUndefined;
   timelineId: TimelineIdOrUndefined;
@@ -56,8 +67,13 @@ export interface RuleTypeParams {
   filters: PartialFilter[] | undefined;
   maxSignals: MaxSignals;
   riskScore: RiskScore;
+  riskScoreMapping: RiskScoreMappingOrUndefined;
+  ruleNameOverride: RuleNameOverrideOrUndefined;
   severity: Severity;
+  severityMapping: SeverityMappingOrUndefined;
   threat: ThreatOrUndefined;
+  threshold: ThresholdOrUndefined;
+  timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: RuleType;
   references: References;

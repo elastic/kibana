@@ -52,7 +52,7 @@ export const migrateIncludeExcludeFormat = {
         output.params[this.name] = parsedValue;
       }
     } else if (isObject(value)) {
-      output.params[this.name] = value.pattern;
+      output.params[this.name] = (value as any).pattern;
     } else if (value && isStringType(aggConfig)) {
       output.params[this.name] = value;
     }

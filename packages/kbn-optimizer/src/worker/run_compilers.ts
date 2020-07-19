@@ -51,6 +51,15 @@ import {
 const PLUGIN_NAME = '@kbn/optimizer';
 
 /**
+ * sass-loader creates about a 40% overhead on the overall optimizer runtime, and
+ * so this constant is used to indicate to assignBundlesToWorkers() that there is
+ * extra work done in a bundle that has a lot of scss imports. The value is
+ * arbitrary and just intended to weigh the bundles so that they are distributed
+ * across mulitple workers on machines with lots of cores.
+ */
+const EXTRA_SCSS_WORK_UNITS = 100;
+
+/**
  * Create an Observable<CompilerMsg> for a specific child compiler + bundle
  */
 const observeCompiler = (
@@ -77,7 +86,7 @@ const observeCompiler = (
    */
   const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
     maybeMap((stats) => {
-      // @ts-ignore not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
+      // @ts-expect-error not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
       if (stats.compilation.needAdditionalPass) {
         return undefined;
       }
@@ -102,6 +111,11 @@ const observeCompiler = (
       const bundleRefExportIds: string[] = [];
       const referencedFiles = new Set<string>();
       let normalModuleCount = 0;
+      let workUnits = stats.compilation.fileDependencies.size;
+
+      if (bundle.manifestPath) {
+        referencedFiles.add(bundle.manifestPath);
+      }
 
       for (const module of stats.compilation.modules) {
         if (isNormalModule(module)) {
@@ -111,6 +125,15 @@ const observeCompiler = (
 
           if (!parsedPath.dirs.includes('node_modules')) {
             referencedFiles.add(path);
+
+            if (path.endsWith('.scss')) {
+              workUnits += EXTRA_SCSS_WORK_UNITS;
+
+              for (const depPath of module.buildInfo.fileDependencies) {
+                referencedFiles.add(depPath);
+              }
+            }
+
             continue;
           }
 
@@ -127,7 +150,7 @@ const observeCompiler = (
         }
 
         if (module instanceof BundleRefModule) {
-          bundleRefExportIds.push(module.exportId);
+          bundleRefExportIds.push(module.ref.exportId);
           continue;
         }
 
@@ -158,6 +181,7 @@ const observeCompiler = (
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
         moduleCount: normalModuleCount,
+        workUnits,
         files,
       });
 

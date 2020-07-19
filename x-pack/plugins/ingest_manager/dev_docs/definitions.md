@@ -5,14 +5,13 @@ Overall documentation of Ingest Management is now maintained in the `elastic/sta
 
 This section is to define terms used across ingest management.
 
-## Data Source
+## Package Config
 
-A data source is a definition on how to collect data from a service, for example `nginx`. A data source contains
+A package config is a definition on how to collect data from a service, for example `nginx`. A package config contains
 definitions for one or multiple inputs and each input can contain one or multiple streams.
 
-With the example of the nginx Data Source, it contains to inputs: `logs` and `nginx/metrics`. Logs and metrics are collected
+With the example of the nginx Package Config, it contains to inputs: `logs` and `nginx/metrics`. Logs and metrics are collected
 differently. The `logs` input contains two streams, `access` and `error`, the `nginx/metrics` input contains the stubstatus stream.
-
 
 ## Data Stream
 
@@ -22,7 +21,6 @@ ingesting data and the setup of Elasticsearch.
 ## Elastic Agent
 
 A single, unified agent that users can deploy to hosts or containers. It controls which data is collected from the host or containers and where the data is sent. It will run Beats, Endpoint or other monitoring programs as needed. It can operate standalone or pull a configuration policy from Fleet.
-
 
 ## Elastic Package Registry
 
@@ -42,15 +40,15 @@ the index strategy is sent to Data Streams.
 
 ## Input
 
-An input is the configuration unit in an Agent Config that defines the options on how to collect data from 
-an endpoint. This could be username / password which are need to authenticate with a service or a host url 
+An input is the configuration unit in an Agent Config that defines the options on how to collect data from
+an endpoint. This could be username / password which are need to authenticate with a service or a host url
 as an example.
 
-An input is part of a Data Source and contains streams.
+An input is part of a Package Config and contains streams.
 
 ## Integration
 
-An integration is a package with the type integration. An integration package has at least 1 data source
+An integration is a package with the type integration. An integration package has at least 1 package config
 and usually collects data from / about a service.
 
 ## Namespace
@@ -59,13 +57,12 @@ A user-specified string that will be used to part of the index name in Elasticse
 
 ## Package
 
-A package contains all the assets for the Elastic Stack. A more detailed definition of a 
+A package contains all the assets for the Elastic Stack. A more detailed definition of a
 package can be found under https://github.com/elastic/package-registry.
 
-Besides the assets, a package contains the data source definitions with its inputs and streams.
+Besides the assets, a package contains the package config definitions with its inputs and streams.
 
 ## Stream
 
 A stream is a configuration unit in the Elastic Agent config. A stream is part of an input and defines how the data
 fetched by this input should be processed and which Data Stream to send it to.
-

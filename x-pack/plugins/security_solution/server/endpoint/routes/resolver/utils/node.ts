@@ -12,6 +12,7 @@ import {
   ResolverTree,
   ResolverChildNode,
   ResolverRelatedAlerts,
+  ResolverChildren,
 } from '../../../../../common/endpoint/types';
 
 /**
@@ -53,7 +54,6 @@ export function createChild(entityID: string): ResolverChildNode {
   const lifecycle = createLifecycle(entityID, []);
   return {
     ...lifecycle,
-    nextChild: null,
   };
 }
 
@@ -75,6 +75,19 @@ export function createLifecycle(
   lifecycle: ResolverEvent[]
 ): ResolverLifecycleNode {
   return { entityID, lifecycle };
+}
+
+/**
+ * Creates a resolver children response.
+ *
+ * @param nodes the child nodes to add to the ResolverChildren response
+ * @param nextChild the cursor for the response
+ */
+export function createChildren(
+  nodes: ResolverChildNode[] = [],
+  nextChild: string | null = null
+): ResolverChildren {
+  return { childNodes: nodes, nextChild };
 }
 
 /**

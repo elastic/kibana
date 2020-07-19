@@ -14,6 +14,8 @@ import {
   TimelineStatus,
   TimelineErrorResponseType,
   TimelineErrorResponse,
+  ImportTimelineResultSchema,
+  importTimelineResultSchema,
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
@@ -21,6 +23,7 @@ import {
   TIMELINE_DRAFT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_EXPORT_URL,
+  TIMELINE_PREPACKAGED_URL,
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -30,7 +33,7 @@ import { createToasterPlainError } from '../../cases/containers/utils';
 import {
   ImportDataProps,
   ImportDataResponse,
-} from '../../alerts/containers/detection_engine/rules';
+} from '../../detections/containers/detection_engine/rules';
 
 interface RequestPostTimeline {
   timeline: TimelineInput;
@@ -53,6 +56,12 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
 const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
   pipe(
     TimelineErrorResponseType.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResultSchema) =>
+  pipe(
+    importTimelineResultSchema.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
@@ -132,6 +141,7 @@ export const persistTimeline = async ({
 
 export const importTimelines = async ({
   fileToImport,
+  signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
   formData.append('file', fileToImport);
@@ -140,24 +150,24 @@ export const importTimelines = async ({
     method: 'POST',
     headers: { 'Content-Type': undefined },
     body: formData,
+    signal,
   });
 };
 
-export const exportSelectedTimeline: ExportSelectedData = async ({
+export const exportSelectedTimeline: ExportSelectedData = ({
   filename = `timelines_export.ndjson`,
   ids = [],
   signal,
 }): Promise<Blob> => {
   const body = ids.length > 0 ? JSON.stringify({ ids }) : undefined;
-  const response = await KibanaServices.get().http.fetch<{ body: Blob }>(`${TIMELINE_EXPORT_URL}`, {
+  return KibanaServices.get().http.fetch<Blob>(`${TIMELINE_EXPORT_URL}`, {
     method: 'POST',
     body,
     query: {
       file_name: filename,
     },
+    signal,
   });
-
-  return response.body;
 };
 
 export const getDraftTimeline = async ({
@@ -198,4 +208,13 @@ export const cleanDraftTimeline = async ({
   });
 
   return decodeTimelineResponse(response);
+};
+
+export const installPrepackedTimelines = async (): Promise<ImportTimelineResultSchema> => {
+  const response = await KibanaServices.get().http.post<ImportTimelineResultSchema>(
+    TIMELINE_PREPACKAGED_URL,
+    {}
+  );
+
+  return decodePrepackedTimelineResponse(response);
 };

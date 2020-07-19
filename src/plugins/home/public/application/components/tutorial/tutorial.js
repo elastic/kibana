@@ -334,6 +334,23 @@ class TutorialUi extends React.Component {
     }
   };
 
+  renderModuleNotices() {
+    const notices = getServices().tutorialService.getModuleNotices();
+    if (notices.length && this.state.tutorial.moduleName) {
+      return (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {notices.map((ModuleNotice, index) => (
+            <EuiFlexItem key={index}>
+              <ModuleNotice moduleName={this.state.tutorial.moduleName} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
     let content;
     if (this.state.notFound) {
@@ -382,6 +399,7 @@ class TutorialUi extends React.Component {
             isBeta={this.state.tutorial.isBeta}
           />
 
+          {this.renderModuleNotices()}
           <EuiSpacer />
           <div className="eui-textCenter">{this.renderInstructionSetsToggle()}</div>
 

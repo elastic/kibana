@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
-// eslint-disable-next-line import/no-default-export
 export default function annotationApiTests({ getService }: FtrProviderContext) {
   const supertestRead = getService('supertestAsApmReadUser');
   const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');
@@ -19,7 +18,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
   function expectContainsObj(source: JsonObject, expected: JsonObject) {
     expect(source).to.eql(
-      merge(cloneDeep(source), expected, (a, b) => {
+      merge(cloneDeep(source), expected, (a: any, b: any) => {
         if (isPlainObject(a) && isPlainObject(b)) {
           return undefined;
         }

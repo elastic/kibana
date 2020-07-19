@@ -33,12 +33,20 @@ import {
   enabled,
   tags,
   threat,
+  threshold,
   throttle,
   references,
   to,
   language,
   query,
   id,
+  building_block_type,
+  author,
+  license,
+  rule_name_override,
+  timestamp_override,
+  risk_score_mapping,
+  severity_mapping,
 } from '../common/schemas';
 import { listArrayOrUndefined } from '../types/lists';
 /* eslint-enable @typescript-eslint/camelcase */
@@ -48,6 +56,8 @@ import { listArrayOrUndefined } from '../types/lists';
  */
 export const patchRulesSchema = t.exact(
   t.partial({
+    author,
+    building_block_type,
     description,
     risk_score,
     name,
@@ -65,6 +75,7 @@ export const patchRulesSchema = t.exact(
     interval,
     query,
     language,
+    license,
     // TODO: output_index: This should be removed eventually
     output_index,
     saved_id,
@@ -73,10 +84,15 @@ export const patchRulesSchema = t.exact(
     meta,
     machine_learning_job_id,
     max_signals,
+    risk_score_mapping,
+    rule_name_override,
+    severity_mapping,
     tags,
     to,
     threat,
+    threshold,
     throttle,
+    timestamp_override,
     references,
     note,
     version,
