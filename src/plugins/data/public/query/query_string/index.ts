@@ -39,11 +39,24 @@ export class QueryStringManager {
     this._query = this.getDefaultQuery();
   }
 
-  private getDefaultQuery() {
+  public getDefaultQuery() {
     return {
       query: '',
       language: this.defaultLanguage,
     };
+  }
+
+  public formatQuery(query: Query | string | undefined): Query {
+    if (!query) {
+      return this.getDefaultQuery();
+    } else if (typeof query === 'string') {
+      return {
+        query,
+        language: this.defaultLanguage,
+      };
+    } else {
+      return query;
+    }
   }
 
   public getQueryUpdate$ = () => {
