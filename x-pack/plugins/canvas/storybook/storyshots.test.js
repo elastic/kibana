@@ -92,6 +92,6 @@ addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
-  configPath: path.resolve(__dirname, './../.storybook'),
+  configPath: path.resolve(__dirname, './../storybook'),
   test: multiSnapshotWithOptions({}),
 });
