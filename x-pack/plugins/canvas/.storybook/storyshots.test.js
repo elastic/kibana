@@ -94,4 +94,5 @@ addSerializer(styleSheetSerializer);
 initStoryshots({
   configPath: path.resolve(__dirname, './../.storybook'),
   test: multiSnapshotWithOptions({}),
+  storyNameRegex:/^((?!.*?redux).)*$/
 });
