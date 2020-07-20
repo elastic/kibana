@@ -32,7 +32,7 @@ export const MLErrorMessages: Record<ErrorCode, string> = {
     'xpack.apm.anomaly_detection.error.missing_write_privileges',
     {
       defaultMessage:
-        'You must have "write" privileges to Machine Learning and APM in order to view Anomaly Detection jobs',
+        'You must have "write" privileges to Machine Learning and APM in order to create Anomaly Detection jobs',
     }
   ),
   ML_NOT_AVAILABLE: i18n.translate(
