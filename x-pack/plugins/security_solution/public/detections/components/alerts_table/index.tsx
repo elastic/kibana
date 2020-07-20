@@ -464,6 +464,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           alertData={addExceptionModalState.alertData}
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
+          alertStatus={filterGroup}
         />
       )}
     </>
