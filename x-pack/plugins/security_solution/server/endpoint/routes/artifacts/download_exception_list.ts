@@ -14,6 +14,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { authenticateAgentWithAccessToken } from '../../../../../ingest_manager/server/services/agents/authenticate';
 import { validate } from '../../../../common/validate';
+import { LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG } from '../../../../common/endpoint/constants';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { ArtifactConstants, ExceptionsCache } from '../../lib/artifacts';
 import {
@@ -43,6 +44,7 @@ export function registerDownloadExceptionListRoute(
           DownloadArtifactRequestParamsSchema
         >(downloadArtifactRequestParamsSchema),
       },
+      options: { tags: [LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG] },
     },
     async (context, req, res) => {
       let scopedSOClient: SavedObjectsClientContract;

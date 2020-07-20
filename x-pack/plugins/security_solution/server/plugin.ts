@@ -41,6 +41,7 @@ import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import { APP_ID, APP_ICON, SERVER_APP_ID, SecurityPageName } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
+import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { ArtifactClient, ManifestManager } from './endpoint/services';
@@ -149,6 +150,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.ml
     );
     registerEndpointRoutes(router, endpointContext);
+    registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
     registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
