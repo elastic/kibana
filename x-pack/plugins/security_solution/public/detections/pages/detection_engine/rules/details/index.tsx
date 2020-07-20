@@ -37,7 +37,7 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
-import { useRule } from '../../../../containers/detection_engine/rules';
+import { useRule, Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import { useWithSource } from '../../../../../common/containers/source';
@@ -90,6 +90,8 @@ import {
   MIN_EVENTS_VIEWER_BODY_HEIGHT,
 } from '../../../../../timelines/components/timeline/body/helpers';
 import { footerHeight } from '../../../../../timelines/components/timeline/footer';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -97,23 +99,26 @@ enum RuleDetailTabs {
   exceptions = 'exceptions',
 }
 
-const ruleDetailTabs = [
-  {
-    id: RuleDetailTabs.alerts,
-    name: detectionI18n.ALERT,
-    disabled: false,
-  },
-  {
-    id: RuleDetailTabs.exceptions,
-    name: i18n.EXCEPTIONS_TAB,
-    disabled: false,
-  },
-  {
-    id: RuleDetailTabs.failures,
-    name: i18n.FAILURE_HISTORY_TAB,
-    disabled: false,
-  },
-];
+const getRuleDetailsTabs = (rule: Rule | null) => {
+  const canUseExceptions = rule && !isMlRule(rule.type) && !isThresholdRule(rule.type);
+  return [
+    {
+      id: RuleDetailTabs.alerts,
+      name: detectionI18n.ALERT,
+      disabled: false,
+    },
+    {
+      id: RuleDetailTabs.exceptions,
+      name: i18n.EXCEPTIONS_TAB,
+      disabled: !canUseExceptions,
+    },
+    {
+      id: RuleDetailTabs.failures,
+      name: i18n.FAILURE_HISTORY_TAB,
+      disabled: false,
+    },
+  ];
+};
 
 export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   filters,
@@ -160,6 +165,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions =
     mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+  const ruleDetailTabs = getRuleDetailsTabs(rule);
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(

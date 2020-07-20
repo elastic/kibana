@@ -23,7 +23,6 @@ export const exportListItemRoute = (router: IRouter): void => {
       path: `${LIST_ITEM_URL}/_export`,
       validate: {
         query: buildRouteValidation(exportListItemQuerySchema),
-        // TODO: Do we want to add a body here like export_rules_route and allow a size limit?
       },
     },
     async (context, request, response) => {
