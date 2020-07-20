@@ -15,7 +15,9 @@
 */
 def withDefaultPrComments(closure) {
   catchErrors {
-    buildState.set('PR_COMMENTS_ENABLED', true)
+    // sendCommentOnError() needs to know if comments are enabled, so lets track it with a global
+    // isPr() just ensures this functionality is skipped for non-PR builds
+    buildState.set('PR_COMMENTS_ENABLED', isPr())
     catchErrors {
       closure()
     }
@@ -24,7 +26,7 @@ def withDefaultPrComments(closure) {
 }
 
 def sendComment(isFinal = false) {
-  if (!params.ENABLE_GITHUB_PR_COMMENTS || !isPr() || !buildState.get('PR_COMMENTS_ENABLED')) {
+  if (!buildState.get('PR_COMMENTS_ENABLED')) {
     return
   }
 
