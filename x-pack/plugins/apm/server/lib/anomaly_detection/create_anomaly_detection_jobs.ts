@@ -34,7 +34,7 @@ export async function createAnomalyDetectionJobs(
 
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    throw new AnomalyDetectionError(ErrorCode.NOT_AVAILABLE_IN_SPACE);
+    throw new AnomalyDetectionError(ErrorCode.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
   if (!mlCapabilities.isPlatinumOrTrialLicense) {

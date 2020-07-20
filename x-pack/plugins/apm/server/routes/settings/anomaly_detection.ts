@@ -18,6 +18,20 @@ import { AnomalyDetectionError } from '../../lib/anomaly_detection/anomaly_detec
 
 type Jobs = PromiseReturnType<typeof getAnomalyDetectionJobs>;
 
+function getMlErrorCode(e: Error) {
+  // Missing privileges
+  if (e instanceof InsufficientMLCapabilities) {
+    return ErrorCode.MISSING_READ_PRIVILEGES;
+  }
+
+  if (e instanceof AnomalyDetectionError) {
+    return e.code;
+  }
+
+  // unexpected error
+  return ErrorCode.UNEXPECTED;
+}
+
 // get ML anomaly detection jobs for each environment
 export const anomalyDetectionJobsRoute = createRoute(() => ({
   method: 'GET',
@@ -35,30 +49,12 @@ export const anomalyDetectionJobsRoute = createRoute(() => ({
         hasLegacyJobs: legacyJobs,
       };
     } catch (e) {
-      // ML error
-      if (e instanceof InsufficientMLCapabilities) {
-        return {
-          jobs: [] as Jobs,
-          hasLegacyJobs: false,
-          errorCode: ErrorCode.MISSING_READ_PRIVILEGES,
-        };
-      }
-
-      // AnomalyDetectionError error
-      if (e instanceof AnomalyDetectionError) {
-        return {
-          jobs: [] as Jobs,
-          hasLegacyJobs: false,
-          errorCode: e.code,
-        };
-      }
-
-      // unexpected error
-      context.logger.warn(e.message);
+      const mlErrorCode = getMlErrorCode(e);
+      context.logger.warn(`Error while retrieving ML jobs: "${e.message}"`);
       return {
         jobs: [] as Jobs,
         hasLegacyJobs: false,
-        errorCode: ErrorCode.UNEXPECTED,
+        errorCode: mlErrorCode,
       };
     }
   },
@@ -83,24 +79,10 @@ export const createAnomalyDetectionJobsRoute = createRoute(() => ({
     try {
       await createAnomalyDetectionJobs(setup, environments, context.logger);
     } catch (e) {
-      // InsufficientMLCapabilities
-      if (e instanceof InsufficientMLCapabilities) {
-        return {
-          errorCode: ErrorCode.MISSING_READ_PRIVILEGES,
-        };
-      }
-
-      // AnomalyDetectionError
-      if (e instanceof AnomalyDetectionError) {
-        return {
-          errorCode: e.code,
-        };
-      }
-
-      // unexpected error
-      context.logger.warn(e.message);
+      const mlErrorCode = getMlErrorCode(e);
+      context.logger.warn(`Error while creating ML job: "${e.message}"`);
       return {
-        errorCode: ErrorCode.UNEXPECTED,
+        errorCode: mlErrorCode,
       };
     }
   },

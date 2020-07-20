@@ -36,27 +36,36 @@ export function getSeverity(score?: number) {
   }
 }
 
-// error message
 export const MLErrorMessages: Record<ErrorCode, string> = {
-  INSUFFICIENT_LICENSE:
-    'You must have a platinum license to use Anomaly Detection',
+  INSUFFICIENT_LICENSE: i18n.translate(
+    'xpack.apm.anomaly_detection.error.insufficient_license',
+    {
+      defaultMessage:
+        'You must have a platinum license to use Anomaly Detection',
+    }
+  ),
   MISSING_READ_PRIVILEGES: i18n.translate(
-    'xpack.apm.anomaly_detection.error.insufficient_privileges',
+    'xpack.apm.anomaly_detection.error.missing_read_privileges',
     {
       defaultMessage:
         'You must have "read" privileges to Machine Learning in order to view Anomaly Detection jobs',
     }
   ),
   MISSING_WRITE_PRIVILEGES: i18n.translate(
-    'xpack.apm.anomaly_detection.error.insufficient_privileges',
+    'xpack.apm.anomaly_detection.error.missing_write_privileges',
     {
       defaultMessage:
         'You must have "write" privileges to Machine Learning and APM in order to view Anomaly Detection jobs',
     }
   ),
-  ML_NOT_AVAILABLE: 'Machine learning is not available',
-  NOT_AVAILABLE_IN_SPACE: i18n.translate(
-    'xpack.apm.anomaly_detection.error.space',
+  ML_NOT_AVAILABLE: i18n.translate(
+    'xpack.apm.anomaly_detection.error.not_available',
+    {
+      defaultMessage: 'Machine learning is not available',
+    }
+  ),
+  ML_NOT_AVAILABLE_IN_SPACE: i18n.translate(
+    'xpack.apm.anomaly_detection.error.not_available_in_space',
     {
       defaultMessage: 'Machine learning is not available in the selected space',
     }
@@ -71,6 +80,6 @@ export enum ErrorCode {
   MISSING_READ_PRIVILEGES = 'MISSING_READ_PRIVILEGES',
   MISSING_WRITE_PRIVILEGES = 'MISSING_WRITE_PRIVILEGES',
   ML_NOT_AVAILABLE = 'ML_NOT_AVAILABLE',
-  NOT_AVAILABLE_IN_SPACE = 'NOT_AVAILABLE_IN_SPACE',
+  ML_NOT_AVAILABLE_IN_SPACE = 'ML_NOT_AVAILABLE_IN_SPACE',
   UNEXPECTED = 'UNEXPECTED',
 }
