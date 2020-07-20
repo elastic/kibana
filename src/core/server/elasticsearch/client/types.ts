@@ -22,6 +22,7 @@ import type {
   ApiResponse,
   TransportRequestOptions,
   TransportRequestParams,
+  TransportRequestPromise,
 } from '@elastic/elasticsearch/lib/Transport';
 
 /**
@@ -37,6 +38,6 @@ export type ElasticsearchClient = Omit<
     request(
       params: TransportRequestParams,
       options?: TransportRequestOptions
-    ): Promise<ApiResponse>;
+    ): TransportRequestPromise<ApiResponse>;
   };
 };
