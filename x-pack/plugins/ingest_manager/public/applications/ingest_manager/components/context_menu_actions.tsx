@@ -22,6 +22,8 @@ type Props = {
     props: EuiButtonProps;
     children: JSX.Element;
   };
+  isOpen?: boolean;
+  onChange?: (isOpen: boolean) => void;
 } & (
   | {
       items: EuiContextMenuPanelProps['items'];
@@ -31,10 +33,27 @@ type Props = {
     }
 );
 
-export const ContextMenuActions = React.memo<Props>(({ button, ...props }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
-  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+export const ContextMenuActions: React.FunctionComponent<Props> = ({
+  button,
+  onChange,
+  isOpen,
+  ...props
+}) => {
+  const [isOpenState, setIsOpenState] = useState(false);
+  const handleCloseMenu = useCallback(() => {
+    if (onChange) {
+      onChange(false);
+    } else {
+      setIsOpenState(false);
+    }
+  }, [setIsOpenState, onChange]);
+  const handleToggleMenu = useCallback(() => {
+    if (onChange) {
+      onChange(!isOpen);
+    } else {
+      setIsOpenState(!isOpenState);
+    }
+  }, [isOpenState, onChange, isOpen]);
 
   return (
     <EuiPopover
@@ -55,7 +74,7 @@ export const ContextMenuActions = React.memo<Props>(({ button, ...props }) => {
           />
         )
       }
-      isOpen={isOpen}
+      isOpen={typeof isOpen !== 'undefined' ? isOpen : isOpenState}
       closePopover={handleCloseMenu}
     >
       {'items' in props ? (
@@ -65,4 +84,4 @@ export const ContextMenuActions = React.memo<Props>(({ button, ...props }) => {
       )}
     </EuiPopover>
   );
-});
+};
