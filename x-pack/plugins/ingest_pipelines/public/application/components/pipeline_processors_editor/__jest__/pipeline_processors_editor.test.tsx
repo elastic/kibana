@@ -180,7 +180,7 @@ describe('Pipeline Editor', () => {
     });
 
     it('prevents moving a processor while in edit mode', () => {
-      const { find, exists, actions } = testBed;
+      const { find, exists } = testBed;
       find('processors>0.editItemButton').simulate('click');
       expect(exists('processorSettingsForm')).toBe(true);
       expect(find('processors>0.moveItemButton').props().disabled).toBe(true);
