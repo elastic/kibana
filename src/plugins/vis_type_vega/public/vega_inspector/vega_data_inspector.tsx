@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './vega_data_inspector.scss';
+
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 
@@ -28,11 +30,11 @@ import { InspectorViewProps } from '../../../inspector/public';
 export type VegaDataInspectorProps = InspectorViewProps<VegaInspectorAdapters>;
 
 const dataSetsLabel = i18n.translate('visTypeVega.inspector.dataSetsLabel', {
-  defaultMessage: 'Data Sets',
+  defaultMessage: 'Data sets',
 });
 
 const signalValuesLabel = i18n.translate('visTypeVega.inspector.signalValuesLabel', {
-  defaultMessage: 'Signal Values',
+  defaultMessage: 'Signal values',
 });
 
 const specLabel = i18n.translate('visTypeVega.inspector.specLabel', {
@@ -54,13 +56,19 @@ export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
     {
       id: 'spec-viewer--id',
       name: specLabel,
-      content: <SpecViewer vegaAdapter={adapters.vega} />,
+      content: (
+        <SpecViewer className="vgaVegaDataInspector__specViewer" vegaAdapter={adapters.vega} />
+      ),
     },
   ];
 
   return (
-    <div className="insVegaViewWrapper">
-      <EuiTabbedContent size="s" tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
-    </div>
+    <EuiTabbedContent
+      className="vgaVegaDataInspector"
+      size="s"
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+    />
   );
 };

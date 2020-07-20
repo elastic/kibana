@@ -29,8 +29,8 @@ interface SignalViewerProps {
 
 const initialSignalColumnWidth = 150;
 
-const signalDataGridAriaLabel = i18n.translate('visTypeVega.inspector.signalViewer.gridAreaLabel', {
-  defaultMessage: 'Signal Values data grid',
+const signalDataGridAriaLabel = i18n.translate('visTypeVega.inspector.signalViewer.gridAriaLabel', {
+  defaultMessage: 'Signal values data grid',
 });
 
 export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {

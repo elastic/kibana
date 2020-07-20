@@ -18,27 +18,34 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiFlexGroup, EuiComboBoxProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiComboBoxProps,
+  EuiFlexItem,
+  EuiSpacer,
+  CommonProps,
+} from '@elastic/eui';
 import { VegaAdapter, InspectDataSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
 
-interface DataViewerProps {
+interface DataViewerProps extends CommonProps {
   vegaAdapter: VegaAdapter;
 }
 
-const getDataGridArealabel = (view: InspectDataSets) =>
-  i18n.translate('visTypeVega.inspector.dataViewer.gridAreaLabel', {
+const getDataGridArialabel = (view: InspectDataSets) =>
+  i18n.translate('visTypeVega.inspector.dataViewer.gridAriaLabel', {
     defaultMessage: '{name} data grid',
     values: {
       name: view.id,
     },
   });
 
-const dataSetAreaLabel = i18n.translate('visTypeVega.inspector.dataViewer.dataSetAreaLabel', {
-  defaultMessage: 'Data Set',
+const dataSetAriaLabel = i18n.translate('visTypeVega.inspector.dataViewer.dataSetAriaLabel', {
+  defaultMessage: 'Data set',
 });
 
-export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
+export const DataViewer = ({ vegaAdapter, ...rest }: DataViewerProps) => {
   const [inspectDataSets, setInspectDataSets] = useState<InspectDataSets[]>([]);
   const [selectedView, setSelectedView] = useState<InspectDataSets>();
   const [dataGridAriaLabel, setDataGridAriaLabel] = useState<string>('');
@@ -48,7 +55,7 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
       const newView = inspectDataSets!.find((view) => view.id === selectedOptions[0].label);
 
       if (newView) {
-        setDataGridAriaLabel(getDataGridArealabel(newView));
+        setDataGridAriaLabel(getDataGridArialabel(newView));
         setSelectedView(newView);
       }
     },
@@ -70,7 +77,7 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
       if (!selectedView) {
         setSelectedView(inspectDataSets[0]);
       } else {
-        setDataGridAriaLabel(getDataGridArealabel(selectedView));
+        setDataGridAriaLabel(getDataGridArialabel(selectedView));
       }
     }
   }, [selectedView, inspectDataSets]);
@@ -80,20 +87,15 @@ export const DataViewer = ({ vegaAdapter }: DataViewerProps) => {
   }
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      className="insVegaView"
-      wrap={false}
-      responsive={false}
-    >
+    <EuiFlexGroup direction="column" gutterSize="s" wrap={false} responsive={false} {...rest}>
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
         <EuiComboBox
+          fullWidth
           options={inspectDataSets.map((item: any) => ({
             label: item.id,
           }))}
-          aria-label={dataSetAreaLabel}
+          aria-label={dataSetAriaLabel}
           onChange={onViewChange}
           isClearable={false}
           singleSelection={{ asPlainText: true }}

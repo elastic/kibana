@@ -25,15 +25,13 @@ import { VegaDataInspector, VegaDataInspectorProps } from './vega_data_inspector
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { Adapters, RequestAdapter, InspectorViewDescription } from '../../../inspector/public';
 
-import './vega_inspector.scss';
-
 export interface VegaInspectorAdapters extends Adapters {
   requests: RequestAdapter;
   vega: VegaAdapter;
 }
 
 const vegaDebugLabel = i18n.translate('visTypeVega.inspector.vegaDebugLabel', {
-  defaultMessage: 'Vega Debug',
+  defaultMessage: 'Vega debug',
 });
 
 interface VegaInspectorViewDependencies {

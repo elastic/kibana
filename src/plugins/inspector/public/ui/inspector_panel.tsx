@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './inspector_panel.scss';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -123,7 +124,9 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody className="insFlyoutBody">{this.renderSelectedPanel()}</EuiFlyoutBody>
+        <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
+          {this.renderSelectedPanel()}
+        </EuiFlyoutBody>
       </React.Fragment>
     );
   }

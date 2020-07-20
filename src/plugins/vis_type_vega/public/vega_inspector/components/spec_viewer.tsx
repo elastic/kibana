@@ -23,25 +23,25 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiCopy,
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiSpacer,
-  EuiToolTip,
+  CommonProps,
 } from '@elastic/eui';
 import { VegaAdapter } from '../vega_adapter';
 import { CodeEditor } from '../../../../kibana_react/public';
 
-interface SpecViewerProps {
+interface SpecViewerProps extends CommonProps {
   vegaAdapter: VegaAdapter;
 }
 
 const copyToClipboardLabel = i18n.translate(
   'visTypeVega.inspector.specViewer.copyToClipboardLabel',
   {
-    defaultMessage: 'Click to copy to clipboard',
+    defaultMessage: 'Copy to clipboard',
   }
 );
 
-export const SpecViewer = ({ vegaAdapter }: SpecViewerProps) => {
+export const SpecViewer = ({ vegaAdapter, ...rest }: SpecViewerProps) => {
   const [spec, setSpec] = useState<string>();
 
   useEffect(() => {
@@ -60,26 +60,18 @@ export const SpecViewer = ({ vegaAdapter }: SpecViewerProps) => {
   }
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      className="insVegaView"
-      wrap={false}
-      responsive={false}
-    >
-      <EuiFlexItem className="eui-textRight" grow={false}>
+    <EuiFlexGroup direction="column" gutterSize="s" wrap={false} responsive={false} {...rest}>
+      <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
-        <EuiCopy textToCopy={spec}>
-          {(copy) => (
-            <EuiToolTip content={copyToClipboardLabel} delay="long">
-              <EuiButtonIcon
-                iconType="copyClipboard"
-                onClick={copy}
-                aria-label={copyToClipboardLabel}
-              />
-            </EuiToolTip>
-          )}
-        </EuiCopy>
+        <div className="eui-textRight">
+          <EuiCopy textToCopy={spec}>
+            {(copy) => (
+              <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
+                {copyToClipboardLabel}
+              </EuiButtonEmpty>
+            )}
+          </EuiCopy>
+        </div>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <CodeEditor
