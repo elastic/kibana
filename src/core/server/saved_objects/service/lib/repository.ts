@@ -1164,12 +1164,16 @@ export class SavedObjectsRepository {
         _source: ['type', 'namespaces'],
       }));
     const bulkGetResponse = bulkGetDocs.length
-      ? await this.client.mget({
-          body: {
-            docs: bulkGetDocs,
+      ? await this.client.mget(
+          {
+            body: {
+              docs: bulkGetDocs,
+            },
           },
-          ignore: [404],
-        })
+          {
+            ignore: [404],
+          }
+        )
       : undefined;
 
     let bulkUpdateRequestIndexCounter = 0;
