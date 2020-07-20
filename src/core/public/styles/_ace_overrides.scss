@@ -1,6 +1,3 @@
-@import '@elastic/eui/src/components/call_out/variables';
-@import '@elastic/eui/src/components/call_out/mixins';
-
 // SASSTODO: Replace with an EUI editor
 // Intentionally not using the EuiCodeBlock colors here because they actually change
 // hue from light to dark theme. So some colors would change while others wouldn't.
@@ -181,7 +178,7 @@
     }
 
     &.ace_multiselect .ace_selection.ace_start {
-      box-shadow: 0 0 3px 0px $euiColorEmptyShade;
+      box-shadow: 0 0 3px 0 $euiColorEmptyShade;
     }
 
     .ace_marker-layer .ace_step {
