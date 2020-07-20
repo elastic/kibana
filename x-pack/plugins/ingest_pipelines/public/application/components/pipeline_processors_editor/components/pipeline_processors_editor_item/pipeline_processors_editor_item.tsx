@@ -96,10 +96,10 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           label={label}
           aria-label={label}
           onChange={() => {
-            if (!isMovingThisProcessor) {
-              onMove();
-            } else {
+            if (isMovingThisProcessor) {
               onCancelMove();
+            } else {
+              onMove();
             }
           }}
         />
