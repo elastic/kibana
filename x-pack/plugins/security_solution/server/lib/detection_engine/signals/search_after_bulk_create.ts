@@ -174,7 +174,6 @@ export const searchAfterAndBulkCreate = async ({
                 searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp']
               )
             : null;
-        signalsCreatedCount += searchResult.hits.hits.length;
 
         // filter out the search results that match with the values found in the list.
         // the resulting set are signals to be indexed, given they are not duplicates
