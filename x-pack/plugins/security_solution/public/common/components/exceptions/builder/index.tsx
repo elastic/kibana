@@ -17,6 +17,7 @@ import {
   OperatorEnum,
   CreateExceptionListItemSchema,
   ExceptionListType,
+  entriesNested,
 } from '../../../../../public/lists_plugin_deps';
 import { AndOrBadge } from '../../and_or_badge';
 import { BuilderButtonOptions } from './builder_button_options';
@@ -53,6 +54,7 @@ interface ExceptionBuilderProps {
   indexPatterns: IIndexPattern;
   isOrDisabled: boolean;
   isAndDisabled: boolean;
+  isNestedDisabled: boolean;
   onChange: (arg: OnChangeProps) => void;
 }
 
@@ -65,53 +67,71 @@ export const ExceptionBuilder = ({
   indexPatterns,
   isOrDisabled,
   isAndDisabled,
+  isNestedDisabled,
   onChange,
 }: ExceptionBuilderProps) => {
-  const [andLogicIncluded, setAndLogicIncluded] = useState<boolean>(false);
+  const [andLogicIncluded, setAndLogicIncluded] = useState(false);
+  const [addNested, setAddNested] = useState(false);
   const [exceptions, setExceptions] = useState<ExceptionsBuilderExceptionItem[]>(
     exceptionListItems
   );
   const [exceptionsToDelete, setExceptionsToDelete] = useState<ExceptionListItemSchema[]>([]);
 
-  const handleCheckAndLogic = (items: ExceptionsBuilderExceptionItem[]): void => {
-    setAndLogicIncluded(items.filter(({ entries }) => entries.length > 1).length > 0);
-  };
+  const handleCheckAndLogic = useCallback(
+    (items: ExceptionsBuilderExceptionItem[]): void => {
+      setAndLogicIncluded(items.filter(({ entries }) => entries.length > 1).length > 0);
+    },
+    [setAndLogicIncluded]
+  );
 
-  const handleDeleteExceptionItem = (
-    item: ExceptionsBuilderExceptionItem,
-    itemIndex: number
-  ): void => {
-    if (item.entries.length === 0) {
-      if (exceptionListItemSchema.is(item)) {
-        setExceptionsToDelete((items) => [...items, item]);
+  const handleExceptionItemChange = useCallback(
+    (item: ExceptionsBuilderExceptionItem, index: number): void => {
+      const updatedExceptions = [
+        ...exceptions.slice(0, index),
+        {
+          ...item,
+        },
+        ...exceptions.slice(index + 1),
+      ];
+
+      handleCheckAndLogic(updatedExceptions);
+      setExceptions(updatedExceptions);
+    },
+    [setExceptions, handleCheckAndLogic, exceptions]
+  );
+
+  const handleDeleteExceptionItem = useCallback(
+    (item: ExceptionsBuilderExceptionItem, itemIndex: number): void => {
+      if (item.entries.length === 0) {
+        if (exceptionListItemSchema.is(item)) {
+          setExceptionsToDelete((items) => [...items, item]);
+        }
+
+        setExceptions((existingExceptions) => {
+          const updatedExceptions = [
+            ...existingExceptions.slice(0, itemIndex),
+            ...existingExceptions.slice(itemIndex + 1),
+          ];
+          const lastExceptionItem = updatedExceptions.slice(-1)[0];
+          const lastItemHasNestedEntries =
+            lastExceptionItem != null
+              ? lastExceptionItem.entries.slice(-1).filter(({ type }) => type === 'nested').length >
+                0
+              : false;
+          setAddNested(lastItemHasNestedEntries);
+          handleCheckAndLogic(updatedExceptions);
+
+          return updatedExceptions;
+        });
+      } else {
+        const lastItemHasNestedEntries =
+          item.entries.slice(-1).filter(({ type }) => type === 'nested').length > 0;
+        setAddNested(lastItemHasNestedEntries);
+        handleExceptionItemChange(item, itemIndex);
       }
-
-      setExceptions((existingExceptions) => {
-        const updatedExceptions = [
-          ...existingExceptions.slice(0, itemIndex),
-          ...existingExceptions.slice(itemIndex + 1),
-        ];
-        handleCheckAndLogic(updatedExceptions);
-
-        return updatedExceptions;
-      });
-    } else {
-      handleExceptionItemChange(item, itemIndex);
-    }
-  };
-
-  const handleExceptionItemChange = (item: ExceptionsBuilderExceptionItem, index: number): void => {
-    const updatedExceptions = [
-      ...exceptions.slice(0, index),
-      {
-        ...item,
-      },
-      ...exceptions.slice(index + 1),
-    ];
-
-    handleCheckAndLogic(updatedExceptions);
-    setExceptions(updatedExceptions);
-  };
+    },
+    [handleExceptionItemChange, handleCheckAndLogic]
+  );
 
   const handleAddNewExceptionItemEntry = useCallback((): void => {
     setExceptions((existingExceptions): ExceptionsBuilderExceptionItem[] => {
@@ -172,6 +192,54 @@ export const ExceptionBuilder = ({
     }
   };
 
+  const handleAddNestedExceptionItemEntry = useCallback((): void => {
+    setExceptions((existingExceptions): ExceptionsBuilderExceptionItem[] => {
+      const lastException = existingExceptions[existingExceptions.length - 1];
+      const { entries } = lastException;
+      const lastEntry = entries[entries.length - 1];
+
+      if (entriesNested.is(lastEntry)) {
+        const updatedException: ExceptionsBuilderExceptionItem = {
+          ...lastException,
+          entries: [
+            ...entries.slice(0, entries.length - 1),
+            {
+              ...lastEntry,
+              entries: [
+                ...lastEntry.entries,
+                {
+                  field: '',
+                  type: OperatorTypeEnum.MATCH,
+                  operator: OperatorEnum.INCLUDED,
+                  value: '',
+                },
+              ],
+            },
+          ],
+        };
+
+        setAndLogicIncluded(updatedException.entries.length > 1);
+
+        return [
+          ...existingExceptions.slice(0, existingExceptions.length - 1),
+          { ...updatedException },
+        ];
+      } else {
+        return existingExceptions;
+      }
+    });
+  }, [setExceptions]);
+
+  const handleAddNestedClick = useCallback((): void => {
+    setAddNested(true);
+    handleAddNewExceptionItemEntry();
+  }, [handleAddNewExceptionItemEntry, setAddNested]);
+
+  const handleAddClick = useCallback((): void => {
+    setAddNested(false);
+    handleAddNewExceptionItemEntry();
+  }, [handleAddNewExceptionItemEntry, setAddNested]);
+
   // Bubble up changes to parent
   useEffect(() => {
     onChange({ exceptionItems: filterExceptionItems(exceptions), exceptionsToDelete });
@@ -187,6 +255,15 @@ export const ExceptionBuilder = ({
       handleAddNewExceptionItem();
     }
   }, [exceptions, handleAddNewExceptionItem]);
+
+  useEffect(() => {
+    // Mainly for when user is editing existing items,
+    // checks to see whether to display the "and" badges
+    // and what state to display the nested button in
+    if (exceptionListItems.length > 0) {
+      handleCheckAndLogic(exceptionListItems);
+    }
+  }, [exceptionListItems, handleCheckAndLogic]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
@@ -216,7 +293,8 @@ export const ExceptionBuilder = ({
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
                 indexPattern={filterIndexPatterns}
-                isLoading={indexPatterns.fields.length === 0}
+                listType={listType}
+                addNested={addNested}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}
                 isOnlyItem={exceptions.length === 1}
@@ -237,12 +315,15 @@ export const ExceptionBuilder = ({
           )}
           <EuiFlexItem grow={1}>
             <BuilderButtonOptions
-              isOrDisabled={isOrDisabled}
+              isOrDisabled={isOrDisabled || addNested}
               isAndDisabled={isAndDisabled}
-              showNestedButton={false}
+              isNestedDisabled={isNestedDisabled}
+              isNested={addNested}
+              showNestedButton
               onOrClicked={handleAddNewExceptionItem}
-              onAndClicked={handleAddNewExceptionItemEntry}
-              onNestedClicked={() => {}}
+              onAndClicked={handleAddClick}
+              onNestedClicked={handleAddNestedClick}
+              onAddClickWhenNested={handleAddNestedExceptionItemEntry}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

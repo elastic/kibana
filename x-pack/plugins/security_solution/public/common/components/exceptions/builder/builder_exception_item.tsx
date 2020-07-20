@@ -11,8 +11,9 @@ import styled from 'styled-components';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AndOrBadge } from '../../and_or_badge';
 import { EntryItemComponent } from './entry_item';
-import { getFormattedBuilderEntries } from '../helpers';
+import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
 import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } from '../types';
+import { ExceptionListType } from '../../../../../public/lists_plugin_deps';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -22,14 +23,25 @@ const MyFirstRowContainer = styled(EuiFlexItem)`
   padding-top: 20px;
 `;
 
+const MyBeautifulLine = styled(EuiFlexItem)`
+  &:after {
+    background: ${({ theme }) => theme.eui.euiColorLightShade};
+    content: '';
+    width: 2px;
+    height: 40px;
+    margin: 0 15px;
+  }
+`;
+
 interface ExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionId: string;
   exceptionItemIndex: number;
-  isLoading: boolean;
   indexPattern: IIndexPattern;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
+  listType: ExceptionListType;
+  addNested: boolean;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
 }
@@ -40,8 +52,9 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
     exceptionId,
     exceptionItemIndex,
     indexPattern,
-    isLoading,
     isOnlyItem,
+    listType,
+    addNested,
     andLogicIncluded,
     onDeleteExceptionItem,
     onChangeExceptionItem,
@@ -63,15 +76,12 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
     );
 
     const handleDeleteEntry = useCallback(
-      (entryIndex: number): void => {
-        const updatedEntries: BuilderEntry[] = [
-          ...exceptionItem.entries.slice(0, entryIndex),
-          ...exceptionItem.entries.slice(entryIndex + 1),
-        ];
-        const updatedExceptionItem: ExceptionsBuilderExceptionItem = {
-          ...exceptionItem,
-          entries: updatedEntries,
-        };
+      (entryIndex: number, parentIndex: number | null): void => {
+        const updatedExceptionItem = getUpdatedEntriesOnDelete(
+          exceptionItem,
+          parentIndex ? parentIndex : entryIndex,
+          parentIndex ? entryIndex : null
+        );
 
         onDeleteExceptionItem(updatedExceptionItem, exceptionItemIndex);
       },
@@ -80,80 +90,86 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
 
     const entries = useMemo(
       (): FormattedBuilderEntry[] =>
-        indexPattern != null ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries) : [],
-      [indexPattern, exceptionItem]
+        indexPattern != null && exceptionItem.entries.length > 0
+          ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries, addNested)
+          : [],
+      [addNested, exceptionItem.entries, indexPattern]
     );
 
-    const andBadge = useMemo((): JSX.Element => {
+    const getAndBadge = useCallback((): JSX.Element => {
       const badge = <AndOrBadge includeAntennas type="and" />;
-      if (entries.length > 1 && exceptionItemIndex === 0) {
-        return (
-          <MyFirstRowContainer grow={false} data-test-subj="exceptionItemEntryFirstRowAndBadge">
-            {badge}
-          </MyFirstRowContainer>
-        );
-      } else if (entries.length > 1) {
-        return (
-          <EuiFlexItem grow={false} data-test-subj="exceptionItemEntryAndBadge">
-            {badge}
-          </EuiFlexItem>
-        );
+
+      if (andLogicIncluded && exceptionItem.entries.length > 1 && exceptionItemIndex === 0) {
+        return <MyFirstRowContainer grow={false}>{badge}</MyFirstRowContainer>;
+      } else if (andLogicIncluded && exceptionItem.entries.length <= 1) {
+        return <MyInvisibleAndBadge grow={false}>{badge}</MyInvisibleAndBadge>;
+      } else if (andLogicIncluded && exceptionItem.entries.length > 1) {
+        return <EuiFlexItem grow={false}>{badge}</EuiFlexItem>;
       } else {
-        return (
-          <MyInvisibleAndBadge grow={false} data-test-subj="exceptionItemEntryInvisibleAndBadge">
-            {badge}
-          </MyInvisibleAndBadge>
-        );
+        return <></>;
       }
-    }, [entries.length, exceptionItemIndex]);
+    }, [exceptionItem.entries.length, exceptionItemIndex, andLogicIncluded]);
 
     const getDeleteButton = useCallback(
-      (index: number): JSX.Element => {
+      (entryIndex: number, parentIndex: number | null): JSX.Element => {
         const button = (
           <EuiButtonIcon
             color="danger"
             iconType="trash"
-            onClick={() => handleDeleteEntry(index)}
-            isDisabled={isOnlyItem && entries.length === 1 && exceptionItemIndex === 0}
+            onClick={() => handleDeleteEntry(entryIndex, parentIndex)}
+            isDisabled={
+              isOnlyItem &&
+              exceptionItem.entries.length === 1 &&
+              exceptionItemIndex === 0 &&
+              (exceptionItem.entries[0].field == null || exceptionItem.entries[0].field === '')
+            }
             aria-label="entryDeleteButton"
             className="exceptionItemEntryDeleteButton"
             data-test-subj="exceptionItemEntryDeleteButton"
           />
         );
-        if (index === 0 && exceptionItemIndex === 0) {
+        if (entryIndex === 0 && exceptionItemIndex === 0 && parentIndex == null) {
           return <MyFirstRowContainer grow={false}>{button}</MyFirstRowContainer>;
         } else {
           return <EuiFlexItem grow={false}>{button}</EuiFlexItem>;
         }
       },
-      [entries.length, exceptionItemIndex, handleDeleteEntry, isOnlyItem]
+      [exceptionItemIndex, exceptionItem.entries, handleDeleteEntry, isOnlyItem]
     );
 
     return (
-      <EuiFlexGroup gutterSize="s" data-test-subj="exceptionEntriesContainer">
-        {andLogicIncluded && andBadge}
-        <EuiFlexItem grow={6}>
-          <EuiFlexGroup gutterSize="s" direction="column">
-            {entries.map((item, index) => (
-              <EuiFlexItem key={`${exceptionId}-${index}`} grow={1}>
-                <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
-                  <EuiFlexItem grow={1}>
-                    <EntryItemComponent
-                      entry={item}
-                      entryIndex={index}
-                      indexPattern={indexPattern}
-                      showLabel={exceptionItemIndex === 0 && index === 0}
-                      isLoading={isLoading}
-                      onChange={handleEntryChange}
-                    />
-                  </EuiFlexItem>
-                  {getDeleteButton(index)}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" data-test-subj="exceptionEntriesContainer">
+          {getAndBadge()}
+          <EuiFlexItem grow={6}>
+            <EuiFlexGroup gutterSize="s" direction="column">
+              {entries.map((item, index) => (
+                <EuiFlexItem key={`${exceptionId}-${index}`} grow={1}>
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
+                    {item.nested === 'child' && <MyBeautifulLine grow={false} />}
+                    <EuiFlexItem grow={1}>
+                      <EntryItemComponent
+                        entry={item}
+                        indexPattern={indexPattern}
+                        listType={listType}
+                        addNested={addNested}
+                        showLabel={
+                          exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
+                        }
+                        onChange={handleEntryChange}
+                      />
+                    </EuiFlexItem>
+                    {getDeleteButton(
+                      item.entryIndex,
+                      item.parent != null ? item.parent.parentIndex : null
+                    )}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     );
   }
 );

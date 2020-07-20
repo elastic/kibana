@@ -210,6 +210,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 ruleName={ruleName}
                 isOrDisabled={false}
                 isAndDisabled={false}
+                isNestedDisabled={false}
                 data-test-subj="edit-exception-modal-builder"
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}

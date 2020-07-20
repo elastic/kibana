@@ -52,15 +52,13 @@ export interface ExceptionsPagination {
   pageSizeOptions: number[];
 }
 
-export interface FormattedBuilderEntryBase {
+export interface FormattedBuilderEntry {
   field: IFieldType | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;
-}
-
-export interface FormattedBuilderEntry extends FormattedBuilderEntryBase {
-  parent?: string;
-  nested?: FormattedBuilderEntryBase[];
+  nested: 'parent' | 'child' | undefined;
+  entryIndex: number;
+  parent: { parent: EntryNested; parentIndex: number } | undefined;
 }
 
 export interface EmptyEntry {
