@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
-import React, { FunctionComponent, useEffect, useState, useRef } from 'react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 
@@ -27,25 +26,18 @@ const MOUSE_PADDING_BOTTOM = 20;
 
 export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({ processor }) => {
   const [position, setPosition] = useState<Position | undefined>();
-  const mountRef = useRef<HTMLDivElement | undefined>();
 
   useEffect(() => {
-    const mountEl = document.createElement('div');
-    mountEl.setAttribute('id', `${PORTAL_HTML_ELEMENT_ID}_${uuid.v4()}`);
-    document.body.appendChild(mountEl);
-    mountRef.current = mountEl;
     const mouseMoveListener = (event: MouseEvent) => {
       setPosition({ x: event.pageX, y: event.pageY - window.scrollY });
     };
-
     document.addEventListener('mousemove', mouseMoveListener);
     return () => {
       document.removeEventListener('mousemove', mouseMoveListener);
-      document.body.removeChild(mountEl);
     };
   }, []);
 
-  if (!mountRef.current || !position) {
+  if (!position) {
     return null;
   }
 
@@ -55,12 +47,7 @@ export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({ proces
      * overflow: hidden we use a portal to render this tooltip in the document body so
      * that we can render it anywhere the cursor can go.
      */
-    <EuiPortal
-      insert={{
-        sibling: mountRef.current,
-        position: 'after',
-      }}
-    >
+    <EuiPortal>
       <div
         className="pipelineProcessorsEditor__itemTooltip"
         style={{
