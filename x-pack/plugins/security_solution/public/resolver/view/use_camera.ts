@@ -284,7 +284,8 @@ export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | n
   const [rect, setRect] = useState<DOMRect | null>(null);
   // Using state as ref.current update does not trigger effect hook when reset
   const [currentNode, setCurrentNode] = useState<Element | null>(null);
-
+  const [currentY, setCurrentY] = useState<number>(0);
+  const [currentX, setCurrentX] = useState<number>(0);
   const ref = useCallback((node: Element | null) => {
     setCurrentNode(node);
     if (node !== null) {
@@ -292,6 +293,21 @@ export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | n
     }
   }, []);
   const { ResizeObserver } = useContext(SideEffectContext);
+  const handleScroll = useCallback(() => {
+    if (currentX !== window.scrollX || currentY !== window.scrollY) {
+      if (currentNode !== null) {
+        setRect(currentNode.getBoundingClientRect());
+        setCurrentY(window.scrollY);
+        setCurrentX(window.scrollX);
+      }
+    }
+  }, [currentX, currentY, setCurrentX, setCurrentY, currentNode]);
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
   useEffect(() => {
     if (currentNode !== null) {
       const resizeObserver = new ResizeObserver((entries) => {
