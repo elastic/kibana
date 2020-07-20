@@ -19,7 +19,7 @@ Feature: RUM Dashboard
       And should display chart legend
 
   Scenario: Breakdown filter
-    Given a user click page load breakdown filter
+    Given a user clicks the page load breakdown filter
     When the user selected the breakdown
     Then breakdown series should appear in chart
 
