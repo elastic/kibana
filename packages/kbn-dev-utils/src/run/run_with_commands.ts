@@ -115,7 +115,7 @@ export class RunWithCommands<T> {
           log,
           flags: commandFlags,
           procRunner,
-          addCleanupTask: cleanup.add,
+          addCleanupTask: cleanup.add.bind(cleanup),
         };
 
         const extendedContext = {
