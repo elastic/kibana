@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { debounce, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
@@ -130,8 +130,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       if (!deepEqual(filters, filterWithoutDropArea)) {
         filterManager.setFilters(filters);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters]);
+    }, [filterManager, filters]);
 
     useEffect(() => {
       setFilterQueryConverted({
@@ -190,8 +189,10 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       return () => {
         isSubscribed = false;
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [savedQueryId]);
+    }, [filters, savedQueryId, savedQueryServices]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const debouncedApplyKqlFilterQuery = useCallback(debounce(1000, applyKqlFilterQuery), []);
 
     const onChangedQuery = useCallback(
       (newQuery: Query) => {
@@ -204,10 +205,10 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             newQuery.query as string,
             newQuery.language as KueryFilterQueryKind
           );
+          debouncedApplyKqlFilterQuery(newQuery.query, newQuery.language);
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [filterQueryDraft]
+      [debouncedApplyKqlFilterQuery, filterQueryDraft, setKqlFilterQueryDraft]
     );
 
     const onSubmitQuery = useCallback(
@@ -236,8 +237,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           });
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [filterQuery, timelineId]
+      [applyKqlFilterQuery, filterQuery, setKqlFilterQueryDraft, timelineId, updateReduxTime]
     );
 
     const onSavedQuery = useCallback(
@@ -279,8 +279,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           setSavedQueryId(null);
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [dataProvidersDsl, savedQueryId, savedQueryServices]
+      [dataProvidersDsl, savedQueryId, savedQueryServices, setSavedQueryId]
     );
 
     return (
