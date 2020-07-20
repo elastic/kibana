@@ -9,7 +9,7 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../../autocomplete/field';
 import { OperatorComponent } from '../../autocomplete/operator';
-import { isOperator } from '../../autocomplete/operators';
+import { isOperator, isOneOfOperator } from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
 import { AutocompleteFieldMatchComponent } from '../../autocomplete/field_value_match';
 import { AutocompleteFieldMatchAnyComponent } from '../../autocomplete/field_value_match_any';
@@ -19,7 +19,7 @@ import { AutocompleteFieldListsComponent } from '../../autocomplete/field_value_
 import { ListSchema, OperatorTypeEnum, ExceptionListType } from '../../../../lists_plugin_deps';
 import { getEmptyValue } from '../../empty_value';
 import * as i18n from './translations';
-import { getValueFromOperator, getFilteredIndexPatterns } from './helpers';
+import { getValueFromOperator, getFilteredIndexPatterns, getOperatorOptions } from './helpers';
 
 interface EntryItemProps {
   entry: FormattedBuilderEntry;
@@ -81,7 +81,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
       } else {
         onChange(
           {
-            field: newField.name,
+            field: newField != null ? newField.name : undefined,
             type: OperatorTypeEnum.MATCH,
             operator: isOperator.operator,
             value: undefined,
@@ -172,7 +172,11 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
       const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry, addNested);
       const comboBox = (
         <FieldComponent
-          placeholder={i18n.EXCEPTION_FIELD_PLACEHOLDER}
+          placeholder={
+            entry.nested != null
+              ? i18n.EXCEPTION_FIELD_NESTED_PLACEHOLDER
+              : i18n.EXCEPTION_FIELD_PLACEHOLDER
+          }
           indexPattern={filteredIndexPatterns}
           selectedField={entry.field}
           isClearable={false}
@@ -197,7 +201,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    const operatorOptions = entry.nested != null || listType === 'endpoint' ? [isOperator] : [];
+    const operatorOptions = getOperatorOptions(entry, listType);
     const comboBox = (
       <OperatorComponent
         placeholder={i18n.EXCEPTION_OPERATOR_PLACEHOLDER}

@@ -5,7 +5,7 @@
  */
 import moment from 'moment';
 
-import { entriesNested } from '../../../../lists_plugin_deps';
+import { entriesNested, ExceptionListItemSchema } from '../../../../lists_plugin_deps';
 import {
   getEntryValue,
   getExceptionOperatorSelect,
@@ -73,7 +73,7 @@ export const getFormattedEntries = (entries: BuilderEntry[]): FormattedEntry[] =
 };
 
 /**
- * Formats ExceptionItem information for description list component
+ * Formats ExceptionItem details for description list component
  *
  * @param exceptionItem an ExceptionItem
  */
@@ -94,7 +94,7 @@ export const getDescriptionListContent = (
       value: exceptionItem.created_by,
     },
     {
-      title: i18n.COMMENT,
+      title: i18n.DESCRIPTION,
       value: exceptionItem.description,
     },
   ];

@@ -52,7 +52,7 @@ export type EntryExists = t.TypeOf<typeof entriesExists>;
 
 export const entriesNested = t.exact(
   t.type({
-    entries: t.array(entriesMatch),
+    entries: t.array(t.union([entriesMatch, entriesMatchAny, entriesExists])),
     field: t.string,
     type: t.keyof({ nested: null }),
   })

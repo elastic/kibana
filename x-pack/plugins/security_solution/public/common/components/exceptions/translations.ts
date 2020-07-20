@@ -172,3 +172,7 @@ export const ADD_TO_CLIPBOARD = i18n.translate(
     defaultMessage: 'Add to clipboard',
   }
 );
+
+export const DESCRIPTION = i18n.translate('xpack.securitySolution.exceptions.descriptionLabel', {
+  defaultMessage: 'Description',
+});

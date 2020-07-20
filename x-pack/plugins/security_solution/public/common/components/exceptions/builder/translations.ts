@@ -28,6 +28,13 @@ export const EXCEPTION_FIELD_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const EXCEPTION_FIELD_NESTED_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.builder.exceptionFieldNestedPlaceholderDescription',
+  {
+    defaultMessage: 'Search nested field',
+  }
+);
+
 export const EXCEPTION_OPERATOR_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.builder.exceptionOperatorPlaceholderDescription',
   {

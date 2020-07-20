@@ -5,8 +5,18 @@
  */
 
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { Entry, OperatorTypeEnum, EntryNested } from '../../../../lists_plugin_deps';
-import { isOperator } from '../../autocomplete/operators';
+import {
+  Entry,
+  OperatorTypeEnum,
+  EntryNested,
+  ExceptionListType,
+} from '../../../../lists_plugin_deps';
+import {
+  isOperator,
+  existsOperator,
+  isOneOfOperator,
+  EXCEPTION_OPERATORS,
+} from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
 import { BuilderEntry, FormattedBuilderEntry, ExceptionsBuilderExceptionItem } from '../types';
 import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
@@ -27,6 +37,7 @@ export const getFilteredIndexPatterns = (
   addNested: boolean
 ): IIndexPattern => {
   if (item.nested === 'child' && item.parent != null) {
+    // when user has selected a nested entry, only fields with the common parent are shown
     return {
       ...patterns,
       fields: patterns.fields.filter(
@@ -38,8 +49,10 @@ export const getFilteredIndexPatterns = (
       ),
     };
   } else if (item.nested === 'parent' && item.field != null) {
+    // when user has selected a nested entry, right above it we show the common parent
     return { ...patterns, fields: [item.field] };
   } else if (item.nested === 'parent' && addNested) {
+    // when user selects to add a nested entry, only nested fields are shown as options
     return {
       ...patterns,
       fields: patterns.fields.filter(
@@ -76,7 +89,7 @@ export const getFormattedBuilderEntry = (
   if (parent != null && parentIndex != null) {
     return {
       field: selectedField,
-      operator: isOperator,
+      operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: 'child',
       parent: { parent, parentIndex },
@@ -257,5 +270,18 @@ export const getValueFromOperator = (
         type: OperatorTypeEnum.EXISTS,
         operator: selectedOperator.operator,
       };
+  }
+};
+
+export const getOperatorOptions = (
+  item: FormattedBuilderEntry,
+  listType: ExceptionListType
+): OperatorOption[] => {
+  if (item.nested != null && listType === 'endpoint') {
+    return [isOperator, isOneOfOperator];
+  } else if (item.nested != null && listType === 'detection') {
+    return [isOperator, isOneOfOperator, existsOperator];
+  } else {
+    return EXCEPTION_OPERATORS;
   }
 };
