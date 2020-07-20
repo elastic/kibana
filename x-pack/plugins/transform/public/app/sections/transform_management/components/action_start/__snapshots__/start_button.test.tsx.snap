@@ -6,15 +6,17 @@ exports[`Transform: Transform List Actions <StartAction /> Minimal initializatio
   delay="regular"
   position="top"
 >
-  <EuiLink
-    color="subdued"
+  <EuiButtonEmpty
+    aria-label="Start"
+    color="text"
     data-test-subj="transformActionStart"
+    flush="left"
+    iconType="play"
+    isDisabled={true}
+    onClick={[Function]}
+    size="s"
   >
-    <EuiIcon
-      type="play"
-    />
-     
     Start
-  </EuiLink>
+  </EuiButtonEmpty>
 </EuiToolTip>
 `;
