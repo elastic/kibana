@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
+import './copy_status_summary_indicator.scss';
+import React, { Fragment } from 'react';
+import { EuiLoadingSpinner, EuiIconTip, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Space } from '../../../common/model/space';
 import { SummarizedCopyToSpaceResult } from '..';
@@ -16,7 +17,7 @@ interface Props {
   conflictResolutionInProgress: boolean;
 }
 
-export const CopyStatusSummaryIndicator = (props: Props) => {
+const renderIcon = (props: Props) => {
   const { summarizedCopyResult } = props;
   const getDataTestSubj = (status: string) => `cts-summary-indicator-${status}-${props.space.id}`;
 
@@ -79,4 +80,17 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
     );
   }
   return null;
+};
+
+export const CopyStatusSummaryIndicator = (props: Props) => {
+  const { summarizedCopyResult } = props;
+
+  return (
+    <Fragment>
+      {renderIcon(props)}
+      <EuiBadge color="#DDD" className="spcCopyToSpace__summaryCountBadge">
+        {summarizedCopyResult.objects.length}
+      </EuiBadge>
+    </Fragment>
+  );
 };
