@@ -6,6 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import Boom from 'boom';
+import semver from 'semver';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
@@ -95,8 +96,7 @@ export async function installPackage(options: {
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-
-  if (pkgVersion < latestPackage.version)
+  if (semver.lt(pkgVersion, latestPackage.version))
     throw Boom.badRequest('Cannot install or update to an out-of-date package');
 
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
@@ -169,17 +169,20 @@ export async function installPackage(options: {
     );
   }
 
-  // update to newly installed version when all assets are successfully installed
-  if (isUpdate) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
   // get template refs to save
   const installedTemplateRefs = installedTemplates.map((template) => ({
     id: template.templateName,
     type: ElasticsearchAssetType.indexTemplate,
   }));
+
   const [installedKibanaAssets] = await Promise.all([
     installKibanaAssetsPromise,
     installIndexPatternPromise,
   ]);
+
+  await saveInstalledKibanaRefs(savedObjectsClient, pkgName, installedKibanaAssets);
+  // update to newly installed version when all assets are successfully installed
+  if (isUpdate) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
   return [...installedKibanaAssets, ...installedPipelines, ...installedTemplateRefs];
 }
 const updateVersion = async (
@@ -230,7 +233,7 @@ export async function createInstallation(options: {
 export const saveInstalledKibanaRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  installedAssets: AssetReference[]
+  installedAssets: KibanaAssetReference[]
 ) => {
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_kibana: installedAssets,
