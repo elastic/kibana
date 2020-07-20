@@ -26,7 +26,7 @@ export const importListItemRoute = (router: IRouter, config: ConfigType): void =
           maxBytes: config.maxImportPayloadBytes,
           parse: false,
         },
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: `${LIST_ITEM_URL}/_import`,
       validate: {

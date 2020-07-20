@@ -21,6 +21,7 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import {
   ExceptionListItemSchema,
@@ -67,6 +68,7 @@ interface AddExceptionModalProps {
   };
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean) => void;
+  alertStatus?: Status;
 }
 
 const Modal = styled(EuiModal)`
@@ -105,6 +107,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   alertData,
   onCancel,
   onConfirm,
+  alertStatus,
 }: AddExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
@@ -183,7 +186,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     if (indexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns) ||
+          exceptionItemsToAdd.length === 0
       );
     }
   }, [
@@ -335,7 +339,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               </ModalBodySection>
               <EuiHorizontalRule />
               <ModalBodySection>
-                {alertData !== undefined && (
+                {alertData !== undefined && alertStatus !== 'closed' && (
                   <EuiFormRow fullWidth>
                     <EuiCheckbox
                       id="close-alert-on-add-add-exception-checkbox"
