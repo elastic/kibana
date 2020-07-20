@@ -1,0 +1,109 @@
+[[development-security-rbac]]
+== Role-based access control
+
+Role-based access control (RBAC) in {kib} relies upon the
+{ref}/security-privileges.html#application-privileges[application privileges]
+that {es} exposes. This allows {kib} to define the privileges that
+{kib} wishes to grant to users, assign them to the relevant users using roles,
+and then authorize the user to perform a specific action. This is handled within
+a secured instance of the `SavedObjectsClient` and available transparently to
+consumers when using `request.getSavedObjectsClient()` or 
+`savedObjects.getScopedSavedObjectsClient()`.
+
+[[development-rbac-privileges]]
+=== {kib} Privileges
+
+When {kib} first starts up, it executes the following `POST` request against {es}. This synchronizes the definition of the privileges with various `actions` which are later used to authorize a user:
+
+[source,js]
+----------------------------------
+POST /_security/privilege
+Content-Type: application/json
+Authorization: Basic {kib} changeme
+
+{
+   "kibana-.kibana":{
+       "all":{
+           "application":"kibana-.kibana",
+           "name":"all",
+           "actions":[
+               "version:7.0.0-alpha1-SNAPSHOT",
+               "action:login",
+               "action:*"
+           ],
+           "metadata":{}
+       },
+       "read":{
+           "application":"kibana-.kibana",
+           "name":"read",
+           "actions":[
+               "version:7.0.0-alpha1-SNAPSHOT",
+               "action:login",
+               "saved_object:dashboard/get",
+               "saved_object:dashboard/bulk_get",
+               "saved_object:dashboard/find",
+               ...
+           ],"metadata":{}}
+   }
+}
+----------------------------------
+
+[NOTE]
+==============================================
+
+The application is created by concatenating the prefix of `kibana-` with the value of `kibana.index` from the `kibana.yml`, so different {kib} tenants are isolated from one another.
+
+==============================================
+
+[[development-rbac-assigning-privileges]]
+=== Assigning {kib} Privileges
+
+{kib} privileges are assigned to specific roles using the `applications` element. For example, the following role assigns the <<kibana-privileges-all, all>> privilege at `*` `resources` (which will in the future be used to secure spaces) to the default {kib} `application`:
+
+[source,js]
+----------------------------------
+"new_kibana_user": {
+   "applications": [
+     {
+       "application": "kibana-.kibana",
+       "privileges": [
+         "all"
+       ],
+       "resources": [
+         "*"
+       ]
+     }
+   ]
+ }
+----------------------------------
+
+Roles that grant <<kibana-privileges>> should be managed using the <<role-management-api>> or the *Management -> Security -> Roles* page, not directly using the {es} {ref}/security-api.html#security-role-apis[role management API]. This role can then be assigned to users using the {es} 
+{ref}/security-api.html#security-user-apis[user management APIs].
+
+[[development-rbac-authorization]]
+=== Authorization
+
+The {es} {ref}/security-api-has-privileges.html[has privileges API] determines whether the user is authorized to perform a specific action:
+
+[source,js]
+----------------------------------
+POST /_security/user/_has_privileges
+Content-Type: application/json
+Authorization: Basic foo_read_only_user password
+
+{
+   "applications":[
+       {
+           "application":"kibana-.kibana",
+           "resources":["*"],
+           "privileges":[
+             "saved_object:dashboard/save",
+           ]
+       }
+   ]
+}
+----------------------------------
+
+{es} checks if the user is granted a specific action. If the user is assigned a role that grants a privilege, {es} uses the <<development-rbac-privileges, {kib} privileges>> definition to associate this with the actions, which makes authorizing users more intuitive and flexible programatically.
+
+Once we have authorized the user to perform a specific action, we can execute the request using `callWithInternalUser`.

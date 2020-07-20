@@ -366,7 +366,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
         it('should error on invalid pagination values', async () => {
           await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=0`).expect(400);
-          await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=2000`).expect(400);
+          await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=20000`).expect(400);
           await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=-1`).expect(400);
         });
       });
@@ -444,14 +444,18 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
         it('should have a populated next parameter', async () => {
           const { body }: { body: ResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}`)
+            .get(
+              `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=0`
+            )
             .expect(200);
           expect(body.nextAncestor).to.eql('94041');
         });
 
         it('should handle an ancestors param request', async () => {
           let { body }: { body: ResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}`)
+            .get(
+              `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=0`
+            )
             .expect(200);
           const next = body.nextAncestor;
 
@@ -579,7 +583,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         it('errors on invalid pagination values', async () => {
           await supertest.get(`/api/endpoint/resolver/${entityID}/children?children=0`).expect(400);
           await supertest
-            .get(`/api/endpoint/resolver/${entityID}/children?children=2000`)
+            .get(`/api/endpoint/resolver/${entityID}/children?children=20000`)
             .expect(400);
           await supertest
             .get(`/api/endpoint/resolver/${entityID}/children?children=-1`)

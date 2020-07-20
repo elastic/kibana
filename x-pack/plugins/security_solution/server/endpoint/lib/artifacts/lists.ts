@@ -12,6 +12,7 @@ import { validate } from '../../../../common/validate';
 import { Entry, EntryNested } from '../../../../../lists/common/schemas/types/entries';
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
+import { ENDPOINT_LIST_ID } from '../../../../common/shared_imports';
 import {
   InternalArtifactSchema,
   TranslatedEntry,
@@ -24,6 +25,8 @@ import {
   translatedEntryMatchMatcher,
   translatedEntryMatchAnyMatcher,
   TranslatedExceptionListItem,
+  internalArtifactCompleteSchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas';
 import { ArtifactConstants } from './common';
 
@@ -31,7 +34,7 @@ export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
   os: string,
   schemaVersion: string
-): Promise<InternalArtifactSchema> {
+): Promise<InternalArtifactCompleteSchema> {
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 
@@ -44,9 +47,30 @@ export async function buildArtifact(
     encodedSha256: sha256,
     decodedSize: exceptionsBuffer.byteLength,
     encodedSize: exceptionsBuffer.byteLength,
-    created: Date.now(),
     body: exceptionsBuffer.toString('base64'),
   };
+}
+
+export async function maybeCompressArtifact(
+  uncompressedArtifact: InternalArtifactSchema
+): Promise<InternalArtifactSchema> {
+  const compressedArtifact = { ...uncompressedArtifact };
+  if (internalArtifactCompleteSchema.is(uncompressedArtifact)) {
+    const compressedExceptionList = await compressExceptionList(
+      Buffer.from(uncompressedArtifact.body, 'base64')
+    );
+    compressedArtifact.body = compressedExceptionList.toString('base64');
+    compressedArtifact.encodedSize = compressedExceptionList.byteLength;
+    compressedArtifact.compressionAlgorithm = 'zlib';
+    compressedArtifact.encodedSha256 = createHash('sha256')
+      .update(compressedExceptionList)
+      .digest('hex');
+  }
+  return compressedArtifact;
+}
+
+export function isCompressed(artifact: InternalArtifactSchema) {
+  return artifact.compressionAlgorithm === 'zlib';
 }
 
 export async function getFullEndpointExceptionList(
@@ -60,7 +84,7 @@ export async function getFullEndpointExceptionList(
 
   do {
     const response = await eClient.findExceptionListItem({
-      listId: 'endpoint_list',
+      listId: ENDPOINT_LIST_ID,
       namespaceType: 'agnostic',
       filter: `exception-list-agnostic.attributes._tags:\"os:${os}\"`,
       perPage: 100,
@@ -97,10 +121,18 @@ export function translateToEndpointExceptions(
   exc: FoundExceptionListItemSchema,
   schemaVersion: string
 ): TranslatedExceptionListItem[] {
+  const entrySet = new Set();
+  const entriesFiltered: TranslatedExceptionListItem[] = [];
   if (schemaVersion === 'v1') {
-    return exc.data.map((item) => {
-      return translateItem(schemaVersion, item);
+    exc.data.forEach((entry) => {
+      const translatedItem = translateItem(schemaVersion, entry);
+      const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
+      if (!entrySet.has(entryHash)) {
+        entriesFiltered.push(translatedItem);
+        entrySet.add(entryHash);
+      }
     });
+    return entriesFiltered;
   } else {
     throw new Error('unsupported schemaVersion');
   }
@@ -124,12 +156,17 @@ function translateItem(
   schemaVersion: string,
   item: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
+  const itemSet = new Set();
   return {
     type: item.type,
-    entries: item.entries.reduce((translatedEntries: TranslatedEntry[], entry) => {
+    entries: item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
       const translatedEntry = translateEntry(schemaVersion, entry);
       if (translatedEntry !== undefined && translatedEntryType.is(translatedEntry)) {
-        translatedEntries.push(translatedEntry);
+        const itemHash = createHash('sha256').update(JSON.stringify(translatedEntry)).digest('hex');
+        if (!itemSet.has(itemHash)) {
+          translatedEntries.push(translatedEntry);
+          itemSet.add(itemHash);
+        }
       }
       return translatedEntries;
     }, []),
@@ -142,8 +179,8 @@ function translateEntry(
 ): TranslatedEntry | undefined {
   switch (entry.type) {
     case 'nested': {
-      const nestedEntries = entry.entries.reduce(
-        (entries: TranslatedEntryNestedEntry[], nestedEntry) => {
+      const nestedEntries = entry.entries.reduce<TranslatedEntryNestedEntry[]>(
+        (entries, nestedEntry) => {
           const translatedEntry = translateEntry(schemaVersion, nestedEntry);
           if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
             entries.push(translatedEntry);

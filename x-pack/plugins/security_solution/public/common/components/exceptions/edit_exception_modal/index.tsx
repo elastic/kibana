@@ -30,14 +30,14 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
-import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { ExceptionBuilder } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExceptionItemsWithComments,
   enrichExceptionItemsWithOS,
-  getOsTagValues,
+  getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
 } from '../helpers';
@@ -93,7 +93,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
@@ -102,15 +102,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onError = useCallback(
     (error) => {
-      errorToToaster({ title: i18n.EDIT_EXCEPTION_ERROR, error, dispatchToaster });
+      addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
       onCancel();
     },
-    [dispatchToaster, onCancel]
+    [addError, onCancel]
   );
   const onSuccess = useCallback(() => {
-    displaySuccessToast(i18n.EDIT_EXCEPTION_SUCCESS, dispatchToaster);
+    addSuccess(i18n.EDIT_EXCEPTION_SUCCESS);
     onConfirm();
-  }, [dispatchToaster, onConfirm]);
+  }, [addSuccess, onConfirm]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {
@@ -134,6 +134,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     isSignalIndexLoading,
     indexPatterns,
   ]);
+
+  useEffect(() => {
+    if (shouldDisableBulkClose === true) {
+      setShouldBulkCloseAlert(false);
+    }
+  }, [shouldDisableBulkClose]);
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -167,7 +173,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       ...(comment !== '' ? [{ comment }] : []),
     ]);
     if (exceptionListType === 'endpoint') {
-      const osTypes = exceptionItem._tags ? getOsTagValues(exceptionItem._tags) : ['windows'];
+      const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
     }
     return enriched;
@@ -175,9 +181,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onEditExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
-      addOrUpdateExceptionItems(enrichExceptionItems());
+      const bulkCloseIndex =
+        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
+      addOrUpdateExceptionItems(enrichExceptionItems(), undefined, bulkCloseIndex);
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems]);
+  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
 
   const indexPatternConfig = useCallback(() => {
     if (exceptionListType === 'endpoint') {
@@ -190,7 +198,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     <EuiOverlayMask>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>{i18n.EDIT_EXCEPTION}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{i18n.EDIT_EXCEPTION_TITLE}</EuiModalHeaderTitle>
           <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
           </ModalHeaderSubtitle>
@@ -199,6 +207,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         {!isSignalIndexLoading && (
           <>
             <ModalBodySection className="builder-section">
+              <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
+              <EuiSpacer />
               <ExceptionBuilder
                 exceptionListItems={[exceptionItem]}
                 listType={exceptionListType}
@@ -231,10 +241,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             </ModalBodySection>
             <EuiHorizontalRule />
             <ModalBodySection>
-              <EuiFormRow>
+              <EuiFormRow fullWidth>
                 <EuiCheckbox
                   id="close-alert-on-add-add-exception-checkbox"
-                  label={i18n.BULK_CLOSE_LABEL}
+                  label={
+                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
+                  }
                   checked={shouldBulkCloseAlert}
                   onChange={onBulkCloseAlertCheckboxChange}
                   disabled={shouldDisableBulkClose}
@@ -248,7 +260,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
           <EuiButton onClick={onEditExceptionConfirm} isLoading={addExceptionIsLoading} fill>
-            {i18n.EDIT_EXCEPTION}
+            {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
           </EuiButton>
         </EuiModalFooter>
       </Modal>

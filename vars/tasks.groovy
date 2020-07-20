@@ -101,10 +101,6 @@ def functionalXpack(Map params = [:]) {
       task(kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh'))
     }
 
-    if (config.pageLoadMetrics) {
-      task(kibanaPipeline.functionalTestProcess('xpack-pageLoadMetrics', './test/scripts/jenkins_xpack_page_load_metrics.sh'))
-    }
-
     if (config.savedObjectsFieldMetrics) {
       task(kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'))
     }

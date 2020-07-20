@@ -15,13 +15,17 @@ import {
   EuiTab,
   EuiTabs,
   EuiToolTip,
+  EuiWindowEvent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { FC, memo, useCallback, useMemo, useState } from 'react';
+import { noop } from 'lodash/fp';
+import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
+import { useWindowSize } from 'react-use';
 
+import { globalHeaderHeightPx } from '../../../../../app/home';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -33,7 +37,8 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
-import { useRule } from '../../../../containers/detection_engine/rules';
+import { useRule, Rule } from '../../../../containers/detection_engine/rules';
+import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import { useWithSource } from '../../../../../common/containers/source';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
@@ -47,7 +52,10 @@ import { OverviewEmpty } from '../../../../../overview/components/overview_empty
 import { useAlertInfo } from '../../../../components/alerts_info';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
-import { buildAlertsRuleIdFilter } from '../../../../components/alerts_table/default_config';
+import {
+  buildAlertsRuleIdFilter,
+  buildShowBuildingBlockFilter,
+} from '../../../../components/alerts_table/default_config';
 import { NoWriteAlertsCallOut } from '../../../../components/no_write_alerts_callout';
 import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../../../../components/rules/read_only_callout';
@@ -58,6 +66,7 @@ import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
+import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../../../common/components/events_viewer/events_viewer';
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { State } from '../../../../../common/store';
 import { InputsRange } from '../../../../../common/store/inputs/model';
@@ -72,7 +81,17 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
+import { FILTERS_GLOBAL_HEIGHT } from '../../../../../../common/constants';
+import { useFullScreen } from '../../../../../common/containers/use_full_screen';
+import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../lists_plugin_deps';
+import {
+  getEventsViewerBodyHeight,
+  MIN_EVENTS_VIEWER_BODY_HEIGHT,
+} from '../../../../../timelines/components/timeline/body/helpers';
+import { footerHeight } from '../../../../../timelines/components/timeline/footer';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -80,23 +99,26 @@ enum RuleDetailTabs {
   exceptions = 'exceptions',
 }
 
-const ruleDetailTabs = [
-  {
-    id: RuleDetailTabs.alerts,
-    name: detectionI18n.ALERT,
-    disabled: false,
-  },
-  {
-    id: RuleDetailTabs.exceptions,
-    name: i18n.EXCEPTIONS_TAB,
-    disabled: false,
-  },
-  {
-    id: RuleDetailTabs.failures,
-    name: i18n.FAILURE_HISTORY_TAB,
-    disabled: false,
-  },
-];
+const getRuleDetailsTabs = (rule: Rule | null) => {
+  const canUseExceptions = rule && !isMlRule(rule.type) && !isThresholdRule(rule.type);
+  return [
+    {
+      id: RuleDetailTabs.alerts,
+      name: detectionI18n.ALERT,
+      disabled: false,
+    },
+    {
+      id: RuleDetailTabs.exceptions,
+      name: i18n.EXCEPTIONS_TAB,
+      disabled: !canUseExceptions,
+    },
+    {
+      id: RuleDetailTabs.failures,
+      name: i18n.FAILURE_HISTORY_TAB,
+      disabled: false,
+    },
+  ];
+};
 
 export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   filters,
@@ -105,7 +127,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
   const {
-    loading,
+    loading: userInfoLoading,
     isSignalIndexExists,
     isAuthenticated,
     hasEncryptionKey,
@@ -113,6 +135,11 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     hasIndexWrite,
     signalIndexName,
   } = useUserInfo();
+  const {
+    loading: listsConfigLoading,
+    needsConfiguration: needsListsConfiguration,
+  } = useListsConfig();
+  const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams();
   const [isLoading, rule] = useRule(ruleId);
   // This is used to re-trigger api rule status when user de/activate rule
@@ -128,13 +155,17 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           scheduleRuleData: null,
         };
   const [lastAlerts] = useAlertInfo({ ruleId });
+  const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { height: windowHeight } = useWindowSize();
+  const { globalFullScreen } = useFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions =
     mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+  const ruleDetailTabs = getRuleDetailsTabs(rule);
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(
@@ -178,9 +209,17 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     [isLoading, rule]
   );
 
+  // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
+  useEffect(() => {
+    setShowBuildingBlockAlerts(rule?.building_block_type != null);
+  }, [rule]);
+
   const alertDefaultFilters = useMemo(
-    () => (ruleId != null ? buildAlertsRuleIdFilter(ruleId) : []),
-    [ruleId]
+    () => [
+      ...(ruleId != null ? buildAlertsRuleIdFilter(ruleId) : []),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+    ],
+    [ruleId, showBuildingBlockAlerts]
   );
 
   const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
@@ -230,7 +269,11 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      setAbsoluteRangeDatePicker({
+        id: 'global',
+        from: new Date(min).toISOString(),
+        to: new Date(max).toISOString(),
+      });
     },
     [setAbsoluteRangeDatePicker]
   );
@@ -250,6 +293,13 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       history.push(getEditRuleUrl(ruleId ?? ''));
     },
     [history, ruleId]
+  );
+
+  const onShowBuildingBlockAlertsChangedCallback = useCallback(
+    (newShowBuildingBlockAlerts: boolean) => {
+      setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
+    },
+    [setShowBuildingBlockAlerts]
   );
 
   const { indicesExist, indexPattern } = useWithSource('default', indexToAdd);
@@ -282,7 +332,14 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     }
   }, [rule]);
 
-  if (redirectToDetections(isSignalIndexExists, isAuthenticated, hasEncryptionKey)) {
+  if (
+    redirectToDetections(
+      isSignalIndexExists,
+      isAuthenticated,
+      hasEncryptionKey,
+      needsListsConfiguration
+    )
+  ) {
     history.replace(getDetectionEngineUrl());
     return null;
   }
@@ -293,143 +350,161 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       {indicesExist ? (
         <StickyContainer>
+          <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage>
-            <DetectionEngineHeaderPage
-              backOptions={{
-                href: getRulesUrl(),
-                text: i18n.BACK_TO_RULES,
-                pageId: SecurityPageName.detections,
-              }}
-              border
-              subtitle={subTitle}
-              subtitle2={[
-                ...(lastAlerts != null
-                  ? [
-                      <>
-                        {detectionI18n.LAST_ALERT}
-                        {': '}
-                        {lastAlerts}
-                      </>,
-                    ]
-                  : []),
-                <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
-              ]}
-              title={title}
-            >
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    position="top"
-                    content={
-                      rule?.type === 'machine_learning' && !hasMlPermissions
-                        ? detectionI18n.ML_RULES_DISABLED_MESSAGE
-                        : undefined
-                    }
-                  >
-                    <RuleSwitch
-                      id={rule?.id ?? '-1'}
-                      isDisabled={
-                        userHasNoPermissions(canUserCRUD) || (!hasMlPermissions && !rule?.enabled)
+          <WrapperPage noPadding={globalFullScreen}>
+            <Display show={!globalFullScreen}>
+              <DetectionEngineHeaderPage
+                backOptions={{
+                  href: getRulesUrl(),
+                  text: i18n.BACK_TO_RULES,
+                  pageId: SecurityPageName.detections,
+                }}
+                border
+                subtitle={subTitle}
+                subtitle2={[
+                  ...(lastAlerts != null
+                    ? [
+                        <>
+                          {detectionI18n.LAST_ALERT}
+                          {': '}
+                          {lastAlerts}
+                        </>,
+                      ]
+                    : []),
+                  <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
+                ]}
+                title={title}
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      position="top"
+                      content={
+                        rule?.type === 'machine_learning' && !hasMlPermissions
+                          ? detectionI18n.ML_RULES_DISABLED_MESSAGE
+                          : undefined
                       }
-                      enabled={rule?.enabled ?? false}
-                      optionLabel={i18n.ACTIVATE_RULE}
-                      onChange={handleOnChangeEnabledRule}
-                    />
-                  </EuiToolTip>
+                    >
+                      <RuleSwitch
+                        id={rule?.id ?? '-1'}
+                        isDisabled={
+                          userHasNoPermissions(canUserCRUD) || (!hasMlPermissions && !rule?.enabled)
+                        }
+                        enabled={rule?.enabled ?? false}
+                        optionLabel={i18n.ACTIVATE_RULE}
+                        onChange={handleOnChangeEnabledRule}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <LinkButton
+                          onClick={goToEditRule}
+                          iconType="controlsHorizontal"
+                          isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
+                          href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
+                        >
+                          {ruleI18n.EDIT_RULE_SETTINGS}
+                        </LinkButton>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <RuleActionsOverflow
+                          rule={rule}
+                          userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </DetectionEngineHeaderPage>
+              {ruleError}
+              <EuiSpacer />
+              <EuiFlexGroup>
+                <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
+                  <StepAboutRuleToggleDetails
+                    loading={isLoading}
+                    stepData={aboutRuleData}
+                    stepDataDetails={modifiedAboutRuleDetailsData}
+                  />
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <LinkButton
-                        onClick={goToEditRule}
-                        iconType="controlsHorizontal"
-                        isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
-                        href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
-                      >
-                        {ruleI18n.EDIT_RULE_SETTINGS}
-                      </LinkButton>
+                <EuiFlexItem grow={1}>
+                  <EuiFlexGroup direction="column">
+                    <EuiFlexItem component="section" grow={1}>
+                      <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                        {defineRuleData != null && (
+                          <StepDefineRule
+                            descriptionColumns="singleSplit"
+                            isReadOnlyView={true}
+                            isLoading={false}
+                            defaultValues={defineRuleData}
+                          />
+                        )}
+                      </StepPanel>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <RuleActionsOverflow
-                        rule={rule}
-                        userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
-                      />
+                    <EuiSpacer />
+                    <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
+                      <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                        {scheduleRuleData != null && (
+                          <StepScheduleRule
+                            descriptionColumns="singleSplit"
+                            isReadOnlyView={true}
+                            isLoading={false}
+                            defaultValues={scheduleRuleData}
+                          />
+                        )}
+                      </StepPanel>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </DetectionEngineHeaderPage>
-            {ruleError}
-            <EuiSpacer />
-            <EuiFlexGroup>
-              <EuiFlexItem data-test-subj="aboutRule" component="section" grow={1}>
-                <StepAboutRuleToggleDetails
-                  loading={isLoading}
-                  stepData={aboutRuleData}
-                  stepDataDetails={modifiedAboutRuleDetailsData}
-                />
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={1}>
-                <EuiFlexGroup direction="column">
-                  <EuiFlexItem component="section" grow={1}>
-                    <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                      {defineRuleData != null && (
-                        <StepDefineRule
-                          descriptionColumns="singleSplit"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={defineRuleData}
-                        />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
-                  <EuiSpacer />
-                  <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
-                    <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                      {scheduleRuleData != null && (
-                        <StepScheduleRule
-                          descriptionColumns="singleSplit"
-                          isReadOnlyView={true}
-                          isLoading={false}
-                          defaultValues={scheduleRuleData}
-                        />
-                      )}
-                    </StepPanel>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            {tabs}
-            <EuiSpacer />
+              <EuiSpacer />
+              {tabs}
+              <EuiSpacer />
+            </Display>
             {ruleDetailTab === RuleDetailTabs.alerts && (
               <>
-                <AlertsHistogramPanel
-                  deleteQuery={deleteQuery}
-                  filters={alertMergedFilters}
-                  query={query}
-                  from={from}
-                  signalIndexName={signalIndexName}
-                  setQuery={setQuery}
-                  stackByOptions={alertsHistogramOptions}
-                  to={to}
-                  updateDateRange={updateDateRangeCallback}
-                />
-                <EuiSpacer />
+                <Display show={!globalFullScreen}>
+                  <AlertsHistogramPanel
+                    deleteQuery={deleteQuery}
+                    filters={alertMergedFilters}
+                    query={query}
+                    from={from}
+                    signalIndexName={signalIndexName}
+                    setQuery={setQuery}
+                    stackByOptions={alertsHistogramOptions}
+                    to={to}
+                    updateDateRange={updateDateRangeCallback}
+                  />
+                  <EuiSpacer />
+                </Display>
                 {ruleId != null && (
                   <AlertsTable
                     timelineId={TimelineId.detectionsRulesDetailsPage}
                     canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
+                    eventsViewerBodyHeight={
+                      globalFullScreen
+                        ? getEventsViewerBodyHeight({
+                            footerHeight,
+                            headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
+                            kibanaChromeHeight: globalHeaderHeightPx,
+                            otherContentHeight: FILTERS_GLOBAL_HEIGHT,
+                            windowHeight,
+                          })
+                        : MIN_EVENTS_VIEWER_BODY_HEIGHT
+                    }
                     hasIndexWrite={hasIndexWrite ?? false}
                     from={from}
                     loading={loading}
+                    showBuildingBlockAlerts={showBuildingBlockAlerts}
+                    onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
                     signalsIndex={signalIndexName ?? ''}
                     to={to}
                   />

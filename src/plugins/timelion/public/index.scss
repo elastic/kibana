@@ -1,0 +1,12 @@
+/* Timelion plugin styles */
+
+// Prefix all styles with "tim" to avoid conflicts.
+// Examples
+//   timChart
+//   timChart__legend
+//   timChart__legend--small
+//   timChart__legend-isLoading
+
+@import './app';
+@import './base';
+@import './directives/index';

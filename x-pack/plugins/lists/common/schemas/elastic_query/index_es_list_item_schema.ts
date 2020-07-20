@@ -38,4 +38,4 @@ export const indexEsListItemSchema = t.intersection([
   esDataTypeUnion,
 ]);
 
-export type IndexEsListItemSchema = t.TypeOf<typeof indexEsListItemSchema>;
+export type IndexEsListItemSchema = t.OutputOf<typeof indexEsListItemSchema>;

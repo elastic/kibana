@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBreadcrumbs, Breadcrumb, EuiCode } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiCode, EuiBetaBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
@@ -19,12 +19,16 @@ export const BoldCode = styled(EuiCode)`
   }
 `;
 
+const BetaHeader = styled(`header`)`
+  margin-bottom: 1em;
+`;
+
 /**
  * The two query parameters we read/write on to control which view the table presents:
  */
 export interface CrumbInfo {
-  readonly crumbId: string;
-  readonly crumbEvent: string;
+  crumbId: string;
+  crumbEvent: string;
 }
 
 const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
@@ -40,26 +44,46 @@ const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: str
   }
 `;
 
+const betaBadgeLabel = i18n.translate(
+  'xpack.securitySolution.enpdoint.resolver.panelutils.betaBadgeLabel',
+  {
+    defaultMessage: 'BETA',
+  }
+);
+
+/**
+ * A component to keep time representations in blocks so they don't wrap
+ * and look bad.
+ */
+export const StyledTime = memo(styled('time')`
+  display: inline-block;
+  text-align: start;
+`);
+
+type Breadcrumbs = Parameters<typeof EuiBreadcrumbs>[0]['breadcrumbs'];
 /**
  * Breadcrumb menu with adjustments per direction from UX team
  */
 export const StyledBreadcrumbs = memo(function StyledBreadcrumbs({
   breadcrumbs,
-  truncate,
 }: {
-  breadcrumbs: Breadcrumb[];
-  truncate?: boolean;
+  breadcrumbs: Breadcrumbs;
 }) {
   const {
     colorMap: { resolverBreadcrumbBackground, resolverEdgeText },
   } = useResolverTheme();
   return (
-    <ThemedBreadcrumbs
-      background={resolverBreadcrumbBackground}
-      text={resolverEdgeText}
-      breadcrumbs={breadcrumbs}
-      truncate={truncate}
-    />
+    <>
+      <BetaHeader>
+        <EuiBetaBadge label={betaBadgeLabel} />
+      </BetaHeader>
+      <ThemedBreadcrumbs
+        background={resolverBreadcrumbBackground}
+        text={resolverEdgeText}
+        breadcrumbs={breadcrumbs}
+        truncate={false}
+      />
+    </>
   );
 });
 

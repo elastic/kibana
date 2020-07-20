@@ -114,10 +114,31 @@ export const ONLY_FAVORITES = i18n.translate(
   }
 );
 
+export const CREATE_TEMPLATE_FROM_TIMELINE = i18n.translate(
+  'xpack.securitySolution.open.timeline.createTemplateFromTimelineTooltip',
+  {
+    defaultMessage: 'Create template from timeline',
+  }
+);
+
+export const CREATE_TIMELINE_FROM_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.open.timeline.createTimelineFromTemplateTooltip',
+  {
+    defaultMessage: 'Create timeline from template',
+  }
+);
+
 export const OPEN_AS_DUPLICATE = i18n.translate(
   'xpack.securitySolution.open.timeline.openAsDuplicateTooltip',
   {
     defaultMessage: 'Duplicate timeline',
+  }
+);
+
+export const OPEN_AS_DUPLICATE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.open.timeline.openAsDuplicateTemplateTooltip',
+  {
+    defaultMessage: 'Duplicate template',
   }
 );
 
@@ -157,10 +178,24 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const SEARCH_TEMPLATE_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.open.timeline.searchTemplatePlaceholder',
+  {
+    defaultMessage: 'e.g. template name, or description',
+  }
+);
+
 export const TIMELINE_NAME = i18n.translate(
   'xpack.securitySolution.open.timeline.timelineNameTableHeader',
   {
     defaultMessage: 'Timeline name',
+  }
+);
+
+export const TIMELINE_TEMPLATE_NAME = i18n.translate(
+  'xpack.securitySolution.open.timeline.timelineTemplateNameTableHeader',
+  {
+    defaultMessage: 'Template name',
   }
 );
 
@@ -181,6 +216,41 @@ export const ZERO_TIMELINES_MATCH = i18n.translate(
     defaultMessage: '0 timelines match the search criteria',
   }
 );
+
+export const SINGLE_TIMELINE = i18n.translate(
+  'xpack.securitySolution.open.timeline.singleTimelineLabel',
+  {
+    defaultMessage: 'timeline',
+  }
+);
+
+export const PLURAL_TIMELINES = i18n.translate(
+  'xpack.securitySolution.open.timeline.pluralTimelinesLabel',
+  {
+    defaultMessage: 'timelines',
+  }
+);
+
+export const SINGLE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.open.timeline.singleTemplateLabel',
+  {
+    defaultMessage: 'template',
+  }
+);
+
+export const PLURAL_TEMPLATES = i18n.translate(
+  'xpack.securitySolution.open.timeline.pluralTemplatesLabel',
+  {
+    defaultMessage: 'templates',
+  }
+);
+
+export const SELECTED_TEMPLATES = (selectedTemplates: number) =>
+  i18n.translate('xpack.securitySolution.open.timeline.selectedTemplatesTitle', {
+    values: { selectedTemplates },
+    defaultMessage:
+      'Selected {selectedTemplates} {selectedTemplates, plural, =1 {template} other {templates}}',
+  });
 
 export const SELECTED_TIMELINES = (selectedTimelines: number) =>
   i18n.translate('xpack.securitySolution.open.timeline.selectedTimelinesTitle', {
@@ -294,11 +364,3 @@ export const IMPORT_FAILED_DETAILED = (id: string, statusCode: number, message: 
       defaultMessage: 'Timeline ID: {id}\n Status Code: {statusCode}\n Message: {message}',
     }
   );
-
-export const TEMPLATE_CALL_OUT_MESSAGE = i18n.translate(
-  'xpack.securitySolution.timelines.components.templateCallOutMessageTitle',
-  {
-    defaultMessage:
-      'Prebuit detection rules are now packaged with Timeline templates. You can also create your own Timeline templates and associate them with any rule.',
-  }
-);

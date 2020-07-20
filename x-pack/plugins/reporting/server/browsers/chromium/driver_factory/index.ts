@@ -24,7 +24,6 @@ import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
-import { getChromeLogLocation } from '../paths';
 import { puppeteerLaunch } from '../puppeteer';
 import { args } from './args';
 
@@ -77,7 +76,6 @@ export class HeadlessChromiumDriverFactory {
         `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
       );
       logger.error(error);
-      logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
       return null;
     });
   }

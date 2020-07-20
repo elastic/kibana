@@ -1,6 +1,7 @@
 **/*.js.snap
 **/graphql/types.ts
 /.es
+/.chromium
 /build
 /built_assets
 /config/apm.dev.js
@@ -25,6 +26,7 @@ target
 /src/plugins/data/common/es_query/kuery/ast/_generated_/**
 /src/plugins/vis_type_timelion/public/_generated_/**
 /src/plugins/vis_type_timelion/public/webpackShims/jquery.flot.*
+/src/plugins/timelion/public/webpackShims/jquery.flot.*
 /x-pack/legacy/plugins/**/__tests__/fixtures/**
 /x-pack/plugins/apm/e2e/**/snapshots.js
 /x-pack/plugins/apm/e2e/tmp/*

@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ExceptionListItemComponent } from './exception_item';
+import { ExceptionListItemComponent } from './builder_exception_item';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import {
   ExceptionListItemSchema,
@@ -23,6 +23,8 @@ import { BuilderButtonOptions } from './builder_button_options';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { Loader } from '../../loader';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import exceptionableFields from '../exceptionable_fields.json';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -78,19 +80,8 @@ export const ExceptionBuilder = ({
   );
 
   const handleCheckAndLogic = (items: ExceptionsBuilderExceptionItem[]): void => {
-    setAndLogicIncluded((includesAnd: boolean): boolean => {
-      if (includesAnd) {
-        return true;
-      } else {
-        return items.filter(({ entries }) => entries.length > 1).length > 0;
-      }
-    });
+    setAndLogicIncluded(items.filter(({ entries }) => entries.length > 1).length > 0);
   };
-
-  // Bubble up changes to parent
-  useEffect(() => {
-    onChange({ exceptionItems: filterExceptionItems(exceptions), exceptionsToDelete });
-  }, [onChange, exceptionsToDelete, exceptions]);
 
   const handleDeleteExceptionItem = (
     item: ExceptionsBuilderExceptionItem,
@@ -162,15 +153,16 @@ export const ExceptionBuilder = ({
     setExceptions((existingExceptions) => [...existingExceptions, { ...newException }]);
   }, [setExceptions, listType, listId, listNamespaceType, ruleName]);
 
-  // An exception item can have an empty array for `entries`
-  const displayInitialAddExceptionButton = useMemo((): boolean => {
-    return (
-      exceptions.length === 0 ||
-      (exceptions.length === 1 &&
-        exceptions[0].entries != null &&
-        exceptions[0].entries.length === 0)
-    );
-  }, [exceptions]);
+  // Filters index pattern fields by exceptionable fields if list type is endpoint
+  const filterIndexPatterns = useCallback(() => {
+    if (listType === 'endpoint') {
+      return {
+        ...indexPatterns,
+        fields: indexPatterns.fields.filter(({ name }) => exceptionableFields.includes(name)),
+      };
+    }
+    return indexPatterns;
+  }, [indexPatterns, listType]);
 
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
@@ -185,6 +177,22 @@ export const ExceptionBuilder = ({
       return `${index}`;
     }
   };
+
+  // Bubble up changes to parent
+  useEffect(() => {
+    onChange({ exceptionItems: filterExceptionItems(exceptions), exceptionsToDelete });
+  }, [onChange, exceptionsToDelete, exceptions]);
+
+  useEffect(() => {
+    if (
+      exceptions.length === 0 ||
+      (exceptions.length === 1 &&
+        exceptions[0].entries != null &&
+        exceptions[0].entries.length === 0)
+    ) {
+      handleAddNewExceptionItem();
+    }
+  }, [exceptions, handleAddNewExceptionItem]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
@@ -216,13 +224,13 @@ export const ExceptionBuilder = ({
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
-                indexPattern={indexPatterns}
+                indexPattern={filterIndexPatterns()}
                 isLoading={indexPatternLoading}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}
-                onCheckAndLogic={handleCheckAndLogic}
+                isOnlyItem={exceptions.length === 1}
                 onDeleteExceptionItem={handleDeleteExceptionItem}
-                onExceptionItemChange={handleExceptionItemChange}
+                onChangeExceptionItem={handleExceptionItemChange}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -240,7 +248,6 @@ export const ExceptionBuilder = ({
             <BuilderButtonOptions
               isOrDisabled={isOrDisabled}
               isAndDisabled={isAndDisabled}
-              displayInitButton={displayInitialAddExceptionButton}
               showNestedButton={false}
               onOrClicked={handleAddNewExceptionItem}
               onAndClicked={handleAddNewExceptionItemEntry}

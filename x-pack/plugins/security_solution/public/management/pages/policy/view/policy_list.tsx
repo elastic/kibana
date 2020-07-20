@@ -23,6 +23,8 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiButton,
+  EuiBetaBadge,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -125,7 +127,7 @@ export const PolicyList = React.memo(() => {
   const { services, notifications } = useKibana();
   const history = useHistory();
   const location = useLocation();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
@@ -394,14 +396,25 @@ export const PolicyList = React.memo(() => {
         data-test-subj="policyListPage"
         headerLeft={
           <>
-            <EuiTitle size="l">
-              <h1 data-test-subj="pageViewHeaderLeftTitle">
-                <FormattedMessage
-                  id="xpack.securitySolution.policyList.pageTitle"
-                  defaultMessage="Policies"
+            <EuiFlexGroup alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1 data-test-subj="pageViewHeaderLeftTitle">
+                    <FormattedMessage
+                      id="xpack.securitySolution.policyList.pageTitle"
+                      defaultMessage="Policies"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.securitySolution.endpoint.policyList.beta', {
+                    defaultMessage: 'Beta',
+                  })}
                 />
-              </h1>
-            </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
               <p>
@@ -425,19 +438,19 @@ export const PolicyList = React.memo(() => {
             />
           </EuiButton>
         }
-        bodyHeader={
-          policyItems &&
-          policyItems.length > 0 && (
-            <EuiText color="subdued" data-test-subj="policyTotalCount">
+      >
+        {policyItems && policyItems.length > 0 && (
+          <>
+            <EuiText color="subdued" data-test-subj="policyTotalCount" size="xs">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
                 defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
                 values={{ totalItemCount }}
               />
             </EuiText>
-          )
-        }
-      >
+            <EuiHorizontalRule margin="xs" />
+          </>
+        )}
         {useMemo(() => {
           return (
             <>
@@ -464,7 +477,7 @@ export const PolicyList = React.memo(() => {
           handleTableChange,
           paginationSetup,
         ])}
-        <SpyRoute pageName={SecurityPageName.management} />
+        <SpyRoute pageName={SecurityPageName.administration} />
       </ManagementPageView>
     </>
   );

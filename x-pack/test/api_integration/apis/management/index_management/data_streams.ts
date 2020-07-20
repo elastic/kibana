@@ -35,9 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         },
-        data_stream: {
-          timestamp_field: '@timestamp',
-        },
+        data_stream: {},
       },
     });
 
@@ -53,8 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
     await deleteComposableIndexTemplate(name);
   };
 
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/71018
-  describe.skip('Data streams', function () {
+  describe('Data streams', function () {
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
@@ -72,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(dataStreams).to.eql([
           {
             name: testDataStreamName,
-            timeStampField: { name: '@timestamp', mapping: { type: 'date' } },
+            timeStampField: { name: '@timestamp' },
             indices: [
               {
                 name: indexName,
@@ -94,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { name: indexName, uuid } = dataStream.indices[0];
         expect(dataStream).to.eql({
           name: testDataStreamName,
-          timeStampField: { name: '@timestamp', mapping: { type: 'date' } },
+          timeStampField: { name: '@timestamp' },
           indices: [
             {
               name: indexName,
