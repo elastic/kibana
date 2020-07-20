@@ -18,9 +18,5 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
     describe('Service Maps', function () {
       loadTestFile(require.resolve('./service_maps/service_maps'));
     });
-
-    describe('Transaction Group', function () {
-      loadTestFile(require.resolve('./transaction_groups/error_rate'));
-    });
   });
 }
