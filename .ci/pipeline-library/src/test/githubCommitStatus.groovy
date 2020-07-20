@@ -12,6 +12,7 @@ class GithubCommitStatusTest extends KibanaBasePipelineTest {
 
   interface BuildState {
     Object get(String key)
+    Object has(String key)
   }
 
   interface GithubApi {
