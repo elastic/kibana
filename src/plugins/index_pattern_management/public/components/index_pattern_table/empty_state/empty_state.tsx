@@ -53,6 +53,8 @@ export const EmptyState = ({
   isMlAvailable: () => boolean;
   canSave: boolean;
 }) => {
+  const mlIsAvailable = isMlAvailable();
+
   const createAnyway = (
     <EuiText color="subdued" textAlign="center" size="xs">
       <FormattedMessage
@@ -118,19 +120,23 @@ export const EmptyState = ({
               <EuiCard
                 onClick={() => navigateToApp('ml', { path: '#/filedatavisualizer' })}
                 className="inpEmptyState__card"
-                betaBadgeLabel={i18n.translate(
-                  'indexPatternManagement.createIndexPattern.emptyState.basicLicenseLabel',
-                  {
-                    defaultMessage: 'Basic',
-                  }
-                )}
+                betaBadgeLabel={
+                  mlIsAvailable
+                    ? undefined
+                    : i18n.translate(
+                        'indexPatternManagement.createIndexPattern.emptyState.basicLicenseLabel',
+                        {
+                          defaultMessage: 'Basic',
+                        }
+                      )
+                }
                 betaBadgeTooltipContent={i18n.translate(
                   'indexPatternManagement.createIndexPattern.emptyState.basicLicenseDescription',
                   {
                     defaultMessage: 'This feature requires a Basic license.',
                   }
                 )}
-                isDisabled={!isMlAvailable()}
+                isDisabled={!mlIsAvailable}
                 icon={<EuiIcon size="xl" type="document" color="subdued" />}
                 title={
                   <FormattedMessage
