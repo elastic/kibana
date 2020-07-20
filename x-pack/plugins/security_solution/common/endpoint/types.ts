@@ -482,7 +482,6 @@ export interface LegacyEndpointEvent {
     type: string;
     version: string;
   };
-  process?: object;
   rule?: object;
   user?: object;
   event?: {

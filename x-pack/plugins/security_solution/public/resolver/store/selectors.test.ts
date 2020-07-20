@@ -9,7 +9,10 @@ import { createStore } from 'redux';
 import { ResolverAction } from './actions';
 import { resolverReducer } from './reducer';
 import * as selectors from './selectors';
-import { EndpointEvent, ResolverEvent, ResolverTree } from '../../../common/endpoint/types';
+import {
+  mockTreeWith2AncestorsAndNoChildren,
+  mockTreeWithNoAncestorsAnd2Children,
+} from './mocks/resolver_tree';
 
 describe('resolver selectors', () => {
   const actions: ResolverAction[] = [];
@@ -33,7 +36,7 @@ describe('resolver selectors', () => {
         actions.push({
           type: 'serverReturnedResolverData',
           payload: {
-            result: treeWith2AncestorsAndNoChildren({
+            result: mockTreeWith2AncestorsAndNoChildren({
               originID,
               firstAncestorID,
               secondAncestorID,
@@ -71,7 +74,7 @@ describe('resolver selectors', () => {
         actions.push({
           type: 'serverReturnedResolverData',
           payload: {
-            result: treeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
+            result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
             // this value doesn't matter
             databaseDocumentID: '',
           },
@@ -149,111 +152,3 @@ describe('resolver selectors', () => {
     });
   });
 });
-/**
- * Simple mock endpoint event that works for tree layouts.
- */
-function mockEndpointEvent({
-  entityID,
-  name,
-  parentEntityId,
-  timestamp,
-}: {
-  entityID: string;
-  name: string;
-  parentEntityId: string;
-  timestamp: number;
-}): EndpointEvent {
-  return {
-    '@timestamp': timestamp,
-    event: {
-      type: 'start',
-      category: 'process',
-    },
-    process: {
-      entity_id: entityID,
-      name,
-      parent: {
-        entity_id: parentEntityId,
-      },
-    },
-  } as EndpointEvent;
-}
-
-function treeWith2AncestorsAndNoChildren({
-  originID,
-  firstAncestorID,
-  secondAncestorID,
-}: {
-  secondAncestorID: string;
-  firstAncestorID: string;
-  originID: string;
-}): ResolverTree {
-  const secondAncestor: ResolverEvent = mockEndpointEvent({
-    entityID: secondAncestorID,
-    name: 'a',
-    parentEntityId: 'none',
-    timestamp: 0,
-  });
-  const firstAncestor: ResolverEvent = mockEndpointEvent({
-    entityID: firstAncestorID,
-    name: 'b',
-    parentEntityId: secondAncestorID,
-    timestamp: 1,
-  });
-  const originEvent: ResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    name: 'c',
-    parentEntityId: firstAncestorID,
-    timestamp: 2,
-  });
-  return ({
-    entityID: originID,
-    children: {
-      childNodes: [],
-    },
-    ancestry: {
-      ancestors: [{ lifecycle: [secondAncestor] }, { lifecycle: [firstAncestor] }],
-    },
-    lifecycle: [originEvent],
-  } as unknown) as ResolverTree;
-}
-
-function treeWithNoAncestorsAnd2Children({
-  originID,
-  firstChildID,
-  secondChildID,
-}: {
-  originID: string;
-  firstChildID: string;
-  secondChildID: string;
-}): ResolverTree {
-  const origin: ResolverEvent = mockEndpointEvent({
-    entityID: originID,
-    name: 'c',
-    parentEntityId: 'none',
-    timestamp: 0,
-  });
-  const firstChild: ResolverEvent = mockEndpointEvent({
-    entityID: firstChildID,
-    name: 'd',
-    parentEntityId: originID,
-    timestamp: 1,
-  });
-  const secondChild: ResolverEvent = mockEndpointEvent({
-    entityID: secondChildID,
-    name: 'e',
-    parentEntityId: originID,
-    timestamp: 2,
-  });
-
-  return ({
-    entityID: originID,
-    children: {
-      childNodes: [{ lifecycle: [firstChild] }, { lifecycle: [secondChild] }],
-    },
-    ancestry: {
-      ancestors: [],
-    },
-    lifecycle: [origin],
-  } as unknown) as ResolverTree;
-}
