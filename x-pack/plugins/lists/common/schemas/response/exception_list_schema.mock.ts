@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ENDPOINT_LIST_ID } from '../..';
+
 import { ExceptionListSchema } from './exception_list_schema';
 
 export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
@@ -12,10 +14,10 @@ export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   created_by: 'user_name',
   description: 'This is a sample endpoint type exception',
   id: '1',
-  list_id: 'endpoint_list',
+  list_id: ENDPOINT_LIST_ID,
   meta: {},
   name: 'Sample Endpoint Exception List',
-  namespace_type: 'single',
+  namespace_type: 'agnostic',
   tags: ['user added string for a tag', 'malware'],
   tie_breaker_id: '77fd1909-6786-428a-a671-30229a719c1f',
   type: 'endpoint',

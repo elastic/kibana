@@ -81,7 +81,7 @@ export const getBrowserFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
-export const getdocValueFields = memoizeOne(
+export const getDocValueFields = memoizeOne(
   (_title: string, fields: IndexField[]): DocValueFields[] =>
     fields && fields.length > 0
       ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
@@ -177,7 +177,7 @@ export const useWithSource = (
               defaultIndex.join(),
               get('data.source.status.indexFields', result)
             ),
-            docValueFields: getdocValueFields(
+            docValueFields: getDocValueFields(
               defaultIndex.join(),
               get('data.source.status.indexFields', result)
             ),
