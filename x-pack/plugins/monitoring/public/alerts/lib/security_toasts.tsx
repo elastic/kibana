@@ -30,7 +30,7 @@ const showTlsAndEncryptionError = () => {
       <div>
         <p>
           {i18n.translate('xpack.monitoring.healthCheck.tlsAndEncryptionError', {
-            defaultMessage: `Stack monitoring alerts require Transport Layer Security between Kibana and Elasticsearch and an encryption key in your kibana.yml file.`,
+            defaultMessage: `Stack monitoring alerts require Transport Layer Security between Kibana and Elasticsearch, and an encryption key in your kibana.yml file.`,
           })}
         </p>
         <EuiSpacer size="xs" />
@@ -57,5 +57,7 @@ export const showSecurityToast = (alertingHealth: AlertingFrameworkHealth) => {
     return;
   }
 
-  showTlsAndEncryptionError();
+  if (!isSufficientlySecure || !hasPermanentEncryptionKey) {
+    showTlsAndEncryptionError();
+  }
 };
