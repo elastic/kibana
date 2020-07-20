@@ -1367,7 +1367,6 @@ describe('disable()', () => {
       await alertsClient.disable({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'disable');
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
     });
 
     test('throws when user is not authorised to disable this type of alert', async () => {
