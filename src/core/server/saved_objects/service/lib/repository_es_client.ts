@@ -121,9 +121,11 @@ type MethodName = keyof RepositoryEsClient;
 
 export function createRepositoryEsClient(client: ElasticsearchClient): RepositoryEsClient {
   return methods.reduce((acc: RepositoryEsClient, key: MethodName) => {
-    acc[key] = async (...args: any[]) => {
+    acc[key] = async (params?: unknown, options?: TransportRequestOptions) => {
       try {
-        return await retryCallCluster(() => (client[key] as Function)(...args));
+        return await retryCallCluster(() =>
+          (client[key] as Function)(params, { maxRetries: 0, ...options })
+        );
       } catch (e) {
         throw decorateEsError(e);
       }

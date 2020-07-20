@@ -43,6 +43,15 @@ describe('RepositoryEsClient', () => {
     expect(retryCallClusterMock).toHaveBeenCalledTimes(1);
   });
 
+  it('sets maxRetries: 0 to delegate retry logic to retryCallCluster', async () => {
+    expect(repositoryClient.bulk).toStrictEqual(expect.any(Function));
+    await repositoryClient.bulk({ body: [] });
+    expect(client.bulk).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ maxRetries: 0 })
+    );
+  });
+
   it('transform elasticsearch errors into saved objects errors', async () => {
     expect.assertions(1);
     client.bulk = jest.fn().mockRejectedValue(new Error('reason'));

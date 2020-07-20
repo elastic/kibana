@@ -44,6 +44,15 @@ describe('MigrationEsClient', () => {
     expect(migrationRetryCallClusterMock).toHaveBeenCalledTimes(1);
   });
 
+  it('sets maxRetries: 0 to delegate retry logic to migrationRetryCallCluster', async () => {
+    expect(migrationEsClient.bulk).toStrictEqual(expect.any(Function));
+    await migrationEsClient.bulk({ body: [] });
+    expect(client.bulk).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ maxRetries: 0 })
+    );
+  });
+
   it('do not transform elasticsearch errors into saved objects errors', async () => {
     expect.assertions(1);
     client.bulk = jest.fn().mockRejectedValue(new Error('reason'));
