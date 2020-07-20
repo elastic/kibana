@@ -133,6 +133,7 @@ const NodeSubMenuComponents = React.memo(
     menuAction,
     optionsWithActions,
     className,
+    projectionMatrix,
   }: {
     menuTitle: string;
     className?: string;
@@ -140,6 +141,10 @@ const NodeSubMenuComponents = React.memo(
     buttonBorderColor: ButtonColor;
     buttonFill: string;
     count?: number;
+    /**
+     * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.
+     */
+    projectionMatrix: Matrix3;
   } & {
     optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
   }) => {
@@ -220,11 +225,20 @@ const NodeSubMenuComponents = React.memo(
           {menuIsOpen && typeof optionsWithActions === 'object' && (
             <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
           )}
+          {/**
+           * EuiPopover has a mutation observer that observers the child tree and repositions itself.
+           * Abuse this to cause it to reposition itself when the project matrix changes.
+           */}
+          <HiddenSpan data-force-mutation-observer={projectionMatrix.join(', ')} />
         </EuiPopover>
       </div>
     );
   }
 );
+
+const HiddenSpan = styled('div')`
+  display: none;
+`;
 
 NodeSubMenuComponents.displayName = 'NodeSubMenu';
 

@@ -417,6 +417,7 @@ const UnstyledProcessEventDot = React.memo(
                   buttonFill={colorMap.resolverBackground}
                   menuAction={handleRelatedEventRequest}
                   menuTitle={subMenuAssets.relatedEvents.title}
+                  projectionMatrix={projectionMatrix}
                   optionsWithActions={relatedEventStatusOrOptions}
                 />
               )}
