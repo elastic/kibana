@@ -188,12 +188,6 @@ export const searchAfterAndBulkCreate = async ({
                 buildRuleMessage,
               })
             : searchResult;
-        if (filteredEvents.hits.total === 0 || filteredEvents.hits.hits.length === 0) {
-          // everything in the events were allowed, so no need to generate signals
-          logger.debug(`filteredEvents was empty`);
-          toReturn.success = true;
-          break;
-        }
 
         // only bulk create if there are filteredEvents leftover
         // if there isn't anything after going through the value list filter
