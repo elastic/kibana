@@ -169,7 +169,9 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       process,
       ...relevantData
     } = relatedEventToShowDetailsFor as ResolverEvent & {
+      // Type this with various unknown keys so that ts will let us delete those keys
       ecs: unknown;
+      process: unknown;
     };
     let displayDate = '';
     const sectionData: Array<{
@@ -371,4 +373,3 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     </>
   );
 });
-RelatedEventDetail.displayName = 'RelatedEventDetail';
