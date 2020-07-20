@@ -15,6 +15,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
+import { noop } from 'lodash/fp';
+
 import * as i18n from '../../translations';
 import { Form, UseField, useForm } from '../../../shared_imports';
 import { schema } from './schema';
@@ -25,7 +27,7 @@ interface EditConnectorProps {
   connectors: Connector[];
   disabled?: boolean;
   isLoading: boolean;
-  onSubmit: (a: string[]) => void;
+  onSubmit: (a: string[], onSuccess: () => void, onError: () => void) => void;
   selectedConnector: string;
 }
 
@@ -59,6 +61,11 @@ export const EditConnector = React.memo(
       [selectedConnector]
     );
 
+    const onError = useCallback(() => {
+      form.setFieldValue('connector', selectedConnector);
+      setConnectorHasChanged(false);
+    }, [form, selectedConnector]);
+
     const onCancelConnector = useCallback(() => {
       form.setFieldValue('connector', selectedConnector);
       setConnectorHasChanged(false);
@@ -67,10 +74,10 @@ export const EditConnector = React.memo(
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await form.submit();
       if (isValid && newData.connector) {
-        onSubmit(newData.connector);
+        onSubmit(newData.connector, noop, onError);
         setConnectorHasChanged(false);
       }
-    }, [form, onSubmit]);
+    }, [form, onSubmit, onError]);
     return (
       <EuiText>
         <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
