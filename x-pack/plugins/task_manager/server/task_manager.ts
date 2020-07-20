@@ -143,7 +143,9 @@ export class TaskManager {
     // pipe store events into the TaskManager's event stream
     this.store.events.subscribe((event) => this.events$.next(event));
 
-    this.bufferedStore = new BufferedTaskStore(this.store);
+    this.bufferedStore = new BufferedTaskStore(this.store, {
+      bufferMaxOperations: opts.config.max_workers,
+    });
 
     this.pool = new TaskPool({
       logger: this.logger,

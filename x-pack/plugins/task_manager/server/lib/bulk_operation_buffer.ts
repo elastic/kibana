@@ -9,6 +9,11 @@ import { Subject, race, from, Subscription } from 'rxjs';
 import { bufferWhen, filter, bufferCount, bufferTime, first } from 'rxjs/operators';
 import { either, Result, asOk, asErr, Ok, Err } from './result_type';
 
+export interface BufferOptions {
+  bufferMaxDuration?: number;
+  bufferMaxOperations?: number;
+}
+
 export interface Entity {
   id: string;
 }
@@ -33,13 +38,7 @@ export type BulkOperation<Input, ErrorOutput, Output = Input> = (
 
 export function createBuffer<Input extends Entity, ErrorOutput, Output extends Entity = Input>(
   bulkOperation: BulkOperation<Input, ErrorOutput, Output>,
-  {
-    bufferMaxDuration = 0,
-    bufferMaxOperations = Number.MAX_VALUE,
-  }: {
-    bufferMaxDuration?: number;
-    bufferMaxOperations?: number;
-  } = {}
+  { bufferMaxDuration = 0, bufferMaxOperations = Number.MAX_VALUE }: BufferOptions = {}
 ): Operation<Input, ErrorOutput, Output> {
   const flushBuffer = new Subject<void>();
 
