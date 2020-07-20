@@ -39,4 +39,4 @@ Lens has a lot of UI elements - to make it easier to refer to them in issues or 
     * **Chart settings popover** Popover shown when clicking the "Settings" button above the chart preview
 * **Suggestion panel** Panel to the bottom showing previews for suggestions how to change the current chart
 
-![Layout](docs/layout.png "Layout")
+![Layout](layout.png "Layout")
