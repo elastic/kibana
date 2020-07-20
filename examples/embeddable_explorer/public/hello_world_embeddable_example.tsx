@@ -28,17 +28,23 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
-import {
+import type { EmbeddableRenderer as EmbeddableRendererType } from '../../../src/plugins/embeddable/public';
+import type {
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactory,
 } from '../../embeddable_examples/public';
 
 interface Props {
   helloWorldEmbeddableFactory: HelloWorldEmbeddableFactory;
+  helloWorldEmbeddable: typeof HelloWorldEmbeddable;
+  EmbeddableRenderer: typeof EmbeddableRendererType;
 }
 
-export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Props) {
+export function HelloWorldEmbeddableExample({
+  helloWorldEmbeddableFactory,
+  helloWorldEmbeddable,
+  EmbeddableRenderer,
+}: Props) {
   return (
     <EuiPageBody>
       <EuiPageHeader>
@@ -56,7 +62,7 @@ export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Pro
             `input` prop may be used to declaratively update current embeddable input
           </EuiText>
           <EuiPanel data-test-subj="helloWorldEmbeddablePanel" paddingSize="none" role="figure">
-            <EmbeddableRenderer embeddable={new HelloWorldEmbeddable({ id: 'hello' })} />
+            <EmbeddableRenderer embeddable={new helloWorldEmbeddable({ id: 'hello' })} />
           </EuiPanel>
 
           <EuiText>

@@ -29,7 +29,7 @@ import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddable
 import {
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddableFactoryDefinition,
-} from '../../../../../examples/embeddable_examples/public';
+} from '../../../../../examples/embeddable_examples/public/hello_world';
 import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';

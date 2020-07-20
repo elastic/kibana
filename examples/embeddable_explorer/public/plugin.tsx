@@ -56,7 +56,7 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
             savedObject: coreStart.savedObjects,
             overlays: coreStart.overlays,
             navigateToApp: coreStart.application.navigateToApp,
-            embeddableExamples: depsStart.embeddableExamples,
+            exampleEmbeddables: depsStart.embeddableExamples.embeddables,
           },
           params.element
         );

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiPanel,
   EuiPageBody,
@@ -29,34 +29,28 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EmbeddableStart, IEmbeddable } from '../../../src/plugins/embeddable/public';
-import {
-  HELLO_WORLD_EMBEDDABLE,
-  TODO_EMBEDDABLE,
-  BOOK_EMBEDDABLE,
-  MULTI_TASK_TODO_EMBEDDABLE,
-  SearchableListContainerFactory,
-} from '../../embeddable_examples/public';
+import type { EmbeddableStart, IEmbeddable } from '../../../src/plugins/embeddable/public';
+import type { ExampleEmbeddables } from '../../embeddable_examples/public';
 
 interface Props {
   embeddableServices: EmbeddableStart;
-  searchListContainerFactory: SearchableListContainerFactory;
+  exampleEmbeddables: ExampleEmbeddables;
 }
 
-export function EmbeddablePanelExample({ embeddableServices, searchListContainerFactory }: Props) {
+export function EmbeddablePanelExample({ embeddableServices, exampleEmbeddables }: Props) {
   const searchableInput = {
     id: '1',
     title: 'My searchable todo list',
     panels: {
       '1': {
-        type: HELLO_WORLD_EMBEDDABLE,
+        type: exampleEmbeddables.helloWorld.type,
         explicitInput: {
           id: '1',
           title: 'Hello',
         },
       },
       '2': {
-        type: TODO_EMBEDDABLE,
+        type: exampleEmbeddables.todo.type,
         explicitInput: {
           id: '2',
           task: 'Goes out on Wednesdays!',
@@ -65,7 +59,7 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
         },
       },
       '3': {
-        type: MULTI_TASK_TODO_EMBEDDABLE,
+        type: exampleEmbeddables.multiTaskTodo.type,
         explicitInput: {
           id: '3',
           icon: 'searchProfilerApp',
@@ -74,14 +68,14 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
         },
       },
       '4': {
-        type: BOOK_EMBEDDABLE,
+        type: exampleEmbeddables.book.type,
         explicitInput: {
           id: '4',
           savedObjectId: 'sample-book-saved-object',
         },
       },
       '5': {
-        type: BOOK_EMBEDDABLE,
+        type: exampleEmbeddables.book.type,
         explicitInput: {
           id: '5',
           attributes: {
@@ -92,7 +86,7 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
         },
       },
       '6': {
-        type: BOOK_EMBEDDABLE,
+        type: exampleEmbeddables.book.type,
         explicitInput: {
           id: '6',
           attributes: {
@@ -107,22 +101,20 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
 
   const [embeddable, setEmbeddable] = useState<IEmbeddable | undefined>(undefined);
 
-  const ref = useRef(false);
-
   useEffect(() => {
-    ref.current = true;
+    let current = true;
     if (!embeddable) {
-      const promise = searchListContainerFactory.create(searchableInput);
+      const promise = exampleEmbeddables.searchableList.getFactory().create(searchableInput);
       if (promise) {
         promise.then((e) => {
-          if (ref.current) {
+          if (current) {
             setEmbeddable(e);
           }
         });
       }
     }
     return () => {
-      ref.current = false;
+      current = false;
     };
   });
 

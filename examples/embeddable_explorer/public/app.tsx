@@ -23,10 +23,10 @@ import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 
 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
-import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
-import {
+import type { EmbeddableStart } from '../../../src/plugins/embeddable/public';
+import type { UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import type { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
+import type {
   AppMountContext,
   AppMountParameters,
   CoreStart,
@@ -34,11 +34,12 @@ import {
   IUiSettingsClient,
   OverlayStart,
 } from '../../../src/core/public';
+import type { ExampleEmbeddables } from '../../embeddable_examples/public/plugin';
+
 import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
-import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 
 interface PageDef {
   title: string;
@@ -82,14 +83,14 @@ interface Props {
   inspector: InspectorStartContract;
   savedObject: SavedObjectsStart;
   uiSettingsClient: IUiSettingsClient;
-  embeddableExamples: EmbeddableExamplesStart;
+  exampleEmbeddables: ExampleEmbeddables;
 }
 
 const EmbeddableExplorerApp = ({
   basename,
   navigateToApp,
   embeddableApi,
-  embeddableExamples,
+  exampleEmbeddables,
 }: Props) => {
   const pages: PageDef[] = [
     {
@@ -97,7 +98,9 @@ const EmbeddableExplorerApp = ({
       id: 'helloWorldEmbeddableSection',
       component: (
         <HelloWorldEmbeddableExample
-          helloWorldEmbeddableFactory={embeddableExamples.factories.getHelloWorldEmbeddableFactory()}
+          helloWorldEmbeddableFactory={exampleEmbeddables.helloWorld.getFactory()}
+          helloWorldEmbeddable={exampleEmbeddables.helloWorld.embeddable}
+          EmbeddableRenderer={embeddableApi.EmbeddableRenderer}
         />
       ),
     },
@@ -106,7 +109,8 @@ const EmbeddableExplorerApp = ({
       id: 'todoEmbeddableSection',
       component: (
         <TodoEmbeddableExample
-          todoEmbeddableFactory={embeddableExamples.factories.getTodoEmbeddableFactory()}
+          todoEmbeddableFactory={exampleEmbeddables.todo.getFactory()}
+          embeddableRenderer={embeddableApi.EmbeddableRenderer}
         />
       ),
     },
@@ -115,8 +119,8 @@ const EmbeddableExplorerApp = ({
       id: 'listContainerSection',
       component: (
         <ListContainerExample
-          listContainerEmbeddableFactory={embeddableExamples.factories.getListContainerEmbeddableFactory()}
-          searchableListContainerEmbeddableFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
+          exampleEmbeddables={exampleEmbeddables}
+          EmbeddableRenderer={embeddableApi.EmbeddableRenderer}
         />
       ),
     },
@@ -126,7 +130,7 @@ const EmbeddableExplorerApp = ({
       component: (
         <EmbeddablePanelExample
           embeddableServices={embeddableApi}
-          searchListContainerFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
+          exampleEmbeddables={exampleEmbeddables}
         />
       ),
     },

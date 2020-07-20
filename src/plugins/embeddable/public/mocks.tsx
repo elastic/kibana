@@ -104,6 +104,7 @@ const createStartContract = (): Start => {
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     filtersAndTimeRangeFromContext: jest.fn(),
     filtersFromContext: jest.fn(),
+    EmbeddableRenderer: jest.fn(),
   };
   return startContract;
 };

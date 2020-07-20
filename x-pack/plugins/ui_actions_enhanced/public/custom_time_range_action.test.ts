@@ -19,7 +19,7 @@ import { HelloWorldContainer } from '../../../../src/plugins/embeddable/public/l
 import {
   HelloWorldEmbeddable,
   HELLO_WORLD_EMBEDDABLE,
-} from '../../../../examples/embeddable_examples/public';
+} from '../../../../examples/embeddable_examples/public/hello_world';
 
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { ReactElement } from 'react';

@@ -47,6 +47,7 @@ import {
   ChartActionContext,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  EmbeddableRenderer,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { AttributeService } from './lib/embeddables/attribute_service';
@@ -107,6 +108,7 @@ export interface EmbeddableStart {
   EmbeddablePanel: EmbeddablePanelHOC;
   getEmbeddablePanel: (stateTransfer?: EmbeddableStateTransfer) => EmbeddablePanelHOC;
   getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
+  EmbeddableRenderer: typeof EmbeddableRenderer;
 }
 
 export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
@@ -225,6 +227,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       },
       EmbeddablePanel: getEmbeddablePanelHoc(),
       getEmbeddablePanel: getEmbeddablePanelHoc,
+      EmbeddableRenderer,
     };
   }
 

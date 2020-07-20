@@ -34,12 +34,15 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { TodoInput } from '../../../examples/embeddable_examples/public/todo';
-import { TodoEmbeddableFactory } from '../../../examples/embeddable_examples/public';
-import { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
+import type {
+  TodoEmbeddableFactory,
+  TodoInput,
+} from '../../../examples/embeddable_examples/public';
+import type { EmbeddableRenderer } from '../../../src/plugins/embeddable/public';
 
 interface Props {
   todoEmbeddableFactory: TodoEmbeddableFactory;
+  embeddableRenderer: typeof EmbeddableRenderer;
 }
 
 interface State {
@@ -125,7 +128,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiPanel data-test-subj="todoEmbeddable" paddingSize="none" role="figure">
-              <EmbeddableRenderer
+              <this.props.embeddableRenderer
                 factory={this.props.todoEmbeddableFactory}
                 input={this.state.input}
               />

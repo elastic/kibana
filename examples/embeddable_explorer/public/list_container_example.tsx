@@ -29,41 +29,33 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
+import type {
   EmbeddableInput,
-  EmbeddableRenderer,
-  ViewMode,
+  EmbeddableRenderer as EmbeddableRendererType,
 } from '../../../src/plugins/embeddable/public';
-import {
-  HELLO_WORLD_EMBEDDABLE,
-  MULTI_TASK_TODO_EMBEDDABLE,
-  TODO_EMBEDDABLE,
-  ListContainerFactory,
-  SearchableListContainerFactory,
-} from '../../embeddable_examples/public';
+import type { ExampleEmbeddables } from '../../embeddable_examples/public';
+
+import { ViewMode } from '../../../src/plugins/embeddable/public';
 
 interface Props {
-  listContainerEmbeddableFactory: ListContainerFactory;
-  searchableListContainerEmbeddableFactory: SearchableListContainerFactory;
+  exampleEmbeddables: ExampleEmbeddables;
+  EmbeddableRenderer: typeof EmbeddableRendererType;
 }
 
-export function ListContainerExample({
-  listContainerEmbeddableFactory,
-  searchableListContainerEmbeddableFactory,
-}: Props) {
+export function ListContainerExample({ exampleEmbeddables, EmbeddableRenderer }: Props) {
   const listInput: EmbeddableInput = {
     id: 'hello',
     title: 'My todo list',
     viewMode: ViewMode.VIEW,
     panels: {
       '1': {
-        type: HELLO_WORLD_EMBEDDABLE,
+        type: exampleEmbeddables.helloWorld.type,
         explicitInput: {
           id: '1',
         },
       },
       '2': {
-        type: TODO_EMBEDDABLE,
+        type: exampleEmbeddables.todo.type,
         explicitInput: {
           id: '2',
           task: 'Goes out on Wednesdays!',
@@ -72,7 +64,7 @@ export function ListContainerExample({
         },
       },
       '3': {
-        type: TODO_EMBEDDABLE,
+        type: exampleEmbeddables.todo.type,
         explicitInput: {
           id: '3',
           icon: 'broom',
@@ -88,14 +80,14 @@ export function ListContainerExample({
     viewMode: ViewMode.VIEW,
     panels: {
       '1': {
-        type: HELLO_WORLD_EMBEDDABLE,
+        type: exampleEmbeddables.helloWorld.type,
         explicitInput: {
           id: '1',
           title: 'Hello',
         },
       },
       '2': {
-        type: TODO_EMBEDDABLE,
+        type: exampleEmbeddables.todo.type,
         explicitInput: {
           id: '2',
           task: 'Goes out on Wednesdays!',
@@ -104,7 +96,7 @@ export function ListContainerExample({
         },
       },
       '3': {
-        type: MULTI_TASK_TODO_EMBEDDABLE,
+        type: exampleEmbeddables.multiTaskTodo.type,
         explicitInput: {
           id: '3',
           icon: 'searchProfilerApp',
@@ -131,7 +123,7 @@ export function ListContainerExample({
             list.
           </EuiText>
           <EuiPanel data-test-subj="listContainerEmbeddablePanel" paddingSize="none" role="figure">
-            <EmbeddableRenderer input={listInput} factory={listContainerEmbeddableFactory} />
+            <EmbeddableRenderer input={listInput} factory={exampleEmbeddables.list.getFactory()} />
           </EuiPanel>
 
           <EuiSpacer />
@@ -169,7 +161,7 @@ export function ListContainerExample({
           >
             <EmbeddableRenderer
               input={searchableInput}
-              factory={searchableListContainerEmbeddableFactory}
+              factory={exampleEmbeddables.searchableList.getFactory()}
             />{' '}
           </EuiPanel>
           <EuiSpacer />

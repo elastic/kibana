@@ -17,23 +17,19 @@
  * under the License.
  */
 
-export {
-  HELLO_WORLD_EMBEDDABLE,
+export type {
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactoryDefinition,
   HelloWorldEmbeddableFactory,
 } from './hello_world';
-export { ListContainer, LIST_CONTAINER, ListContainerFactory } from './list_container';
-export { TODO_EMBEDDABLE, TodoEmbeddableFactory } from './todo';
-
-export { BOOK_EMBEDDABLE } from './book';
-
-import { EmbeddableExamplesPlugin } from './plugin';
-
-export {
+export type { ListContainer, ListContainerFactory } from './list_container';
+export type { TodoEmbeddableFactory, TodoInput } from './todo';
+export type {
   SearchableListContainer,
-  SEARCHABLE_LIST_CONTAINER,
   SearchableListContainerFactory,
 } from './searchable_list_container';
-export { MULTI_TASK_TODO_EMBEDDABLE, MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
+export type { MultiTaskTodoEmbeddableFactory } from './multi_task_todo';
+export type { ExampleEmbeddables } from './plugin';
+
+import { EmbeddableExamplesPlugin } from './plugin';
 export const plugin = () => new EmbeddableExamplesPlugin();
