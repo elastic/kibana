@@ -59,7 +59,6 @@ exports[`EmptyState should render normally 1`] = `
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
-            betaBadgeLabel="Basic"
             betaBadgeTooltipContent="This feature requires a Basic license."
             className="inpEmptyState__card"
             description={
