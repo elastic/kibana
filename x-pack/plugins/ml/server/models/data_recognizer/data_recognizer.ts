@@ -498,7 +498,7 @@ export class DataRecognizer {
         saveResults.savedObjects = await this.saveKibanaObjects(savedObjects);
       } catch (error) {
         // only one error is returned for the bulk create saved object request
-        // so populate every every saved object with the same error.
+        // so populate every saved object with the same error.
         this.populateKibanaResultErrors(results.kibana, error.output?.payload);
       }
     }
