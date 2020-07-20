@@ -19,3 +19,5 @@ export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item'
 export { ProcessorRemoveModal } from './processor_remove_modal';
 
 export { OnDoneLoadJsonHandler, LoadFromJsonButton } from './load_from_json';
+
+export { PipelineProcessorsItemTooltip, Position } from './pipeline_processors_editor_item_tooltip';
