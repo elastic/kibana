@@ -33,7 +33,7 @@ export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, server
       <EuiTitle>
         <h2>
           <FormattedMessage
-            id="statusPage.serverStatus.statusTitle"
+            id="core.statusPage.serverStatus.statusTitle"
             defaultMessage="Kibana status is {kibanaStatus}"
             values={{
               kibanaStatus: <EuiBadge color={serverState.uiColor}>{serverState.title}</EuiBadge>,

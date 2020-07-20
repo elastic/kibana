@@ -50,21 +50,21 @@ function formatMetrics(data: StatusResponse): Metric[] {
 
   return [
     {
-      name: i18n.translate('statusPage.metricsTiles.columns.heapTotalHeader', {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.heapTotalHeader', {
         defaultMessage: 'Heap total',
       }),
       value: _.get(data.metrics, 'process.memory.heap.size_limit'),
       type: 'byte',
     },
     {
-      name: i18n.translate('statusPage.metricsTiles.columns.heapUsedHeader', {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.heapUsedHeader', {
         defaultMessage: 'Heap used',
       }),
       value: _.get(data.metrics, 'process.memory.heap.used_in_bytes'),
       type: 'byte',
     },
     {
-      name: i18n.translate('statusPage.metricsTiles.columns.loadHeader', {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.loadHeader', {
         defaultMessage: 'Load',
       }),
       value: [
@@ -75,21 +75,21 @@ function formatMetrics(data: StatusResponse): Metric[] {
       type: 'float',
     },
     {
-      name: i18n.translate('statusPage.metricsTiles.columns.resTimeAvgHeader', {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeAvgHeader', {
         defaultMessage: 'Response time avg',
       }),
       value: _.get(data.metrics, 'response_times.avg_in_millis'),
       type: 'ms',
     },
     {
-      name: i18n.translate('statusPage.metricsTiles.columns.resTimeMaxHeader', {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
         defaultMessage: 'Response time max',
       }),
       value: _.get(data.metrics, 'response_times.max_in_millis'),
       type: 'ms',
     },
     {
-      name: i18n.translate('statusPage.metricsTiles.columns.requestsPerSecHeader', {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.requestsPerSecHeader', {
         defaultMessage: 'Requests per second',
       }),
       value:
@@ -133,14 +133,14 @@ export async function loadStatus({
   } catch (e) {
     if ((e.response?.status ?? 0) >= 400) {
       notifications.toasts.addDanger(
-        i18n.translate('statusPage.loadStatus.serverStatusCodeErrorMessage', {
+        i18n.translate('core.statusPage.loadStatus.serverStatusCodeErrorMessage', {
           defaultMessage: 'Failed to request server status with status code {responseStatus}',
           values: { responseStatus: e.response?.status },
         })
       );
     } else {
       notifications.toasts.addDanger(
-        i18n.translate('statusPage.loadStatus.serverIsDownErrorMessage', {
+        i18n.translate('core.statusPage.loadStatus.serverIsDownErrorMessage', {
           defaultMessage: 'Failed to request server status. Perhaps your server is down?',
         })
       );

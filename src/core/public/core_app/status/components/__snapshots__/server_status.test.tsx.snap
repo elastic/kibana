@@ -17,7 +17,7 @@ exports[`render 1`] = `
       <h2>
         <FormattedMessage
           defaultMessage="Kibana status is {kibanaStatus}"
-          id="statusPage.serverStatus.statusTitle"
+          id="core.statusPage.serverStatus.statusTitle"
           values={
             Object {
               "kibanaStatus": <EuiBadge

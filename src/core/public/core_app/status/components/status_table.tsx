@@ -37,13 +37,13 @@ const tableColumns = [
   },
   {
     field: 'id',
-    name: i18n.translate('statusPage.statusTable.columns.idHeader', {
+    name: i18n.translate('core.statusPage.statusTable.columns.idHeader', {
       defaultMessage: 'ID',
     }),
   },
   {
     field: 'state',
-    name: i18n.translate('statusPage.statusTable.columns.statusHeader', {
+    name: i18n.translate('core.statusPage.statusTable.columns.statusHeader', {
       defaultMessage: 'Status',
     }),
     render: (state: FormattedStatus['state']) => <span>{state.message}</span>,

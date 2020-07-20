@@ -78,7 +78,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
       return (
         <EuiText color="danger">
           <FormattedMessage
-            id="statusPage.statusApp.loadingErrorText"
+            id="core.statusPage.statusApp.loadingErrorText"
             defaultMessage="An error occurred loading the status"
           />
         </EuiText>
@@ -106,7 +106,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
                 <EuiTitle size="s">
                   <h2>
                     <FormattedMessage
-                      id="statusPage.statusApp.statusTitle"
+                      id="core.statusPage.statusApp.statusTitle"
                       defaultMessage="Plugin status"
                     />
                   </h2>
@@ -118,7 +118,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
                     <EuiText size="s">
                       <p>
                         <FormattedMessage
-                          id="statusPage.statusApp.statusActions.buildText"
+                          id="core.statusPage.statusApp.statusActions.buildText"
                           defaultMessage="BUILD {buildNum}"
                           values={{
                             buildNum: <strong>{buildNumber}</strong>,
@@ -131,7 +131,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
                     <EuiText size="s">
                       <p>
                         <FormattedMessage
-                          id="statusPage.statusApp.statusActions.commitText"
+                          id="core.statusPage.statusApp.statusActions.commitText"
                           defaultMessage="COMMIT {buildSha}"
                           values={{
                             buildSha: <strong>{buildHash}</strong>,
