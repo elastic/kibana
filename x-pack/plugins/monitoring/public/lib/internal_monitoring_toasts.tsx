@@ -13,8 +13,8 @@ import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { isInSetupMode, toggleSetupMode } from './setup_mode';
 
 export interface MonitoringIndicesTypes {
-  legacyIndices: boolean;
-  metricbeatIndices: boolean;
+  legacyIndices: number;
+  metricbeatIndices: number;
 }
 
 const enterSetupModeLabel = () =>
@@ -40,7 +40,7 @@ const showIfLegacyOnlyIndices = () => {
       <div>
         <p>
           {i18n.translate('xpack.monitoring.internalMonitoringToast.description', {
-            defaultMessage: `It appears you are using "Internal Collection" for Stack Monitoring. 
+            defaultMessage: `It appears you are using "Legacy Collection" for Stack Monitoring. 
             This method of monitoring will no longer be supported in the next major release (8.0.0). 
             Please follow the steps in setup mode to start monitoring with Metricbeat.`,
           })}
@@ -73,14 +73,14 @@ const showIfLegacyAndMetricbeatIndices = () => {
     title: toMountPoint(
       <FormattedMessage
         id="xpack.monitoring.internalAndMetricbeatMonitoringToast.title"
-        defaultMessage="Partial Internal Monitoring Detected"
+        defaultMessage="Partial Legacy Monitoring Detected"
       />
     ),
     text: toMountPoint(
       <div>
         <p>
           {i18n.translate('xpack.monitoring.internalAndMetricbeatMonitoringToast.description', {
-            defaultMessage: `It appears you are using both Metricbeat and "Internal Collection" for Stack Monitoring. 
+            defaultMessage: `It appears you are using both Metricbeat and "Legacy Collection" for Stack Monitoring. 
             only Metricbeat type monitoring will be supported in the next major release (8.0.0). 
             Please follow the steps in setup mode to migrate the rest of the monitoring to Metricbeat.`,
           })}

@@ -4,46 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CatIndicesParams } from 'elasticsearch';
+// @ts-ignore
+import { RequestHandlerContext } from 'kibana/server';
+import { getIndexPatterns } from '../../../../../lib/cluster/get_index_patterns';
+
 // @ts-ignore
 import { handleError } from '../../../../../lib/errors';
 import { RouteDependencies } from '../../../../../types';
 
-export function internalMonitoringCheckRoute(_server: unknown, npRoute: RouteDependencies) {
+const queryBody = {
+  size: 15,
+  query: {
+    bool: {
+      filter: [
+        {
+          range: {
+            timestamp: {
+              gte: 'now-15m',
+              lte: 'now',
+            },
+          },
+        },
+      ],
+    },
+  },
+  sort: [
+    {
+      timestamp: {
+        order: 'desc',
+      },
+    },
+  ],
+  _source: {
+    excludes: ['*'],
+  },
+};
+
+const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, index: string) => {
+  const { client: esClient } = context.core.elasticsearch.legacy;
+  const result = await esClient.callAsCurrentUser('search', {
+    index,
+    body: queryBody,
+  });
+
+  const {
+    hits: { hits },
+  } = result;
+  const counts = {
+    legacyIndicesCount: 0,
+    mbIndicesCount: 0,
+  };
+
+  if (!hits?.length) {
+    return counts;
+  }
+
+  counts.mbIndicesCount = hits.filter(({ _index }: { _index: string }) =>
+    _index.includes('-mb-')
+  ).length;
+
+  counts.legacyIndicesCount = hits.length - counts.mbIndicesCount;
+
+  return counts;
+};
+
+export function internalMonitoringCheckRoute(server: unknown, npRoute: RouteDependencies) {
   npRoute.router.get(
     {
       path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
-      options: { tags: ['access:monitoring'] },
       validate: false,
     },
     async (context, _request, response) => {
       try {
-        const catQuery: Pick<CatIndicesParams, 'format' | 'h'> & {
-          expand_wildcards: string;
-          index?: string;
-        } = {
-          format: 'json',
-          h: 'index',
-          expand_wildcards: 'hidden,all',
-          index: '.monitoring-*',
+        const typeCount = {
+          legacy_indices: 0,
+          mb_indices: 0,
         };
 
-        const { client: esClient } = context.core.elasticsearch.legacy;
-        const monitoringIndices = await esClient.callAsInternalUser('transport.request', {
-          method: 'GET',
-          path: '/_cat/indices',
-          query: catQuery,
+        const { esIndexPattern, kbnIndexPattern, lsIndexPattern } = getIndexPatterns(server);
+        const indexCounts = await Promise.all([
+          checkLatestMonitoringIsLegacy(context, esIndexPattern),
+          checkLatestMonitoringIsLegacy(context, kbnIndexPattern),
+          checkLatestMonitoringIsLegacy(context, lsIndexPattern),
+        ]);
+
+        indexCounts.forEach((counts) => {
+          typeCount.legacy_indices += counts.legacyIndicesCount;
+          typeCount.mb_indices += counts.mbIndicesCount;
         });
 
-        const mbIndices = monitoringIndices.filter(({ index }: { index: string }) =>
-          index.includes('-mb-')
-        );
-
         return response.ok({
-          body: {
-            legacy_indices: Boolean(monitoringIndices.length - mbIndices.length),
-            mb_indices: Boolean(mbIndices.length),
-          },
+          body: typeCount,
         });
       } catch (err) {
         throw handleError(err);
