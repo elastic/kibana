@@ -125,9 +125,6 @@ describe('createConfig()', () => {
   it('should wrap in Elasticsearch config', async () => {
     const config = createConfig(
       configSchema.validate({
-        elasticsearch: {
-          hosts: 'http://localhost:9200',
-        },
         ui: {
           elasticsearch: {
             hosts: 'http://localhost:9200',
@@ -135,7 +132,6 @@ describe('createConfig()', () => {
         },
       })
     );
-    expect(config.elasticsearch.hosts).toEqual(['http://localhost:9200']);
     expect(config.ui.elasticsearch.hosts).toEqual(['http://localhost:9200']);
   });
 
@@ -147,9 +143,6 @@ describe('createConfig()', () => {
     };
     const config = createConfig(
       configSchema.validate({
-        elasticsearch: {
-          ssl,
-        },
         ui: {
           elasticsearch: {
             ssl,
@@ -162,7 +155,6 @@ describe('createConfig()', () => {
       key: 'contents-of-packages/kbn-dev-utils/certs/elasticsearch.key',
       certificateAuthorities: ['contents-of-packages/kbn-dev-utils/certs/ca.crt'],
     });
-    expect(config.elasticsearch.ssl).toEqual(expected);
     expect(config.ui.elasticsearch.ssl).toEqual(expected);
   });
 });
