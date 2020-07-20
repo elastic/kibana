@@ -26,7 +26,6 @@ import {
 } from '../../../../../src/plugins/kibana_react/public';
 import { px, units } from '../style/variables';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
-import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { routes } from '../components/app/Main/route_config';
 import { history, resetHistory } from '../utils/history';
@@ -52,13 +51,11 @@ const App = () => {
       <MainContainer data-test-subj="apmMainContainer" role="main">
         <UpdateBreadcrumbs routes={routes} />
         <Route component={ScrollToTopOnPathChange} />
-        <APMIndicesPermission>
-          <Switch>
-            {routes.map((route, i) => (
-              <ApmRoute key={i} {...route} />
-            ))}
-          </Switch>
-        </APMIndicesPermission>
+        <Switch>
+          {routes.map((route, i) => (
+            <ApmRoute key={i} {...route} />
+          ))}
+        </Switch>
       </MainContainer>
     </ThemeProvider>
   );

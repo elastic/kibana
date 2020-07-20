@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import semver from 'semver';
-import { Duration } from 'moment';
+import moment, { Duration } from 'moment';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 
@@ -619,6 +619,23 @@ function isValidTimeInterval(value: string | undefined): boolean {
     return true;
   }
   return parseTimeIntervalForJob(value) !== null;
+}
+
+// The earliest start time for the datafeed should be the max(latest_record_timestamp, latest_bucket.timestamp + bucket_span).
+export function getEarliestDatafeedStartTime(
+  latestRecordTimestamp: number | undefined,
+  latestBucketTimestamp: number | undefined,
+  bucketSpan?: Duration | null | undefined
+): number | undefined {
+  if (latestRecordTimestamp !== undefined && latestBucketTimestamp !== undefined) {
+    // if bucket span is available (e.g. 15m) add it to the latest bucket timestamp in ms
+    const adjustedBucketStartTime = bucketSpan
+      ? moment(latestBucketTimestamp).add(bucketSpan).valueOf()
+      : latestBucketTimestamp;
+    return Math.max(latestRecordTimestamp, adjustedBucketStartTime);
+  } else {
+    return latestRecordTimestamp !== undefined ? latestRecordTimestamp : latestBucketTimestamp;
+  }
 }
 
 // Returns the latest of the last source data and last processed bucket timestamp,
