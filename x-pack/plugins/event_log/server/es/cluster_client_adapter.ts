@@ -6,8 +6,9 @@
 
 import { reject, isUndefined } from 'lodash';
 import { SearchResponse, Client } from 'elasticsearch';
-import { Logger, LegacyClusterClient } from '../../../../../src/core/server';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
+import { Logger, LegacyClusterClient } from 'src/core/server';
+
+import { IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 
 export type EsClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
@@ -22,7 +23,7 @@ export interface QueryEventsBySavedObjectResult {
   page: number;
   per_page: number;
   total: number;
-  data: IEvent[];
+  data: IValidatedEvent[];
 }
 
 export class ClusterClientAdapter {
@@ -129,10 +130,91 @@ export class ClusterClientAdapter {
 
   public async queryEventsBySavedObject(
     index: string,
+    namespace: string | undefined,
     type: string,
     id: string,
     { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
   ): Promise<QueryEventsBySavedObjectResult> {
+    const defaultNamespaceQuery = {
+      bool: {
+        must_not: {
+          exists: {
+            field: 'kibana.saved_objects.namespace',
+          },
+        },
+      },
+    };
+    const namedNamespaceQuery = {
+      term: {
+        'kibana.saved_objects.namespace': {
+          value: namespace,
+        },
+      },
+    };
+    const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
+
+    const body = {
+      size: perPage,
+      from: (page - 1) * perPage,
+      sort: { [sort_field]: { order: sort_order } },
+      query: {
+        bool: {
+          must: reject(
+            [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: SAVED_OBJECT_REL_PRIMARY,
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: type,
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.id': {
+                              value: id,
+                            },
+                          },
+                        },
+                        namespaceQuery,
+                      ],
+                    },
+                  },
+                },
+              },
+              start && {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                  },
+                },
+              },
+              end && {
+                range: {
+                  '@timestamp': {
+                    lte: end,
+                  },
+                },
+              },
+            ],
+            isUndefined
+          ),
+        },
+      },
+    };
+
     try {
       const {
         hits: { hits, total },
@@ -141,72 +223,13 @@ export class ClusterClientAdapter {
         // The SearchResponse type only supports total as an int,
         // so we're forced to explicitly request that it return as an int
         rest_total_hits_as_int: true,
-        body: {
-          size: perPage,
-          from: (page - 1) * perPage,
-          sort: { [sort_field]: { order: sort_order } },
-          query: {
-            bool: {
-              must: reject(
-                [
-                  {
-                    nested: {
-                      path: 'kibana.saved_objects',
-                      query: {
-                        bool: {
-                          must: [
-                            {
-                              term: {
-                                'kibana.saved_objects.rel': {
-                                  value: SAVED_OBJECT_REL_PRIMARY,
-                                },
-                              },
-                            },
-                            {
-                              term: {
-                                'kibana.saved_objects.type': {
-                                  value: type,
-                                },
-                              },
-                            },
-                            {
-                              term: {
-                                'kibana.saved_objects.id': {
-                                  value: id,
-                                },
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    },
-                  },
-                  start && {
-                    range: {
-                      '@timestamp': {
-                        gte: start,
-                      },
-                    },
-                  },
-                  end && {
-                    range: {
-                      '@timestamp': {
-                        lte: end,
-                      },
-                    },
-                  },
-                ],
-                isUndefined
-              ),
-            },
-          },
-        },
+        body,
       });
       return {
         page,
         per_page: perPage,
         total,
-        data: hits.map((hit) => hit._source) as IEvent[],
+        data: hits.map((hit) => hit._source) as IValidatedEvent[],
       };
     } catch (err) {
       throw new Error(

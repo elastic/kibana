@@ -61,7 +61,7 @@ export class PaginationBuilder {
     const lastResult = results[results.length - 1];
     const cursor = {
       timestamp: lastResult['@timestamp'],
-      eventID: eventId(lastResult),
+      eventID: eventId(lastResult) === undefined ? '' : String(eventId(lastResult)),
     };
     return PaginationBuilder.urlEncodeCursor(cursor);
   }

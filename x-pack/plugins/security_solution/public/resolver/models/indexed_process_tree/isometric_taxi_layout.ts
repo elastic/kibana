@@ -73,7 +73,32 @@ export function isometricTaxiLayout(indexedProcessTree: IndexedProcessTree): Iso
   return {
     processNodePositions: transformedPositions,
     edgeLineSegments: transformedEdgeLineSegments,
+    ariaLevels: ariaLevels(indexedProcessTree),
   };
+}
+
+/**
+ * Calculate a level (starting at 1) for each node.
+ */
+function ariaLevels(indexedProcessTree: IndexedProcessTree): Map<ResolverEvent, number> {
+  const map: Map<ResolverEvent, number> = new Map();
+  for (const node of model.levelOrder(indexedProcessTree)) {
+    const parentNode = model.parent(indexedProcessTree, node);
+    if (parentNode === undefined) {
+      // nodes at the root have a level of 1
+      map.set(node, 1);
+    } else {
+      const parentLevel: number | undefined = map.get(parentNode);
+
+      // because we're iterating in level order, we should have processed the parent of any node that has one.
+      if (parentLevel === undefined) {
+        throw new Error('failed to calculate aria levels');
+      }
+
+      map.set(node, parentLevel + 1);
+    }
+  }
+  return map;
 }
 
 /**

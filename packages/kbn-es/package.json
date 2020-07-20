@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
-    "@elastic/elasticsearch": "^7.4.0",
+    "@elastic/elasticsearch": "7.9.0-rc.1",
     "@kbn/dev-utils": "1.0.0",
     "abort-controller": "^2.0.3",
     "chalk": "^2.4.2",
