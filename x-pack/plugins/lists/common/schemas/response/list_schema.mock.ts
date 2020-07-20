@@ -17,12 +17,15 @@ import {
 } from '../../../common/constants.mock';
 
 export const getListResponseMock = (): ListSchema => ({
+  _version: undefined,
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,
+  deserializer: undefined,
   id: LIST_ID,
   meta: META,
   name: NAME,
+  serializer: undefined,
   tie_breaker_id: TIE_BREAKER,
   type: TYPE,
   updated_at: DATE_NOW,

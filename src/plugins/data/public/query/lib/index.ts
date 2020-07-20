@@ -17,9 +17,10 @@
  * under the License.
  */
 
-export * from './match_pairs';
+export * from './add_to_query_log';
 export * from './from_user';
-export * from './to_user';
-export * from './to_user';
-export * from './get_query_log';
 export * from './get_default_query';
+export * from './get_query_log';
+export * from './match_pairs';
+export * from './to_user';
+export * from './to_user';

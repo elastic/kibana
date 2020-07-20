@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
@@ -20,6 +19,7 @@ import { ServiceNameFilter } from '../../shared/LocalUIFilters/ServiceNameFilter
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { RUM_AGENTS } from '../../../../common/agent_name';
+import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
 
 export function RumOverview() {
   useTrackPageview({ app: 'apm', path: 'rum_overview' });
@@ -38,15 +38,11 @@ export function RumOverview() {
     urlParams: { start, end },
   } = useUrlParams();
 
-  const isRumServiceRoute = useRouteMatch(
-    '/services/:serviceName/rum-overview'
-  );
-
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          pathname: '/api/apm/services',
+          pathname: '/api/apm/rum-client/services',
           params: {
             query: {
               start,
@@ -65,18 +61,17 @@ export function RumOverview() {
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
+          <EnvironmentFilter />
+          <EuiSpacer />
           <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
-            {!isRumServiceRoute && (
-              <>
-                <ServiceNameFilter
-                  serviceNames={
-                    data?.items?.map((service) => service.serviceName) ?? []
-                  }
-                />
-                <EuiSpacer size="xl" />
-                <EuiHorizontalRule margin="none" />{' '}
-              </>
-            )}
+            <>
+              <ServiceNameFilter
+                loading={status !== 'success'}
+                serviceNames={data ?? []}
+              />
+              <EuiSpacer size="xl" />
+              <EuiHorizontalRule margin="none" />{' '}
+            </>
           </LocalUIFilters>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>

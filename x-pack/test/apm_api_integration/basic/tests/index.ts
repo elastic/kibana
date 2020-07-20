@@ -9,10 +9,32 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
   describe('APM specs (basic)', function () {
     this.tags('ciGroup1');
 
-    loadTestFile(require.resolve('./annotations'));
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./agent_configuration'));
-    loadTestFile(require.resolve('./custom_link'));
-    loadTestFile(require.resolve('./service_maps'));
+
+    describe('Service Maps', function () {
+      loadTestFile(require.resolve('./service_maps/service_maps'));
+    });
+
+    describe('Services', function () {
+      loadTestFile(require.resolve('./services/annotations'));
+      loadTestFile(require.resolve('./services/top_services'));
+      loadTestFile(require.resolve('./services/agent_name'));
+      loadTestFile(require.resolve('./services/transaction_types'));
+    });
+
+    describe('Settings', function () {
+      loadTestFile(require.resolve('./settings/custom_link'));
+      loadTestFile(require.resolve('./settings/agent_configuration'));
+    });
+
+    describe('Traces', function () {
+      loadTestFile(require.resolve('./traces/top_traces'));
+    });
+
+    describe('Transaction Group', function () {
+      loadTestFile(require.resolve('./transaction_groups/top_transaction_groups'));
+      loadTestFile(require.resolve('./transaction_groups/transaction_charts'));
+      loadTestFile(require.resolve('./transaction_groups/error_rate'));
+    });
   });
 }

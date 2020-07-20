@@ -7,7 +7,7 @@ import { TypeOf } from '@kbn/config-schema';
 import Boom from 'boom';
 import { RequestHandler } from 'src/core/server';
 import { appContextService, packageConfigService } from '../../services';
-import { ensureInstalledPackage, getPackageInfo } from '../../services/epm/packages';
+import { getPackageInfo } from '../../services/epm/packages';
 import {
   GetPackageConfigsRequestSchema,
   GetOnePackageConfigRequestSchema,
@@ -106,26 +106,10 @@ export const createPackageConfigHandler: RequestHandler<
       newData = updatedNewData;
     }
 
-    // Make sure the associated package is installed
-    if (newData.package?.name) {
-      await ensureInstalledPackage({
-        savedObjectsClient: soClient,
-        pkgName: newData.package.name,
-        callCluster,
-      });
-      const pkgInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: newData.package.name,
-        pkgVersion: newData.package.version,
-      });
-      newData.inputs = (await packageConfigService.assignPackageStream(
-        pkgInfo,
-        newData.inputs
-      )) as TypeOf<typeof CreatePackageConfigRequestSchema.body>['inputs'];
-    }
-
     // Create package config
-    const packageConfig = await packageConfigService.create(soClient, newData, { user });
+    const packageConfig = await packageConfigService.create(soClient, callCluster, newData, {
+      user,
+    });
     const body: CreatePackageConfigResponse = { item: packageConfig, success: true };
     return response.ok({
       body,

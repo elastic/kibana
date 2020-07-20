@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
-      const { body: apiKeyBody } = await esClient.security.createApiKey({
+      const { body: apiKeyBody } = await esClient.security.createApiKey<typeof apiKey>({
         body: {
           name: `test access api key: ${uuid.v4()}`,
         },
@@ -38,7 +38,7 @@ export default function (providerContext: FtrProviderContext) {
       await esClient.update({
         index: '.kibana',
         id: 'fleet-agents:agent1',
-        refresh: 'true',
+        refresh: true,
         body: {
           doc: agentDoc,
         },

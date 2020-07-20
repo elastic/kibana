@@ -17,21 +17,19 @@
  * under the License.
  */
 
-import { getRangeBucketAgg, RangeBucketAggDependencies } from '../range';
+import { getRangeBucketAgg } from '../range';
 import { createFilterRange } from './range';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common';
 import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { FieldFormatsStart } from '../../../../field_formats';
 import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
-import { notificationServiceMock } from '../../../../../../../core/public/mocks';
 import { GetInternalStartServicesFn, InternalStartServices } from '../../../../types';
 
 describe('AggConfig Filters', () => {
   describe('range', () => {
-    let aggTypesDependencies: RangeBucketAggDependencies;
     let getInternalStartServices: GetInternalStartServicesFn;
     let fieldFormats: FieldFormatsStart;
 
@@ -41,17 +39,7 @@ describe('AggConfig Filters', () => {
       getInternalStartServices = () =>
         (({
           fieldFormats,
-          notifications: notificationServiceMock.createStartContract(),
         } as unknown) as InternalStartServices);
-
-      aggTypesDependencies = {
-        getInternalStartServices: () =>
-          (({
-            notifications: notificationServiceMock.createStartContract(),
-          } as unknown) as InternalStartServices),
-      };
-
-      mockDataServices();
     });
 
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
@@ -84,7 +72,7 @@ describe('AggConfig Filters', () => {
           },
         ],
         {
-          typesRegistry: mockAggTypesRegistry([getRangeBucketAgg(aggTypesDependencies)]),
+          typesRegistry: mockAggTypesRegistry([getRangeBucketAgg({ getInternalStartServices })]),
         }
       );
     };

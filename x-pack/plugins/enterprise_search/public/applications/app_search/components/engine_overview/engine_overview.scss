@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+/**
+ * Engine Overview
+ */
+.engineOverview {
+  width: 100%;
+
+  &__body {
+    padding: $euiSize;
+
+    @include euiBreakpoint('m', 'l', 'xl') {
+      padding: $euiSizeXL;
+    }
+  }
+}
+
+.engineIcon {
+  display: inline-block;
+  width: $euiSize;
+  height: $euiSize;
+  margin-right: $euiSizeXS;
+}

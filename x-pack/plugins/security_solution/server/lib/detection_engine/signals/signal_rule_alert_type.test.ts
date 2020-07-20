@@ -10,7 +10,13 @@ import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
-import { getGapBetweenRuns, getListsClient, getExceptions, sortExceptionItems } from './utils';
+import {
+  getGapBetweenRuns,
+  getGapMaxCatchupRatio,
+  getListsClient,
+  getExceptions,
+  sortExceptionItems,
+} from './utils';
 import { RuleExecutorOptions } from './types';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
@@ -97,6 +103,7 @@ describe('rules_notification_alert_type', () => {
       exceptionsWithValueLists: [],
     });
     (searchAfterAndBulkCreate as jest.Mock).mockClear();
+    (getGapMaxCatchupRatio as jest.Mock).mockClear();
     (searchAfterAndBulkCreate as jest.Mock).mockResolvedValue({
       success: true,
       searchAfterTimes: [],
@@ -126,20 +133,37 @@ describe('rules_notification_alert_type', () => {
   });
 
   describe('executor', () => {
-    it('should warn about the gap between runs', async () => {
-      (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(1000));
+    it('should warn about the gap between runs if gap is very large', async () => {
+      (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(100, 'm'));
+      (getGapMaxCatchupRatio as jest.Mock).mockReturnValue({
+        maxCatchup: 4,
+        ratio: 20,
+        gapDiffInUnits: 95,
+      });
       await alert.executor(payload);
       expect(logger.warn).toHaveBeenCalled();
       expect(logger.warn.mock.calls[0][0]).toContain(
-        'a few seconds (1000ms) has passed since last rule execution, and signals may have been missed.'
+        '2 hours (6000000ms) has passed since last rule execution, and signals may have been missed.'
       );
       expect(ruleStatusService.error).toHaveBeenCalled();
       expect(ruleStatusService.error.mock.calls[0][0]).toContain(
-        'a few seconds (1000ms) has passed since last rule execution, and signals may have been missed.'
+        '2 hours (6000000ms) has passed since last rule execution, and signals may have been missed.'
       );
       expect(ruleStatusService.error.mock.calls[0][1]).toEqual({
-        gap: 'a few seconds',
+        gap: '2 hours',
       });
+    });
+
+    it('should NOT warn about the gap between runs if gap small', async () => {
+      (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(1, 'm'));
+      (getGapMaxCatchupRatio as jest.Mock).mockReturnValue({
+        maxCatchup: 1,
+        ratio: 1,
+        gapDiffInUnits: 1,
+      });
+      await alert.executor(payload);
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+      expect(ruleStatusService.error).toHaveBeenCalledTimes(0);
     });
 
     it("should set refresh to 'wait_for' when actions are present", async () => {

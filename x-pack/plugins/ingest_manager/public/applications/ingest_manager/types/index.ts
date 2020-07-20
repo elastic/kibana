@@ -18,12 +18,14 @@ export {
   UpdatePackageConfig,
   PackageConfigInput,
   PackageConfigInputStream,
+  PackageConfigConfigRecord,
   PackageConfigConfigRecordEntry,
   Output,
   DataStream,
   // API schema - misc setup, status
   GetFleetStatusResponse,
   // API schemas - Agent Config
+  GetAgentConfigsRequest,
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
@@ -90,8 +92,11 @@ export {
   RequirementVersion,
   ScreenshotItem,
   ServiceName,
+  GetCategoriesRequest,
   GetCategoriesResponse,
+  GetPackagesRequest,
   GetPackagesResponse,
+  GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
@@ -99,6 +104,7 @@ export {
   InstallStatus,
   InstallationStatus,
   Installable,
+  RegistryRelease,
 } from '../../../../common';
 
 export * from './intra_app_route_state';

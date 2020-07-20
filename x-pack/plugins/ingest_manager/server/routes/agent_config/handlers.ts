@@ -38,8 +38,12 @@ export const getAgentConfigsHandler: RequestHandler<
   TypeOf<typeof GetAgentConfigsRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const { full: withPackageConfigs = false, ...restOfQuery } = request.query;
   try {
-    const { items, total, page, perPage } = await agentConfigService.list(soClient, request.query);
+    const { items, total, page, perPage } = await agentConfigService.list(soClient, {
+      withPackageConfigs,
+      ...restOfQuery,
+    });
     const body: GetAgentConfigsResponse = {
       items,
       total,
@@ -103,6 +107,7 @@ export const createAgentConfigHandler: RequestHandler<
   TypeOf<typeof CreateAgentConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
@@ -128,15 +133,10 @@ export const createAgentConfigHandler: RequestHandler<
     if (withSysMonitoring && newSysPackageConfig !== undefined && agentConfig !== undefined) {
       newSysPackageConfig.config_id = agentConfig.id;
       newSysPackageConfig.namespace = agentConfig.namespace;
-      const sysPackageConfig = await packageConfigService.create(soClient, newSysPackageConfig, {
+      await packageConfigService.create(soClient, callCluster, newSysPackageConfig, {
         user,
+        bumpConfigRevision: false,
       });
-
-      if (sysPackageConfig) {
-        agentConfig = await agentConfigService.assignPackageConfigs(soClient, agentConfig.id, [
-          sysPackageConfig.id,
-        ]);
-      }
     }
 
     const body: CreateAgentConfigResponse = {
@@ -233,15 +233,17 @@ export const deleteAgentConfigsHandler: RequestHandler<
   }
 };
 
-export const getFullAgentConfig: RequestHandler<TypeOf<
-  typeof GetFullAgentConfigRequestSchema.params
->> = async (context, request, response) => {
+export const getFullAgentConfig: RequestHandler<
+  TypeOf<typeof GetFullAgentConfigRequestSchema.params>,
+  TypeOf<typeof GetFullAgentConfigRequestSchema.query>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
 
   try {
     const fullAgentConfig = await agentConfigService.getFullConfig(
       soClient,
-      request.params.agentConfigId
+      request.params.agentConfigId,
+      { standalone: request.query.standalone === true }
     );
     if (fullAgentConfig) {
       const body: GetFullAgentConfigResponse = {
@@ -265,21 +267,24 @@ export const getFullAgentConfig: RequestHandler<TypeOf<
   }
 };
 
-export const downloadFullAgentConfig: RequestHandler<TypeOf<
-  typeof GetFullAgentConfigRequestSchema.params
->> = async (context, request, response) => {
+export const downloadFullAgentConfig: RequestHandler<
+  TypeOf<typeof GetFullAgentConfigRequestSchema.params>,
+  TypeOf<typeof GetFullAgentConfigRequestSchema.query>
+> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const {
     params: { agentConfigId },
   } = request;
 
   try {
-    const fullAgentConfig = await agentConfigService.getFullConfig(soClient, agentConfigId);
+    const fullAgentConfig = await agentConfigService.getFullConfig(soClient, agentConfigId, {
+      standalone: request.query.standalone === true,
+    });
     if (fullAgentConfig) {
       const body = configToYaml(fullAgentConfig);
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent-config-${fullAgentConfig.id}.yml"`,
+        'content-disposition': `attachment; filename="elastic-agent.yml"`,
       };
       return response.ok({
         body,

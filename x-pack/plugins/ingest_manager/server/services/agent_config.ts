@@ -41,7 +41,8 @@ class AgentConfigService {
     soClient: SavedObjectsClientContract,
     id: string,
     agentConfig: Partial<AgentConfigSOAttributes>,
-    user?: AuthenticatedUser
+    user?: AuthenticatedUser,
+    options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id, false);
 
@@ -60,7 +61,7 @@ class AgentConfigService {
 
     await soClient.update<AgentConfigSOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
-      revision: oldAgentConfig.revision + 1,
+      ...(options.bumpRevision ? { revision: oldAgentConfig.revision + 1 } : {}),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
@@ -141,11 +142,20 @@ class AgentConfigService {
 
   public async list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: ListWithKuery & {
+      withPackageConfigs?: boolean;
+    }
   ): Promise<{ items: AgentConfig[]; total: number; page: number; perPage: number }> {
-    const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
+    const {
+      page = 1,
+      perPage = 20,
+      sortField = 'updated_at',
+      sortOrder = 'desc',
+      kuery,
+      withPackageConfigs = false,
+    } = options;
 
-    const agentConfigs = await soClient.find<AgentConfigSOAttributes>({
+    const agentConfigsSO = await soClient.find<AgentConfigSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       sortField,
       sortOrder,
@@ -160,12 +170,29 @@ class AgentConfigService {
         : undefined,
     });
 
+    const agentConfigs = await Promise.all(
+      agentConfigsSO.saved_objects.map(async (agentConfigSO) => {
+        const agentConfig = {
+          id: agentConfigSO.id,
+          ...agentConfigSO.attributes,
+        };
+        if (withPackageConfigs) {
+          const agentConfigWithPackageConfigs = await this.get(
+            soClient,
+            agentConfigSO.id,
+            withPackageConfigs
+          );
+          if (agentConfigWithPackageConfigs) {
+            agentConfig.package_configs = agentConfigWithPackageConfigs.package_configs;
+          }
+        }
+        return agentConfig;
+      })
+    );
+
     return {
-      items: agentConfigs.saved_objects.map<AgentConfig>((agentConfigSO) => ({
-        id: agentConfigSO.id,
-        ...agentConfigSO.attributes,
-      })),
-      total: agentConfigs.total,
+      items: agentConfigs,
+      total: agentConfigsSO.total,
       page,
       perPage,
     };
@@ -239,7 +266,7 @@ class AgentConfigService {
     soClient: SavedObjectsClientContract,
     id: string,
     packageConfigIds: string[],
-    options?: { user?: AuthenticatedUser }
+    options: { user?: AuthenticatedUser; bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id, false);
 
@@ -255,7 +282,8 @@ class AgentConfigService {
           [...((oldAgentConfig.package_configs || []) as string[])].concat(packageConfigIds)
         ),
       },
-      options?.user
+      options?.user,
+      { bumpRevision: options.bumpRevision }
     );
   }
 
@@ -339,7 +367,8 @@ class AgentConfigService {
 
   public async getFullConfig(
     soClient: SavedObjectsClientContract,
-    id: string
+    id: string,
+    options?: { standalone: boolean }
   ): Promise<FullAgentConfig | null> {
     let config;
 
@@ -374,6 +403,13 @@ class AgentConfigService {
               api_key,
               ...outputConfig,
             };
+
+            if (options?.standalone) {
+              delete outputs[name].api_key;
+              outputs[name].username = 'ES_USERNAME';
+              outputs[name].password = 'ES_PASSWORD';
+            }
+
             return outputs;
           },
           {} as FullAgentConfig['outputs']
@@ -383,7 +419,7 @@ class AgentConfigService {
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {
-            settings: {
+            agent: {
               monitoring: {
                 use_output: defaultOutput.name,
                 enabled: true,
@@ -393,7 +429,7 @@ class AgentConfigService {
             },
           }
         : {
-            settings: {
+            agent: {
               monitoring: { enabled: false, logs: false, metrics: false },
             },
           }),

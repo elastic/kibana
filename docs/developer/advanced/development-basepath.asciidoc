@@ -1,0 +1,18 @@
+[[development-basepath]]
+== Considerations for basepath
+
+In dev mode, {kib} by default runs behind a proxy which adds a random path component to its URL.
+
+You can set this explicitly using `server.basePath` in <<settings>>. 
+
+Use the server.rewriteBasePath setting to tell {kib} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (/).
+
+If you want to turn off the basepath when in development mode, start {kib} with the `--no-basepath` flag
+
+[source,bash]
+----
+yarn start --no-basepath
+----
+
+
+
