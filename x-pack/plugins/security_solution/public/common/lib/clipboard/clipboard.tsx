@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiGlobalToastListToast as Toast, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import React from 'react';
-import uuid from 'uuid';
 
 import * as i18n from './translations';
-import { useStateToaster } from '../../components/toasters';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type OnCopy = ({
   content,
@@ -19,17 +18,6 @@ export type OnCopy = ({
   content: string | number;
   isSuccess: boolean;
 }) => void;
-
-interface GetSuccessToastParams {
-  titleSummary?: string;
-}
-
-const getSuccessToast = ({ titleSummary }: GetSuccessToastParams): Toast => ({
-  id: `copy-success-${uuid.v4()}`,
-  color: 'success',
-  iconType: 'copyClipboard',
-  title: `${i18n.COPIED} ${titleSummary} ${i18n.TO_THE_CLIPBOARD}`,
-});
 
 interface Props {
   children?: JSX.Element;
@@ -40,7 +28,7 @@ interface Props {
 }
 
 export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTimeMs }: Props) => {
-  const dispatchToaster = useStateToaster()[1];
+  const { addSuccess } = useAppToasts();
   const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -52,10 +40,7 @@ export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTi
     }
 
     if (isSuccess) {
-      dispatchToaster({
-        type: 'addToaster',
-        toast: { toastLifeTimeMs, ...getSuccessToast({ titleSummary }) },
-      });
+      addSuccess(`${i18n.COPIED} ${titleSummary} ${i18n.TO_THE_CLIPBOARD}`, { toastLifeTimeMs });
     }
   };
 
