@@ -207,7 +207,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         </ModalHeader>
 
         {(addExceptionIsLoading || indexPatternLoading || isSignalIndexLoading) && (
-          <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
+          <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
         )}
 
         {!isSignalIndexLoading && !addExceptionIsLoading && !indexPatternLoading && (
