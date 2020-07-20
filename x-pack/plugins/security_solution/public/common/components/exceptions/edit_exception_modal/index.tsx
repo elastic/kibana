@@ -30,7 +30,7 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
-import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { ExceptionBuilder } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
@@ -41,6 +41,7 @@ import {
   entryHasListType,
   entryHasNonEcsType,
 } from '../helpers';
+import { Loader } from '../../loader';
 
 interface EditExceptionModalProps {
   ruleName: string;
@@ -93,7 +94,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
@@ -102,15 +103,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onError = useCallback(
     (error) => {
-      errorToToaster({ title: i18n.EDIT_EXCEPTION_ERROR, error, dispatchToaster });
+      addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
       onCancel();
     },
-    [dispatchToaster, onCancel]
+    [addError, onCancel]
   );
   const onSuccess = useCallback(() => {
-    displaySuccessToast(i18n.EDIT_EXCEPTION_SUCCESS, dispatchToaster);
+    addSuccess(i18n.EDIT_EXCEPTION_SUCCESS);
     onConfirm();
-  }, [dispatchToaster, onConfirm]);
+  }, [addSuccess, onConfirm]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {
@@ -124,7 +125,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     if (indexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns) ||
+          exceptionItemsToAdd.length === 0
       );
     }
   }, [
@@ -204,7 +206,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           </ModalHeaderSubtitle>
         </ModalHeader>
 
-        {!isSignalIndexLoading && (
+        {(addExceptionIsLoading || indexPatternLoading || isSignalIndexLoading) && (
+          <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
+        )}
+
+        {!isSignalIndexLoading && !addExceptionIsLoading && !indexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
