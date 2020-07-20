@@ -5,7 +5,8 @@
  */
 
 import { isUndefined } from 'lodash';
-import { get, keyBy, pick, set, isEmpty } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { get, keyBy, pick, isEmpty } from 'lodash/fp';
 import { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
@@ -31,6 +32,11 @@ export interface BrowserField {
   name: string;
   searchable: boolean;
   type: string;
+}
+
+export interface DocValueFields {
+  field: string;
+  format: string;
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
@@ -75,14 +81,38 @@ export const getBrowserFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
+export const getDocValueFields = memoizeOne(
+  (_title: string, fields: IndexField[]): DocValueFields[] =>
+    fields && fields.length > 0
+      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
+          if (field.type === 'date' && accumulator.length < 100) {
+            const format: string =
+              field.format != null && !isEmpty(field.format) ? field.format : 'date_time';
+            return [
+              ...accumulator,
+              {
+                field: field.name,
+                format,
+              },
+            ];
+          }
+          return accumulator;
+        }, [])
+      : [],
+  // Update the value only if _title has changed
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+);
+
 export const indicesExistOrDataTemporarilyUnavailable = (
   indicesExist: boolean | null | undefined
 ) => indicesExist || isUndefined(indicesExist);
 
 const EMPTY_BROWSER_FIELDS = {};
+const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
 
 interface UseWithSourceState {
   browserFields: BrowserFields;
+  docValueFields: DocValueFields[];
   errorMessage: string | null;
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
@@ -97,13 +127,14 @@ export const useWithSource = (
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
     if (indexToAdd != null && !isEmpty(indexToAdd)) {
-      return [...(!onlyCheckIndexToAdd ? configIndex : []), ...indexToAdd];
+      return onlyCheckIndexToAdd ? indexToAdd : [...configIndex, ...indexToAdd];
     }
     return configIndex;
   }, [configIndex, indexToAdd, onlyCheckIndexToAdd]);
 
   const [state, setState] = useState<UseWithSourceState>({
     browserFields: EMPTY_BROWSER_FIELDS,
+    docValueFields: EMPTY_DOCVALUE_FIELD,
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
     indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
@@ -135,41 +166,36 @@ export const useWithSource = (
             },
           },
         });
-        if (!isSubscribed) {
-          return setState((prevState) => ({
-            ...prevState,
-            loading: false,
-          }));
-        }
 
-        setState({
-          loading: false,
-          indicesExist: indicesExistOrDataTemporarilyUnavailable(
-            get('data.source.status.indicesExist', result)
-          ),
-          browserFields: getBrowserFields(
-            defaultIndex.join(),
-            get('data.source.status.indexFields', result)
-          ),
-          indexPattern: getIndexFields(
-            defaultIndex.join(),
-            get('data.source.status.indexFields', result)
-          ),
-          errorMessage: null,
-        });
+        if (isSubscribed) {
+          setState({
+            loading: false,
+            indicesExist: indicesExistOrDataTemporarilyUnavailable(
+              get('data.source.status.indicesExist', result)
+            ),
+            browserFields: getBrowserFields(
+              defaultIndex.join(),
+              get('data.source.status.indexFields', result)
+            ),
+            docValueFields: getDocValueFields(
+              defaultIndex.join(),
+              get('data.source.status.indexFields', result)
+            ),
+            indexPattern: getIndexFields(
+              defaultIndex.join(),
+              get('data.source.status.indexFields', result)
+            ),
+            errorMessage: null,
+          });
+        }
       } catch (error) {
-        if (!isSubscribed) {
-          return setState((prevState) => ({
+        if (isSubscribed) {
+          setState((prevState) => ({
             ...prevState,
             loading: false,
+            errorMessage: error.message,
           }));
         }
-
-        setState((prevState) => ({
-          ...prevState,
-          loading: false,
-          errorMessage: error.message,
-        }));
       }
     }
 

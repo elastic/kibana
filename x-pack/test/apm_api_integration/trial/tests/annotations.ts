@@ -18,7 +18,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
 
   function expectContainsObj(source: JsonObject, expected: JsonObject) {
     expect(source).to.eql(
-      merge(cloneDeep(source), expected, (a, b) => {
+      merge(cloneDeep(source), expected, (a: any, b: any) => {
         if (isPlainObject(a) && isPlainObject(b)) {
           return undefined;
         }

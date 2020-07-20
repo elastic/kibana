@@ -56,6 +56,7 @@ export const PageLoadDistribution = () => {
           },
         });
       }
+      return Promise.resolve(null);
     },
     [
       end,
@@ -68,7 +69,7 @@ export const PageLoadDistribution = () => {
   );
 
   const onPercentileChange = (min: number, max: number) => {
-    setPercentileRange({ min: min * 1000, max: max * 1000 });
+    setPercentileRange({ min, max });
   };
 
   return (

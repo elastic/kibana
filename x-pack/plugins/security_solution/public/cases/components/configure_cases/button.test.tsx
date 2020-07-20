@@ -8,6 +8,7 @@ import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { EuiText } from '@elastic/eui';
 
+import '../../../common/mock/match_media';
 import { ConfigureCaseButton, ConfigureCaseButtonProps } from './button';
 import { TestProviders } from '../../../common/mock';
 import { searchURL } from './__mock__';
@@ -95,7 +96,11 @@ describe('Configuration button', () => {
     );
 
     newWrapper.find('[data-test-subj="configure-case-button"]').first().simulate('mouseOver');
-
-    expect(newWrapper.find('.euiToolTipPopover').text()).toBe(`${titleTooltip}${msgTooltip}`);
+    // EuiToolTip mounts children after a 250ms delay
+    setTimeout(
+      () =>
+        expect(newWrapper.find('.euiToolTipPopover').text()).toBe(`${titleTooltip}${msgTooltip}`),
+      250
+    );
   });
 });

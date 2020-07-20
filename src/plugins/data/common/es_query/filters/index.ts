@@ -44,6 +44,6 @@ export * from './types';
  * @param {object} filter The filter to clean
  * @returns {object}
  */
-export const cleanFilter = (filter: Filter): Filter => omit(filter, ['meta', '$state']);
+export const cleanFilter = (filter: Filter): Filter => omit(filter, ['meta', '$state']) as Filter;
 
 export const isFilterDisabled = (filter: Filter): boolean => get(filter, 'meta.disabled', false);

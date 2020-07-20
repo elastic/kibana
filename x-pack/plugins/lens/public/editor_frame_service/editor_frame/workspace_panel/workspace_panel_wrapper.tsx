@@ -66,50 +66,52 @@ export function WorkspacePanelWrapper({
     [dispatch]
   );
   return (
-    <EuiFlexGroup gutterSize="s" direction="column" alignItems="stretch" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <ChartSwitch
-          data-test-subj="lnsChartSwitcher"
-          visualizationMap={visualizationMap}
-          visualizationId={visualizationId}
-          visualizationState={visualizationState}
-          datasourceMap={datasourceMap}
-          datasourceStates={datasourceStates}
-          dispatch={dispatch}
-          framePublicAPI={framePublicAPI}
-        />
-      </EuiFlexItem>
-      {activeVisualization && activeVisualization.renderToolbar && (
-        <EuiFlexItem grow={false}>
-          <NativeRenderer
-            render={activeVisualization.renderToolbar}
-            nativeProps={{
-              frame: framePublicAPI,
-              state: visualizationState,
-              setState: setVisualizationState,
-            }}
-          />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>
-        <EuiPageContent className="lnsWorkspacePanelWrapper">
-          {(!emptyExpression || title) && (
-            <EuiPageContentHeader
-              className={classNames('lnsWorkspacePanelWrapper__pageContentHeader', {
-                'lnsWorkspacePanelWrapper__pageContentHeader--unsaved': !title,
-              })}
-            >
-              <span data-test-subj="lns_ChartTitle">
-                {title ||
-                  i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
-              </span>
-            </EuiPageContentHeader>
+    <>
+      <div className="lnsWorkspacePanelWrapper__toolbar">
+        <EuiFlexGroup gutterSize="s" direction="row" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <ChartSwitch
+              data-test-subj="lnsChartSwitcher"
+              visualizationMap={visualizationMap}
+              visualizationId={visualizationId}
+              visualizationState={visualizationState}
+              datasourceMap={datasourceMap}
+              datasourceStates={datasourceStates}
+              dispatch={dispatch}
+              framePublicAPI={framePublicAPI}
+            />
+          </EuiFlexItem>
+          {activeVisualization && activeVisualization.renderToolbar && (
+            <EuiFlexItem grow>
+              <NativeRenderer
+                render={activeVisualization.renderToolbar}
+                nativeProps={{
+                  frame: framePublicAPI,
+                  state: visualizationState,
+                  setState: setVisualizationState,
+                }}
+              />
+            </EuiFlexItem>
           )}
-          <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-            {children}
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexGroup>
+      </div>
+      <EuiPageContent className="lnsWorkspacePanelWrapper">
+        {(!emptyExpression || title) && (
+          <EuiPageContentHeader
+            className={classNames('lnsWorkspacePanelWrapper__pageContentHeader', {
+              'lnsWorkspacePanelWrapper__pageContentHeader--unsaved': !title,
+            })}
+          >
+            <span data-test-subj="lns_ChartTitle">
+              {title ||
+                i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
+            </span>
+          </EuiPageContentHeader>
+        )}
+        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
+          {children}
+        </EuiPageContentBody>
+      </EuiPageContent>
+    </>
   );
 }

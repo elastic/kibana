@@ -20,16 +20,15 @@
 import { getConfig, createRunner } from './lib';
 
 import {
+  BuildKibanaPlatformPluginsTask,
   BuildPackagesTask,
-  CleanClientModulesOnDLLTask,
   CleanEmptyFoldersTask,
   CleanExtraBinScriptsTask,
-  CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
-  CleanPackagesTask,
-  CleanTypescriptTask,
   CleanNodeBuildsTask,
+  CleanPackagesTask,
   CleanTask,
+  CleanTypescriptTask,
   CopyBinScriptsTask,
   CopySourceTask,
   CreateArchivesSourcesTask,
@@ -44,20 +43,20 @@ import {
   CreateRpmPackageTask,
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
+  InstallChromiumTask,
   InstallDependenciesTask,
-  BuildKibanaPlatformPluginsTask,
   OptimizeBuildTask,
   PatchNativeModulesTask,
+  PathLengthTask,
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
   TranspileBabelTask,
   TranspileScssTask,
   UpdateLicenseFileTask,
+  UuidVerificationTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
-  PathLengthTask,
   WriteShaSumsTask,
-  UuidVerificationTask,
 } from './tasks';
 
 export async function buildDistributables(options) {
@@ -127,19 +126,18 @@ export async function buildDistributables(options) {
   await run(TranspileScssTask);
   await run(BuildKibanaPlatformPluginsTask);
   await run(OptimizeBuildTask);
-  await run(CleanClientModulesOnDLLTask);
   await run(CleanTypescriptTask);
   await run(CleanExtraFilesFromModulesTask);
   await run(CleanEmptyFoldersTask);
 
   /**
    * copy generic build outputs into platform-specific build
-   * directories and perform platform-specific steps
+   * directories and perform platform/architecture-specific steps
    */
   await run(CreateArchivesSourcesTask);
   await run(PatchNativeModulesTask);
+  await run(InstallChromiumTask);
   await run(CleanExtraBinScriptsTask);
-  await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
 
   await run(PathLengthTask);

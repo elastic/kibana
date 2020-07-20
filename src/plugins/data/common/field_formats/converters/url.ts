@@ -30,7 +30,7 @@ import {
 } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
-const whitelistUrlSchemes = ['http://', 'https://'];
+const allowedUrlSchemes = ['http://', 'https://'];
 
 const URL_TYPES = [
   {
@@ -161,8 +161,8 @@ export class UrlFormat extends FieldFormat {
 
         return this.generateImgHtml(url, imageLabel);
       default:
-        const inWhitelist = whitelistUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
-        if (!inWhitelist && !parsedUrl) {
+        const allowed = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
+        if (!allowed && !parsedUrl) {
           return url;
         }
 
@@ -178,7 +178,7 @@ export class UrlFormat extends FieldFormat {
          * UNSUPPORTED
          *  - app/kibana
          */
-        if (!inWhitelist) {
+        if (!allowed) {
           // Handles urls like: `#/discover`
           if (url[0] === '#') {
             prefix = `${origin}${pathname}`;

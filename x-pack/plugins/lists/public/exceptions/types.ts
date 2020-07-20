@@ -9,6 +9,7 @@ import {
   CreateExceptionListSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
+  ExceptionListType,
   NamespaceType,
   Page,
   PerPage,
@@ -60,7 +61,7 @@ export interface UseExceptionListProps {
 export interface ExceptionIdentifiers {
   id: string;
   namespaceType: NamespaceType;
-  type?: string;
+  type: ExceptionListType;
 }
 
 export interface ApiCallByListIdProps {
@@ -107,5 +108,10 @@ export interface UpdateExceptionListProps {
 export interface UpdateExceptionListItemProps {
   http: HttpStart;
   listItem: UpdateExceptionListItemSchema;
+  signal: AbortSignal;
+}
+
+export interface AddEndpointExceptionListProps {
+  http: HttpStart;
   signal: AbortSignal;
 }

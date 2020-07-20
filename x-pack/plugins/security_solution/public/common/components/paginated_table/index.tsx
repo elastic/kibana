@@ -249,7 +249,6 @@ const PaginatedTableComponent: FC<SiemTables> = ({
           <>
             <BasicTable
               columns={columns}
-              compressed
               items={pageOfItems}
               onChange={onChange}
               sorting={

@@ -4,6 +4,12 @@
     "name": {
       "type": "keyword"
     },
+    "deserializer": {
+      "type": "keyword"
+    },
+    "serializer": {
+      "type": "keyword"
+    },
     "description": {
       "type": "keyword"
     },

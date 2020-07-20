@@ -1,0 +1,39 @@
+[[building-kibana]]
+== Building a {kib} distributable
+
+The following commands will build a {kib} production distributable.
+
+[source,bash]
+----
+yarn build --skip-os-packages
+----
+
+You can get all build options using the following command:
+
+[source,bash]
+----
+yarn build --help
+----
+
+[discrete]
+=== Building OS packages
+
+Packages are built using fpm, dpkg, and rpm.  Package building has only been tested on Linux and is not supported on any other platform.
+
+
+[source,bash]
+----
+apt-get install ruby-dev rpm
+gem install fpm -v 1.5.0
+yarn build --skip-archives
+----
+
+To specify a package to build you can add `rpm` or `deb` as an argument.
+
+
+[source,bash]
+----
+yarn build --rpm
+----
+
+Distributable packages can be found in `target/` after the build completes.

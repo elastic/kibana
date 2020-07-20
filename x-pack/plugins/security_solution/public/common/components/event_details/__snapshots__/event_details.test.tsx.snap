@@ -4,6 +4,33 @@ exports[`EventDetails rendering should match snapshot 1`] = `
 <Details
   data-test-subj="eventDetails"
 >
+  <styled.div>
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
+        <EuiToolTip
+          content="Collapse event"
+          delay="regular"
+          position="top"
+        >
+          <CollapseButton
+            aria-label="Collapse"
+            data-test-subj="collapse"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="s"
+          />
+        </EuiToolTip>
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      isOpen={false}
+      ownFocus={false}
+      panelPaddingSize="m"
+      repositionOnScroll={true}
+    />
+  </styled.div>
   <EuiTabbedContent
     autoFocus="initial"
     onTabClick={[Function]}
@@ -377,6 +404,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
                       "auditbeat-*",
                       "endgame-*",
                       "filebeat-*",
+                      "logs-*",
                       "packetbeat-*",
                       "winlogbeat-*",
                     ],
@@ -1069,6 +1097,7 @@ In other use cases the message field can be used to concatenate different values
                         "auditbeat-*",
                         "endgame-*",
                         "filebeat-*",
+                        "logs-*",
                         "packetbeat-*",
                         "winlogbeat-*",
                       ],
