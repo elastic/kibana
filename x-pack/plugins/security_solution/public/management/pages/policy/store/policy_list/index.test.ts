@@ -152,6 +152,7 @@ describe('policy list store concerns', () => {
         offline: 0,
         online: 0,
         total: 0,
+        other: 0,
       },
     });
   });
