@@ -19,10 +19,9 @@
 
 import { defer, throwError, iif, timer } from 'rxjs';
 import { concatMap, retryWhen } from 'rxjs/operators';
-import { errors as esErrors } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 
-const retryMigrationStatusCodes = [
+const retryResponseStatuses = [
   503, // ServiceUnavailable
   401, // AuthorizationException
   403, // AuthenticationException
@@ -48,11 +47,7 @@ export const retryCallCluster = <T extends Promise<unknown>>(apiCaller: () => T)
       retryWhen((errors) =>
         errors.pipe(
           concatMap((error) =>
-            iif(
-              () => error instanceof esErrors.NoLivingConnectionsError,
-              timer(1000),
-              throwError(error)
-            )
+            iif(() => error.name === 'NoLivingConnectionsError', timer(1000), throwError(error))
           )
         )
       )
@@ -91,10 +86,11 @@ export const migrationRetryCallCluster = <T extends Promise<unknown>>(
             }
             return iif(
               () =>
-                error instanceof esErrors.NoLivingConnectionsError ||
-                error instanceof esErrors.ConnectionError ||
-                error instanceof esErrors.TimeoutError ||
-                retryMigrationStatusCodes.includes(error.statusCode) ||
+                error.name === 'NoLivingConnectionsError' ||
+                error.name === 'ConnectionError' ||
+                error.name === 'TimeoutError' ||
+                (error.name === 'ResponseError' &&
+                  retryResponseStatuses.includes(error.statusCode)) ||
                 error?.body?.error?.type === 'snapshot_in_progress_exception',
               timer(delay),
               throwError(error)
