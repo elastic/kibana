@@ -175,7 +175,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         all: {
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution'],
+          api: ['securitySolution', 'lists-all'],
           savedObject: {
             all: [
               'alert',
@@ -195,7 +195,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         read: {
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution'],
+          api: ['securitySolution', 'lists-read'],
           savedObject: {
             all: ['alert'],
             read: [

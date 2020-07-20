@@ -114,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
               enabled: true,
               excluded: false,
               kqlQuery: '',
+              type: 'default',
               queryMatch: {
                 field: 'host.name',
                 displayField: null,
