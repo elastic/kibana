@@ -434,7 +434,7 @@ export function XYChart({
           showGridLines={gridlinesVisibilitySettings?.y}
           hide={filteredLayers[0].hide}
           // @ts-ignore, temporary solution for not displaying the ticks
-          tickFormat={tickLabelsVisibilitySettings?.y ? (d) => xAxisFormatter.convert(d) : () => {}}
+          tickFormat={tickLabelsVisibilitySettings?.y ? (d) => axis.formatter.convert(d) : () => {}}
         />
       ))}
 
