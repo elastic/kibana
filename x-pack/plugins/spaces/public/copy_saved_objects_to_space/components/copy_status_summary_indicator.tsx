@@ -9,19 +9,31 @@ import React, { Fragment } from 'react';
 import { EuiLoadingSpinner, EuiIconTip, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Space } from '../../../common/model/space';
+import { ImportRetry } from '../types';
+import { ResolveAllConflicts } from './resolve_all_conflicts';
 import { SummarizedCopyToSpaceResult } from '..';
 
 interface Props {
   space: Space;
   summarizedCopyResult: SummarizedCopyToSpaceResult;
   conflictResolutionInProgress: boolean;
+  retries: ImportRetry[];
+  onRetriesChange: (retries: ImportRetry[]) => void;
+  onDestinationMapChange: (value?: Map<string, string>) => void;
 }
 
 const renderIcon = (props: Props) => {
-  const { summarizedCopyResult } = props;
-  const getDataTestSubj = (status: string) => `cts-summary-indicator-${status}-${props.space.id}`;
+  const {
+    space,
+    summarizedCopyResult,
+    conflictResolutionInProgress,
+    retries,
+    onRetriesChange,
+    onDestinationMapChange,
+  } = props;
+  const getDataTestSubj = (status: string) => `cts-summary-indicator-${status}-${space.id}`;
 
-  if (summarizedCopyResult.processing || props.conflictResolutionInProgress) {
+  if (summarizedCopyResult.processing || conflictResolutionInProgress) {
     return <EuiLoadingSpinner data-test-subj={getDataTestSubj('loading')} />;
   }
 
@@ -37,7 +49,7 @@ const renderIcon = (props: Props) => {
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.successMessage"
             defaultMessage="Copied successfully to the {space} space."
-            values={{ space: props.space.name }}
+            values={{ space: space.name }}
           />
         }
       />
@@ -55,7 +67,7 @@ const renderIcon = (props: Props) => {
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatusSummary.failedMessage"
             defaultMessage="Copy to the {space} space failed. Expand this section for details."
-            values={{ space: props.space.name }}
+            values={{ space: space.name }}
           />
         }
       />
@@ -63,20 +75,28 @@ const renderIcon = (props: Props) => {
   }
   if (summarizedCopyResult.hasConflicts) {
     return (
-      <EuiIconTip
-        type={'alert'}
-        color={'warning'}
-        iconProps={{
-          'data-test-subj': getDataTestSubj('conflicts'),
-        }}
-        content={
-          <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.copyStatusSummary.conflictsMessage"
-            defaultMessage="One or more conflicts detected in the {space} space. Expand this section to resolve."
-            values={{ space: props.space.name }}
-          />
-        }
-      />
+      <Fragment>
+        <ResolveAllConflicts
+          summarizedCopyResult={summarizedCopyResult}
+          retries={retries}
+          onRetriesChange={onRetriesChange}
+          onDestinationMapChange={onDestinationMapChange}
+        />
+        <EuiIconTip
+          type={'alert'}
+          color={'warning'}
+          iconProps={{
+            'data-test-subj': getDataTestSubj('conflicts'),
+          }}
+          content={
+            <FormattedMessage
+              id="xpack.spaces.management.copyToSpace.copyStatusSummary.conflictsMessage"
+              defaultMessage="One or more conflicts detected in the {space} space. Expand this section to resolve."
+              values={{ space: space.name }}
+            />
+          }
+        />
+      </Fragment>
     );
   }
   return null;

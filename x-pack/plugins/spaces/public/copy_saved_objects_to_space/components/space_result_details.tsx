@@ -5,7 +5,7 @@
  */
 
 import './space_result_details.scss';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiText,
   EuiFlexGroup,
@@ -34,6 +34,8 @@ interface Props {
   space: Space;
   retries: ImportRetry[];
   onRetriesChange: (retries: ImportRetry[]) => void;
+  destinationMap: Map<string, string>;
+  onDestinationMapChange: (value?: Map<string, string>) => void;
   conflictResolutionInProgress: boolean;
 }
 
@@ -52,17 +54,9 @@ const isAmbiguousConflictError = (
   error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError
 ): error is SavedObjectsImportAmbiguousConflictError => error.type === 'ambiguous_conflict';
 
-const getInitialSelectValue = (objects: SummarizedCopyToSpaceResult['objects']) =>
-  objects.reduce((acc, { type, id, conflict }) => {
-    if (conflict && isAmbiguousConflictError(conflict.error)) {
-      acc.set(`${type}:${id}`, conflict.error.destinations[0].id);
-    }
-    return acc;
-  }, new Map<string, string>());
-
 export const SpaceCopyResultDetails = (props: Props) => {
-  const { objects } = props.summarizedCopyResult;
-  const [selectValue, setSelectValue] = useState(getInitialSelectValue(objects));
+  const { destinationMap, onDestinationMapChange, summarizedCopyResult } = props;
+  const { objects } = summarizedCopyResult;
 
   return (
     <div className="spcCopyToSpaceResultDetails">
@@ -82,9 +76,14 @@ export const SpaceCopyResultDetails = (props: Props) => {
 
             if (!checked) {
               props.onRetriesChange(filtered);
+              if (isAmbiguousConflictError(error)) {
+                // reset the selection to the first entry
+                const value = error.destinations[0].id;
+                onDestinationMapChange(new Map(destinationMap.set(`${type}:${id}`, value)));
+              }
             } else {
               const destinationId = isAmbiguousConflictError(error)
-                ? selectValue.get(`${type}:${id}`)
+                ? destinationMap.get(`${type}:${id}`)
                 : error.destinationId;
               const retry = { type, id, overwrite: true, ...(destinationId && { destinationId }) };
               props.onRetriesChange([...filtered, retry]);
@@ -118,7 +117,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
                 })
               : [],
           onChange: (value: string) => {
-            setSelectValue(new Map(selectValue.set(`${type}:${id}`, value)));
+            onDestinationMapChange(new Map(destinationMap.set(`${type}:${id}`, value)));
             const filtered = props.retries.filter((r) => r.type !== type || r.id !== id);
             const retry = { type, id, overwrite: true, destinationId: value };
             props.onRetriesChange([...filtered, retry]);
@@ -176,7 +175,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
               <div className="euiAccordion__childWrapper">
                 <EuiSuperSelect
                   options={selectProps.options}
-                  valueOfSelected={selectValue.get(`${type}:${id}`)}
+                  valueOfSelected={destinationMap.get(`${type}:${id}`)}
                   onChange={selectProps.onChange}
                   append="Object ID"
                   hasDividers

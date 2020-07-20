@@ -19,7 +19,7 @@ import {
 } from 'src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
 import { CopyOptions, ImportRetry } from '../types';
-import { SpaceResult } from './space_result';
+import { SpaceResult, SpaceResultProcessing } from './space_result';
 import { summarizeCopyResult } from '..';
 
 interface Props {
@@ -107,14 +107,18 @@ export const ProcessingCopyToSpace = (props: Props) => {
 
         return (
           <Fragment key={id}>
-            <SpaceResult
-              savedObject={props.savedObject}
-              space={space}
-              summarizedCopyResult={summarizedSpaceCopyResult}
-              retries={props.retries[space.id] || []}
-              onRetriesChange={(retries) => updateRetries(space.id, retries)}
-              conflictResolutionInProgress={props.conflictResolutionInProgress}
-            />
+            {summarizedSpaceCopyResult.processing ? (
+              <SpaceResultProcessing space={space} />
+            ) : (
+              <SpaceResult
+                savedObject={props.savedObject}
+                space={space}
+                summarizedCopyResult={summarizedSpaceCopyResult}
+                retries={props.retries[space.id] || []}
+                onRetriesChange={(retries) => updateRetries(space.id, retries)}
+                conflictResolutionInProgress={props.conflictResolutionInProgress}
+              />
+            )}
             <EuiSpacer size="s" />
           </Fragment>
         );
