@@ -20,7 +20,7 @@ import {
   DownloadArtifactRequestParamsSchema,
   downloadArtifactRequestParamsSchema,
   downloadArtifactResponseSchema,
-  InternalArtifactSchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
 import { EndpointAppContext } from '../../types';
 
@@ -86,8 +86,8 @@ export function registerDownloadExceptionListRoute(
       } else {
         logger.debug(`Cache MISS artifact ${id}`);
         return scopedSOClient
-          .get<InternalArtifactSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
-          .then((artifact: SavedObject<InternalArtifactSchema>) => {
+          .get<InternalArtifactCompleteSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
+          .then((artifact: SavedObject<InternalArtifactCompleteSchema>) => {
             const body = Buffer.from(artifact.attributes.body, 'base64');
             cache.set(id, body);
             return buildAndValidateResponse(artifact.attributes.identifier, body);
