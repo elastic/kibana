@@ -31,7 +31,7 @@ import type {
  */
 export type ElasticsearchClient = Omit<
   KibanaClient,
-  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'helpers' | 'child' | 'close'
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
 > & {
   transport: {
     request(
