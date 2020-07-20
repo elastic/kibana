@@ -26,6 +26,7 @@ import {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Type,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 
@@ -106,12 +107,14 @@ export interface CreateListItemOptions {
 }
 
 export interface UpdateListItemOptions {
+  _version: _VersionOrUndefined;
   id: Id;
   value: string | null | undefined;
   meta: MetaOrUndefined;
 }
 
 export interface UpdateListOptions {
+  _version: _VersionOrUndefined;
   id: Id;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;

@@ -6,7 +6,7 @@
 
 import querystring from 'querystring';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function serviceMapsApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

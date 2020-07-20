@@ -5,8 +5,8 @@
  */
 import URL from 'url';
 import expect from '@kbn/expect';
-import { CustomLink } from '../../../../plugins/apm/common/custom_link/custom_link_types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { CustomLink } from '../../../../../plugins/apm/common/custom_link/custom_link_types';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
   const supertestRead = getService('supertestAsApmReadUser');
