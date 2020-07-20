@@ -5,7 +5,13 @@
  */
 
 import _ from 'lodash';
-import { createSavedObjectClass } from '../../../../../../../src/plugins/saved_objects/public';
+import { SavedObjectReference } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+import {
+  createSavedObjectClass,
+  SavedObject,
+  SavedObjectKibanaServices,
+} from '../../../../../../../src/plugins/saved_objects/public';
 import {
   getTimeFilters,
   getMapZoom,
@@ -18,65 +24,74 @@ import {
 } from '../../../selectors/map_selectors';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
 import { copyPersistentState } from '../../../reducers/util';
+// @ts-expect-error
 import { extractReferences, injectReferences } from '../../../../common/migrations/references';
 import { getExistingMapPath, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+// @ts-expect-error
 import { getStore } from '../../store_operations';
+import { MapStoreState } from '../../../reducers/store';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 
-export function createSavedGisMapClass(services) {
+export interface ISavedGisMap extends SavedObject {
+  layerListJSON?: string;
+  mapStateJSON?: string;
+  uiStateJSON?: string;
+  getLayerList(): LayerDescriptor[];
+  syncWithStore(): void;
+}
+
+export function createSavedGisMapClass(services: SavedObjectKibanaServices) {
   const SavedObjectClass = createSavedObjectClass(services);
 
-  class SavedGisMap extends SavedObjectClass {
-    static type = MAP_SAVED_OBJECT_TYPE;
+  class SavedGisMap extends SavedObjectClass implements ISavedGisMap {
+    public static type = MAP_SAVED_OBJECT_TYPE;
 
     // Mappings are used to place object properties into saved object _source
-    static mapping = {
+    public static mapping = {
       title: 'text',
       description: 'text',
       mapStateJSON: 'text',
       layerListJSON: 'text',
       uiStateJSON: 'text',
     };
-    static fieldOrder = ['title', 'description'];
-    static searchSource = false;
+    public static fieldOrder = ['title', 'description'];
+    public static searchSource = false;
 
-    constructor(id) {
+    public showInRecentlyAccessed = true;
+    public layerListJSON?: string;
+    public mapStateJSON?: string;
+    public uiStateJSON?: string;
+
+    constructor(id: string) {
       super({
         type: SavedGisMap.type,
         mapping: SavedGisMap.mapping,
         searchSource: SavedGisMap.searchSource,
         extractReferences,
-        injectReferences: (savedObject, references) => {
+        injectReferences: (savedObject: ISavedGisMap, references: SavedObjectReference[]) => {
           const { attributes } = injectReferences({
             attributes: { layerListJSON: savedObject.layerListJSON },
             references,
           });
 
           savedObject.layerListJSON = attributes.layerListJSON;
-
-          const indexPatternIds = references
-            .filter((reference) => {
-              return reference.type === 'index-pattern';
-            })
-            .map((reference) => {
-              return reference.id;
-            });
-          savedObject.indexPatternIds = _.uniq(indexPatternIds);
         },
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
-        id: id,
+        id,
 
         // default values that will get assigned if the doc is new
         defaults: {
-          title: 'New Map',
+          title: i18n.translate('xpack.maps.newMapTitle', {
+            defaultMessage: 'New Map',
+          }),
           description: '',
         },
       });
-      this.showInRecentlyAccessed = true;
-    }
 
-    getFullPath() {
-      return getExistingMapPath(this.id);
+      this.getFullPath = () => {
+        return getExistingMapPath(this.id!);
+      };
     }
 
     getLayerList() {
@@ -84,7 +99,7 @@ export function createSavedGisMapClass(services) {
     }
 
     syncWithStore() {
-      const state = getStore().getState();
+      const state: MapStoreState = getStore().getState();
       const layerList = getLayerListRaw(state);
       const layerListConfigOnly = copyPersistentState(layerList);
       this.layerListJSON = JSON.stringify(layerListConfigOnly);

@@ -179,13 +179,6 @@ export const EXCEPTION_FIELD_LISTS_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const ADD_EXCEPTION_TITLE = i18n.translate(
-  'xpack.securitySolution.exceptions.addExceptionTitle',
-  {
-    defaultMessage: 'Add exception',
-  }
-);
-
 export const AND = i18n.translate('xpack.securitySolution.exceptions.andDescription', {
   defaultMessage: 'AND',
 });
