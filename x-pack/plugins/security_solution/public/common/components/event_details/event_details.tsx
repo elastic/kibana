@@ -30,11 +30,12 @@ const PopoverContainer = styled.div`
   left: -40px;
   position: relative;
   top: 10px;
+  height: 0;
 
-  .euiPopover {
-    position: fixed;
-    z-index: 10;
-  }
+  // .euiPopover {
+  //   position: fixed;
+  //   z-index: 10;
+  // }
 `;
 
 const CollapseButton = styled(EuiButtonIcon)`
@@ -90,28 +91,31 @@ export const EventDetails = React.memo<Props>(
       [onEventToggled]
     );
 
-    const tabs: EuiTabbedContentTab[] = [
-      {
-        id: 'table-view',
-        name: i18n.TABLE,
-        content: (
-          <EventFieldsBrowser
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            data={data}
-            eventId={id}
-            onUpdateColumns={onUpdateColumns}
-            timelineId={timelineId}
-            toggleColumn={toggleColumn}
-          />
-        ),
-      },
-      {
-        id: 'json-view',
-        name: i18n.JSON_VIEW,
-        content: <JsonView data={data} />,
-      },
-    ];
+    const tabs: EuiTabbedContentTab[] = useMemo(
+      () => [
+        {
+          id: 'table-view',
+          name: i18n.TABLE,
+          content: (
+            <EventFieldsBrowser
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              data={data}
+              eventId={id}
+              onUpdateColumns={onUpdateColumns}
+              timelineId={timelineId}
+              toggleColumn={toggleColumn}
+            />
+          ),
+        },
+        {
+          id: 'json-view',
+          name: i18n.JSON_VIEW,
+          content: <JsonView data={data} />,
+        },
+      ],
+      [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn]
+    );
 
     return (
       <Details data-test-subj="eventDetails">
