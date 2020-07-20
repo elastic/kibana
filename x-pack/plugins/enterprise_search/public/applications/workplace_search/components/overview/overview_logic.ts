@@ -9,7 +9,13 @@ import { HttpSetup } from 'src/core/public';
 import { kea } from 'kea';
 
 import { IAccount, IOrganization, IUser } from '../../types';
-import { IFlashMessagesProps, IKeaLogic } from '../../../shared/types';
+import {
+  IFlashMessagesProps,
+  IKeaLogic,
+  TKeaReducers,
+  TKeaSelectors,
+  IKeaParams,
+} from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
 
@@ -45,119 +51,102 @@ export interface IOverviewValues extends IOverviewServerData {
   flashMessages: IFlashMessagesProps;
 }
 
-interface IListenerParams {
-  actions: IOverviewActions;
-}
-
-interface IOverviewLogic extends IKeaLogic, IListenerParams {
-  values: IOverviewValues;
-}
-
 export const OverviewLogic = kea({
   actions: (): IOverviewActions => ({
-    setServerData: (serverData: IOverviewServerData) => serverData,
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({
-      flashMessages,
-    }),
-    setHasErrorConnecting: (hasErrorConnecting: boolean) => ({ hasErrorConnecting }),
-    initializeOverview: ({ http }: { http: HttpSetup }) => ({ http }),
+    setServerData: (serverData) => serverData,
+    setFlashMessages: (flashMessages) => ({ flashMessages }),
+    setHasErrorConnecting: (hasErrorConnecting) => ({ hasErrorConnecting }),
+    initializeOverview: ({ http }) => ({ http }),
   }),
-  reducers: () => ({
+  reducers: (): TKeaReducers<IOverviewValues, IOverviewActions> => ({
     organization: [
-      {},
+      {} as IOrganization,
       {
-        setServerData: (_: IOverviewValues, { organization }: IOverviewValues) => organization,
+        setServerData: (_, { organization }) => organization,
       },
     ],
     isFederatedAuth: [
       true,
       {
-        setServerData: (_: IOverviewValues, { isFederatedAuth }: IOverviewValues) =>
-          isFederatedAuth,
+        setServerData: (_, { isFederatedAuth }) => isFederatedAuth,
       },
     ],
     currentUser: [
-      {},
+      {} as IUser,
       {
-        setServerData: (_: IOverviewValues, { currentUser }: IOverviewValues) => currentUser,
+        setServerData: (_, { currentUser }) => currentUser,
       },
     ],
     fpAccount: [
-      {},
+      {} as IAccount,
       {
-        setServerData: (_: IOverviewValues, { fpAccount }: IOverviewValues) => fpAccount,
+        setServerData: (_, { fpAccount }) => fpAccount,
       },
     ],
     canCreateInvitations: [
       false,
       {
-        setServerData: (_: IOverviewValues, { canCreateInvitations }: IOverviewValues) =>
-          canCreateInvitations,
+        setServerData: (_, { canCreateInvitations }) => canCreateInvitations,
       },
     ],
     flashMessages: [
       {},
       {
-        setFlashMessages: (_: IOverviewValues, { flashMessages }: IOverviewValues) => flashMessages,
+        setFlashMessages: (_, { flashMessages }) => flashMessages,
       },
     ],
     hasUsers: [
       false,
       {
-        setServerData: (_: IOverviewServerData, { hasUsers }: IOverviewValues) => hasUsers,
+        setServerData: (_, { hasUsers }) => hasUsers,
       },
     ],
     hasOrgSources: [
       false,
       {
-        setServerData: (_: IOverviewServerData, { hasOrgSources }: IOverviewValues) =>
-          hasOrgSources,
+        setServerData: (_, { hasOrgSources }) => hasOrgSources,
       },
     ],
     canCreateContentSources: [
       false,
       {
-        setServerData: (_: IOverviewServerData, { canCreateContentSources }: IOverviewValues) =>
-          canCreateContentSources,
+        setServerData: (_, { canCreateContentSources }) => canCreateContentSources,
       },
     ],
     isOldAccount: [
       false,
       {
-        setServerData: (_: IOverviewServerData, { isOldAccount }: IOverviewValues) => isOldAccount,
+        setServerData: (_, { isOldAccount }) => isOldAccount,
       },
     ],
     sourcesCount: [
       0,
       {
-        setServerData: (_: IOverviewServerData, { sourcesCount }: IOverviewValues) => sourcesCount,
+        setServerData: (_, { sourcesCount }) => sourcesCount,
       },
     ],
     pendingInvitationsCount: [
       0,
       {
-        setServerData: (_: IOverviewServerData, { pendingInvitationsCount }: IOverviewValues) =>
-          pendingInvitationsCount,
+        setServerData: (_, { pendingInvitationsCount }) => pendingInvitationsCount,
       },
     ],
     accountsCount: [
       0,
       {
-        setServerData: (_: IOverviewServerData, { accountsCount }: IOverviewValues) =>
-          accountsCount,
+        setServerData: (_, { accountsCount }) => accountsCount,
       },
     ],
     personalSourcesCount: [
       0,
       {
-        setServerData: (_: IOverviewServerData, { personalSourcesCount }: IOverviewValues) =>
-          personalSourcesCount,
+        setServerData: (_, { personalSourcesCount }) => personalSourcesCount,
       },
     ],
     activityFeed: [
       [],
       {
-        setServerData: (_: IOverviewServerData, { activityFeed }: IOverviewValues) => activityFeed,
+        setServerData: (_, { activityFeed }) => activityFeed,
       },
     ],
     dataLoading: [
@@ -170,12 +159,11 @@ export const OverviewLogic = kea({
     hasErrorConnecting: [
       false,
       {
-        setHasErrorConnecting: (_: IOverviewServerData, { hasErrorConnecting }: IOverviewValues) =>
-          hasErrorConnecting,
+        setHasErrorConnecting: (_, { hasErrorConnecting }) => hasErrorConnecting,
       },
     ],
   }),
-  selectors: ({ selectors }: { selectors: IOverviewValues }) => ({
+  selectors: ({ selectors }): TKeaSelectors<IOverviewValues> => ({
     hideOnboarding: [
       () => [
         selectors.hasUsers,
@@ -191,7 +179,7 @@ export const OverviewLogic = kea({
       (isFederatedAuth: boolean) => (isFederatedAuth ? 'halves' : 'fourths'),
     ],
   }),
-  listeners: ({ actions }: IListenerParams) => ({
+  listeners: ({ actions }): Partial<IOverviewActions> => ({
     initializeOverview: async ({ http }: { http: HttpSetup }) => {
       try {
         const response = await http.get('/api/workplace_search/overview');
@@ -201,4 +189,4 @@ export const OverviewLogic = kea({
       }
     },
   }),
-}) as IOverviewLogic;
+} as IKeaParams<IOverviewValues, IOverviewActions>) as IKeaLogic<IOverviewValues, IOverviewActions>;
