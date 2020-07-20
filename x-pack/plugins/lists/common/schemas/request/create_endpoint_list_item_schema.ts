@@ -19,7 +19,7 @@ import {
   name,
   tags,
 } from '../common/schemas';
-import { Identity, RequiredKeepUndefined } from '../../types';
+import { RequiredKeepUndefined } from '../../types';
 import { CreateCommentsArray, DefaultCreateCommentsArray, DefaultEntryArray } from '../types';
 import { EntriesArray } from '../types/entries';
 import { DefaultUuid } from '../../siem_common_deps';
@@ -44,20 +44,16 @@ export const createEndpointListItemSchema = t.intersection([
   ),
 ]);
 
-export type CreateEndpointListItemSchemaPartial = Identity<
-  t.TypeOf<typeof createEndpointListItemSchema>
->;
-export type CreateEndpointListItemSchema = RequiredKeepUndefined<
-  t.TypeOf<typeof createEndpointListItemSchema>
->;
+export type CreateEndpointListItemSchema = t.OutputOf<typeof createEndpointListItemSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type CreateEndpointListItemSchemaDecoded = Identity<
-  Omit<CreateEndpointListItemSchema, '_tags' | 'tags' | 'item_id' | 'entries' | 'comments'> & {
-    _tags: _Tags;
-    comments: CreateCommentsArray;
-    tags: Tags;
-    item_id: ItemId;
-    entries: EntriesArray;
-  }
->;
+export type CreateEndpointListItemSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof createEndpointListItemSchema>>,
+  '_tags' | 'tags' | 'item_id' | 'entries' | 'comments'
+> & {
+  _tags: _Tags;
+  comments: CreateCommentsArray;
+  tags: Tags;
+  item_id: ItemId;
+  entries: EntriesArray;
+};
