@@ -52,7 +52,7 @@ export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {
   }
 
   return (
-    <>
+    <div>
       <EuiSpacer size="s" />
       <InspectorDataGrid
         columns={inspectSignalsSets.columns.map((column, index) => {
@@ -67,6 +67,6 @@ export const SignalViewer = ({ vegaAdapter }: SignalViewerProps) => {
         data={inspectSignalsSets.data}
         dataGridAriaLabel={signalDataGridAriaLabel}
       />
-    </>
+    </div>
   );
 };
