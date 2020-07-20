@@ -21,7 +21,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
   router.put(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_URL,
       validate: {

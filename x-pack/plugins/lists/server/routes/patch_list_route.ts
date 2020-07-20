@@ -17,7 +17,7 @@ export const patchListRoute = (router: IRouter): void => {
   router.patch(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_URL,
       validate: {
