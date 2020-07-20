@@ -25,28 +25,28 @@ export const RESILIENT_TITLE = i18n.translate(
 export const RESILIENT_PROJECT_KEY_LABEL = i18n.translate(
   'xpack.securitySolution.case.connectors.resilient.orgId',
   {
-    defaultMessage: 'Organization Id',
+    defaultMessage: 'Organization ID',
   }
 );
 
 export const RESILIENT_PROJECT_KEY_REQUIRED = i18n.translate(
   'xpack.securitySolution.case.connectors.resilient.requiredOrgIdTextField',
   {
-    defaultMessage: 'Organization Id',
+    defaultMessage: 'Organization ID is required',
   }
 );
 
 export const RESILIENT_API_KEY_ID_LABEL = i18n.translate(
   'xpack.securitySolution.case.connectors.resilient.apiKeyId',
   {
-    defaultMessage: 'API key id',
+    defaultMessage: 'API key ID',
   }
 );
 
 export const RESILIENT_API_KEY_ID_REQUIRED = i18n.translate(
   'xpack.securitySolution.case.connectors.resilient.requiredApiKeyIdTextField',
   {
-    defaultMessage: 'API key id is required',
+    defaultMessage: 'API key ID is required',
   }
 );
 
