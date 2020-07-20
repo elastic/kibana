@@ -31,12 +31,6 @@ export function asErr<T>(error: T): Err<T> {
   };
 }
 
-export function isResult<T, E>(maybeResult: unknown): maybeResult is Result<T, E> {
-  return (
-    (maybeResult as Result<T, E>)?.tag === 'ok' || (maybeResult as Result<T, E>)?.tag === 'err'
-  );
-}
-
 export function isOk<T, E>(result: Result<T, E>): result is Ok<T> {
   return result.tag === 'ok';
 }

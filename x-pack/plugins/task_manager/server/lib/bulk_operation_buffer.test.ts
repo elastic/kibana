@@ -54,7 +54,7 @@ describe('Bulk Operation Buffer', () => {
       expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
     });
 
-    test('batch updates are executed at most by the next Event Loop tick', async () => {
+    test('batch updates are executed at most by the next Event Loop tick by default', async () => {
       const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn((tasks) => {
         return Promise.resolve(tasks.map(incrementAttempts));
       });
@@ -96,6 +96,127 @@ describe('Bulk Operation Buffer', () => {
       });
     });
 
+    test('batch updates can be customised to execute after a certain period', async () => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn((tasks) => {
+        return Promise.resolve(tasks.map(incrementAttempts));
+      });
+
+      const bufferMaxDuration = 50;
+      const bufferedUpdate = createBuffer(bulkUpdate, { bufferMaxDuration });
+
+      const task1 = createTask();
+      const task2 = createTask();
+      const task3 = createTask();
+      const task4 = createTask();
+      const task5 = createTask();
+      const task6 = createTask();
+
+      return new Promise((resolve) => {
+        Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]).then((_) => {
+          expect(bulkUpdate).toHaveBeenCalledTimes(1);
+          expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
+          expect(bulkUpdate).not.toHaveBeenCalledWith([task3, task4]);
+        });
+
+        setTimeout(() => {
+          // on next tick
+          setTimeout(() => {
+            // on next tick
+            expect(bulkUpdate).toHaveBeenCalledTimes(2);
+            Promise.all([bufferedUpdate(task5), bufferedUpdate(task6)]).then((_) => {
+              expect(bulkUpdate).toHaveBeenCalledTimes(3);
+              expect(bulkUpdate).toHaveBeenCalledWith([task5, task6]);
+              resolve();
+            });
+          }, bufferMaxDuration + 1);
+
+          expect(bulkUpdate).toHaveBeenCalledTimes(1);
+          Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]).then((_) => {
+            expect(bulkUpdate).toHaveBeenCalledTimes(2);
+            expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
+          });
+        }, bufferMaxDuration + 1);
+      });
+    });
+
+    test('batch updates are executed once queue hits a certain bound', async () => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn((tasks) => {
+        return Promise.resolve(tasks.map(incrementAttempts));
+      });
+
+      const bufferedUpdate = createBuffer(bulkUpdate, {
+        bufferMaxDuration: 100,
+        bufferMaxOperations: 2,
+      });
+
+      const task1 = createTask();
+      const task2 = createTask();
+      const task3 = createTask();
+      const task4 = createTask();
+      const task5 = createTask();
+
+      return new Promise((resolve) => {
+        bufferedUpdate(task1);
+        bufferedUpdate(task2);
+        bufferedUpdate(task3);
+        bufferedUpdate(task4);
+
+        setTimeout(() => {
+          expect(bulkUpdate).toHaveBeenCalledTimes(2);
+          expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
+          expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
+
+          setTimeout(() => {
+            expect(bulkUpdate).toHaveBeenCalledTimes(2);
+            bufferedUpdate(task5).then((_) => {
+              expect(bulkUpdate).toHaveBeenCalledTimes(3);
+              expect(bulkUpdate).toHaveBeenCalledWith([task5]);
+              resolve();
+            });
+          }, 50);
+        }, 50);
+      });
+    });
+
+    test('queue upper bound is reset after each flush', async () => {
+      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn((tasks) => {
+        return Promise.resolve(tasks.map(incrementAttempts));
+      });
+
+      const bufferMaxDuration = 100;
+      const bufferedUpdate = createBuffer(bulkUpdate, {
+        bufferMaxDuration,
+        bufferMaxOperations: 3,
+      });
+
+      const task1 = createTask();
+      const task2 = createTask();
+      const task3 = createTask();
+      const task4 = createTask();
+
+      return new Promise((resolve) => {
+        bufferedUpdate(task1);
+        bufferedUpdate(task2);
+
+        setTimeout(() => {
+          expect(bulkUpdate).toHaveBeenCalledTimes(1);
+          expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
+
+          bufferedUpdate(task3);
+          bufferedUpdate(task4);
+
+          setTimeout(() => {
+            expect(bulkUpdate).toHaveBeenCalledTimes(1);
+
+            setTimeout(() => {
+              expect(bulkUpdate).toHaveBeenCalledTimes(2);
+              expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
+              resolve();
+            }, bufferMaxDuration / 2);
+          }, bufferMaxDuration / 2);
+        }, bufferMaxDuration + 1);
+      });
+    });
     test('handles both resolutions and rejections at individual task level', async (done) => {
       const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
         ([task1, task2, task3]) => {
