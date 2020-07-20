@@ -83,8 +83,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
       });
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
-      const disabled =
-        isEditorNotInIdleMode && (!isMovingThisProcessor || editor.mode.id === 'editingProcessor');
+      const disabled = isEditorNotInIdleMode && !isMovingThisProcessor;
       const moveButton = (
         <EuiButtonToggle
           isEmpty={!isMovingThisProcessor}
