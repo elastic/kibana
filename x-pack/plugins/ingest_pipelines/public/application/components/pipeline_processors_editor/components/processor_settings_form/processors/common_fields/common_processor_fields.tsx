@@ -27,7 +27,6 @@ const ignoreFailureConfig: FieldConfig = {
 };
 
 const ifConfig: FieldConfig = {
-  defaultValue: undefined,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldLabel', {
     defaultMessage: 'Condition (optional)',
   }),
@@ -35,7 +34,6 @@ const ifConfig: FieldConfig = {
 };
 
 const tagConfig: FieldConfig = {
-  defaultValue: undefined,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldLabel', {
     defaultMessage: 'Tag (optional)',
   }),
@@ -45,11 +43,11 @@ const tagConfig: FieldConfig = {
 export const CommonProcessorFields: FunctionComponent = () => {
   return (
     <>
-      <UseField config={ignoreFailureConfig} component={ToggleField} path={'ignore_failure'} />
+      <UseField config={ignoreFailureConfig} component={ToggleField} path="fields.ignore_failure" />
 
-      <UseField config={ifConfig} component={Field} path={'if'} />
+      <UseField config={ifConfig} component={Field} path="fields.if" />
 
-      <UseField config={tagConfig} component={Field} path={'tag'} />
+      <UseField config={tagConfig} component={Field} path="fields.tag" />
     </>
   );
 };

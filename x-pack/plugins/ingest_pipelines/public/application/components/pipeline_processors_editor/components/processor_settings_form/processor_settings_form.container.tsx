@@ -40,10 +40,10 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   const handleSubmit = useCallback(
     async (data: FormData, isValid: boolean) => {
       if (isValid) {
-        const { type, customOptions, ...options } = data;
+        const { type, customOptions, fields } = data;
         onSubmit({
           type,
-          options: customOptions ? customOptions : options,
+          options: customOptions ? customOptions : fields,
         });
       }
     },
@@ -51,7 +51,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   );
 
   const { form } = useForm({
-    defaultValue: processor?.options,
+    defaultValue: { fields: processor?.options },
     onSubmit: handleSubmit,
   });
 
