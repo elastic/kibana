@@ -344,7 +344,13 @@ export async function initWebDriver(
     ),
 
     Rx.race(
-      Rx.defer(() => attemptToCreateCommand(log, browserType, lifecycle, config)),
+      Rx.defer(async () => {
+        const command = await attemptToCreateCommand(log, browserType, lifecycle, config);
+        if (!command) {
+          throw new Error('remote creation aborted');
+        }
+        return command;
+      }),
       Rx.timer(30 * SECOND).pipe(
         map(() => {
           throw new Error('remote failed to start within 30 seconds');
