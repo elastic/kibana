@@ -144,9 +144,9 @@
     },
     "series": [
       {
-        "id": "1.1",
-        "rawId": "col-1-1.1",
-        "label": "1st percentile of AvgTicketPrice",
+        "id": "1.['1.1']",
+        "rawId": "col-1-1.['1.1']",
+        "label": "1.1th percentile of AvgTicketPrice",
         "values": [
           {
             "x": 1557460800000,
@@ -160,8 +160,8 @@
                     "name": "timestamp per day"
                   },
                   {
-                    "id": "col-1-1.1",
-                    "name": "1st percentile of AvgTicketPrice"
+                    "id": "col-1-1.['1.1']",
+                    "name": "1.1th percentile of AvgTicketPrice"
                   },
                   {
                     "id": "col-2-1.50",
@@ -171,12 +171,12 @@
                 "rows": [
                   {
                     "col-0-2": 1557460800000,
-                    "col-1-1.1": 116,
+                    "col-1-1.['1.1']": 116,
                     "col-2-1.50": 658
                   },
                   {
                     "col-0-2": 1557547200000,
-                    "col-1-1.1": 223,
+                    "col-1-1.['1.1']": 223,
                     "col-2-1.50": 756
                   }
                 ]
@@ -193,8 +193,8 @@
                     "name": "timestamp per day"
                   },
                   {
-                    "id": "col-1-1.1",
-                    "name": "1st percentile of AvgTicketPrice"
+                    "id": "col-1-1.['1.1']",
+                    "name": "1.1th percentile of AvgTicketPrice"
                   },
                   {
                     "id": "col-2-1.50",
@@ -204,12 +204,12 @@
                 "rows": [
                   {
                     "col-0-2": 1557460800000,
-                    "col-1-1.1": 116,
+                    "col-1-1.['1.1']": 116,
                     "col-2-1.50": 658
                   },
                   {
                     "col-0-2": 1557547200000,
-                    "col-1-1.1": 223,
+                    "col-1-1.['1.1']": 223,
                     "col-2-1.50": 756
                   }
                 ]
@@ -219,8 +219,8 @@
               "value": 116.33676605224609
             },
             "parent": null,
-            "series": "1st percentile of AvgTicketPrice",
-            "seriesId": "col-1-1.1"
+            "series": "1.1th percentile of AvgTicketPrice",
+            "seriesId": "col-1-1.['1.1']"
           },
           {
             "x": 1557547200000,
@@ -234,8 +234,8 @@
                     "name": "timestamp per day"
                   },
                   {
-                    "id": "col-1-1.1",
-                    "name": "1st percentile of AvgTicketPrice"
+                    "id": "col-1-1.['1.1']",
+                    "name": "1.1th percentile of AvgTicketPrice"
                   },
                   {
                     "id": "col-2-1.50",
@@ -245,12 +245,12 @@
                 "rows": [
                   {
                     "col-0-2": 1557460800000,
-                    "col-1-1.1": 116,
+                    "col-1-1.['1.1']": 116,
                     "col-2-1.50": 658
                   },
                   {
                     "col-0-2": 1557547200000,
-                    "col-1-1.1": 223,
+                    "col-1-1.['1.1']": 223,
                     "col-2-1.50": 756
                   }
                 ]
@@ -267,8 +267,8 @@
                     "name": "timestamp per day"
                   },
                   {
-                    "id": "col-1-1.1",
-                    "name": "1st percentile of AvgTicketPrice"
+                    "id": "col-1-1.['1.1']",
+                    "name": "1.1th percentile of AvgTicketPrice"
                   },
                   {
                     "id": "col-2-1.50",
@@ -278,12 +278,12 @@
                 "rows": [
                   {
                     "col-0-2": 1557460800000,
-                    "col-1-1.1": 116,
+                    "col-1-1.['1.1']": 116,
                     "col-2-1.50": 658
                   },
                   {
                     "col-0-2": 1557547200000,
-                    "col-1-1.1": 223,
+                    "col-1-1.['1.1']": 223,
                     "col-2-1.50": 756
                   }
                 ]
@@ -293,8 +293,8 @@
               "value": 223
             },
             "parent": null,
-            "series": "1st percentile of AvgTicketPrice",
-            "seriesId": "col-1-1.1"
+            "series": "1.1th percentile of AvgTicketPrice",
+            "seriesId": "col-1-1.['1.1']"
           }
         ]
       },
@@ -315,8 +315,8 @@
                     "name": "timestamp per day"
                   },
                   {
-                    "id": "col-1-1.1",
-                    "name": "1st percentile of AvgTicketPrice"
+                    "id": "col-1-1.['1.1']",
+                    "name": "1.1th percentile of AvgTicketPrice"
                   },
                   {
                     "id": "col-2-1.50",
@@ -326,12 +326,12 @@
                 "rows": [
                   {
                     "col-0-2": 1557460800000,
-                    "col-1-1.1": 116,
+                    "col-1-1.['1.1']": 116,
                     "col-2-1.50": 658
                   },
                   {
                     "col-0-2": 1557547200000,
-                    "col-1-1.1": 223,
+                    "col-1-1.['1.1']": 223,
                     "col-2-1.50": 756
                   }
                 ]
@@ -348,8 +348,8 @@
                     "name": "timestamp per day"
                   },
                   {
-                    "id": "col-1-1.1",
-                    "name": "1st percentile of AvgTicketPrice"
+                    "id": "col-1-1.['1.1']",
+                    "name": "1.1th percentile of AvgTicketPrice"
                   },
                   {
                     "id": "col-2-1.50",
@@ -359,12 +359,12 @@
                 "rows": [
                   {
                     "col-0-2": 1557460800000,
-                    "col-1-1.1": 116,
+                    "col-1-1.['1.1']": 116,
                     "col-2-1.50": 658
                   },
                   {
                     "col-0-2": 1557547200000,
-                    "col-1-1.1": 223,
+                    "col-1-1.['1.1']": 223,
                     "col-2-1.50": 756
                   }
                 ]
@@ -389,8 +389,8 @@
                     "name": "timestamp per day"
                   },
                   {
-                    "id": "col-1-1.1",
-                    "name": "1st percentile of AvgTicketPrice"
+                    "id": "col-1-1.['1.1']",
+                    "name": "1.1th percentile of AvgTicketPrice"
                   },
                   {
                     "id": "col-2-1.50",
@@ -400,12 +400,12 @@
                 "rows": [
                   {
                     "col-0-2": 1557460800000,
-                    "col-1-1.1": 116,
+                    "col-1-1.['1.1']": 116,
                     "col-2-1.50": 658
                   },
                   {
                     "col-0-2": 1557547200000,
-                    "col-1-1.1": 223,
+                    "col-1-1.['1.1']": 223,
                     "col-2-1.50": 756
                   }
                 ]
@@ -422,8 +422,8 @@
                     "name": "timestamp per day"
                   },
                   {
-                    "id": "col-1-1.1",
-                    "name": "1st percentile of AvgTicketPrice"
+                    "id": "col-1-1.['1.1']",
+                    "name": "1.1th percentile of AvgTicketPrice"
                   },
                   {
                     "id": "col-2-1.50",
@@ -433,12 +433,12 @@
                 "rows": [
                   {
                     "col-0-2": 1557460800000,
-                    "col-1-1.1": 116,
+                    "col-1-1.['1.1']": 116,
                     "col-2-1.50": 658
                   },
                   {
                     "col-0-2": 1557547200000,
-                    "col-1-1.1": 223,
+                    "col-1-1.['1.1']": 223,
                     "col-2-1.50": 756
                   }
                 ]
@@ -456,9 +456,8 @@
     ],
     "type": "series",
     "labels": [
-      "1st percentile of AvgTicketPrice",
+      "1.1th percentile of AvgTicketPrice",
       "50th percentile of AvgTicketPrice"
     ]
   }
-
 }
