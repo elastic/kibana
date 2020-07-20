@@ -17,9 +17,11 @@ import { trackUiMetric } from './services/ui_metric';
 export const App = ({
   history,
   navigateToApp,
+  getUrlForApp,
 }: {
   history: ScopedHistory;
   navigateToApp: ApplicationStart['navigateToApp'];
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }) => {
   useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);
 
@@ -32,7 +34,10 @@ export const App = ({
           path={`/policies`}
           render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
         />
-        <Route path={`/policies/edit/:policyName?`} component={EditPolicy} />
+        <Route
+          path={`/policies/edit/:policyName?`}
+          render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
+        />
       </Switch>
     </Router>
   );

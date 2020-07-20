@@ -46,7 +46,7 @@ export class IndexLifecycleManagementPlugin {
           const {
             i18n: { Context: I18nContext },
             docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-            application: { navigateToApp },
+            application: { navigateToApp, getUrlForApp },
           } = coreStart;
 
           // Initialize additional services.
@@ -55,7 +55,7 @@ export class IndexLifecycleManagementPlugin {
           );
 
           const { renderApp } = await import('./application');
-          return renderApp(element, I18nContext, history, navigateToApp);
+          return renderApp(element, I18nContext, history, navigateToApp, getUrlForApp);
         },
       });
 
