@@ -12,6 +12,8 @@ import { platformServiceFactory } from './platform';
 import { navLinkServiceFactory } from './nav_link';
 import { expressionsServiceFactory } from './expressions';
 
+import { serviceMocks } from './mock_services';
+
 export type CanvasServiceFactory<Service> = (
   coreSetup: CoreSetup,
   coreStart: CoreStart,
@@ -26,6 +28,10 @@ class CanvasServiceProvider<Service> {
 
   constructor(factory: CanvasServiceFactory<Service>) {
     this.factory = factory;
+  }
+
+  mockService(service: Service) {
+    this.service = service;
   }
 
   async start(
@@ -89,6 +95,14 @@ export const startServices = async (
 
 export const stopServices = () => {
   Object.entries(services).forEach(([key, provider]) => provider.stop());
+};
+
+export const startMockServices = async (providedMocks: Partial<CanvasServices>) => {
+  Object.entries(services).map(([key, provider]) => {
+    const mock = providedMocks[key] || serviceMocks[key];
+
+    provider.mockService(mock);
+  });
 };
 
 export const {

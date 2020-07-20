@@ -13,7 +13,7 @@ export const getInitialState = (path) => {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here
     transient: {
-      canUserWrite: platformService.getService().coreStart.application.capabilities.canvas.save,
+      canUserWrite: platformService.getService().getHasWriteAccess(),
       zoomScale: 1,
       elementStats: {
         total: 0,

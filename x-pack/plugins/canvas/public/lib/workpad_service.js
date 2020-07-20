@@ -44,17 +44,17 @@ const sanitizeWorkpad = function (workpad) {
 };
 
 const getApiPath = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return `${basePath}${API_ROUTE_WORKPAD}`;
 };
 
 const getApiPathStructures = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return `${basePath}${API_ROUTE_WORKPAD_STRUCTURES}`;
 };
 
 const getApiPathAssets = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return `${basePath}${API_ROUTE_WORKPAD_ASSETS}`;
 };
 
