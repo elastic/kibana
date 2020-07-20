@@ -30,12 +30,17 @@ def sendComment(isFinal = false) {
 
   def status = buildUtils.getBuildStatus()
   if (status == "ABORTED") {
-    return;
+    return
   }
 
   def lastComment = getLatestBuildComment()
   def info = getLatestBuildInfo(lastComment) ?: [:]
   info.builds = (info.builds ?: []).takeRight(5) // Rotate out old builds
+
+  // If two builds are running at the same time, the first one should not post a comment after the second one
+  if (info.number && info.number.toInteger() > env.BUILD_NUMBER.toInteger()) {
+    return
+  }
 
   def shouldUpdateComment = !!info.builds.find { it.number == env.BUILD_NUMBER }
 
