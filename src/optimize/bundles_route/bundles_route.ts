@@ -28,22 +28,19 @@ import { assertIsNpUiPluginPublicDirs, NpUiPluginPublicDirs } from '../np_ui_plu
 import { fromRoot } from '../../core/server/utils';
 
 /**
- *  Creates the routes that serves files from `bundlesPath` or from
- *  `dllBundlesPath` (if they are dll bundle's related files). If the
+ *  Creates the routes that serves files from `bundlesPath`. If the
  *  file is js or css then it is searched for instances of
  *  PUBLIC_PATH_PLACEHOLDER and replaces them with `publicPath`.
  *
  *  @param {Object} options
  *  @property {Array<{id,path}>} options.npUiPluginPublicDirs array of ids and paths that should be served for new platform plugins
  *  @property {string} options.regularBundlesPath
- *  @property {string} options.dllBundlesPath
  *  @property {string} options.basePublicPath
  *
  *  @return Array.of({Hapi.Route})
  */
 export function createBundlesRoute({
   regularBundlesPath,
-  dllBundlesPath,
   basePublicPath,
   builtCssPath,
   npUiPluginPublicDirs = [],
@@ -51,7 +48,6 @@ export function createBundlesRoute({
   isDist = false,
 }: {
   regularBundlesPath: string;
-  dllBundlesPath: string;
   basePublicPath: string;
   builtCssPath: string;
   npUiPluginPublicDirs?: NpUiPluginPublicDirs;
@@ -67,12 +63,6 @@ export function createBundlesRoute({
   if (typeof regularBundlesPath !== 'string' || !isAbsolute(regularBundlesPath)) {
     throw new TypeError(
       'regularBundlesPath must be an absolute path to the directory containing the regular bundles'
-    );
-  }
-
-  if (typeof dllBundlesPath !== 'string' || !isAbsolute(dllBundlesPath)) {
-    throw new TypeError(
-      'dllBundlesPath must be an absolute path to the directory containing the dll bundles'
     );
   }
 
@@ -115,13 +105,6 @@ export function createBundlesRoute({
       publicPath: `${basePublicPath}/${buildHash}/bundles/`,
       routePath: `/${buildHash}/bundles/`,
       bundlesPath: regularBundlesPath,
-      fileHashCache,
-      isDist,
-    }),
-    buildRouteForBundles({
-      publicPath: `${basePublicPath}/${buildHash}/built_assets/dlls/`,
-      routePath: `/${buildHash}/built_assets/dlls/`,
-      bundlesPath: dllBundlesPath,
       fileHashCache,
       isDist,
     }),
