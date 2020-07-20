@@ -858,7 +858,6 @@ export class SavedObjectsRepository {
       type,
       namespaces,
       ...(updatedAt && { updated_at: updatedAt }),
-      // @ts-expect-error GetResponse doesn't have _seq_no, _primary_term as SavedObjectsRawDoc
       version: encodeHitVersion(body),
       attributes: body._source[type],
       references: body._source.references || [],
@@ -1331,8 +1330,6 @@ export class SavedObjectsRepository {
       index: this.getIndexForType(type),
       // @ts-expect-error
       refresh,
-      // @ts-expect-error
-      _source: true,
       body: {
         script: {
           source: `

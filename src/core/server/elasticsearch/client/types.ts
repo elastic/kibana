@@ -92,6 +92,8 @@ export interface GetResponse<T> {
   _routing?: string;
   found: boolean;
   _source: T;
+  _seq_no: number;
+  _primary_term: number;
 }
 
 export interface DeleteDocumentResponse {
