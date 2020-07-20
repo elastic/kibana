@@ -9,22 +9,32 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
   describe('APM specs (basic)', function () {
     this.tags('ciGroup1');
 
-    // feature_controls
     loadTestFile(require.resolve('./feature_controls'));
 
-    // service_maps
-    loadTestFile(require.resolve('./service_maps/service_maps'));
+    describe('Service Maps', function () {
+      loadTestFile(require.resolve('./service_maps/service_maps'));
+    });
 
-    // services
-    loadTestFile(require.resolve('./services/'));
+    describe('Services', function () {
+      loadTestFile(require.resolve('./services/annotations'));
+      loadTestFile(require.resolve('./services/top_services'));
+      loadTestFile(require.resolve('./services/agent_name'));
+      loadTestFile(require.resolve('./services/transaction_types'));
+    });
 
-    // settings
-    loadTestFile(require.resolve('./settings/'));
+    describe('Settings', function () {
+      loadTestFile(require.resolve('./settings/custom_link'));
+      loadTestFile(require.resolve('./settings/agent_configuration'));
+    });
 
-    // traces
-    loadTestFile(require.resolve('./traces/'));
+    describe('Traces', function () {
+      loadTestFile(require.resolve('./traces/top_traces'));
+    });
 
-    // transaction_group
-    loadTestFile(require.resolve('./transaction_groups/'));
+    describe('Transaction Group', function () {
+      loadTestFile(require.resolve('./transaction_groups/top_transaction_groups'));
+      loadTestFile(require.resolve('./transaction_groups/transaction_charts'));
+      loadTestFile(require.resolve('./transaction_groups/error_rate'));
+    });
   });
 }

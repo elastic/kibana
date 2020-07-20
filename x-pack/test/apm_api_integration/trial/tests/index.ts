@@ -10,13 +10,17 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
   describe('APM specs (trial)', function () {
     this.tags('ciGroup1');
 
-    // services
-    loadTestFile(require.resolve('./services'));
+    describe('Services', function () {
+      loadTestFile(require.resolve('./services/annotations'));
+      loadTestFile(require.resolve('./services/rum_services.ts'));
+    });
 
-    // service_maps
-    loadTestFile(require.resolve('./service_maps/service_maps'));
+    describe('Service Maps', function () {
+      loadTestFile(require.resolve('./service_maps/service_maps'));
+    });
 
-    // transaction_groups
-    loadTestFile(require.resolve('./transaction_groups'));
+    describe('Transaction Group', function () {
+      loadTestFile(require.resolve('./transaction_groups/error_rate'));
+    });
   });
 }
