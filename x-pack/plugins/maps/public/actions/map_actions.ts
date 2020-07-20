@@ -8,11 +8,13 @@
 import { Dispatch } from 'redux';
 // @ts-ignore
 import turf from 'turf';
+import uuid from 'uuid/v4';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
+  getMapSettings,
   getWaitingForMapReadyLayerListRaw,
   getQuery,
 } from '../selectors/map_selectors';
@@ -42,7 +44,11 @@ import {
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
-import { syncDataForAllLayers } from './data_request_actions';
+import {
+  fitToDataBounds,
+  syncDataForAllJoinLayers,
+  syncDataForAllLayers,
+} from './data_request_actions';
 import { addLayer } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
@@ -51,6 +57,7 @@ import {
   MapExtent,
   MapRefreshConfig,
 } from '../../common/descriptor_types';
+import { scaleBounds } from '../elasticsearch_geo_utils';
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -134,15 +141,7 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
       }
 
       if (!doesBufferContainExtent || currentZoom !== newZoom) {
-        const scaleFactor = 0.5; // TODO put scale factor in store and fetch with selector
-        const width = extent.maxLon - extent.minLon;
-        const height = extent.maxLat - extent.minLat;
-        dataFilters.buffer = {
-          minLon: extent.minLon - width * scaleFactor,
-          minLat: extent.minLat - height * scaleFactor,
-          maxLon: extent.maxLon + width * scaleFactor,
-          maxLat: extent.maxLat + height * scaleFactor,
-        };
+        dataFilters.buffer = scaleBounds(extent, 0.5);
       }
     }
 
@@ -197,6 +196,7 @@ function generateQueryTimestamp() {
   return new Date().toISOString();
 }
 
+let lastSetQueryCallId: string = '';
 export function setQuery({
   query,
   timeFilters,
@@ -226,7 +226,22 @@ export function setQuery({
       filters,
     });
 
-    await dispatch<any>(syncDataForAllLayers());
+    if (getMapSettings(getState()).autoFitToDataBounds) {
+      // Joins are performed on the client.
+      // As a result, bounds for join layers must also be performed on the client.
+      // Therefore join layers need to fetch data prior to auto fitting bounds.
+      const localSetQueryCallId = uuid();
+      lastSetQueryCallId = localSetQueryCallId;
+      await dispatch<any>(syncDataForAllJoinLayers());
+
+      // setQuery can be triggered before async data fetching completes
+      // Only continue execution path if setQuery has not been re-triggered.
+      if (localSetQueryCallId === lastSetQueryCallId) {
+        dispatch<any>(fitToDataBounds());
+      }
+    } else {
+      await dispatch<any>(syncDataForAllLayers());
+    }
   };
 }
 

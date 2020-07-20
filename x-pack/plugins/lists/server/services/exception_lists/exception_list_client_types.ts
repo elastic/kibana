@@ -38,6 +38,7 @@ import {
   UpdateCommentsArray,
   _Tags,
   _TagsOrUndefined,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 
 export interface ConstructorOptions {
@@ -64,6 +65,7 @@ export interface CreateExceptionListOptions {
 
 export interface UpdateExceptionListOptions {
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   id: IdOrUndefined;
   listId: ListIdOrUndefined;
   namespaceType: NamespaceType;
@@ -130,6 +132,7 @@ export interface CreateEndpointListItemOptions {
 
 export interface UpdateExceptionListItemOptions {
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
   entries: EntriesArrayOrUndefined;
   id: IdOrUndefined;
@@ -144,6 +147,7 @@ export interface UpdateExceptionListItemOptions {
 
 export interface UpdateEndpointListItemOptions {
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
   entries: EntriesArrayOrUndefined;
   id: IdOrUndefined;

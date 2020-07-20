@@ -7,11 +7,11 @@
 import { FILTER } from '../../constants.mock';
 
 import {
-  FindEndpointListItemSchemaPartial,
-  FindEndpointListItemSchemaPartialDecoded,
+  FindEndpointListItemSchema,
+  FindEndpointListItemSchemaDecoded,
 } from './find_endpoint_list_item_schema';
 
-export const getFindEndpointListItemSchemaMock = (): FindEndpointListItemSchemaPartial => ({
+export const getFindEndpointListItemSchemaMock = (): FindEndpointListItemSchema => ({
   filter: FILTER,
   page: '1',
   per_page: '25',
@@ -19,7 +19,7 @@ export const getFindEndpointListItemSchemaMock = (): FindEndpointListItemSchemaP
   sort_order: undefined,
 });
 
-export const getFindEndpointListItemSchemaDecodedMock = (): FindEndpointListItemSchemaPartialDecoded => ({
+export const getFindEndpointListItemSchemaDecodedMock = (): FindEndpointListItemSchemaDecoded => ({
   filter: FILTER,
   page: 1,
   per_page: 25,
