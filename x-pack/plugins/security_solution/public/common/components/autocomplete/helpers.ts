@@ -7,7 +7,7 @@
 import dateMath from '@elastic/datemath';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { IFieldType, Ipv4Address } from '../../../../../../../src/plugins/data/common';
+import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
 import {
   EXCEPTION_OPERATORS,
@@ -46,12 +46,6 @@ export const validateParams = (
       case 'date':
         const moment = dateMath.parse(params);
         return Boolean(moment && moment.isValid());
-      case 'ip':
-        try {
-          return Boolean(new Ipv4Address(params));
-        } catch (e) {
-          return false;
-        }
       default:
         return acc;
     }

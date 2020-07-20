@@ -77,18 +77,6 @@ describe('helpers', () => {
 
       expect(isValid).toBeFalsy();
     });
-
-    test('returns true if type is "ip" and value is valid', () => {
-      const isValid = validateParams('126.45.211.34', getField('ip'));
-
-      expect(isValid).toBeTruthy();
-    });
-
-    test('returns false if type is "ip" and value is not valid', () => {
-      const isValid = validateParams('hellooo', getField('ip'));
-
-      expect(isValid).toBeFalsy();
-    });
   });
 
   describe('#getGenericComboBoxProps', () => {

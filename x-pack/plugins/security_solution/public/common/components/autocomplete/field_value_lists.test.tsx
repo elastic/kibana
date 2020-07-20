@@ -8,21 +8,26 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 
 import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
-import { AutocompleteFieldListsComponent } from './field_value_lists';
+import { ListSchema } from '../../../lists_plugin_deps';
 import { getFoundListSchemaMock } from '../../../../../lists/common/schemas/response/found_list_schema.mock';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { wait } from '../../../common/lib/helpers';
+import { DATE_NOW } from '../../../../../lists/common/constants.mock';
+
+import { AutocompleteFieldListsComponent } from './field_value_lists';
 
 jest.mock('../../../common/lib/kibana');
 const mockStart = jest.fn();
-const mockKeywordList = getListResponseMock();
-mockKeywordList.id = 'keyword_list';
-mockKeywordList.type = 'keyword';
-mockKeywordList.name = 'keyword list';
-const mockResult = getFoundListSchemaMock();
+const mockKeywordList: ListSchema = {
+  ...getListResponseMock(),
+  id: 'keyword_list',
+  type: 'keyword',
+  name: 'keyword list',
+};
+const mockResult = { ...getFoundListSchemaMock() };
 mockResult.data = [...mockResult.data, mockKeywordList];
 jest.mock('../../../lists_plugin_deps', () => {
   const originalModule = jest.requireActual('../../../lists_plugin_deps');
@@ -40,21 +45,21 @@ jest.mock('../../../lists_plugin_deps', () => {
 
 describe('AutocompleteFieldListsComponent', () => {
   test('it renders disabled if "isDisabled" is true', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <AutocompleteFieldListsComponent
-            placeholder="Placeholder text"
-            selectedField={getField('ip')}
-            selectedValue="some-list-id"
-            isLoading={false}
-            isClearable={false}
-            isDisabled={true}
-            onChange={jest.fn()}
-          />
-        </ThemeProvider>
-      );
-      await wait();
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <AutocompleteFieldListsComponent
+          placeholder="Placeholder text"
+          selectedField={getField('ip')}
+          selectedValue="some-list-id"
+          isLoading={false}
+          isClearable={false}
+          isDisabled={true}
+          onChange={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    await waitFor(() => {
       expect(
         wrapper
           .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input`)
@@ -64,21 +69,21 @@ describe('AutocompleteFieldListsComponent', () => {
   });
 
   test('it renders loading if "isLoading" is true', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <AutocompleteFieldListsComponent
-            placeholder="Placeholder text"
-            selectedField={getField('ip')}
-            selectedValue="some-list-id"
-            isLoading={true}
-            isClearable={false}
-            isDisabled={false}
-            onChange={jest.fn()}
-          />
-        </ThemeProvider>
-      );
-      await wait();
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <AutocompleteFieldListsComponent
+          placeholder="Placeholder text"
+          selectedField={getField('ip')}
+          selectedValue="some-list-id"
+          isLoading={true}
+          isClearable={false}
+          isDisabled={false}
+          onChange={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    await waitFor(() => {
       wrapper
         .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] button`)
         .at(0)
@@ -201,14 +206,12 @@ describe('AutocompleteFieldListsComponent', () => {
       </ThemeProvider>
     );
 
-    await act(async () => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: 'some name' }]);
-    });
+    ((wrapper.find(EuiComboBox).props() as unknown) as {
+      onChange: (a: EuiComboBoxOptionOption[]) => void;
+    }).onChange([{ label: 'some name' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith({
-      created_at: '2020-04-20T15:25:31.830Z',
+      created_at: DATE_NOW,
       created_by: 'some user',
       description: 'some description',
       id: 'some-list-id',
@@ -216,7 +219,7 @@ describe('AutocompleteFieldListsComponent', () => {
       name: 'some name',
       tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
       type: 'ip',
-      updated_at: '2020-04-20T15:25:31.830Z',
+      updated_at: DATE_NOW,
       updated_by: 'some user',
     });
   });
