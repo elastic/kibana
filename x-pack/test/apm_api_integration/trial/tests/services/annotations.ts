@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { merge, cloneDeep, isPlainObject } from 'lodash';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
