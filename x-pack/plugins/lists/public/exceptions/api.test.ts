@@ -508,7 +508,7 @@ describe('Exceptions Lists API', () => {
     test('it returns expected format when call succeeds', async () => {
       const exceptionResponse = await fetchExceptionListItemsByListId({
         http: mockKibanaHttpService(),
-        listId: 'endpoint_list',
+        listId: 'endpoint_list_id',
         namespaceType: 'single',
         pagination: {
           page: 1,

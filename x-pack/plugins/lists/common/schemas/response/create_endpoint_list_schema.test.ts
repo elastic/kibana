@@ -24,13 +24,26 @@ describe('create_endpoint_list_schema', () => {
   });
 
   test('it should accept an empty object when an endpoint list already exists', () => {
-    const payload = {};
+    const payload: CreateEndpointListSchema = {};
     const decoded = createEndpointListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
+  });
+
+  test('it should NOT accept an undefined for "list_id"', () => {
+    const payload = getExceptionListSchemaMock();
+    delete payload.list_id;
+    const decoded = createEndpointListSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'invalid keys "_tags,["endpoint","process","malware","os:linux"],created_at,created_by,description,id,meta,{},name,namespace_type,tags,["user added string for a tag","malware"],tie_breaker_id,type,updated_at,updated_by"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('it should NOT allow missing fields', () => {
