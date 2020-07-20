@@ -35,15 +35,17 @@ const GLOBAL_STATE_STORAGE_KEY = '_g';
  * @param kbnUrlStateStorage to use for syncing
  */
 export const syncQueryStateWithUrl = (
-  query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'state$'>,
+  query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'queryString' | 'state$'>,
   kbnUrlStateStorage: IKbnUrlStateStorage
 ) => {
   const {
     timefilter: { timefilter },
+    queryString,
     filterManager,
   } = query;
   const defaultState: QueryState = {
     time: timefilter.getTime(),
+    queryString: queryString.getQuery(),
     refreshInterval: timefilter.getRefreshInterval(),
     filters: filterManager.getGlobalFilters(),
   };
@@ -66,6 +68,7 @@ export const syncQueryStateWithUrl = (
   const stopSyncingWithStateContainer = connectToQueryState(query, globalQueryStateContainer, {
     refreshInterval: true,
     time: true,
+    queryString: true,
     filters: FilterStateStore.GLOBAL_STATE,
   });
 
