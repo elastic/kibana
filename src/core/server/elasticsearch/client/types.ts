@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import type {
   ApiResponse,
   TransportRequestOptions,
@@ -30,7 +30,7 @@ import type {
  * @public
  */
 export type ElasticsearchClient = Omit<
-  Client,
+  KibanaClient,
   'connectionPool' | 'transport' | 'serializer' | 'extend' | 'helpers' | 'child' | 'close'
 > & {
   transport: {
