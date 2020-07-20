@@ -613,10 +613,6 @@ export class AlertsClient {
       WriteOperations.Disable
     );
 
-    if (attributes.actions.length) {
-      await this.actionsAuthorization.ensureAuthorized('execute');
-    }
-
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
