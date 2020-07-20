@@ -20,6 +20,7 @@
 import { Server } from 'http';
 import { readFileSync } from 'fs';
 import supertest from 'supertest';
+import { PassThrough } from 'stream';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
@@ -68,6 +69,7 @@ beforeEach(() => {
     port: 10002,
     ssl: { enabled: false },
     compression: { enabled: true },
+    socketTimeout: 2000,
   } as HttpConfig;
 
   configWithSSL = {
@@ -988,6 +990,54 @@ describe('body options', () => {
       parse: false,
       maxBytes: 1024, // hapi populates the default
       output: 'data',
+    });
+  });
+});
+
+describe('idle socket timeout', () => {
+  test('should set socket timeout based on the server timeout when not specified in the route', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.get(
+      {
+        path: '/',
+        validate: { body: schema.any() },
+      },
+      (context, req, res) => {
+        // net.Socket::timeout isn't documented or part of the types, yet...
+        return res.ok({ body: { socketTimeout: (req.socket as any).socket.timeout } });
+      }
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener).get('/').send().expect(200, {
+      socketTimeout: config.socketTimeout,
+    });
+  });
+
+  test('should set socket timeout when specified in the route', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const routeIdleSocketTimeout = 12000;
+    const router = new Router('', logger, enhanceWithContext);
+    router.get(
+      {
+        path: '/',
+        validate: { body: schema.any() },
+        options: { timeout: { idleSocket: routeIdleSocketTimeout } },
+      },
+      (context, req, res) => {
+        // net.Socket::timeout isn't documented or part of the types, yet...
+        return res.ok({ body: { socketTimeout: (req.socket as any).socket.timeout } });
+      }
+    );
+    registerRouter(router);
+
+    await server.start();
+    await supertest(innerServer.listener).get('/').send().expect(200, {
+      socketTimeout: routeIdleSocketTimeout,
     });
   });
 });
