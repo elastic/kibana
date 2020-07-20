@@ -158,14 +158,15 @@ const findLastFullBucket = (
   }, last(buckets));
 };
 
-const getMetricValueFromBucket = (
+export const getMetricValueFromBucket = (
   type: SnapshotMetricType,
   bucket: InfraSnapshotMetricsBucket,
   index: number
 ) => {
   const key = type === 'custom' ? `custom_${index}` : type;
   const metric = bucket[key];
-  return (metric && (metric.normalized_value || metric.value)) || 0;
+  const value = metric && (metric.normalized_value || metric.value);
+  return isFinite(value) ? value : null;
 };
 
 function calculateMax(
