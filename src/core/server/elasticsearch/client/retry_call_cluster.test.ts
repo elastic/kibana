@@ -44,26 +44,20 @@ describe('retryCallCluster', () => {
   it('retries ES API calls that rejects with `NoLivingConnectionsError`', async () => {
     const successReturn = elasticsearchClientMock.createClientResponse({ ...dummyBody });
 
-    let i = 0;
-    client.asyncSearch.get.mockImplementation(() => {
-      i++;
-      return i <= 2
-        ? createErrorReturn(new errors.NoLivingConnectionsError('no living connections', {} as any))
-        : successReturn;
-    });
+    client.asyncSearch.get
+      .mockImplementationOnce(() =>
+        createErrorReturn(new errors.NoLivingConnectionsError('no living connections', {} as any))
+      )
+      .mockImplementationOnce(() => successReturn);
 
     const result = await retryCallCluster(() => client.asyncSearch.get());
     expect(result.body).toEqual(dummyBody);
   });
 
   it('rejects when ES API calls reject with other errors', async () => {
-    let i = 0;
-    client.ping.mockImplementation(() => {
-      i++;
-      return i === 1
-        ? createErrorReturn(new Error('unknown error'))
-        : elasticsearchClientMock.createClientResponse({ ...dummyBody });
-    });
+    client.ping
+      .mockImplementationOnce(() => createErrorReturn(new Error('unknown error')))
+      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
 
     await expect(retryCallCluster(() => client.ping())).rejects.toMatchInlineSnapshot(
       `[Error: unknown error]`
@@ -71,21 +65,15 @@ describe('retryCallCluster', () => {
   });
 
   it('stops retrying when ES API calls reject with other errors', async () => {
-    let i = 0;
-    client.ping.mockImplementation(() => {
-      i++;
-      switch (i) {
-        case 1:
-        case 2:
-          return createErrorReturn(
-            new errors.NoLivingConnectionsError('no living connections', {} as any)
-          );
-        case 3:
-          return createErrorReturn(new Error('unknown error'));
-        default:
-          return elasticsearchClientMock.createClientResponse({ ...dummyBody });
-      }
-    });
+    client.ping
+      .mockImplementationOnce(() =>
+        createErrorReturn(new errors.NoLivingConnectionsError('no living connections', {} as any))
+      )
+      .mockImplementationOnce(() =>
+        createErrorReturn(new errors.NoLivingConnectionsError('no living connections', {} as any))
+      )
+      .mockImplementationOnce(() => createErrorReturn(new Error('unknown error')))
+      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
 
     await expect(retryCallCluster(() => client.ping())).rejects.toMatchInlineSnapshot(
       `[Error: unknown error]`
@@ -103,13 +91,10 @@ describe('migrationRetryCallCluster', () => {
   });
 
   const mockClientPingWithErrorBeforeSuccess = (error: any) => {
-    let i = 0;
-    client.ping.mockImplementation(() => {
-      i++;
-      return i <= 2
-        ? createErrorReturn(error)
-        : elasticsearchClientMock.createClientResponse({ ...dummyBody });
-    });
+    client.ping
+      .mockImplementationOnce(() => createErrorReturn(error))
+      .mockImplementationOnce(() => createErrorReturn(error))
+      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
   };
 
   it('retries ES API calls that rejects with `NoLivingConnectionsError`', async () => {
@@ -207,35 +192,40 @@ describe('migrationRetryCallCluster', () => {
   });
 
   it('logs only once for each unique error message', async () => {
-    let i = 0;
-    client.ping.mockImplementation(() => {
-      i++;
-      switch (i) {
-        case 1:
-        case 3:
-          return createErrorReturn(
-            new errors.ResponseError({
-              statusCode: 503,
-            } as any)
-          );
-        case 2:
-        case 4:
-          return createErrorReturn(new errors.ConnectionError('connection error', {} as any));
-        case 5:
-          return createErrorReturn(
-            new errors.ResponseError({
-              statusCode: 500,
-              body: {
-                error: {
-                  type: 'snapshot_in_progress_exception',
-                },
+    client.ping
+      .mockImplementationOnce(() =>
+        createErrorReturn(
+          new errors.ResponseError({
+            statusCode: 503,
+          } as any)
+        )
+      )
+      .mockImplementationOnce(() =>
+        createErrorReturn(new errors.ConnectionError('connection error', {} as any))
+      )
+      .mockImplementationOnce(() =>
+        createErrorReturn(
+          new errors.ResponseError({
+            statusCode: 503,
+          } as any)
+        )
+      )
+      .mockImplementationOnce(() =>
+        createErrorReturn(new errors.ConnectionError('connection error', {} as any))
+      )
+      .mockImplementationOnce(() =>
+        createErrorReturn(
+          new errors.ResponseError({
+            statusCode: 500,
+            body: {
+              error: {
+                type: 'snapshot_in_progress_exception',
               },
-            } as any)
-          );
-        default:
-          return elasticsearchClientMock.createClientResponse({ ...dummyBody });
-      }
-    });
+            },
+          } as any)
+        )
+      )
+      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
 
     await migrationRetryCallCluster(() => client.ping(), logger, 1);
 
@@ -255,22 +245,20 @@ describe('migrationRetryCallCluster', () => {
   });
 
   it('rejects when ES API calls reject with other errors', async () => {
-    let i = 0;
-    client.ping.mockImplementation(() => {
-      i++;
-      return i === 1
-        ? createErrorReturn(
-            new errors.ResponseError({
-              statusCode: 418,
-              body: {
-                error: {
-                  type: `I'm a teapot`,
-                },
+    client.ping
+      .mockImplementationOnce(() =>
+        createErrorReturn(
+          new errors.ResponseError({
+            statusCode: 418,
+            body: {
+              error: {
+                type: `I'm a teapot`,
               },
-            } as any)
-          )
-        : elasticsearchClientMock.createClientResponse({ ...dummyBody });
-    });
+            },
+          } as any)
+        )
+      )
+      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
 
     await expect(
       migrationRetryCallCluster(() => client.ping(), logger, 1)
@@ -278,19 +266,15 @@ describe('migrationRetryCallCluster', () => {
   });
 
   it('stops retrying when ES API calls reject with other errors', async () => {
-    let i = 0;
-    client.ping.mockImplementation(() => {
-      i++;
-      switch (i) {
-        case 1:
-        case 2:
-          return createErrorReturn(new errors.TimeoutError('timeout error', {} as any));
-        case 3:
-          return createErrorReturn(new Error('unknown error'));
-        default:
-          return elasticsearchClientMock.createClientResponse({ ...dummyBody });
-      }
-    });
+    client.ping
+      .mockImplementationOnce(() =>
+        createErrorReturn(new errors.TimeoutError('timeout error', {} as any))
+      )
+      .mockImplementationOnce(() =>
+        createErrorReturn(new errors.TimeoutError('timeout error', {} as any))
+      )
+      .mockImplementationOnce(() => createErrorReturn(new Error('unknown error')))
+      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
 
     await expect(
       migrationRetryCallCluster(() => client.ping(), logger, 1)
