@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSeverity } from '../../../../../common/anomaly_detection';
+import { getSeverity } from '../Popover/getSeverity';
 
 export function generateServiceMapElements(size: number): any[] {
   const services = range(size).map((i) => {

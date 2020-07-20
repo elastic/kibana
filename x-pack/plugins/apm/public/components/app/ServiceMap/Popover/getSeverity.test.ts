@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSeverity } from './getSeverity';
+import { getSeverity, severity } from './getSeverity';
 
 describe('getSeverity', () => {
   describe('when score is undefined', () => {
