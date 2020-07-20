@@ -29,8 +29,8 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
@@ -115,7 +115,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
@@ -124,15 +124,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const onError = useCallback(
     (error: Error) => {
-      errorToToaster({ title: i18n.ADD_EXCEPTION_ERROR, error, dispatchToaster });
+      addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
       onCancel();
     },
-    [dispatchToaster, onCancel]
+    [addError, onCancel]
   );
   const onSuccess = useCallback(() => {
-    displaySuccessToast(i18n.ADD_EXCEPTION_SUCCESS, dispatchToaster);
+    addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
     onConfirm(shouldCloseAlert);
-  }, [dispatchToaster, onConfirm, shouldCloseAlert]);
+  }, [addSuccess, onConfirm, shouldCloseAlert]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {

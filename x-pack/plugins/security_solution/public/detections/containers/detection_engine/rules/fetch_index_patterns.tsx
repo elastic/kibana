@@ -12,7 +12,7 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
   BrowserFields,
   getBrowserFields,
-  getdocValueFields,
+  getDocValueFields,
   getIndexFields,
   sourceQuery,
   DocValueFields,
@@ -89,7 +89,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
                     indices.join(),
                     get('data.source.status.indexFields', result)
                   ),
-                  docValueFields: getdocValueFields(
+                  docValueFields: getDocValueFields(
                     indices.join(),
                     get('data.source.status.indexFields', result)
                   ),
