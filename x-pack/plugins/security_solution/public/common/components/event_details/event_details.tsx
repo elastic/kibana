@@ -31,11 +31,6 @@ const PopoverContainer = styled.div`
   position: relative;
   top: 10px;
   height: 0;
-
-  // .euiPopover {
-  //   position: fixed;
-  //   z-index: 10;
-  // }
 `;
 
 const CollapseButton = styled(EuiButtonIcon)`
