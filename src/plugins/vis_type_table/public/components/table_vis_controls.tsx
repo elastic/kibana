@@ -75,7 +75,7 @@ export const TableVisControls = memo((props: TableVisControlsProps) => {
 
   const items = [
     <EuiContextMenuItem key="rawCsv" onClick={onClickRawExport}>
-      <FormattedMessage id="inspector.data.rawCSVButtonLabel" defaultMessage="Raw" />
+      <FormattedMessage id="visTypeTable.vis.controls.rawCSVButtonLabel" defaultMessage="Raw" />
     </EuiContextMenuItem>,
     <EuiContextMenuItem key="csv" onClick={onClickFormattedExport}>
       <FormattedMessage
@@ -87,7 +87,7 @@ export const TableVisControls = memo((props: TableVisControlsProps) => {
 
   return (
     <EuiPopover
-      id="inspectorDownloadData"
+      id="dataTableExportData"
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
