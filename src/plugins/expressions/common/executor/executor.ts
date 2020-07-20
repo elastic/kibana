@@ -19,6 +19,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { cloneDeep, mapValues } from 'lodash';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
@@ -26,9 +27,12 @@ import { Execution, ExecutionParams } from '../execution/execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
-import { ExpressionAstExpression } from '../ast';
+import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
+import { getByAlias } from '../util';
+
+import { SavedObjectReference } from '../../../../core/types';
 
 export interface ExpressionExecOptions {
   /**
@@ -195,6 +199,57 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const execution = new Execution<Context & ExtraContext, Input, Output>(params);
 
     return execution;
+  }
+
+  private walkAst(
+    ast: ExpressionAstExpression,
+    action: (fn: ExpressionFunction, link: ExpressionAstFunction) => void
+  ) {
+    const newAST = cloneDeep(ast);
+    for (const link of newAST.chain) {
+      const { function: fnName, arguments: fnArgs } = link;
+      const fn = getByAlias(this.state.get().functions, fnName);
+
+      if (fn) {
+        // if any of arguments are expressions we should migrate those first
+        link.arguments = mapValues(fnArgs, (asts, argName) => {
+          return asts.map((arg) => {
+            if (typeof arg === 'object') {
+              return this.walkAst(arg, action);
+            }
+            return arg;
+          });
+        });
+
+        action(fn, link);
+      }
+    }
+
+    return newAST;
+  }
+
+  public inject(ast: ExpressionAstExpression, references: SavedObjectReference[]) {
+    return this.walkAst(ast, (fn, link) => {
+      link.arguments = fn.inject(link.arguments, references);
+    });
+  }
+
+  public extract(ast: ExpressionAstExpression) {
+    const allReferences: SavedObjectReference[] = [];
+    const newAst = this.walkAst(ast, (fn, link) => {
+      const { args, references } = fn.extract(link.arguments);
+      link.arguments = args;
+      references.forEach((ref) => allReferences.push(ref));
+    });
+    return { ast: newAst, references: allReferences };
+  }
+
+  public migrate(ast: ExpressionAstExpression, version: string) {
+    this.walkAst(ast, (fn, link) => {
+      const newLink = fn.migrate(link, version);
+      link.function = newLink.function;
+      link.arguments = newLink.arguments;
+    });
   }
 
   public fork(): Executor<Context> {

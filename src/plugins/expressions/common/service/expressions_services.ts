@@ -21,6 +21,7 @@ import { Executor } from '../executor';
 import { ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
+import { SavedObjectReference } from '../../../../core/types';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -254,6 +255,18 @@ export class ExpressionsService {
     const fork = new ExpressionsService({ executor, renderers });
 
     return fork;
+  };
+
+  public readonly migrate = (state: ExpressionAstExpression, version: string) => {
+    return this.executor.migrate(state, version);
+  };
+
+  public readonly extract = (state: ExpressionAstExpression) => {
+    return this.executor.extract(state);
+  };
+
+  public readonly inject = (state: ExpressionAstExpression, references: SavedObjectReference[]) => {
+    return this.executor.inject(state, references);
   };
 
   /**

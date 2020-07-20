@@ -216,7 +216,7 @@ export class Execution<
       const { function: fnName, arguments: fnArgs } = link;
       const fn = getByAlias(this.state.get().functions, fnName);
 
-      if (!fn) {
+      if (!fn || fn.disabled) {
         return createError({ message: `Function ${fnName} could not be found.` });
       }
 

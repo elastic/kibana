@@ -30,6 +30,8 @@ import {
   ExpressionFunctionVar,
   ExpressionFunctionTheme,
 } from './specs';
+import { SavedObjectReference } from '../../../../core/types';
+import { ExpressionAstFunction } from '../ast';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -46,6 +48,11 @@ export interface ExpressionFunctionDefinition<
    * The name of the function, as will be used in expression.
    */
   name: Name;
+
+  /**
+   * if set to true function will be disabled (but its migrate function will still be available)
+   */
+  disabled?: boolean;
 
   /**
    * Name of type of value this function outputs.
@@ -87,6 +94,33 @@ export interface ExpressionFunctionDefinition<
    *     same for all functions in expression chain.
    */
   fn(input: Input, args: Arguments, context: Context): Output;
+
+  /**
+   * migrate function
+   * @param state any previuous or current version of the ast for this function
+   * @param version string representation of version of the state
+   */
+  migrate?(state: unknown, version: string): any;
+
+  /**
+   * extract function takes the state and returns same state with references extracted
+   * and array of references
+   * @param state
+   */
+  extract?(
+    state: ExpressionAstFunction['arguments']
+  ): { args: ExpressionAstFunction['arguments']; references: SavedObjectReference[] };
+
+  /**
+   * inject function takes the state with extracted references and a list of references and
+   * returns state with references injected.
+   * @param state
+   * @param references
+   */
+  inject?(
+    state: ExpressionAstFunction['arguments'],
+    references: SavedObjectReference[]
+  ): ExpressionAstFunction['arguments'];
 
   /**
    * @deprecated Use `inputTypes` instead.

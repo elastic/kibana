@@ -17,10 +17,13 @@
  * under the License.
  */
 
+import { identity } from 'lodash';
 import { AnyExpressionFunctionDefinition } from './types';
 import { ExpressionFunctionParameter } from './expression_function_parameter';
 import { ExpressionValue } from '../expression_types/types';
 import { ExecutionContext } from '../execution';
+import { ExpressionAstFunction } from '../ast';
+import { SavedObjectReference } from '../../../../core/types';
 
 export class ExpressionFunction {
   /**
@@ -60,8 +63,31 @@ export class ExpressionFunction {
    */
   inputTypes: string[] | undefined;
 
+  disabled: boolean;
+  migrate: (state: ExpressionAstFunction, version: string) => ExpressionAstFunction;
+  extract: (
+    state: ExpressionAstFunction['arguments']
+  ) => { args: ExpressionAstFunction['arguments']; references: SavedObjectReference[] };
+  inject: (
+    state: ExpressionAstFunction['arguments'],
+    references: SavedObjectReference[]
+  ) => ExpressionAstFunction['arguments'];
+
   constructor(functionDefinition: AnyExpressionFunctionDefinition) {
-    const { name, type, aliases, fn, help, args, inputTypes, context } = functionDefinition;
+    const {
+      name,
+      type,
+      aliases,
+      fn,
+      help,
+      args,
+      inputTypes,
+      context,
+      disabled,
+      migrate,
+      inject,
+      extract,
+    } = functionDefinition;
 
     this.name = name;
     this.type = type;
@@ -70,6 +96,10 @@ export class ExpressionFunction {
       Promise.resolve(fn(input, params, handlers as ExecutionContext));
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
+    this.disabled = disabled || false;
+    this.migrate = migrate || identity;
+    this.inject = inject || identity;
+    this.extract = extract || ((s) => ({ args: s, references: [] }));
 
     for (const [key, arg] of Object.entries(args || {})) {
       this.args[key] = new ExpressionFunctionParameter(key, arg);
