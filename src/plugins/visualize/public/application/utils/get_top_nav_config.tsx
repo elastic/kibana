@@ -225,7 +225,7 @@ export const getTopNavConfig = (
                 : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
                     defaultMessage: 'save',
                   }),
-            emphasize: !savedVis || !savedVis.id || !originatingApp,
+            emphasize: (savedVis && !savedVis.id) || !originatingApp,
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),
@@ -298,7 +298,8 @@ export const getTopNavConfig = (
       }),
       testId: 'shareTopNavButton',
       run: (anchorElement) => {
-        if (share && savedVis && savedVis.id) {
+        if (share && !embeddableId) {
+          // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({
             anchorElement,
             allowEmbed: true,
