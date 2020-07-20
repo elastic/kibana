@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import expectedTransactionGroups from './expectations/top_transaction_groups.json';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import expectedTransactionGroups from './expectation/top_transaction_groups.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
