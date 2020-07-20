@@ -186,7 +186,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     if (indexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns) ||
+          exceptionItemsToAdd.length === 0
       );
     }
   }, [
@@ -338,7 +339,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               </ModalBodySection>
               <EuiHorizontalRule />
               <ModalBodySection>
-                {(alertData !== undefined || alertStatus === 'closed') && (
+                {alertData !== undefined && alertStatus !== 'closed' && (
                   <EuiFormRow fullWidth>
                     <EuiCheckbox
                       id="close-alert-on-add-add-exception-checkbox"
