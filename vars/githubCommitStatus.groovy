@@ -34,7 +34,9 @@ def onFinish(commit = defaultCommit(), context = 'kibana-ci') {
 
 def trackBuild(commit, context, Closure closure) {
   onStart(commit, context)
-  closure()
+  catchError {
+    closure()
+  }
   onFinish(commit, context)
 }
 
