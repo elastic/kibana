@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('createAnyway');
         // @ts-expect-error
         await es.transport.request({
-          path: '/blogs/_doc',
+          path: '/logstash-a/_doc',
           method: 'POST',
           body: { user: 'matt', message: 20 },
         });
@@ -144,7 +144,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('createAnyway');
         // @ts-expect-error
         await es.transport.request({
-          path: '/blogs/_doc',
+          path: '/logstash-a/_doc',
           method: 'POST',
           body: { user: 'matt', message: 20 },
         });
