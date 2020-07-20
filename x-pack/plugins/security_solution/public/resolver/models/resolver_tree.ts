@@ -42,7 +42,7 @@ export function lifecycleEvents(tree: ResolverTree) {
 /**
  * This returns a map of entity_ids to stats for the related events and alerts.
  */
-export function relatedEventStats(tree: ResolverTree): Map<string, ResolverNodeStats> {
+export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNodeStats> {
   const nodeStats: Map<string, ResolverNodeStats> = new Map();
   for (const node of lifecycleNodes(tree)) {
     if (node.stats) {

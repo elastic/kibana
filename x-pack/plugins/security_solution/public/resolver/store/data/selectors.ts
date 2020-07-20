@@ -114,13 +114,13 @@ export const tree = createSelector(graphableProcesses, function indexedTree(
 /**
  * This returns a map of entity_ids to stats about the related events and alerts.
  */
-export const relatedEventStats: (
+export const relatedEventsStats: (
   state: DataState
 ) => (nodeID: string) => ResolverNodeStats | undefined = createSelector(
   resolverTreeResponse,
   (resolverTree?: ResolverTree) => {
     if (resolverTree) {
-      const map = resolverTreeModel.relatedEventStats(resolverTree);
+      const map = resolverTreeModel.relatedEventsStats(resolverTree);
       return (nodeID: string) => map.get(nodeID);
     } else {
       return () => undefined;
@@ -207,7 +207,7 @@ export const relatedEventInfoByEntityId: (
   state: DataState
 ) => (entityID: string) => RelatedInfoFunctions | null = createSelector(
   relatedEventsByEntityId,
-  relatedEventStats,
+  relatedEventsStats,
   function selectLineageLimitInfo(
     /* eslint-disable no-shadow */
     relatedEventsByEntityId,
@@ -527,7 +527,7 @@ export function databaseDocumentIDToAbort(state: DataState): string | null {
 export const relatedEventTotalForProcess: (
   state: DataState
 ) => (event: ResolverEvent) => number | null = createSelector(
-  relatedEventStats,
+  relatedEventsStats,
   (statsForProcess) => {
     return (event: ResolverEvent) => {
       const stats = statsForProcess(uniquePidForProcess(event));

@@ -103,7 +103,7 @@ export const relatedEventsStats: (
   state: ResolverState
 ) => (nodeID: string) => ResolverNodeStats | undefined = composeSelectors(
   dataStateSelector,
-  dataSelectors.relatedEventStats
+  dataSelectors.relatedEventsStats
 );
 
 /**

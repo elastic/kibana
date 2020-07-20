@@ -120,13 +120,8 @@ const UnstyledProcessEventDot = React.memo(
     const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
     const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
     const nodeID = processEventModel.uniquePidForProcess(event);
-
-    /**
-     * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
-     * to provide the user some visibility regarding the contents thereof.
-     * Statistics for the number of related events and alerts for this process node
-     */
     const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
+
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
     const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), [
