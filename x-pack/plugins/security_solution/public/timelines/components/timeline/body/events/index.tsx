@@ -6,10 +6,9 @@
 
 import React from 'react';
 
-import { BrowserFields } from '../../../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../../../graphql/types';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { maxDelay } from '../../../../../common/lib/helpers/scheduler';
 import { Note } from '../../../../../common/lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import {
@@ -33,6 +32,7 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   containerElementRef: HTMLDivElement;
   data: TimelineItem[];
+  docValueFields: DocValueFields[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
@@ -59,6 +59,7 @@ const EventsComponent: React.FC<Props> = ({
   columnRenderers,
   containerElementRef,
   data,
+  docValueFields,
   eventIdToNoteIds,
   getNotesByIds,
   id,
@@ -79,12 +80,14 @@ const EventsComponent: React.FC<Props> = ({
   <EventsTbody data-test-subj="events">
     {data.map((event, i) => (
       <StatefulEvent
-        containerElementRef={containerElementRef}
         actionsColumnWidth={actionsColumnWidth}
         addNoteToEvent={addNoteToEvent}
         browserFields={browserFields}
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
+        containerElementRef={containerElementRef}
+        disableSensorVisibility={data != null && data.length < 101}
+        docValueFields={docValueFields}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
@@ -92,7 +95,6 @@ const EventsComponent: React.FC<Props> = ({
         isEventViewer={isEventViewer}
         key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
-        maxDelay={maxDelay(i)}
         onColumnResized={onColumnResized}
         onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}

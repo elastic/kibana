@@ -9,7 +9,6 @@
 import * as t from 'io-ts';
 
 import {
-  NamespaceType,
   Tags,
   _Tags,
   _tags,
@@ -26,6 +25,7 @@ import {
   DefaultEntryArray,
   DefaultUpdateCommentsArray,
   EntriesArray,
+  NamespaceType,
   UpdateCommentsArray,
 } from '../types';
 

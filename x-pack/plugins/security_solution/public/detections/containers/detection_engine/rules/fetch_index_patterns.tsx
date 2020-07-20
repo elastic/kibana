@@ -12,8 +12,10 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
   BrowserFields,
   getBrowserFields,
+  getDocValueFields,
   getIndexFields,
   sourceQuery,
+  DocValueFields,
 } from '../../../../common/containers/source';
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { SourceQuery } from '../../../../graphql/types';
@@ -23,6 +25,7 @@ import * as i18n from './translations';
 
 interface FetchIndexPatternReturn {
   browserFields: BrowserFields;
+  docValueFields: DocValueFields[];
   isLoading: boolean;
   indices: string[];
   indicesExists: boolean;
@@ -31,18 +34,29 @@ interface FetchIndexPatternReturn {
 
 export type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
 
+const DEFAULT_BROWSER_FIELDS = {};
+const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
+const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
+
 export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => {
   const apolloClient = useApolloClient();
   const [indices, setIndices] = useState<string[]>(defaultIndices);
-  const [indicesExists, setIndicesExists] = useState(false);
-  const [indexPatterns, setIndexPatterns] = useState<IIndexPattern>({ fields: [], title: '' });
-  const [browserFields, setBrowserFields] = useState<BrowserFields>({});
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [state, setState] = useState<FetchIndexPatternReturn>({
+    browserFields: DEFAULT_BROWSER_FIELDS,
+    docValueFields: DEFAULT_DOC_VALUE_FIELDS,
+    indices: defaultIndices,
+    indicesExists: false,
+    indexPatterns: DEFAULT_INDEX_PATTERNS,
+    isLoading: false,
+  });
+
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
     if (!deepEqual(defaultIndices, indices)) {
       setIndices(defaultIndices);
+      setState((prevState) => ({ ...prevState, indices: defaultIndices }));
     }
   }, [defaultIndices, indices]);
 
@@ -52,7 +66,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
 
     async function fetchIndexPatterns() {
       if (apolloClient && !isEmpty(indices)) {
-        setIsLoading(true);
+        setState((prevState) => ({ ...prevState, isLoading: true }));
         apolloClient
           .query<SourceQuery.Query, SourceQuery.Variables>({
             query: sourceQuery,
@@ -70,19 +84,28 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
           .then(
             (result) => {
               if (isSubscribed) {
-                setIsLoading(false);
-                setIndicesExists(get('data.source.status.indicesExist', result));
-                setIndexPatterns(
-                  getIndexFields(indices.join(), get('data.source.status.indexFields', result))
-                );
-                setBrowserFields(
-                  getBrowserFields(indices.join(), get('data.source.status.indexFields', result))
-                );
+                setState({
+                  browserFields: getBrowserFields(
+                    indices.join(),
+                    get('data.source.status.indexFields', result)
+                  ),
+                  docValueFields: getDocValueFields(
+                    indices.join(),
+                    get('data.source.status.indexFields', result)
+                  ),
+                  indices,
+                  isLoading: false,
+                  indicesExists: get('data.source.status.indicesExist', result),
+                  indexPatterns: getIndexFields(
+                    indices.join(),
+                    get('data.source.status.indexFields', result)
+                  ),
+                });
               }
             },
             (error) => {
               if (isSubscribed) {
-                setIsLoading(false);
+                setState((prevState) => ({ ...prevState, isLoading: false }));
                 errorToToaster({ title: i18n.RULE_ADD_FAILURE, error, dispatchToaster });
               }
             }
@@ -97,5 +120,5 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indices]);
 
-  return [{ browserFields, isLoading, indices, indicesExists, indexPatterns }, setIndices];
+  return [state, setIndices];
 };

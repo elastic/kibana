@@ -27,6 +27,7 @@ import { getDocLinks } from '../../../../util/dependency_cache';
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
+import { AccessDeniedPage } from '../access_denied_page';
 
 interface Tab {
   id: string;
@@ -68,6 +69,7 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
 
 export const JobsListPage: FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
   const [initialized, setInitialized] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
   const tabs = getTabs(isMlEnabledInSpace);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
@@ -76,12 +78,11 @@ export const JobsListPage: FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
   const check = async () => {
     try {
       const checkPrivilege = await checkGetManagementMlJobsResolver();
-      setInitialized(true);
       setIsMlEnabledInSpace(checkPrivilege.mlFeatureEnabledInSpace);
     } catch (e) {
-      // Silent fail, `checkGetManagementMlJobs()` should redirect when
-      // there are insufficient permissions.
+      setAccessDenied(true);
     }
+    setInitialized(true);
   };
 
   useEffect(() => {
@@ -118,6 +119,10 @@ export const JobsListPage: FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
         initialSelectedTab={tabs[0]}
       />
     );
+  }
+
+  if (accessDenied) {
+    return <AccessDeniedPage />;
   }
 
   return (

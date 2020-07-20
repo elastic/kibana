@@ -7,6 +7,7 @@
     "public/tests/test_samples"
   ],
   "requiredBundles": [
+    "kibanaUtils",
     "kibanaReact"
   ]
 }

@@ -29,6 +29,7 @@ import { SideEffectContext } from './side_effect_context';
 export const ResolverMap = React.memo(function ({
   className,
   databaseDocumentID,
+  resolverComponentInstanceID,
 }: {
   /**
    * Used by `styled-components`.
@@ -39,18 +40,26 @@ export const ResolverMap = React.memo(function ({
    * Used as the origin of the Resolver graph.
    */
   databaseDocumentID?: string;
+  /**
+   * A string literal describing where in the app resolver is located,
+   * used to prevent collisions in things like query params
+   */
+  resolverComponentInstanceID: string;
 }) {
   /**
    * This is responsible for dispatching actions that include any external data.
    * `databaseDocumentID`
    */
-  useStateSyncingActions({ databaseDocumentID });
+  useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID });
 
   const { timestamp } = useContext(SideEffectContext);
+
+  // use this for the entire render in order to keep things in sync
+  const timeAtRender = timestamp();
+
   const { processNodePositions, connectingEdgeLineSegments } = useSelector(
-    selectors.visibleProcessNodePositionsAndEdgeLineSegments
-  )(timestamp());
-  const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
+    selectors.visibleNodesAndEdgeLines
+  )(timeAtRender);
   const relatedEventsStats = useSelector(selectors.relatedEventsStats);
   const terminatedProcesses = useSelector(selectors.terminatedProcesses);
   const { projectionMatrix, ref, onMouseDown } = useCamera();
@@ -94,24 +103,19 @@ export const ResolverMap = React.memo(function ({
             />
           ))}
           {[...processNodePositions].map(([processEvent, position]) => {
-            const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
             const processEntityId = entityId(processEvent);
-            if (!adjacentNodeMap) {
-              // This should never happen
-              throw new Error('Issue calculating adjacency node map.');
-            }
             return (
               <ProcessEventDot
                 key={processEntityId}
                 position={position}
                 projectionMatrix={projectionMatrix}
                 event={processEvent}
-                adjacentNodeMap={adjacentNodeMap}
                 relatedEventsStatsForProcess={
                   relatedEventsStats ? relatedEventsStats.get(entityId(processEvent)) : undefined
                 }
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
                 isProcessOrigin={false}
+                timeAtRender={timeAtRender}
               />
             );
           })}
