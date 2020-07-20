@@ -57,7 +57,7 @@ Import an index pattern and dashboard:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 
@@ -83,7 +83,7 @@ Import an index pattern and dashboard that includes a conflict on the index patt
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 
@@ -119,7 +119,7 @@ Import a visualization and dashboard with an index pattern for the visualization
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@file.ndjson
+$ curl -X POST api/saved_objects/_import -H "kbn-xsrf: true" --form file=@file.ndjson
 --------------------------------------------------
 // KIBANA
 

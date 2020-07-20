@@ -29,8 +29,8 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
@@ -115,7 +115,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
 
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
@@ -124,15 +124,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const onError = useCallback(
     (error: Error) => {
-      errorToToaster({ title: i18n.ADD_EXCEPTION_ERROR, error, dispatchToaster });
+      addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
       onCancel();
     },
-    [dispatchToaster, onCancel]
+    [addError, onCancel]
   );
   const onSuccess = useCallback(() => {
-    displaySuccessToast(i18n.ADD_EXCEPTION_SUCCESS, dispatchToaster);
+    addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
     onConfirm(shouldCloseAlert);
-  }, [dispatchToaster, onConfirm, shouldCloseAlert]);
+  }, [addSuccess, onConfirm, shouldCloseAlert]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {
@@ -251,13 +251,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const onAddExceptionConfirm = useCallback(() => {
     if (addOrUpdateExceptionItems !== null) {
-      if (shouldCloseAlert && alertData) {
-        addOrUpdateExceptionItems(enrichExceptionItems(), alertData.ecsData._id);
-      } else {
-        addOrUpdateExceptionItems(enrichExceptionItems());
-      }
+      const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
+      const bulkCloseIndex =
+        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
+      addOrUpdateExceptionItems(enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
-  }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldCloseAlert, alertData]);
+  }, [
+    addOrUpdateExceptionItems,
+    enrichExceptionItems,
+    shouldCloseAlert,
+    shouldBulkCloseAlert,
+    alertData,
+    signalIndexName,
+  ]);
 
   const isSubmitButtonDisabled = useCallback(
     () => fetchOrCreateListError || exceptionItemsToAdd.length === 0,
@@ -330,7 +336,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               <EuiHorizontalRule />
               <ModalBodySection>
                 {alertData !== undefined && (
-                  <EuiFormRow>
+                  <EuiFormRow fullWidth>
                     <EuiCheckbox
                       id="close-alert-on-add-add-exception-checkbox"
                       label="Close this alert"
@@ -339,10 +345,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                     />
                   </EuiFormRow>
                 )}
-                <EuiFormRow>
+                <EuiFormRow fullWidth>
                   <EuiCheckbox
                     id="bulk-close-alert-on-add-add-exception-checkbox"
-                    label={i18n.BULK_CLOSE_LABEL}
+                    label={
+                      shouldDisableBulkClose
+                        ? i18n.BULK_CLOSE_LABEL_DISABLED
+                        : i18n.BULK_CLOSE_LABEL
+                    }
                     checked={shouldBulkCloseAlert}
                     onChange={onBulkCloseAlertCheckboxChange}
                     disabled={shouldDisableBulkClose}

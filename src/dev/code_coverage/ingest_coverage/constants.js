@@ -32,3 +32,4 @@ export const TEAM_ASSIGNMENT_PIPELINE_NAME = process.env.PIPELINE_NAME || 'team_
 export const CODE_COVERAGE_CI_JOB_NAME = 'elastic+kibana+code-coverage';
 export const RESEARCH_CI_JOB_NAME = 'elastic+kibana+qa-research';
 export const CI_JOB_NAME = process.env.COVERAGE_JOB_NAME || RESEARCH_CI_JOB_NAME;
+export const RESEARCH_CLUSTER_ES_HOST = process.env.ES_HOST || 'http://localhost:9200';

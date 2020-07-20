@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsSerializer } from '../../serialization';
@@ -25,7 +26,7 @@ import { createSavedObjectsMigrationLoggerMock } from '../../migrations/mocks';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
-    const transform = jest.fn<any, any>((doc: any) => _.set(doc, 'attributes.name', 'HOI!'));
+    const transform = jest.fn<any, any>((doc: any) => set(doc, 'attributes.name', 'HOI!'));
     const result = await migrateRawDocs(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
@@ -53,7 +54,7 @@ describe('migrateRawDocs', () => {
   test('passes invalid docs through untouched and logs error', async () => {
     const logger = createSavedObjectsMigrationLoggerMock();
     const transform = jest.fn<any, any>((doc: any) =>
-      _.set(_.cloneDeep(doc), 'attributes.name', 'TADA')
+      set(_.cloneDeep(doc), 'attributes.name', 'TADA')
     );
     const result = await migrateRawDocs(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),

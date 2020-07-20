@@ -82,5 +82,5 @@ export const createExceptionListItem = async ({
     type,
     updated_by: user,
   });
-  return transformSavedObjectToExceptionListItem({ namespaceType, savedObject });
+  return transformSavedObjectToExceptionListItem({ savedObject });
 };

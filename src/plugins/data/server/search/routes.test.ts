@@ -33,9 +33,8 @@ describe('Search service', () => {
   });
 
   it('handler calls context.search.search with the given request and strategy', async () => {
-    const mockSearch = jest.fn().mockResolvedValue('yay');
-    mockDataStart.search.getSearchStrategy.mockReturnValueOnce({ search: mockSearch });
-
+    const response = { id: 'yay' };
+    mockDataStart.search.search.mockResolvedValue(response);
     const mockContext = {};
     const mockBody = { params: {} };
     const mockParams = { strategy: 'foo' };
@@ -51,21 +50,21 @@ describe('Search service', () => {
     const handler = mockRouter.post.mock.calls[0][1];
     await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockDataStart.search.getSearchStrategy.mock.calls[0][0]).toBe(mockParams.strategy);
-    expect(mockSearch).toBeCalled();
-    expect(mockSearch.mock.calls[0][1]).toStrictEqual(mockBody);
+    expect(mockDataStart.search.search).toBeCalled();
+    expect(mockDataStart.search.search.mock.calls[0][1]).toStrictEqual(mockBody);
     expect(mockResponse.ok).toBeCalled();
-    expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: 'yay' });
+    expect(mockResponse.ok.mock.calls[0][0]).toEqual({
+      body: response,
+    });
   });
 
   it('handler throws an error if the search throws an error', async () => {
-    const mockSearch = jest.fn().mockRejectedValue({
+    mockDataStart.search.search.mockRejectedValue({
       message: 'oh no',
       body: {
         error: 'oops',
       },
     });
-    mockDataStart.search.getSearchStrategy.mockReturnValueOnce({ search: mockSearch });
 
     const mockContext = {};
     const mockBody = { params: {} };
@@ -82,9 +81,8 @@ describe('Search service', () => {
     const handler = mockRouter.post.mock.calls[0][1];
     await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockDataStart.search.getSearchStrategy.mock.calls[0][0]).toBe(mockParams.strategy);
-    expect(mockSearch).toBeCalled();
-    expect(mockSearch.mock.calls[0][1]).toStrictEqual(mockBody);
+    expect(mockDataStart.search.search).toBeCalled();
+    expect(mockDataStart.search.search.mock.calls[0][1]).toStrictEqual(mockBody);
     expect(mockResponse.customError).toBeCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.body.message).toBe('oh no');

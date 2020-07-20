@@ -187,7 +187,7 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
     colorCategory: 'palette_0',
   });
 
-  const meta = colorStyle.pluckCategoricalStyleMetaFromFieldMetaData({
+  const meta = colorStyle._pluckCategoricalStyleMetaFromFieldMetaData({
     foobar: {
       buckets: [
         {
@@ -323,21 +323,21 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           -1,
           'rgba(0,0,0,0)',
           0,
-          '#f7faff',
+          '#ecf1f7',
           12.5,
-          '#ddeaf7',
+          '#d9e3ef',
           25,
-          '#c5daee',
+          '#c5d5e7',
           37.5,
-          '#9dc9e0',
+          '#b2c7df',
           50,
-          '#6aadd5',
+          '#9eb9d8',
           62.5,
-          '#4191c5',
+          '#8bacd0',
           75,
-          '#2070b4',
+          '#769fc8',
           87.5,
-          '#072f6b',
+          '#6092c0',
         ]);
       });
     });
