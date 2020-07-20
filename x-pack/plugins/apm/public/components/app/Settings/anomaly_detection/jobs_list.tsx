@@ -143,7 +143,7 @@ function getNoItemsMessage({
     return <LoadingStatePrompt />;
   }
 
-  // A known erorr occured. Show specific error message
+  // A known error occured. Show specific error message
   if (errorCode) {
     return MLErrorMessages[errorCode];
   }

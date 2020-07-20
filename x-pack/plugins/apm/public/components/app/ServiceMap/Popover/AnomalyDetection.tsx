@@ -20,10 +20,8 @@ import { asInteger, asDuration } from '../../../../utils/formatters';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { getSeverityColor, popoverWidth } from '../cytoscapeOptions';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
-import {
-  ServiceAnomalyStats,
-  getSeverity,
-} from '../../../../../common/anomaly_detection';
+import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
+import { getSeverity } from './getSeverity';
 
 const HealthStatusTitle = styled(EuiTitle)`
   display: inline;

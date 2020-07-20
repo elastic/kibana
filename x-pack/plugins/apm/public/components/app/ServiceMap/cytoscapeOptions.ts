@@ -11,11 +11,8 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { EuiTheme } from '../../../../../observability/public';
 import { defaultIcon, iconForNode } from './icons';
-import {
-  ServiceAnomalyStats,
-  severity,
-  getSeverity,
-} from '../../../../common/anomaly_detection';
+import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
+import { severity, getSeverity } from './Popover/getSeverity';
 
 export const popoverWidth = 280;
 
