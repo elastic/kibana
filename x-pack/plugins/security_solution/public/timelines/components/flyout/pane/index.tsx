@@ -100,8 +100,8 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         <StyledResizable
           enable={RESIZABLE_ENABLE}
           defaultSize={resizableDefaultSize}
-          minWidth={timelineFullScreen ? '100vw' : minWidthPixels}
-          maxWidth={timelineFullScreen ? '100vw' : `${maxWidthPercent}vw`}
+          minWidth={timelineFullScreen ? 'calc(100vw - 8px)' : minWidthPixels}
+          maxWidth={timelineFullScreen ? 'calc(100vw - 8px)' : `${maxWidthPercent}vw`}
           handleComponent={resizableHandleComponent}
           onResizeStop={onResizeStop}
         >
