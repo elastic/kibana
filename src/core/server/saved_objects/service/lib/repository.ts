@@ -557,8 +557,7 @@ export class SavedObjectsRepository {
     const { body } = await this.client.updateByQuery(
       {
         index: this.getIndicesForTypes(typesToUpdate),
-        // @ts-expect-error
-        refresh,
+        refresh: Boolean(refresh),
         body: {
           script: {
             source: `
