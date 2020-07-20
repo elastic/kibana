@@ -61,6 +61,8 @@ def sendCommentOnError(Closure closure) {
   try {
     closure()
   } catch (ex) {
+    // If this is the first failed step, it's likely that the error hasn't propagated up far enough to mark the build as a failure
+    currentBuild.result = 'FAILURE'
     catchErrors {
       sendComment(false)
     }
