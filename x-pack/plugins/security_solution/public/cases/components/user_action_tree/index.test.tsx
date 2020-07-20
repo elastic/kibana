@@ -277,7 +277,7 @@ describe('UserActionTree ', () => {
           )
           .exists()
       ).toEqual(false);
-      expect(onUpdateField).toBeCalledWith('description', sampleData.content);
+      expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
     });
   });
 

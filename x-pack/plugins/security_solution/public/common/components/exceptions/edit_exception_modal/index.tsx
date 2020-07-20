@@ -41,6 +41,7 @@ import {
   entryHasListType,
   entryHasNonEcsType,
 } from '../helpers';
+import { Loader } from '../../loader';
 
 interface EditExceptionModalProps {
   ruleName: string;
@@ -124,7 +125,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     if (indexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns) ||
+          exceptionItemsToAdd.length === 0
       );
     }
   }, [
@@ -204,7 +206,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           </ModalHeaderSubtitle>
         </ModalHeader>
 
-        {!isSignalIndexLoading && (
+        {(addExceptionIsLoading || indexPatternLoading || isSignalIndexLoading) && (
+          <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
+        )}
+
+        {!isSignalIndexLoading && !addExceptionIsLoading && !indexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
