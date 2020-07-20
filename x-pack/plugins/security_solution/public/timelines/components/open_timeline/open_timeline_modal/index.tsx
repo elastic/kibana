@@ -22,7 +22,7 @@ export interface OpenTimelineModalProps {
 }
 
 const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
-const OPEN_TIMELINE_MODAL_WIDTH = 1000; // px
+const OPEN_TIMELINE_MODAL_WIDTH = 1100; // px
 
 export const OpenTimelineModal = React.memo<OpenTimelineModalProps>(
   ({ hideActions = [], modalTitle, onClose, onOpen }) => {

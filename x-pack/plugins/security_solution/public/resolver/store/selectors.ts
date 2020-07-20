@@ -10,7 +10,7 @@ import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
 import { uniquePidForProcess } from '../models/process_event';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -99,7 +99,9 @@ export const terminatedProcesses = composeSelectors(
 /**
  * Returns a map of `ResolverEvent` entity_id to their related event and alert statistics
  */
-export const relatedEventsStats = composeSelectors(
+export const relatedEventsStats: (
+  state: ResolverState
+) => (nodeID: string) => ResolverNodeStats | undefined = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsStats
 );
@@ -212,17 +214,6 @@ export const graphableProcesses = composeSelectors(
   dataSelectors.graphableProcesses
 );
 
-/**
- * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
- * concern-specific selector. `selector` should return the concern-specific state.
- */
-function composeSelectors<OuterState, InnerState, ReturnValue>(
-  selector: (state: OuterState) => InnerState,
-  secondSelector: (state: InnerState) => ReturnValue
-): (state: OuterState) => ReturnValue {
-  return (state) => secondSelector(selector(state));
-}
-
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 
 const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.nodesAndEdgelines);
@@ -246,6 +237,7 @@ export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundi
   boundingBox
   /* eslint-enable no-shadow */
 ) {
+  // `boundingBox` and `nodesAndEdgelines` are each memoized.
   return (time: number) => nodesAndEdgelines(boundingBox(time));
 });
 
@@ -261,14 +253,14 @@ export const ariaLevel: (
 
 /**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
- * If the node has a following sibling that is currently visible, that will be returned, otherwise null.
+ * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
 export const ariaFlowtoNodeID: (
   state: ResolverState
 ) => (time: number) => (nodeID: string) => string | null = createSelector(
   visibleNodesAndEdgeLines,
-  composeSelectors(dataStateSelector, dataSelectors.followingSibling),
-  (visibleNodesAndEdgeLinesAtTime, followingSibling) => {
+  composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate),
+  (visibleNodesAndEdgeLinesAtTime, ariaFlowtoCandidate) => {
     return defaultMemoize((time: number) => {
       // get the visible nodes at `time`
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
@@ -280,10 +272,23 @@ export const ariaFlowtoNodeID: (
 
       // return the ID of `nodeID`'s following sibling, if it is visible
       return (nodeID: string): string | null => {
-        const sibling: string | null = followingSibling(nodeID);
+        const flowtoNode: string | null = ariaFlowtoCandidate(nodeID);
 
-        return sibling === null || nodesVisibleAtTime.has(sibling) === false ? null : sibling;
+        return flowtoNode === null || nodesVisibleAtTime.has(flowtoNode) === false
+          ? null
+          : flowtoNode;
       };
     });
   }
 );
+
+/**
+ * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a
+ * concern-specific selector. `selector` should return the concern-specific state.
+ */
+function composeSelectors<OuterState, InnerState, ReturnValue>(
+  selector: (state: OuterState) => InnerState,
+  secondSelector: (state: InnerState) => ReturnValue
+): (state: OuterState) => ReturnValue {
+  return (state) => secondSelector(selector(state));
+}

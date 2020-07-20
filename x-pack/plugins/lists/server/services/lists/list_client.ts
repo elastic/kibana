@@ -395,6 +395,7 @@ export class ListClient {
   };
 
   public updateListItem = async ({
+    _version,
     id,
     value,
     meta,
@@ -402,6 +403,7 @@ export class ListClient {
     const { callCluster, user } = this;
     const listItemIndex = this.getListItemIndex();
     return updateListItem({
+      _version,
       callCluster,
       id,
       listItemIndex,
@@ -412,6 +414,7 @@ export class ListClient {
   };
 
   public updateList = async ({
+    _version,
     id,
     name,
     description,
@@ -420,6 +423,7 @@ export class ListClient {
     const { callCluster, user } = this;
     const listIndex = this.getListIndex();
     return updateList({
+      _version,
       callCluster,
       description,
       id,
