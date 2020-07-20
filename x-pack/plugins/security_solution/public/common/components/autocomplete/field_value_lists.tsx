@@ -36,8 +36,12 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   const getLabel = useCallback(({ name }) => name, []);
 
   const optionsMemo = useMemo(() => {
-    if (selectedField != null) {
-      return lists.filter(({ type }) => type === selectedField.type);
+    if (
+      selectedField != null &&
+      selectedField.esTypes != null &&
+      selectedField.esTypes.length > 0
+    ) {
+      return lists.filter(({ type }) => selectedField.esTypes?.includes(type));
     } else {
       return [];
     }
