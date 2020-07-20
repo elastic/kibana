@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY, NO_ALERT_INDEX } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 
 import { IndexField, SourceQuery } from '../../../graphql/types';
@@ -126,8 +126,9 @@ export const useWithSource = (
 ) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
-    if (indexToAdd != null && !isEmpty(indexToAdd)) {
-      return onlyCheckIndexToAdd ? indexToAdd : [...configIndex, ...indexToAdd];
+    const filterIndexAdd = (indexToAdd ?? []).filter((item) => item !== NO_ALERT_INDEX);
+    if (!isEmpty(filterIndexAdd)) {
+      return onlyCheckIndexToAdd ? filterIndexAdd : [...configIndex, ...filterIndexAdd];
     }
     return configIndex;
   }, [configIndex, indexToAdd, onlyCheckIndexToAdd]);
@@ -138,7 +139,7 @@ export const useWithSource = (
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
     indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
-    loading: false,
+    loading: true,
   });
 
   const apolloClient = useApolloClient();
@@ -155,7 +156,7 @@ export const useWithSource = (
       try {
         const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
           query: sourceQuery,
-          fetchPolicy: 'cache-first',
+          fetchPolicy: 'network-only',
           variables: {
             sourceId,
             defaultIndex,
