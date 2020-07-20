@@ -7,17 +7,33 @@
 import crypto from 'crypto';
 import { map } from 'rxjs/operators';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { UnwrapObservable } from '@kbn/utility-types';
 import { PluginInitializerContext } from 'src/core/server';
 
-export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-  encryptionKey: schema.conditional(
-    schema.contextRef('dist'),
-    true,
-    schema.maybe(schema.string({ minLength: 32 })),
-    schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
-  ),
-});
+export type ConfigType = UnwrapObservable<ReturnType<typeof createConfig$>>;
+
+export const ConfigSchema = schema.object(
+  {
+    enabled: schema.boolean({ defaultValue: true }),
+    encryptionKey: schema.conditional(
+      schema.contextRef('dist'),
+      true,
+      schema.maybe(schema.string({ minLength: 32 })),
+      schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
+    ),
+    keyRotation: schema.object({
+      decryptionOnlyKeys: schema.arrayOf(schema.string({ minLength: 32 }), { defaultValue: [] }),
+    }),
+  },
+  {
+    validate(value) {
+      const decryptionOnlyKeys = value.keyRotation?.decryptionOnlyKeys ?? [];
+      if (value.encryptionKey && decryptionOnlyKeys.includes(value.encryptionKey)) {
+        return '`keyRotation.decryptionOnlyKeys` cannot contain primary encryption key specified in `encryptionKey`.';
+      }
+    },
+  }
+);
 
 export function createConfig$(context: PluginInitializerContext) {
   return context.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -37,7 +53,8 @@ export function createConfig$(context: PluginInitializerContext) {
       }
 
       return {
-        config: { ...config, encryptionKey },
+        ...config,
+        encryptionKey,
         usingEphemeralEncryptionKey,
       };
     })

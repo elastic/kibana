@@ -13,10 +13,12 @@ import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
   EncryptionError,
+  EncryptionKeyRotationService,
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { setupSavedObjects, ClientInstanciator } from './saved_objects';
 import { getCreateMigration, CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
+import { defineRoutes } from './routes';
 
 export interface PluginsSetup {
   security?: SecurityPluginSetup;
@@ -48,18 +50,21 @@ export class Plugin {
     core: CoreSetup,
     deps: PluginsSetup
   ): Promise<EncryptedSavedObjectsPluginSetup> {
-    const {
-      config: { encryptionKey },
-      usingEphemeralEncryptionKey,
-    } = await createConfig$(this.initializerContext).pipe(first()).toPromise();
-
-    const crypto = nodeCrypto({ encryptionKey });
-
+    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
     const auditLogger = new EncryptedSavedObjectsAuditLogger(
       deps.security?.audit.getLogger('encryptedSavedObjects')
     );
+
+    // This list of cryptos consists of the primary crypto that is used for both encryption and
+    // decryption, and the optional secondary cryptos that are used for decryption only.
+    const cryptos = [
+      nodeCrypto({ encryptionKey: config.encryptionKey }),
+      ...config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
+        nodeCrypto({ encryptionKey: decryptionKey })
+      ),
+    ];
     const service = Object.freeze(
-      new EncryptedSavedObjectsService(crypto, this.logger, auditLogger)
+      new EncryptedSavedObjectsService(cryptos, this.logger, auditLogger)
     );
 
     this.savedObjectsSetup = setupSavedObjects({
@@ -69,15 +74,29 @@ export class Plugin {
       getStartServices: core.getStartServices,
     });
 
+    defineRoutes({
+      router: core.http.createRouter(),
+      logger: this.initializerContext.logger.get('routes'),
+      encryptionKeyRotationService: Object.freeze(
+        new EncryptionKeyRotationService({
+          logger: this.logger.get('key-rotation-service'),
+          service,
+          getStartServices: core.getStartServices,
+          security: deps.security,
+        })
+      ),
+      config,
+    });
+
     return {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
-      usingEphemeralEncryptionKey,
+      usingEphemeralEncryptionKey: config.usingEphemeralEncryptionKey,
       createMigration: getCreateMigration(
         service,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
           const serviceForMigration = new EncryptedSavedObjectsService(
-            crypto,
+            cryptos,
             this.logger,
             auditLogger
           );
