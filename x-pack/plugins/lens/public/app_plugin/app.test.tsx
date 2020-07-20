@@ -539,7 +539,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, false);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
 
         inst.setProps({ savedObjectId: 'aaa' });
 
@@ -627,7 +627,7 @@ describe('Lens App', () => {
           title: 'hello there',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true, false);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true, true);
       });
 
       it('saves app filters and does not save pinned filters', async () => {
