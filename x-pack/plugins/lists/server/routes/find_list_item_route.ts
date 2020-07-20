@@ -10,7 +10,7 @@ import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/siem_common_deps';
 import {
-  FindListItemSchemaPartialDecoded,
+  FindListItemSchemaDecoded,
   findListItemSchema,
   foundListItemSchema,
 } from '../../common/schemas';
@@ -26,7 +26,7 @@ export const findListItemRoute = (router: IRouter): void => {
       },
       path: `${LIST_ITEM_URL}/_find`,
       validate: {
-        query: buildRouteValidation<typeof findListItemSchema, FindListItemSchemaPartialDecoded>(
+        query: buildRouteValidation<typeof findListItemSchema, FindListItemSchemaDecoded>(
           findListItemSchema
         ),
       },
