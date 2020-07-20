@@ -1901,7 +1901,7 @@ describe('SavedObjectsRepository', () => {
         expect(client.updateByQuery).toHaveBeenCalledTimes(1);
       });
 
-      it(`defaults to a refresh setting of wait_for`, async () => {
+      it.skip(`defaults to a refresh setting of wait_for`, async () => {
         await deleteByNamespaceSuccess(namespace);
         expect(client.updateByQuery).toHaveBeenCalledWith(
           expect.objectContaining({
