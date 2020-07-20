@@ -22,6 +22,7 @@ import {
   PluginInitializerContext,
   CoreSetup,
   RequestHandlerContext,
+  Logger,
 } from '../../../../core/server';
 import { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
 import { registerSearchRoute } from './routes';
@@ -41,7 +42,10 @@ interface StrategyMap {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: StrategyMap = {};
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(
+    private initializerContext: PluginInitializerContext,
+    private readonly logger: Logger
+  ) {}
 
   public setup(
     core: CoreSetup<object, DataPluginStart>,
@@ -49,7 +53,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchSetup {
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
-      esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
+      esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$, this.logger)
     );
 
     core.savedObjects.registerType(searchTelemetry);
@@ -76,17 +80,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   public start(): ISearchStart {
     return {
       getSearchStrategy: this.getSearchStrategy,
-      search: this.search,
+      search: (context: RequestHandlerContext, searchRequest: IEsSearchRequest, options: any) => {
+        return this.search(context, searchRequest, options);
+      },
     };
   }
 
   public stop() {}
 
   private registerSearchStrategy = (name: string, strategy: ISearchStrategy) => {
+    this.logger.info(`Register strategy ${name}`);
     this.searchStrategies[name] = strategy;
   };
 
   private getSearchStrategy = (name: string): ISearchStrategy => {
+    this.logger.info(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
     if (!strategy) {
       throw new Error(`Search strategy ${name} not found`);
