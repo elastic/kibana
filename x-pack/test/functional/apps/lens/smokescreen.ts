@@ -111,9 +111,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
       await assertExpectedMetric();
-      await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsDatatable');
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
       await assertExpectedTable();
-      await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsMetric');
+      await PageObjects.lens.switchToVisualization('lnsMetric');
       await assertExpectedMetric();
     });
 
@@ -123,33 +123,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
 
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: '@message.raw',
       });
 
-      await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsDatatable');
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.removeDimension('lnsDatatable_column');
-      await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_bar_stacked');
+      await PageObjects.lens.switchToVisualization('bar_stacked');
 
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
@@ -168,6 +164,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
+    });
+
+    it('should switch from a multi-layer stacked bar to a multi-layer line chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer();
+
+      expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
+
+      await PageObjects.lens.switchToVisualization('line');
+
+      expect(await PageObjects.lens.getLayerCount()).to.eql(2);
     });
   });
 }

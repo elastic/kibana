@@ -72,6 +72,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         docLinks={deps!.docLinks}
+        consumer={'case'}
       />
     );
     expect(wrapper.find('[data-test-subj="case-servicenow-mappings"]').length > 0).toBeTruthy();

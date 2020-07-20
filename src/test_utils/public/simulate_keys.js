@@ -20,7 +20,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import Bluebird from 'bluebird';
-import { keyMap } from 'ui/directives/key_map';
+import { keyMap } from './key_map';
 const reverseKeyMap = _.mapValues(_.invert(keyMap), _.ary(_.parseInt, 1));
 
 /**

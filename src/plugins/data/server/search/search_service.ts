@@ -27,6 +27,11 @@ import { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
 import { registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
 import { DataPluginStart } from '../plugin';
+import { UsageCollectionSetup } from '../../../usage_collection/server';
+import { registerUsageCollector } from './collectors/register';
+import { usageProvider } from './collectors/usage';
+import { searchTelemetry } from '../saved_objects';
+import { registerSearchUsageRoute } from './collectors/routes';
 import { IEsSearchRequest } from '../../common';
 
 interface StrategyMap {
@@ -38,15 +43,26 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup<object, DataPluginStart>): ISearchSetup {
+  public setup(
+    core: CoreSetup<object, DataPluginStart>,
+    { usageCollection }: { usageCollection?: UsageCollectionSetup }
+  ): ISearchSetup {
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
       esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
     );
 
-    registerSearchRoute(core);
+    core.savedObjects.registerType(searchTelemetry);
+    if (usageCollection) {
+      registerUsageCollector(usageCollection, this.initializerContext);
+    }
 
-    return { registerSearchStrategy: this.registerSearchStrategy };
+    const usage = usageProvider(core);
+
+    registerSearchRoute(core);
+    registerSearchUsageRoute(core, usage);
+
+    return { registerSearchStrategy: this.registerSearchStrategy, usage };
   }
 
   private search(context: RequestHandlerContext, searchRequest: IEsSearchRequest, options: any) {

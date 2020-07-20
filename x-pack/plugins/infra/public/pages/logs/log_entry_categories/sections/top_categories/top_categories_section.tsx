@@ -14,7 +14,7 @@ import { BetaBadge } from '../../../../../components/beta_badge';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { RecreateJobButton } from '../../../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
-import { DatasetsSelector } from './datasets_selector';
+import { DatasetsSelector } from '../../../../../components/logging/log_analysis_results/datasets_selector';
 import { TopCategoriesTable } from './top_categories_table';
 
 export const TopCategoriesSection: React.FunctionComponent<{

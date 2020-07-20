@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
@@ -328,10 +328,19 @@ describe('helpers', () => {
 
   describe('buildSeverityDescription', () => {
     test('returns ListItem with passed in label and SeverityBadge component', () => {
-      const result: ListItems[] = buildSeverityDescription('Test label', 'Test description value');
+      const result: ListItems[] = buildSeverityDescription({
+        value: 'low',
+        mapping: [{ field: 'host.name', operator: 'equals', value: 'hello', severity: 'high' }],
+      });
 
-      expect(result[0].title).toEqual('Test label');
-      expect(result[0].description).toEqual(<SeverityBadge value="Test description value" />);
+      expect(result[0].title).toEqual('Severity');
+      expect(result[0].description).toEqual(<SeverityBadge value="low" />);
+      expect(result[1].title).toEqual('Severity override');
+
+      const wrapper = mount<React.ReactElement>(result[1].description as React.ReactElement);
+      expect(wrapper.find('[data-test-subj="severityOverrideSeverity0"]').first().text()).toEqual(
+        'High'
+      );
     });
   });
 
@@ -402,6 +411,18 @@ describe('helpers', () => {
       const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'query');
 
       expect(result.description).toEqual('Query');
+    });
+
+    it('returns the label for a threshold type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threshold');
+
+      expect(result.title).toEqual('Test label');
+    });
+
+    it('returns a humanized description for a threshold type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threshold');
+
+      expect(result.description).toEqual('Threshold');
     });
   });
 });

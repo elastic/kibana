@@ -218,5 +218,7 @@ async function addPackageToConfig(
     config.namespace
   );
 
-  await packageConfigService.create(soClient, callCluster, newPackageConfig);
+  await packageConfigService.create(soClient, callCluster, newPackageConfig, {
+    bumpConfigRevision: false,
+  });
 }
