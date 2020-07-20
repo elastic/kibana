@@ -99,8 +99,9 @@ const PanelContent = memo(function PanelContent() {
 
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
   const { crumbId, crumbEvent } = queryParams;
-  const relatedStatsForIdFromParams: ResolverNodeStats | undefined =
-    idFromParams && relatedEventStats ? relatedEventStats.get(idFromParams) : undefined;
+  const relatedStatsForIdFromParams: ResolverNodeStats | undefined = idFromParams
+    ? relatedEventStats(idFromParams)
+    : undefined;
 
   /**
    * Determine which set of breadcrumbs to display based on the query parameters

@@ -13,16 +13,13 @@ import { removeLifecycleForIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
 
-export class RemoveLifecyclePolicyConfirmModal extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      policies: [],
-      selectedPolicyName: null,
-      selectedAlias: null,
-    };
-  }
+interface Props {
+  indexNames: string[];
+  closeModal: () => void;
+  reloadIndices: () => void;
+}
 
+export class RemoveLifecyclePolicyConfirmModal extends Component<Props> {
   removePolicy = async () => {
     const { indexNames, closeModal, reloadIndices } = this.props;
 
