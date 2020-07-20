@@ -20,19 +20,12 @@ export const readExceptionListItemSchema = t.exact(
   })
 );
 
-export type ReadExceptionListItemSchemaPartial = t.TypeOf<typeof readExceptionListItemSchema>;
+export type ReadExceptionListItemSchema = t.OutputOf<typeof readExceptionListItemSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type ReadExceptionListItemSchemaPartialDecoded = Omit<
-  ReadExceptionListItemSchemaPartial,
+export type ReadExceptionListItemSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof readExceptionListItemSchema>>,
   'namespace_type'
 > & {
   namespace_type: NamespaceType;
 };
-
-// This type is used after a decode since some things are defaults after a decode.
-export type ReadExceptionListItemSchemaDecoded = RequiredKeepUndefined<
-  ReadExceptionListItemSchemaPartialDecoded
->;
-
-export type ReadExceptionListItemSchema = RequiredKeepUndefined<ReadExceptionListItemSchemaPartial>;

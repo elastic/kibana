@@ -9,6 +9,7 @@
 import * as t from 'io-ts';
 
 import {
+  _versionOrUndefined,
   created_at,
   created_by,
   description,
@@ -25,6 +26,7 @@ import {
 
 export const listSchema = t.exact(
   t.type({
+    _version: _versionOrUndefined,
     created_at,
     created_by,
     description,

@@ -4784,10 +4784,10 @@
   resolved "https://registry.yarnpkg.com/@types/chroma-js/-/chroma-js-2.0.0.tgz#b0fc98c8625d963f14e8138e0a7961103303ab22"
   integrity sha512-iomunXsXjDxhm2y1OeJt8NwmgC7RyNkPAOddlYVGsbGoX8+1jYt84SG4/tf6RWcwzROLx1kPXPE95by1s+ebIg==
 
-"@types/chromedriver@^2.38.0":
-  version "2.38.0"
-  resolved "https://registry.yarnpkg.com/@types/chromedriver/-/chromedriver-2.38.0.tgz#971032b73eb7f44036f4f5bed59a7fd5b468014f"
-  integrity sha512-vcPGkZt1y2YVXKAY8SwCvU0u9mgw9+7tBV4HGb0YX/6bu1WXbb61bf8Y/N+xNCYwEj/Ug1UAMnhCcsSohXzRXw==
+"@types/chromedriver@^81.0.0":
+  version "81.0.0"
+  resolved "https://registry.yarnpkg.com/@types/chromedriver/-/chromedriver-81.0.0.tgz#d7c97bd2b1de34270f44e60f4eee43bfdba3a8e2"
+  integrity sha512-Oqwo24DPn5lYI66aA74ApKrfAqVFEjC66raiB/2eHhhryYiumlMpRTR/++riaRcXmfrLXrIiNTtE+Op4vGCIFQ==
   dependencies:
     "@types/node" "*"
 
@@ -5140,6 +5140,11 @@
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/has-ansi/-/has-ansi-3.0.0.tgz#636403dc4e0b2649421c4158e5c404416f3f0330"
   integrity sha512-H3vFOwfLlFEC0MOOrcSkus8PCnMCzz4N0EqUbdJZCdDhBTfkAu86aRYA+MTxjKW6jCpUvxcn4715US8g+28BMA==
+
+"@types/he@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/he/-/he-1.1.1.tgz#19e14033c4ee8f1a702c74dcc6182664839ac2b7"
+  integrity sha512-jpzrsR1ns0n3kyWt92QfOUQhIuJGQ9+QGa7M62rO6toe98woQjnsnzjdMtsQXCdvjjmqjS2ZBCC7xKw0cdzU+Q==
 
 "@types/history@*":
   version "4.7.2"
@@ -6718,6 +6723,13 @@ agent-base@^4.1.0:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-4.2.1.tgz#d89e5999f797875674c07d87f260fc41e83e8ca9"
   integrity sha512-JVwXMr9nHYTUXsBFKUqhJwvlcYU/blreOEUkhNR2eXZIvwd+c+o5V4MgDPKWnMS/56awN3TRzIP+KoPn+roQtg==
+  dependencies:
+    es6-promisify "^5.0.0"
+
+agent-base@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-4.3.0.tgz#8165f01c436009bccad0b1d122f05ed770efc6ee"
+  integrity sha512-salcGninV0nPrwpGNn4VTXBb1SOuXQBiqbrNXoeizJsHrsL6ERFM2Ne3JUSBWRE6aeNJI2ROP/WEEIDUiDe3cg==
   dependencies:
     es6-promisify "^5.0.0"
 
@@ -9965,15 +9977,16 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^83.0.0:
-  version "83.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-83.0.0.tgz#75d7d838e58014658c3990089464166fef951926"
-  integrity sha512-AePp9ykma+z4aKPRqlbzvVlc22VsQ6+rgF+0aL3B5onHOncK18dWSkLrSSJMczP/mXILN9ohGsvpuTwoRSj6OQ==
+chromedriver@^84.0.0:
+  version "84.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-84.0.0.tgz#980d72bf0990bbfbce282074d15448296c55d89d"
+  integrity sha512-fNX9eT1C38D1W8r5ss9ty42eDK+GIkCZVKukfeDs0XSBeKfyT0o/vbMdPr9MUkWQ+vIcFAS5hFGp9E3+xoaMeQ==
   dependencies:
     "@testim/chrome-version" "^1.0.7"
     axios "^0.19.2"
     del "^5.1.0"
     extract-zip "^2.0.0"
+    https-proxy-agent "^2.2.4"
     mkdirp "^1.0.4"
     tcp-port-used "^1.0.1"
 
@@ -17063,7 +17076,7 @@ hawk@~6.0.2:
     hoek "4.x.x"
     sntp "2.x.x"
 
-he@1.2.0, he@1.2.x, he@^1.1.1:
+he@1.2.0, he@1.2.x, he@^1.1.1, he@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
@@ -17441,6 +17454,14 @@ https-proxy-agent@2.2.1, https-proxy-agent@^2.2.1:
   integrity sha512-HPCTS1LW51bcyMYbxUIOO4HEOlQ1/1qRaFWcyxvwaqUS9TY88aoEuHUY33kuAh1YhVVaDQhLZsnPd+XNARWZlQ==
   dependencies:
     agent-base "^4.1.0"
+    debug "^3.1.0"
+
+https-proxy-agent@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-2.2.4.tgz#4ee7a737abd92678a293d9b34a1af4d0d08c787b"
+  integrity sha512-OmvfoQ53WLjtA9HeYP9RNrWMJzzAz1JGaSFr1nijg0PVR1JaD/xbJq1mdEIIlxGpXp9eSe/O2LgU9DJmTPd0Eg==
+  dependencies:
+    agent-base "^4.3.0"
     debug "^3.1.0"
 
 https-proxy-agent@^4.0.0:
