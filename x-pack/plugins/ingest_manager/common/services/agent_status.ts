@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AGENT_POLLING_THRESHOLD_MS,
-  AGENT_TYPE_PERMANENT,
-  AGENT_SAVED_OBJECT_TYPE,
-} from '../constants';
+import { AGENT_POLLING_THRESHOLD_MS, AGENT_SAVED_OBJECT_TYPE } from '../constants';
 import { Agent, AgentStatus } from '../types';
 
 export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
@@ -41,8 +37,16 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   return 'online';
 }
 
+export function buildKueryForEnrollingAgents() {
+  return `not ${AGENT_SAVED_OBJECT_TYPE}.last_checkin:*`;
+}
+
+export function buildKueryForUnenrollingAgents() {
+  return `${AGENT_SAVED_OBJECT_TYPE}.unenrollment_started_at:*`;
+}
+
 export function buildKueryForOnlineAgents() {
-  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()})`;
+  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()}) AND not (${buildKueryForEnrollingAgents()}) AND not (${buildKueryForUnenrollingAgents()})`;
 }
 
 export function buildKueryForErrorAgents() {
@@ -50,7 +54,7 @@ export function buildKueryForErrorAgents() {
 }
 
 export function buildKueryForOfflineAgents() {
-  return `((${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
+  return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
     (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
-  }s) AND not ( ${buildKueryForErrorAgents()} ))`;
+  }s AND not (${buildKueryForErrorAgents()})`;
 }

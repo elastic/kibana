@@ -60,19 +60,15 @@ describe('exception_list_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  // TODO: Should this throw an error? "namespace_type" gets auto-populated
-  // with default "single", is that desired behavior?
-  test.skip('it should NOT accept an undefined for "namespace_type"', () => {
+  test('it should accept an undefined for "namespace_type" and make "namespace_type" that of "single"', () => {
     const payload = getExceptionListSchemaMock();
     delete payload.namespace_type;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "namespace_type"',
-    ]);
-    expect(message.schema).toEqual({});
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect((message.schema as ExceptionListSchema).namespace_type).toEqual('single');
   });
 
   test('it should NOT accept an undefined for "description"', () => {
