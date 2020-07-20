@@ -33,8 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const inspector = getService('inspector');
   const log = getService('log');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('vega chart in visualize app', () => {
+  describe('vega chart in visualize app', () => {
     before(async () => {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
