@@ -85,6 +85,14 @@ export interface SavedObjectsRepositoryOptions {
   allowedTypes: string[];
 }
 
+function toRefresh(refresh?: MutatingOperationRefreshSetting) {
+  if (refresh === undefined) return;
+  if (refresh === true) return 'true';
+  if (refresh === false) return 'false';
+  if (refresh === 'wait_for') return 'wait_for';
+  throw new Error(`Incompatible [refresh] value: [${refresh}]`);
+}
+
 /**
  * @public
  */
@@ -260,15 +268,13 @@ export class SavedObjectsRepository {
         ? await this.client.index({
             id: raw._id,
             index: this.getIndexForType(type),
-            // @ts-expect-error
-            refresh,
+            refresh: toRefresh(refresh),
             body: raw._source,
           })
         : await this.client.create({
             id: raw._id,
             index: this.getIndexForType(type),
-            // @ts-expect-error
-            refresh,
+            refresh: toRefresh(refresh),
             body: raw._source,
           });
 
@@ -408,8 +414,7 @@ export class SavedObjectsRepository {
 
     const bulkResponse = bulkCreateParams.length
       ? await this.client.bulk({
-          // @ts-expect-error
-          refresh,
+          refresh: toRefresh(refresh),
           body: bulkCreateParams,
         })
       : undefined;
@@ -484,8 +489,7 @@ export class SavedObjectsRepository {
             id: rawId,
             index: this.getIndexForType(type),
             ...getExpectedVersionProperties(undefined, preflightResult),
-            // @ts-expect-error
-            refresh,
+            refresh: toRefresh(refresh),
             body: {
               doc,
             },
@@ -506,8 +510,7 @@ export class SavedObjectsRepository {
         id: rawId,
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(undefined, preflightResult),
-        // @ts-expect-error
-        refresh,
+        refresh: toRefresh(refresh),
       },
       { ignore: [404] }
     );
@@ -906,13 +909,12 @@ export class SavedObjectsRepository {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult),
-        // @ts-expect-error refresh?: 'true' | 'false' | 'wait_for' in Client
-        refresh,
+        refresh: toRefresh(refresh),
 
         body: {
           doc,
         },
-        _sourceIncludes: ['namespace', 'namespaces'],
+        _source_includes: ['namespace', 'namespaces'],
       },
       { ignore: [404] }
     );
@@ -985,8 +987,7 @@ export class SavedObjectsRepository {
         id: rawId,
         index: this.getIndexForType(type),
         ...getExpectedVersionProperties(version, preflightResult),
-        // @ts-expect-error
-        refresh,
+        refresh: toRefresh(refresh),
         body: {
           doc,
         },
@@ -1051,8 +1052,7 @@ export class SavedObjectsRepository {
           id: rawId,
           index: this.getIndexForType(type),
           ...getExpectedVersionProperties(undefined, preflightResult),
-          // @ts-expect-error
-          refresh,
+          refresh: toRefresh(refresh),
 
           body: {
             doc,
@@ -1073,10 +1073,9 @@ export class SavedObjectsRepository {
       const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
         {
           id: this._serializer.generateRawId(undefined, type, id),
-          index: this.getIndexForType(type),
+          refresh: toRefresh(refresh),
           ...getExpectedVersionProperties(undefined, preflightResult),
-          // @ts-expect-error
-          refresh,
+          index: this.getIndexForType(type),
         },
         {
           ignore: [404],
@@ -1236,8 +1235,7 @@ export class SavedObjectsRepository {
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const bulkUpdateResponse = bulkUpdateParams.length
       ? await this.client.bulk({
-          // @ts-expect-error
-          refresh,
+          refresh: toRefresh(refresh),
           body: bulkUpdateParams,
         })
       : undefined;
@@ -1328,8 +1326,7 @@ export class SavedObjectsRepository {
     const { body } = await this.client.update({
       id: raw._id,
       index: this.getIndexForType(type),
-      // @ts-expect-error
-      refresh,
+      refresh: toRefresh(refresh),
       body: {
         script: {
           source: `
