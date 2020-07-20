@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
 import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
@@ -514,6 +513,44 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           }
         }
       );
+    },
+
+    async getFilter(filterId: string, expectedCode = 200) {
+      return await esSupertest.get(`/_ml/filters/${filterId}`).expect(expectedCode);
+    },
+
+    async createFilter(filterId: string, requestBody: object) {
+      log.debug(`Creating filter with id '${filterId}'...`);
+      await esSupertest.put(`/_ml/filters/${filterId}`).send(requestBody).expect(200);
+
+      await this.waitForFilterToExist(filterId, `expected filter '${filterId}' to be created`);
+    },
+
+    async deleteFilter(filterId: string) {
+      log.debug(`Deleting filter with id '${filterId}'...`);
+      await esSupertest.delete(`/_ml/filters/${filterId}`);
+
+      await this.waitForFilterToNotExist(filterId, `expected filter '${filterId}' to be created`);
+    },
+
+    async waitForFilterToExist(filterId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${filterId}' to exist`, 5 * 1000, async () => {
+        if (await this.getFilter(filterId, 200)) {
+          return true;
+        } else {
+          throw new Error(errorMsg || `expected filter '${filterId}' to exist`);
+        }
+      });
+    },
+
+    async waitForFilterToNotExist(filterId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${filterId}' to not exist`, 5 * 1000, async () => {
+        if (await this.getFilter(filterId, 404)) {
+          return true;
+        } else {
+          throw new Error(errorMsg || `expected filter '${filterId}' to exist`);
+        }
+      });
     },
   };
 }
