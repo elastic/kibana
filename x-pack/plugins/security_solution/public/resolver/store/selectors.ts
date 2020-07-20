@@ -144,26 +144,15 @@ export const relatedEventInfoByEntityId = composeSelectors(
 /**
  * Returns the id of the "current" tree node (fake-focused)
  */
-export const uiActiveDescendantId = composeSelectors(
+export const ariaActiveDescendant = composeSelectors(
   uiStateSelector,
-  uiSelectors.activeDescendantId
+  uiSelectors.ariaActiveDescendant
 );
 
 /**
- * Returns the id of the "selected" tree node (the node that is currently "pressed" and possibly controlling other popups / components)
+ * Returns the nodeID of the selected node
  */
-export const uiSelectedDescendantId = composeSelectors(
-  uiStateSelector,
-  uiSelectors.selectedDescendantId
-);
-
-/**
- * Returns the entity_id of the "selected" tree node's process
- */
-export const uiSelectedDescendantProcessId = composeSelectors(
-  uiStateSelector,
-  uiSelectors.selectedDescendantProcessId
-);
+export const selectedNode = composeSelectors(uiStateSelector, uiSelectors.selectedNode);
 
 /**
  * Returns the camera state from within ResolverState

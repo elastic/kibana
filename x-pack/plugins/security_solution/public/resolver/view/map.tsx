@@ -64,7 +64,7 @@ export const ResolverMap = React.memo(function ({
   const { projectionMatrix, ref, onMouseDown } = useCamera();
   const isLoading = useSelector(selectors.isLoading);
   const hasError = useSelector(selectors.hasError);
-  const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+  const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
   const { colorMap } = useResolverTheme();
 
   return (

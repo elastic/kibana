@@ -112,8 +112,8 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
-    const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
+    const selectedNode = useSelector(selectors.selectedNode);
     const nodeID = processEventModel.uniquePidForProcess(event);
     const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
 
@@ -211,19 +211,17 @@ const UnstyledProcessEventDot = React.memo(
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const isAriaCurrent = nodeID === activeDescendantId;
-    const isAriaSelected = nodeID === selectedDescendantId;
+    const isAriaCurrent = nodeID === ariaActiveDescendant;
+    const isAriaSelected = nodeID === selectedNode;
 
     const dispatch = useResolverDispatch();
 
     const handleFocus = useCallback(() => {
       dispatch({
         type: 'userFocusedOnResolverNode',
-        payload: {
-          nodeId: nodeHTMLID(nodeID),
-        },
+        payload: nodeID,
       });
-    }, [dispatch, nodeHTMLID, nodeID]);
+    }, [dispatch, nodeID]);
 
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
@@ -242,13 +240,10 @@ const UnstyledProcessEventDot = React.memo(
       }
       dispatch({
         type: 'userSelectedResolverNode',
-        payload: {
-          nodeId: nodeHTMLID(nodeID),
-          selectedProcessId: nodeID,
-        },
+        payload: nodeID,
       });
       pushToQueryParams({ crumbId: nodeID, crumbEvent: '' });
-    }, [animationTarget, dispatch, pushToQueryParams, nodeID, nodeHTMLID]);
+    }, [animationTarget, dispatch, pushToQueryParams, nodeID]);
 
     /**
      * Enumerates the stats for related events to display with the node as options,
