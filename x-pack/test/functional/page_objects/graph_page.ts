@@ -106,13 +106,6 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       await testSubjects.click('graphRemoveSelection');
     }
 
-    async clickEdge(edge: Edge) {
-      await this.stopLayout();
-      await PageObjects.common.sleep(1000);
-      await edge.element.click();
-      await this.startLayout();
-    }
-
     async stopLayout() {
       if (await testSubjects.exists('graphPauseLayout')) {
         await testSubjects.click('graphPauseLayout');
