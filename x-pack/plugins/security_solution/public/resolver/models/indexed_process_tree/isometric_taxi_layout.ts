@@ -19,6 +19,7 @@ import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as model from './index';
 import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
+import { uniquePidForProcess } from '../process_event';
 
 /**
  * Graph the process tree
@@ -146,10 +147,12 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
     return widths;
   }
 
-  const processesInReverseLevelOrder = [...model.levelOrder(indexedProcessTree)].reverse();
+  const processesInReverseLevelOrder: ResolverEvent[] = [
+    ...model.levelOrder(indexedProcessTree),
+  ].reverse();
 
   for (const process of processesInReverseLevelOrder) {
-    const children = model.children(indexedProcessTree, process);
+    const children = model.children(indexedProcessTree, uniquePidForProcess(process));
 
     const sumOfWidthOfChildren = function sumOfWidthOfChildren() {
       return children.reduce(function sum(currentValue, child) {
@@ -226,7 +229,7 @@ function processEdgeLineSegments(
       metadata: edgeLineMetadata,
     };
 
-    const siblings = model.children(indexedProcessTree, parent);
+    const siblings = model.children(indexedProcessTree, uniquePidForProcess(parent));
     const isFirstChild = process === siblings[0];
 
     if (metadata.isOnlyChild) {
@@ -420,7 +423,7 @@ function* levelOrderWithWidths(
         parentWidth,
       };
 
-      const siblings = model.children(tree, parent);
+      const siblings = model.children(tree, uniquePidForProcess(parent));
       if (siblings.length === 1) {
         metadata.isOnlyChild = true;
         metadata.lastChildWidth = width;
