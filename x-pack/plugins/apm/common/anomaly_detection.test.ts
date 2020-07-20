@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSeverity, severity } from './ml_job_constants';
+import { getSeverity, severity } from './anomaly_detection';
 
-describe('ml_job_constants', () => {
+describe('anomaly_detection', () => {
   describe('getSeverity', () => {
     describe('when score is undefined', () => {
       it('returns undefined', () => {

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { MLErrorMessages } from '../../../../../common/anomaly_detection';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
@@ -57,23 +58,16 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
 ];
 
 interface Props {
+  data: AnomalyDetectionApiResponse;
   status: FETCH_STATUS;
   onAddEnvironments: () => void;
-  jobs: Jobs;
-  hasLegacyJobs: boolean;
-  errorMessage?: string;
 }
-export const JobsList = ({
-  status,
-  onAddEnvironments,
-  jobs,
-  hasLegacyJobs,
-  errorMessage,
-}: Props) => {
+export const JobsList = ({ data, status, onAddEnvironments }: Props) => {
+  const { jobs, hasLegacyJobs, errorCode } = data;
   const isLoading =
     status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
 
-  const hasFetchFailure = status === FETCH_STATUS.FAILURE || errorMessage;
+  const hasFetchFailure = status === FETCH_STATUS.FAILURE || !!errorCode;
 
   return (
     <EuiPanel>
@@ -127,14 +121,13 @@ export const JobsList = ({
           isLoading ? (
             <LoadingStatePrompt />
           ) : // Handled error
-          errorMessage ? (
-            errorMessage
+          errorCode ? (
+            MLErrorMessages[errorCode]
           ) : // Unhandled error
           hasFetchFailure ? (
-            <FailureStatePrompt />
+            unhandledErrorText
           ) : (
-            // empty state
-            <EmptyStatePrompt />
+            emptyStateText
           )
         }
         columns={columns}
@@ -147,28 +140,12 @@ export const JobsList = ({
   );
 };
 
-function EmptyStatePrompt() {
-  return (
-    <>
-      {i18n.translate(
-        'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
-        {
-          defaultMessage: 'No anomaly detection jobs.',
-        }
-      )}
-    </>
-  );
-}
+const emptyStateText = i18n.translate(
+  'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
+  { defaultMessage: 'No anomaly detection jobs.' }
+);
 
-function FailureStatePrompt({ errorMessage: string }) {
-  return (
-    <>
-      {i18n.translate(
-        'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
-        {
-          defaultMessage: 'Unabled to fetch anomaly detection jobs.',
-        }
-      )}
-    </>
-  );
-}
+const unhandledErrorText = i18n.translate(
+  'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
+  { defaultMessage: 'Unabled to fetch anomaly detection jobs.' }
+);

@@ -10,9 +10,12 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { EuiTheme } from '../../../../../observability/public';
-import { severity, getSeverity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
-import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
+import {
+  ServiceAnomalyStats,
+  severity,
+  getSeverity,
+} from '../../../../common/anomaly_detection';
 
 export const popoverWidth = 280;
 

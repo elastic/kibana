@@ -6,16 +6,24 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMLink } from './APMLink';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 
+export type AnomalyDetectionApiResponse = APIReturnType<
+  '/api/apm/settings/anomaly-detection',
+  'GET'
+>;
+
+const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false, errorCode: undefined };
+
 export function AnomalyDetectionSetupLink() {
   const { uiFilters } = useUrlParams();
   const environment = uiFilters.environment;
 
-  const { data = { jobs: [], hasLegacyJobs: false }, status } = useFetcher(
+  const { data = DEFAULT_DATA, status } = useFetcher(
     (callApmApi) =>
       callApmApi({ pathname: `/api/apm/settings/anomaly-detection` }),
     [],
@@ -28,7 +36,7 @@ export function AnomalyDetectionSetupLink() {
       <EuiButtonEmpty size="s" color="primary" iconType="inspect">
         {ANOMALY_DETECTION_LINK_LABEL}
       </EuiButtonEmpty>
-      {isFetchSuccess && showAlert(data.jobs, environment) && (
+      {isFetchSuccess && showAlert(data, environment) && (
         <EuiToolTip position="bottom" content={getTooltipText(environment)}>
           <EuiIcon type="alert" color="danger" />
         </EuiToolTip>
@@ -59,9 +67,15 @@ const ANOMALY_DETECTION_LINK_LABEL = i18n.translate(
 );
 
 export function showAlert(
-  jobs: Array<{ environment: string }> = [],
+  { jobs = [], errorCode }: AnomalyDetectionApiResponse,
   environment: string | undefined
 ) {
+  // don't show warning if an error occurred
+  // might be due to insufficient access in which case we shouldn't draw attention to the feature
+  if (errorCode) {
+    return false;
+  }
+
   return (
     // No job exists, or
     jobs.length === 0 ||

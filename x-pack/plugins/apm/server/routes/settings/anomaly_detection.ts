@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import Boom from 'boom';
+import { ErrorCode } from '../../../common/anomaly_detection';
 import { PromiseReturnType } from '../../../typings/common';
 import { InsufficientMLCapabilities } from '../../../../ml/server';
 import { createRoute } from '../create_route';
@@ -14,6 +14,7 @@ import { createAnomalyDetectionJobs } from '../../lib/anomaly_detection/create_a
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getAllEnvironments } from '../../lib/environments/get_all_environments';
 import { hasLegacyJobs } from '../../lib/anomaly_detection/has_legacy_jobs';
+import { AnomalyDetectionError } from '../../lib/anomaly_detection/anomaly_detection_error';
 
 type Jobs = PromiseReturnType<typeof getAnomalyDetectionJobs>;
 
@@ -39,25 +40,25 @@ export const anomalyDetectionJobsRoute = createRoute(() => ({
         return {
           jobs: [] as Jobs,
           hasLegacyJobs: false,
-          error:
-            'You must have "read" privileges to Machine Learning in order to view ML jobs',
+          errorCode: ErrorCode.MISSING_READ_PRIVILEGES,
         };
       }
 
-      // Boom error
-      if (Boom.isBoom(e)) {
+      // AnomalyDetectionError error
+      if (e instanceof AnomalyDetectionError) {
         return {
           jobs: [] as Jobs,
           hasLegacyJobs: false,
-          error: e.message,
+          errorCode: e.code,
         };
       }
 
-      // unknown error
+      // unexpected error
       context.logger.warn(e.message);
       return {
         jobs: [] as Jobs,
         hasLegacyJobs: false,
+        errorCode: ErrorCode.UNEXPECTED,
       };
     }
   },
@@ -79,11 +80,29 @@ export const createAnomalyDetectionJobsRoute = createRoute(() => ({
     const { environments } = context.params.body;
     const setup = await setupRequest(context, request);
 
-    return await createAnomalyDetectionJobs(
-      setup,
-      environments,
-      context.logger
-    );
+    try {
+      await createAnomalyDetectionJobs(setup, environments, context.logger);
+    } catch (e) {
+      // InsufficientMLCapabilities
+      if (e instanceof InsufficientMLCapabilities) {
+        return {
+          errorCode: ErrorCode.MISSING_READ_PRIVILEGES,
+        };
+      }
+
+      // AnomalyDetectionError
+      if (e instanceof AnomalyDetectionError) {
+        return {
+          errorCode: e.code,
+        };
+      }
+
+      // unexpected error
+      context.logger.warn(e.message);
+      return {
+        errorCode: ErrorCode.UNEXPECTED,
+      };
+    }
   },
 }));
 

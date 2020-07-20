@@ -7,7 +7,9 @@
 import React, { useState } from 'react';
 import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
+import { MLErrorMessages } from '../../../../../common/anomaly_detection';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
 import { useFetcher } from '../../../../hooks/useFetcher';
@@ -23,19 +25,24 @@ export type AnomalyDetectionApiResponse = APIReturnType<
 const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],
   hasLegacyJobs: false,
-  error: undefined,
+  errorCode: undefined,
 };
 
 export const AnomalyDetection = () => {
+  const plugin = useApmPluginContext();
+  const canGetJobs = !!plugin.core.application.capabilities.ml.canGetJobs;
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 
   const [viewAddEnvironments, setViewAddEnvironments] = useState(false);
 
   const { refetch, data = DEFAULT_VALUE, status } = useFetcher(
-    (callApmApi) =>
-      callApmApi({ pathname: `/api/apm/settings/anomaly-detection` }),
-    [],
+    (callApmApi) => {
+      if (canGetJobs) {
+        return callApmApi({ pathname: `/api/apm/settings/anomaly-detection` });
+      }
+    },
+    [canGetJobs],
     { preservePreviousData: false, showToastOnError: false }
   );
 
@@ -50,6 +57,17 @@ export const AnomalyDetection = () => {
                 "To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability monitor your services with the aid of machine learning.",
             }
           )}
+        />
+      </EuiPanel>
+    );
+  }
+
+  if (!canGetJobs) {
+    return (
+      <EuiPanel>
+        <EuiEmptyPrompt
+          iconType="warning"
+          body={<>{MLErrorMessages.MISSING_READ_PRIVILEGES}</>}
         />
       </EuiPanel>
     );
@@ -85,10 +103,8 @@ export const AnomalyDetection = () => {
         />
       ) : (
         <JobsList
+          data={data}
           status={status}
-          errorMessage={data.error}
-          jobs={data.jobs}
-          hasLegacyJobs={data.hasLegacyJobs}
           onAddEnvironments={() => {
             setViewAddEnvironments(true);
           }}
