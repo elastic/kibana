@@ -189,5 +189,29 @@ exports[`EmptyState should render normally 1`] = `
     </EuiPageContentBody>
   </EuiPageContent>
   <EuiSpacer />
+  <EuiText
+    color="subdued"
+    size="xs"
+    textAlign="center"
+  >
+    <FormattedMessage
+      defaultMessage="Some indices may be hidden. Try to {link} anyway."
+      id="indexPatternManagement.createIndexPattern.emptyState.createAnyway"
+      values={
+        Object {
+          "link": <EuiLink
+            data-test-subj="createAnyway"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="create an index pattern"
+              id="indexPatternManagement.createIndexPattern.emptyState.createAnywayLink"
+              values={Object {}}
+            />
+          </EuiLink>,
+        }
+      }
+    />
+  </EuiText>
 </Fragment>
 `;

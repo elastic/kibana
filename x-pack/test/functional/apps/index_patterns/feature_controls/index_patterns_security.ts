@@ -84,6 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           method: 'POST',
           body: { user: 'matt', message: 20 },
         });
+        // await new Promise((r) => setTimeout(r, 300000));
         await testSubjects.click('refreshIndicesButton');
         await testSubjects.existOrFail('createIndexPatternButton', { timeout: 5000 });
         // test when there's an existing pattern
