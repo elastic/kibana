@@ -27,6 +27,7 @@ exports[`should render 1`] = `
     <EuiSwitch
       checked={false}
       compressed={true}
+      data-test-subj="autoFitToDataBoundsSwitch"
       label="Auto fit map to data bounds"
       onChange={[Function]}
     />
@@ -116,6 +117,7 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
     <EuiSwitch
       checked={false}
       compressed={true}
+      data-test-subj="autoFitToDataBoundsSwitch"
       label="Auto fit map to data bounds"
       onChange={[Function]}
     />
@@ -225,6 +227,7 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
     <EuiSwitch
       checked={false}
       compressed={true}
+      data-test-subj="autoFitToDataBoundsSwitch"
       label="Auto fit map to data bounds"
       onChange={[Function]}
     />

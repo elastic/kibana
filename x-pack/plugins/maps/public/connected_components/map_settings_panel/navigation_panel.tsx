@@ -222,6 +222,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           checked={settings.autoFitToDataBounds}
           onChange={onAutoFitToDataBoundsChange}
           compressed
+          data-test-subj="autoFitToDataBoundsSwitch"
         />
       </EuiFormRow>
 

@@ -656,6 +656,28 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async getCategorySuggestions() {
       return await comboBox.getOptionsList(`colorStopInput1`);
     }
+
+    async isChecked() {}
+
+    async enableAutoFitToBounds() {
+      await testSubjects.click('openSettingsButton');
+      const isEnabled = await testSubjects.getAttribute('autoFitToDataBoundsSwitch', 'checked');
+      log.debug(`isEnabled: ${isEnabled}`);
+      if (!isEnabled) {
+        await retry.try(async () => {
+          await testSubjects.click('autoFitToDataBoundsSwitch');
+          const ensureEnabled = await testSubjects.getAttribute(
+            'autoFitToDataBoundsSwitch',
+            'checked'
+          );
+          log.debug(`ensureEnabled: ${ensureEnabled}`);
+          if (!ensureEnabled) {
+            throw new Error('autoFitToDataBoundsSwitch is not enabled');
+          }
+        });
+      }
+      await testSubjects.click('mapSettingSubmitButton');
+    }
   }
   return new GisPage();
 }
