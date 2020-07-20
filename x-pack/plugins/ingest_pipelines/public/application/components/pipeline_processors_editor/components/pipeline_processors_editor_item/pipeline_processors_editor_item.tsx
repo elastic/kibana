@@ -172,6 +172,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 {!isInMoveMode && (
                   <EuiToolTip content={i18nTexts.editButtonLabel}>
                     <EuiButtonIcon
+                      data-test-subj="editItemButton"
                       disabled={isEditorNotInIdleMode}
                       aria-label={i18nTexts.editButtonLabel}
                       iconType="pencil"
