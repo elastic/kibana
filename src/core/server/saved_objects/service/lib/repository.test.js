@@ -1901,25 +1901,6 @@ describe('SavedObjectsRepository', () => {
         expect(client.updateByQuery).toHaveBeenCalledTimes(1);
       });
 
-      it.skip(`defaults to a refresh setting of wait_for`, async () => {
-        await deleteByNamespaceSuccess(namespace);
-        expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            refresh: 'wait_for',
-          }),
-          expect.anything()
-        );
-      });
-
-      it.skip(`accepts a custom refresh setting`, async () => {
-        const refresh = 'foo';
-        await deleteByNamespaceSuccess(namespace, { refresh });
-        expect(client.updateByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({ refresh }),
-          expect.anything()
-        );
-      });
-
       it(`should use all indices for types that are not namespace-agnostic`, async () => {
         await deleteByNamespaceSuccess(namespace);
         expect(client.updateByQuery).toHaveBeenCalledWith(

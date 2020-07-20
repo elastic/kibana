@@ -107,8 +107,8 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
  * @public
  */
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
+  /** The Elasticsearch supports only boolean flag for this operation */
+  refresh?: boolean;
 }
 
 const DEFAULT_REFRESH_SETTING = 'wait_for';
@@ -550,14 +550,13 @@ export class SavedObjectsRepository {
       throw new TypeError(`namespace is required, and must be a string`);
     }
 
-    const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
     const typesToUpdate = allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type));
 
     const { body } = await this.client.updateByQuery(
       {
         index: this.getIndicesForTypes(typesToUpdate),
-        refresh: Boolean(refresh),
+        refresh: options.refresh,
         body: {
           script: {
             source: `
