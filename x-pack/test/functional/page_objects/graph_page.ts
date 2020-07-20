@@ -83,10 +83,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       return [this.getPositionAsString(x1, y1), this.getPositionAsString(x2, y2)];
     }
 
-    async isolateEdge(edge: Edge) {
-      const from = edge.sourceNode.label;
-      const to = edge.targetNode.label;
-
+    async isolateEdge(from: string, to: string) {
       // select all nodes
       await testSubjects.click('graphSelectAll');
 

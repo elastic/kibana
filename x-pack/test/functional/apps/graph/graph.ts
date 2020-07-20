@@ -132,12 +132,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await buildGraph();
       const { edges } = await PageObjects.graph.getGraphObjects();
 
+      await PageObjects.graph.isolateEdge('test', '/test/wp-admin/');
+
       const testTestWpAdminBlogEdge = edges.find(
         ({ sourceNode, targetNode }) =>
           targetNode.label === '/test/wp-admin/' && sourceNode.label === 'test'
       )!;
-
-      await PageObjects.graph.isolateEdge(testTestWpAdminBlogEdge);
 
       await PageObjects.graph.clickEdge(testTestWpAdminBlogEdge);
 
