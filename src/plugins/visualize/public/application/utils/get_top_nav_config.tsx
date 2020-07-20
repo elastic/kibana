@@ -31,16 +31,21 @@ import {
 } from '../../../../saved_objects/public';
 import { unhashUrl } from '../../../../kibana_utils/public';
 
-import { SavedVisInstance, VisualizeServices, VisualizeAppStateContainer } from '../types';
+import {
+  VisualizeServices,
+  VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
+} from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
+
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
   openInspector: () => void;
   originatingApp?: string;
   hasUnappliedChanges: boolean;
-  savedVisInstance: SavedVisInstance;
+  visInstance: VisualizeEditorVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
@@ -53,7 +58,7 @@ export const getTopNavConfig = (
     openInspector,
     originatingApp,
     hasUnappliedChanges,
-    savedVisInstance: { embeddableHandler, savedVis, vis },
+    visInstance,
     stateContainer,
     visualizationIdFromUrl,
     embeddableId,
@@ -71,10 +76,15 @@ export const getTopNavConfig = (
     featureFlagConfig,
   }: VisualizeServices
 ) => {
+  const { vis, embeddableHandler } = visInstance;
+  const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
   /**
    * Called when the user clicks "Save" button.
    */
   async function doSave(saveOptions: SavedObjectSaveOpts) {
+    if (!savedVis) {
+      return {};
+    }
     const newlyCreated = !Boolean(savedVis.id) || savedVis.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
@@ -240,6 +250,9 @@ export const getTopNavConfig = (
                 newDescription,
                 returnToOrigin,
               }: OnSaveProps & { returnToOrigin: boolean }) => {
+                if (!savedVis) {
+                  return;
+                }
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 savedVis.copyOnSave = newCopyOnSave;
@@ -259,7 +272,7 @@ export const getTopNavConfig = (
               };
               const saveModal = (
                 <SavedObjectSaveModalOrigin
-                  documentInfo={savedVis}
+                  documentInfo={savedVis || { title: '' }}
                   onSave={onSave}
                   objectType={'visualization'}
                   onClose={() => {}}
@@ -268,7 +281,7 @@ export const getTopNavConfig = (
               );
               if (originatingApp === 'dashboards' && featureFlagConfig.showNewVisualizeFlow) {
                 createVisReference();
-              } else {
+              } else if (savedVis) {
                 showSaveModal(saveModal, I18nContext);
               }
             },
@@ -285,23 +298,23 @@ export const getTopNavConfig = (
       }),
       testId: 'shareTopNavButton',
       run: (anchorElement) => {
-        if (share && savedVis) {
+        if (share && savedVis && savedVis.id) {
           share.toggleShareContextMenu({
             anchorElement,
             allowEmbed: true,
             allowShortUrl: visualizeCapabilities.createShortUrl,
             shareableUrl: unhashUrl(window.location.href),
-            objectId: savedVis.id,
+            objectId: savedVis?.id,
             objectType: 'visualization',
             sharingData: {
-              title: savedVis.title,
+              title: savedVis?.title,
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
           });
         }
       },
       // disable the Share button if no action specified
-      disableButton: !share || embeddableId,
+      disableButton: (!share || embeddableId) as boolean,
     },
     {
       id: 'inspector',

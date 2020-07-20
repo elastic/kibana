@@ -50,7 +50,6 @@ export const VisualizeEditor = () => {
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
-    false,
     savedVisInstance
   );
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
@@ -80,7 +79,7 @@ export const VisualizeEditor = () => {
 
   return (
     <VisualizeEditorCommon
-      savedVisInstance={savedVisInstance}
+      visInstance={savedVisInstance}
       appState={appState}
       currentAppState={currentAppState}
       isChromeVisible={isChromeVisible}

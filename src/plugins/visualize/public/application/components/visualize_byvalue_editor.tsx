@@ -54,7 +54,7 @@ export const VisualizeByValueEditor = () => {
 
   const isChromeVisible = useChromeVisibility(services.chrome);
 
-  const { savedVisInstance, visEditorRef, visEditorController } = useVisByValue(
+  const { byValueVisInstance, visEditorRef, visEditorController } = useVisByValue(
     services,
     eventEmitter,
     isChromeVisible,
@@ -63,19 +63,17 @@ export const VisualizeByValueEditor = () => {
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,
     eventEmitter,
-    true,
-    savedVisInstance
+    byValueVisInstance
   );
   const { isEmbeddableRendered, currentAppState } = useEditorUpdates(
     services,
     eventEmitter,
     setHasUnsavedChanges,
     appState,
-    savedVisInstance,
-    visEditorController,
-    true
+    byValueVisInstance,
+    visEditorController
   );
-  useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
+  useLinkedSearchUpdates(services, eventEmitter, appState, byValueVisInstance);
 
   useEffect(() => {
     // clean up all registered listeners if any is left
@@ -86,7 +84,7 @@ export const VisualizeByValueEditor = () => {
 
   return (
     <VisualizeEditorCommon
-      savedVisInstance={savedVisInstance}
+      visInstance={byValueVisInstance}
       appState={appState}
       currentAppState={currentAppState}
       isChromeVisible={isChromeVisible}

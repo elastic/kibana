@@ -20,7 +20,7 @@
 import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
 import { VisualizeInput } from 'src/plugins/visualizations/public';
-import { IEditorController, SavedVisInstance, VisualizeServices } from '../../types';
+import { ByValueVisInstance, IEditorController, VisualizeServices } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { DefaultEditorController } from '../../../../../vis_default_editor/public';
@@ -32,7 +32,7 @@ export const useVisByValue = (
   valueInput?: VisualizeInput
 ) => {
   const [state, setState] = useState<{
-    savedVisInstance?: SavedVisInstance;
+    byValueVisInstance?: ByValueVisInstance;
     visEditorController?: IEditorController;
   }>({});
   const visEditorRef = useRef<HTMLDivElement>(null);
@@ -43,8 +43,8 @@ export const useVisByValue = (
       if (!valueInput || loaded.current) {
         return;
       }
-      const savedVisInstance = await getVisualizationInstanceFromInput(services, valueInput);
-      const { embeddableHandler, vis } = savedVisInstance;
+      const byValueVisInstance = await getVisualizationInstanceFromInput(services, valueInput);
+      const { embeddableHandler, vis } = byValueVisInstance;
       const Editor = vis.type.editor || DefaultEditorController;
       const visEditorController = new Editor(
         visEditorRef.current,
@@ -59,7 +59,7 @@ export const useVisByValue = (
 
       loaded.current = true;
       setState({
-        savedVisInstance,
+        byValueVisInstance,
         visEditorController,
       });
     };
@@ -69,7 +69,7 @@ export const useVisByValue = (
     eventEmitter,
     isChromeVisible,
     services,
-    state.savedVisInstance,
+    state.byValueVisInstance,
     state.visEditorController,
     valueInput,
   ]);
@@ -78,11 +78,8 @@ export const useVisByValue = (
     return () => {
       if (state.visEditorController) {
         state.visEditorController.destroy();
-      } else if (state.savedVisInstance?.embeddableHandler) {
-        state.savedVisInstance.embeddableHandler.destroy();
-      }
-      if (state.savedVisInstance?.savedVis) {
-        state.savedVisInstance.savedVis.destroy();
+      } else if (state.byValueVisInstance?.embeddableHandler) {
+        state.byValueVisInstance.embeddableHandler.destroy();
       }
     };
   }, [state]);

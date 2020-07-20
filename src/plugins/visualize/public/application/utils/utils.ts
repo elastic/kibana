@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ChromeStart, DocLinksStart } from 'kibana/public';
 import { Filter, UI_SETTINGS } from '../../../../data/public';
-import { VisualizeServices, SavedVisInstance } from '../types';
+import { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
   chrome.setHelpExtension({
@@ -57,16 +57,18 @@ export const getDefaultQuery = ({ localStorage, uiSettings }: VisualizeServices)
 });
 
 export const visStateToEditorState = (
-  { vis, savedVis }: SavedVisInstance,
+  visInstance: VisualizeEditorVisInstance,
   services: VisualizeServices
 ) => {
+  const vis = visInstance.vis;
   const savedVisState = services.visualizations.convertFromSerializedVis(vis.serialize());
+  const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
   return {
     uiState:
       savedVis && savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : vis.uiState.toJSON(),
     query: vis.data.searchSource?.getOwnField('query') || getDefaultQuery(services),
     filters: (vis.data.searchSource?.getOwnField('filter') as Filter[]) || [],
     vis: { ...savedVisState.visState, title: vis.title },
-    linked: savedVis ? !!savedVis.savedSearchId : !!savedVisState.savedSearchId,
+    linked: savedVis && savedVis.id ? !!savedVis.savedSearchId : !!savedVisState.savedSearchId,
   };
 };

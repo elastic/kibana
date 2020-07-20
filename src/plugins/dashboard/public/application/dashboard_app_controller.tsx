@@ -61,6 +61,7 @@ import {
   ContainerOutput,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
+  EmbeddablePackageState,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
@@ -429,18 +430,20 @@ export class DashboardAppController {
 
             const incomingState = embeddable
               .getStateTransfer(scopedHistory())
-              .getIncomingEmbeddablePackage();
+              .getIncomingEmbeddablePackage() as EmbeddablePackageState;
             if (incomingState) {
               if ('id' in incomingState) {
                 container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
                   savedObjectId: incomingState.id,
                 });
               } else if ('input' in incomingState) {
-                const { input, type, embeddableId } = incomingState;
+                const { input, type } = incomingState;
                 delete input.id;
                 const explicitInput = {
                   savedVis: input,
                 };
+                const embeddableId =
+                  'embeddableId' in incomingState ? incomingState.embeddableId : undefined;
                 container.addOrUpdateEmbeddable<EmbeddableInput>(type, explicitInput, embeddableId);
               }
             }

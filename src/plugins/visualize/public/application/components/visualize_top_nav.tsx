@@ -27,7 +27,7 @@ import {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
-  SavedVisInstance,
+  VisualizeEditorVisInstance,
 } from '../types';
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
@@ -40,7 +40,7 @@ interface VisualizeTopNavProps {
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
   originatingApp?: string;
-  savedVisInstance: SavedVisInstance;
+  visInstance: VisualizeEditorVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
@@ -54,14 +54,14 @@ const TopNav = ({
   setHasUnsavedChanges,
   hasUnappliedChanges,
   originatingApp,
-  savedVisInstance,
+  visInstance,
   stateContainer,
   visualizationIdFromUrl,
   embeddableId,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
-  const { embeddableHandler, vis } = savedVisInstance;
+  const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const openInspector = useCallback(() => {
     const session = embeddableHandler.openInspector();
@@ -73,10 +73,10 @@ const TopNav = ({
       if (!isEqual(currentAppState.query, query)) {
         stateContainer.transitions.set('query', query || currentAppState.query);
       } else {
-        savedVisInstance.embeddableHandler.reload();
+        visInstance.embeddableHandler.reload();
       }
     },
-    [currentAppState.query, savedVisInstance.embeddableHandler, stateContainer.transitions]
+    [currentAppState.query, visInstance.embeddableHandler, stateContainer.transitions]
   );
 
   const config = useMemo(() => {
@@ -88,7 +88,7 @@ const TopNav = ({
           hasUnappliedChanges,
           openInspector,
           originatingApp,
-          savedVisInstance,
+          visInstance,
           stateContainer,
           visualizationIdFromUrl,
           embeddableId,
@@ -103,7 +103,7 @@ const TopNav = ({
     hasUnappliedChanges,
     openInspector,
     originatingApp,
-    savedVisInstance,
+    visInstance,
     stateContainer,
     visualizationIdFromUrl,
     services,

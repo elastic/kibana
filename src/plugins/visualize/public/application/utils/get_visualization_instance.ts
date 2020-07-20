@@ -76,14 +76,10 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
 
 export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
-  input?: VisualizeInput
+  input: VisualizeInput
 ) => {
-  if (!input) {
-    return;
-  }
   const { visualizations } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
-
   let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
   if (vis.type.setup) {
     try {

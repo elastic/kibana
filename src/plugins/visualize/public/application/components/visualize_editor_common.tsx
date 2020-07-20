@@ -22,10 +22,15 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
-import { SavedVisInstance, VisualizeAppState, VisualizeAppStateContainer } from '../types';
+import {
+  SavedVisInstance,
+  VisualizeAppState,
+  VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
+} from '../types';
 
 interface VisualizeEditorCommonProps {
-  savedVisInstance?: SavedVisInstance;
+  visInstance?: VisualizeEditorVisInstance;
   appState: VisualizeAppStateContainer | null;
   currentAppState?: VisualizeAppState;
   isChromeVisible?: boolean;
@@ -40,7 +45,7 @@ interface VisualizeEditorCommonProps {
 }
 
 export const VisualizeEditorCommon = ({
-  savedVisInstance,
+  visInstance,
   appState,
   currentAppState,
   isChromeVisible,
@@ -54,8 +59,8 @@ export const VisualizeEditorCommon = ({
   visEditorRef,
 }: VisualizeEditorCommonProps) => {
   return (
-    <div className={`app-container visEditor visEditor--${savedVisInstance?.vis.type.name}`}>
-      {savedVisInstance && appState && currentAppState && (
+    <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
+      {visInstance && appState && currentAppState && (
         <VisualizeTopNav
           currentAppState={currentAppState}
           hasUnsavedChanges={hasUnsavedChanges}
@@ -64,23 +69,23 @@ export const VisualizeEditorCommon = ({
           isEmbeddableRendered={isEmbeddableRendered}
           hasUnappliedChanges={hasUnappliedChanges}
           originatingApp={originatingApp}
-          savedVisInstance={savedVisInstance}
+          visInstance={visInstance}
           stateContainer={appState}
           visualizationIdFromUrl={visualizationIdFromUrl}
           embeddableId={embeddableId}
         />
       )}
-      {savedVisInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
-      {savedVisInstance && (
+      {visInstance?.vis?.type?.isExperimental && <ExperimentalVisInfo />}
+      {visInstance && (
         <EuiScreenReaderOnly>
           <h1>
-            {savedVisInstance.savedVis ? (
+            {'savedVis' in visInstance && visInstance.savedVis.id ? (
               <FormattedMessage
                 id="visualize.pageHeading"
                 defaultMessage="{chartName} {chartType} visualization"
                 values={{
-                  chartName: savedVisInstance.savedVis.title,
-                  chartType: savedVisInstance.vis.type.title,
+                  chartName: (visInstance as SavedVisInstance).savedVis.title,
+                  chartType: (visInstance as SavedVisInstance).vis.type.title,
                 }}
               />
             ) : (
@@ -88,7 +93,7 @@ export const VisualizeEditorCommon = ({
                 id="visualize.byValue_pageHeading"
                 defaultMessage="Visualization of type {chartType} embedded into {originatingApp} app"
                 values={{
-                  chartType: savedVisInstance.vis.type.title,
+                  chartType: visInstance.vis.type.title,
                   originatingApp: originatingApp || 'dashboards',
                 }}
               />

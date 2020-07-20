@@ -27,8 +27,8 @@ import {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
-  SavedVisInstance,
   IEditorController,
+  VisualizeEditorVisInstance,
 } from '../../types';
 
 export const useEditorUpdates = (
@@ -36,20 +36,20 @@ export const useEditorUpdates = (
   eventEmitter: EventEmitter,
   setHasUnsavedChanges: (value: boolean) => void,
   appState: VisualizeAppStateContainer | null,
-  savedVisInstance: SavedVisInstance | undefined,
-  visEditorController: IEditorController | undefined,
-  byValue?: boolean
+  visInstance: VisualizeEditorVisInstance | undefined,
+  visEditorController: IEditorController | undefined
 ) => {
   const [isEmbeddableRendered, setIsEmbeddableRendered] = useState(false);
   const [currentAppState, setCurrentAppState] = useState<VisualizeAppState>();
 
   useEffect(() => {
-    if (appState && savedVisInstance) {
+    if (appState && visInstance) {
       const {
         timefilter: { timefilter },
         filterManager,
       } = services.data.query;
-      const { embeddableHandler, savedVis, savedSearch, vis } = savedVisInstance;
+      const { embeddableHandler, savedSearch, vis } = visInstance;
+      const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
       const initialState = appState.getState();
       setCurrentAppState(initialState);
 
@@ -172,14 +172,7 @@ export const useEditorUpdates = (
         unsubscribeStateUpdates();
       };
     }
-  }, [
-    appState,
-    eventEmitter,
-    savedVisInstance,
-    services,
-    setHasUnsavedChanges,
-    visEditorController,
-  ]);
+  }, [appState, eventEmitter, visInstance, services, setHasUnsavedChanges, visEditorController]);
 
   return { isEmbeddableRendered, currentAppState };
 };

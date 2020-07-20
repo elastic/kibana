@@ -121,6 +121,14 @@ export interface SavedVisInstance {
   embeddableHandler: VisualizeEmbeddableContract;
 }
 
+export interface ByValueVisInstance {
+  vis: Vis;
+  savedSearch?: SavedObject;
+  embeddableHandler: VisualizeEmbeddableContract;
+}
+
+export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
+
 export interface IEditorController {
   render(props: EditorRenderProps): void;
   destroy(): void;
