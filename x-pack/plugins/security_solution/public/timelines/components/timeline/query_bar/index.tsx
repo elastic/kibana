@@ -205,7 +205,10 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             newQuery.query as string,
             newQuery.language as KueryFilterQueryKind
           );
-          debouncedApplyKqlFilterQuery(newQuery.query, newQuery.language);
+          debouncedApplyKqlFilterQuery(
+            newQuery.query as string,
+            newQuery.language as KueryFilterQueryKind
+          );
         }
       },
       [debouncedApplyKqlFilterQuery, filterQueryDraft, setKqlFilterQueryDraft]
