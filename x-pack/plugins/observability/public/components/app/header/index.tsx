@@ -69,10 +69,7 @@ export const Header = ({
           </EuiFlexItem>
           {showGiveFeedback && (
             <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
-              <EuiButtonEmpty
-                href={'https://discuss.elastic.co/c/observability/'}
-                iconType="popout"
-              >
+              <EuiButtonEmpty href={'https://ela.st/observability-discuss'} iconType="popout">
                 {i18n.translate('xpack.observability.home.feedback', {
                   defaultMessage: 'Give us feedback',
                 })}

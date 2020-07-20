@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState, useCallback, useContext } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { encode } from 'rison-node';
 import moment from 'moment';
@@ -40,12 +40,8 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   context: LogEntryContext;
 }> = ({ id, dataset, message, timestamp, timeRange, tiebreaker, context }) => {
   const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
-  // the dataset must be encoded for the field column and the empty value must
-  // be turned into a user-friendly value
-  const encodedDatasetFieldValue = useMemo(
-    () => JSON.stringify(getFriendlyNameForPartitionId(dataset)),
-    [dataset]
-  );
+  // handle special cases for the dataset value
+  const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const setHovered = useCallback(() => setIsHovered(true), []);
@@ -100,7 +96,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
           columnValue={{
             columnId: datasetColumnId,
             field: 'event.dataset',
-            value: encodedDatasetFieldValue,
+            value: humanFriendlyDataset,
             highlights: [],
           }}
           highlights={noHighlights}
