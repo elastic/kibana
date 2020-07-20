@@ -41,6 +41,7 @@ export const updateEndpointListItemRoute = (router: IRouter): void => {
           meta,
           type,
           _tags,
+          _version,
           comments,
           entries,
           item_id: itemId,
@@ -49,6 +50,7 @@ export const updateEndpointListItemRoute = (router: IRouter): void => {
         const exceptionLists = getExceptionListClient(context);
         const exceptionListItem = await exceptionLists.updateEndpointListItem({
           _tags,
+          _version,
           comments,
           description,
           entries,
