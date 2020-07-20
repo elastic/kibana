@@ -108,6 +108,13 @@ export default (kibana) => {
                 resolve: {
                   extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts'],
                 },
+                node: {
+                  fs: 'empty',
+                  child_process: 'empty',
+                  dns: 'empty',
+                  net: 'empty',
+                  tls: 'empty',
+                },
               },
               webpackConfig
             );

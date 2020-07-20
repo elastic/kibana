@@ -480,9 +480,6 @@ export function reducer(state: State, action: Action): State {
 
       // update state attributes which are derived from other state attributes.
       if (action.payload.destinationIndex !== undefined) {
-        newFormState.destinationIndexNameExists = state.indexNames.some(
-          (name) => newFormState.destinationIndex === name
-        );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
         newFormState.destinationIndexPatternTitleExists =
@@ -513,14 +510,6 @@ export function reducer(state: State, action: Action): State {
       return state.isAdvancedEditorEnabled
         ? validateAdvancedEditor({ ...state, form: newFormState })
         : validateForm({ ...state, form: newFormState });
-
-    case ACTION.SET_INDEX_NAMES: {
-      const newState = { ...state, indexNames: action.indexNames };
-      newState.form.destinationIndexNameExists = newState.indexNames.some(
-        (name) => newState.form.destinationIndex === name
-      );
-      return newState;
-    }
 
     case ACTION.SET_INDEX_PATTERN_TITLES: {
       const newState = {
