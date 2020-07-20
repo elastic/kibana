@@ -49,6 +49,8 @@ const showTlsAndEncryptionError = () => {
 };
 
 export const showSecurityToast = (alertingHealth: AlertingFrameworkHealth) => {
+  const { isSufficientlySecure, hasPermanentEncryptionKey } = alertingHealth;
+
   if (
     Array.isArray(alertingHealth) ||
     (!alertingHealth.hasOwnProperty('isSufficientlySecure') &&
