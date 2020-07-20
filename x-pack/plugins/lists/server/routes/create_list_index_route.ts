@@ -17,7 +17,7 @@ export const createListIndexRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_INDEX,
       validate: false,

@@ -17,6 +17,7 @@ export const getFindListSchemaMock = (): FindListSchemaEncoded => ({
 });
 
 export const getFindListSchemaDecodedMock = (): FindListSchema => ({
+  cursor: undefined,
   filter: FILTER,
   page: 1,
   per_page: 25,

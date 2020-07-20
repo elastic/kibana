@@ -14,7 +14,7 @@ import {
   getFindEndpointListItemSchemaMock,
 } from './find_endpoint_list_item_schema.mock';
 import {
-  FindEndpointListItemSchemaPartial,
+  FindEndpointListItemSchema,
   findEndpointListItemSchema,
 } from './find_endpoint_list_item_schema';
 
@@ -29,7 +29,7 @@ describe('find_endpoint_list_item_schema', () => {
   });
 
   test('it should validate and empty object since everything is optional and has defaults', () => {
-    const payload: FindEndpointListItemSchemaPartial = {};
+    const payload: FindEndpointListItemSchema = {};
     const decoded = findEndpointListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
@@ -98,7 +98,7 @@ describe('find_endpoint_list_item_schema', () => {
   });
 
   test('it should not allow an extra key to be sent in', () => {
-    const payload: FindEndpointListItemSchemaPartial & {
+    const payload: FindEndpointListItemSchema & {
       extraKey: string;
     } = { ...getFindEndpointListItemSchemaMock(), extraKey: 'some new value' };
     const decoded = findEndpointListItemSchema.decode(payload);
