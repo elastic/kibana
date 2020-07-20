@@ -116,13 +116,14 @@ export const tree = createSelector(graphableProcesses, function indexedTree(
  */
 export const relatedEventsStats: (
   state: DataState
-) => Map<string, ResolverNodeStats> | null = createSelector(
+) => (nodeID: string) => ResolverNodeStats | undefined = createSelector(
   resolverTreeResponse,
   (resolverTree?: ResolverTree) => {
     if (resolverTree) {
-      return resolverTreeModel.relatedEventsStats(resolverTree);
+      const map = resolverTreeModel.relatedEventsStats(resolverTree);
+      return (nodeID: string) => map.get(nodeID);
     } else {
-      return null;
+      return () => undefined;
     }
   }
 );
@@ -213,12 +214,8 @@ export const relatedEventInfoByEntityId: (
     relatedEventsStats
     /* eslint-enable no-shadow */
   ) {
-    if (!relatedEventsStats) {
-      // If there are no related event stats, there are no related event info objects
-      return () => null;
-    }
     return (entityId) => {
-      const stats = relatedEventsStats.get(entityId);
+      const stats = relatedEventsStats(entityId);
       if (!stats) {
         return null;
       }
@@ -525,36 +522,15 @@ export function databaseDocumentIDToAbort(state: DataState): string | null {
 }
 
 /**
- * `ResolverNodeStats` for a process (`ResolverEvent`)
- */
-const relatedEventStatsForProcess: (
-  state: DataState
-) => (event: ResolverEvent) => ResolverNodeStats | null = createSelector(
-  relatedEventsStats,
-  (statsMap) => {
-    if (!statsMap) {
-      return () => null;
-    }
-    return (event: ResolverEvent) => {
-      const nodeStats = statsMap.get(uniquePidForProcess(event));
-      if (!nodeStats) {
-        return null;
-      }
-      return nodeStats;
-    };
-  }
-);
-
-/**
  * The sum of all related event categories for a process.
  */
 export const relatedEventTotalForProcess: (
   state: DataState
 ) => (event: ResolverEvent) => number | null = createSelector(
-  relatedEventStatsForProcess,
+  relatedEventsStats,
   (statsForProcess) => {
     return (event: ResolverEvent) => {
-      const stats = statsForProcess(event);
+      const stats = statsForProcess(uniquePidForProcess(event));
       if (!stats) {
         return null;
       }

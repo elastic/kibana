@@ -131,6 +131,7 @@ export class ExceptionListClient {
    */
   public updateEndpointListItem = async ({
     _tags,
+    _version,
     comments,
     description,
     entries,
@@ -145,6 +146,7 @@ export class ExceptionListClient {
     await this.createEndpointList();
     return updateExceptionListItem({
       _tags,
+      _version,
       comments,
       description,
       entries,
@@ -198,6 +200,7 @@ export class ExceptionListClient {
 
   public updateExceptionList = async ({
     _tags,
+    _version,
     id,
     description,
     listId,
@@ -210,6 +213,7 @@ export class ExceptionListClient {
     const { savedObjectsClient, user } = this;
     return updateExceptionList({
       _tags,
+      _version,
       description,
       id,
       listId,
@@ -270,6 +274,7 @@ export class ExceptionListClient {
 
   public updateExceptionListItem = async ({
     _tags,
+    _version,
     comments,
     description,
     entries,
@@ -284,6 +289,7 @@ export class ExceptionListClient {
     const { savedObjectsClient, user } = this;
     return updateExceptionListItem({
       _tags,
+      _version,
       comments,
       description,
       entries,
