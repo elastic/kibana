@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber, last, max, sum, get } from 'lodash';
+import { isFinite, isNumber, last, max, sum, get } from 'lodash';
 import moment from 'moment';
 
 import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
