@@ -164,7 +164,8 @@ export const scale: (state: CameraState) => (time: number) => Vector2 = createSe
         scalingConstants.maximum
       );
 
-      return (time) => {
+      // memoizing this so the vector returned will be the same object reference if called with the same `time`.
+      return defaultMemoize((time) => {
         /**
          * If the animation has completed, return the `scaleNotCountingAnimation`, as
          * the animation always completes with the scale set back at starting value.
@@ -247,12 +248,13 @@ export const scale: (state: CameraState) => (time: number) => Vector2 = createSe
            */
           return [lerpedScale, lerpedScale];
         }
-      };
+      });
     } else {
       /**
        * The scale should be the same in both axes.
+       * Memoizing this so the vector returned will be the same object reference every time.
        */
-      return () => [scaleNotCountingAnimation, scaleNotCountingAnimation];
+      return defaultMemoize(() => [scaleNotCountingAnimation, scaleNotCountingAnimation]);
     }
 
     /**
@@ -277,22 +279,26 @@ export const clippingPlanes: (
 ) => (time: number) => ClippingPlanes = createSelector(
   (state) => state.rasterSize,
   scale,
-  (rasterSize, scaleAtTime) => (time: number) => {
-    const [scaleX, scaleY] = scaleAtTime(time);
-    const renderWidth = rasterSize[0];
-    const renderHeight = rasterSize[1];
-    const clippingPlaneRight = renderWidth / 2 / scaleX;
-    const clippingPlaneTop = renderHeight / 2 / scaleY;
+  (rasterSize, scaleAtTime) =>
+    /**
+     * memoizing this for object reference equality.
+     */
+    defaultMemoize((time: number) => {
+      const [scaleX, scaleY] = scaleAtTime(time);
+      const renderWidth = rasterSize[0];
+      const renderHeight = rasterSize[1];
+      const clippingPlaneRight = renderWidth / 2 / scaleX;
+      const clippingPlaneTop = renderHeight / 2 / scaleY;
 
-    return {
-      renderWidth,
-      renderHeight,
-      clippingPlaneRight,
-      clippingPlaneTop,
-      clippingPlaneLeft: -clippingPlaneRight,
-      clippingPlaneBottom: -clippingPlaneTop,
-    };
-  }
+      return {
+        renderWidth,
+        renderHeight,
+        clippingPlaneRight,
+        clippingPlaneTop,
+        clippingPlaneLeft: -clippingPlaneRight,
+        clippingPlaneBottom: -clippingPlaneTop,
+      };
+    })
 );
 
 /**
@@ -323,7 +329,10 @@ export const translation: (state: CameraState) => (time: number) => Vector2 = cr
   scale,
   (state) => state.animation,
   (panning, translationNotCountingCurrentPanning, scaleAtTime, animation) => {
-    return (time: number) => {
+    /**
+     * Memoizing this for object reference equality.
+     */
+    return defaultMemoize((time: number) => {
       const [scaleX, scaleY] = scaleAtTime(time);
       if (animation !== undefined && animationIsActive(animation, time)) {
         return vector2.lerp(
@@ -343,7 +352,7 @@ export const translation: (state: CameraState) => (time: number) => Vector2 = cr
       } else {
         return translationNotCountingCurrentPanning;
       }
-    };
+    });
   }
 );
 
@@ -357,7 +366,10 @@ export const inverseProjectionMatrix: (
   clippingPlanes,
   translation,
   (clippingPlanesAtTime, translationAtTime) => {
-    return (time: number) => {
+    /**
+     * Memoizing this for object reference equality (and reduced memory churn.)
+     */
+    return defaultMemoize((time: number) => {
       const {
         renderWidth,
         renderHeight,
@@ -404,7 +416,7 @@ export const inverseProjectionMatrix: (
         translateForCamera,
         multiply(scaleToClippingPlaneDimensions, multiply(invertY, screenToNDC))
       );
-    };
+    });
   }
 );
 
@@ -415,7 +427,8 @@ export const viewableBoundingBox: (state: CameraState) => (time: number) => AABB
   clippingPlanes,
   inverseProjectionMatrix,
   (clippingPlanesAtTime, matrixAtTime) => {
-    return (time: number) => {
+    // memoizing this so the AABB returned will be the same object reference if called with the same `time`.
+    return defaultMemoize((time: number) => {
       const { renderWidth, renderHeight } = clippingPlanesAtTime(time);
       const matrix = matrixAtTime(time);
       const bottomLeftCorner: Vector2 = [0, renderHeight];
@@ -424,7 +437,7 @@ export const viewableBoundingBox: (state: CameraState) => (time: number) => AABB
         minimum: vector2.applyMatrix3(bottomLeftCorner, matrix),
         maximum: vector2.applyMatrix3(topRightCorner, matrix),
       };
-    };
+    });
   }
 );
 
@@ -436,6 +449,8 @@ export const projectionMatrix: (state: CameraState) => (time: number) => Matrix3
   clippingPlanes,
   translation,
   (clippingPlanesAtTime, translationAtTime) => {
+    // memoizing this so the matrix returned will be the same object reference if called with the same `time`.
+    // this should also save on some memory allocation
     return defaultMemoize((time: number) => {
       const {
         renderWidth,

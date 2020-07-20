@@ -306,6 +306,203 @@ describe('helpers', () => {
         width: 1100,
       });
     });
+
+    test('if duplicates and timeline.timelineType is not matching with outcome timelineType it should return draft with empty title', () => {
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        title: 'Awesome Timeline',
+        version: '1',
+        status: TimelineStatus.active,
+        timelineType: TimelineType.default,
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
+      expect(newTimeline).toEqual({
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            width: 190,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'message',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.category',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.action',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            width: 180,
+          },
+        ],
+        dataProviders: [],
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
+        description: '',
+        deletedEventIds: [],
+        eventIdToNoteIds: {},
+        eventType: 'all',
+        excludedRowRendererIds: [],
+        filters: [],
+        highlightedDropAndProviderId: '',
+        historyIds: [],
+        id: 'savedObject-1',
+        isFavorite: false,
+        isLive: false,
+        isSelectAllChecked: false,
+        isLoading: false,
+        isSaving: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: null,
+          filterQueryDraft: null,
+        },
+        loadingEventIds: [],
+        noteIds: [],
+        pinnedEventIds: {},
+        pinnedEventsSaveObject: {},
+        savedObjectId: 'savedObject-1',
+        selectedEventIds: {},
+        show: false,
+        showCheckboxes: false,
+        sort: {
+          columnId: '@timestamp',
+          sortDirection: 'desc',
+        },
+        status: TimelineStatus.draft,
+        title: '',
+        timelineType: TimelineType.template,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
+        version: '1',
+        width: 1100,
+      });
+    });
+
+    test('if duplicates and timeline.timelineType is not matching with outcome timelineType it should return draft with empty title template', () => {
+      const timeline = {
+        savedObjectId: 'savedObject-1',
+        title: 'Awesome Template',
+        version: '1',
+        status: TimelineStatus.active,
+        timelineType: TimelineType.template,
+      };
+
+      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
+      expect(newTimeline).toEqual({
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            width: 190,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'message',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.category',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'event.action',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+            width: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+            width: 180,
+          },
+        ],
+        dataProviders: [],
+        dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
+        description: '',
+        deletedEventIds: [],
+        eventIdToNoteIds: {},
+        eventType: 'all',
+        excludedRowRendererIds: [],
+        filters: [],
+        highlightedDropAndProviderId: '',
+        historyIds: [],
+        id: 'savedObject-1',
+        isFavorite: false,
+        isLive: false,
+        isSelectAllChecked: false,
+        isLoading: false,
+        isSaving: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: null,
+          filterQueryDraft: null,
+        },
+        loadingEventIds: [],
+        noteIds: [],
+        pinnedEventIds: {},
+        pinnedEventsSaveObject: {},
+        savedObjectId: 'savedObject-1',
+        selectedEventIds: {},
+        show: false,
+        showCheckboxes: false,
+        sort: {
+          columnId: '@timestamp',
+          sortDirection: 'desc',
+        },
+        status: TimelineStatus.draft,
+        title: '',
+        timelineType: TimelineType.default,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
+        version: '1',
+        width: 1100,
+      });
+    });
+
     test('if columns are null, we should get the default columns', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
