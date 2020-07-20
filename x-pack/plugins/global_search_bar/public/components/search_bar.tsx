@@ -13,22 +13,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiIcon,
 } from '@elastic/eui';
+import { map, takeUntil } from 'rxjs/operators';
+import { GlobalSearchResultProvider } from '../../global_search/public';
 
-export function SearchBar(globalSearch: any) {
+export function SearchBar({ globalSearch }: GlobalSearchResultProvider) {
   const [isSearchFocused, setSearchFocus] = useState(false);
-  // console.log(globalSearch);
-  // globalSearch.find('discover').subscribe({
-  //   next: ({ results }) => {
-  //     console.log(results);
-  //   },
-  // });
+  const [options, setOptions] = useState([]);
+  const [isLoading, setLoadingState] = useState(false);
+
   return (
     <EuiSelectable
       searchable
       height={300}
       singleSelection={true}
       searchProps={{
+        isLoading,
         'data-test-subj': 'header-search',
         onFocus: () => {
           setSearchFocus(true);
@@ -37,26 +38,42 @@ export function SearchBar(globalSearch: any) {
         placeholder: 'Search for anything...',
         incremental: true,
         compressed: true,
-        onSearch: (/* term */) => {
-          // console.log(globalSearch.find(term));
+        onSearch: async (term) => {
+          const arr = [];
+          setLoadingState(true);
+          globalSearch.find(term, {}).subscribe({
+            next: ({ results }) => {
+              arr.push(...results);
+              setOptions([...arr]);
+            },
+            error: () => {
+              // TODO
+            },
+            complete: () => {
+              setLoadingState(false);
+            },
+          });
         },
       }}
       listProps={{
         rowHeight: 68,
       }}
-      options={[
-        { label: 'hello' },
-        { label: 'two' },
-        // { label: 'three' },
-        // { label: 'hello' },
-        // { label: 'two' },
-        // { label: 'three' },
-      ]}
-      // onChange={(str) => {
-      //   console.log(str);
-      //   // call global search API
-      //   // export class GlobalSearchProvidersPlugin  implements Plugin<{}, {}, {}, GlobalSearchProvidersPluginStartDeps> {  setup(    { getStartServices }: CoreSetup<{}, {}>,    { globalSearch }: GlobalSearchProvidersPluginSetupDeps  ) {    return {};  }  start(core, { globalSearch }: GlobalSearchProvidersPluginStartDeps) {    globalSearch.find('term')    return {};  }}
-      // }}
+      options={options.map((option) => ({ key: option.id, ...option }))}
+      renderOption={(option, searchValue) => (
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>{option.icon && <EuiIcon type={option.icon} />}</EuiFlexItem>
+          <EuiFlexItem>{option.title}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              aria-hidden={true}
+              className="kibanaChromeSearch__itemGotoBadge"
+              color="hollow"
+            >
+              Go to <small>&#x21A9;</small>
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     >
       {(list, search) => (
         <>

@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["globalSearch", "globalSearchProviders"],
+  "requiredPlugins": ["globalSearch"],
   "optionalPlugins": [],
   "configPath": ["xpack", "global_search_bar"]
 }
