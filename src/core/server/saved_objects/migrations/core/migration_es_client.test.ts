@@ -16,40 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { retryCallClusterMock } from './repository_es_client.test.mock';
+import { migrationRetryCallClusterMock } from './migration_es_client.test.mock';
 
-import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
+import { createMigrationEsClient, MigrationEsClient } from './migration_es_client';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-import { SavedObjectsErrorHelpers } from './errors';
+import { loggerMock } from '../../../logging/logger.mock';
+import { SavedObjectsErrorHelpers } from '../../service/lib/errors';
 
-describe('RepositoryEsClient', () => {
+describe('MigrationEsClient', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
-  let repositoryClient: RepositoryEsClient;
+  let migrationEsClient: MigrationEsClient;
 
   beforeEach(() => {
     client = elasticsearchClientMock.createElasticSearchClient();
-    repositoryClient = createRepositoryEsClient(client);
-    retryCallClusterMock.mockClear();
+    migrationEsClient = createMigrationEsClient(client, loggerMock.create());
+    migrationRetryCallClusterMock.mockClear();
   });
 
   it('delegates call to ES client method', async () => {
-    expect(repositoryClient.bulk).toStrictEqual(expect.any(Function));
-    await repositoryClient.bulk({ body: [] });
+    expect(migrationEsClient.bulk).toStrictEqual(expect.any(Function));
+    await migrationEsClient.bulk({ body: [] });
     expect(client.bulk).toHaveBeenCalledTimes(1);
   });
 
-  it('wraps a method call in retryCallCluster', async () => {
-    await repositoryClient.bulk({ body: [] });
-    expect(retryCallClusterMock).toHaveBeenCalledTimes(1);
+  it('wraps a method call in migrationRetryCallClusterMock', async () => {
+    await migrationEsClient.bulk({ body: [] });
+    expect(migrationRetryCallClusterMock).toHaveBeenCalledTimes(1);
   });
 
-  it('transform elasticsearch errors into saved objects errors', async () => {
+  it('do not transform elasticsearch errors into saved objects errors', async () => {
     expect.assertions(1);
     client.bulk = jest.fn().mockRejectedValue(new Error('reason'));
     try {
-      await repositoryClient.bulk({ body: [] });
+      await migrationEsClient.bulk({ body: [] });
     } catch (e) {
-      expect(SavedObjectsErrorHelpers.isSavedObjectsClientError(e)).toBe(true);
+      expect(SavedObjectsErrorHelpers.isSavedObjectsClientError(e)).toBe(false);
     }
   });
 });

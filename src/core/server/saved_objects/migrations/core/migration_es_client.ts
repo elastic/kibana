@@ -168,12 +168,12 @@ export function createMigrationEsClient(
   delay?: number
 ): MigrationEsClient {
   return methods.reduce((acc: MigrationEsClient, key: MethodName) => {
-    set(acc, key, (...args: any[]) => {
+    set(acc, key, async (...args: any[]) => {
       const fn = get(client, key);
       if (!fn) {
         throw new Error(`unknown ElasticsearchClient client method [${key}]`);
       }
-      return migrationRetryCallCluster(() => fn(...args), log, delay);
+      return await migrationRetryCallCluster(() => fn(...args), log, delay);
     });
     return acc;
   }, {} as MigrationEsClient);
