@@ -312,15 +312,6 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
       });
-
-      it.skip(`accepts a custom refresh setting`, async () => {
-        const refresh = 'foo';
-        await addToNamespacesSuccess(type, id, [newNs1, newNs2], { refresh });
-        expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining({ refresh }),
-          expect.anything()
-        );
-      });
     });
 
     describe('errors', () => {
@@ -585,12 +576,6 @@ describe('SavedObjectsRepository', () => {
       it(`defaults to a refresh setting of wait_for`, async () => {
         await bulkCreateSuccess([obj1, obj2]);
         expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }));
-      });
-
-      it.skip(`accepts a custom refresh setting`, async () => {
-        const refresh = 'foo';
-        await bulkCreateSuccess([obj1, obj2], { refresh });
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh }));
       });
 
       it(`should use default index`, async () => {
@@ -1117,7 +1102,10 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget).toHaveBeenCalled();
 
         const docs = [expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj2.id}` })];
-        expect(client.mget).toHaveBeenCalledWith(expect.objectContaining({ body: { docs } }));
+        expect(client.mget).toHaveBeenCalledWith(
+          expect.objectContaining({ body: { docs } }),
+          expect.anything()
+        );
       });
 
       it(`formats the ES request`, async () => {
@@ -1178,12 +1166,6 @@ describe('SavedObjectsRepository', () => {
       it(`defaults to a refresh setting of wait_for`, async () => {
         await bulkUpdateSuccess([obj1, obj2]);
         expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }));
-      });
-
-      it.skip(`accepts a custom refresh setting`, async () => {
-        const refresh = 'foo';
-        await bulkUpdateSuccess([obj1, obj2], { refresh });
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh }));
       });
 
       it(`defaults to the version of the existing document for multi-namespace types`, async () => {
@@ -1496,12 +1478,6 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`accepts a custom refresh setting`, async () => {
-        const refresh = 'foo';
-        await createSuccess(type, attributes, { refresh });
-        expect(client.create).toHaveBeenCalledWith(expect.objectContaining({ refresh }));
-      });
-
       it(`should use default index`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
@@ -1730,15 +1706,6 @@ describe('SavedObjectsRepository', () => {
         await deleteSuccess(type, id);
         expect(client.delete).toHaveBeenCalledWith(
           expect.objectContaining({ refresh: 'wait_for' }),
-          expect.anything()
-        );
-      });
-
-      it.skip(`accepts a custom refresh setting`, async () => {
-        const refresh = 'foo';
-        await deleteSuccess(type, id, { refresh });
-        expect(client.delete).toHaveBeenCalledWith(
-          expect.objectContaining({ refresh }),
           expect.anything()
         );
       });
@@ -2515,16 +2482,6 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it.skip(`accepts a custom refresh setting`, async () => {
-        const refresh = 'foo';
-        await incrementCounterSuccess(type, id, field, { namespace, refresh });
-        expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining({
-            refresh,
-          })
-        );
-      });
-
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
         await incrementCounterSuccess(type, id, field, { namespace });
         expect(client.update).toHaveBeenCalledWith(
@@ -2777,16 +2734,6 @@ describe('SavedObjectsRepository', () => {
           );
         });
 
-        it.skip(`accepts a custom refresh setting`, async () => {
-          const refresh = 'foo';
-          const expectFn = () =>
-            expect(client.delete).toHaveBeenCalledWith(
-              expect.objectContaining({ refresh }),
-              expect.anything()
-            );
-          await deleteFromNamespacesSuccessDelete(expectFn, { refresh });
-        });
-
         it(`should use default index`, async () => {
           const expectFn = () =>
             expect(client.delete).toHaveBeenCalledWith(
@@ -2862,16 +2809,6 @@ describe('SavedObjectsRepository', () => {
               expect.anything()
             );
           await deleteFromNamespacesSuccessUpdate(expectFn);
-        });
-
-        it.skip(`accepts a custom refresh setting`, async () => {
-          const refresh = 'foo';
-          const expectFn = () =>
-            expect(client.update).toHaveBeenCalledWith(
-              expect.objectContaining({ refresh }),
-              expect.anything()
-            );
-          await deleteFromNamespacesSuccessUpdate(expectFn, { refresh });
         });
 
         it(`should use default index`, async () => {
@@ -3144,15 +3081,6 @@ describe('SavedObjectsRepository', () => {
           expect.objectContaining({
             refresh: 'wait_for',
           }),
-          expect.anything()
-        );
-      });
-
-      it.skip(`accepts a custom refresh setting`, async () => {
-        const refresh = 'foo';
-        await updateSuccess(type, id, { foo: 'bar' }, { refresh });
-        expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining({ refresh }),
           expect.anything()
         );
       });
