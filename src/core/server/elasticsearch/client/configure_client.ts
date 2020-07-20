@@ -35,9 +35,15 @@ export const configureClient = (
 };
 
 const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
-  client.on('response', (err, event) => {
-    if (err) {
-      logger.error(`${err.name}: ${err.message}`);
+  client.on('response', (error, event) => {
+    if (error) {
+      const errorMessage =
+        // error details for response errors provided by elasticsearch
+        error.name === 'ResponseError'
+          ? `[${event.body.error.type}]: ${event.body.error.reason}`
+          : `[${error.name}]: ${error.message}`;
+
+      logger.error(errorMessage);
     }
     if (event && logQueries) {
       const params = event.meta.request.params;

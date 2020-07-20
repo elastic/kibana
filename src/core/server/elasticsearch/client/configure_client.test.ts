@@ -118,26 +118,38 @@ describe('configureClient', () => {
   });
 
   describe('Client logging', () => {
-    it('logs error when the client emits an error', () => {
+    it('logs error when the client emits an @elastic/elasticsearch error', () => {
+      const client = configureClient(config, { logger, scoped: false });
+
+      const response = createApiResponse({ body: {} });
+      client.emit('response', new errors.TimeoutError('message', response), response);
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "[TimeoutError]: message",
+          ],
+        ]
+      `);
+    });
+
+    it('logs error when the client emits an ResponseError returned by elasticsearch', () => {
       const client = configureClient(config, { logger, scoped: false });
 
       const response = createApiResponse({
         body: {
           error: {
-            type: 'error message',
+            type: 'illegal_argument_exception',
+            reason: 'request [/_path] contains unrecognized parameter: [name]',
           },
         },
       });
-      client.emit('response', new errors.ResponseError(response), null);
-      client.emit('response', new Error('some error'), null);
+      client.emit('response', new errors.ResponseError(response), response);
 
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "ResponseError: error message",
-          ],
-          Array [
-            "Error: some error",
+            "[illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
           ],
         ]
       `);
