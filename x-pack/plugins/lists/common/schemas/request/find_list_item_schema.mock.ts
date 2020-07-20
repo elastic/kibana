@@ -6,12 +6,9 @@
 
 import { CURSOR, FILTER, LIST_ID } from '../../constants.mock';
 
-import {
-  FindListItemSchemaPartial,
-  FindListItemSchemaPartialDecoded,
-} from './find_list_item_schema';
+import { FindListItemSchema, FindListItemSchemaDecoded } from './find_list_item_schema';
 
-export const getFindListItemSchemaMock = (): FindListItemSchemaPartial => ({
+export const getFindListItemSchemaMock = (): FindListItemSchema => ({
   cursor: CURSOR,
   filter: FILTER,
   list_id: LIST_ID,
@@ -21,7 +18,7 @@ export const getFindListItemSchemaMock = (): FindListItemSchemaPartial => ({
   sort_order: undefined,
 });
 
-export const getFindListItemSchemaDecodedMock = (): FindListItemSchemaPartialDecoded => ({
+export const getFindListItemSchemaDecodedMock = (): FindListItemSchemaDecoded => ({
   cursor: CURSOR,
   filter: FILTER,
   list_id: LIST_ID,
