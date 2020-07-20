@@ -32,18 +32,18 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 const from = '2019-08-26T22:10:56.791Z';
 const to = '2019-08-27T22:10:56.794Z';
 
+const defaultMocks = {
+  browserFields: mockBrowserFields,
+  indexPatterns: mockIndexPattern,
+  docValueFields: mockDocValueFields,
+  isLoading: false,
+};
+
 describe('EventsViewer', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [
-      {
-        browserFields: mockBrowserFields,
-        indexPatterns: mockIndexPattern,
-        docValueFields: mockDocValueFields,
-        isLoading: false,
-      },
-    ]);
+    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks }]);
   });
 
   test('it renders the "Showing..." subtitle with the expected event count', async () => {
@@ -69,14 +69,7 @@ describe('EventsViewer', () => {
   });
 
   test('it does NOT render fetch index pattern is loading', async () => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [
-      {
-        browserFields: mockBrowserFields,
-        indexPatterns: mockIndexPattern,
-        docValueFields: mockDocValueFields,
-        isLoading: true,
-      },
-    ]);
+    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks, isLoading: true }]);
 
     const wrapper = mount(
       <TestProviders>
@@ -98,14 +91,7 @@ describe('EventsViewer', () => {
   });
 
   test('it does NOT render when start is empty', async () => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [
-      {
-        browserFields: mockBrowserFields,
-        indexPatterns: mockIndexPattern,
-        docValueFields: mockDocValueFields,
-        isLoading: true,
-      },
-    ]);
+    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks, isLoading: true }]);
 
     const wrapper = mount(
       <TestProviders>
@@ -127,14 +113,7 @@ describe('EventsViewer', () => {
   });
 
   test('it does NOT render when end is empty', async () => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [
-      {
-        browserFields: mockBrowserFields,
-        indexPatterns: mockIndexPattern,
-        docValueFields: mockDocValueFields,
-        isLoading: true,
-      },
-    ]);
+    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks, isLoading: true }]);
 
     const wrapper = mount(
       <TestProviders>

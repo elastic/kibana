@@ -9,7 +9,8 @@ import { listMock } from '../../../../../lists/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types/entries';
-import { getFullEndpointExceptionList } from './lists';
+import { buildArtifact, getFullEndpointExceptionList } from './lists';
+import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 
 describe('buildEventTypeSignal', () => {
   let mockExceptionClient: ExceptionListClient;
@@ -339,5 +340,96 @@ describe('buildEventTypeSignal', () => {
     mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionsResponse);
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
     expect(resp.entries.length).toEqual(0);
+  });
+
+  test('it should return a stable hash regardless of order of entries', async () => {
+    const translatedEntries: TranslatedEntry[] = [
+      {
+        entries: [
+          {
+            field: 'some.nested.field',
+            operator: 'included',
+            type: 'exact_cased',
+            value: 'some value',
+          },
+        ],
+        field: 'some.parentField',
+        type: 'nested',
+      },
+      {
+        field: 'nested.field',
+        operator: 'included',
+        type: 'exact_cased',
+        value: 'some value',
+      },
+    ];
+    const translatedEntriesReversed = translatedEntries.reverse();
+
+    const translatedExceptionList = {
+      entries: [
+        {
+          type: 'simple',
+          entries: translatedEntries,
+        },
+      ],
+    };
+
+    const translatedExceptionListReversed = {
+      entries: [
+        {
+          type: 'simple',
+          entries: translatedEntriesReversed,
+        },
+      ],
+    };
+
+    const artifact1 = await buildArtifact(translatedExceptionList, 'linux', 'v1');
+    const artifact2 = await buildArtifact(translatedExceptionListReversed, 'linux', 'v1');
+    expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
+  });
+
+  test('it should return a stable hash regardless of order of items', async () => {
+    const translatedItems: TranslatedExceptionListItem[] = [
+      {
+        type: 'simple',
+        entries: [
+          {
+            entries: [
+              {
+                field: 'some.nested.field',
+                operator: 'included',
+                type: 'exact_cased',
+                value: 'some value',
+              },
+            ],
+            field: 'some.parentField',
+            type: 'nested',
+          },
+        ],
+      },
+      {
+        type: 'simple',
+        entries: [
+          {
+            field: 'nested.field',
+            operator: 'included',
+            type: 'exact_cased',
+            value: 'some value',
+          },
+        ],
+      },
+    ];
+
+    const translatedExceptionList = {
+      entries: translatedItems,
+    };
+
+    const translatedExceptionListReversed = {
+      entries: translatedItems.reverse(),
+    };
+
+    const artifact1 = await buildArtifact(translatedExceptionList, 'linux', 'v1');
+    const artifact2 = await buildArtifact(translatedExceptionListReversed, 'linux', 'v1');
+    expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
   });
 });
