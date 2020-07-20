@@ -125,6 +125,72 @@ describe('filterEventsAgainstList', () => {
         'ci-badguys.txt'
       );
       expect(res.hits.hits.length).toEqual(2);
+
+      // @ts-ignore
+      const ipVals = res.hits.hits.map((item) => item._source.source.ip);
+      expect(['3.3.3.3', '7.7.7.7']).toEqual(ipVals);
+    });
+
+    it('should respond with less items in the list given two exception items with entries of type list if some values match', async () => {
+      const exceptionItem = getExceptionListItemSchemaMock();
+      exceptionItem.entries = [
+        {
+          field: 'source.ip',
+          operator: 'included',
+          type: 'list',
+          list: {
+            id: 'ci-badguys.txt',
+            type: 'ip',
+          },
+        },
+      ];
+
+      const exceptionItemAgain = getExceptionListItemSchemaMock();
+      exceptionItemAgain.entries = [
+        {
+          field: 'source.ip',
+          operator: 'included',
+          type: 'list',
+          list: {
+            id: 'ci-badguys-again.txt',
+            type: 'ip',
+          },
+        },
+      ];
+
+      // this call represents an exception list with a value list containing ['2.2.2.2', '4.4.4.4']
+      (listClient.getListItemByValues as jest.Mock).mockResolvedValueOnce([
+        { ...getListItemResponseMock(), value: '2.2.2.2' },
+        { ...getListItemResponseMock(), value: '4.4.4.4' },
+      ]);
+      // this call represents an exception list with a value list containing ['6.6.6.6']
+      (listClient.getListItemByValues as jest.Mock).mockResolvedValueOnce([
+        { ...getListItemResponseMock(), value: '6.6.6.6' },
+      ]);
+
+      const res = await filterEventsAgainstList({
+        logger: mockLogger,
+        listClient,
+        exceptionsList: [exceptionItem, exceptionItemAgain],
+        eventSearchResult: repeatedSearchResultsWithSortId(9, 9, someGuids.slice(0, 9), [
+          '1.1.1.1',
+          '2.2.2.2',
+          '3.3.3.3',
+          '4.4.4.4',
+          '5.5.5.5',
+          '6.6.6.6',
+          '7.7.7.7',
+          '8.8.8.8',
+          '9.9.9.9',
+        ]),
+        buildRuleMessage,
+      });
+      expect(listClient.getListItemByValues as jest.Mock).toHaveBeenCalledTimes(2);
+      expect(res.hits.hits.length).toEqual(6);
+
+      // @ts-ignore
+      const ipVals = res.hits.hits.map((item) => item._source.source.ip);
+      expect(['1.1.1.1', '3.3.3.3', '5.5.5.5', '7.7.7.7', '8.8.8.8', '9.9.9.9']).toEqual(ipVals);
     });
   });
   describe('operator type is excluded', () => {
