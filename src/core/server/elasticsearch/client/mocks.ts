@@ -141,6 +141,17 @@ const createMockedClientError = (err: any): MockedTransportRequestPromise<never>
   return promise as MockedTransportRequestPromise<never>;
 };
 
+function createApiResponse(opts: Partial<ApiResponse> = {}): ApiResponse {
+  return {
+    body: {},
+    statusCode: 500,
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+    ...opts,
+  };
+}
+
 export const elasticsearchClientMock = {
   createClusterClient: createClusterClientMock,
   createCustomClusterClient: createCustomClusterClientMock,
@@ -149,4 +160,5 @@ export const elasticsearchClientMock = {
   createInternalClient: createInternalClientMock,
   createClientResponse: createMockedClientResponse,
   createClientError: createMockedClientError,
+  createApiResponse,
 };
