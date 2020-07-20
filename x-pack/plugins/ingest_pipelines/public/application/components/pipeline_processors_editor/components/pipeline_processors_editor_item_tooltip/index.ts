@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum DropSpecialLocations {
-  top = 'TOP',
-  bottom = 'BOTTOM',
-}
+export { PipelineProcessorsItemTooltip, Position } from './pipeline_processors_editor_item_tooltip';
