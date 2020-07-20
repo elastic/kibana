@@ -58,6 +58,7 @@ export const persistTimelineMutation = gql`
         }
         description
         eventType
+        excludedRowRendererIds
         favorite {
           fullName
           userName

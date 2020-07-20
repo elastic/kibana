@@ -173,10 +173,6 @@ const getTemplateTimelineId = (
   duplicate: boolean,
   targetTimelineType?: TimelineType
 ) => {
-  if (!duplicate) {
-    return timeline.templateTimelineId;
-  }
-
   if (
     targetTimelineType === TimelineType.default &&
     timeline.timelineType === TimelineType.template
@@ -184,8 +180,10 @@ const getTemplateTimelineId = (
     return timeline.templateTimelineId;
   }
 
-  // TODO: MOVE TO BACKEND
-  return uuid.v4();
+  return duplicate && timeline.timelineType === TimelineType.template
+    ? // TODO: MOVE TO THE BACKEND
+      uuid.v4()
+    : timeline.templateTimelineId;
 };
 
 const convertToDefaultField = ({ and, ...dataProvider }: DataProviderResult) => {

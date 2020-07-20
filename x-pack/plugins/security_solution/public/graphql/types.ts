@@ -5872,6 +5872,8 @@ export namespace PersistTimelineMutation {
 
     eventType: Maybe<string>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     favorite: Maybe<Favorite[]>;
 
     filters: Maybe<Filters[]>;

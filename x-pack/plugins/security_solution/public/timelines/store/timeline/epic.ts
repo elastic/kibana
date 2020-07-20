@@ -88,6 +88,7 @@ import { ActionTimeline, TimelineEpicDependencies } from './types';
 const timelineActionsType = [
   applyKqlFilterQuery.type,
   addProvider.type,
+  addTimeline.type,
   dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
