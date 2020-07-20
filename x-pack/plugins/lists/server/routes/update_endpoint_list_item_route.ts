@@ -21,7 +21,7 @@ export const updateEndpointListItemRoute = (router: IRouter): void => {
   router.put(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {
