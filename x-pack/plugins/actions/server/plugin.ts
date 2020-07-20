@@ -323,7 +323,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     return new ActionsAuthorization({
       request,
       authorization: this.security?.authz,
-      securityLicense: this.security?.license,
       auditLogger: new ActionsAuthorizationAuditLogger(
         this.security?.audit.getLogger(ACTIONS_FEATURE.id)
       ),

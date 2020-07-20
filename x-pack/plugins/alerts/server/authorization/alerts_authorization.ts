@@ -13,7 +13,6 @@ import { SecurityPluginSetup } from '../../../security/server';
 import { RegistryAlertType } from '../alert_type_registry';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { AlertsAuthorizationAuditLogger, ScopeType } from './audit_logger';
-import { SecurityLicense } from '../../../security/common/licensing';
 import { Space } from '../../../spaces/server';
 
 export enum ReadOperations {
@@ -53,14 +52,12 @@ export interface ConstructorOptions {
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   auditLogger: AlertsAuthorizationAuditLogger;
   authorization?: SecurityPluginSetup['authz'];
-  securityLicense?: SecurityLicense;
 }
 
 export class AlertsAuthorization {
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
-  private readonly securityLicense?: SecurityLicense;
   private readonly auditLogger: AlertsAuthorizationAuditLogger;
   private readonly featuresIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
@@ -69,14 +66,12 @@ export class AlertsAuthorization {
     alertTypeRegistry,
     request,
     authorization,
-    securityLicense,
     features,
     auditLogger,
     getSpace,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
-    this.securityLicense = securityLicense;
     this.alertTypeRegistry = alertTypeRegistry;
     this.auditLogger = auditLogger;
 
@@ -114,8 +109,7 @@ export class AlertsAuthorization {
   }
 
   private shouldCheckAuthorization(): boolean {
-    const { authorization, securityLicense } = this;
-    return (authorization && securityLicense && securityLicense?.isEnabled()) ?? false;
+    return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
   public async ensureAuthorized(
