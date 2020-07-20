@@ -54,16 +54,20 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
 
   mockify(client, omittedProps);
 
-  client.transport = {
+  // client got some read-only (getter) properties
+  // so we need to extend it to override the getter-only props.
+  const mock: any = { ...client };
+
+  mock.transport = {
     request: jest.fn(),
   };
-  client.close = jest.fn().mockReturnValue(Promise.resolve());
-  client.child = jest.fn().mockImplementation(() => createInternalClientMock());
-  client.on = jest.fn();
-  client.off = jest.fn();
-  client.once = jest.fn();
+  mock.close = jest.fn().mockReturnValue(Promise.resolve());
+  mock.child = jest.fn().mockImplementation(() => createInternalClientMock());
+  mock.on = jest.fn();
+  mock.off = jest.fn();
+  mock.once = jest.fn();
 
-  return (client as unknown) as DeeplyMockedKeys<Client>;
+  return (mock as unknown) as DeeplyMockedKeys<Client>;
 };
 
 export type ElasticSearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
