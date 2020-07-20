@@ -26,23 +26,25 @@ import { Query, UI_SETTINGS } from '../../../common';
 export class QueryStringManager {
   private queryUpdate$ = new Subject();
   private _query: Query;
-  private defaultLanguage: string;
 
-  constructor(storage: IStorageWrapper, uiSettings: CoreStart['uiSettings']) {
-    this.defaultLanguage =
-      storage.get('kibana.userQueryLanguage') || uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
-
-    uiSettings.get$(UI_SETTINGS.SEARCH_QUERY_LANGUAGE).subscribe((defaultLanguage: string) => {
-      this.defaultLanguage = defaultLanguage;
-    });
-
+  constructor(
+    private readonly storage: IStorageWrapper,
+    private readonly uiSettings: CoreStart['uiSettings']
+  ) {
     this._query = this.getDefaultQuery();
+  }
+
+  private getDefaultLanguage() {
+    return (
+      this.storage.get('kibana.userQueryLanguage') ||
+      this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
+    );
   }
 
   public getDefaultQuery() {
     return {
       query: '',
-      language: this.defaultLanguage,
+      language: this.getDefaultLanguage(),
     };
   }
 
@@ -52,7 +54,7 @@ export class QueryStringManager {
     } else if (typeof query === 'string') {
       return {
         query,
-        language: this.defaultLanguage,
+        language: this.getDefaultLanguage(),
       };
     } else {
       return query;
