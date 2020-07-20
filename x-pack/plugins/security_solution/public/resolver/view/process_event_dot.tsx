@@ -207,7 +207,12 @@ const UnstyledProcessEventDot = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = cubeAssetsForNode(isProcessTerminated, false);
+    } = cubeAssetsForNode(
+      isProcessTerminated,
+      /**
+       * There is no definition for 'trigger process' yet. return false.
+       */ false
+    );
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 

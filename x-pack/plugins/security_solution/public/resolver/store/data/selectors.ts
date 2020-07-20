@@ -346,7 +346,7 @@ export const layout = createSelector(
     const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedProcessTree);
 
     if (!originID) {
-      // TODO, this should only happen when no data has loaded.
+      // no data has loaded.
       return taxiLayout;
     }
 
@@ -367,7 +367,8 @@ export const layout = createSelector(
       return taxiLayout;
     }
 
-    // subtract the origin position from the layout, centering the layout around the origin node
+    // Take the origin position, and multipy it by -1, then move the layout by that amount.
+    // This should center the layout around the origin.
     return isometricTaxiLayoutModel.translated(taxiLayout, vector2.scale(originPosition, -1));
   }
 );

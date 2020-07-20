@@ -493,7 +493,12 @@ export function nodePosition(model: IsometricTaxiLayout, node: ResolverEvent): V
 }
 
 /**
- * Return a clone of `model` with all positions incremented by `position`.
+ * Return a clone of `model` with all positions incremented by `translation`.
+ * Use this to move the layout around.
+ * e.g.
+ * ```
+ * translated(layout, [100, -200]) // return a copy of `layout`, thats been moved 100 to the right and 200 up
+ * ```
  */
 export function translated(model: IsometricTaxiLayout, translation: Vector2): IsometricTaxiLayout {
   return {
