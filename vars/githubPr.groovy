@@ -214,10 +214,6 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
     """
   }
 
-  // TODO remove
-  print "Status: ${status}"
-  getFailedSteps()
-
   if (status != 'SUCCESS' && status != 'UNSTABLE') {
     try {
       def steps = getFailedSteps()
