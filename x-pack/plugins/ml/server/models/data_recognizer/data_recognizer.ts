@@ -629,11 +629,13 @@ export class DataRecognizer {
     kibanaSaveResults: DataRecognizerConfigResponse['kibana'],
     error: any
   ) {
+    const errorObj =
+      error === undefined ? { message: 'Unknown error when creating saved object' } : error;
     (Object.keys(kibanaSaveResults) as Array<keyof DataRecognizerConfigResponse['kibana']>).forEach(
       (type) => {
         kibanaSaveResults[type].forEach((resultItem) => {
           if (resultItem.exists === false) {
-            resultItem.error = error;
+            resultItem.error = errorObj;
           }
         });
       }
