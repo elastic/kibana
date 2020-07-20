@@ -22,7 +22,6 @@ import { AndOrBadge } from '../../and_or_badge';
 import { BuilderButtonOptions } from './builder_button_options';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
-import { Loader } from '../../loader';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import exceptionableFields from '../exceptionable_fields.json';
 
@@ -52,7 +51,6 @@ interface ExceptionBuilderProps {
   listNamespaceType: NamespaceType;
   ruleName: string;
   indexPatterns: IIndexPattern;
-  isLoading: boolean;
   isOrDisabled: boolean;
   isAndDisabled: boolean;
   onChange: (arg: OnChangeProps) => void;
@@ -65,7 +63,6 @@ export const ExceptionBuilder = ({
   listNamespaceType,
   ruleName,
   indexPatterns,
-  isLoading,
   isOrDisabled,
   isAndDisabled,
   onChange,
@@ -193,9 +190,6 @@ export const ExceptionBuilder = ({
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
-      {(isLoading || indexPatterns == null) && (
-        <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-      )}
       {exceptions.map((exceptionListItem, index) => (
         <EuiFlexItem grow={1} key={getExceptionListItemId(exceptionListItem, index)}>
           <EuiFlexGroup gutterSize="s" direction="column">

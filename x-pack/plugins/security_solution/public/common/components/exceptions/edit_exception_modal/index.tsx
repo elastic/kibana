@@ -93,12 +93,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
   const { addError, addSuccess } = useAppToasts();
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
-
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const [
-    { isLoading: signalIndexPatternLoading, indexPatterns: signalIndexPatterns },
+    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
   ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : []);
+
+  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
 
   const onError = useCallback(
     (error) => {
@@ -121,7 +121,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   );
 
   useEffect(() => {
-    if (signalIndexPatternLoading === false && isSignalIndexLoading === false) {
+    if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
           entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns)
@@ -130,9 +130,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   }, [
     setShouldDisableBulkClose,
     exceptionItemsToAdd,
-    signalIndexPatternLoading,
-    signalIndexPatterns,
+    isSignalIndexPatternLoading,
     isSignalIndexLoading,
+    signalIndexPatterns,
   ]);
 
   useEffect(() => {
@@ -188,7 +188,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
 
   return (
-    <EuiOverlayMask>
+    <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
           <EuiModalHeaderTitle>{i18n.EDIT_EXCEPTION_TITLE}</EuiModalHeaderTitle>
@@ -197,7 +197,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           </ModalHeaderSubtitle>
         </ModalHeader>
 
-        {!indexPatternLoading && !isSignalIndexLoading && !signalIndexPatternLoading && (
+        {!isSignalIndexLoading && !isIndexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
@@ -208,7 +208,6 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 listId={exceptionItem.list_id}
                 listNamespaceType={exceptionItem.namespace_type}
                 ruleName={ruleName}
-                isLoading={false}
                 isOrDisabled={false}
                 isAndDisabled={false}
                 data-test-subj="edit-exception-modal-builder"

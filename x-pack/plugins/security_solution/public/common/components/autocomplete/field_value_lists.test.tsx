@@ -94,30 +94,27 @@ describe('AutocompleteFieldListsComponent', () => {
   });
 
   test('it allows user to clear values if "isClearable" is true', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <AutocompleteFieldListsComponent
-            placeholder="Placeholder text"
-            selectedField={getField('ip')}
-            selectedValue="some-list-id"
-            isLoading={false}
-            isClearable={true}
-            isDisabled={false}
-            onChange={jest.fn()}
-          />
-        </ThemeProvider>
-      );
-      await wait();
-      expect(
-        wrapper
-          .find(`[data-test-subj="comboBoxInput"]`)
-          .hasClass('euiComboBox__inputWrap-isClearable')
-      ).toBeTruthy();
-    });
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <AutocompleteFieldListsComponent
+          placeholder="Placeholder text"
+          selectedField={getField('ip')}
+          selectedValue="some-list-id"
+          isLoading={false}
+          isClearable={true}
+          isDisabled={false}
+          onChange={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+    expect(
+      wrapper
+        .find(`[data-test-subj="comboBoxInput"]`)
+        .hasClass('euiComboBox__inputWrap-isClearable')
+    ).toBeTruthy();
   });
 
-  test('it correctly displays lists that match the selected "keyword" field esType', async () => {
+  test('it correctly displays lists that match the selected "keyword" field esType', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
@@ -132,17 +129,16 @@ describe('AutocompleteFieldListsComponent', () => {
       </ThemeProvider>
     );
 
-    await act(async () => {
-      wrapper.find('[data-test-subj="comboBoxToggleListButton"] button').simulate('click');
-    });
+    wrapper.find('[data-test-subj="comboBoxToggleListButton"] button').simulate('click');
 
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]').at(0).props()
-        .options
+      wrapper
+        .find('EuiComboBox[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]')
+        .prop('options')
     ).toEqual([{ label: 'keyword list' }]);
   });
 
-  test('it correctly displays lists that match the selected "ip" field esType', async () => {
+  test('it correctly displays lists that match the selected "ip" field esType', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
@@ -157,13 +153,12 @@ describe('AutocompleteFieldListsComponent', () => {
       </ThemeProvider>
     );
 
-    await act(async () => {
-      wrapper.find('[data-test-subj="comboBoxToggleListButton"] button').simulate('click');
-    });
+    wrapper.find('[data-test-subj="comboBoxToggleListButton"] button').simulate('click');
 
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]').at(0).props()
-        .options
+      wrapper
+        .find('EuiComboBox[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]')
+        .prop('options')
     ).toEqual([{ label: 'some name' }]);
   });
 

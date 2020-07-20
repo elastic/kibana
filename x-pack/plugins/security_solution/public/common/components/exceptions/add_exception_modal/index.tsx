@@ -33,6 +33,7 @@ import { useKibana } from '../../../lib/kibana';
 import { ExceptionBuilder } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -44,7 +45,6 @@ import {
   getMappedNonEcsValue,
 } from '../helpers';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 export interface AddExceptionModalBaseProps {
   ruleName: string;
@@ -108,13 +108,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const { addError, addSuccess } = useAppToasts();
-
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
-
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const [
-    { isLoading: signalIndexPatternLoading, indexPatterns: signalIndexPatterns },
+    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
   ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : []);
+
+  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
 
   const onError = useCallback(
     (error: Error) => {
@@ -174,7 +173,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
 
   useEffect(() => {
-    if (signalIndexPatternLoading === false && isSignalIndexLoading === false) {
+    if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
           entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns)
@@ -183,9 +182,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [
     setShouldDisableBulkClose,
     exceptionItemsToAdd,
-    signalIndexPatternLoading,
-    signalIndexPatterns,
+    isSignalIndexPatternLoading,
     isSignalIndexLoading,
+    signalIndexPatterns,
   ]);
 
   useEffect(() => {
@@ -265,7 +264,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   return (
-    <EuiOverlayMask>
+    <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
           <EuiModalHeaderTitle>{i18n.ADD_EXCEPTION}</EuiModalHeaderTitle>
@@ -284,9 +283,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         )}
         {fetchOrCreateListError === false &&
           !isSignalIndexLoading &&
-          !signalIndexPatternLoading &&
-          !indexPatternLoading &&
+          !isSignalIndexPatternLoading &&
           !isLoadingExceptionList &&
+          !isIndexPatternLoading &&
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">
@@ -299,7 +298,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   listNamespaceType={ruleExceptionList.namespace_type}
                   ruleName={ruleName}
                   indexPatterns={indexPatterns}
-                  isLoading={false}
                   isOrDisabled={false}
                   isAndDisabled={false}
                   data-test-subj="alert-exception-builder"
