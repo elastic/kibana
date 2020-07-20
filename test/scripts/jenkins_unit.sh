@@ -2,6 +2,8 @@
 
 set -e
 
+source test/scripts/jenkins_setup.sh
+
 if [[ -z "$IS_PIPELINE_JOB" ]] ; then
   trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
 fi
