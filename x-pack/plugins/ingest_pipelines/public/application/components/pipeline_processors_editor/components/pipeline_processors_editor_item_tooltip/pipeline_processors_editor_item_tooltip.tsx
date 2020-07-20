@@ -20,7 +20,6 @@ interface Props {
   processor: ProcessorInternal;
 }
 
-const PORTAL_HTML_ELEMENT_ID = 'pipelineProcessorsEditorTooltipPortal';
 const MOUSE_PADDING_RIGHT = 20;
 const MOUSE_PADDING_BOTTOM = 20;
 
