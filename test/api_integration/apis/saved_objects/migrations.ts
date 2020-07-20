@@ -23,22 +23,39 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import { assert } from 'chai';
+import expect from '@kbn/expect';
+import { ElasticsearchClient, SavedObjectMigrationMap, SavedObjectsType } from 'src/core/server';
+import { SearchResponse } from '../../../../src/core/server/elasticsearch/client';
 import {
   DocumentMigrator,
   IndexMigrator,
+  createMigrationEsClient,
 } from '../../../../src/core/server/saved_objects/migrations/core';
+import { SavedObjectsTypeMappingDefinitions } from '../../../../src/core/server/saved_objects/mappings';
+
 import {
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
 } from '../../../../src/core/server/saved_objects';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default ({ getService }) => {
-  const es = getService('legacyEs');
-  const callCluster = (path, ...args) => _.get(es, path).call(es, ...args);
+function getLogMock() {
+  return {
+    debug() {},
+    error() {},
+    fatal() {},
+    info() {},
+    log() {},
+    trace() {},
+    warn() {},
+    get: getLogMock,
+  };
+}
+export default ({ getService }: FtrProviderContext) => {
+  const esClient = getService('es');
 
   describe('Kibana index migration', () => {
-    before(() => callCluster('indices.delete', { index: '.migrate-*' }));
+    before(() => esClient.indices.delete({ index: '.migrate-*' }));
 
     it('Migrates an existing index that has never been migrated before', async () => {
       const index = '.migration-a';
@@ -55,7 +72,7 @@ export default ({ getService }) => {
         bar: { properties: { mynum: { type: 'integer' } } },
       };
 
-      const migrations = {
+      const migrations: Record<string, SavedObjectMigrationMap> = {
         foo: {
           '1.0.0': (doc) => set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
         },
@@ -66,11 +83,11 @@ export default ({ getService }) => {
         },
       };
 
-      await createIndex({ callCluster, index });
-      await createDocs({ callCluster, index, docs: originalDocs });
+      await createIndex({ esClient, index });
+      await createDocs({ esClient, index, docs: originalDocs });
 
       // Test that unrelated index templates are unaffected
-      await callCluster('indices.putTemplate', {
+      await esClient.indices.putTemplate({
         name: 'migration_test_a_template',
         body: {
           index_patterns: 'migration_test_a',
@@ -82,7 +99,7 @@ export default ({ getService }) => {
       });
 
       // Test that obsolete index templates get removed
-      await callCluster('indices.putTemplate', {
+      await esClient.indices.putTemplate({
         name: 'migration_a_template',
         body: {
           index_patterns: index,
@@ -93,29 +110,37 @@ export default ({ getService }) => {
         },
       });
 
-      assert.isTrue(await callCluster('indices.existsTemplate', { name: 'migration_a_template' }));
+      const migrationATemplate = await esClient.indices.existsTemplate({
+        name: 'migration_a_template',
+      });
+      expect(migrationATemplate.body).to.be.ok();
 
       const result = await migrateIndex({
-        callCluster,
+        esClient,
         index,
         migrations,
         mappingProperties,
         obsoleteIndexTemplatePattern: 'migration_a*',
       });
 
-      assert.isFalse(await callCluster('indices.existsTemplate', { name: 'migration_a_template' }));
-      assert.isTrue(
-        await callCluster('indices.existsTemplate', { name: 'migration_test_a_template' })
-      );
+      const migrationATemplateAfter = await esClient.indices.existsTemplate({
+        name: 'migration_a_template',
+      });
 
-      assert.deepEqual(_.omit(result, 'elapsedMs'), {
+      expect(migrationATemplateAfter.body).not.to.be.ok();
+      const migrationTestATemplateAfter = await esClient.indices.existsTemplate({
+        name: 'migration_test_a_template',
+      });
+
+      expect(migrationTestATemplateAfter.body).to.be.ok();
+      expect(_.omit(result, 'elapsedMs')).to.eql({
         destIndex: '.migration-a_2',
         sourceIndex: '.migration-a_1',
         status: 'migrated',
       });
 
       // The docs in the original index are unchanged
-      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_1` }), [
+      expect(await fetchDocs(esClient, `${index}_1`)).to.eql([
         { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
         { id: 'bar:o', type: 'bar', bar: { nomnom: 2 } },
         { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
@@ -124,7 +149,7 @@ export default ({ getService }) => {
       ]);
 
       // The docs in the alias have been migrated
-      assert.deepEqual(await fetchDocs({ callCluster, index }), [
+      expect(await fetchDocs(esClient, index)).to.eql([
         {
           id: 'bar:i',
           type: 'bar',
@@ -171,7 +196,7 @@ export default ({ getService }) => {
         bar: { properties: { mynum: { type: 'integer' } } },
       };
 
-      const migrations = {
+      const migrations: Record<string, SavedObjectMigrationMap> = {
         foo: {
           '1.0.0': (doc) => set(doc, 'attributes.name', doc.attributes.name.toUpperCase()),
         },
@@ -182,19 +207,20 @@ export default ({ getService }) => {
         },
       };
 
-      await createIndex({ callCluster, index });
-      await createDocs({ callCluster, index, docs: originalDocs });
+      await createIndex({ esClient, index });
+      await createDocs({ esClient, index, docs: originalDocs });
 
-      await migrateIndex({ callCluster, index, migrations, mappingProperties });
+      await migrateIndex({ esClient, index, migrations, mappingProperties });
 
+      // @ts-expect-error name doesn't exist on mynum type
       mappingProperties.bar.properties.name = { type: 'keyword' };
       migrations.foo['2.0.1'] = (doc) => set(doc, 'attributes.name', `${doc.attributes.name}v2`);
       migrations.bar['2.3.4'] = (doc) => set(doc, 'attributes.name', `NAME ${doc.id}`);
 
-      await migrateIndex({ callCluster, index, migrations, mappingProperties });
+      await migrateIndex({ esClient, index, migrations, mappingProperties });
 
       // The index for the initial migration has not been destroyed...
-      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_2` }), [
+      expect(await fetchDocs(esClient, `${index}_2`)).to.eql([
         {
           id: 'bar:i',
           type: 'bar',
@@ -226,7 +252,7 @@ export default ({ getService }) => {
       ]);
 
       // The docs were migrated again...
-      assert.deepEqual(await fetchDocs({ callCluster, index }), [
+      expect(await fetchDocs(esClient, index)).to.eql([
         {
           id: 'bar:i',
           type: 'bar',
@@ -266,48 +292,43 @@ export default ({ getService }) => {
         foo: { properties: { name: { type: 'text' } } },
       };
 
-      const migrations = {
+      const migrations: Record<string, SavedObjectMigrationMap> = {
         foo: {
           '1.0.0': (doc) => set(doc, 'attributes.name', 'LOTR'),
         },
       };
 
-      await createIndex({ callCluster, index });
-      await createDocs({ callCluster, index, docs: originalDocs });
+      await createIndex({ esClient, index });
+      await createDocs({ esClient, index, docs: originalDocs });
 
       const result = await Promise.all([
-        migrateIndex({ callCluster, index, migrations, mappingProperties }),
-        migrateIndex({ callCluster, index, migrations, mappingProperties }),
+        migrateIndex({ esClient, index, migrations, mappingProperties }),
+        migrateIndex({ esClient, index, migrations, mappingProperties }),
       ]);
 
       // The polling instance and the migrating instance should both
-      // return a similar migraiton result.
-      assert.deepEqual(
+      // return a similar migration result.
+      expect(
         result
+          // @ts-expect-error destIndex exists only on MigrationResult status: 'migrated';
           .map(({ status, destIndex }) => ({ status, destIndex }))
-          .sort((a) => (a.destIndex ? 0 : 1)),
-        [
-          { status: 'migrated', destIndex: '.migration-c_2' },
-          { status: 'skipped', destIndex: undefined },
-        ]
-      );
+          .sort((a) => (a.destIndex ? 0 : 1))
+      ).to.eql([
+        { status: 'migrated', destIndex: '.migration-c_2' },
+        { status: 'skipped', destIndex: undefined },
+      ]);
 
+      const { body } = await esClient.cat.indices({ index: '.migration-c*', format: 'json' });
       // It only created the original and the dest
-      assert.deepEqual(
-        _.map(
-          await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }),
-          'index'
-        ).sort(),
-        ['.migration-c_1', '.migration-c_2']
-      );
+      expect(_.map(body, 'index').sort()).to.eql(['.migration-c_1', '.migration-c_2']);
 
       // The docs in the original index are unchanged
-      assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_1` }), [
+      expect(await fetchDocs(esClient, `${index}_1`)).to.eql([
         { id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } },
       ]);
 
       // The docs in the alias have been migrated
-      assert.deepEqual(await fetchDocs({ callCluster, index }), [
+      expect(await fetchDocs(esClient, index)).to.eql([
         {
           id: 'foo:lotr',
           type: 'foo',
@@ -320,38 +341,53 @@ export default ({ getService }) => {
   });
 };
 
-async function createIndex({ callCluster, index }) {
-  await callCluster('indices.delete', { index: `${index}*`, ignore: [404] });
+async function createIndex({ esClient, index }: { esClient: ElasticsearchClient; index: string }) {
+  await esClient.indices.delete({ index: `${index}*` }, { ignore: [404] });
   const properties = {
     type: { type: 'keyword' },
     foo: { properties: { name: { type: 'keyword' } } },
     bar: { properties: { nomnom: { type: 'integer' } } },
     baz: { properties: { title: { type: 'keyword' } } },
   };
-  await callCluster('indices.create', {
+  await esClient.indices.create({
     index,
     body: { mappings: { dynamic: 'strict', properties } },
   });
 }
 
-async function createDocs({ callCluster, index, docs }) {
-  await callCluster('bulk', {
+async function createDocs({
+  esClient,
+  index,
+  docs,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  docs: any[];
+}) {
+  await esClient.bulk({
     body: docs.reduce((acc, doc) => {
       acc.push({ index: { _id: doc.id, _index: index } });
       acc.push(_.omit(doc, 'id'));
       return acc;
     }, []),
   });
-  await callCluster('indices.refresh', { index });
+  await esClient.indices.refresh({ index });
 }
 
 async function migrateIndex({
-  callCluster,
+  esClient,
   index,
   migrations,
   mappingProperties,
   validateDoc,
   obsoleteIndexTemplatePattern,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  migrations: Record<string, SavedObjectMigrationMap>;
+  mappingProperties: SavedObjectsTypeMappingDefinitions;
+  validateDoc?: (doc: any) => void;
+  obsoleteIndexTemplatePattern?: string;
 }) {
   const typeRegistry = new SavedObjectTypeRegistry();
   const types = migrationsToTypes(migrations);
@@ -361,17 +397,17 @@ async function migrateIndex({
     kibanaVersion: '99.9.9',
     typeRegistry,
     validateDoc: validateDoc || _.noop,
-    log: { info: _.noop, debug: _.noop, warn: _.noop },
+    log: getLogMock(),
   });
 
   const migrator = new IndexMigrator({
-    callCluster,
+    client: createMigrationEsClient(esClient, getLogMock()),
     documentMigrator,
     index,
     obsoleteIndexTemplatePattern,
     mappingProperties,
     batchSize: 10,
-    log: { info: _.noop, debug: _.noop, warn: _.noop },
+    log: getLogMock(),
     pollInterval: 50,
     scrollDuration: '5m',
     serializer: new SavedObjectsSerializer(typeRegistry),
@@ -380,21 +416,22 @@ async function migrateIndex({
   return await migrator.migrate();
 }
 
-function migrationsToTypes(migrations) {
-  return Object.entries(migrations).map(([type, migrations]) => ({
+function migrationsToTypes(
+  migrations: Record<string, SavedObjectMigrationMap>
+): SavedObjectsType[] {
+  return Object.entries(migrations).map(([type, migrationsMap]) => ({
     name: type,
     hidden: false,
     namespaceType: 'single',
     mappings: { properties: {} },
-    migrations: { ...migrations },
+    migrations: { ...migrationsMap },
   }));
 }
 
-async function fetchDocs({ callCluster, index }) {
-  const {
-    hits: { hits },
-  } = await callCluster('search', { index });
-  return hits
+async function fetchDocs(esClient: ElasticsearchClient, index: string) {
+  const { body } = await esClient.search<SearchResponse<any>>({ index });
+
+  return body.hits.hits
     .map((h) => ({
       ...h._source,
       id: h._id,
