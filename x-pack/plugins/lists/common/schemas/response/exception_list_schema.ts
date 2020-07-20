@@ -25,7 +25,6 @@ import {
   updated_by,
 } from '../common/schemas';
 
-// TODO: Should we use a partial here to reflect that this can JSON serialize meta as non existent?
 export const exceptionListSchema = t.exact(
   t.type({
     _tags,
