@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function annotationApiTests({ getService }: FtrProviderContext) {
   const supertestWrite = getService('supertestAsApmAnnotationsWriteUser');

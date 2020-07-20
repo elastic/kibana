@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import expectTopTraces from './expectation/top_traces.expectation.json';
+import expectedTransactionCharts from './expectation/transaction_charts.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -16,38 +16,39 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
   const uiFilters = encodeURIComponent(JSON.stringify({}));
 
-  describe('Top traces', () => {
+  describe('Transaction charts', () => {
     describe('when data is not loaded ', () => {
-      it('handles empty state', async () => {
+      it('handles the empty state', async () => {
         const response = await supertest.get(
-          `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
+          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body).to.eql({ items: [], isAggregationAccurate: true, bucketSize: 1000 });
+        expect(response.body).to.eql({
+          apmTimeseries: {
+            overallAvgDuration: null,
+            responseTimes: {
+              avg: [],
+              p95: [],
+              p99: [],
+            },
+            tpmBuckets: [],
+          },
+        });
       });
     });
 
     describe('when data is loaded', () => {
-      let response: any;
-      before(async () => {
-        await esArchiver.load('8.0.0');
-        response = await supertest.get(
-          `/api/apm/traces?start=${start}&end=${end}&uiFilters=${uiFilters}`
-        );
-      });
+      before(() => esArchiver.load('8.0.0'));
       after(() => esArchiver.unload('8.0.0'));
 
-      it('returns the correct status code', async () => {
+      it('returns the transaction charts', async () => {
+        const response = await supertest.get(
+          `/api/apm/services/opbeans-node/transaction_groups/charts?start=${start}&end=${end}&uiFilters=${uiFilters}`
+        );
+
         expect(response.status).to.be(200);
-      });
-
-      it('returns the correct number of buckets', async () => {
-        expect(response.body.items.length).to.be(33);
-      });
-
-      it('returns the correct buckets and samples', async () => {
-        expect(response.body.items).to.eql(expectTopTraces);
+        expect(response.body).to.eql(expectedTransactionCharts);
       });
     });
   });
