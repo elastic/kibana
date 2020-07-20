@@ -22,9 +22,9 @@ describe('CpuUsageAlert', () => {
     const alert = new CpuUsageAlert();
     expect(alert.type).toBe(ALERT_CPU_USAGE);
     expect(alert.label).toBe('CPU Usage');
-    expect(alert.defaultThrottle).toBe('1m');
+    expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
-    expect(alert.defaultParams).toStrictEqual({ threshold: 90, duration: '5m' });
+    expect(alert.defaultParams).toStrictEqual({ threshold: 85, duration: '5m' });
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       {

@@ -24,7 +24,7 @@ const TYPES = [
     severity: AlertSeverity.Danger,
     color: 'danger',
     label: i18n.translate('xpack.monitoring.alerts.callout.dangerLabel', {
-      defaultMessage: 'DAnger alert(s)',
+      defaultMessage: 'Danger alert(s)',
     }),
   },
 ];
