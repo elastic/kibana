@@ -10,7 +10,7 @@ import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
 import { uniquePidForProcess } from '../models/process_event';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -99,9 +99,11 @@ export const terminatedProcesses = composeSelectors(
 /**
  * Returns a map of `ResolverEvent` entity_id to their related event and alert statistics
  */
-export const relatedEventsStats = composeSelectors(
+export const relatedEventsStats: (
+  state: ResolverState
+) => (nodeID: string) => ResolverNodeStats | undefined = composeSelectors(
   dataStateSelector,
-  dataSelectors.relatedEventsStats
+  dataSelectors.relatedEventStats
 );
 
 /**
