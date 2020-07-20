@@ -36,6 +36,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
       try {
         const {
           _tags,
+          _version,
           tags,
           name,
           description,
@@ -54,6 +55,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
         } else {
           const list = await exceptionLists.updateExceptionList({
             _tags,
+            _version,
             description,
             id,
             listId,
