@@ -6,6 +6,7 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ErrorCode } from '../../../../../common/anomaly_detection';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMLink } from './APMLink';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
@@ -70,9 +71,8 @@ export function showAlert(
   { jobs = [], errorCode }: AnomalyDetectionApiResponse,
   environment: string | undefined
 ) {
-  // don't show warning if an error occurred
-  // might be due to insufficient access in which case we shouldn't draw attention to the feature
-  if (errorCode) {
+  // don't show warning if the user is missing read privileges
+  if (errorCode === ErrorCode.MISSING_READ_PRIVILEGES) {
     return false;
   }
 

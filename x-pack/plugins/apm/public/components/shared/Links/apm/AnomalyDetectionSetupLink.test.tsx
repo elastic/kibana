@@ -13,9 +13,7 @@ const dataWithJobs = {
     { job_id: 'job2', environment: 'production' },
   ],
 };
-
 const dataWithoutJobs = ({ jobs: [] } as unknown) as any;
-const dataWithErrorCode = ({ errorCode: 'any' } as unknown) as any;
 
 describe('#showAlert', () => {
   describe('when an environment is selected', () => {
@@ -46,7 +44,10 @@ describe('#showAlert', () => {
 
   describe('when a known error occurred', () => {
     it('should return false', () => {
-      const result = showAlert(dataWithErrorCode, undefined);
+      const data = ({
+        errorCode: 'MISSING_READ_PRIVILEGES',
+      } as unknown) as any;
+      const result = showAlert(data, undefined);
       expect(result).toBe(false);
     });
   });
