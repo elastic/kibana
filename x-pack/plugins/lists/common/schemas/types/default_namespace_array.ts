@@ -39,7 +39,5 @@ export const DefaultNamespaceArray = new t.Type<
   String
 );
 
-export type DefaultNamespaceC = typeof DefaultNamespaceArray;
-
-export type DefaultNamespaceArrayTypeEncoded = t.OutputOf<typeof DefaultNamespaceArray>;
+export type DefaultNamespaceArrayType = t.OutputOf<typeof DefaultNamespaceArray>;
 export type DefaultNamespaceArrayTypeDecoded = t.TypeOf<typeof DefaultNamespaceArray>;

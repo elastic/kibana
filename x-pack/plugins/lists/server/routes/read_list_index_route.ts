@@ -17,7 +17,7 @@ export const readListIndexRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: LIST_INDEX,
       validate: false,
