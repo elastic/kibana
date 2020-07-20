@@ -70,7 +70,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
         apolloClient
           .query<SourceQuery.Query, SourceQuery.Variables>({
             query: sourceQuery,
-            fetchPolicy: 'cache-first',
+            fetchPolicy: 'network-only',
             variables: {
               sourceId: 'default',
               defaultIndex: indices,
