@@ -65,10 +65,15 @@ describe('OpenTimelineModal', () => {
       </ThemeProvider>
     );
 
-    await waitFor(() => {
-      wrapper.update();
+    await waitFor(
+      () => {
+        wrapper.update();
 
-      expect(wrapper.find('div[data-test-subj="open-timeline-modal"].euiModal').length).toEqual(1);
-    });
-  });
+        expect(wrapper.find('div[data-test-subj="open-timeline-modal"].euiModal').length).toEqual(
+          1
+        );
+      },
+      { timeout: 10000 }
+    );
+  }, 20000);
 });
