@@ -18,7 +18,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HOME_APP_BASE_PATH } from '../../../../common/constants';
 import { getServices } from '../../kibana_services';
@@ -32,20 +32,26 @@ export const ChangeHomeRoute: FunctionComponent<Props> = ({ defaultRoute }) => {
   const changeDefaultRoute = () => uiSettings.set('defaultRoute', defaultRoute);
 
   return (
-    <EuiText>
-      <p>
-        <FormattedMessage
-          id="home.changeHomeRouteText"
-          defaultMessage="Would you prefer to have an alternate home page for this Elastic space? "
-        />
-        <EuiButtonEmpty iconType="home" onClick={changeDefaultRoute}>
+    <EuiFlexGroup className="homPage__footer" alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              id="home.changeHomeRouteText"
+              defaultMessage="Would you prefer to have an alternate home page for this Elastic space? "
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty size="xs" iconType="home" onClick={changeDefaultRoute}>
           <FormattedMessage
             id="home.changeHomeRouteLink"
             defaultMessage="Change your home page route"
           />
         </EuiButtonEmpty>
-      </p>
-    </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

@@ -1,5 +1,5 @@
 .homSolutionsPanel {
-  margin-top: -$euiSizeXL*2;
+  margin-top: -$euiSizeXL;
 
   .homeSolutionsPanel--restrictHalfWidth {
     max-width: 50%;
@@ -24,32 +24,30 @@
     }
   }
 
+  .homSolutionsPanel__header {
+    border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
+    color: $euiColorEmptyShade;
+
+    img {
+      position: absolute;
+      width: auto;
+    }
+  }
+
   .homSolutionsPanel__enterpriseSearch {
     .homSolutionsPanel__enterpriseSearchHeader {
       background-color: #017d73;
-      color: $euiColorEmptyShade;
 
-      .homSolutionsPanel__enterpriseSearchTopLeftImage {
-        .euiImage__img {
-          position: absolute;
-          top: 0;
-          left: 0;
-          margin-top: $euiSizeS;
-          height: $euiSizeXL;
-          width: auto;
-        }
+      .homSolutionsPanel__enterpriseSearchTopLeftImage img {
+        top: $euiSizeS;
+        left: 0;
+        height: $euiSizeXL;
       }
 
-      .homSolutionsPanel__enterpriseSearchBottomRightImage {
-        .euiImage__img {
-          position: absolute;
-          right: 0;
-          bottom: 0;
-          height: $euiSizeXL;
-          width: auto;
-          margin-bottom: $euiSizeS;
-          margin-right: $euiSizeS;
-        }
+      .homSolutionsPanel__enterpriseSearchBottomRightImage img {
+        right: $euiSizeS;
+        bottom: $euiSizeS;
+        height: $euiSizeXL;
       }
     }
   }
@@ -57,18 +55,11 @@
   .homSolutionsPanel__observability {
     .homSolutionsPanel__observabilityHeader {
       background-color: #c42373;
-      color: $euiColorEmptyShade;
 
-      .homSolutionsPanel__observabilityTopRightImage {
-        .euiImage__img {
-          position: absolute;
-          top: 0;
-          right: 0;
-          height: $euiSizeXL;
-          width: auto;
-          margin-top: $euiSizeS;
-          margin-right: $euiSizeS;
-        }
+      .homSolutionsPanel__observabilityTopRightImage img {
+        top: $euiSizeS;
+        right: $euiSizeS;
+        height: $euiSizeXL;
       }
     }
   }
@@ -76,18 +67,11 @@
   .homSolutionsPanel__securitySolution {
     .homSolutionsPanel__securitySolutionHeader {
       background-color: #343741;
-      color: $euiColorEmptyShade;
 
-      .homSolutionsPanel__securitySolutionTopLeftImage {
-        .euiImage__img {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: $euiSizeXXL;
-          width: auto;
-          margin-top: $euiSize;
-          margin-left: $euiSize;
-        }
+      .homSolutionsPanel__securitySolutionTopLeftImage img {
+        top: $euiSizeS;
+        left: $euiSizeS;
+        height: $euiSizeXXL;
       }
     }
   }
@@ -95,26 +79,17 @@
   .homSolutionsPanel__kibana {
     .homSolutionsPanel__kibanaHeader {
       background-color: #006bb4;
-      color: $euiColorEmptyShade;
 
-      .homSolutionsPanel__kibanaTopLeftImage {
-        .euiImage__img {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: $euiSizeXXL * 4;
-          width: auto;
-        }
+      .homSolutionsPanel__kibanaTopLeftImage img {
+        top: 0;
+        left: 0;
+        height: $euiSizeXXL * 4;
       }
 
-      .homSolutionsPanel__kibanaBottomRightImage {
-        .euiImage__img {
-          position: absolute;
-          right: 0;
-          bottom: 0;
-          height: $euiSizeXXL * 4;
-          width: auto;
-        }
+      .homSolutionsPanel__kibanaBottomRightImage img {
+        right: 0;
+        bottom: 0;
+        height: $euiSizeXXL * 4;
       }
     }
   }

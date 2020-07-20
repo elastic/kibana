@@ -242,7 +242,10 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                 onClick={createAppNavigationHandler('/app/app_search')} // TODO: double check this url once enterprise search plugin is merged
               >
                 <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__enterpriseSearchHeader">
+                  <EuiFlexItem
+                    grow={1}
+                    className="homSolutionsPanel__header homSolutionsPanel__enterpriseSearchHeader"
+                  >
                     <EuiImage
                       className="homSolutionsPanel__enterpriseSearchTopLeftImage"
                       url={addBasePath(
@@ -278,7 +281,10 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                 onClick={createAppNavigationHandler(observability.path)}
               >
                 <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__observabilityHeader">
+                  <EuiFlexItem
+                    grow={1}
+                    className="homSolutionsPanel__header homSolutionsPanel__observabilityHeader"
+                  >
                     <EuiImage
                       className="homSolutionsPanel__observabilityTopRightImage"
                       url={addBasePath(
@@ -305,7 +311,10 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
                 onClick={createAppNavigationHandler(securitySolution.path)}
               >
                 <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__securitySolutionHeader">
+                  <EuiFlexItem
+                    grow={1}
+                    className="homSolutionsPanel__header homSolutionsPanel__securitySolutionHeader"
+                  >
                     <EuiImage
                       className="homSolutionsPanel__securitySolutionTopLeftImage"
                       url={addBasePath(
@@ -335,7 +344,10 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
         onClick={createAppNavigationHandler('/app/dashboards')}
       >
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={1} className="homSolutionsPanel__kibanaHeader">
+          <EuiFlexItem
+            grow={1}
+            className="homSolutionsPanel__header homSolutionsPanel__kibanaHeader"
+          >
             <EuiImage
               className="homSolutionsPanel__kibanaTopLeftImage"
               url={addBasePath('/plugins/home/assets/background_kibana_top_left_2x.png')}

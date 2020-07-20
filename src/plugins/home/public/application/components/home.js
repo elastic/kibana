@@ -26,13 +26,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
-  EuiPage,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiHorizontalRule,
@@ -150,28 +146,29 @@ export class Home extends Component {
     const stackManagement = this.findDirectoryById('stack-management');
 
     return (
-      <EuiPage restrictWidth={1200} data-test-subj="homeApp">
-        <EuiPageBody className="eui-displayBlock">
-          <EuiScreenReaderOnly>
-            <h1>
-              <FormattedMessage id="home.welcomeHomePageHeader" defaultMessage="Kibana home" />
-            </h1>
-          </EuiScreenReaderOnly>
-          <EuiSpacer />
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle size="m">
+      <Fragment>
+        <header className="homPageHeader">
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem>
+              <EuiScreenReaderOnly>
                 <h1>
-                  <FormattedMessage
-                    id="home.pageHeader.welcomeNoUserTitle"
-                    defaultMessage="Welcome to {ELASTIC}!"
-                    values={{ ELASTIC: 'Elastic' }}
-                  />
+                  <FormattedMessage id="home.welcomeHomePageHeader" defaultMessage="Kibana home" />
                 </h1>
-              </EuiTitle>
-            </EuiPageHeaderSection>
-            <EuiPageHeaderSection>
-              <EuiFlexGroup>
+              </EuiScreenReaderOnly>
+              <EuiFlexGroup gutterSize="none">
+                <EuiTitle size="m">
+                  <h1>
+                    <FormattedMessage
+                      id="home.pageHeader.welcomeNoUserTitle"
+                      defaultMessage="Welcome to {ELASTIC}!"
+                      values={{ ELASTIC: 'Elastic' }}
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="flexEnd">
                 <EuiFlexItem>
                   <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
                     {i18n.translate('home.pageHeader.addDataButtonLabel', {
@@ -211,110 +208,111 @@ export class Home extends Component {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </header>
+        <div className="homPageContainer">
+          <main className="homPage" data-test-subj="homeApp">
+            <div className="homSolutionsPanel">
+              <SolutionsPanel
+                addBasePath={addBasePath}
+                observability={this.findDirectoryById('observability')}
+                enterpriseSearch={this.findDirectoryById('appSearch')}
+                securitySolution={this.findDirectoryById('securitySolution')}
+              />
 
-          <EuiSpacer />
+              <EuiHorizontalRule margin="xl" />
+              <EuiSpacer size="s" />
 
-          <EuiHorizontalRule />
-
-          <div className="homSolutionsPanel">
-            <SolutionsPanel
-              addBasePath={addBasePath}
-              observability={this.findDirectoryById('observability')}
-              enterpriseSearch={this.findDirectoryById('appSearch')}
-              securitySolution={this.findDirectoryById('securitySolution')}
-            />
-
-            <EuiHorizontalRule />
-
-            <div className="homAddData">
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={1}>
-                  <EuiTitle size="s">
-                    <h3>
-                      {i18n.translate('home.addData.sectionTitle', {
-                        defaultMessage: 'Add your data',
-                      })}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="tableDensityExpanded"
-                    href="#/tutorial_directory/sampleData"
-                    size="s"
-                  >
-                    <FormattedMessage
-                      id="home.addData.sampleDataButtonLabel"
-                      defaultMessage="Try our sample data"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <EuiSpacer />
-
-              <EuiFlexGroup>
-                <EuiFlexItem grow={1}>
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    {this.renderDirectory(fileDataVisualizer)}
-                    <EuiFlexItem className="homHome__synopsisItem">
-                      <Synopsis
-                        description={i18n.translate('home.addData.addIntegrationDescription', {
-                          defaultMessage: 'Add data from a variety of common sources.',
+              <div className="homAddData">
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+                  <EuiFlexItem grow={1}>
+                    <EuiTitle size="s">
+                      <h3>
+                        {i18n.translate('home.addData.sectionTitle', {
+                          defaultMessage: 'Add your data',
                         })}
-                        iconType="indexOpen"
-                        title={i18n.translate('home.addData.addIntegrationTitle', {
-                          defaultMessage: 'Add an integration',
-                        })}
-                        url="#/tutorial_directory"
-                        wrapInPanel
+                      </h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="tableDensityExpanded"
+                      href="#/tutorial_directory/sampleData"
+                      size="xs"
+                    >
+                      <FormattedMessage
+                        id="home.addData.sampleDataButtonLabel"
+                        defaultMessage="Try our sample data"
                       />
-                    </EuiFlexItem>
-                    {this.renderDirectory(ingestManager, {
-                      isBeta: true,
-                      betaLabel: 'Experimental',
-                    })}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-            {security || monitoring || snapshotRestore || indexLifecycleManagement ? (
-              <Fragment>
-                <EuiHorizontalRule />
+                <EuiSpacer />
 
-                <div className="homManageData">
-                  <EuiTitle size="s">
-                    <h3>
-                      {i18n.translate('home.manageData.sectionTitle', {
-                        defaultMessage: 'Manage your data',
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={1}>
+                    <EuiFlexGroup justifyContent="spaceAround">
+                      {this.renderDirectory(fileDataVisualizer)}
+                      <EuiFlexItem className="homHome__synopsisItem">
+                        <Synopsis
+                          description={i18n.translate('home.addData.addIntegrationDescription', {
+                            defaultMessage: 'Add data from a variety of common sources.',
+                          })}
+                          iconType="indexOpen"
+                          title={i18n.translate('home.addData.addIntegrationTitle', {
+                            defaultMessage: 'Add an integration',
+                          })}
+                          url="#/tutorial_directory"
+                          wrapInPanel
+                        />
+                      </EuiFlexItem>
+                      {this.renderDirectory(ingestManager, {
+                        isBeta: true,
+                        betaLabel: 'Experimental',
                       })}
-                    </h3>
-                  </EuiTitle>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
 
-                  <EuiSpacer />
+              {security || monitoring || snapshotRestore || indexLifecycleManagement ? (
+                <Fragment>
+                  <EuiHorizontalRule margin="xl" />
+                  <EuiSpacer size="s" />
 
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    {this.renderDirectory(security)}
-                    {this.renderDirectory(monitoring)}
-                    {this.renderDirectory(snapshotRestore)}
-                    {this.renderDirectory(indexLifecycleManagement)}
-                  </EuiFlexGroup>
-                </div>
-              </Fragment>
-            ) : null}
+                  <div className="homManageData">
+                    <EuiTitle size="s">
+                      <h3>
+                        {i18n.translate('home.manageData.sectionTitle', {
+                          defaultMessage: 'Manage your data',
+                        })}
+                      </h3>
+                    </EuiTitle>
 
-            {canChangeHomeRoute && (
-              <Fragment>
-                <EuiHorizontalRule />
-                <ChangeHomeRoute defaultRoute={HOME_APP_BASE_PATH} />
-              </Fragment>
-            )}
-          </div>
-        </EuiPageBody>
-      </EuiPage>
+                    <EuiSpacer />
+
+                    <EuiFlexGroup justifyContent="spaceAround">
+                      {this.renderDirectory(security)}
+                      {this.renderDirectory(monitoring)}
+                      {this.renderDirectory(snapshotRestore)}
+                      {this.renderDirectory(indexLifecycleManagement)}
+                    </EuiFlexGroup>
+                  </div>
+                </Fragment>
+              ) : null}
+
+              {canChangeHomeRoute && (
+                <Fragment>
+                  <EuiHorizontalRule margin="xl" />
+                  <ChangeHomeRoute defaultRoute={HOME_APP_BASE_PATH} />
+                </Fragment>
+              )}
+            </div>
+          </main>
+        </div>
+      </Fragment>
     );
   }
 
