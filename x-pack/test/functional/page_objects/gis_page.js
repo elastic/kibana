@@ -657,12 +657,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await comboBox.getOptionsList(`colorStopInput1`);
     }
 
-    async isChecked() {}
-
     async enableAutoFitToBounds() {
       await testSubjects.click('openSettingsButton');
       const isEnabled = await testSubjects.getAttribute('autoFitToDataBoundsSwitch', 'checked');
-      log.debug(`isEnabled: ${isEnabled}`);
       if (!isEnabled) {
         await retry.try(async () => {
           await testSubjects.click('autoFitToDataBoundsSwitch');
@@ -670,7 +667,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
             'autoFitToDataBoundsSwitch',
             'checked'
           );
-          log.debug(`ensureEnabled: ${ensureEnabled}`);
           if (!ensureEnabled) {
             throw new Error('autoFitToDataBoundsSwitch is not enabled');
           }
