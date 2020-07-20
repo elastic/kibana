@@ -3,10 +3,6 @@
 source test/scripts/jenkins_test_setup_oss.sh
 
 if [[ -z "$CODE_COVERAGE" ]]; then
-  if [ "$CI_GROUP" == "1" ]; then
-    exit 1
-  fi
-
   checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
 
   if [ "$CI_GROUP" == "1" ]; then
