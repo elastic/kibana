@@ -17,8 +17,8 @@ import {
   getFindExceptionListItemSchemaMultipleMock,
 } from './find_exception_list_item_schema.mock';
 import {
-  FindExceptionListItemSchemaPartial,
-  FindExceptionListItemSchemaPartialDecoded,
+  FindExceptionListItemSchema,
+  FindExceptionListItemSchemaDecoded,
   findExceptionListItemSchema,
 } from './find_exception_list_item_schema';
 
@@ -42,15 +42,19 @@ describe('find_list_item_schema', () => {
   });
 
   test('it should validate just a list_id where it decodes into an array for list_id and adds a namespace_type of "single" as an array', () => {
-    const payload: FindExceptionListItemSchemaPartial = { list_id: LIST_ID };
+    const payload: FindExceptionListItemSchema = { list_id: LIST_ID };
     const decoded = findExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: FindExceptionListItemSchemaPartialDecoded = {
+    const expected: FindExceptionListItemSchemaDecoded = {
       filter: [],
       list_id: [LIST_ID],
       namespace_type: ['single'],
+      page: undefined,
+      per_page: undefined,
+      sort_field: undefined,
+      sort_order: undefined,
     };
     expect(message.schema).toEqual(expected);
   });
@@ -86,7 +90,7 @@ describe('find_list_item_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: FindExceptionListItemSchemaPartialDecoded = {
+    const expected: FindExceptionListItemSchemaDecoded = {
       ...getFindExceptionListItemSchemaDecodedMock(),
       filter: [],
     };
@@ -118,7 +122,7 @@ describe('find_list_item_schema', () => {
   });
 
   test('it should not allow an extra key to be sent in', () => {
-    const payload: FindExceptionListItemSchemaPartial & {
+    const payload: FindExceptionListItemSchema & {
       extraKey: string;
     } = { ...getFindExceptionListItemSchemaMock(), extraKey: 'some new value' };
     const decoded = findExceptionListItemSchema.decode(payload);
