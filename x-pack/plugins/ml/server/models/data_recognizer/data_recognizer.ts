@@ -93,6 +93,7 @@ export interface RecognizeResult {
 interface ObjectExistResult {
   id: string;
   type: string;
+  exists?: boolean;
 }
 
 interface ObjectExistResponse {
@@ -493,7 +494,13 @@ export class DataRecognizer {
       // update the exists flag in the results
       this.updateKibanaResults(results.kibana, savedObjects);
       // create the savedObjects
-      saveResults.savedObjects = await this.saveKibanaObjects(savedObjects);
+      try {
+        saveResults.savedObjects = await this.saveKibanaObjects(savedObjects);
+      } catch (error) {
+        // only one error is returned for the bulk create saved object request
+        // so populate every saved object with the same error.
+        this.populateKibanaResultErrors(results.kibana, error.output?.payload);
+      }
     }
     // merge all the save results
     this.updateResults(results, saveResults);
@@ -610,7 +617,26 @@ export class DataRecognizer {
       (type) => {
         kibanaSaveResults[type].forEach((resultItem) => {
           const i = objectExistResults.find((o) => o.id === resultItem.id && o.type === type);
-          resultItem.exists = i !== undefined;
+          resultItem.exists = i !== undefined && i.exists;
+        });
+      }
+    );
+  }
+
+  // add an error object to every kibana saved object,
+  // if it doesn't already exist.
+  populateKibanaResultErrors(
+    kibanaSaveResults: DataRecognizerConfigResponse['kibana'],
+    error: any
+  ) {
+    const errorObj =
+      error === undefined ? { message: 'Unknown error when creating saved object' } : error;
+    (Object.keys(kibanaSaveResults) as Array<keyof DataRecognizerConfigResponse['kibana']>).forEach(
+      (type) => {
+        kibanaSaveResults[type].forEach((resultItem) => {
+          if (resultItem.exists === false) {
+            resultItem.error = errorObj;
+          }
         });
       }
     );
