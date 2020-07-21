@@ -16,6 +16,7 @@ import {
   MetaOrUndefined,
   NameOrUndefined,
   UpdateEsListSchema,
+  VersionOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
 
@@ -31,6 +32,7 @@ export interface UpdateListOptions {
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   dateNow?: string;
+  version: VersionOrUndefined;
 }
 
 export const updateList = async ({
@@ -43,12 +45,14 @@ export const updateList = async ({
   user,
   meta,
   dateNow,
+  version,
 }: UpdateListOptions): Promise<ListSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
   const list = await getList({ callCluster, id, listIndex });
   if (list == null) {
     return null;
   } else {
+    const calculatedVersion = version == null ? list.version + 1 : version;
     const doc: UpdateEsListSchema = {
       description,
       meta,
@@ -70,6 +74,7 @@ export const updateList = async ({
       description: description ?? list.description,
       deserializer: list.deserializer,
       id: response._id,
+      immutable: list.immutable,
       meta,
       name: name ?? list.name,
       serializer: list.serializer,
@@ -77,6 +82,7 @@ export const updateList = async ({
       type: list.type,
       updated_at: updatedAt,
       updated_by: user,
+      version: calculatedVersion,
     };
   }
 };
