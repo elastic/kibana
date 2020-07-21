@@ -8,10 +8,10 @@ import { fromExpression, toExpression, Ast } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { syncFilterExpression } from '../../../public/lib/sync_filter_expression';
-import { RendererFactory } from '../../../types';
+import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
+import { RendererFactory } from '../../../../types';
 import { DropdownFilter } from './component';
-import { RendererStrings } from '../../../i18n';
+import { RendererStrings } from '../../../../i18n';
 
 const { dropdownFilter: strings } = RendererStrings;
 
