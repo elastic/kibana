@@ -11,15 +11,23 @@ import { act } from 'react-dom/test-utils';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
 import { ListSchema } from '../../../../../lists/common/schemas/response';
 import { TestProviders } from '../../../common/mock';
-import { ValueListsTable } from './table';
+import { ValueListsTable, TableItem } from './table';
+
+const buildItems = (lists: ListSchema[]): TableItem[] =>
+  lists.map((list) => ({
+    ...list,
+    isDeleting: false,
+    isExporting: false,
+  }));
 
 describe('ValueListsTable', () => {
   it('renders a row for each list', () => {
     const lists = Array<ListSchema>(3).fill(getListResponseMock());
+    const items = buildItems(lists);
     const container = mount(
       <TestProviders>
         <ValueListsTable
-          lists={lists}
+          items={items}
           onChange={jest.fn()}
           loading={false}
           onExport={jest.fn()}
@@ -34,11 +42,12 @@ describe('ValueListsTable', () => {
 
   it('calls onChange when pagination is modified', () => {
     const lists = Array<ListSchema>(6).fill(getListResponseMock());
+    const items = buildItems(lists);
     const onChange = jest.fn();
     const container = mount(
       <TestProviders>
         <ValueListsTable
-          lists={lists}
+          items={items}
           onChange={onChange}
           loading={false}
           onExport={jest.fn()}
@@ -59,11 +68,12 @@ describe('ValueListsTable', () => {
 
   it('calls onExport when export is clicked', () => {
     const lists = Array<ListSchema>(3).fill(getListResponseMock());
+    const items = buildItems(lists);
     const onExport = jest.fn();
     const container = mount(
       <TestProviders>
         <ValueListsTable
-          lists={lists}
+          items={items}
           onChange={jest.fn()}
           loading={false}
           onExport={onExport}
@@ -86,11 +96,12 @@ describe('ValueListsTable', () => {
 
   it('calls onDelete when delete is clicked', () => {
     const lists = Array<ListSchema>(3).fill(getListResponseMock());
+    const items = buildItems(lists);
     const onDelete = jest.fn();
     const container = mount(
       <TestProviders>
         <ValueListsTable
-          lists={lists}
+          items={items}
           onChange={jest.fn()}
           loading={false}
           onExport={jest.fn()}
