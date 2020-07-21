@@ -70,11 +70,7 @@ These singletons can then be changed at will, as well as audited for unused meth
 
 Canvas uses Redux.  Component code is divided into React components and Redux containers.  This way, components can be reused, their containers can be edited, and both can be tested independently.
 
-Canvas has an "index-export" structure that has served it well, until recently.  In this structure, the `index.ts` file serves as the primary export of the Redux component, (and holds that code).  The component is then named-- `component.tsx`-- and consumed in the `index` file.
-
-The problem we've run into is when you have sub-components which are also connected to Redux.  To maintain this structure, each sub-component and its Redux container would then be stored in a subdirectory, (with only two files in it).
-
-Therefore, we are migrating to a different structure which uses the `index.ts` file as a thin exporting index, rather than functional code:
+Canvas is actively migrating to a structure which uses the `index.ts` file as a thin exporting index, rather than functional code:
 
 ```
 - components
@@ -99,6 +95,14 @@ export { Foo } from './foo';
 export { Foo as FooComponent } from './foo.component';
 ```
 
+### Why?
+
+Canvas has been using an "index-export" structure that has served it well, until recently.  In this structure, the `index.ts` file serves as the primary export of the Redux component, (and holds that code).  The component is then named-- `component.tsx`-- and consumed in the `index` file.
+
+The problem we've run into is when you have sub-components which are also connected to Redux.  To maintain this structure, each sub-component and its Redux container would then be stored in a subdirectory, (with only two files in it).
+
+> NOTE: if a PR touches component code that is in the older structure, it should be migrated to the structure above.
+
 ## Storybook
 
 Canvas uses [Storybook](https://storybook.js.org) to test and develop components.  This has a number of benefits:
@@ -107,3 +111,29 @@ Canvas uses [Storybook](https://storybook.js.org) to test and develop components
 - Testing components interactively without starting ES + Kibana.
 - Automatic Storyshot integration with Jest
 
+### Using Storybook
+
+The Canvas Storybook instance can be started by running `node scripts/storybook` from the Canvas root directory.  It has a number of options:
+
+```
+node scripts/storybook
+
+  Storybook runner for Canvas.
+
+  Options:
+    --clean            Forces a clean of the Storybook DLL and exits.
+    --dll              Cleans and builds the Storybook dependency DLL and exits.
+    --stats            Produces a Webpack stats file.
+    --site             Produces a site deployment of this Storybook.
+    --verbose, -v      Log verbosely
+    --debug            Log debug messages (less than verbose)
+    --quiet            Only log errors
+    --silent           Don't log anything
+    --help             Show this message
+```
+
+### What about `kbn-storybook`?
+
+Canvas wants to move to the Kibana Storybook instance as soon as feasible.  There are few tweaks Canvas makes to Storybook, so we're actively working with the maintainers to make that migration successful.
+
+In the meantime, people can test our progress by running `node scripts/storybook_new` from the Canvas root.
