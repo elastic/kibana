@@ -15,6 +15,13 @@ const ELASTICSEARCH_USERNAME = (argv.username as string) || 'elastic';
 const ELASTICSEARCH_PASSWORD = argv.password as string | undefined;
 const KIBANA_BASE_URL = argv.kibanaUrl as string | undefined;
 
+console.log({
+  KIBANA_ROLE_SUFFIX,
+  ELASTICSEARCH_USERNAME,
+  ELASTICSEARCH_PASSWORD,
+  KIBANA_BASE_URL,
+});
+
 interface User {
   username: string;
   roles: string[];
