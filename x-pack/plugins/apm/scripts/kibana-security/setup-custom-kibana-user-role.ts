@@ -84,6 +84,16 @@ async function init() {
     return;
   }
 
+  if (
+    !KIBANA_BASE_URL.startsWith('https://') &&
+    !KIBANA_BASE_URL.startsWith('http://')
+  ) {
+    console.log(
+      'Kibana url must be prefixed with http(s):// `--kibana-url http://localhost:5601`'
+    );
+    return;
+  }
+
   if (!KIBANA_ROLE_SUFFIX) {
     console.log(
       'Please specify a unique suffix that will be added to your roles with `--role-suffix <suffix>` '
