@@ -16,7 +16,7 @@ interface Props {
 
 export const TabPreview = ({ templateDetails }: Props) => {
   return (
-    <div data-test-subj="previewTab">
+    <div data-test-subj="previewTabContent">
       <EuiText>
         <p>
           <FormattedMessage
