@@ -74,7 +74,7 @@ export const ContextMenuActions: React.FunctionComponent<Props> = ({
           />
         )
       }
-      isOpen={typeof isOpen !== 'undefined' ? isOpen : isOpenState}
+      isOpen={isOpen === undefined ? isOpenState : isOpen}
       closePopover={handleCloseMenu}
     >
       {'items' in props ? (
