@@ -8,10 +8,12 @@ import Handlebars from 'handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
 import { PackageConfigConfigRecord } from '../../../../common';
 
+const handlebars = Handlebars.create();
+
 export function createStream(variables: PackageConfigConfigRecord, streamTemplate: string) {
   const { vars, yamlValues } = buildTemplateVariables(variables, streamTemplate);
 
-  const template = Handlebars.compile(streamTemplate, { noEscape: true });
+  const template = handlebars.compile(streamTemplate, { noEscape: true });
   let stream = template(vars);
   stream = replaceRootLevelYamlVariables(yamlValues, stream);
 
@@ -93,7 +95,7 @@ function containsHelper(item: string, list: string[], options: any) {
   }
   return '';
 }
-Handlebars.registerHelper('contains', containsHelper);
+handlebars.registerHelper('contains', containsHelper);
 
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {

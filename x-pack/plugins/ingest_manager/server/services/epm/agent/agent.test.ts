@@ -84,7 +84,7 @@ foo: bar
     });
   });
 
-  it('should support conditional inclusion blocks', () => {
+  describe('contains blocks', () => {
     const streamTemplate = `
 input: log
 paths:
@@ -106,34 +106,42 @@ password: {{password}}
 hidden_password: {{password}}
 {{/if}}
       `;
-    const noForwarded = {
-      paths: { value: ['/usr/local/var/log/nginx/access.log'] },
-      password: { type: 'password', value: '' },
-      tags: { value: ['foo', 'bar'] },
-    };
-    const forwarded = {
-      paths: { value: ['/usr/local/var/log/nginx/access.log'] },
-      password: { type: 'password', value: '' },
-      tags: { value: ['foo', 'bar', 'forwarded'] },
-    };
 
-    expect(createStream(noForwarded, streamTemplate)).toEqual({
-      input: 'log',
-      paths: ['/usr/local/var/log/nginx/access.log'],
-      exclude_files: ['.gz$'],
-      processors: [{ add_locale: null }],
-      password: '',
-      tags: ['foo', 'bar'],
+    it('should support when a value is not contained in the array', () => {
+      const vars = {
+        paths: { value: ['/usr/local/var/log/nginx/access.log'] },
+        password: { type: 'password', value: '' },
+        tags: { value: ['foo', 'bar', 'forwarded'] },
+      };
+
+      const output = createStream(vars, streamTemplate);
+      expect(output).toEqual({
+        input: 'log',
+        paths: ['/usr/local/var/log/nginx/access.log'],
+        exclude_files: ['.gz$'],
+        processors: [{ add_locale: null }],
+        password: '',
+        'publisher_pipeline.disable_host': true,
+        tags: ['foo', 'bar', 'forwarded'],
+      });
     });
 
-    expect(createStream(forwarded, streamTemplate)).toEqual({
-      input: 'log',
-      paths: ['/usr/local/var/log/nginx/access.log'],
-      exclude_files: ['.gz$'],
-      processors: [{ add_locale: null }],
-      password: '',
-      'publisher_pipeline.disable_host': true,
-      tags: ['foo', 'bar', 'forwarded'],
+    it('should support when a value is contained in the array', () => {
+      const vars = {
+        paths: { value: ['/usr/local/var/log/nginx/access.log'] },
+        password: { type: 'password', value: '' },
+        tags: { value: ['foo', 'bar'] },
+      };
+
+      const output = createStream(vars, streamTemplate);
+      expect(output).toEqual({
+        input: 'log',
+        paths: ['/usr/local/var/log/nginx/access.log'],
+        exclude_files: ['.gz$'],
+        processors: [{ add_locale: null }],
+        password: '',
+        tags: ['foo', 'bar'],
+      });
     });
   });
 
