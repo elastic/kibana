@@ -63,7 +63,6 @@ export const ComponentTemplatesSelector = ({
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [componentsSelected, setComponentsSelected] = useState<ComponentTemplateListItem[]>([]);
   const isInitialized = useRef(false);
-  const isMounted = useRef(false);
 
   const hasSelection = Object.keys(componentsSelected).length > 0;
   const hasComponents = components && components.length > 0 ? true : false;
@@ -71,14 +70,6 @@ export const ComponentTemplatesSelector = ({
   const closeComponentTemplateDetails = () => {
     setSelectedComponent(null);
   };
-
-  useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
 
   useEffect(() => {
     if (components) {
@@ -132,15 +123,6 @@ export const ComponentTemplatesSelector = ({
       removeContent('componentTemplateDetails');
     }
   }, [selectedComponent, removeContent]);
-
-  useEffect(() => {
-    return () => {
-      // Close the flyout when unmounting the component
-      if (!isMounted.current) {
-        removeContent('componentTemplateDetails');
-      }
-    };
-  }, [removeContent]);
 
   const onSelectionReorder = (reorderedComponents: ComponentTemplateListItem[]) => {
     setComponentsSelected(reorderedComponents);

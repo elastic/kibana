@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -46,7 +46,6 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   const { data, isLoading, error, sendRequest } = api.useLoadComponentTemplates();
 
   const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
-  const isMounted = useRef(false);
 
   const goToComponentTemplateList = useCallback(() => {
     return history.push({
@@ -76,14 +75,6 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   useEffect(() => {
     trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
   }, [trackMetric]);
-
-  useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
 
   useEffect(() => {
     if (componentTemplateName) {
@@ -145,15 +136,6 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
       removeContent('componentTemplateDetails');
     }
   }, [componentTemplateName, removeContent]);
-
-  useEffect(() => {
-    return () => {
-      if (!isMounted.current) {
-        // Close the flyout when unmounting the component
-        removeContent('componentTemplateDetails');
-      }
-    };
-  }, [removeContent]);
 
   let content: React.ReactNode;
 

@@ -87,14 +87,12 @@ export const EditFieldContainer = React.memo(() => {
 
   useEffect(() => {
     return () => {
-      if (!isMounted.current) {
+      if (!isMounted.current && isEditing) {
         // When the component unmounts, exit edit mode.
         exitEdit();
-        // and close the flyout
-        removeContent('mappingsEditField');
       }
     };
-  }, [exitEdit, removeContent]);
+  }, [isEditing, exitEdit]);
 
   return modal.isOpen ? <ModalConfirmationDeleteFields {...modal.props} /> : null;
 });

@@ -17,7 +17,15 @@
  * under the License.
  */
 
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+} from 'react';
 import { EuiFlyout } from '@elastic/eui';
 
 interface Context {
@@ -117,5 +125,46 @@ export const useFlyoutMultiContent = () => {
     throw new Error('useFlyoutMultiContent must be used within a <FlyoutMultiContentProvider />');
   }
 
-  return ctx;
+  const isMounted = useRef(false);
+  /**
+   * A component can add one or multiple content to the flyout
+   * during its lifecycle. When it unmounts, we will remove
+   * all those content added to the flyout.
+   */
+  const contentAdded = useRef<Set<string> | undefined>(undefined);
+  const { removeContent, addContent: addContentContext } = ctx;
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const getContentAdded = useCallback(() => {
+    if (contentAdded.current === undefined) {
+      contentAdded.current = new Set();
+    }
+    return contentAdded.current;
+  }, []);
+
+  const addContent: Context['addContent'] = useCallback(
+    (content) => {
+      getContentAdded().add(content.id);
+      return addContentContext(content);
+    },
+    [getContentAdded, addContentContext]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (!isMounted.current) {
+        // When the component unmounts, remove all the content it has added to the flyout
+        Array.from(getContentAdded()).forEach(removeContent);
+      }
+    };
+  }, [removeContent]);
+
+  return { ...ctx, addContent };
 };

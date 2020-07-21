@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButton } from '@elastic/eui';
@@ -97,8 +97,7 @@ export const TemplateForm = ({
   onSave,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
-  const { addContent, removeContent, closeFlyout } = useFlyoutMultiContent();
-  const isMounted = useRef(false);
+  const { addContent, closeFlyout } = useFlyoutMultiContent();
 
   const indexTemplate = defaultValue ?? {
     name: '',
@@ -266,23 +265,6 @@ export const TemplateForm = ({
     const template = buildTemplateObject(indexTemplate)(wizardData);
     return template;
   }, [buildTemplateObject, indexTemplate, wizardContent]);
-
-  useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (!isMounted.current) {
-        // Close the "Preview template" flyout when unmounting the component
-        removeContent('simulateTemplate');
-      }
-    };
-  }, [removeContent]);
 
   return (
     <>
