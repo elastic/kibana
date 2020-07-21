@@ -26,7 +26,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
     validateUrls(relativeUrls);
 
     return {
-      basePath: setupDeps.basePath(req),
+      basePath: setupDeps.basePath(req).serverBasePath,
       browserTimezone,
       forceNow: new Date().toISOString(),
       headers: serializedEncryptedHeaders,
