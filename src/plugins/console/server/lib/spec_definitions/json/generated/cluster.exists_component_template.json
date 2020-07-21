@@ -1,11 +1,11 @@
 {
-  "cluster.delete_component_template": {
+  "cluster.exists_component_template": {
     "url_params": {
-      "timeout": "",
-      "master_timeout": ""
+      "master_timeout": "",
+      "local": "__flag__"
     },
     "methods": [
-      "DELETE"
+      "HEAD"
     ],
     "patterns": [
       "_component_template/{name}"

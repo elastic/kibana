@@ -1,7 +1,6 @@
 {
-  "indices.put_mapping": {
+  "indices.add_block": {
     "url_params": {
-      "include_type_name": "__flag__",
       "timeout": "",
       "master_timeout": "",
       "ignore_unavailable": "__flag__",
@@ -12,16 +11,14 @@
         "hidden",
         "none",
         "all"
-      ],
-      "write_index_only": "__flag__"
+      ]
     },
     "methods": [
-      "PUT",
-      "POST"
+      "PUT"
     ],
     "patterns": [
-      "{indices}/_mapping"
+      "{indices}/_block/{block}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-put-mapping.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-blocks.html"
   }
 }
