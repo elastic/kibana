@@ -17,20 +17,16 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, createAnyInstanceSerializer } from '@kbn/dev-utils';
 
 import { readCliArgs } from './args';
 
-const fn = (...subArgs: string[]) => {
-  const result = readCliArgs(['node', 'scripts/build', ...subArgs]);
-  (result as any).log = result.log instanceof ToolingLog ? '<ToolingLog>' : String(result.log);
-  return result;
-};
+expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
 it('renders help if `--help` passed', () => {
-  expect(fn('--help')).toMatchInlineSnapshot(`
+  expect(readCliArgs(['node', 'scripts/build', '--help'])).toMatchInlineSnapshot(`
     Object {
-      "log": "<ToolingLog>",
+      "log": <ToolingLog>,
       "showHelp": true,
       "unknownFlags": Array [],
     }
@@ -38,7 +34,7 @@ it('renders help if `--help` passed', () => {
 });
 
 it('build default and oss dist for current platform, without packages, by default', () => {
-  expect(fn()).toMatchInlineSnapshot(`
+  expect(readCliArgs(['node', 'scripts/build'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
@@ -53,7 +49,7 @@ it('build default and oss dist for current platform, without packages, by defaul
         "targetAllPlatforms": false,
         "versionQualifier": "",
       },
-      "log": "<ToolingLog>",
+      "log": <ToolingLog>,
       "showHelp": false,
       "unknownFlags": Array [],
     }
@@ -61,7 +57,7 @@ it('build default and oss dist for current platform, without packages, by defaul
 });
 
 it('builds packages if --all-platforms is passed', () => {
-  expect(fn('--all-platforms')).toMatchInlineSnapshot(`
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
@@ -76,7 +72,7 @@ it('builds packages if --all-platforms is passed', () => {
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
-      "log": "<ToolingLog>",
+      "log": <ToolingLog>,
       "showHelp": false,
       "unknownFlags": Array [],
     }
@@ -84,7 +80,7 @@ it('builds packages if --all-platforms is passed', () => {
 });
 
 it('limits packages if --rpm passed with --all-platforms', () => {
-  expect(fn('--all-platforms', '--rpm')).toMatchInlineSnapshot(`
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--rpm'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
@@ -99,7 +95,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
-      "log": "<ToolingLog>",
+      "log": <ToolingLog>,
       "showHelp": false,
       "unknownFlags": Array [],
     }
@@ -107,7 +103,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
 });
 
 it('limits packages if --deb passed with --all-platforms', () => {
-  expect(fn('--all-platforms', '--deb')).toMatchInlineSnapshot(`
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--deb'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
@@ -122,7 +118,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
-      "log": "<ToolingLog>",
+      "log": <ToolingLog>,
       "showHelp": false,
       "unknownFlags": Array [],
     }
@@ -130,7 +126,8 @@ it('limits packages if --deb passed with --all-platforms', () => {
 });
 
 it('limits packages if --docker passed with --all-platforms', () => {
-  expect(fn('--all-platforms', '--docker')).toMatchInlineSnapshot(`
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--docker']))
+    .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
@@ -145,7 +142,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
-      "log": "<ToolingLog>",
+      "log": <ToolingLog>,
       "showHelp": false,
       "unknownFlags": Array [],
     }
@@ -153,7 +150,8 @@ it('limits packages if --docker passed with --all-platforms', () => {
 });
 
 it('limits packages if --docker passed with --skip-docker-ubi and --all-platforms', () => {
-  expect(fn('--all-platforms', '--docker', '--skip-docker-ubi')).toMatchInlineSnapshot(`
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--docker', '--skip-docker-ubi']))
+    .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
@@ -168,7 +166,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "targetAllPlatforms": true,
         "versionQualifier": "",
       },
-      "log": "<ToolingLog>",
+      "log": <ToolingLog>,
       "showHelp": false,
       "unknownFlags": Array [],
     }
