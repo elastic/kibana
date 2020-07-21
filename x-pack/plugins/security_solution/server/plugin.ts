@@ -7,6 +7,7 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import LRU from 'lru-cache';
 
 import {
   CoreSetup,
@@ -34,7 +35,7 @@ import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
-import { ManifestTask, ExceptionsCache } from './endpoint/lib/artifacts';
+import { ManifestTask } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
@@ -95,14 +96,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
 
   private manifestTask: ManifestTask | undefined;
-  private exceptionsCache: ExceptionsCache;
+  private exceptionsCache: LRU<string, Buffer>;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
-    this.exceptionsCache = new ExceptionsCache(5); // TODO
+    this.exceptionsCache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }); // TODO
 
     this.logger.debug('plugin initialized');
   }

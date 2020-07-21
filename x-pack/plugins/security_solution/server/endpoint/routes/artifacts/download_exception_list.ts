@@ -12,6 +12,7 @@ import {
   SavedObject,
 } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import LRU from 'lru-cache';
 import { authenticateAgentWithAccessToken } from '../../../../../ingest_manager/server/services/agents/authenticate';
 import { validate } from '../../../../common/validate';
 import { LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG } from '../../../../common/endpoint/constants';
@@ -33,7 +34,7 @@ const allowlistBaseRoute: string = '/api/endpoint/artifacts';
 export function registerDownloadExceptionListRoute(
   router: IRouter,
   endpointContext: EndpointAppContext,
-  cache: ExceptionsCache
+  cache: LRU<string, Buffer>
 ) {
   router.get(
     {
