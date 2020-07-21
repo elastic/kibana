@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   EuiSelectable,
   EuiPopover,
@@ -14,14 +14,59 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiIcon,
+  keys,
 } from '@elastic/eui';
-import { map, takeUntil } from 'rxjs/operators';
-import { GlobalSearchResultProvider } from '../../global_search/public';
+import { ApplicationStart } from 'kibana/public';
+import { GlobalSearchResultProvider, GlobalSearchResult } from '../../../global_search/public';
 
-export function SearchBar({ globalSearch }: GlobalSearchResultProvider) {
+interface Props {
+  globalSearch: GlobalSearchResultProvider;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
+}
+
+export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   const [isSearchFocused, setSearchFocus] = useState(false);
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState([] as GlobalSearchResult[]);
   const [isLoading, setLoadingState] = useState(false);
+  const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
+
+  const onSearch = useCallback(
+    (term: string) => {
+      const arr: GlobalSearchResult[] = [];
+      setLoadingState(true);
+      globalSearch.find(term, {}).subscribe({
+        next: ({ results }) => {
+          arr.push(...results);
+          setOptions([...arr]);
+        },
+        error: () => {
+          // TODO
+        },
+        complete: () => {
+          setLoadingState(false);
+        },
+      });
+    },
+    [globalSearch]
+  );
+
+  useEffect(() => {
+    onSearch('');
+  }, [onSearch]);
+
+  useEffect(() => {
+    const openSearch = (event: KeyboardEvent) => {
+      if (event.key === 'k' && event.metaKey) {
+        // TODO if windows, use ctrl
+        if (searchRef) searchRef.focus();
+      }
+    };
+    window.addEventListener('keydown', openSearch);
+
+    return () => {
+      window.removeEventListener('keydown', openSearch);
+    };
+  }, [searchRef]);
 
   return (
     <EuiSelectable
@@ -30,6 +75,7 @@ export function SearchBar({ globalSearch }: GlobalSearchResultProvider) {
       singleSelection={true}
       searchProps={{
         isLoading,
+        onSearch,
         'data-test-subj': 'header-search',
         onFocus: () => {
           setSearchFocus(true);
@@ -38,21 +84,8 @@ export function SearchBar({ globalSearch }: GlobalSearchResultProvider) {
         placeholder: 'Search for anything...',
         incremental: true,
         compressed: true,
-        onSearch: async (term) => {
-          const arr = [];
-          setLoadingState(true);
-          globalSearch.find(term, {}).subscribe({
-            next: ({ results }) => {
-              arr.push(...results);
-              setOptions([...arr]);
-            },
-            error: () => {
-              // TODO
-            },
-            complete: () => {
-              setLoadingState(false);
-            },
-          });
+        inputRef: (ref: HTMLInputElement) => {
+          setSearchRef(ref);
         },
       }}
       listProps={{
@@ -74,6 +107,19 @@ export function SearchBar({ globalSearch }: GlobalSearchResultProvider) {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
+      onChange={(selected) => {
+        const { url } = selected.find(({ checked }) => checked === 'on');
+
+        if (typeof url === 'string') {
+          if (url.startsWith('https://')) {
+            window.location.assign(url);
+          } else {
+            navigateToUrl(url);
+          }
+        } else {
+          // TODO
+        }
+      }}
     >
       {(list, search) => (
         <>

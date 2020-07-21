@@ -8,17 +8,15 @@ import { CoreStart, Plugin } from 'src/core/public';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import ReactDOM from 'react-dom';
+import { ApplicationStart } from 'kibana/public';
 import { SearchBar } from '../public/components/search_bar';
-import { GlobalSearchPluginSetup } from '../../global_search/public';
+import { GlobalSearchPluginStart } from '../../global_search/public';
 
 export interface GlobalSearchBarPluginStartDeps {
   globalSearch: GlobalSearchPluginStart;
 }
 
-export class GlobalSearchProvidersPlugin
-  implements Plugin<{}, {}, GlobalSearchBarPluginSetupDeps, {}> {
-  private search: GlobalSearchPluginSetup | undefined = undefined;
-
+export class GlobalSearchProvidersPlugin implements Plugin<{}, {}> {
   public async setup() {
     return {};
   }
@@ -26,15 +24,19 @@ export class GlobalSearchProvidersPlugin
   public start(core: CoreStart, { globalSearch }: GlobalSearchBarPluginStartDeps) {
     core.chrome.navControls.registerCenter({
       order: 1000,
-      mount: (target) => this.mount(target, globalSearch),
+      mount: (target) => this.mount(target, globalSearch, core.application.navigateToUrl),
     });
     return {};
   }
 
-  private mount(targetDomElement: HTMLElement, globalSearch: GlobalSearchPluginStart) {
+  private mount(
+    targetDomElement: HTMLElement,
+    globalSearch: GlobalSearchPluginStart,
+    navigateToUrl: ApplicationStart['navigateToUrl']
+  ) {
     ReactDOM.render(
       <I18nProvider>
-        <SearchBar globalSearch={globalSearch} />
+        <SearchBar globalSearch={globalSearch} navigateToUrl={navigateToUrl} />
       </I18nProvider>,
       targetDomElement
     );
