@@ -185,50 +185,6 @@ describe('QueryBar ', () => {
     });
   });
 
-  describe('state', () => {
-    test('clears draftQuery when filterQueryDraft has been cleared', () => {
-      const KibanaWithStorageProvider = createKibanaContextProviderMock();
-
-      const Proxy = (props: QueryBarComponentProps) => (
-        <TestProviders>
-          <KibanaWithStorageProvider services={{ storage: { get: jest.fn() } }}>
-            <QueryBar {...props} />
-          </KibanaWithStorageProvider>
-        </TestProviders>
-      );
-
-      const wrapper = mount(
-        <Proxy
-          dateRangeFrom={DEFAULT_FROM}
-          dateRangeTo={DEFAULT_TO}
-          hideSavedQuery={false}
-          indexPattern={mockIndexPattern}
-          isRefreshPaused={true}
-          filterQuery={{ query: '', language: 'kuery' }}
-          filterQueryDraft={{ expression: 'host.name', kind: 'kuery' }}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filters={[]}
-          onChangedQuery={mockOnChangeQuery}
-          onSubmitQuery={mockOnSubmitQuery}
-          onSavedQuery={mockOnSavedQuery}
-        />
-      );
-
-      let queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
-      queryInput.simulate('change', { target: { value: 'host.name:*' } });
-
-      wrapper.update();
-      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
-      expect(queryInput.props().children).toBe('host.name:*');
-
-      wrapper.setProps({ filterQueryDraft: null });
-      wrapper.update();
-      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
-
-      expect(queryInput.props().children).toBe('');
-    });
-  });
-
   describe('#onQueryChange', () => {
     test(' is the only reference that changed when filterQueryDraft props get updated', () => {
       const KibanaWithStorageProvider = createKibanaContextProviderMock();

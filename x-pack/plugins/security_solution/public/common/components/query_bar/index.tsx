@@ -19,7 +19,6 @@ import {
   SavedQueryTimeFilter,
 } from '../../../../../../../src/plugins/data/public';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
-import { KueryFilterQuery } from '../../store';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
@@ -30,7 +29,6 @@ export interface QueryBarComponentProps {
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
-  filterQueryDraft?: KueryFilterQuery;
   filterManager: FilterManager;
   filters: Filter[];
   onChangedQuery: (query: Query) => void;
@@ -49,7 +47,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
     isLoading = false,
     isRefreshPaused,
     filterQuery,
-    filterQueryDraft,
     filterManager,
     filters,
     onChangedQuery,
@@ -62,11 +59,8 @@ export const QueryBar = memo<QueryBarComponentProps>(
     const [draftQuery, setDraftQuery] = useState(filterQuery);
 
     useEffect(() => {
-      // Reset draftQuery when `Create new timeline` is clicked
-      if (filterQueryDraft == null) {
-        setDraftQuery(filterQuery);
-      }
-    }, [filterQuery, filterQueryDraft]);
+      setDraftQuery(filterQuery);
+    }, [filterQuery]);
 
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
