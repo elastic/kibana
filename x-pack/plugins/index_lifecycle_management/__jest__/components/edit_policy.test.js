@@ -120,7 +120,7 @@ describe('edit policy', () => {
     store = indexLifecycleManagementStore();
     component = (
       <Provider store={store}>
-        <EditPolicy />
+        <EditPolicy getUrlForApp={() => {}} />
       </Provider>
     );
     store.dispatch(fetchedPolicies(policies));
@@ -155,7 +155,7 @@ describe('edit policy', () => {
     test('should show error when trying to save as new policy but using the same name', () => {
       component = (
         <Provider store={store}>
-          <EditPolicy match={{ params: { policyName: 'testy0' } }} />
+          <EditPolicy match={{ params: { policyName: 'testy0' } }} getUrlForApp={() => {}} />
         </Provider>
       );
       const rendered = mountWithIntl(component);
