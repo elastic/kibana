@@ -74,7 +74,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <EuiText className="eui-textBreakWord">
             <h1>
               {(agentConfig && agentConfig.name) || (
                 <FormattedMessage
