@@ -50,7 +50,7 @@ export const useSavedView = (props: Props) => {
   const { data, loading, find, error: errorOnFind, hasView } = useFindSavedObject<
     SavedViewSavedObject<ViewState>
   >(viewType);
-  const [shouldLoadDefault, setShouldLoadDefault] = useState(props.shouldLoadDefault);
+  const [shouldLoadDefault] = useState(props.shouldLoadDefault);
   const [currentView, setCurrentView] = useState<SavedView<any> | null>(null);
   const [loadingDefaultView, setLoadingDefaultView] = useState<boolean | null>(null);
   const { create, error: errorOnCreate, data: createdViewData, createdId } = useCreateSavedObject(
