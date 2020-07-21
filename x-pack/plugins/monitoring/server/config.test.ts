@@ -27,33 +27,6 @@ describe('config schema', () => {
           },
           "enabled": true,
         },
-        "elasticsearch": Object {
-          "apiVersion": "master",
-          "customHeaders": Object {},
-          "healthCheck": Object {
-            "delay": "PT2.5S",
-          },
-          "ignoreVersionMismatch": false,
-          "logFetchCount": 10,
-          "logQueries": false,
-          "pingTimeout": "PT30S",
-          "preserveHost": true,
-          "requestHeadersWhitelist": Array [
-            "authorization",
-          ],
-          "requestTimeout": "PT30S",
-          "shardTimeout": "PT30S",
-          "sniffInterval": false,
-          "sniffOnConnectionFault": false,
-          "sniffOnStart": false,
-          "ssl": Object {
-            "alwaysPresentCertificate": false,
-            "keystore": Object {},
-            "truststore": Object {},
-            "verificationMode": "full",
-          },
-          "startupTimeout": "PT5S",
-        },
         "enabled": true,
         "kibana": Object {
           "collection": Object {
