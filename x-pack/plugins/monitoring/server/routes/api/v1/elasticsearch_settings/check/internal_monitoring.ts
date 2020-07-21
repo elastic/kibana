@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { RequestHandlerContext } from 'kibana/server';
+// @ts-ignore
 import { getIndexPatterns } from '../../../../../lib/cluster/get_index_patterns';
-
 // @ts-ignore
 import { handleError } from '../../../../../lib/errors';
 import { RouteDependencies } from '../../../../../types';
