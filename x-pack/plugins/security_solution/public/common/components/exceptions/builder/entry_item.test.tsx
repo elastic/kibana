@@ -45,46 +45,25 @@ jest.mock('../../../../lists_plugin_deps', () => {
 });
 
 describe('EntryItemComponent', () => {
-  test('it renders fields disabled if "isLoading" is "true"', () => {
-    const wrapper = mount(
-      <EntryItemComponent
-        entry={{ field: undefined, operator: isOperator, value: undefined }}
-        entryIndex={0}
-        indexPattern={{
-          id: '1234',
-          title: 'logstash-*',
-          fields,
-        }}
-        showLabel={false}
-        isLoading={true}
-        onChange={jest.fn()}
-      />
-    );
-
-    expect(
-      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().disabled
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().disabled
-    ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"] input').props().disabled
-    ).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldFormRow"]')).toHaveLength(0);
-  });
-
   test('it renders field labels if "showLabel" is "true"', () => {
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: undefined, operator: isOperator, value: undefined }}
-        entryIndex={0}
+        entry={{
+          field: undefined,
+          operator: isOperator,
+          value: undefined,
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={true}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -95,15 +74,22 @@ describe('EntryItemComponent', () => {
   test('it renders field values correctly when operator is "isOperator"', () => {
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isOperator, value: '1234' }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isOperator,
+          value: '1234',
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -118,15 +104,22 @@ describe('EntryItemComponent', () => {
   test('it renders field values correctly when operator is "isNotOperator"', () => {
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isNotOperator, value: '1234' }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isNotOperator,
+          value: '1234',
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -143,15 +136,22 @@ describe('EntryItemComponent', () => {
   test('it renders field values correctly when operator is "isOneOfOperator"', () => {
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isOneOfOperator, value: ['1234'] }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isOneOfOperator,
+          value: ['1234'],
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -168,15 +168,22 @@ describe('EntryItemComponent', () => {
   test('it renders field values correctly when operator is "isNotOneOfOperator"', () => {
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isNotOneOfOperator, value: ['1234'] }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isNotOneOfOperator,
+          value: ['1234'],
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -193,15 +200,22 @@ describe('EntryItemComponent', () => {
   test('it renders field values correctly when operator is "isInListOperator"', () => {
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isInListOperator, value: 'some-list-id' }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isInListOperator,
+          value: 'some-list-id',
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -218,15 +232,22 @@ describe('EntryItemComponent', () => {
   test('it renders field values correctly when operator is "isNotInListOperator"', () => {
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isNotInListOperator, value: 'some-list-id' }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isNotInListOperator,
+          value: 'some-list-id',
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -243,15 +264,22 @@ describe('EntryItemComponent', () => {
   test('it renders field values correctly when operator is "existsOperator"', () => {
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: existsOperator, value: undefined }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: existsOperator,
+          value: undefined,
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -271,15 +299,22 @@ describe('EntryItemComponent', () => {
   test('it renders field values correctly when operator is "doesNotExistOperator"', () => {
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: doesNotExistOperator, value: undefined }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: doesNotExistOperator,
+          value: undefined,
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -300,15 +335,22 @@ describe('EntryItemComponent', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isOperator, value: '1234' }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isOperator,
+          value: '1234',
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={mockOnChange}
       />
     );
@@ -323,19 +365,26 @@ describe('EntryItemComponent', () => {
     );
   });
 
-  test('it invokes "onChange" when new operator is selected and resets value field', () => {
+  test('it invokes "onChange" when new operator is selected', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isOperator, value: '1234' }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isOperator,
+          value: '1234',
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={mockOnChange}
       />
     );
@@ -345,7 +394,7 @@ describe('EntryItemComponent', () => {
     }).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', operator: 'excluded', type: 'match', value: '' },
+      { field: 'ip', operator: 'excluded', type: 'match', value: '1234' },
       0
     );
   });
@@ -354,15 +403,22 @@ describe('EntryItemComponent', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isNotOperator, value: '1234' }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isNotOperator,
+          value: '1234',
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={mockOnChange}
       />
     );
@@ -381,15 +437,22 @@ describe('EntryItemComponent', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isOneOfOperator, value: '1234' }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isOneOfOperator,
+          value: '1234',
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={mockOnChange}
       />
     );
@@ -408,15 +471,22 @@ describe('EntryItemComponent', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
       <EntryItemComponent
-        entry={{ field: getField('ip'), operator: isNotInListOperator, value: '1234' }}
-        entryIndex={0}
+        entry={{
+          field: getField('ip'),
+          operator: isNotInListOperator,
+          value: '1234',
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+        }}
         indexPattern={{
           id: '1234',
           title: 'logstash-*',
           fields,
         }}
         showLabel={false}
-        isLoading={false}
+        listType="detection"
+        addNested={false}
         onChange={mockOnChange}
       />
     );

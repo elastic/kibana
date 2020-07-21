@@ -100,11 +100,23 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
       const badge = <AndOrBadge includeAntennas type="and" />;
 
       if (andLogicIncluded && exceptionItem.entries.length > 1 && exceptionItemIndex === 0) {
-        return <MyFirstRowContainer grow={false}>{badge}</MyFirstRowContainer>;
+        return (
+          <MyFirstRowContainer grow={false} data-test-subj="exceptionItemEntryFirstRowAndBadge">
+            {badge}
+          </MyFirstRowContainer>
+        );
       } else if (andLogicIncluded && exceptionItem.entries.length <= 1) {
-        return <MyInvisibleAndBadge grow={false}>{badge}</MyInvisibleAndBadge>;
+        return (
+          <MyInvisibleAndBadge grow={false} data-test-subj="exceptionItemEntryInvisibleAndBadge">
+            {badge}
+          </MyInvisibleAndBadge>
+        );
       } else if (andLogicIncluded && exceptionItem.entries.length > 1) {
-        return <EuiFlexItem grow={false}>{badge}</EuiFlexItem>;
+        return (
+          <EuiFlexItem grow={false} data-test-subj="exceptionItemEntryAndBadge">
+            {badge}
+          </EuiFlexItem>
+        );
       } else {
         return <></>;
       }

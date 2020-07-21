@@ -64,7 +64,7 @@ export const getOperatorType = (item: BuilderEntry): OperatorTypeEnum => {
  * @param item a single ExceptionItem entry
  */
 export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption => {
-  if (entriesNested.is(item)) {
+  if (item.type === 'nested') {
     return isOperator;
   } else {
     const operatorType = getOperatorType(item);

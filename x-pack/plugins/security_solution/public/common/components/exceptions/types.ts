@@ -9,6 +9,9 @@ import { OperatorOption } from '../autocomplete/types';
 import {
   EntryNested,
   Entry,
+  EntryMatch,
+  EntryMatchAny,
+  EntryExists,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   NamespaceType,
@@ -75,7 +78,13 @@ export interface EmptyListEntry {
   list: { id: string | undefined; type: string | undefined };
 }
 
-export type BuilderEntry = Entry | EmptyListEntry | EmptyEntry | EntryNested;
+export interface EmptyNestedEntry {
+  field: string | undefined;
+  type: OperatorTypeEnum.NESTED;
+  entries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists>;
+}
+
+export type BuilderEntry = Entry | EmptyListEntry | EmptyEntry | EntryNested | EmptyNestedEntry;
 
 export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entries'> & {
   entries: BuilderEntry[];

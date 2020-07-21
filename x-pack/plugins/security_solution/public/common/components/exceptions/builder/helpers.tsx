@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
   Entry,
   OperatorTypeEnum,
@@ -159,6 +159,7 @@ export const getFormattedBuilderEntries = (
         parent: undefined,
       };
 
+      // User has selected to add a nested field, but not yet selected the field
       if (isNewNestedEntry) {
         return [...acc, parentEntry];
       }
@@ -237,25 +238,35 @@ export const getUpdatedEntriesOnDelete = (
   }
 };
 
+/**
+ * On operator change, determines whether value needs to be cleared or not
+ *
+ * @param field
+ * @param selectedOperator
+ * @param currentEntry
+ *
+ */
 export const getValueFromOperator = (
-  field: IFieldType | undefined,
-  selectedOperator: OperatorOption
+  selectedOperator: OperatorOption,
+  currentEntry: FormattedBuilderEntry
 ): Entry => {
-  const fieldValue = field != null ? field.name : '';
+  const isSameOperatorType = currentEntry.operator.type === selectedOperator.type;
+  const fieldValue = currentEntry.field != null ? currentEntry.field.name : '';
   switch (selectedOperator.type) {
     case 'match':
       return {
         field: fieldValue,
         type: OperatorTypeEnum.MATCH,
         operator: selectedOperator.operator,
-        value: '',
+        value:
+          isSameOperatorType && typeof currentEntry.value === 'string' ? currentEntry.value : '',
       };
     case 'match_any':
       return {
         field: fieldValue,
         type: OperatorTypeEnum.MATCH_ANY,
         operator: selectedOperator.operator,
-        value: [],
+        value: isSameOperatorType && Array.isArray(currentEntry.value) ? currentEntry.value : [],
       };
     case 'list':
       return {
@@ -273,15 +284,25 @@ export const getValueFromOperator = (
   }
 };
 
+/**
+ * Determines which operators to make available
+ *
+ * @param item
+ * @param listType
+ *
+ */
 export const getOperatorOptions = (
   item: FormattedBuilderEntry,
-  listType: ExceptionListType
+  listType: ExceptionListType,
+  isBoolean: boolean
 ): OperatorOption[] => {
-  if (item.nested != null && listType === 'endpoint') {
-    return [isOperator, isOneOfOperator];
+  if (item.nested === 'parent') {
+    return [isOperator];
+  } else if ((item.nested != null && listType === 'endpoint') || listType === 'endpoint') {
+    return isBoolean ? [isOperator] : [isOperator, isOneOfOperator];
   } else if (item.nested != null && listType === 'detection') {
-    return [isOperator, isOneOfOperator, existsOperator];
+    return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
   } else {
-    return EXCEPTION_OPERATORS;
+    return isBoolean ? [isOperator, existsOperator] : EXCEPTION_OPERATORS;
   }
 };
