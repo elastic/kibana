@@ -116,8 +116,10 @@ export class Home extends Component {
   findDirectoryById = (id) =>
     this.props.directories.find((directory) => directory.showOnHomePage && directory.id === id);
 
-  renderDirectory = (directory) => {
+  renderDirectory = (featureId) => {
     const { addBasePath } = this.props;
+
+    const directory = this.findDirectoryById(featureId);
 
     return directory ? (
       <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
@@ -136,15 +138,22 @@ export class Home extends Component {
   renderNormal() {
     const { addBasePath, directories } = this.props;
 
-    const fileDataVisualizer = this.findDirectoryById('ml_file_data_visualizer');
-    const ingestManager = this.findDirectoryById('ingestManager');
-    const security = this.findDirectoryById('security');
-    const monitoring = this.findDirectoryById('monitoring');
-    const snapshotRestore = this.findDirectoryById('snapshot_restore');
-    const indexLifecycleManagement = this.findDirectoryById('index_lifecycle_management');
     const devTools = this.findDirectoryById('console');
     const stackManagement = this.findDirectoryById('stack-management');
     const advancedSettings = this.findDirectoryById('advanced_settings');
+    const sampleData = this.findDirectoryById('home_sample_data');
+
+    const addDataFeatureCards = [
+      'home_tutorial_directory',
+      'ingestManager',
+      'ml_file_data_visualizer',
+    ].map(this.renderDirectory);
+    const manageDataFeatureCards = [
+      'security',
+      'monitoring',
+      'snapshot_restore',
+      'index_lifecycle_management',
+    ].map(this.renderDirectory);
 
     console.log({ directories });
 
@@ -170,7 +179,7 @@ export class Home extends Component {
                 </EuiTitle>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="flexEnd">
                 <EuiFlexItem>
                   <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
@@ -237,46 +246,28 @@ export class Home extends Component {
                     </h3>
                   </EuiTitle>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    iconType="tableDensityExpanded"
-                    href="#/tutorial_directory/sampleData"
-                    size="xs"
-                  >
-                    <FormattedMessage
-                      id="home.addData.sampleDataButtonLabel"
-                      defaultMessage="Try our sample data"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                {sampleData ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty iconType={sampleData.icon} href={sampleData.path} size="xs">
+                      <FormattedMessage
+                        id="home.addData.sampleDataButtonLabel"
+                        defaultMessage="Try our sample data"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
 
               <EuiSpacer />
 
               <EuiFlexGroup>
                 <EuiFlexItem grow={1}>
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    <EuiFlexItem className="homHome__synopsisItem">
-                      <Synopsis
-                        description={i18n.translate('home.addData.addIntegrationDescription', {
-                          defaultMessage: 'Add data from a variety of common sources.',
-                        })}
-                        iconType="indexOpen"
-                        title={i18n.translate('home.addData.addIntegrationTitle', {
-                          defaultMessage: 'Add an integration',
-                        })}
-                        url="#/tutorial_directory"
-                        wrapInPanel
-                      />
-                    </EuiFlexItem>
-                    {this.renderDirectory(ingestManager)}
-                    {this.renderDirectory(fileDataVisualizer)}
-                  </EuiFlexGroup>
+                  <EuiFlexGroup justifyContent="spaceAround">{addDataFeatureCards}</EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>
 
-            {security || monitoring || snapshotRestore || indexLifecycleManagement ? (
+            {manageDataFeatureCards.length ? (
               <Fragment>
                 <EuiHorizontalRule margin="xl" />
                 <EuiSpacer size="s" />
@@ -292,12 +283,7 @@ export class Home extends Component {
 
                   <EuiSpacer />
 
-                  <EuiFlexGroup justifyContent="spaceAround">
-                    {this.renderDirectory(security)}
-                    {this.renderDirectory(monitoring)}
-                    {this.renderDirectory(snapshotRestore)}
-                    {this.renderDirectory(indexLifecycleManagement)}
-                  </EuiFlexGroup>
+                  <EuiFlexGroup justifyContent="spaceAround">{manageDataFeatureCards}</EuiFlexGroup>
                 </div>
               </Fragment>
             ) : null}
