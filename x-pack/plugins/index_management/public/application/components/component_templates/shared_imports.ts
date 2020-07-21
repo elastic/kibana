@@ -19,6 +19,7 @@ export {
   useAuthorizationContext,
   NotAuthorizedSection,
   Forms,
+  FlyoutMultiContent,
 } from '../../../../../../../src/plugins/es_ui_shared/public';
 
 export {
