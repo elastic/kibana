@@ -58,7 +58,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
       loadData();
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [currentView, shouldLoadDefault]);
+  }, [loadData, shouldLoadDefault]);
 
   return (
     <EuiErrorBoundary>
