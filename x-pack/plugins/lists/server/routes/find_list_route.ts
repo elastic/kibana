@@ -18,7 +18,7 @@ export const findListRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: `${LIST_URL}/_find`,
       validate: {
