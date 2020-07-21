@@ -150,7 +150,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (!adapters) return;
 
     return this.deps.start().plugins.inspector.open(adapters, {
-      title: this.getTitle() || '',
+      title: this.getTitle() || this.title || '',
     });
   };
 
@@ -208,8 +208,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       dirty = true;
     }
 
-    if (this.output.title !== this.title) {
-      this.title = this.output.title;
+    if (this.output.title !== this.title || this.title !== this.vis.title) {
+      // Output has priority, but use vis.title as fallback
+      this.title = this.output.title || this.vis.title;
+
       if (this.domNode) {
         this.domNode.setAttribute('data-title', this.title || '');
       }
@@ -306,7 +308,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       })
     );
 
-    div.setAttribute('data-title', this.output.title || '');
+    div.setAttribute('data-title', this.title || '');
 
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);
