@@ -32,7 +32,7 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
       headers: serializedEncryptedHeaders,
       browserTimezone,
       layout,
-      basePath: setupDeps.basePath(req),
+      basePath: setupDeps.basePath(req).serverBasePath,
       forceNow: new Date().toISOString(),
     };
   };
