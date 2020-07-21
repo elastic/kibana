@@ -64,7 +64,7 @@ describe('esRawResponse', () => {
           },
         },
       };
-      const result = esRawResponse.to.datatable(response);
+      const result = esRawResponse.to!.datatable(response, {});
       expect(result).toMatchSnapshot();
     });
   });
@@ -435,7 +435,7 @@ describe('esRawResponse', () => {
           },
         },
       };
-      const result = esRawResponse.to.datatable(response);
+      const result = esRawResponse.to!.datatable(response, {});
       expect(result).toMatchSnapshot();
     });
   });
@@ -821,7 +821,7 @@ describe('esRawResponse', () => {
         },
       },
     };
-    const result = esRawResponse.to.datatable(response);
+    const result = esRawResponse.to!.datatable(response, {});
     expect(result).toMatchSnapshot();
   });
 });
