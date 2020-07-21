@@ -51,7 +51,7 @@ This plugin follows the `common`, `server`, `public` structure from the [Archite
 
 You need to have `docker` to run ingest manager api integration tests
 
-1. In one terminal, change to the `x-pack` directory and start the test server with
+1. In one terminal, run the tests from the Kibana root directory with
 
    ```
    INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/ingest_manager_api_integration/config.ts
@@ -63,7 +63,7 @@ You need to have `docker` to run ingest manager api integration tests
    INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts
    ```
 
-   Optionnaly you can filter which tests you want to run using `--grep`
+   Optionally you can filter which tests you want to run using `--grep`
 
    ```
    INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts --grep='fleet'
