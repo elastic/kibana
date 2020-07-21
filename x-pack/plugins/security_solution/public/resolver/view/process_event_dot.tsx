@@ -32,11 +32,13 @@ const StyledActionsContainer = styled.div<StyledActionsContainer>`
   color: ${(props) => props.color};
   display: flex;
   flex-flow: column;
+  /* TODO, remove from class */
   font-size: ${(props) => `${props.fontSize}px`};
   left: 20.9%;
   line-height: 140%;
   padding: 0.25rem 0 0 0.1rem;
   position: absolute;
+  /* TODO, remove from class */
   top: ${(props) => `${props.topPct}%`};
   width: auto;
 `;
@@ -46,21 +48,6 @@ interface StyledDescriptionText {
   readonly color: string;
   readonly isDisplaying: boolean;
 }
-
-const StyledDescriptionText = styled.div<StyledDescriptionText>`
-  background-color: ${(props) => props.backgroundColor};
-  color: ${(props) => props.color};
-  display: ${(props) => (props.isDisplaying ? 'block' : 'none')};
-  font-size: 0.8rem;
-  font-weight: bold;
-  letter-spacing: -0.01px;
-  line-height: 1;
-  margin: 0;
-  padding: 4px 0 0 2px;
-  text-align: left;
-  text-transform: uppercase;
-  width: fit-content;
-`;
 
 /**
  * An artifact that represents a process node and the things associated with it in the Resolver
@@ -136,6 +123,7 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * As the resolver zooms and buttons and text change visibility, we look to keep the overall container properly vertically aligned
      */
+    // TODO, fix this. use css for alignment
     const actionableButtonsTopOffset =
       (isShowingEventActions ? 3.5 : isShowingDescriptionText ? 1 : 21) * xScale + 5;
 
@@ -152,6 +140,7 @@ const UnstyledProcessEventDot = React.memo(
     /**
      * As the scale changes and button visibility toggles on the graph, these offsets help scale to keep the nodes centered on the edge
      */
+    // TODO, fix this. use CSS for alignment
     const nodeXOffsetValue = isShowingEventActions ? -0.147413 : -0.147413 - (xScale - 0.5) * 0.08;
     const nodeYOffsetValue = isShowingEventActions
       ? -0.53684
@@ -256,6 +245,7 @@ const UnstyledProcessEventDot = React.memo(
      * e.g. "10 DNS", "230 File"
      */
 
+    // TODO AFTER 7.9, move this into `NodeSubMenu`
     const relatedEventOptions = useMemo(() => {
       const relatedStatsList = [];
 
@@ -297,8 +287,12 @@ const UnstyledProcessEventDot = React.memo(
      */
     return (
       <div
-        data-test-subj={'resolverNode'}
-        className={`${className} kbn-resetFocusState`}
+        data-test-subj={/* TODO, remove if not used. */ 'resolverNode'}
+        className={
+          /* is this classname used? */
+
+          `${className} kbn-resetFocusState`
+        }
         role="treeitem"
         aria-level={ariaLevel === null ? undefined : ariaLevel}
         aria-flowto={ariaFlowtoNodeID === null ? undefined : nodeHTMLID(ariaFlowtoNodeID)}
@@ -313,14 +307,16 @@ const UnstyledProcessEventDot = React.memo(
         <svg
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
-          style={{
-            display: 'block',
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            top: '0',
-            left: '0',
-          }}
+          style={
+            /* TODO, use styled components */ {
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              top: '0',
+              left: '0',
+            }
+          }
         >
           <g>
             <use
@@ -375,6 +371,7 @@ const UnstyledProcessEventDot = React.memo(
             onFocus={handleFocus}
             tabIndex={-1}
             style={{
+              /* TODO, styled-components */
               backgroundColor: colorMap.resolverBackground,
               alignSelf: 'flex-start',
               padding: 0,
@@ -385,7 +382,13 @@ const UnstyledProcessEventDot = React.memo(
               fill={isLabelFilled}
               size="s"
               style={{
+                /**
+                 * TODO, not good for perf: is this necessary?
+                 */
                 maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
+                /**
+                 * TODO, not good for perf: is this necessary?
+                 */
                 maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
@@ -402,6 +405,7 @@ const UnstyledProcessEventDot = React.memo(
             justifyContent="flexStart"
             gutterSize="xs"
             style={{
+              /** TODO, styled components */
               alignSelf: 'flex-start',
               background: colorMap.resolverBackground,
               display: `${isShowingEventActions ? 'flex' : 'none'}`,
@@ -482,4 +486,19 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
   & .euiSelectableListItem__text {
     color: white;
   }
+`;
+
+const StyledDescriptionText = styled.div<StyledDescriptionText>`
+  background-color: ${(props) => props.backgroundColor};
+  color: ${(props) => props.color};
+  display: ${(props) => (props.isDisplaying ? 'block' : 'none')};
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: -0.01px;
+  line-height: 1;
+  margin: 0;
+  padding: 4px 0 0 2px;
+  text-align: left;
+  text-transform: uppercase;
+  width: fit-content;
 `;
