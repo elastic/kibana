@@ -10,6 +10,9 @@ import {
   OperatorTypeEnum,
   EntryNested,
   ExceptionListType,
+  EntryMatch,
+  EntryMatchAny,
+  EntryExists,
 } from '../../../../lists_plugin_deps';
 import {
   isOperator,
@@ -18,7 +21,13 @@ import {
   EXCEPTION_OPERATORS,
 } from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
-import { BuilderEntry, FormattedBuilderEntry, ExceptionsBuilderExceptionItem } from '../types';
+import {
+  BuilderEntry,
+  FormattedBuilderEntry,
+  ExceptionsBuilderExceptionItem,
+  EmptyEntry,
+  EmptyNestedEntry,
+} from '../types';
 import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
 
 /**
@@ -196,18 +205,13 @@ export const getUpdatedEntriesOnDelete = (
   entryIndex: number,
   nestedEntryIndex: number | null
 ): ExceptionsBuilderExceptionItem => {
-  const itemOfInterest = exceptionItem.entries[entryIndex];
+  const itemOfInterest: BuilderEntry = exceptionItem.entries[entryIndex];
 
-  if (nestedEntryIndex != null && itemOfInterest.type === 'nested') {
-    const updatedEntryEntries = [
+  if (nestedEntryIndex != null && itemOfInterest.type === OperatorTypeEnum.NESTED) {
+    const updatedEntryEntries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists> = [
       ...itemOfInterest.entries.slice(0, nestedEntryIndex),
       ...itemOfInterest.entries.slice(nestedEntryIndex + 1),
     ];
-
-    const updatedItemOfInterest = {
-      ...itemOfInterest,
-      entries: updatedEntryEntries,
-    };
 
     if (updatedEntryEntries.length === 0) {
       return {
@@ -218,6 +222,13 @@ export const getUpdatedEntriesOnDelete = (
         ],
       };
     } else {
+      const { field } = itemOfInterest;
+      const updatedItemOfInterest: EntryNested | EmptyNestedEntry = {
+        field,
+        type: OperatorTypeEnum.NESTED,
+        entries: updatedEntryEntries,
+      };
+
       return {
         ...exceptionItem,
         entries: [
