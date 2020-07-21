@@ -14,14 +14,18 @@ exports[`render 1`] = `
     grow={false}
   >
     <EuiTitle>
-      <h2>
+      <h2
+        data-test-subj="serverStatusTitle"
+      >
         <FormattedMessage
           defaultMessage="Kibana status is {kibanaStatus}"
           id="core.statusPage.serverStatus.statusTitle"
           values={
             Object {
               "kibanaStatus": <EuiBadge
+                aria-label="Green"
                 color="secondary"
+                data-test-subj="serverStatusTitleBadge"
               >
                 Green
               </EuiBadge>,
