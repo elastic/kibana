@@ -7,7 +7,7 @@ pipelines that perform common transformations and
 enrichments on your data.  For example, you might remove a field,
 rename an existing field, or set a new field.
 
-You’ll find *Ingest Node Pipelines* in *Stack Management. With this feature, you can:
+You’ll find *Ingest Node Pipelines* in *Stack Management > Ingest*. With this feature, you can:
 
 * View a list of your pipelines and drill down into details.
 * Create a pipeline that defines a series of tasks, known as processors.

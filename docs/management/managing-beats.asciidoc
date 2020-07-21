@@ -4,7 +4,7 @@
 
 include::{asciidoc-dir}/../../shared/discontinued.asciidoc[tag=cm-discontinued]
 
-To use {beats} Central Management UI, open the menu, go to *Stack Management > Ingest
+To use {beats} Central Management UI, open the menu, go to *Stack Management > Ingest >
 {beats} Central Management*, then define and
 manage configurations in a central location in {kib} and quickly deploy
 configuration changes to all {beats} running across your enterprise. For more
