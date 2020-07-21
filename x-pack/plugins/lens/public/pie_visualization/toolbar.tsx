@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './toolbar.scss';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -11,7 +12,6 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiSelect,
-  EuiButtonEmpty,
   EuiFormRow,
   EuiSuperSelect,
   EuiRange,
@@ -24,7 +24,7 @@ import { Position } from '@elastic/charts';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState, SharedLayerState } from './types';
 import { VisualizationToolbarProps } from '../types';
-import './toolbar.scss';
+import { ToolbarButton } from '../toolbar_button';
 
 const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
   {
@@ -97,21 +97,21 @@ const legendOptions: Array<{
   {
     id: 'pieLegendDisplay-default',
     value: 'default',
-    label: i18n.translate('xpack.lens.pieChart.defaultLegendLabel', {
+    label: i18n.translate('xpack.lens.pieChart.legendVisibility.auto', {
       defaultMessage: 'auto',
     }),
   },
   {
     id: 'pieLegendDisplay-show',
     value: 'show',
-    label: i18n.translate('xpack.lens.pieChart.alwaysShowLegendLabel', {
+    label: i18n.translate('xpack.lens.pieChart.legendVisibility.show', {
       defaultMessage: 'show',
     }),
   },
   {
     id: 'pieLegendDisplay-hide',
     value: 'hide',
-    label: i18n.translate('xpack.lens.pieChart.hideLegendLabel', {
+    label: i18n.translate('xpack.lens.pieChart.legendVisibility.hide', {
       defaultMessage: 'hide',
     }),
   },
@@ -130,16 +130,14 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         <EuiPopover
           panelClassName="lnsPieToolbar__popover"
           button={
-            <EuiButtonEmpty
-              color="text"
-              iconType="arrowDown"
-              iconSide="right"
+            <ToolbarButton
+              fontWeight="normal"
               onClick={() => {
                 setOpen(!open);
               }}
             >
               {i18n.translate('xpack.lens.pieChart.settingsLabel', { defaultMessage: 'Settings' })}
-            </EuiButtonEmpty>
+            </ToolbarButton>
           }
           isOpen={open}
           closePopover={() => {
@@ -238,7 +236,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
                 isFullWidth
               />
 
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiSwitch
                 compressed
                 label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
@@ -267,7 +265,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
                 { value: Position.Right, text: 'Right' },
                 { value: Position.Bottom, text: 'Bottom' },
               ]}
-              value={layer.legendPosition}
+              value={layer.legendPosition || Position.Right}
               onChange={(e) => {
                 setState({
                   ...state,

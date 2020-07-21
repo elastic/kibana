@@ -24,6 +24,7 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import {
   VisualizationLayerWidgetProps,
@@ -159,35 +160,38 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               })
             }
           >
-            <EuiFormRow
-              display="columnCompressed"
-              label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
-                defaultMessage: 'Fill missing values',
-              })}
-            >
-              <EuiSuperSelect
-                compressed
-                disabled={!hasNonBarSeries}
-                options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                  return {
-                    value: id,
-                    dropdownDisplay: (
-                      <>
-                        <strong>{title}</strong>
-                        <EuiText size="xs" color="subdued">
-                          <p>{description}</p>
-                        </EuiText>
-                      </>
-                    ),
-                    inputDisplay: title,
-                  };
+            <>
+              <EuiFormRow
+                display="columnCompressed"
+                label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
+                  defaultMessage: 'Fill missing values',
                 })}
-                valueOfSelected={props.state?.fittingFunction || 'None'}
-                onChange={(value) => props.setState({ ...props.state, fittingFunction: value })}
-                itemLayoutAlign="top"
-                hasDividers
-              />
-            </EuiFormRow>
+              >
+                <EuiSuperSelect
+                  compressed
+                  disabled={!hasNonBarSeries}
+                  options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                    return {
+                      value: id,
+                      dropdownDisplay: (
+                        <>
+                          <strong>{title}</strong>
+                          <EuiText size="xs" color="subdued">
+                            <p>{description}</p>
+                          </EuiText>
+                        </>
+                      ),
+                      inputDisplay: title,
+                    };
+                  })}
+                  valueOfSelected={props.state?.fittingFunction || 'None'}
+                  onChange={(value) => props.setState({ ...props.state, fittingFunction: value })}
+                  itemLayoutAlign="top"
+                  hasDividers
+                />
+              </EuiFormRow>
+              <EuiHorizontalRule />
+            </>
           </EuiToolTip>
           <EuiFormRow
             display="columnCompressed"
@@ -196,12 +200,12 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             })}
           >
             <EuiButtonGroup
+              isFullWidth
               legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
                 defaultMessage: 'Legend display',
               })}
               name="legendDisplay"
               buttonSize="compressed"
-              className="eui-displayInlineBlock"
               options={legendOptions}
               idSelected={legendOptions.find(({ value }) => value === legendMode)!.id}
               onChange={(optionId) => {
