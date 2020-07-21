@@ -6,6 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import expectedAvgDurationByBrowser from './expectation/avg_duration_by_browser.json';
+import expectedAvgDurationByBrowserWithTransactionName from './expectation/avg_duration_by_browser_transaction_name.json';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -13,6 +14,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = encodeURIComponent('2020-06-29T06:45:00.000Z');
   const end = encodeURIComponent('2020-06-29T06:49:00.000Z');
+  const transactionName = '/products';
   const uiFilters = encodeURIComponent(JSON.stringify({}));
 
   describe('Average duration by browser', () => {
@@ -37,6 +39,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(response.body).to.eql(expectedAvgDurationByBrowser);
+      });
+      it('returns the average duration by browser filtering by transaction name', async () => {
+        const response = await supertest.get(
+          `/api/apm/services/client/transaction_groups/avg_duration_by_browser?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionName=${transactionName}&_debug=true`
+        );
+
+        expect(response.status).to.be(200);
+        expect(response.body).to.eql(expectedAvgDurationByBrowserWithTransactionName);
       });
     });
   });

@@ -28,7 +28,7 @@ function toTimeSeries(data?: AvgDurationByBrowserAPIResponse): TimeSeries[] {
 
 export function useAvgDurationByBrowser() {
   const {
-    urlParams: { serviceName, start, end },
+    urlParams: { serviceName, start, end, transactionName },
     uiFilters,
   } = useUrlParams();
 
@@ -43,13 +43,14 @@ export function useAvgDurationByBrowser() {
             query: {
               start,
               end,
+              transactionName,
               uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, start, end, uiFilters]
+    [serviceName, start, end, transactionName, uiFilters]
   );
 
   return {
