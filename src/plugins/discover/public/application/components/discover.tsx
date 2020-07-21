@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HitsCounter } from './hits_counter';
@@ -30,6 +30,7 @@ import { DiscoverUninitialized } from '../angular/directives/uninitialized';
 import { DiscoverHistogram } from '../angular/directives/histogram';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DiscoverFetchError } from './fetch_error/fetch_error';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonToggle } from '@elastic/eui';
 
 export function Discover({
   addColumn,
@@ -78,6 +79,11 @@ export function Discover({
   }
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch } = opts;
+  const [toggle4On, setToggle4On] = useState(true);
+
+  const onToggle4Change = (e) => {
+    setToggle4On(e.target.checked);
+  };
 
   return (
     <I18nProvider>
@@ -136,29 +142,42 @@ export function Discover({
             {resultState === 'ready' && (
               <div className="dscWrapper__content">
                 <div className="dscResultCount">
-                  <div className="dscResuntCount__title eui-textTruncate eui-textNoWrap">
-                    <HitsCounter
-                      hits={hits > 0 ? hits : 0}
-                      showResetButton={!!(savedSearch && savedSearch.id)}
-                      onResetQuery={resetQuery}
-                    />
-                  </div>
-                  <div className="dscResultCount__actions eui-textTruncate eui-textNoWrap">
-                    <TimechartHeader
-                      from={toMoment(timeRange.from)}
-                      to={toMoment(timeRange.to)}
-                      options={intervalOptions}
-                      onChangeInterval={onChangeInterval}
-                      stateInterval={state.interval}
-                      showScaledInfo={bucketInterval.scaled}
-                      bucketIntervalDescription={bucketInterval.description}
-                      bucketIntervalScale={bucketInterval.scale}
-                    />
-                  </div>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem
+                      grow={false}
+                      className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
+                    >
+                      <HitsCounter
+                        hits={hits > 0 ? hits : 0}
+                        showResetButton={!!(savedSearch && savedSearch.id)}
+                        onResetQuery={resetQuery}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem className="dscResultCount__actions eui-textTruncate eui-textNoWrap">
+                      <TimechartHeader
+                        from={toMoment(timeRange.from)}
+                        to={toMoment(timeRange.to)}
+                        options={intervalOptions}
+                        onChangeInterval={onChangeInterval}
+                        stateInterval={state.interval}
+                        showScaledInfo={bucketInterval.scaled}
+                        bucketIntervalDescription={bucketInterval.description}
+                        bucketIntervalScale={bucketInterval.scale}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonToggle
+                        label={toggle4On ? 'Hide chart' : 'Show chart'}
+                        iconType={toggle4On ? 'eyeClosed' : 'eye'}
+                        onChange={onToggle4Change}
+                        isSelected={toggle4On}
+                        isEmpty
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </div>
-
                 <div className="dscResults">
-                  {opts.timefield && (
+                  {opts.timefield && toggle4On && (
                     <section
                       aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
                       className="dscTimechart"
