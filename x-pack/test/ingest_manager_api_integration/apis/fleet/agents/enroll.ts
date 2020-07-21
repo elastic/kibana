@@ -44,7 +44,7 @@ export default function (providerContext: FtrProviderContext) {
       await esClient.update({
         index: '.kibana',
         id: 'fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
-        refresh: true,
+        refresh: 'true',
         body: {
           doc: enrollmentApiKeyDoc,
         },
