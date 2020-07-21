@@ -4,18 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { SectionLoading, ComponentTemplateDeserialized } from '../shared_imports';
+import {
+  SectionLoading,
+  ComponentTemplateDeserialized,
+  FlyoutMultiContent,
+} from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
 import { attemptToDecodeURI } from '../lib';
 import { useComponentTemplatesContext } from '../component_templates_context';
-import { ComponentTemplateDetailsFlyout } from '../component_template_details';
+import {
+  ComponentTemplateDetailsFlyoutContent,
+  flyoutProps,
+  ComponentTemplateDetailsProps,
+} from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
 import { LoadError } from './error';
@@ -26,38 +34,126 @@ interface Props {
   history: RouteComponentProps['history'];
 }
 
+const { useFlyoutMultiContent } = FlyoutMultiContent;
+
 export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
   history,
 }) => {
+  const { addContent, removeContent } = useFlyoutMultiContent();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
 
   const { data, isLoading, error, sendRequest } = api.useLoadComponentTemplates();
 
   const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
+  const isMounted = useRef(false);
 
-  const goToComponentTemplateList = () => {
+  const goToComponentTemplateList = useCallback(() => {
     return history.push({
       pathname: 'component_templates',
     });
-  };
+  }, [history]);
 
-  const goToEditComponentTemplate = (name: string) => {
-    return history.push({
-      pathname: encodeURI(`edit_component_template/${encodeURIComponent(name)}`),
-    });
-  };
+  const goToEditComponentTemplate = useCallback(
+    (name: string) => {
+      return history.push({
+        pathname: encodeURI(`edit_component_template/${encodeURIComponent(name)}`),
+      });
+    },
+    [history]
+  );
 
-  const goToCloneComponentTemplate = (name: string) => {
-    return history.push({
-      pathname: encodeURI(`create_component_template/${encodeURIComponent(name)}`),
-    });
-  };
+  const goToCloneComponentTemplate = useCallback(
+    (name: string) => {
+      return history.push({
+        pathname: encodeURI(`create_component_template/${encodeURIComponent(name)}`),
+      });
+    },
+    [history]
+  );
 
   // Track component loaded
   useEffect(() => {
     trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
   }, [trackMetric]);
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (componentTemplateName) {
+      const actions = [
+        {
+          name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.editButtonLabel', {
+            defaultMessage: 'Edit',
+          }),
+          icon: 'pencil',
+          handleActionClick: () =>
+            goToEditComponentTemplate(attemptToDecodeURI(componentTemplateName)),
+        },
+        {
+          name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.cloneActionLabel', {
+            defaultMessage: 'Clone',
+          }),
+          icon: 'copy',
+          handleActionClick: () =>
+            goToCloneComponentTemplate(attemptToDecodeURI(componentTemplateName)),
+        },
+        {
+          name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {
+            defaultMessage: 'Delete',
+          }),
+          icon: 'trash',
+          getIsDisabled: (details: ComponentTemplateDeserialized) =>
+            details._kbnMeta.usedBy.length > 0,
+          closePopoverOnClick: true,
+          handleActionClick: () => {
+            setComponentTemplatesToDelete([attemptToDecodeURI(componentTemplateName)]);
+          },
+        },
+      ];
+
+      // Open the flyout with the Component Template Details content
+      addContent<ComponentTemplateDetailsProps>({
+        id: 'componentTemplateDetails',
+        Component: ComponentTemplateDetailsFlyoutContent,
+        props: {
+          onClose: goToComponentTemplateList,
+          componentTemplateName,
+          showSummaryCallToAction: true,
+          actions,
+        },
+        flyoutProps: { ...flyoutProps, onClose: goToComponentTemplateList },
+      });
+    }
+  }, [
+    componentTemplateName,
+    goToComponentTemplateList,
+    goToEditComponentTemplate,
+    goToCloneComponentTemplate,
+    addContent,
+    history,
+  ]);
+
+  useEffect(() => {
+    if (!componentTemplateName) {
+      removeContent('componentTemplateDetails');
+    }
+  }, [componentTemplateName, removeContent]);
+
+  useEffect(() => {
+    return () => {
+      if (!isMounted.current) {
+        // Close the flyout when unmounting the component
+        removeContent('componentTemplateDetails');
+      }
+    };
+  }, [removeContent]);
 
   let content: React.ReactNode;
 
@@ -126,45 +222,6 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
           componentTemplatesToDelete={componentTemplatesToDelete}
         />
       ) : null}
-
-      {/* details flyout */}
-      {componentTemplateName && (
-        <ComponentTemplateDetailsFlyout
-          onClose={goToComponentTemplateList}
-          componentTemplateName={componentTemplateName}
-          showSummaryCallToAction={true}
-          actions={[
-            {
-              name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.editButtonLabel', {
-                defaultMessage: 'Edit',
-              }),
-              icon: 'pencil',
-              handleActionClick: () =>
-                goToEditComponentTemplate(attemptToDecodeURI(componentTemplateName)),
-            },
-            {
-              name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.cloneActionLabel', {
-                defaultMessage: 'Clone',
-              }),
-              icon: 'copy',
-              handleActionClick: () =>
-                goToCloneComponentTemplate(attemptToDecodeURI(componentTemplateName)),
-            },
-            {
-              name: i18n.translate('xpack.idxMgmt.componentTemplateDetails.deleteButtonLabel', {
-                defaultMessage: 'Delete',
-              }),
-              icon: 'trash',
-              getIsDisabled: (details: ComponentTemplateDeserialized) =>
-                details._kbnMeta.usedBy.length > 0,
-              closePopoverOnClick: true,
-              handleActionClick: () => {
-                setComponentTemplatesToDelete([attemptToDecodeURI(componentTemplateName)]);
-              },
-            },
-          ]}
-        />
-      )}
     </div>
   );
 };

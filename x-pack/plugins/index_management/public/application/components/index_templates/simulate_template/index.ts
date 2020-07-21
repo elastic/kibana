@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SimulateTemplateFlyout } from './simulate_template_flyout';
+export {
+  SimulateTemplateFlyoutContent,
+  flyoutProps as simulateTemplateFlyoutProps,
+  Props as SimulateTemplateProps,
+} from './simulate_template_flyout';
 
 export { SimulateTemplate } from './simulate_template';

@@ -57,6 +57,27 @@ interface Props {
   navigateToStep: (stepId: WizardSection) => void;
 }
 
+const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
+  return (
+    <div data-test-subj="previewTab">
+      <EuiSpacer size="m" />
+
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.templateForm.stepReview.previewTab.descriptionText"
+            defaultMessage="This is the final template that will be applied to your indices."
+          />
+        </p>
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <SimulateTemplate template={template} />
+    </div>
+  );
+};
+
 export const StepReview: React.FunctionComponent<Props> = React.memo(
   ({ template, navigateToStep }) => {
     const {
@@ -255,27 +276,6 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
       </div>
     );
 
-    const PreviewTab = () => {
-      return (
-        <div data-test-subj="previewTab">
-          <EuiSpacer size="m" />
-
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.templateForm.stepReview.previewTab.descriptionText"
-                defaultMessage="This is the final template that will be applied to your indices."
-              />
-            </p>
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
-          <SimulateTemplate template={template} />
-        </div>
-      );
-    };
-
     const RequestTab = () => {
       const esApiEndpoint = isLegacy ? '_template' : '_index_template';
       const endpoint = `PUT ${esApiEndpoint}/${name || '<templateName>'}`;
@@ -331,7 +331,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
         name: i18n.translate('xpack.idxMgmt.templateForm.stepReview.previewTabTitle', {
           defaultMessage: 'Preview',
         }),
-        content: <PreviewTab />,
+        content: <PreviewTab template={template} />,
       });
     }
 

@@ -6,7 +6,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
@@ -22,12 +21,17 @@ import {
 
 import { SimulateTemplate } from './simulate_template';
 
-interface Props {
+export interface Props {
   onClose(): void;
   getTemplate: () => { [key: string]: any };
 }
 
-export const SimulateTemplateFlyout = ({ onClose, getTemplate }: Props) => {
+export const flyoutProps = {
+  'data-test-subj': 'simulateTemplateFlyout',
+  'aria-labelledby': 'simulateTemplateFlyoutTitle',
+};
+
+export const SimulateTemplateFlyoutContent = ({ onClose, getTemplate }: Props) => {
   const isMounted = useRef(false);
   const [heightCodeBlock, setHeightCodeBlock] = useState(0);
   const [template, setTemplate] = useState<{ [key: string]: any }>({});
@@ -41,10 +45,6 @@ export const SimulateTemplateFlyout = ({ onClose, getTemplate }: Props) => {
   const updatePreview = useCallback(async () => {
     const indexTemplate = await getTemplate();
     setTemplate(indexTemplate);
-    // const { data, error } = await simulateIndexTemplate(
-    //   serializeTemplate(stripEmptyFields(indexTemplate) as any)
-    // );
-    // setTemplatePreview(JSON.stringify(data ?? error, null, 2));
   }, [getTemplate]);
 
   useEffect(() => {
@@ -55,13 +55,7 @@ export const SimulateTemplateFlyout = ({ onClose, getTemplate }: Props) => {
   }, [updatePreview]);
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      data-test-subj="simulateTemplateFlyout"
-      aria-labelledby="simulateTemplateFlyoutTitle"
-      size="m"
-      maxWidth={500}
-    >
+    <>
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="componentTemplatesFlyoutTitle" data-test-subj="title">
@@ -120,6 +114,6 @@ export const SimulateTemplateFlyout = ({ onClose, getTemplate }: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

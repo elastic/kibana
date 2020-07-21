@@ -19,7 +19,7 @@ interface Props {
   minHeightCodeBlock?: string;
 }
 
-export const SimulateTemplate = ({ template, minHeightCodeBlock }: Props) => {
+export const SimulateTemplate = React.memo(({ template, minHeightCodeBlock }: Props) => {
   const [templatePreview, setTemplatePreview] = useState('{}');
 
   const updatePreview = useCallback(async () => {
@@ -49,8 +49,12 @@ export const SimulateTemplate = ({ template, minHeightCodeBlock }: Props) => {
   }, [updatePreview]);
 
   return templatePreview === '{}' ? null : (
-    <EuiCodeBlock style={{ minHeight: minHeightCodeBlock }} lang="json">
+    <EuiCodeBlock
+      style={{ minHeight: minHeightCodeBlock }}
+      lang="json"
+      data-test-subj="simulateTemplatePreview"
+    >
       {templatePreview}
     </EuiCodeBlock>
   );
-};
+});

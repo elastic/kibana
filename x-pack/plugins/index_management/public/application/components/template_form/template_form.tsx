@@ -3,15 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButton } from '@elastic/eui';
 
 import { TemplateDeserialized } from '../../../../common';
-import { serializers, Forms } from '../../../shared_imports';
+import { serializers, Forms, FlyoutMultiContent } from '../../../shared_imports';
 import { SectionError } from '../section_error';
-import { SimulateTemplateFlyout } from '../index_templates';
+import {
+  SimulateTemplateFlyoutContent,
+  SimulateTemplateProps,
+  simulateTemplateFlyoutProps,
+} from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 import {
   CommonWizardSteps,
@@ -23,6 +27,7 @@ import { documentationService } from '../../services/documentation';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
+const { useFlyoutMultiContent } = FlyoutMultiContent;
 
 interface Props {
   title: string | JSX.Element;
@@ -91,8 +96,9 @@ export const TemplateForm = ({
   clearSaveError,
   onSave,
 }: Props) => {
-  const [isSimulateVisible, setIsSimulateVisible] = useState(false);
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
+  const { addContent, removeContent, closeFlyout } = useFlyoutMultiContent();
+  const isMounted = useRef(false);
 
   const indexTemplate = defaultValue ?? {
     name: '',
@@ -150,6 +156,18 @@ export const TemplateForm = ({
     </>
   ) : null;
 
+  const showPreviewFlyout = () => {
+    addContent<SimulateTemplateProps>({
+      id: 'simulateTemplate',
+      Component: SimulateTemplateFlyoutContent,
+      props: {
+        getTemplate: getTemplateSimulate,
+        onClose: closeFlyout,
+      },
+      flyoutProps: simulateTemplateFlyoutProps,
+    });
+  };
+
   const getRightContentWizardNav = (stepId: WizardSection) => {
     if (isLegacy) {
       return null;
@@ -161,7 +179,7 @@ export const TemplateForm = ({
     }
 
     return (
-      <EuiButton size="s" onClick={() => setIsSimulateVisible(true)}>
+      <EuiButton size="s" onClick={showPreviewFlyout}>
         <FormattedMessage
           id="xpack.idxMgmt.templateForm.previewIndexTemplateButtonLabel"
           defaultMessage="Preview index template"
@@ -249,6 +267,23 @@ export const TemplateForm = ({
     return template;
   }, [buildTemplateObject, indexTemplate, wizardContent]);
 
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (!isMounted.current) {
+        // Close the "Preview template" flyout when unmounting the component
+        removeContent('simulateTemplate');
+      }
+    };
+  }, [removeContent]);
+
   return (
     <>
       {/* Form header */}
@@ -299,14 +334,6 @@ export const TemplateForm = ({
           <StepReviewContainer getTemplateData={buildTemplateObject(indexTemplate)} />
         </FormWizardStep>
       </FormWizard>
-
-      {/* Simulate index template */}
-      {isSimulateVisible && (
-        <SimulateTemplateFlyout
-          getTemplate={getTemplateSimulate}
-          onClose={() => setIsSimulateVisible(false)}
-        />
-      )}
     </>
   );
 };
