@@ -6,9 +6,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RendererFactory } from '../../../types';
+import { RendererFactory } from '../../../../types';
 import { AdvancedFilter } from './component';
-import { RendererStrings } from '../../../i18n';
+import { RendererStrings } from '../../../../i18n';
 
 const { advancedFilter: strings } = RendererStrings;
 

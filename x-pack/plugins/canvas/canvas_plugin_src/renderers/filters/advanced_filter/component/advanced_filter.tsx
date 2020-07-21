@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
-import { ComponentStrings } from '../../../../i18n';
+import { ComponentStrings } from '../../../../../i18n';
 
 const { AdvancedFilter: strings } = ComponentStrings;
 
