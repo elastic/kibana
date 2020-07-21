@@ -33,18 +33,18 @@ describe('EventDetails', () => {
     timelineId: 'test',
     toggleColumn: jest.fn(),
   };
-
-  describe('rendering', () => {
-    test('should match snapshot', () => {
-      const wrapper = shallow(<EventDetails {...defaultProps} />);
-      expect(wrapper).toMatchSnapshot();
-    });
-  });
   const wrapper = mount(
     <TestProviders>
       <EventDetails {...defaultProps} />
     </TestProviders>
   );
+
+  describe('rendering', () => {
+    test('should match snapshot', () => {
+      const shallowWrap = shallow(<EventDetails {...defaultProps} />);
+      expect(shallowWrap).toMatchSnapshot();
+    });
+  });
 
   describe('tabs', () => {
     ['Table', 'JSON View'].forEach((tab) => {
