@@ -10,7 +10,8 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-import { wait } from '../../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { TestProviderWithoutDragAndDrop } from '../../../../common/mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../../common/mock/timeline_results';
 import { useGetAllTimeline, getAllTimeline } from '../../../containers/all';
@@ -64,10 +65,15 @@ describe('OpenTimelineModal', () => {
       </ThemeProvider>
     );
 
-    await wait();
+    await waitFor(
+      () => {
+        wrapper.update();
 
-    wrapper.update();
-
-    expect(wrapper.find('div[data-test-subj="open-timeline-modal"].euiModal').length).toEqual(1);
-  });
+        expect(wrapper.find('div[data-test-subj="open-timeline-modal"].euiModal').length).toEqual(
+          1
+        );
+      },
+      { timeout: 10000 }
+    );
+  }, 20000);
 });

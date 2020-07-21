@@ -79,10 +79,10 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     });
   };
 
-  const isValid = useMemo(
-    (): boolean => validateParams(selectedValue, selectedField ? selectedField.type : ''),
-    [selectedField, selectedValue]
-  );
+  const isValid = useMemo((): boolean => validateParams(selectedValue, selectedField), [
+    selectedField,
+    selectedValue,
+  ]);
 
   return (
     <EuiComboBox
