@@ -30,5 +30,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./transform'));
     loadTestFile(require.resolve('./endpoint'));
     loadTestFile(require.resolve('./lists'));
+    loadTestFile(require.resolve('./upgrade_assistant'));
   });
 }
