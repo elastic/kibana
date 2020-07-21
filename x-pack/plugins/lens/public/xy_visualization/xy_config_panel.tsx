@@ -150,49 +150,56 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           }}
           anchorPosition="downRight"
         >
-          <EuiToolTip
-            anchorClassName="eui-displayBlock"
-            content={
-              !hasNonBarSeries &&
-              i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
-                defaultMessage:
-                  'This setting only applies to line charts and unstacked area charts.',
-              })
-            }
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
+              defaultMessage: 'Fill missing values',
+            })}
           >
-            <>
-              <EuiFormRow
-                display="columnCompressed"
-                label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
-                  defaultMessage: 'Fill missing values',
-                })}
-              >
-                <EuiSuperSelect
-                  compressed
-                  disabled={!hasNonBarSeries}
-                  options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                    return {
-                      value: id,
-                      dropdownDisplay: (
-                        <>
-                          <strong>{title}</strong>
-                          <EuiText size="xs" color="subdued">
-                            <p>{description}</p>
-                          </EuiText>
-                        </>
-                      ),
-                      inputDisplay: title,
-                    };
+            <EuiToolTip
+              anchorClassName="eui-displayBlock"
+              content={
+                !hasNonBarSeries &&
+                i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
+                  defaultMessage:
+                    'This setting only applies to line charts and unstacked area charts.',
+                })
+              }
+            >
+              <>
+                <EuiFormRow
+                  display="columnCompressed"
+                  label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
+                    defaultMessage: 'Fill missing values',
                   })}
-                  valueOfSelected={props.state?.fittingFunction || 'None'}
-                  onChange={(value) => props.setState({ ...props.state, fittingFunction: value })}
-                  itemLayoutAlign="top"
-                  hasDividers
-                />
-              </EuiFormRow>
-              <EuiHorizontalRule />
-            </>
-          </EuiToolTip>
+                >
+                  <EuiSuperSelect
+                    compressed
+                    disabled={!hasNonBarSeries}
+                    options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                      return {
+                        value: id,
+                        dropdownDisplay: (
+                          <>
+                            <strong>{title}</strong>
+                            <EuiText size="xs" color="subdued">
+                              <p>{description}</p>
+                            </EuiText>
+                          </>
+                        ),
+                        inputDisplay: title,
+                      };
+                    })}
+                    valueOfSelected={props.state?.fittingFunction || 'None'}
+                    onChange={(value) => props.setState({ ...props.state, fittingFunction: value })}
+                    itemLayoutAlign="top"
+                    hasDividers
+                  />
+                </EuiFormRow>
+                <EuiHorizontalRule />
+              </>
+            </EuiToolTip>
+          </EuiFormRow>
           <EuiFormRow
             display="columnCompressed"
             label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
