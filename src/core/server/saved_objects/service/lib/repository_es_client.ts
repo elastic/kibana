@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { RequestParams } from '@elastic/elasticsearch';
-
-import type {
-  ApiResponse,
-  TransportRequestOptions,
-  RequestNDBody,
-  RequestBody,
-} from '@elastic/elasticsearch/lib/Transport';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 
 import { ElasticsearchClient } from '../../../elasticsearch/';
 import { retryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';
 import { decorateEsError } from './decorate_es_error';
 
-const methods: MethodName[] = [
+const methods = [
   'bulk',
   'create',
   'delete',
@@ -39,97 +33,25 @@ const methods: MethodName[] = [
   'search',
   'update',
   'updateByQuery',
-];
+] as const;
 
-// TODO use Pick when @elastic/elasticsearch provides Kibana specific types without overloading
-export interface RepositoryEsClient {
-  bulk<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestNDBody = Array<Record<string, any>>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Bulk<TRequestBody>,
-    options?: TransportRequestOptions
-  ): Promise<ApiResponse<TResponse, TContext>>;
+type MethodName = typeof methods[number];
 
-  create<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Create<TRequestBody>,
-    options?: TransportRequestOptions
-  ): Promise<ApiResponse<TResponse, TContext>>;
-
-  get<TResponse = Record<string, any>, TContext = unknown>(
-    params?: RequestParams.Get,
-    options?: TransportRequestOptions
-  ): Promise<ApiResponse<TResponse, TContext>>;
-
-  delete<TResponse = Record<string, any>, TContext = unknown>(
-    params?: RequestParams.Delete,
-    options?: TransportRequestOptions
-  ): Promise<ApiResponse<TResponse, TContext>>;
-
-  index<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Index<TRequestBody>,
-    options?: TransportRequestOptions
-  ): Promise<ApiResponse<TResponse, TContext>>;
-
-  mget<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Mget<TRequestBody>,
-    options?: TransportRequestOptions
-  ): Promise<ApiResponse<TResponse, TContext>>;
-
-  search<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Search<TRequestBody>,
-    options?: TransportRequestOptions
-  ): Promise<ApiResponse<TResponse, TContext>>;
-
-  update<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Update<TRequestBody>,
-    options?: TransportRequestOptions
-  ): Promise<ApiResponse<TResponse, TContext>>;
-
-  updateByQuery<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.UpdateByQuery<TRequestBody>,
-    options?: TransportRequestOptions
-  ): Promise<ApiResponse<TResponse, TContext>>;
-}
-
-type MethodName = keyof RepositoryEsClient;
+export type RepositoryEsClient = Pick<KibanaClient, MethodName>;
 
 export function createRepositoryEsClient(client: ElasticsearchClient): RepositoryEsClient {
   return methods.reduce((acc: RepositoryEsClient, key: MethodName) => {
-    acc[key] = async (params?: unknown, options?: TransportRequestOptions) => {
-      try {
-        return await retryCallCluster(() =>
-          (client[key] as Function)(params, { maxRetries: 0, ...options })
-        );
-      } catch (e) {
-        throw decorateEsError(e);
-      }
-    };
+    Object.defineProperty(acc, key, {
+      value: async (params?: unknown, options?: TransportRequestOptions) => {
+        try {
+          return await retryCallCluster(() =>
+            (client[key] as Function)(params, { maxRetries: 0, ...options })
+          );
+        } catch (e) {
+          throw decorateEsError(e);
+        }
+      },
+    });
     return acc;
   }, {} as RepositoryEsClient);
 }

@@ -65,7 +65,6 @@ export interface Context {
   source: Index.FullIndexInfo;
   dest: Index.FullIndexInfo;
   documentMigrator: VersionedTransformer;
-  logger: Logger;
   log: SavedObjectsMigrationLogger;
   batchSize: number;
   pollInterval: number;
@@ -91,7 +90,6 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     source,
     dest,
     log: new MigrationLogger(log),
-    logger: log,
     batchSize: opts.batchSize,
     documentMigrator: opts.documentMigrator,
     pollInterval: opts.pollInterval,

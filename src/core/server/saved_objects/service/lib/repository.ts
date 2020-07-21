@@ -122,7 +122,6 @@ export class SavedObjectsRepository {
   private _registry: SavedObjectTypeRegistry;
   private _allowedTypes: string[];
   private readonly client: RepositoryEsClient;
-  // private _unwrappedCallCluster: LegacyAPICaller;
   private _serializer: SavedObjectsSerializer;
 
   /**

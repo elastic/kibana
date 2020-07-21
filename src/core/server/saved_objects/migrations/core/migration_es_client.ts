@@ -16,14 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { RequestParams } from '@elastic/elasticsearch';
-import type {
-  ApiResponse,
-  TransportRequestOptions,
-  TransportRequestPromise,
-  RequestNDBody,
-  RequestBody,
-} from '@elastic/elasticsearch/lib/Transport';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 
@@ -52,113 +46,26 @@ const methods = [
 type MethodName = typeof methods[number];
 
 export interface MigrationEsClient {
-  bulk<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestNDBody = Array<Record<string, any>>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Bulk<TRequestBody>,
-    options?: TransportRequestOptions
-  ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
+  bulk: KibanaClient['bulk'];
   cat: {
-    templates<TResponse = Record<string, any>, TContext = unknown>(
-      params?: RequestParams.CatTemplates,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    templates: KibanaClient['cat']['templates'];
   };
-
-  clearScroll<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.ClearScroll<TRequestBody>,
-    options?: TransportRequestOptions
-  ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
-  count<TResponse = Record<string, any>, TContext = unknown>(
-    params?: RequestParams.CatCount,
-    options?: TransportRequestOptions
-  ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
+  clearScroll: KibanaClient['clearScroll'];
+  count: KibanaClient['count'];
   indices: {
-    create<
-      TResponse = Record<string, any>,
-      TRequestBody extends RequestBody = Record<string, any>,
-      TContext = unknown
-    >(
-      params?: RequestParams.IndicesCreate<TRequestBody>,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
-    delete<TResponse = Record<string, any>, TContext = unknown>(
-      params?: RequestParams.IndicesDelete,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
-    deleteTemplate<TResponse = Record<string, any>, TContext = unknown>(
-      params?: RequestParams.IndicesDeleteTemplate,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
-    get<TResponse = Record<string, any>, TContext = unknown>(
-      params?: RequestParams.IndicesGet,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
-    getAlias<TResponse = Record<string, any>, TContext = unknown>(
-      params?: RequestParams.IndicesGetAlias,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
-    refresh<TResponse = Record<string, any>, TContext = unknown>(
-      params?: RequestParams.IndicesRefresh,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
-    updateAliases<
-      TResponse = Record<string, any>,
-      TRequestBody extends RequestBody = Record<string, any>,
-      TContext = unknown
-    >(
-      params?: RequestParams.IndicesUpdateAliases<TRequestBody>,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    create: KibanaClient['indices']['create'];
+    delete: KibanaClient['indices']['delete'];
+    deleteTemplate: KibanaClient['indices']['deleteTemplate'];
+    get: KibanaClient['indices']['get'];
+    getAlias: KibanaClient['indices']['getAlias'];
+    refresh: KibanaClient['indices']['refresh'];
+    updateAliases: KibanaClient['indices']['updateAliases'];
   };
-
-  reindex<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Reindex<TRequestBody>,
-    options?: TransportRequestOptions
-  ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
-  search<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Search<TRequestBody>,
-    options?: TransportRequestOptions
-  ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
-  scroll<
-    TResponse = Record<string, any>,
-    TRequestBody extends RequestBody = Record<string, any>,
-    TContext = unknown
-  >(
-    params?: RequestParams.Scroll<TRequestBody>,
-    options?: TransportRequestOptions
-  ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
-
+  reindex: KibanaClient['reindex'];
+  search: KibanaClient['search'];
+  scroll: KibanaClient['scroll'];
   tasks: {
-    get<TResponse = Record<string, any>, TContext = unknown>(
-      params?: RequestParams.TasksGet,
-      options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse<TResponse, TContext>>;
+    get: KibanaClient['tasks']['get'];
   };
 }
 

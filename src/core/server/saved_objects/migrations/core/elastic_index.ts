@@ -177,7 +177,6 @@ export async function migrationsUpToDate(
     }
 
     const { body } = await client.count<CountResponse>({
-      // @ts-expect-error body is missed from the type definition
       body: {
         query: {
           bool: {
