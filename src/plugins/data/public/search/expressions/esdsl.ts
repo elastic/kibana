@@ -38,21 +38,28 @@ interface Arguments {
   dsl: string;
 }
 
-export const esdsl = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
+export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof name,
+  Input,
+  Arguments,
+  Output
+>;
+
+export const esdsl = (): EsdslExpressionFunctionDefinition => ({
   name,
   type: 'es_raw_response',
   inputTypes: ['kibana_context', 'null'],
-  help: i18n.translate('data.search.es_search.esdsl.help', {
+  help: i18n.translate('data.search.esdsl.help', {
     defaultMessage: 'Run elasticsearch request',
   }),
   args: {
     dsl: {
       types: ['string'],
       aliases: ['_', 'q', 'query'],
-      help: i18n.translate('data.search.es_search.esdsl.q.help', {
+      help: i18n.translate('data.search.esdsl.q.help', {
         defaultMessage: 'Query DSL',
       }),
-      default: `"{}"`,
+      required: true,
     },
   },
   async fn(input, args, { inspectorAdapters, abortSignal }) {
@@ -74,14 +81,13 @@ export const esdsl = (): ExpressionFunctionDefinition<typeof name, Input, Argume
 
       if (!dslBody.query) {
         dslBody.query = query;
-      }
-      if (!dslBody.query.bool) {
+      } else if (!dslBody.query.bool) {
         dslBody.query.bool = query.bool;
-      }
-      if (!dslBody.query.bool.filter) {
+      } else if (!dslBody.query.bool.filter) {
         dslBody.query.bool.filter = query.bool.filter;
+      } else {
+        dslBody.query.bool.filter = dslBody.query.bool.filter.concat(query.bool.filter);
       }
-      dslBody.query.bool.filter = dslBody.query.bool.filter.concat(query.bool.filter);
     }
 
     if (!inspectorAdapters.requests) {
@@ -89,7 +95,7 @@ export const esdsl = (): ExpressionFunctionDefinition<typeof name, Input, Argume
     }
 
     const request = inspectorAdapters.requests.start(
-      i18n.translate('data.search.es_search.dataRequest.title', {
+      i18n.translate('data.search.dataRequest.title', {
         defaultMessage: 'Data',
       }),
       {

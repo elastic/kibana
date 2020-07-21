@@ -18,6 +18,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { ExpressionTypeDefinition } from '../../../../expressions/common';
 
 const name = 'es_raw_response';
 
@@ -29,22 +30,23 @@ export interface EsRawResponse<T = unknown> {
 function flatten(obj: any, keyPrefix = '') {
   let topLevelKeys: Record<string, any> = {};
   const nestedRows: any[] = [];
+  const prefix = keyPrefix ? keyPrefix + '.' : '';
   Object.keys(obj).forEach((key) => {
     if (Array.isArray(obj[key])) {
       nestedRows.push(
         ...obj[key]
-          .map((nestedRow: any) => flatten(nestedRow, keyPrefix + '.' + key))
+          .map((nestedRow: any) => flatten(nestedRow, prefix + key))
           .reduce((acc: any, object: any) => [...acc, ...object], [])
       );
     } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      const subRows = flatten(obj[key], keyPrefix + '.' + key);
+      const subRows = flatten(obj[key], prefix + key);
       if (subRows.length === 1) {
         topLevelKeys = { ...topLevelKeys, ...subRows[0] };
       } else {
         nestedRows.push(...subRows);
       }
     } else {
-      topLevelKeys[keyPrefix + '.' + key] = obj[key];
+      topLevelKeys[prefix + key] = obj[key];
     }
   });
   if (nestedRows.length === 0) {
@@ -62,7 +64,7 @@ const convertResult = (body: SearchResponse<unknown>) => {
   return body.hits.hits.length ? parseRawDocs(body.hits) : flatten(body.aggregations);
 };
 
-export const esRawResponse = {
+export const esRawResponse: ExpressionTypeDefinition<typeof name, EsRawResponse, EsRawResponse> = {
   name,
   to: {
     datatable: (context: EsRawResponse) => {

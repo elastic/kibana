@@ -13,11 +13,6 @@ Object {
                   "gender": "male",
                 },
               },
-              Object {
-                "match_phrase": Object {
-                  "gender": "male",
-                },
-              },
             ],
             "must": Array [],
             "must_not": Array [],
