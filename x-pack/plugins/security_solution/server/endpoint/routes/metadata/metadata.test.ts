@@ -12,6 +12,7 @@ import {
   RouteConfig,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -31,7 +32,6 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -306,11 +306,11 @@ describe('test endpoint route', () => {
       });
 
       mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
-        throw Boom.notFound('Agent not found');
+        SavedObjectsErrorHelpers.createGenericNotFoundError();
       });
 
       mockAgentService.getAgent = jest.fn().mockImplementation(() => {
-        throw Boom.notFound('Agent not found');
+        SavedObjectsErrorHelpers.createGenericNotFoundError();
       });
 
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
