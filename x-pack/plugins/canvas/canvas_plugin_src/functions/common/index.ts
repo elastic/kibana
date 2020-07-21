@@ -48,11 +48,6 @@ import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
-import { savedLens } from './saved_lens';
-import { savedMap } from './saved_map';
-// TODO: elastic/kibana#44822 Disabling pending filters work
-// import { savedSearch } from './saved_search';
-import { savedVisualization } from './saved_visualization';
 import { seriesStyle } from './seriesStyle';
 import { shape } from './shape';
 import { sort } from './sort';
@@ -111,11 +106,6 @@ export const functions = [
   revealImage,
   rounddate,
   rowCount,
-  savedLens,
-  savedMap,
-  // TODO: elastic/kibana#44822 Disabling pending filters work
-  // savedSearch,
-  savedVisualization,
   seriesStyle,
   shape,
   sort,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedLensInput } from '../../../functions/common/saved_lens';
+import { SavedLensInput } from '../../../functions/external/saved_lens';
 
 export function toExpression(input: SavedLensInput): string {
   const expressionParts = [] as string[];
