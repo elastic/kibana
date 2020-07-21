@@ -12,6 +12,7 @@ import {
   Tags,
   _Tags,
   _tags,
+  _version,
   description,
   exceptionListItemType,
   id,
@@ -19,7 +20,7 @@ import {
   name,
   tags,
 } from '../common/schemas';
-import { Identity, RequiredKeepUndefined } from '../../types';
+import { RequiredKeepUndefined } from '../../types';
 import {
   DefaultEntryArray,
   DefaultUpdateCommentsArray,
@@ -38,6 +39,7 @@ export const updateEndpointListItemSchema = t.intersection([
   t.exact(
     t.partial({
       _tags, // defaults to empty array if not set during decode
+      _version, // defaults to undefined if not set during decode
       comments: DefaultUpdateCommentsArray, // defaults to empty array if not set during decode
       entries: DefaultEntryArray, // defaults to empty array if not set during decode
       id, // defaults to undefined if not set during decode
@@ -48,19 +50,15 @@ export const updateEndpointListItemSchema = t.intersection([
   ),
 ]);
 
-export type UpdateEndpointListItemSchemaPartial = Identity<
-  t.TypeOf<typeof updateEndpointListItemSchema>
->;
-export type UpdateEndpointListItemSchema = RequiredKeepUndefined<
-  t.TypeOf<typeof updateEndpointListItemSchema>
->;
+export type UpdateEndpointListItemSchema = t.OutputOf<typeof updateEndpointListItemSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type UpdateEndpointListItemSchemaDecoded = Identity<
-  Omit<UpdateEndpointListItemSchema, '_tags' | 'tags' | 'entries' | 'comments'> & {
-    _tags: _Tags;
-    comments: UpdateCommentsArray;
-    tags: Tags;
-    entries: EntriesArray;
-  }
->;
+export type UpdateEndpointListItemSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof updateEndpointListItemSchema>>,
+  '_tags' | 'tags' | 'entries' | 'comments'
+> & {
+  _tags: _Tags;
+  comments: UpdateCommentsArray;
+  tags: Tags;
+  entries: EntriesArray;
+};
