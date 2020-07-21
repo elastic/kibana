@@ -99,7 +99,7 @@ export class IngestManagerPlugin
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
     }
 
-    // deps.indexPatternManagement.environment.update({ ingestManager: true });
+    deps.indexPatternManagement.environment.update({ ingestManager: true });
 
     return {};
   }
