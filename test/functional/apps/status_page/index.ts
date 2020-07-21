@@ -18,8 +18,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
@@ -31,11 +32,32 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('status_page');
     });
 
-    it('should show the kibana plugin as ready', async function () {
+    it('should show the kibana plugin as ready', async () => {
       await retry.tryForTime(6000, async () => {
         const text = await testSubjects.getVisibleText('statusBreakdown');
         expect(text.indexOf('plugin:kibana')).to.be.above(-1);
       });
+    });
+
+    it('should show the build hash and number', async () => {
+      const buildNumberText = await testSubjects.getVisibleText('statusBuildNumber');
+      expect(buildNumberText).to.contain('BUILD ');
+
+      const hashText = await testSubjects.getVisibleText('statusBuildHash');
+      expect(hashText).to.contain('COMMIT ');
+    });
+
+    it('should display the server metrics', async () => {
+      const metrics = await testSubjects.findAll('serverMetric');
+      expect(metrics).to.have.length(6);
+    });
+
+    it('should display the server status', async () => {
+      const titleText = await testSubjects.getVisibleText('serverStatusTitle');
+      expect(titleText).to.contain('Kibana status is');
+
+      const serverStatus = await testSubjects.getAttribute('serverStatusTitleBadge', 'aria-label');
+      expect(serverStatus).to.be('Green');
     });
   });
 }

@@ -31,12 +31,20 @@ export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, server
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" style={{ flexGrow: 0 }}>
     <EuiFlexItem grow={false}>
       <EuiTitle>
-        <h2>
+        <h2 data-test-subj="serverStatusTitle">
           <FormattedMessage
             id="core.statusPage.serverStatus.statusTitle"
             defaultMessage="Kibana status is {kibanaStatus}"
             values={{
-              kibanaStatus: <EuiBadge color={serverState.uiColor}>{serverState.title}</EuiBadge>,
+              kibanaStatus: (
+                <EuiBadge
+                  data-test-subj="serverStatusTitleBadge"
+                  color={serverState.uiColor}
+                  aria-label={serverState.title}
+                >
+                  {serverState.title}
+                </EuiBadge>
+              ),
             }}
           />
         </h2>

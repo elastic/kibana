@@ -116,7 +116,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <p>
+                      <p data-test-subj="statusBuildNumber">
                         <FormattedMessage
                           id="core.statusPage.statusApp.statusActions.buildText"
                           defaultMessage="BUILD {buildNum}"
@@ -129,7 +129,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <p>
+                      <p data-test-subj="statusBuildHash">
                         <FormattedMessage
                           id="core.statusPage.statusApp.statusActions.commitText"
                           defaultMessage="COMMIT {buildSha}"

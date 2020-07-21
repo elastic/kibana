@@ -26,7 +26,14 @@ import { formatNumber, Metric } from '../lib';
  */
 export const MetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
   const { name } = metric;
-  return <EuiCard layout="horizontal" title={formatMetric(metric)} description={name} />;
+  return (
+    <EuiCard
+      data-test-subj={`serverMetric-${formatMetricId(metric)}`}
+      layout="horizontal"
+      title={formatMetric(metric)}
+      description={name}
+    />
+  );
 };
 
 /*
@@ -35,7 +42,7 @@ export const MetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) =>
 export const MetricTiles: FunctionComponent<{ metrics: Metric[] }> = ({ metrics }) => (
   <EuiFlexGrid columns={3}>
     {metrics.map((metric) => (
-      <EuiFlexItem key={metric.name}>
+      <EuiFlexItem key={metric.name} data-test-subj="serverMetric">
         <MetricTile metric={metric} />
       </EuiFlexItem>
     ))}
@@ -45,4 +52,8 @@ export const MetricTiles: FunctionComponent<{ metrics: Metric[] }> = ({ metrics 
 const formatMetric = ({ value, type }: Metric) => {
   const metrics = Array.isArray(value) ? value : [value];
   return metrics.map((metric) => formatNumber(metric, type)).join(', ');
+};
+
+const formatMetricId = ({ name }: Metric) => {
+  return name.toLowerCase().replace(' ', '');
 };
