@@ -5,15 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, {
-  ReactNode,
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-  useLayoutEffect,
-  useLayoutEffect,
-} from 'react';
+import React, { ReactNode, useState, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import {
   EuiI18nNumber,
   EuiSelectable,
