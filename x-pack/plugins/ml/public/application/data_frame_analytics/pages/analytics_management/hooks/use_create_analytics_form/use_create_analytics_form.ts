@@ -25,7 +25,6 @@ import { reducer } from './reducer';
 import {
   getInitialState,
   getJobConfigFromFormState,
-  EsIndexName,
   FormMessage,
   State,
   SourceIndexMap,
@@ -66,9 +65,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const resetAdvancedEditorMessages = () =>
     dispatch({ type: ACTION.RESET_ADVANCED_EDITOR_MESSAGES });
-
-  const setIndexNames = (indexNames: EsIndexName[]) =>
-    dispatch({ type: ACTION.SET_INDEX_NAMES, indexNames });
 
   const setAdvancedEditorRawString = (advancedEditorRawString: string) =>
     dispatch({ type: ACTION.SET_ADVANCED_EDITOR_RAW_STRING, advancedEditorRawString });
@@ -214,21 +210,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
 
     try {
-      setIndexNames((await ml.getIndices()).map((index) => index.name));
-    } catch (e) {
-      addRequestMessage({
-        error: getErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorGettingDataFrameIndexNames',
-          {
-            defaultMessage: 'An error occurred getting the existing index names:',
-          }
-        ),
-      });
-    }
-
-    try {
-      // Set the index pattern titles which the user can choose as the source.
+      // Set the existing index pattern titles.
       const indexPatternsMap: SourceIndexMap = {};
       const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
       savedObjects.forEach((obj) => {

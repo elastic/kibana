@@ -51,7 +51,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     editor,
     processorsDispatch,
   }) {
-    const isDisabled = editor.mode.id !== 'idle';
+    const isEditorNotInIdleMode = editor.mode.id !== 'idle';
     const isInMoveMode = Boolean(movingProcessor);
     const isMovingThisProcessor = processor.id === movingProcessor?.id;
     const isEditingThisProcessor =
@@ -83,6 +83,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
       });
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
+      const disabled = isEditorNotInIdleMode && !isMovingThisProcessor;
       const moveButton = (
         <EuiButtonToggle
           isEmpty={!isMovingThisProcessor}
@@ -91,10 +92,16 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           iconType={icon}
           data-test-subj={dataTestSubj}
           size="s"
-          disabled={isDisabled && !isMovingThisProcessor}
+          isDisabled={disabled}
           label={label}
           aria-label={label}
-          onChange={() => (!isMovingThisProcessor ? onMove() : onCancelMove())}
+          onChange={() => {
+            if (isMovingThisProcessor) {
+              onCancelMove();
+            } else {
+              onMove();
+            }
+          }}
         />
       );
       // Remove the tooltip from the DOM to prevent it from lingering if the mouse leave event
@@ -132,7 +139,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
               </EuiFlexItem>
               <EuiFlexItem className={inlineTextInputContainerClasses} grow={false}>
                 <InlineTextInput
-                  disabled={isDisabled}
+                  disabled={isEditorNotInIdleMode}
                   onChange={(nextDescription) => {
                     let nextOptions: Record<string, any>;
                     if (!nextDescription) {
@@ -164,7 +171,8 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                 {!isInMoveMode && (
                   <EuiToolTip content={i18nTexts.editButtonLabel}>
                     <EuiButtonIcon
-                      disabled={isDisabled}
+                      data-test-subj="editItemButton"
+                      disabled={isEditorNotInIdleMode}
                       aria-label={i18nTexts.editButtonLabel}
                       iconType="pencil"
                       size="s"
@@ -183,7 +191,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           <EuiFlexItem grow={false}>
             <ContextMenu
               data-test-subj="moreMenu"
-              disabled={isDisabled}
+              disabled={isEditorNotInIdleMode}
               hidden={isInMoveMode}
               showAddOnFailure={!processor.onFailure?.length}
               onAddOnFailure={() => {

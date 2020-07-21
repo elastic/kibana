@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import Boom from 'boom';
 import { ILegacyScopedClusterClient } from 'kibana/server';
+import { parseTimeIntervalForJob } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
@@ -24,11 +25,11 @@ import { resultsServiceProvider } from '../results_service';
 import { CalendarManager, Calendar } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
+  getEarliestDatafeedStartTime,
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
-
 export interface MlJobsResponse {
   jobs: Job[];
   count: number;
@@ -171,6 +172,11 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
         description: job.description || '',
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
         processed_record_count: job.data_counts?.processed_record_count,
+        earliestStartTimestampMs: getEarliestDatafeedStartTime(
+          dataCounts?.latest_record_timestamp,
+          dataCounts?.latest_bucket_timestamp,
+          parseTimeIntervalForJob(job.analysis_config?.bucket_span)
+        ),
         memory_status: job.model_size_stats ? job.model_size_stats.memory_status : '',
         jobState: job.deleting === true ? deletingStr : job.state,
         hasDatafeed,
@@ -182,8 +188,8 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
         latestTimestampMs: dataCounts?.latest_record_timestamp,
         earliestTimestampMs: dataCounts?.earliest_record_timestamp,
         latestResultsTimestampMs: getLatestDataOrBucketTimestamp(
-          dataCounts?.latest_record_timestamp as number,
-          dataCounts?.latest_bucket_timestamp as number
+          dataCounts?.latest_record_timestamp,
+          dataCounts?.latest_bucket_timestamp
         ),
         isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: job.node ? job.node.name : undefined,
