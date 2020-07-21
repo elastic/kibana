@@ -30,6 +30,7 @@ import { first } from 'rxjs/operators';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
+  FeatureCatalogueCategory,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
   TutorialService,
@@ -115,8 +116,38 @@ export class HomePublicPlugin
     });
     kibanaLegacy.forwardApp('home', 'home');
 
+    const featureCatalogue = { ...this.featuresCatalogueRegistry.setup() };
+
+    featureCatalogue.register({
+      id: 'home_tutorial_directory',
+      title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
+        defaultMessage: 'Add an integration',
+      }),
+      description: i18n.translate('home.tutorialDirectory.featureCatalogueDescription', {
+        defaultMessage: 'Add data from a variety of common sources.',
+      }),
+      icon: 'indexOpen',
+      showOnHomePage: true,
+      path: `${HOME_APP_BASE_PATH}#/tutorial_directory`,
+      category: FeatureCatalogueCategory.DATA, // TODO: is the correct category for this plugin?
+    });
+
+    featureCatalogue.register({
+      id: 'home_sample_data',
+      title: i18n.translate('home.sampleData.featureCatalogueTitle', {
+        defaultMessage: 'Sample Data',
+      }),
+      description: i18n.translate('home.sampleData.featureCatalogueDescription', {
+        defaultMessage: 'Load a data set and a Kibana dashboard',
+      }),
+      icon: 'tableDensityExpanded',
+      showOnHomePage: true,
+      path: `${HOME_APP_BASE_PATH}#/tutorial_directory/sampleData`,
+      category: FeatureCatalogueCategory.DATA, // TODO: is the correct category for this plugin?
+    });
+
     return {
-      featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
+      featureCatalogue,
       environment: { ...this.environmentService.setup() },
       tutorials: { ...this.tutorialService.setup() },
     };
