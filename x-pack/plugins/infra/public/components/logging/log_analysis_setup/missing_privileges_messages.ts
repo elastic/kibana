@@ -6,6 +6,21 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const missingMlResultsPrivilegesTitle = i18n.translate(
+  'xpack.infra.logs.analysis.missingMlResultsPrivilegesTitle',
+  {
+    defaultMessage: 'Additional Machine Learning privileges required',
+  }
+);
+
+export const missingMlResultsPrivilegesDescription = i18n.translate(
+  'xpack.infra.logs.analysis.missingMlResultsPrivilegesDescription',
+  {
+    defaultMessage:
+      'This feature makes use of Machine Learning jobs, which require at least the read permission for the Machine Learning app in order to access their status and results.',
+  }
+);
+
 export const missingMlSetupPrivilegesTitle = i18n.translate(
   'xpack.infra.logs.analysis.missingMlSetupPrivilegesTitle',
   {
@@ -17,6 +32,6 @@ export const missingMlSetupPrivilegesDescription = i18n.translate(
   'xpack.infra.logs.analysis.missingMlSetupPrivilegesDescription',
   {
     defaultMessage:
-      'This feature makes use of Machine Learning jobs, which require all permissions for the Machine Learning App in order to be set up.',
+      'This feature makes use of Machine Learning jobs, which require all permissions for the Machine Learning app in order to be set up.',
   }
 );
