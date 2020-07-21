@@ -87,6 +87,14 @@ function buildTemplateVariables(variables: PackageConfigConfigRecord, streamTemp
   return { vars, yamlValues };
 }
 
+function containsHelper(item: string, list: string[], options: any) {
+  if (list instanceof Array && list.indexOf(item) > -1) {
+    return options.fn(this);
+  }
+  return '';
+}
+Handlebars.registerHelper('contains', containsHelper);
+
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
     return yamlTemplate;
