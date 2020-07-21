@@ -19,7 +19,7 @@
 
 import fs from 'fs';
 import { createHash } from 'crypto';
-import { pipeline } from 'stream';
+import { pipeline, Writable } from 'stream';
 import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
 import { inspect, promisify } from 'util';
@@ -31,8 +31,6 @@ import del from 'del';
 import deleteEmpty from 'delete-empty';
 import tar, { ExtractOptions } from 'tar';
 import { ToolingLog } from '@kbn/dev-utils';
-
-import { createMapStream } from '../../../legacy/utils';
 
 const pipelineAsync = promisify(pipeline);
 const mkdirAsync = promisify(fs.mkdir);
@@ -180,7 +178,12 @@ export async function copyAll(
         base: destination,
         dot,
       }),
-      createMapStream<File>((file) => utimesAsync(file.path, time, time))
+      new Writable({
+        objectMode: true,
+        write(file: File, _, cb) {
+          utimesAsync(file.path, time, time).then(() => cb(), cb);
+        },
+      })
     );
   }
 }
