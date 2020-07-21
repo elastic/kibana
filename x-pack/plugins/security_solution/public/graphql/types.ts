@@ -428,6 +428,10 @@ export enum FlowDirection {
   biDirectional = 'biDirectional',
 }
 
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
+
 export type ToStringArray = string[];
 
 export type Date = string;
@@ -627,6 +631,10 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<ToStringArrayNoNullable>;
+
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 export interface AuthenticationsData {
@@ -2780,6 +2788,10 @@ export namespace SourceQuery {
     aggregatable: boolean;
 
     format: Maybe<string>;
+
+    esTypes: Maybe<ToStringArrayNoNullable>;
+
+    subType: Maybe<ToIFieldSubTypeNonNullable>;
   };
 }
 
@@ -5654,6 +5666,8 @@ export namespace GetOneTimeline {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<_QueryMatch>;
   };
 
@@ -5870,6 +5884,8 @@ export namespace PersistTimelineMutation {
 
     eventType: Maybe<string>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     favorite: Maybe<Favorite[]>;
 
     filters: Maybe<Filters[]>;
@@ -5932,6 +5948,8 @@ export namespace PersistTimelineMutation {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<QueryMatch>;
 
     and: Maybe<And[]>;
@@ -5963,6 +5981,8 @@ export namespace PersistTimelineMutation {
     excluded: Maybe<boolean>;
 
     kqlQuery: Maybe<string>;
+
+    type: Maybe<DataProviderType>;
 
     queryMatch: Maybe<_QueryMatch>;
   };

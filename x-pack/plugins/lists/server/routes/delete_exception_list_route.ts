@@ -21,7 +21,7 @@ export const deleteExceptionListRoute = (router: IRouter): void => {
   router.delete(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_URL,
       validate: {
