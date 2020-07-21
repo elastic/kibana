@@ -535,7 +535,10 @@ export const buildPipeline = async (
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {
-      pipeline += `${prepareString('index', indexPattern.id)}`;
+      pipeline += `${prepareString('index', indexPattern.id)} `;
+      if (vis.data.aggs) {
+        pipeline += `${prepareJson('aggConfigs', vis.data.aggs!.aggs)}`;
+      }
     }
   }
 

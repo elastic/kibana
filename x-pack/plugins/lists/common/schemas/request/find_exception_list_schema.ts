@@ -24,21 +24,12 @@ export const findExceptionListSchema = t.exact(
   })
 );
 
-export type FindExceptionListSchemaPartial = t.TypeOf<typeof findExceptionListSchema>;
+export type FindExceptionListSchema = t.OutputOf<typeof findExceptionListSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type FindExceptionListSchemaPartialDecoded = Omit<
-  FindExceptionListSchemaPartial,
+export type FindExceptionListSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof findExceptionListSchema>>,
   'namespace_type'
 > & {
   namespace_type: NamespaceType;
 };
-
-// This type is used after a decode since some things are defaults after a decode.
-export type FindExceptionListSchemaDecoded = RequiredKeepUndefined<
-  FindExceptionListSchemaPartialDecoded
->;
-
-export type FindExceptionListSchema = RequiredKeepUndefined<
-  t.TypeOf<typeof findExceptionListSchema>
->;

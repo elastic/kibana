@@ -398,11 +398,11 @@ describe('Exception helpers', () => {
           title: 'OS',
         },
         {
-          description: 'April 23rd 2020 @ 00:19:13',
+          description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
         {
-          description: 'user_name',
+          description: 'some user',
           title: 'Created by',
         },
       ];
@@ -417,11 +417,11 @@ describe('Exception helpers', () => {
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {
-          description: 'April 23rd 2020 @ 00:19:13',
+          description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
         {
-          description: 'user_name',
+          description: 'some user',
           title: 'Created by',
         },
         {
@@ -440,11 +440,11 @@ describe('Exception helpers', () => {
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {
-          description: 'April 23rd 2020 @ 00:19:13',
+          description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
         {
-          description: 'user_name',
+          description: 'some user',
           title: 'Created by',
         },
       ];
@@ -520,12 +520,12 @@ describe('Exception helpers', () => {
       const expected = {
         _tags: ['endpoint', 'process', 'malware', 'os:linux'],
         comments: [],
-        description: 'This is a sample endpoint type exception',
+        description: 'some description',
         entries: ENTRIES,
         id: '1',
         item_id: 'endpoint_list_item',
         meta: {},
-        name: 'Sample Endpoint Exception List',
+        name: 'some name',
         namespace_type: 'single',
         tags: ['user added string for a tag', 'malware'],
         type: 'simple',
