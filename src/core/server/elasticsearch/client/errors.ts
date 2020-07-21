@@ -24,7 +24,7 @@ export type UnauthorizedError = ResponseError & {
 };
 
 export function isResponseError(error: any): error is ResponseError {
-  return !!(error.body && error.statusCode && error.headers);
+  return Boolean(error.body && error.statusCode && error.headers);
 }
 
 export function isUnauthorizedError(error: any): error is UnauthorizedError {

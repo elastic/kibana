@@ -289,17 +289,17 @@ export class Router implements IRouter {
 }
 
 const convertEsUnauthorized = (e: EsNotAuthorizedError): ErrorHttpResponseOptions => {
+  const getAuthenticateHeaderValue = () => {
+    const header = Object.entries(e.headers).find(
+      ([key]) => key.toLowerCase() === 'www-authenticate'
+    );
+    return header ? header[1] : 'Basic realm="Authorization Required"';
+  };
   return {
     body: e.message,
-    headers: Object.entries(e.headers).reduce((headers, [key, value]) => {
-      if (key.toLowerCase() === 'www-authenticate') {
-        return {
-          ...headers,
-          'www-authenticate': value,
-        };
-      }
-      return headers;
-    }, {} as Record<string, string>),
+    headers: {
+      'www-authenticate': getAuthenticateHeaderValue(),
+    },
   };
 };
 

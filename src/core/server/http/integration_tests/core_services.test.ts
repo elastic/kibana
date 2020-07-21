@@ -509,5 +509,41 @@ describe('http service', () => {
 
       expect(header['www-authenticate']).toEqual('content');
     });
+
+    it('uses a default value for `www-authenticate` header when ES 401 does not specify it', async () => {
+      const { http } = await root.setup();
+      const { createRouter } = http;
+      // eslint-disable-next-line prefer-const
+      let elasticsearch: InternalElasticsearchServiceStart;
+
+      esClient.ping.mockImplementation(() =>
+        elasticsearchClientMock.createClientError(
+          new ResponseError({
+            statusCode: 401,
+            body: {
+              error: {
+                type: 'Unauthorized',
+              },
+            },
+            warnings: [],
+            headers: {},
+            meta: {} as any,
+          })
+        )
+      );
+
+      const router = createRouter('/new-platform');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        await elasticsearch.client.asScoped(req).asInternalUser.ping();
+        return res.ok();
+      });
+
+      const coreStart = await root.start();
+      elasticsearch = coreStart.elasticsearch;
+
+      const { header } = await kbnTestServer.request.get(root, '/new-platform/').expect(401);
+
+      expect(header['www-authenticate']).toEqual('Basic realm="Authorization Required"');
+    });
   });
 });
