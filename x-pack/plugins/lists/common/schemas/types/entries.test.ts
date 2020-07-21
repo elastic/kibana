@@ -59,6 +59,18 @@ describe('Entries', () => {
       expect(message.schema).toEqual(payload);
     });
 
+    test('it should not validate when "field" is empty string', () => {
+      const payload: Omit<EntryMatch, 'field'> & { field: string } = {
+        ...getEntryMatchMock(),
+        field: '',
+      };
+      const decoded = entriesMatch.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "field"']);
+      expect(message.schema).toEqual({});
+    });
+
     test('it should not validate when "value" is not string', () => {
       const payload: Omit<EntryMatch, 'value'> & { value: string[] } = {
         ...getEntryMatchMock(),
@@ -70,6 +82,18 @@ describe('Entries', () => {
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "["some value"]" supplied to "value"',
       ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should not validate when "value" is empty string', () => {
+      const payload: Omit<EntryMatch, 'value'> & { value: string } = {
+        ...getEntryMatchMock(),
+        value: '',
+      };
+      const decoded = entriesMatch.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "value"']);
       expect(message.schema).toEqual({});
     });
 
@@ -127,6 +151,30 @@ describe('Entries', () => {
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
+    });
+
+    test('it should not validate when field is empty string', () => {
+      const payload: Omit<EntryMatchAny, 'field'> & { field: string } = {
+        ...getEntryMatchAnyMock(),
+        field: '',
+      };
+      const decoded = entriesMatchAny.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "field"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should not validate when value is empty array', () => {
+      const payload: Omit<EntryMatchAny, 'value'> & { value: string[] } = {
+        ...getEntryMatchAnyMock(),
+        value: [],
+      };
+      const decoded = entriesMatchAny.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "[]" supplied to "value"']);
+      expect(message.schema).toEqual({});
     });
 
     test('it should not validate when value is not string array', () => {
@@ -197,6 +245,18 @@ describe('Entries', () => {
       expect(message.schema).toEqual(payload);
     });
 
+    test('it should not validate when "field" is empty string', () => {
+      const payload: Omit<EntryExists, 'field'> & { field: string } = {
+        ...getEntryExistsMock(),
+        field: '',
+      };
+      const decoded = entriesExists.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "field"']);
+      expect(message.schema).toEqual({});
+    });
+
     test('it should strip out extra keys', () => {
       const payload: EntryExists & {
         extraKey?: string;
@@ -265,6 +325,18 @@ describe('Entries', () => {
       expect(message.schema).toEqual({});
     });
 
+    test('it should not validate when "list.id" is empty string', () => {
+      const payload: Omit<EntryList, 'list'> & { list: { id: string; type: 'ip' } } = {
+        ...getEntryListMock(),
+        list: { id: '', type: 'ip' },
+      };
+      const decoded = entriesList.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "list,id"']);
+      expect(message.schema).toEqual({});
+    });
+
     test('it should not validate when "type" is not "lists"', () => {
       const payload: Omit<EntryList, 'type'> & { type: 'match_any' } = {
         ...getEntryListMock(),
@@ -311,6 +383,17 @@ describe('Entries', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual(['Invalid value "match" supplied to "type"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should NOT validate when "field" is empty string', () => {
+      const payload: Omit<EntryNested, 'field'> & {
+        field: string;
+      } = { ...getEntryNestedMock(), field: '' };
+      const decoded = entriesNested.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "field"']);
       expect(message.schema).toEqual({});
     });
 

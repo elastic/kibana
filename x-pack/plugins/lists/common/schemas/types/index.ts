@@ -10,5 +10,7 @@ export * from './default_comments_array';
 export * from './default_create_comments_array';
 export * from './default_update_comments_array';
 export * from './default_namespace';
-export * from './default_entries_array';
 export * from './entries';
+export * from './non_empty_entries_array';
+export * from './non_empty_or_nullable_string_array';
+export * from './non_empty_nested_entries_array';

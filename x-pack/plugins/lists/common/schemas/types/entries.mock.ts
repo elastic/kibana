@@ -54,15 +54,15 @@ export const getEntryExistsMock = (): EntryExists => ({
 });
 
 export const getEntryNestedMock = (): EntryNested => ({
-  entries: [getEntryMatchMock(), getEntryMatchMock()],
+  entries: [{ ...getEntryMatchMock() }, { ...getEntryMatchAnyMock() }],
   field: FIELD,
   type: NESTED,
 });
 
 export const getEntriesArrayMock = (): EntriesArray => [
-  getEntryMatchMock(),
-  getEntryMatchAnyMock(),
-  getEntryListMock(),
-  getEntryExistsMock(),
-  getEntryNestedMock(),
+  { ...getEntryMatchMock() },
+  { ...getEntryMatchAnyMock() },
+  { ...getEntryListMock() },
+  { ...getEntryExistsMock() },
+  { ...getEntryNestedMock() },
 ];
