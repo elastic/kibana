@@ -194,11 +194,11 @@ describe('#toExpression', () => {
       frame
     ) as Ast;
     expect(
-      (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments.x
-    ).toBeTruthy();
-    expect(
-      (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments.y
-    ).toBeTruthy();
+      (expression.chain[0].arguments.tickLabelsVisibilitySettings[0] as Ast).chain[0].arguments
+    ).toEqual({
+      x: [true],
+      y: [true],
+    });
   });
 
   it('should default the gridlines visibility settings to false', () => {
@@ -219,10 +219,10 @@ describe('#toExpression', () => {
       frame
     ) as Ast;
     expect(
-      (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments.x
-    ).toBeTruthy();
-    expect(
-      (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments.y
-    ).toBeTruthy();
+      (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments
+    ).toEqual({
+      x: [false],
+      y: [false],
+    });
   });
 });
