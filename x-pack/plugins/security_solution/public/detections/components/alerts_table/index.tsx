@@ -54,7 +54,7 @@ import {
 import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 import {
   AddExceptionModal,
-  AddExceptionOnClick,
+  AddExceptionModalBaseProps,
 } from '../../../common/components/exceptions/add_exception_modal';
 
 interface OwnProps {
@@ -73,9 +73,10 @@ interface OwnProps {
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
-const addExceptionModalInitialState: AddExceptionOnClick = {
+const addExceptionModalInitialState: AddExceptionModalBaseProps = {
   ruleName: '',
   ruleId: '',
+  ruleIndices: [],
   exceptionListType: 'detection',
   alertData: undefined,
 };
@@ -112,7 +113,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [shouldShowAddExceptionModal, setShouldShowAddExceptionModal] = useState(false);
-  const [addExceptionModalState, setAddExceptionModalState] = useState<AddExceptionOnClick>(
+  const [addExceptionModalState, setAddExceptionModalState] = useState<AddExceptionModalBaseProps>(
     addExceptionModalInitialState
   );
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
@@ -216,12 +217,19 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const openAddExceptionModalCallback = useCallback(
-    ({ ruleName, ruleId, exceptionListType, alertData }: AddExceptionOnClick) => {
+    ({
+      ruleName,
+      ruleIndices,
+      ruleId,
+      exceptionListType,
+      alertData,
+    }: AddExceptionModalBaseProps) => {
       if (alertData !== null && alertData !== undefined) {
         setShouldShowAddExceptionModal(true);
         setAddExceptionModalState({
           ruleName,
           ruleId,
+          ruleIndices,
           exceptionListType,
           alertData,
         });
@@ -421,12 +429,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     closeAddExceptionModal();
   }, [closeAddExceptionModal]);
 
-  const onAddExceptionConfirm = useCallback(
-    (didCloseAlert: boolean) => {
-      closeAddExceptionModal();
-    },
-    [closeAddExceptionModal]
-  );
+  const onAddExceptionConfirm = useCallback(() => closeAddExceptionModal(), [
+    closeAddExceptionModal,
+  ]);
 
   if (loading || isEmpty(signalsIndex)) {
     return (
@@ -454,6 +459,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         <AddExceptionModal
           ruleName={addExceptionModalState.ruleName}
           ruleId={addExceptionModalState.ruleId}
+          ruleIndices={addExceptionModalState.ruleIndices}
           exceptionListType={addExceptionModalState.exceptionListType}
           alertData={addExceptionModalState.alertData}
           onCancel={onAddExceptionCancel}

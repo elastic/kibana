@@ -80,7 +80,7 @@ export async function fetchSearchSourceAndRecordWithInspector({
       inspectorRequest.json(body);
     });
     resp = await searchSource.fetch({ abortSignal });
-    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+    inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
   } catch (error) {
     inspectorRequest.error({ error });
     throw error;
