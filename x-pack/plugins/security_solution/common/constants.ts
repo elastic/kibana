@@ -167,8 +167,3 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
-
-/*
- * This should be set to true after https://github.com/elastic/kibana/pull/67496 is merged
- */
-export const enableElasticFilter = false;

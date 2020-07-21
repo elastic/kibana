@@ -20,6 +20,10 @@ interface Props {
 export const AlertsStatus: React.FC<Props> = (props: Props) => {
   const { alerts, showBadge = false, showOnlyCount = false } = props;
 
+  if (!alerts) {
+    return null;
+  }
+
   let atLeastOneDanger = false;
   const count = Object.values(alerts).reduce((cnt, alertStatus) => {
     if (alertStatus.states.length) {

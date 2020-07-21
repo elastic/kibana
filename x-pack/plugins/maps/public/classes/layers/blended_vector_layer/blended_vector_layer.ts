@@ -237,6 +237,10 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return [];
   }
 
+  hasJoins() {
+    return false;
+  }
+
   getSource() {
     return this._isClustered ? this._clusterSource : this._documentSource;
   }

@@ -67,6 +67,7 @@ describe('ExceptionsViewer', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewer
           ruleId={'123'}
+          ruleIndices={['filebeat-*']}
           ruleName={ruleName}
           exceptionListsMeta={[
             {
@@ -88,6 +89,7 @@ describe('ExceptionsViewer', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewer
+          ruleIndices={['filebeat-*']}
           ruleId={'123'}
           ruleName={ruleName}
           exceptionListsMeta={[]}
@@ -116,6 +118,7 @@ describe('ExceptionsViewer', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewer
+          ruleIndices={['filebeat-*']}
           ruleId={'123'}
           ruleName={ruleName}
           exceptionListsMeta={[
