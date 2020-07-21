@@ -105,7 +105,7 @@ export class IngestManagerPlugin
         title: i18n.translate('xpack.ingestManager.featureCatalogueTitle', {
           defaultMessage: 'Manage ingest',
         }),
-        description: i18n.translate('xpack.ingestManager.featureCatalogueTitle', {
+        description: i18n.translate('xpack.ingestManager.featureCatalogueDescription', {
           defaultMessage: 'Management for Elastic Agents and integrations.',
         }),
         icon: 'logstashInput',
