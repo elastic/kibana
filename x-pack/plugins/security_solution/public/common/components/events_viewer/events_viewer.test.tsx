@@ -10,7 +10,8 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
 import { mockIndexPattern, TestProviders } from '../../mock';
-import { wait } from '../../lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
@@ -60,12 +61,13 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual(
-      'Showing: 12 events'
-    );
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual(
+        'Showing: 12 events'
+      );
+    });
   });
 
   test('it does NOT render fetch index pattern is loading', async () => {
@@ -84,10 +86,13 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(false);
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
+        false
+      );
+    });
   });
 
   test('it does NOT render when start is empty', async () => {
@@ -106,10 +111,13 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(false);
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
+        false
+      );
+    });
   });
 
   test('it does NOT render when end is empty', async () => {
@@ -128,10 +136,13 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(false);
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
+        false
+      );
+    });
   });
 
   test('it renders the Fields Browser as a settings gear', async () => {
@@ -148,10 +159,11 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
+      expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
+    });
   });
 
   test('it renders the footer containing the Load More button', async () => {
@@ -168,10 +180,11 @@ describe('EventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find(`[data-test-subj="TimelineMoreButton"]`).first().exists()).toBe(true);
+      expect(wrapper.find(`[data-test-subj="TimelineMoreButton"]`).first().exists()).toBe(true);
+    });
   });
 
   defaultHeaders.forEach((header) => {
@@ -189,14 +202,15 @@ describe('EventsViewer', () => {
         </TestProviders>
       );
 
-      await wait();
-      wrapper.update();
+      await waitFor(() => {
+        wrapper.update();
 
-      defaultHeaders.forEach((h) =>
-        expect(wrapper.find(`[data-test-subj="header-text-${header.id}"]`).first().exists()).toBe(
-          true
-        )
-      );
+        defaultHeaders.forEach((h) =>
+          expect(wrapper.find(`[data-test-subj="header-text-${header.id}"]`).first().exists()).toBe(
+            true
+          )
+        );
+      });
     });
   });
 });
