@@ -34,6 +34,34 @@ describe('getNonExistingReferenceAsKeys()', () => {
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 
+  test('skips objects when ignoreMissingReferences is included in retry', async () => {
+    const savedObjects = [
+      {
+        id: '2',
+        type: 'visualization',
+        attributes: {},
+        references: [{ name: 'ref_0', type: 'index-pattern', id: '1' }],
+      },
+    ];
+    const retries = [
+      {
+        type: 'visualization',
+        id: '2',
+        overwrite: false,
+        replaceReferences: [],
+        ignoreMissingReferences: true,
+      },
+    ];
+    const result = await getNonExistingReferenceAsKeys(
+      savedObjects,
+      savedObjectsClient,
+      undefined,
+      retries
+    );
+    expect(result).toEqual([]);
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+  });
+
   test('removes references that exist within savedObjects', async () => {
     const savedObjects = [
       {
@@ -439,6 +467,30 @@ describe('validateReferences()', () => {
         ],
       }
     `);
+  });
+
+  test(`doesn't return errors when ignoreMissingReferences is included in retry`, async () => {
+    const savedObjects = [
+      {
+        id: '2',
+        type: 'visualization',
+        attributes: {},
+        references: [{ name: 'ref_0', type: 'index-pattern', id: '1' }],
+      },
+    ];
+    const retries = [
+      {
+        type: 'visualization',
+        id: '2',
+        overwrite: false,
+        replaceReferences: [],
+        ignoreMissingReferences: true,
+      },
+    ];
+    const result = await validateReferences(savedObjects, savedObjectsClient, undefined, retries);
+    expect(result.errors).toHaveLength(0);
+    expect(result.filteredObjects).toHaveLength(1);
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
   test(`doesn't return errors when references exist in Elasticsearch`, async () => {

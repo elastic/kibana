@@ -59,6 +59,8 @@ The request body must include the multipart/form-data type.
     (Optional, string) Specifies which destination ID the imported object should have (if different from the current ID).
     `replaceReferences`:::
     (Optional, array) A list of `type`, `from`, and `to` used to change the object references.
+    `ignoreMissingReferences`:::
+    (Optional, boolean) When set to `true`, any missing references errors are ignored. When set to `false`, this does nothing.
 =====
 
 [[saved-objects-api-resolve-import-errors-response-body]]
@@ -168,11 +170,12 @@ that were returned in the `successResults` array. In this example, we retried im
 
 This example builds upon the <<saved-objects-api-import-example-4,Import objects API example with missing reference errors>>.
 
-Resolve a missing reference error for a visualization by replacing the index pattern with another:
+Resolve a missing reference error for a visualization by replacing the index pattern with another, and resolve a missing reference error for
+a search by ignoring it:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern-*","to":"existing-pattern"}]},{"type":"dashboard","id":"my-dashboard"}]'
+$ curl -X POST api/saved_objects/_resolve_import_errors -H "kbn-xsrf: true" --form file=@file.ndjson --form retries='[{"type":"visualization","id":"my-vis","replaceReferences":[{"type":"index-pattern","from":"my-pattern-*","to":"existing-pattern"}]},{"type":"search","id":"my-search","ignoreMissingReferences":true},{"type":"dashboard","id":"my-dashboard"}]'
 --------------------------------------------------
 // KIBANA
 
@@ -181,6 +184,7 @@ The `file.ndjson` file contains the following:
 [source,sh]
 --------------------------------------------------
 {"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}
+{"type":"search","id":"my-search","attributes":{"title":"Look at my search"},"references":[{"name":"ref_0","type":"index-pattern","id":"another-pattern-*"}]}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
 --------------------------------------------------
 
@@ -190,7 +194,7 @@ The API returns the following:
 --------------------------------------------------
 {
   "success": true,
-  "successCount": 2,
+  "successCount": 3,
   "successResults": [
     {
       "id": "my-vis",
@@ -198,6 +202,14 @@ The API returns the following:
       "meta": {
         "icon": "visualizeApp",
         "title": "Look at my visualization"
+      }
+    },
+    {
+      "id": "my-search",
+      "type": "search",
+      "meta": {
+        "icon": "searchApp",
+        "title": "Look at my search"
       }
     },
     {
@@ -212,7 +224,7 @@ The API returns the following:
 }
 --------------------------------------------------
 
-This result indicates that the import was successful, and both objects were created.
+This result indicates that the import was successful, and all three objects were created.
 
 TIP: If a prior import attempt resulted in resolvable errors, you must include a retry for each object you want to import, including any
 that were returned in the `successResults` array. In this example, we retried importing the dashboard accordingly.

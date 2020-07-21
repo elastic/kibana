@@ -223,7 +223,7 @@ describe(`POST ${URL}`, () => {
     );
   });
 
-  it('resolves conflicts by replacing the visualization references', async () => {
+  it('resolves `missing_references` errors by replacing the missing references', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockVisualization] });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
@@ -269,6 +269,50 @@ describe(`POST ${URL}`, () => {
       [{ fields: ['id'], id: 'existing', type: 'index-pattern' }],
       expect.any(Object) // options
     );
+  });
+
+  it('resolves `missing_references` errors by ignoring the missing references', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [mockVisualization] });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
+      .send(
+        [
+          '--EXAMPLE',
+          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+          'Content-Type: application/ndjson',
+          '',
+          '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"missing"}]}',
+          '--EXAMPLE',
+          'Content-Disposition: form-data; name="retries"',
+          '',
+          '[{"type":"visualization","id":"my-vis","ignoreMissingReferences":true}]',
+          '--EXAMPLE--',
+        ].join('\r\n')
+      )
+      .expect(200);
+
+    const { type, id, attributes } = mockVisualization;
+    const references = [{ name: 'ref_0', type: 'index-pattern', id: 'missing' }];
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 1,
+      successResults: [
+        {
+          type: 'visualization',
+          id: 'my-vis',
+          meta: { title: 'Look at my visualization', icon: 'visualization-icon' },
+        },
+      ],
+    });
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [{ type, id, attributes, references, migrationVersion: {} }],
+      expect.objectContaining({ overwrite: undefined })
+    );
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
   describe('createNewCopies enabled', () => {

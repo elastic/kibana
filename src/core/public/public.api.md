@@ -1288,6 +1288,7 @@ export interface SavedObjectsImportRetry {
     destinationId?: string;
     // (undocumented)
     id: string;
+    ignoreMissingReferences?: boolean;
     // (undocumented)
     overwrite: boolean;
     // (undocumented)

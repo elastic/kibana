@@ -96,7 +96,8 @@ export async function resolveSavedObjectsImportErrors({
   const validateReferencesResult = await validateReferences(
     objectsToResolve,
     savedObjectsClient,
-    namespace
+    namespace,
+    retries
   );
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
 

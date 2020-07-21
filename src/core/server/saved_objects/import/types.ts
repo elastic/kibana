@@ -43,6 +43,10 @@ export interface SavedObjectsImportRetry {
    * `createNewCopies` mode is disabled and ambiguous source conflicts are detected.
    */
   createNewCopy?: boolean;
+  /**
+   * If `ignoreMissingReferences` is specified, reference validation will be skipped for this object.
+   */
+  ignoreMissingReferences?: boolean;
 }
 
 /**

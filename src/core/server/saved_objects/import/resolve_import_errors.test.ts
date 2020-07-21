@@ -182,7 +182,8 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('validates references', async () => {
-      const options = setupOptions();
+      const retries = [createRetry()];
+      const options = setupOptions(retries);
       const collectedObjects = [createObject()];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
@@ -194,17 +195,20 @@ describe('#importSavedObjectsFromStream', () => {
       expect(validateReferences).toHaveBeenCalledWith(
         collectedObjects,
         savedObjectsClient,
-        namespace
+        namespace,
+        retries
       );
     });
 
     test('uses `retries` to replace references of collected objects before validating', async () => {
       const object = createObject([{ type: 'bar-type', id: 'abc', name: 'some name' }]);
-      const retry = createRetry({
-        id: object.id,
-        replaceReferences: [{ type: 'bar-type', from: 'abc', to: 'def' }],
-      });
-      const options = setupOptions([retry]);
+      const retries = [
+        createRetry({
+          id: object.id,
+          replaceReferences: [{ type: 'bar-type', from: 'abc', to: 'def' }],
+        }),
+      ];
+      const options = setupOptions(retries);
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
         collectedObjects: [object],
@@ -219,7 +223,8 @@ describe('#importSavedObjectsFromStream', () => {
       expect(validateReferences).toHaveBeenCalledWith(
         [objectWithReplacedReferences],
         savedObjectsClient,
-        namespace
+        namespace,
+        retries
       );
     });
 

@@ -67,6 +67,8 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
     (Required, boolean) When set to `true`, the saved object from the source space (desigated by the <<spaces-api-resolve-copy-saved-objects-conflicts-path-params, `space_id` path parameter>>) overwrites the conflicting object in the destination space. When set to `false`, this does nothing.
     `destinationId`::::
     (Optional, string) Specifies which destination ID the copied object should have (if different from the current ID).
+    `ignoreMissingReferences`:::
+    (Optional, boolean) When set to `true`, any missing references errors are ignored. When set to `false`, this does nothing.
 ======
 =====
 
@@ -119,8 +121,8 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
 `successResults`:::
   (Optional, array) Indicates the objects that were copied successfully, with any metadata if applicable.
 +
-NOTE: No objects are actually created until all resolvable errors have been addressed! This includes conflict errors. See the examples below
-for how to resolve these errors.
+NOTE: No objects are actually created until all resolvable errors have been addressed! This includes conflict errors and missing references
+errors. See the examples below for how to resolve these errors.
 
 =====
 
@@ -224,3 +226,83 @@ This result indicates that the copy was successful, and all four objects were cr
 
 TIP: If a prior copy attempt resulted in resolvable errors, you must include a retry for each object you want to copy, including any that
 were returned in the `successResults` array. In this example, we retried copying the dashboard accordingly.
+
+[[spaces-api-resolve-copy-saved-objects-conflicts-example-2]]
+===== 2. Resolve missing reference errors
+
+This example builds upon the <<spaces-api-copy-saved-objects-example-4,Copy objects API example with missing reference errors>>.
+
+Resolve missing reference errors for a visualization by ignoring the error:
+
+[source,sh]
+----
+$ curl -X POST api/spaces/_resolve_copy_saved_objects_errors
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "includeReferences": true,
+  "retries": {
+    "marketing": [
+      {
+        "type": "visualization",
+        "id": "my-vis",
+        "ignoreMissingReferences": true
+      },
+      {
+        "type": "canvas",
+        "id": "my-canvas"
+      },
+      {
+        "type": "dashboard",
+        "id": "my-dashboard"
+      }
+    ]
+  }
+}
+----
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+----
+{
+  "sales": {
+    "success": true,
+    "successCount": 3,
+    "successResults": [
+      {
+        "id": "my-vis",
+        "type": "visualization",
+        "meta": {
+          "icon": "visualizeApp",
+          "title": "Look at my visualization"
+        }
+      },
+      {
+        "id": "my-canvas",
+        "type": "canvas-workpad",
+        "meta": {
+          "icon": "canvasApp",
+          "title": "Look at my canvas"
+        }
+      },
+      {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "meta": {
+          "icon": "dashboardApp",
+          "title": "Look at my dashboard"
+        }
+      }
+    ]
+  }
+}
+----
+
+This result indicates that the copy was successful, and all three objects were created.
+
+TIP: If a prior copy attempt resulted in resolvable errors, you must include a retry for each object you want to copy, including any that
+were returned in the `successResults` array. In this example, we retried copying the dashboard and canvas accordingly.

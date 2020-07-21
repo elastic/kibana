@@ -59,7 +59,7 @@ The request body must include the multipart/form-data type.
   (array) Indicates the objects that were imported successfully, with any metadata if applicable.
 +
 NOTE: No objects are actually created until all resolvable errors have been addressed! This includes conflict errors and missing references
-errors. See the <<saved-objects-api-resolve-import-errors,Resolve import errors API>> documentation for more information.
+errors. See the examples below for how to resolve these errors.
 
 [[saved-objects-api-import-codes]]
 ==== Response code
@@ -299,7 +299,8 @@ The `file.ndjson` file contains the following:
 [source,sh]
 --------------------------------------------------
 {"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern-*"}]}
-{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}
+{"type":"search","id":"my-search","attributes":{"title":"Look at my search"},"references":[{"name":"ref_0","type":"index-pattern","id":"another-pattern-*"}]}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"},{"name":"ref_1","type":"search","id":"my-search"}]}
 --------------------------------------------------
 
 The API returns the following:
@@ -308,7 +309,7 @@ The API returns the following:
 --------------------------------------------------
 {
   "success": false,
-  "successCount": 0,
+  "successCount": 1,
   "errors": [
     {
       "id": "my-vis",
@@ -327,6 +328,24 @@ The API returns the following:
         "icon": "visualizeApp",
         "title": "Look at my visualization"
       }
+    },
+    {
+      "id": "my-search",
+      "type": "search",
+      "title": "Look at my search",
+      "error": {
+        "type": "missing_references",
+        "references": [
+          {
+            "type": "index-pattern",
+            "id": "another-pattern-*"
+          }
+        ]
+      },
+      "meta": {
+        "icon": "searchApp",
+        "title": "Look at my search"
+      }
     }
   ],
   "successResults": [
@@ -342,5 +361,7 @@ The API returns the following:
 }
 --------------------------------------------------
 
-This result indicates that the import was not successful because the visualization resulted in a missing references error. No objects will
-be imported until this error is resolved using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import errors API>>.
+This result indicates that the import was not successful because the visualization and search each resulted in a missing references error.
+
+No objects will be imported until these errors are resolved using the <<saved-objects-api-resolve-import-errors-example-2,Resolve import
+errors API>>.
