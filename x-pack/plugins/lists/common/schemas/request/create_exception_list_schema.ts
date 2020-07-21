@@ -21,7 +21,11 @@ import {
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { DefaultUuid } from '../../siem_common_deps';
+import {
+  DefaultUuid,
+  DefaultVersionNumber,
+  DefaultVersionNumberDecoded,
+} from '../../siem_common_deps';
 import { NamespaceType } from '../types';
 
 export const createExceptionListSchema = t.intersection([
@@ -39,6 +43,7 @@ export const createExceptionListSchema = t.intersection([
       meta, // defaults to undefined if not set during decode
       namespace_type, // defaults to 'single' if not set during decode
       tags, // defaults to empty array if not set during decode
+      version: DefaultVersionNumber, // defaults to numerical 1 if not set during decode
     })
   ),
 ]);
@@ -54,4 +59,5 @@ export type CreateExceptionListSchemaDecoded = Omit<
   tags: Tags;
   list_id: ListId;
   namespace_type: NamespaceType;
+  version: DefaultVersionNumberDecoded;
 };
