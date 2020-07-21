@@ -17,21 +17,27 @@
  * under the License.
  */
 
-export { BinderBase } from './binder';
-export { BinderFor } from './binder_for';
-export { deepCloneWithBuffers } from './deep_clone_with_buffers';
-export { unset } from './unset';
-export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
-export { IS_KIBANA_RELEASE } from './artifact_type';
+import { Project } from '@kbn/pm';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createIntersperseStream,
-  createListStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createSplitStream,
-  createMapStream,
-  createReplaceStream,
-} from './streams';
+import { Task } from '../lib';
+
+export const InstallDependencies: Task = {
+  description: 'Installing node_modules, including production builds of packages',
+
+  async run(config, log, build) {
+    const project = await Project.fromPath(build.resolvePath());
+
+    await project.installDependencies({
+      extraArgs: [
+        '--production',
+        '--ignore-optional',
+        '--frozen-lockfile',
+        '--prefer-offline',
+
+        // We're using --no-bin-links to support systems that don't have symlinks.
+        // This is commonly seen in shared folders on virtual machines
+        '--no-bin-links',
+      ],
+    });
+  },
+};

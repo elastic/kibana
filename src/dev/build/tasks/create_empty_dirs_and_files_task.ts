@@ -17,21 +17,16 @@
  * under the License.
  */
 
-export { BinderBase } from './binder';
-export { BinderFor } from './binder_for';
-export { deepCloneWithBuffers } from './deep_clone_with_buffers';
-export { unset } from './unset';
-export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
-export { IS_KIBANA_RELEASE } from './artifact_type';
+import { mkdirp, write, Task } from '../lib';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createIntersperseStream,
-  createListStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createSplitStream,
-  createMapStream,
-  createReplaceStream,
-} from './streams';
+export const CreateEmptyDirsAndFiles: Task = {
+  description: 'Creating some empty directories and files to prevent file-permission issues',
+
+  async run(config, log, build) {
+    await Promise.all([
+      mkdirp(build.resolvePath('plugins')),
+      mkdirp(build.resolvePath('data/optimize')),
+      write(build.resolvePath('data/optimize/.babel_register_cache.json'), '{}'),
+    ]);
+  },
+};

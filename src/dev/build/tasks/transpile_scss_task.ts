@@ -17,21 +17,17 @@
  * under the License.
  */
 
-export { BinderBase } from './binder';
-export { BinderFor } from './binder_for';
-export { deepCloneWithBuffers } from './deep_clone_with_buffers';
-export { unset } from './unset';
-export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
-export { IS_KIBANA_RELEASE } from './artifact_type';
+import { Task } from '../lib';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createIntersperseStream,
-  createListStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createSplitStream,
-  createMapStream,
-  createReplaceStream,
-} from './streams';
+// @ts-expect-error buildSass isn't TS yet
+import { buildSass } from '../../sass';
+
+export const TranspileScss: Task = {
+  description: 'Transpiling SCSS to CSS',
+  async run(config, log, build) {
+    await buildSass({
+      log,
+      kibanaDir: build.resolvePath('.'),
+    });
+  },
+};

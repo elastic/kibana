@@ -17,21 +17,21 @@
  * under the License.
  */
 
-export { BinderBase } from './binder';
-export { BinderFor } from './binder_for';
-export { deepCloneWithBuffers } from './deep_clone_with_buffers';
-export { unset } from './unset';
-export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
-export { IS_KIBANA_RELEASE } from './artifact_type';
+import { deleteAll, Task } from '../../lib';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createIntersperseStream,
-  createListStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createSplitStream,
-  createMapStream,
-  createReplaceStream,
-} from './streams';
+export const CleanNodeBuilds: Task = {
+  description: 'Cleaning npm from node',
+
+  async run(config, log, build) {
+    for (const platform of config.getNodePlatforms()) {
+      await deleteAll(
+        [
+          build.resolvePathForPlatform(platform, 'node/lib/node_modules'),
+          build.resolvePathForPlatform(platform, 'node/bin/npm'),
+          build.resolvePathForPlatform(platform, 'node/bin/npx'),
+        ],
+        log
+      );
+    }
+  },
+};

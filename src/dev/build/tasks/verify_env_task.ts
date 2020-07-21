@@ -17,21 +17,19 @@
  * under the License.
  */
 
-export { BinderBase } from './binder';
-export { BinderFor } from './binder_for';
-export { deepCloneWithBuffers } from './deep_clone_with_buffers';
-export { unset } from './unset';
-export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
-export { IS_KIBANA_RELEASE } from './artifact_type';
+import { GlobalTask } from '../lib';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createIntersperseStream,
-  createListStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createSplitStream,
-  createMapStream,
-  createReplaceStream,
-} from './streams';
+export const VerifyEnv: GlobalTask = {
+  global: true,
+  description: 'Verifying environment meets requirements',
+
+  async run(config, log) {
+    const version = `v${config.getNodeVersion()}`;
+
+    if (version !== process.version) {
+      throw new Error(`Invalid nodejs version, please use ${version}`);
+    }
+
+    log.success('Node.js version verified');
+  },
+};
