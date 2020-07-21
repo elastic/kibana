@@ -8,7 +8,13 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
-import { AlertType, AlertTypeParams, AlertTypeState } from './types';
+import {
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from './types';
 
 interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
@@ -31,8 +37,10 @@ export class AlertTypeRegistry {
 
   public register<
     Params extends AlertTypeParams = AlertTypeParams,
-    State extends AlertTypeState = AlertTypeState
-  >(alertType: AlertType<Params, State>) {
+    State extends AlertTypeState = AlertTypeState,
+    AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
+    AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
+  >(alertType: AlertType<Params, State, AlertInstanceStateType, AlertInstanceContextType>) {
     if (this.has(alertType.id)) {
       throw new Error(
         i18n.translate('xpack.alerts.alertTypeRegistry.register.duplicateAlertTypeError', {

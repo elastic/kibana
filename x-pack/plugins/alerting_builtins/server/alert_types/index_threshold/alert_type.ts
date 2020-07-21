@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
-import { BaseActionContext, addMessages } from './action_context';
+import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { TimeSeriesQuery } from './lib/time_series_query';
 
 export const ID = '.index-threshold';
@@ -18,7 +18,7 @@ const ActionGroupId = 'threshold met';
 const ComparatorFns = getComparatorFns();
 export const ComparatorFnNames = new Set(ComparatorFns.keys());
 
-export function getAlertType(service: Service): AlertType {
+export function getAlertType(service: Service): AlertType<Params, {}, {}, ActionContext> {
   const { logger } = service;
 
   const alertTypeName = i18n.translate('xpack.alertingBuiltins.indexThreshold.alertTypeTitle', {
@@ -88,9 +88,9 @@ export function getAlertType(service: Service): AlertType {
     producer: 'alerting',
   };
 
-  async function executor(options: AlertExecutorOptions) {
+  async function executor(options: AlertExecutorOptions<Params, {}, {}, ActionContext>) {
     const { alertId, name, services } = options;
-    const params: Params = options.params as Params;
+    const params = options.params;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {
