@@ -74,8 +74,12 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
     const { getHref } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
 
+    const isUnenrolling = agent.status === 'unenrolling';
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     return (
       <ContextMenuActions
+        isOpen={isMenuOpen}
+        onChange={(isOpen) => setIsMenuOpen(isOpen)}
         items={[
           <EuiContextMenuItem
             icon="inspect"
@@ -100,7 +104,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
             />
           </EuiContextMenuItem>,
 
-          <AgentUnenrollProvider>
+          <AgentUnenrollProvider forceUnenroll={isUnenrolling}>
             {(unenrollAgentsPrompt) => (
               <EuiContextMenuItem
                 disabled={!hasWriteCapabilites}
@@ -108,13 +112,21 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
                 onClick={() => {
                   unenrollAgentsPrompt([agent.id], 1, () => {
                     refresh();
+                    setIsMenuOpen(false);
                   });
                 }}
               >
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.unenrollOneButton"
-                  defaultMessage="Unenroll"
-                />
+                {isUnenrolling ? (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+                    defaultMessage="Force unenroll"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.unenrollOneButton"
+                    defaultMessage="Unenroll"
+                  />
+                )}
               </EuiContextMenuItem>
             )}
           </AgentUnenrollProvider>,
