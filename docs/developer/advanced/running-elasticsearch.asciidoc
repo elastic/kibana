@@ -13,7 +13,7 @@ This will run a snapshot of {es} that is usually built nightly. Read more about 
 ----
 yarn es snapshot
 ----
-
+The default credentials are `elastic:changeme`
 See all available options, like how to specify a specific license, with the `--help` flag.
 
 [source,bash]
