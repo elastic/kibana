@@ -65,7 +65,7 @@ function getOptions(environments: string[]) {
   ];
 }
 
-export const EnvironmentFilter: React.FC = () => {
+export function EnvironmentFilter() {
   const location = useLocation();
   const { uiFilters, urlParams } = useUrlParams();
 
@@ -90,4 +90,4 @@ export const EnvironmentFilter: React.FC = () => {
       isLoading={status === 'loading'}
     />
   );
-};
+}

@@ -37,14 +37,14 @@ interface Props {
   traceSamples: IBucket['samples'];
 }
 
-export const WaterfallWithSummmary: React.FC<Props> = ({
+export function WaterfallWithSummmary({
   urlParams,
   location,
   waterfall,
   exceedsMax,
   isLoading,
   traceSamples,
-}) => {
+}: Props) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
   useEffect(() => {
@@ -135,4 +135,4 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
       />
     </EuiPanel>
   );
-};
+}

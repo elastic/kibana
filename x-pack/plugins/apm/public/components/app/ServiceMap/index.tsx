@@ -29,7 +29,7 @@ interface ServiceMapProps {
   serviceName?: string;
 }
 
-export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
+export function ServiceMap({ serviceName }: ServiceMapProps) {
   const theme = useTheme();
   const license = useLicense();
   const { urlParams } = useUrlParams();
@@ -101,4 +101,4 @@ export const ServiceMap = ({ serviceName }: ServiceMapProps) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}

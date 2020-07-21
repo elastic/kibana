@@ -20,24 +20,26 @@ interface Props {
   onRemove: (val: string) => void;
 }
 
-const FilterBadgeList = ({ onRemove, value }: Props) => (
-  <EuiFlexGrid gutterSize="s">
-    {value.map((val) => (
-      <EuiFlexItem key={val} grow={false}>
-        <button
-          type="button"
-          onClick={() => {
-            onRemove(val);
-          }}
-        >
-          <EuiBadge color="hollow">
-            <BadgeText>{val}</BadgeText>
-            <EuiIcon type="cross" />
-          </EuiBadge>
-        </button>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGrid>
-);
+function FilterBadgeList({ onRemove, value }: Props) {
+  return (
+    <EuiFlexGrid gutterSize="s">
+      {value.map((val) => (
+        <EuiFlexItem key={val} grow={false}>
+          <button
+            type="button"
+            onClick={() => {
+              onRemove(val);
+            }}
+          >
+            <EuiBadge color="hollow">
+              <BadgeText>{val}</BadgeText>
+              <EuiIcon type="cross" />
+            </EuiBadge>
+          </button>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
+  );
+}
 
 export { FilterBadgeList };

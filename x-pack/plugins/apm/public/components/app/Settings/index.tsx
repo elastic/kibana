@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -17,7 +17,7 @@ import { HomeLink } from '../../shared/Links/apm/HomeLink';
 import { useLocation } from '../../../hooks/useLocation';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 
-export const Settings: React.FC = (props) => {
+export function Settings(props: { children: ReactNode }) {
   const { search, pathname } = useLocation();
   return (
     <>
@@ -84,4 +84,4 @@ export const Settings: React.FC = (props) => {
       </EuiPage>
     </>
   );
-};
+}

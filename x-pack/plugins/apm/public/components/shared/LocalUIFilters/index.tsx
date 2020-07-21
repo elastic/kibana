@@ -31,13 +31,13 @@ const ButtonWrapper = styled.div`
   display: inline-block;
 `;
 
-const LocalUIFilters = ({
+function LocalUIFilters({
   projection,
   params,
   filterNames,
   children,
   showCount = true,
-}: Props) => {
+}: Props) {
   const { filters, setFilterValue, clearValues } = useLocalUIFilters({
     filterNames,
     projection,
@@ -91,6 +91,6 @@ const LocalUIFilters = ({
       ) : null}
     </>
   );
-};
+}
 
 export { LocalUIFilters };

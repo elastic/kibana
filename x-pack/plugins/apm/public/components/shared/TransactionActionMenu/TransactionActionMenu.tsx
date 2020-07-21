@@ -6,10 +6,8 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo, useState, MouseEvent } from 'react';
+import React, { MouseEvent, useMemo, useState } from 'react';
 import url from 'url';
-import { Filter } from '../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -19,32 +17,34 @@ import {
   SectionSubtitle,
   SectionTitle,
 } from '../../../../../observability/public';
+import { Filter } from '../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useFetcher } from '../../../hooks/useFetcher';
+import { useLicense } from '../../../hooks/useLicense';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { CustomLinkFlyout } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout';
+import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
 import { CustomLink } from './CustomLink';
 import { CustomLinkPopover } from './CustomLink/CustomLinkPopover';
 import { getSections } from './sections';
-import { useLicense } from '../../../hooks/useLicense';
-import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
 
 interface Props {
   readonly transaction: Transaction;
 }
 
-const ActionMenuButton = ({ onClick }: { onClick: () => void }) => (
-  <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onClick}>
-    {i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
-      defaultMessage: 'Actions',
-    })}
-  </EuiButtonEmpty>
-);
+function ActionMenuButton({ onClick }: { onClick: () => void }) {
+  return (
+    <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onClick}>
+      {i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
+        defaultMessage: 'Actions',
+      })}
+    </EuiButtonEmpty>
+  );
+}
 
-export const TransactionActionMenu: FunctionComponent<Props> = ({
-  transaction,
-}: Props) => {
+export function TransactionActionMenu({ transaction }: Props) {
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
 
@@ -211,4 +211,4 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
       </ActionMenu>
     </>
   );
-};
+}

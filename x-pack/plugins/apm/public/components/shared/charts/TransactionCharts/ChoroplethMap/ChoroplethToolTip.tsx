@@ -9,11 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { asDuration, asInteger } from '../../../../../utils/formatters';
 import { fontSizes } from '../../../../../style/variables';
 
-export const ChoroplethToolTip: React.FC<{
+export function ChoroplethToolTip({
+  name,
+  value,
+  docCount,
+}: {
   name: string;
   value: number;
   docCount: number;
-}> = ({ name, value, docCount }) => {
+}) {
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: fontSizes.large }}>{name}</div>
@@ -41,4 +45,4 @@ export const ChoroplethToolTip: React.FC<{
       </div>
     </div>
   );
-};
+}

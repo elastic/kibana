@@ -11,7 +11,7 @@ import { VisitorBreakdownLabel } from '../translations';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 
-export const VisitorBreakdown = () => {
+export function VisitorBreakdown() {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end, serviceName } = urlParams;
@@ -62,4 +62,4 @@ export const VisitorBreakdown = () => {
       </EuiFlexGroup>
     </>
   );
-};
+}

@@ -14,7 +14,7 @@ interface Props {
   showBetaBadge?: boolean;
 }
 
-export const LicensePrompt = ({ text, showBetaBadge = false }: Props) => {
+export function LicensePrompt({ text, showBetaBadge = false }: Props) {
   const licensePageUrl = useKibanaUrl(
     '/app/kibana',
     '/management/stack/license_management/home'
@@ -60,4 +60,4 @@ export const LicensePrompt = ({ text, showBetaBadge = false }: Props) => {
   );
 
   return <>{showBetaBadge ? renderWithBetaBadge : renderLicenseBody}</>;
-};
+}

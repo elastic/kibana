@@ -38,12 +38,12 @@ interface Props {
   showGiveFeedback?: boolean;
 }
 
-export const Header = ({
+export function Header({
   color,
   restrictWidth,
   showAddData = false,
   showGiveFeedback = false,
-}: Props) => {
+}: Props) {
   const { core } = usePluginContext();
   return (
     <Container color={color}>
@@ -91,4 +91,4 @@ export const Header = ({
       </Wrapper>
     </Container>
   );
-};
+}

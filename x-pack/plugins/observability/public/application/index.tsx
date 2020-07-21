@@ -29,7 +29,7 @@ function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
     .join(' | ');
 }
 
-const App = () => {
+function App() {
   return (
     <>
       <Switch>
@@ -53,7 +53,7 @@ const App = () => {
       </Switch>
     </>
   );
-};
+}
 
 export const renderApp = (core: CoreStart, { element }: AppMountParameters) => {
   const i18nCore = core.i18n;

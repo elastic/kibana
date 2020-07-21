@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, HTMLAttributes } from 'react';
+import React, { HTMLAttributes, ReactNode } from 'react';
 import {
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 
 interface Props {
+  children?: ReactNode;
   /**
    * Height for the chart
    */
@@ -27,12 +28,12 @@ interface Props {
   'aria-label'?: string;
 }
 
-export const ChartWrapper: FC<Props> = ({
+export function ChartWrapper({
   loading = false,
   height = '100%',
   children,
   ...rest
-}) => {
+}: Props) {
   const opacity = loading === true ? 0.3 : 1;
 
   return (
@@ -60,4 +61,4 @@ export const ChartWrapper: FC<Props> = ({
       )}
     </EuiErrorBoundary>
   );
-};
+}

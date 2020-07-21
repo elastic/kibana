@@ -36,7 +36,7 @@ const ServiceNodeName = styled.div`
   ${truncate(px(8 * unit))}
 `;
 
-const ServiceNodeOverview = () => {
+function ServiceNodeOverview() {
   const { uiFilters, urlParams } = useUrlParams();
   const { serviceName, start, end } = urlParams;
 
@@ -182,6 +182,6 @@ const ServiceNodeOverview = () => {
       </EuiFlexGroup>
     </>
   );
-};
+}
 
 export { ServiceNodeOverview };

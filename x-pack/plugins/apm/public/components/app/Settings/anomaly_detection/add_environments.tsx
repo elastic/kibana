@@ -31,11 +31,11 @@ interface Props {
   onCreateJobSuccess: () => void;
   onCancel: () => void;
 }
-export const AddEnvironments = ({
+export function AddEnvironments({
   currentEnvironments,
   onCreateJobSuccess,
   onCancel,
-}: Props) => {
+}: Props) {
   const { notifications, application } = useApmPluginContext().core;
   const canCreateJob = !!application.capabilities.ml.canCreateJob;
   const { toasts } = notifications;
@@ -175,4 +175,4 @@ export const AddEnvironments = ({
       <EuiSpacer size="l" />
     </EuiPanel>
   );
-};
+}

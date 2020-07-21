@@ -29,7 +29,7 @@ const formatTooltipValue = (coordinate: Coordinate) => {
     : NOT_AVAILABLE_LABEL;
 };
 
-const TransactionBreakdownGraph: React.FC<Props> = (props) => {
+function TransactionBreakdownGraph(props: Props) {
   const { timeseries } = props;
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const handleHover = useMemo(
@@ -49,6 +49,6 @@ const TransactionBreakdownGraph: React.FC<Props> = (props) => {
       onHover={handleHover}
     />
   );
-};
+}
 
 export { TransactionBreakdownGraph };
