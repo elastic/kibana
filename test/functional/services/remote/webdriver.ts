@@ -21,10 +21,9 @@ import { delimiter, resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, takeUntil } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, catchError } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test/src/functional_test_runner/lib/lifecycle';
 import { ToolingLog } from '@kbn/dev-utils';
-import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
@@ -353,25 +352,33 @@ export async function initWebDriver(
     edgePaths = await installDriver();
   }
 
-  return await Promise.race([
-    (async () => {
-      await delay(2 * MINUTE);
-      throw new Error('remote failed to start within 2 minutes');
-    })(),
+  return await Rx.race(
+    Rx.timer(2 * MINUTE).pipe(
+      map(() => {
+        throw new Error('remote failed to start within 2 minutes');
+      })
+    ),
 
-    (async () => {
-      while (true) {
-        const command = await Promise.race([
-          delay(30 * SECOND),
-          attemptToCreateCommand(log, browserType, lifecycle, logPollingMs),
-        ]);
-
+    Rx.race(
+      Rx.defer(async () => {
+        const command = await attemptToCreateCommand(log, browserType, lifecycle, logPollingMs);
         if (!command) {
-          continue;
+          throw new Error('remote creation aborted');
         }
-
         return command;
-      }
-    })(),
-  ]);
+      }),
+      Rx.timer(30 * SECOND).pipe(
+        map(() => {
+          throw new Error('remote failed to start within 30 seconds');
+        })
+      )
+    ).pipe(
+      catchError((error, resubscribe) => {
+        log.warning('Failure while creating webdriver instance');
+        log.warning(error);
+        log.warning('...retrying...');
+        return resubscribe;
+      })
+    )
+  ).toPromise();
 }
