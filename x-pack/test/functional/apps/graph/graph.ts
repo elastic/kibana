@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.graph.isolateEdge('test', '/test/wp-admin/');
 
-      await this.stopLayout();
+      await PageObjects.graph.stopLayout();
       await PageObjects.common.sleep(1000);
       const testTestWpAdminBlogEdge = edges.find(
         ({ sourceNode, targetNode }) =>
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       )!;
       await testTestWpAdminBlogEdge.element.click();
       await PageObjects.common.sleep(1000);
-      await this.startLayout();
+      await PageObjects.graph.startLayout();
 
       const vennTerm1 = await PageObjects.graph.getVennTerm1();
       log.debug('vennTerm1 = ' + vennTerm1);
