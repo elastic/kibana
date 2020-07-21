@@ -33,12 +33,7 @@ type Props = {
     }
 );
 
-export const ContextMenuActions: React.FunctionComponent<Props> = ({
-  button,
-  onChange,
-  isOpen,
-  ...props
-}) => {
+export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen, ...props }) => {
   const [isOpenState, setIsOpenState] = useState(false);
   const handleCloseMenu = useCallback(() => {
     if (onChange) {
@@ -84,4 +79,4 @@ export const ContextMenuActions: React.FunctionComponent<Props> = ({
       )}
     </EuiPopover>
   );
-};
+});
