@@ -13,7 +13,7 @@ import { EuiButtonIcon, IconType, EuiLoadingSpinner, EuiToolTip } from '@elastic
 import { ListSchema } from '../../../../../lists/common/schemas/response';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import * as i18n from './translations';
-import { ActionCallback, TableItem, TableProps } from './table';
+import { TableItem, TableItemCallback, TableProps } from './types';
 
 const AlignedSpinner = styled(EuiLoadingSpinner)`
   margin: ${({ theme }) => theme.eui.euiSizeXS};
@@ -26,7 +26,7 @@ const ActionButton: React.FC<{
   icon: IconType;
   isLoading: boolean;
   item: TableItem;
-  onClick: ActionCallback;
+  onClick: TableItemCallback;
 }> = ({ content, dataTestSubj, icon, item, onClick, isLoading }) => (
   <EuiToolTip content={content}>
     {isLoading ? (
@@ -43,8 +43,8 @@ const ActionButton: React.FC<{
 );
 
 export const buildColumns = (
-  onExport: ActionCallback,
-  onDelete: ActionCallback
+  onExport: TableItemCallback,
+  onDelete: TableItemCallback
 ): TableProps['columns'] => [
   {
     field: 'name',

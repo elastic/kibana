@@ -11,7 +11,8 @@ import { act } from 'react-dom/test-utils';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
 import { ListSchema } from '../../../../../lists/common/schemas/response';
 import { TestProviders } from '../../../common/mock';
-import { ValueListsTable, TableItem } from './table';
+import { ValueListsTable } from './table';
+import { TableItem } from './types';
 
 const buildItems = (lists: ListSchema[]): TableItem[] =>
   lists.map((list) => ({

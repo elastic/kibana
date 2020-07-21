@@ -5,25 +5,18 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiBasicTableProps, EuiText, EuiPanel } from '@elastic/eui';
+import { EuiBasicTable, EuiText, EuiPanel } from '@elastic/eui';
 
-import { ListSchema } from '../../../../../lists/common/schemas/response';
 import * as i18n from './translations';
 import { buildColumns } from './table_helpers';
-
-export interface TableItem extends ListSchema {
-  isDeleting: boolean;
-  isExporting: boolean;
-}
-export type TableProps = EuiBasicTableProps<TableItem>;
-export type ActionCallback = (item: TableItem) => void;
+import { TableProps, TableItemCallback } from './types';
 
 export interface ValueListsTableProps {
   items: TableProps['items'];
   loading: boolean;
   onChange: TableProps['onChange'];
-  onExport: ActionCallback;
-  onDelete: ActionCallback;
+  onExport: TableItemCallback;
+  onDelete: TableItemCallback;
   pagination: Exclude<TableProps['pagination'], undefined>;
 }
 
