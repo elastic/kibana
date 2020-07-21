@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isInteger } from 'lodash/fp';
 import {
   TimelineTypeLiteralWithNull,
   TimelineType,
@@ -77,7 +77,10 @@ export class CompareTimelinesStatus {
       ((this.timelineObject.isCreatable && !this.isHandlingTemplateTimeline) ||
         (this.templateTimelineObject.isCreatable &&
           this.timelineObject.isCreatable &&
-          this.isHandlingTemplateTimeline))
+          this.isHandlingTemplateTimeline) ||
+        (this.templateTimelineObject.isCreatable &&
+          !this.timelineObject.isCreatable &&
+          this.timelineObject.getData?.timelineType === this.timelineType))
     );
   }
 
@@ -195,24 +198,27 @@ export class CompareTimelinesStatus {
   }
 
   private get isTemplateVersionConflict() {
-    const version = this.templateTimelineObject?.getVersion;
+    const templateTimelineVersion = this.templateTimelineObject?.getVersion;
     const existingTemplateTimelineVersion = this.templateTimelineObject?.data
       ?.templateTimelineVersion;
     if (
-      version != null &&
+      templateTimelineVersion != null &&
       this.templateTimelineObject.isExists &&
       existingTemplateTimelineVersion != null
     ) {
-      return version <= existingTemplateTimelineVersion;
-    } else if (this.templateTimelineObject.isExists && version == null) {
+      return templateTimelineVersion <= existingTemplateTimelineVersion;
+    } else if (this.templateTimelineObject.isExists && templateTimelineVersion == null) {
       return true;
     }
     return false;
   }
 
   private get isTemplateVersionValid() {
-    const version = this.templateTimelineObject?.getVersion;
-    return typeof version === 'number' && !this.isTemplateVersionConflict;
+    const templateTimelineVersion = this.templateTimelineObject?.getVersion;
+    return (
+      templateTimelineVersion == null ||
+      (isInteger(templateTimelineVersion) && !this.isTemplateVersionConflict)
+    );
   }
 
   private get isUpdatedTimelineStatusValid() {

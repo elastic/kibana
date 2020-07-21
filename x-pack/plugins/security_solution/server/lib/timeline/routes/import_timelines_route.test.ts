@@ -598,6 +598,28 @@ describe('import timeline templates', () => {
         mockNewTemplateTimelineId
       );
     });
+
+    test('should return 200 if create via import without a templateTimelineId or templateTimelineVersion', async () => {
+      mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+        mockDuplicateIdErrors,
+        [
+          {
+            ...mockUniqueParsedTemplateTimelineObjects[0],
+            templateTimelineId: null,
+            templateTimelineVersion: null,
+          },
+        ],
+      ]);
+      const mockRequest = getImportTimelinesRequest();
+      const result = await server.inject(mockRequest, context);
+      expect(result.body).toEqual({
+        errors: [],
+        success: true,
+        success_count: 1,
+        timelines_installed: 1,
+        timelines_updated: 0,
+      });
+    });
   });
 
   describe('Import a timeline template already exist', () => {
