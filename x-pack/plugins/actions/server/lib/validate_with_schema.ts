@@ -5,24 +5,40 @@
  */
 
 import Boom from 'boom';
-import { ActionType } from '../types';
+import { ActionType, ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
 
-export function validateParams(actionType: ActionType<any, any, any>, value: unknown) {
+export function validateParams<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
+>(actionType: ActionType<Config, Secrets, Params>, value: unknown) {
   return validateWithSchema(actionType, 'params', value);
 }
 
-export function validateConfig(actionType: ActionType<any, any, any>, value: unknown) {
+export function validateConfig<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
+>(actionType: ActionType<Config, Secrets, Params>, value: unknown) {
   return validateWithSchema(actionType, 'config', value);
 }
 
-export function validateSecrets(actionType: ActionType<any, any, any>, value: unknown) {
+export function validateSecrets<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
+>(actionType: ActionType<Config, Secrets, Params>, value: unknown) {
   return validateWithSchema(actionType, 'secrets', value);
 }
 
 type ValidKeys = 'params' | 'config' | 'secrets';
 
-function validateWithSchema(
-  actionType: ActionType<any, any, any>,
+function validateWithSchema<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
+>(
+  actionType: ActionType<Config, Secrets, Params>,
   key: ValidKeys,
   value: unknown
 ): Record<string, unknown> {
