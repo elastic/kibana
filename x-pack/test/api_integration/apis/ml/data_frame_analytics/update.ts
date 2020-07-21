@@ -63,7 +63,6 @@ export default ({ getService }: FtrProviderContext) => {
   async function createJobs(mockJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>>) {
     for (const jobConfig of mockJobConfigs) {
       await ml.api.createDataFrameAnalyticsJob(jobConfig as DataFrameAnalyticsConfig);
-      // await ml.api.waitForJobState(jobConfig.id, JOB_STATE.CLOSED);
     }
   }
 
