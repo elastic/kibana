@@ -41,10 +41,9 @@ const ConfigSchema = schema.object(ConfigSchemaProps);
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
-  configObject: unknown
+  configObject: ActionTypeConfigType
 ): string | void {
-  // avoids circular reference ...
-  const config = configObject as ActionTypeConfigType;
+  const config = configObject;
 
   // Make sure service is set, or if not, both host/port must be set.
   // If service is set, host/port are ignored, when the email is sent.

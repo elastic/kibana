@@ -8,6 +8,8 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { ExecutorError, TaskRunnerFactory, ILicenseState } from './lib';
+import { ActionType as CommonActionType } from '../common';
+import { ActionsConfigurationUtilities } from './actions_config';
 import {
   ActionType,
   PreConfiguredAction,
@@ -15,8 +17,6 @@ import {
   ActionTypeSecrets,
   ActionTypeParams,
 } from './types';
-import { ActionType as CommonActionType } from '../common';
-import { ActionsConfigurationUtilities } from './actions_config';
 
 export interface ActionTypeRegistryOpts {
   taskManager: TaskManagerSetupContract;
@@ -137,7 +137,7 @@ export class ActionTypeRegistry {
         })
       );
     }
-    return (this.actionTypes.get(id)! as unknown) as ActionType<Config, Secrets, Params>;
+    return this.actionTypes.get(id)! as ActionType<Config, Secrets, Params>;
   }
 
   /**

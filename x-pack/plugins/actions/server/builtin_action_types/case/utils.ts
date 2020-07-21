@@ -5,11 +5,15 @@
  */
 
 import { curry, flow, get } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { ActionTypeExecutorOptions, ActionTypeExecutorResult, ActionType } from '../../types';
 
-import { ExecutorParamsSchema, ExternalIncidentServiceConfigurationSchema } from './schema';
+import { ExecutorParamsSchema } from './schema';
+import {
+  ExternalIncidentServiceConfiguration,
+  ExternalIncidentServiceSecretConfiguration,
+} from './types';
 
 import {
   CreateExternalServiceArgs,
@@ -63,10 +67,14 @@ export const createConnectorExecutor = ({
   api,
   createExternalService,
 }: CreateExternalServiceBasicArgs) => async (
-  execOptions: ActionTypeExecutorOptions
+  execOptions: ActionTypeExecutorOptions<
+    ExternalIncidentServiceConfiguration,
+    ExternalIncidentServiceSecretConfiguration,
+    ExecutorParams
+  >
 ): Promise<ActionTypeExecutorResult> => {
   const { actionId, config, params, secrets } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
+  const { subAction, subActionParams } = params;
   let data = {};
 
   const res: Pick<ActionTypeExecutorResult, 'status'> &
@@ -92,10 +100,7 @@ export const createConnectorExecutor = ({
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
     const { comments, externalId, ...restParams } = pushToServiceParams;
 
-    const mapping = buildMap(
-      (config as TypeOf<typeof ExternalIncidentServiceConfigurationSchema>).casesConfiguration
-        .mapping
-    );
+    const mapping = buildMap(config.casesConfiguration.mapping);
     const externalCase = mapParams(restParams, mapping);
 
     data = await api.pushToService({

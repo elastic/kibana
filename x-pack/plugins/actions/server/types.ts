@@ -52,11 +52,7 @@ export interface ActionsConfigType {
 }
 
 // the parameters passed to an action type executor function
-export interface ActionTypeExecutorOptions<
-  Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-  Params extends ActionTypeParams = ActionTypeParams
-> {
+export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   actionId: string;
   services: Services;
   config: Config;
@@ -94,11 +90,7 @@ export interface ActionTypeExecutorResult<Data = unknown> {
 }
 
 // signature of the action type executor function
-export type ExecutorType<
-  Config extends ActionTypeConfig = ActionTypeConfig,
-  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-  Params extends ActionTypeParams = ActionTypeParams
-> = (
+export type ExecutorType<Config, Secrets, Params> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult | null | undefined | void>;
 

@@ -18,9 +18,14 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { createExternalService } from './service';
 import { api } from './api';
-import { ExecutorParams, ExecutorSubActionPushParams } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
+import {
+  ExecutorParams,
+  ExecutorSubActionPushParams,
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+} from './types';
 
 // TODO: to remove, need to support Case
 import { buildMap, mapParams } from '../case/utils';
@@ -32,7 +37,13 @@ interface GetActionTypeParams {
 }
 
 // action type definition
-export function getActionType(params: GetActionTypeParams): ActionType {
+export function getActionType(
+  params: GetActionTypeParams
+): ActionType<
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  ExecutorParams
+> {
   const { logger, configurationUtilities } = params;
   return {
     id: '.servicenow',
@@ -55,10 +66,14 @@ export function getActionType(params: GetActionTypeParams): ActionType {
 
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
+  execOptions: ActionTypeExecutorOptions<
+    ServiceNowPublicConfigurationType,
+    ServiceNowSecretConfigurationType,
+    ExecutorParams
+  >
 ): Promise<ActionTypeExecutorResult> {
   const { actionId, config, params, secrets } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
+  const { subAction, subActionParams } = params;
   let data: PushToServiceResponse | null = null;
 
   const externalService = createExternalService({
