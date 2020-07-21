@@ -61,6 +61,7 @@
  */
 
 import Boom from 'boom';
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
@@ -291,7 +292,7 @@ function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrat
     ...doc,
     migrationVersion: props(doc).reduce((acc, prop) => {
       const version = propVersion(migrations, prop);
-      return version ? _.set(acc, prop, version) : acc;
+      return version ? set(acc, prop, version) : acc;
     }, {}),
   };
 }

@@ -4146,9 +4146,6 @@
           "config_revision": {
             "type": ["number", "null"]
           },
-          "config_newest_revision": {
-            "type": "number"
-          },
           "last_checkin": {
             "type": "string"
           },

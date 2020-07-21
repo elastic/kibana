@@ -11,6 +11,7 @@ export {
   sendRequest,
   useRequest,
   Forms,
+  extractQueryParams,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
 export {
@@ -21,6 +22,8 @@ export {
   useForm,
   Form,
   getUseField,
+  UseField,
+  FormDataProvider,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
@@ -32,6 +35,7 @@ export {
 export {
   getFormRow,
   Field,
+  ToggleField,
   JsonEditorField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 

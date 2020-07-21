@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './xy_config_panel.scss';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
-  EuiButtonEmpty,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,8 +34,7 @@ import { State, SeriesType, visualizationTypes, YAxisMode } from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { fittingFunctionDefinitions } from './fitting_functions';
-
-import './xy_config_panel.scss';
+import { ToolbarButton } from '../toolbar_button';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -133,17 +132,16 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       <EuiFlexItem grow={false}>
         <EuiPopover
           panelClassName="lnsXyToolbar__popover"
+          ownFocus
           button={
-            <EuiButtonEmpty
-              color="text"
-              iconType="arrowDown"
-              iconSide="right"
+            <ToolbarButton
+              fontWeight="normal"
               onClick={() => {
                 setOpen(!open);
               }}
             >
               {i18n.translate('xpack.lens.xyChart.settingsLabel', { defaultMessage: 'Settings' })}
-            </EuiButtonEmpty>
+            </ToolbarButton>
           }
           isOpen={open}
           closePopover={() => {
@@ -151,12 +149,9 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
           }}
           anchorPosition="downRight"
         >
-          <EuiFormRow
-            display="columnCompressed"
-            label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
-              defaultMessage: 'Fill missing values',
-            })}
-            helpText={
+          <EuiToolTip
+            anchorClassName="eui-displayBlock"
+            content={
               !hasNonBarSeries &&
               i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
                 defaultMessage:
@@ -164,29 +159,36 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               })
             }
           >
-            <EuiSuperSelect
-              compressed
-              disabled={!hasNonBarSeries}
-              options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                return {
-                  value: id,
-                  dropdownDisplay: (
-                    <>
-                      <strong>{title}</strong>
-                      <EuiText size="xs" color="subdued">
-                        <p>{description}</p>
-                      </EuiText>
-                    </>
-                  ),
-                  inputDisplay: title,
-                };
+            <EuiFormRow
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.xyChart.fittingLabel', {
+                defaultMessage: 'Fill missing values',
               })}
-              valueOfSelected={props.state?.fittingFunction || 'None'}
-              onChange={(value) => props.setState({ ...props.state, fittingFunction: value })}
-              itemLayoutAlign="top"
-              hasDividers
-            />
-          </EuiFormRow>
+            >
+              <EuiSuperSelect
+                compressed
+                disabled={!hasNonBarSeries}
+                options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                  return {
+                    value: id,
+                    dropdownDisplay: (
+                      <>
+                        <strong>{title}</strong>
+                        <EuiText size="xs" color="subdued">
+                          <p>{description}</p>
+                        </EuiText>
+                      </>
+                    ),
+                    inputDisplay: title,
+                  };
+                })}
+                valueOfSelected={props.state?.fittingFunction || 'None'}
+                onChange={(value) => props.setState({ ...props.state, fittingFunction: value })}
+                itemLayoutAlign="top"
+                hasDividers
+              />
+            </EuiFormRow>
+          </EuiToolTip>
           <EuiFormRow
             display="columnCompressed"
             label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
@@ -275,12 +277,12 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
         })}
       >
         <EuiButtonGroup
+          isFullWidth
           legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
             defaultMessage: 'Axis side',
           })}
           name="axisSide"
           buttonSize="compressed"
-          className="eui-displayInlineBlock"
           options={[
             {
               id: `${idPrefix}auto`,
@@ -333,7 +335,7 @@ const tooltipContent = {
   }),
   disabled: i18n.translate('xpack.lens.configPanel.color.tooltip.disabled', {
     defaultMessage:
-      'Individual series cannot be custom colored when the layer includes a “Break down by“',
+      'Individual series cannot be custom colored when the layer includes a “Break down by.“',
   }),
 };
 
@@ -378,6 +380,22 @@ const ColorPicker = ({
     [state, layer, accessor, index]
   );
 
+  const colorPicker = (
+    <EuiColorPicker
+      compressed
+      isClearable
+      onChange={handleColor}
+      color={disabled ? '' : color}
+      disabled={disabled}
+      placeholder={i18n.translate('xpack.lens.xyChart.seriesColor.auto', {
+        defaultMessage: 'Auto',
+      })}
+      aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
+        defaultMessage: 'Series color',
+      })}
+    />
+  );
+
   return (
     <EuiFormRow
       display="columnCompressed"
@@ -404,25 +422,10 @@ const ColorPicker = ({
           delay="long"
           anchorClassName="eui-displayBlock"
         >
-          <EuiColorPicker
-            compressed
-            onChange={handleColor}
-            color=""
-            disabled
-            aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-              defaultMessage: 'Series color',
-            })}
-          />
+          {colorPicker}
         </EuiToolTip>
       ) : (
-        <EuiColorPicker
-          compressed
-          onChange={handleColor}
-          color={color}
-          aria-label={i18n.translate('xpack.lens.xyChart.seriesColor.label', {
-            defaultMessage: 'Series color',
-          })}
-        />
+        colorPicker
       )}
     </EuiFormRow>
   );

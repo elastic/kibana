@@ -305,6 +305,7 @@ export const ActionForm = ({
               editAction={setActionParamsProperty}
               messageVariables={messageVariables}
               defaultMessage={defaultActionMessage ?? undefined}
+              docLinks={docLinks}
             />
           </Suspense>
         ) : null}

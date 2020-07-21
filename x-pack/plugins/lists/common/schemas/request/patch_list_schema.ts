@@ -8,8 +8,8 @@
 
 import * as t from 'io-ts';
 
-import { description, id, meta, name } from '../common/schemas';
-import { Identity, RequiredKeepUndefined } from '../../types';
+import { _version, description, id, meta, name } from '../common/schemas';
+import { RequiredKeepUndefined } from '../../types';
 
 export const patchListSchema = t.intersection([
   t.exact(
@@ -17,8 +17,8 @@ export const patchListSchema = t.intersection([
       id,
     })
   ),
-  t.exact(t.partial({ description, meta, name })),
+  t.exact(t.partial({ _version, description, meta, name })),
 ]);
 
-export type PatchListSchemaPartial = Identity<t.TypeOf<typeof patchListSchema>>;
-export type PatchListSchema = RequiredKeepUndefined<Identity<t.TypeOf<typeof patchListSchema>>>;
+export type PatchListSchema = t.OutputOf<typeof patchListSchema>;
+export type PatchListSchemaDecoded = RequiredKeepUndefined<t.TypeOf<typeof patchListSchema>>;

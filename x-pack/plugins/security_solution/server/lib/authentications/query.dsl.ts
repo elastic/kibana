@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
+
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, sourceFieldsMap } from '../ecs_fields';
@@ -26,6 +28,7 @@ export const buildQuery = ({
   timerange: { from, to },
   pagination: { querySize },
   defaultIndex,
+  docValueFields,
   sourceConfiguration: {
     fields: { timestamp },
   },
@@ -40,6 +43,7 @@ export const buildQuery = ({
         [timestamp]: {
           gte: from,
           lte: to,
+          format: 'strict_date_optional_time',
         },
       },
     },
@@ -58,6 +62,7 @@ export const buildQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
+      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...agg,
         group_by_users: {

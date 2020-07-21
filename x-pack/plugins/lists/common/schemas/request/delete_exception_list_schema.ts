@@ -8,7 +8,9 @@
 
 import * as t from 'io-ts';
 
-import { NamespaceType, id, list_id, namespace_type } from '../common/schemas';
+import { id, list_id, namespace_type } from '../common/schemas';
+import { NamespaceType } from '../types';
+import { RequiredKeepUndefined } from '../../types';
 
 export const deleteExceptionListSchema = t.exact(
   t.partial({
@@ -18,9 +20,12 @@ export const deleteExceptionListSchema = t.exact(
   })
 );
 
-export type DeleteExceptionListSchema = t.TypeOf<typeof deleteExceptionListSchema>;
+export type DeleteExceptionListSchema = t.OutputOf<typeof deleteExceptionListSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type DeleteExceptionListSchemaDecoded = Omit<DeleteExceptionListSchema, 'namespace_type'> & {
+export type DeleteExceptionListSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof deleteExceptionListSchema>>,
+  'namespace_type'
+> & {
   namespace_type: NamespaceType;
 };
