@@ -8,7 +8,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';
-import { TimelinesPage } from './timelines_page';
+import { TimelinesPageComponent } from './timelines_page';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -21,6 +21,16 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../../overview/components/events_by_dataset');
+jest.mock('../../common/containers/source', () => {
+  const originalModule = jest.requireActual('../../common/containers/source');
+
+  return {
+    ...originalModule,
+    useWithSource: jest.fn().mockReturnValue({
+      indicesExist: true,
+    }),
+  };
+});
 jest.mock('../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../common/lib/kibana');
 
@@ -46,7 +56,7 @@ describe('TimelinesPageComponent', () => {
           },
         },
       });
-      wrapper = shallow(<TimelinesPage />);
+      wrapper = shallow(<TimelinesPageComponent />);
     });
 
     afterAll(() => {
@@ -92,7 +102,7 @@ describe('TimelinesPageComponent', () => {
           },
         },
       });
-      wrapper = shallow(<TimelinesPage />);
+      wrapper = shallow(<TimelinesPageComponent />);
     });
 
     afterAll(() => {
