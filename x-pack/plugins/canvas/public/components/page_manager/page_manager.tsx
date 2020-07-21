@@ -4,38 +4,63 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DragDropContextProps } from 'react-beautiful-dnd';
+// @ts-expect-error untyped dependency
 import Style from 'style-it';
+
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { PagePreview } from '../page_preview';
 
 import { ComponentStrings } from '../../../i18n';
+import { CanvasPage } from '../../../types';
 
 const { PageManager: strings } = ComponentStrings;
 
-export class PageManager extends React.PureComponent {
+export interface Props {
+  isWriteable: boolean;
+  onAddPage: () => void;
+  onMovePage: (pageId: string, position: number) => void;
+  onPreviousPage: () => void;
+  onRemovePage: (pageId: string) => void;
+  pages: CanvasPage[];
+  selectedPage?: string;
+  workpadCSS?: string;
+  workpadId: string;
+}
+
+interface State {
+  showTrayPop: boolean;
+  removeId: string | null;
+}
+
+export class PageManager extends Component<Props, State> {
   static propTypes = {
     isWriteable: PropTypes.bool.isRequired,
+    onAddPage: PropTypes.func.isRequired,
+    onMovePage: PropTypes.func.isRequired,
+    onPreviousPage: PropTypes.func.isRequired,
+    onRemovePage: PropTypes.func.isRequired,
     pages: PropTypes.array.isRequired,
-    workpadId: PropTypes.string.isRequired,
-    addPage: PropTypes.func.isRequired,
-    movePage: PropTypes.func.isRequired,
-    previousPage: PropTypes.func.isRequired,
-    duplicatePage: PropTypes.func.isRequired,
-    removePage: PropTypes.func.isRequired,
     selectedPage: PropTypes.string,
-    deleteId: PropTypes.string,
-    setDeleteId: PropTypes.func.isRequired,
     workpadCSS: PropTypes.string,
+    workpadId: PropTypes.string.isRequired,
   };
 
-  state = {
-    showTrayPop: true,
-  };
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      showTrayPop: true,
+      removeId: null,
+    };
+  }
+
+  _isMounted: boolean = false;
+  _activePageRef: HTMLDivElement | null = null;
+  _pageListRef: HTMLDivElement | null = null;
 
   componentDidMount() {
     // keep track of whether or not the component is mounted, to prevent rogue setState calls
@@ -44,11 +69,13 @@ export class PageManager extends React.PureComponent {
     // gives the tray pop animation time to finish
     setTimeout(() => {
       this.scrollToActivePage();
-      this._isMounted && this.setState({ showTrayPop: false });
+      if (this._isMounted) {
+        this.setState({ showTrayPop: false });
+      }
     }, 1000);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: Props) {
     // scrolls to the active page on the next tick, otherwise new pages don't scroll completely into view
     if (prevProps.selectedPage !== this.props.selectedPage) {
       setTimeout(this.scrollToActivePage, 0);
@@ -60,33 +87,33 @@ export class PageManager extends React.PureComponent {
   }
 
   scrollToActivePage = () => {
-    if (this.activePageRef && this.pageListRef) {
+    if (this._activePageRef && this._pageListRef) {
       // not all target browsers support element.scrollTo
       // TODO: replace this with something more cross-browser, maybe scrollIntoView
-      if (!this.pageListRef.scrollTo) {
+      if (!this._pageListRef.scrollTo) {
         return;
       }
 
-      const pageOffset = this.activePageRef.offsetLeft;
+      const pageOffset = this._activePageRef.offsetLeft;
       const {
         left: pageLeft,
         right: pageRight,
         width: pageWidth,
-      } = this.activePageRef.getBoundingClientRect();
+      } = this._activePageRef.getBoundingClientRect();
       const {
         left: listLeft,
         right: listRight,
         width: listWidth,
-      } = this.pageListRef.getBoundingClientRect();
+      } = this._pageListRef.getBoundingClientRect();
 
       if (pageLeft < listLeft) {
-        this.pageListRef.scrollTo({
+        this._pageListRef.scrollTo({
           left: pageOffset,
           behavior: 'smooth',
         });
       }
       if (pageRight > listRight) {
-        this.pageListRef.scrollTo({
+        this._pageListRef.scrollTo({
           left: pageOffset - listWidth + pageWidth,
           behavior: 'smooth',
         });
@@ -94,22 +121,29 @@ export class PageManager extends React.PureComponent {
     }
   };
 
-  confirmDelete = (pageId) => {
-    this._isMounted && this.props.setDeleteId(pageId);
-  };
-
-  resetDelete = () => this._isMounted && this.props.setDeleteId(null);
-
-  doDelete = () => {
-    const { previousPage, removePage, deleteId, selectedPage } = this.props;
-    this.resetDelete();
-    if (deleteId === selectedPage) {
-      previousPage();
+  onConfirmRemove = (removeId: string) => {
+    if (this._isMounted) {
+      this.setState({ removeId });
     }
-    removePage(deleteId);
   };
 
-  onDragEnd = ({ draggableId: pageId, source, destination }) => {
+  resetRemove = () => this._isMounted && this.setState({ removeId: null });
+
+  doRemove = () => {
+    const { onPreviousPage, onRemovePage, selectedPage } = this.props;
+    const { removeId } = this.state;
+    this.resetRemove();
+
+    if (removeId === selectedPage) {
+      onPreviousPage();
+    }
+
+    if (removeId !== null) {
+      onRemovePage(removeId);
+    }
+  };
+
+  onDragEnd: DragDropContextProps['onDragEnd'] = ({ draggableId: pageId, source, destination }) => {
     // dropped outside the list
     if (!destination) {
       return;
@@ -117,18 +151,11 @@ export class PageManager extends React.PureComponent {
 
     const position = destination.index - source.index;
 
-    this.props.movePage(pageId, position);
+    this.props.onMovePage(pageId, position);
   };
 
-  renderPage = (page, i) => {
-    const {
-      isWriteable,
-      selectedPage,
-      workpadId,
-      movePage,
-      duplicatePage,
-      workpadCSS,
-    } = this.props;
+  renderPage = (page: CanvasPage, i: number) => {
+    const { isWriteable, selectedPage, workpadId, workpadCSS } = this.props;
     const pageNumber = i + 1;
 
     return (
@@ -141,7 +168,7 @@ export class PageManager extends React.PureComponent {
             }`}
             ref={(el) => {
               if (page.id === selectedPage) {
-                this.activePageRef = el;
+                this._activePageRef = el;
               }
               provided.innerRef(el);
             }}
@@ -163,16 +190,7 @@ export class PageManager extends React.PureComponent {
                   {Style.it(
                     workpadCSS,
                     <div>
-                      <PagePreview
-                        isWriteable={isWriteable}
-                        page={page}
-                        height={100}
-                        pageNumber={pageNumber}
-                        movePage={movePage}
-                        selectedPage={selectedPage}
-                        duplicatePage={duplicatePage}
-                        confirmDelete={this.confirmDelete}
-                      />
+                      <PagePreview height={100} page={page} onRemove={this.onConfirmRemove} />
                     </div>
                   )}
                 </Link>
@@ -185,8 +203,8 @@ export class PageManager extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId, isWriteable } = this.props;
-    const { showTrayPop } = this.state;
+    const { pages, onAddPage, isWriteable } = this.props;
+    const { showTrayPop, removeId } = this.state;
 
     return (
       <Fragment>
@@ -200,7 +218,7 @@ export class PageManager extends React.PureComponent {
                       showTrayPop ? 'canvasPageManager--trayPop' : ''
                     }`}
                     ref={(el) => {
-                      this.pageListRef = el;
+                      this._pageListRef = el;
                       provided.innerRef(el);
                     }}
                     {...provided.droppableProps}
@@ -216,11 +234,11 @@ export class PageManager extends React.PureComponent {
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 anchorClassName="canvasPageManager__addPageTip"
-                content="Add a new page to this workpad"
+                content={strings.getAddPageTooltip()}
                 position="left"
               >
                 <button
-                  onClick={addPage}
+                  onClick={onAddPage}
                   className="canvasPageManager__addPage kbn-resetFocusState"
                 >
                   <EuiIcon color="ghost" type="plusInCircle" size="l" />
@@ -230,12 +248,12 @@ export class PageManager extends React.PureComponent {
           )}
         </EuiFlexGroup>
         <ConfirmModal
-          isOpen={deleteId != null}
-          title="Remove Page"
-          message="Are you sure you want to remove this page?"
-          confirmButtonText="Remove"
-          onConfirm={this.doDelete}
-          onCancel={this.resetDelete}
+          isOpen={removeId !== null}
+          title={strings.getConfirmRemoveTitle()}
+          message={strings.getConfirmRemoveDescription()}
+          confirmButtonText={strings.getConfirmRemoveButtonLabel()}
+          onConfirm={this.doRemove}
+          onCancel={this.resetRemove}
         />
       </Fragment>
     );

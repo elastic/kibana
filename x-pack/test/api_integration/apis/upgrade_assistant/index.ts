@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PagePreview } from './page_preview';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Upgrade Assistant', () => {
+    loadTestFile(require.resolve('./upgrade_assistant'));
+  });
+}
