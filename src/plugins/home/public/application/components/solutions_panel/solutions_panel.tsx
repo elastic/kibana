@@ -17,9 +17,17 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { SolutionsTitle } from './solutions_title';
 import { FeatureCatalogueEntry } from '../../../';
 import { createAppNavigationHandler } from '../app_navigation_handler';
@@ -215,16 +223,10 @@ const solutionCTAs: { [key: string]: any } = {
   },
 };
 
-const halfWidthClass = 'homeSolutionsPanel--restrictHalfWidth';
-
-export const SolutionsPanel: FunctionComponent<Props> = ({
-  addBasePath,
-  findDirectoryById
-}) => {
+export const SolutionsPanel: FunctionComponent<Props> = ({ addBasePath, findDirectoryById }) => {
   const observability = findDirectoryById('observability');
   const enterpriseSearch = findDirectoryById('appSearch');
   const securitySolution = findDirectoryById('securitySolution');
-
 
   const addSpacersBetweenReducer = (
     acc: JSX.Element[],
@@ -272,162 +274,167 @@ export const SolutionsPanel: FunctionComponent<Props> = ({
     []
   );
 
-const halfWidthClass = 'homSolutionsPanel--restrictHalfWidth';
+  const halfWidthClass = 'homSolutionsPanel--restrictHalfWidth';
 
-  return (
-  <EuiFlexGroup justifyContent="spaceAround">
-      {enterpriseSearchActions.length || observabilityActions.length || securitySolution ? (
-
-      <EuiFlexItem className={halfWidthClass}>
-        {/* TODO: once app search is merged, register add to feature catalogue and remove hard coded text here */}
-        <EuiFlexGroup direction="column">
-        {enterpriseSearchActions.length ? (
-
-            <EuiFlexItem className="homSolutionsPanel__enterpriseSearch">
-              <EuiPanel
-                paddingSize="none"
-                className="homSolutionsPanel__solutionPanel"
-                onClick={createAppNavigationHandler('/app/enterprise_search/app_search')} // TODO: double check this url once enterprise search overview page is available
-              >
-                <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem
-                    grow={1}
-                    className="homSolutionsPanel__header homSolutionsPanel__enterpriseSearchHeader"
+  return enterpriseSearchActions.length ||
+    observabilityActions.length ||
+    securitySolution ||
+    kibanaActions.length ? (
+    <Fragment>
+      <EuiFlexGroup className="homSolutionsPanel" justifyContent="spaceAround">
+        {enterpriseSearchActions.length || observabilityActions.length || securitySolution ? (
+          <EuiFlexItem className={halfWidthClass}>
+            {/* TODO: once app search is merged, register add to feature catalogue and remove hard coded text here */}
+            <EuiFlexGroup direction="column">
+              {enterpriseSearchActions.length ? (
+                <EuiFlexItem className="homSolutionsPanel__enterpriseSearch">
+                  <EuiPanel
+                    paddingSize="none"
+                    className="homSolutionsPanel__solutionPanel"
+                    onClick={createAppNavigationHandler('/app/enterprise_search/app_search')} // TODO: double check this url once enterprise search overview page is available
                   >
-                    <EuiImage
-                      className="homSolutionsPanel__enterpriseSearchTopLeftImage"
-                      url={addBasePath(
-                        '/plugins/home/assets/background_enterprise_search_top_left_2x.png'
-                      )}
-                      alt="Enterprise search top left background graphic"
-                    />
-                    <SolutionsTitle
-                      iconType="logoEnterpriseSearch"
-                      title="Enterprise Search"
-                      subtitle={i18n.translate('home.solutionsPanel.enterpriseSearchSubtitle', {
-                        defaultMessage: 'Search everything',
-                      })}
-                    />
-                    <EuiImage
-                      className="homSolutionsPanel__enterpriseSearchBottomRightImage"
-                      url={addBasePath(
-                        '/plugins/home/assets/background_enterprise_search_bottom_right_2x.png'
-                      )}
-                      alt="Enterprise search bottom right background graphic"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-                      {enterpriseSearchActions}
-                    </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          ) : null}
-             {observabilityActions.length ? (
-
-            <EuiFlexItem className="homSolutionsPanel__observability">
-              <EuiPanel
-                paddingSize="none"
-                className="homSolutionsPanel__solutionPanel"
-                // onClick={createAppNavigationHandler(observability.path)}
-                onClick={createAppNavigationHandler('/app/observability#/landing')}
-
-              >
-                <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem
-                    grow={1}
-                    className="homSolutionsPanel__header homSolutionsPanel__observabilityHeader"
+                    <EuiFlexGroup gutterSize="none">
+                      <EuiFlexItem
+                        grow={1}
+                        className="homSolutionsPanel__header homSolutionsPanel__enterpriseSearchHeader"
+                      >
+                        <EuiImage
+                          className="homSolutionsPanel__enterpriseSearchTopLeftImage"
+                          url={addBasePath(
+                            '/plugins/home/assets/background_enterprise_search_top_left_2x.png'
+                          )}
+                          alt="Enterprise search top left background graphic"
+                        />
+                        <SolutionsTitle
+                          iconType="logoEnterpriseSearch"
+                          title="Enterprise Search"
+                          subtitle={i18n.translate('home.solutionsPanel.enterpriseSearchSubtitle', {
+                            defaultMessage: 'Search everything',
+                          })}
+                        />
+                        <EuiImage
+                          className="homSolutionsPanel__enterpriseSearchBottomRightImage"
+                          url={addBasePath(
+                            '/plugins/home/assets/background_enterprise_search_bottom_right_2x.png'
+                          )}
+                          alt="Enterprise search bottom right background graphic"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
+                        {enterpriseSearchActions}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                </EuiFlexItem>
+              ) : null}
+              {observabilityActions.length ? (
+                <EuiFlexItem className="homSolutionsPanel__observability">
+                  <EuiPanel
+                    paddingSize="none"
+                    className="homSolutionsPanel__solutionPanel"
+                    // onClick={createAppNavigationHandler(observability.path)}
+                    onClick={createAppNavigationHandler('/app/observability#/landing')}
                   >
-                    <EuiImage
-                      className="homSolutionsPanel__observabilityTopRightImage"
-                      url={addBasePath(
-                        '/plugins/home/assets/background_observability_top_right_2x.png'
-                      )}
-                      alt="Observability top right background graphic"
-                    />
-                    <SolutionsTitle
-                      iconType={observability.icon}
-                      title={observability.title}
-                      subtitle={observability.description}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-                      {observabilityActions}
-                    </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          ) : null}
-          {securitySolution ? (
-            <EuiFlexItem className="homSolutionsPanel__securitySolution">
-              <EuiPanel
-                paddingSize="none"
-                className="homSolutionsPanel__solutionPanel"
-                onClick={createAppNavigationHandler(securitySolution.path)}
-              >
-                <EuiFlexGroup gutterSize="none">
-                  <EuiFlexItem
-                    grow={1}
-                    className="homSolutionsPanel__header homSolutionsPanel__securitySolutionHeader"
+                    <EuiFlexGroup gutterSize="none">
+                      <EuiFlexItem
+                        grow={1}
+                        className="homSolutionsPanel__header homSolutionsPanel__observabilityHeader"
+                      >
+                        <EuiImage
+                          className="homSolutionsPanel__observabilityTopRightImage"
+                          url={addBasePath(
+                            '/plugins/home/assets/background_observability_top_right_2x.png'
+                          )}
+                          alt="Observability top right background graphic"
+                        />
+                        <SolutionsTitle
+                          iconType={observability.icon}
+                          title={observability.title}
+                          subtitle={observability.description}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
+                        {observabilityActions}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                </EuiFlexItem>
+              ) : null}
+              {securitySolution ? (
+                <EuiFlexItem className="homSolutionsPanel__securitySolution">
+                  <EuiPanel
+                    paddingSize="none"
+                    className="homSolutionsPanel__solutionPanel"
+                    onClick={createAppNavigationHandler(securitySolution.path)}
                   >
-                    <EuiImage
-                      className="homSolutionsPanel__securitySolutionTopLeftImage"
-                      url={addBasePath(
-                        '/plugins/home/assets/background_security_solution_top_left_2x.png'
-                      )}
-                      alt="Enterprise search top left background graphic"
-                    />
-                    <SolutionsTitle
-                      iconType={securitySolution.icon}
-                      title={securitySolution.title}
-                      subtitle={securitySolution.description}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-                      {securitySolutionActions}
-                    </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    ) : null}
-{kibanaActions.length ? (
-    <EuiFlexItem className={`homSolutionsPanel__kibana ${halfWidthClass}`}>
-      <EuiPanel
-        paddingSize="none"
-        className="homSolutionsPanel__solutionPanel"
-        onClick={createAppNavigationHandler('/app/dashboards')}
-      >
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem
-            grow={1}
-            className="homSolutionsPanel__header homSolutionsPanel__kibanaHeader"
-          >
-            <EuiImage
-              className="homSolutionsPanel__kibanaTopLeftImage"
-              url={addBasePath('/plugins/home/assets/background_kibana_top_left_2x.png')}
-              alt="Kibana top left background graphic"
-            />
-            <SolutionsTitle
-              iconType="logoKibana"
-              title="Kibana"
-              subtitle={i18n.translate('home.solutionsPanel.kibanaSubtitle', {
-                defaultMessage: 'Visualize & analyze',
-              })}
-            />
-            <EuiImage
-              className="homSolutionsPanel__kibanaBottomRightImage"
-              url={addBasePath('/plugins/home/assets/background_kibana_bottom_right_2x.png')}
-              alt="Kibana bottom right background graphic"
-            />
+                    <EuiFlexGroup gutterSize="none">
+                      <EuiFlexItem
+                        grow={1}
+                        className="homSolutionsPanel__header homSolutionsPanel__securitySolutionHeader"
+                      >
+                        <EuiImage
+                          className="homSolutionsPanel__securitySolutionTopLeftImage"
+                          url={addBasePath(
+                            '/plugins/home/assets/background_security_solution_top_left_2x.png'
+                          )}
+                          alt="Enterprise search top left background graphic"
+                        />
+                        <SolutionsTitle
+                          iconType={securitySolution.icon}
+                          title={securitySolution.title}
+                          subtitle={securitySolution.description}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
+                        {securitySolutionActions}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
-                {kibanaActions}
-              </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiFlexItem>):null}
-  </EuiFlexGroup>
-);}
+        ) : null}
+        {kibanaActions.length ? (
+          <EuiFlexItem className={`homSolutionsPanel__kibana ${halfWidthClass}`}>
+            <EuiPanel
+              paddingSize="none"
+              className="homSolutionsPanel__solutionPanel"
+              onClick={createAppNavigationHandler('/app/dashboards')}
+            >
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem
+                  grow={1}
+                  className="homSolutionsPanel__header homSolutionsPanel__kibanaHeader"
+                >
+                  <EuiImage
+                    className="homSolutionsPanel__kibanaTopLeftImage"
+                    url={addBasePath('/plugins/home/assets/background_kibana_top_left_2x.png')}
+                    alt="Kibana top left background graphic"
+                  />
+                  <SolutionsTitle
+                    iconType="logoKibana"
+                    title="Kibana"
+                    subtitle={i18n.translate('home.solutionsPanel.kibanaSubtitle', {
+                      defaultMessage: 'Visualize & analyze',
+                    })}
+                  />
+                  <EuiImage
+                    className="homSolutionsPanel__kibanaBottomRightImage"
+                    url={addBasePath('/plugins/home/assets/background_kibana_bottom_right_2x.png')}
+                    alt="Kibana bottom right background graphic"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
+                  {kibanaActions}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule margin="xl" />
+    </Fragment>
+  ) : null;
+};

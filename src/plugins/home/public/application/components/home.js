@@ -225,14 +225,8 @@ export class Home extends Component {
         </header>
         <div className="homPageContainer">
           <main className="homPage" data-test-subj="homeApp">
-            <div className="homSolutionsPanel">
-              <SolutionsPanel
-                addBasePath={addBasePath}
-                findDirectoryById={this.findDirectoryById}
-              />
-            </div>
+            <SolutionsPanel addBasePath={addBasePath} findDirectoryById={this.findDirectoryById} />
 
-            <EuiHorizontalRule margin="xl" />
             <EuiSpacer size="s" />
 
             <div className="homAddData">
