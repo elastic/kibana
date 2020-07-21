@@ -104,6 +104,7 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
             defaultMessage: 'Name',
           }
         ),
+        truncateText: true,
       },
       {
         field: 'description',
