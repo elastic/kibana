@@ -106,7 +106,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const updateThreshold = useCallback(
     (enteredThreshold) => {
       const t = isMetricPct
-        ? enteredThreshold.map((v) => correctedPctConvert(v, false))
+        ? enteredThreshold.map((v: number) => correctedPctConvert(v, false))
         : enteredThreshold;
       if (t.join() !== expression.threshold.join()) {
         setAlertParams(expressionId, { ...expression, threshold: t });
