@@ -12338,7 +12338,6 @@
     "xpack.reporting.shareContextMenu.pdfReportsButtonLabel": "PDF 报告",
     "xpack.reporting.shareContextMenu.pngReportsButtonLabel": "PNG 报告",
     "xpack.rollupJobs.appTitle": "汇总/打包作业",
-    "xpack.rollupJobs.breadcrumbsTitle": "汇总/打包作业",
     "xpack.rollupJobs.create.backButton.label": "上一步",
     "xpack.rollupJobs.create.dateTypeField": "日期",
     "xpack.rollupJobs.create.errors.dateHistogramFieldMissing": "“日期”字段必填。",
