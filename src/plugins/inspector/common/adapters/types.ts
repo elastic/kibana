@@ -16,22 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
 
-import { RequestsViewComponent } from './components/requests_view';
-import { InspectorViewDescription } from '../../types';
-import { Adapters } from '../../../common';
-
-export const getRequestsViewDescription = (): InspectorViewDescription => ({
-  title: i18n.translate('inspector.requests.requestsTitle', {
-    defaultMessage: 'Requests',
-  }),
-  order: 20,
-  help: i18n.translate('inspector.requests.requestsDescriptionTooltip', {
-    defaultMessage: 'View the requests that collected the data',
-  }),
-  shouldShow(adapters: Adapters) {
-    return Boolean(adapters.requests);
-  },
-  component: RequestsViewComponent,
-});
+/**
+ * The interface that the adapters used to open an inspector have to fullfill.
+ */
+export interface Adapters {
+  [key: string]: any;
+}
