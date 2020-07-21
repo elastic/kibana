@@ -6,10 +6,6 @@
 
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
-import {
-  createPackageConfigWithManifestMock,
-  createPackageConfigWithInitialManifestMock,
-} from '../../../../../../ingest_manager/common/mocks';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import { listMock } from '../../../../../../lists/server/mocks';
@@ -18,6 +14,8 @@ import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
 import { ManifestManager } from './manifest_manager';
 import {
+  createPackageConfigWithManifestMock,
+  createPackageConfigWithInitialManifestMock,
   getMockManifest,
   getMockArtifactsWithDiff,
   getEmptyMockArtifacts,
