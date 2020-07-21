@@ -8,6 +8,9 @@ export default function ({ loadTestFile }) {
   describe('Ingest Manager Endpoints', function () {
     this.tags('ciGroup7');
 
+    // Fleet
+    loadTestFile(require.resolve('./fleet/index'));
+
     // EPM
     loadTestFile(require.resolve('./epm/list'));
     loadTestFile(require.resolve('./epm/file'));

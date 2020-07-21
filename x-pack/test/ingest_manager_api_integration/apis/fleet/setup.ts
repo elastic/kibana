@@ -5,14 +5,16 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/72053
-  describe.skip('fleet_setup', () => {
+  describe('fleet_setup', () => {
+    skipIfNoDockerRegistry(providerContext);
     beforeEach(async () => {
       try {
         await es.security.deleteUser({
