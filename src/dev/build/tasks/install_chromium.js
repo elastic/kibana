@@ -22,9 +22,7 @@ import { first } from 'rxjs/operators';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
 
-import { Task } from '../lib';
-
-export const InstallChromium: Task = {
+export const InstallChromium = {
   description: 'Installing Chromium',
 
   async run(config, log, build) {
@@ -36,7 +34,7 @@ export const InstallChromium: Task = {
 
         const { binaryPath$ } = installBrowser(
           // TODO: https://github.com/elastic/kibana/issues/72496
-          log as any,
+          log,
           build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
           platform.getName(),
           platform.getArchitecture()
