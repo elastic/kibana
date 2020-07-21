@@ -32,7 +32,7 @@ Main.displayName = 'Main';
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
 /** the global Kibana navigation at the top of every page */
-const globalHeaderHeightPx = 48;
+export const globalHeaderHeightPx = 48;
 
 const calculateFlyoutHeight = ({
   globalHeaderSize,

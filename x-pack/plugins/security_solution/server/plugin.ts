@@ -48,6 +48,7 @@ import { EndpointAppContextService } from './endpoint/endpoint_app_context_servi
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
+import { AppRequestContext } from './types';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -80,7 +81,7 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,
-  `${APP_ID}:${SecurityPageName.management}`,
+  `${APP_ID}:${SecurityPageName.administration}`,
 ];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -127,9 +128,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
-      getAppClient: () => this.appClientFactory.create(request),
-    }));
+    core.http.registerRouteHandlerContext(
+      APP_ID,
+      (context, request, response): AppRequestContext => ({
+        getAppClient: () => this.appClientFactory.create(request),
+      })
+    );
 
     this.appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
@@ -144,7 +148,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml
     );
-
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
@@ -164,7 +167,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         all: {
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: [
+            'securitySolution',
+            'actions-read',
+            'actions-all',
+            'alerting-read',
+            'alerting-all',
+            'lists-all',
+          ],
           savedObject: {
             all: [
               'alert',
@@ -192,7 +202,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         read: {
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: [
+            'securitySolution',
+            'actions-read',
+            'actions-all',
+            'alerting-read',
+            'alerting-all',
+            'lists-read',
+          ],
           savedObject: {
             all: ['alert', 'action', 'action_task_params'],
             read: [
@@ -249,7 +266,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    const libs = compose(core, plugins, this.context.env.mode.prod);
+    const libs = compose(core, plugins, this.context.env.mode.prod, endpointContext);
     initServer(libs);
 
     return {};

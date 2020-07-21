@@ -18,7 +18,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from 'kibana/public';
-import { ManagementSectionId } from '../../management/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
@@ -31,7 +30,7 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
   public setup(core: CoreSetup, { management }: AdvancedSettingsPluginSetup) {
-    const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
+    const kibanaSection = management.sections.section.kibana;
 
     kibanaSection.registerApp({
       id: 'settings',
