@@ -299,7 +299,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
-      getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
+      getScopedSavedObjectsClient: (request: KibanaRequest) =>
+        core.savedObjects.getScopedClient(request, {
+          includedHiddenTypes,
+        }),
     });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
