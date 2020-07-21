@@ -14,7 +14,7 @@ const { DLL_OUTPUT, KIBANA_ROOT } = require('./constants');
 module.exports = async ({ config }) => {
   // Find and alter the CSS rule to replace the Kibana public path string with a path
   // to the route we've added in middleware.js
-  const cssRule = config.module.rules.find(rule => rule.test.source.includes('.css$'));
+  const cssRule = config.module.rules.find((rule) => rule.test.source.includes('.css$'));
   cssRule.use.push({
     loader: 'string-replace-loader',
     options: {
@@ -153,7 +153,7 @@ module.exports = async ({ config }) => {
   config.plugins.push(
     // replace imports for `uiExports/*` modules with a synthetic module
     // created by create_ui_exports_module.js
-    new webpack.NormalModuleReplacementPlugin(/^uiExports\//, resource => {
+    new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
       // uiExports used by Canvas
       const extensions = {
         hacks: [],
@@ -179,10 +179,22 @@ module.exports = async ({ config }) => {
     }),
 
     // Mock out libs used by a few componets to avoid loading in kibana_legacy and platform
-    new webpack.NormalModuleReplacementPlugin(/(lib)?\/notify/, path.resolve(__dirname, '../tasks/mocks/uiNotify')),
-    new webpack.NormalModuleReplacementPlugin(/lib\/download_workpad/, path.resolve(__dirname, '../tasks/mocks/downloadWorkpad')),
-    new webpack.NormalModuleReplacementPlugin(/(lib)?\/custom_element_service/, path.resolve(__dirname, '../tasks/mocks/customElementService')),
-    new webpack.NormalModuleReplacementPlugin(/(lib)?\/ui_metric/, path.resolve(__dirname, '../tasks/mocks/uiMetric')),
+    new webpack.NormalModuleReplacementPlugin(
+      /(lib)?\/notify/,
+      path.resolve(__dirname, '../tasks/mocks/uiNotify')
+    ),
+    new webpack.NormalModuleReplacementPlugin(
+      /lib\/download_workpad/,
+      path.resolve(__dirname, '../tasks/mocks/downloadWorkpad')
+    ),
+    new webpack.NormalModuleReplacementPlugin(
+      /(lib)?\/custom_element_service/,
+      path.resolve(__dirname, '../tasks/mocks/customElementService')
+    ),
+    new webpack.NormalModuleReplacementPlugin(
+      /(lib)?\/ui_metric/,
+      path.resolve(__dirname, '../tasks/mocks/uiMetric')
+    )
   );
 
   // Tell Webpack about relevant extensions
@@ -196,7 +208,10 @@ module.exports = async ({ config }) => {
     '../tasks/mocks/uiNotifyFormatMsg'
   );
   config.resolve.alias['ui/notify'] = path.resolve(__dirname, '../tasks/mocks/uiNotify');
-  config.resolve.alias['ui/url/absolute_to_parsed_url'] = path.resolve(__dirname, '../tasks/mocks/uiAbsoluteToParsedUrl');
+  config.resolve.alias['ui/url/absolute_to_parsed_url'] = path.resolve(
+    __dirname,
+    '../tasks/mocks/uiAbsoluteToParsedUrl'
+  );
   config.resolve.alias['ui/chrome'] = path.resolve(__dirname, '../tasks/mocks/uiChrome');
   config.resolve.alias.ui = path.resolve(KIBANA_ROOT, 'src/legacy/ui/public');
   config.resolve.alias.ng_mock$ = path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock');

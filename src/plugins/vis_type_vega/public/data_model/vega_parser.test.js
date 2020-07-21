@@ -97,6 +97,7 @@ describe('VegaParser._resolveEsQueries', () => {
       search: jest.fn(() => ({
         toPromise: jest.fn(() => Promise.resolve(data)),
       })),
+      resetSearchStats: jest.fn(),
     };
   });
 

@@ -20,7 +20,8 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { InspectorPanel } from './inspector_panel';
-import { Adapters, InspectorViewDescription } from '../types';
+import { InspectorViewDescription } from '../types';
+import { Adapters } from '../../common';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;
