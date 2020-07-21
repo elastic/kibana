@@ -3,9 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { embeddableRendererFactory } from './embeddable';
 
-export * from './common';
-export * from './lists';
-export * from './manifest';
-export * from './manifest_entry';
-export * from './task';
+export const renderFunctions = [];
+export const renderFunctionFactories = [embeddableRendererFactory];

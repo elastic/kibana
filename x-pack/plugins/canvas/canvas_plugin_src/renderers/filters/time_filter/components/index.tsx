@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeFilter } from './time_filter';
-
-export { TimeFilter };
+export { TimeFilter } from './time_filter';
