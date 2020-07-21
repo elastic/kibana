@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import type { ServerStatus, StatusResponse } from '../../../../types/status';
@@ -53,14 +53,14 @@ function formatMetrics(data: StatusResponse): Metric[] {
       name: i18n.translate('core.statusPage.metricsTiles.columns.heapTotalHeader', {
         defaultMessage: 'Heap total',
       }),
-      value: _.get(data.metrics, 'process.memory.heap.size_limit'),
+      value: get(data.metrics, 'process.memory.heap.size_limit'),
       type: 'byte',
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.heapUsedHeader', {
         defaultMessage: 'Heap used',
       }),
-      value: _.get(data.metrics, 'process.memory.heap.used_in_bytes'),
+      value: get(data.metrics, 'process.memory.heap.used_in_bytes'),
       type: 'byte',
     },
     {
@@ -68,9 +68,9 @@ function formatMetrics(data: StatusResponse): Metric[] {
         defaultMessage: 'Load',
       }),
       value: [
-        _.get(data.metrics, 'os.load.1m'),
-        _.get(data.metrics, 'os.load.5m'),
-        _.get(data.metrics, 'os.load.15m'),
+        get(data.metrics, 'os.load.1m'),
+        get(data.metrics, 'os.load.5m'),
+        get(data.metrics, 'os.load.15m'),
       ],
       type: 'float',
     },
@@ -78,14 +78,14 @@ function formatMetrics(data: StatusResponse): Metric[] {
       name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeAvgHeader', {
         defaultMessage: 'Response time avg',
       }),
-      value: _.get(data.metrics, 'response_times.avg_in_millis'),
+      value: get(data.metrics, 'response_times.avg_in_millis'),
       type: 'ms',
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
         defaultMessage: 'Response time max',
       }),
-      value: _.get(data.metrics, 'response_times.max_in_millis'),
+      value: get(data.metrics, 'response_times.max_in_millis'),
       type: 'ms',
     },
     {
@@ -93,8 +93,8 @@ function formatMetrics(data: StatusResponse): Metric[] {
         defaultMessage: 'Requests per second',
       }),
       value:
-        (_.get(data.metrics, 'requests.total') * 1000) /
-        _.get(data.metrics, 'collection_interval_in_millis'),
+        (get(data.metrics, 'requests.total') * 1000) /
+        get(data.metrics, 'collection_interval_in_millis'),
     },
   ];
 }
