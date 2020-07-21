@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { ToolingLog, ToolingLogCollectingWriter, createRecursiveSerializer } from '@kbn/dev-utils';
+import {
+  ToolingLog,
+  ToolingLogCollectingWriter,
+  createAnyInstanceSerializer,
+} from '@kbn/dev-utils';
 
 import { Config, Platform } from '../../lib';
 import { DownloadNodeBuilds } from './download_node_builds_task';
@@ -30,10 +34,7 @@ jest.mock('./node_shasums');
 jest.mock('./node_download_info');
 jest.mock('../../lib/download');
 
-expect.addSnapshotSerializer({
-  test: (v) => v instanceof ToolingLog,
-  serialize: () => '<ToolingLog>',
-});
+expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
 const { getNodeDownloadInfo } = jest.requireMock('./node_download_info');
 const { getNodeShasums } = jest.requireMock('./node_shasums');

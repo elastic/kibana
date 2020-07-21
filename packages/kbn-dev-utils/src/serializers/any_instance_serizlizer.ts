@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export * from './absolute_path_serializer';
-export * from './strip_ansi_serializer';
-export * from './recursive_serializer';
-export * from './any_instance_serizlizer';
+export function createAnyInstanceSerializer(Class: Function, name?: string) {
+  return {
+    test: (v: any) => v instanceof Class,
+    serialize: () => `<${name ?? Class.name}>`,
+  };
+}

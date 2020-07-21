@@ -17,7 +17,11 @@
  * under the License.
  */
 
-import { ToolingLog, ToolingLogCollectingWriter, createRecursiveSerializer } from '@kbn/dev-utils';
+import {
+  ToolingLog,
+  ToolingLogCollectingWriter,
+  createAnyInstanceSerializer,
+} from '@kbn/dev-utils';
 
 import { Config, Platform } from '../../lib';
 import { VerifyExistingNodeBuilds } from './verify_existing_node_builds_task';
@@ -34,10 +38,7 @@ const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
 log.setWriters([testWriter]);
 
-expect.addSnapshotSerializer({
-  test: (v) => v instanceof Config,
-  serialize: () => `<Config>`,
-});
+expect.addSnapshotSerializer(createAnyInstanceSerializer(Config));
 
 async function setup(actualShaSums?: Record<string, string>) {
   const config = await Config.create({
