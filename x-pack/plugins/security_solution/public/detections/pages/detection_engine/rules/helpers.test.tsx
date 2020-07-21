@@ -402,7 +402,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 0;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: boolean = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -415,7 +415,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 0;
-      const result: boolean = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -428,7 +428,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: boolean = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -441,7 +441,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 1;
-      const result: boolean = getPrePackagedRuleStatus(
+      const result: string = getPrePackagedRuleStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -456,7 +456,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 0;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: boolean = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -469,7 +469,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 0;
-      const result: boolean = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -482,7 +482,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 1;
       const rulesNotUpdated = 0;
-      const result: boolean = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated
@@ -495,7 +495,7 @@ describe('rule helpers', () => {
       const rulesInstalled = 1;
       const rulesNotInstalled = 0;
       const rulesNotUpdated = 1;
-      const result: boolean = getPrePackagedTimelineStatus(
+      const result: string = getPrePackagedTimelineStatus(
         rulesInstalled,
         rulesNotInstalled,
         rulesNotUpdated

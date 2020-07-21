@@ -80,7 +80,8 @@ export class CompareTimelinesStatus {
           this.isHandlingTemplateTimeline) ||
         (this.templateTimelineObject.isCreatable &&
           !this.timelineObject.isCreatable &&
-          this.timelineObject.getData?.timelineType === this.timelineType))
+          this.timelineObject.getData?.timelineType === this.timelineType &&
+          this.isHandlingTemplateTimeline))
     );
   }
 

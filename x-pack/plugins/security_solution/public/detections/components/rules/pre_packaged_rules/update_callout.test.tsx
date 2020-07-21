@@ -61,7 +61,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines = 0', () => {
-    const wrapper = shallow(
+    shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={1}
@@ -74,7 +74,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines = 0', () => {
-    const wrapper = shallow(
+    shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={1}
@@ -87,7 +87,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules = 0 and numberOfUpdatedTimelines > 0', () => {
-    const wrapper = shallow(
+    shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={0}
@@ -100,7 +100,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules = 0 and numberOfUpdatedTimelines > 0', () => {
-    const wrapper = shallow(
+    shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={0}
@@ -113,7 +113,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines > 0', () => {
-    const wrapper = shallow(
+    shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={1}
@@ -126,7 +126,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines > 0', () => {
-    const wrapper = shallow(
+    shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={1}
