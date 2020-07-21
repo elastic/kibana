@@ -7,7 +7,7 @@
 import { EuiIcon } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { ChangeEvent, FocusEvent, FunctionComponent } from 'react';
-import { ComponentStrings } from '../../../../i18n';
+import { ComponentStrings } from '../../../../../i18n';
 
 const { DropdownFilter: strings } = ComponentStrings;
 
