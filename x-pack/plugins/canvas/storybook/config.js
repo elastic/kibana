@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { configure, addDecorator, addParameters } from '@storybook/react';
-import { withKnobs } from '@storybook/addon-knobs/react';
 import { withInfo } from '@storybook/addon-info';
 import { create } from '@storybook/theming';
 
-import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+import { addDecorators } from './decorators';
 
 // If we're running Storyshots, be sure to register the require context hook.
 // Otherwise, add the other decorators.
@@ -31,18 +29,9 @@ if (process.env.NODE_ENV === 'test') {
       },
     })
   );
-
-  // Add optional knobs to customize each story.
-  addDecorator(withKnobs);
 }
 
-// Add New Platform Context for any stories that need it
-const settings = new Map();
-settings.set('darkMode', true);
-const platform = {
-  uiSettings: settings,
-};
-addDecorator(fn => <KibanaContextProvider services={platform}>{fn()}</KibanaContextProvider>);
+addDecorators();
 
 function loadStories() {
   require('./dll_contexts');
@@ -54,14 +43,14 @@ function loadStories() {
     true,
     /plugins\/(?=canvas).*light\.css/
   );
-  css.keys().forEach(filename => css(filename));
+  css.keys().forEach((filename) => css(filename));
 
-  // Find all files ending in *.examples.ts
-  const req = require.context('./..', true, /.(stories|examples).tsx$/);
-  req.keys().forEach(filename => req(filename));
+  // Find all files ending in *.stories.tsx
+  const req = require.context('./..', true, /.(stories).tsx$/);
+  req.keys().forEach((filename) => req(filename));
 
   // Import Canvas CSS
-  require('../public/style/index.scss')
+  require('../public/style/index.scss');
 }
 
 // Set up the Storybook environment with custom settings.

@@ -53,7 +53,7 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
 });
 
 // Mock React Portal for components that use modals, tooltips, etc
-ReactDOM.createPortal = jest.fn(element => {
+ReactDOM.createPortal = jest.fn((element) => {
   return element;
 });
 
@@ -67,7 +67,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
 // https://github.com/elastic/eui/issues/3712
 jest.mock('@elastic/eui/lib/components/overlay_mask/overlay_mask', () => {
   return {
-    EuiOverlayMask: ({children}) => children,
+    EuiOverlayMask: ({ children }) => children,
   };
 });
 
@@ -79,19 +79,19 @@ jest.mock(
   }
 );
 
+import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
+jest.mock('@elastic/eui/test-env/components/observer/observer');
+EuiObserver.mockImplementation(() => 'EuiObserver');
+
 // This element uses a `ref` and cannot be rendered by Jest snapshots.
 import { RenderedElement } from '../shareable_runtime/components/rendered_element';
 jest.mock('../shareable_runtime/components/rendered_element');
 RenderedElement.mockImplementation(() => 'RenderedElement');
 
-import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
-jest.mock('@elastic/eui/test-env/components/observer/observer');
-EuiObserver.mockImplementation(() => 'EuiObserver');
-
 addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
-  configPath: path.resolve(__dirname, './../.storybook'),
+  configPath: path.resolve(__dirname, './../storybook'),
   test: multiSnapshotWithOptions({}),
 });
