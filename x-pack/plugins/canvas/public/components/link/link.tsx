@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, MouseEvent } from 'react';
+import React, { FC, MouseEvent, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiLinkProps } from '@elastic/eui';
+import { RouterContext } from '../router';
 
 import { ComponentStrings } from '../../../i18n';
 
@@ -20,39 +21,45 @@ interface Props {
   params: Record<string, any>;
 }
 
-export const Link: FC<Props & EuiLinkProps> = (
-  { onClick, target, name, params, children, ...linkArgs },
-  { router }
-) => {
-  const navigateTo = (ev: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    if (onClick) {
-      onClick(ev);
-    }
+export const Link: FC<Props & EuiLinkProps> = ({
+  onClick,
+  target,
+  name,
+  params,
+  children,
+  ...linkArgs
+}) => {
+  const router = useContext(RouterContext);
 
-    if (
-      !ev.defaultPrevented && // onClick prevented default
-      ev.button === 0 && // ignore everything but left clicks
-      !target && // let browser handle "target=_blank" etc.
-      !isModifiedEvent(ev) // ignore clicks with modifier keys
-    ) {
-      ev.preventDefault();
-      router.navigateTo(name, params);
-    }
-  };
+  if (router) {
+    const navigateTo = (ev: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+      if (onClick) {
+        onClick(ev);
+      }
 
-  try {
-    const href = router.getFullPath(router.create(name, params));
-    const props = {
-      target,
-      href,
-      onClick: navigateTo,
-      ...linkArgs,
+      if (
+        !ev.defaultPrevented && // onClick prevented default
+        ev.button === 0 && // ignore everything but left clicks
+        !target && // let browser handle "target=_blank" etc.
+        !isModifiedEvent(ev) // ignore clicks with modifier keys
+      ) {
+        ev.preventDefault();
+        router.navigateTo(name, params);
+      }
     };
 
-    return <EuiLink {...props}>{children}</EuiLink>;
-  } catch (e) {
-    return <div>{strings.getErrorMessage(e.message)}</div>;
+    try {
+      return (
+        <EuiLink {...linkArgs} target={target} onClick={navigateTo}>
+          {children}
+        </EuiLink>
+      );
+    } catch (e) {
+      return <div>{strings.getErrorMessage(e.message)}</div>;
+    }
   }
+
+  return <div>{strings.getErrorMessage('Router Undefined')}</div>;
 };
 
 Link.contextTypes = {
