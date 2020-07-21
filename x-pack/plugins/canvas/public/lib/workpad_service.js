@@ -13,8 +13,6 @@ import {
 import { fetch } from '../../common/lib/fetch';
 import { platformService } from '../services';
 
-const { getBasePath } = platformService.getService();
-
 /*
   Remove any top level keys from the workpad which will be rejected by validation
 */
@@ -47,15 +45,18 @@ const sanitizeWorkpad = function (workpad) {
 };
 
 const getApiPath = function () {
-  return `${getBasePath()}${API_ROUTE_WORKPAD}`;
+  const basePath = platformService.getService().getBasePath();
+  return `${basePath}${API_ROUTE_WORKPAD}`;
 };
 
 const getApiPathStructures = function () {
-  return `${getBasePath()}${API_ROUTE_WORKPAD_STRUCTURES}`;
+  const basePath = platformService.getService().getBasePath();
+  return `${basePath}${API_ROUTE_WORKPAD_STRUCTURES}`;
 };
 
 const getApiPathAssets = function () {
-  return `${getBasePath()}${API_ROUTE_WORKPAD_ASSETS}`;
+  const basePath = platformService.getService().getBasePath();
+  return `${basePath}${API_ROUTE_WORKPAD_ASSETS}`;
 };
 
 export function create(workpad) {
