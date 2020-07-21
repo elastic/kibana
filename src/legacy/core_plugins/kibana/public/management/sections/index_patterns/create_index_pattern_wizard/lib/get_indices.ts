@@ -27,7 +27,7 @@ export async function getIndices(
   indexPatternCreationType: IndexPatternCreationConfig,
   rawPattern: string,
   limit: number,
-  showHidden?: boolean = false
+  showHidden: boolean = false
 ): Promise<MatchedIndex[]> {
   const pattern = rawPattern.trim();
 

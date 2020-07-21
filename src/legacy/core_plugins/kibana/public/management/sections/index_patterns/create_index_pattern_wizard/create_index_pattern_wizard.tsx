@@ -209,7 +209,7 @@ export class CreateIndexPatternWizard extends Component<
     this.setState({ step: 1 });
   };
 
-  onChangeIncludingSystemIndices = () => {
+  onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
     this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchData());
   };
 
