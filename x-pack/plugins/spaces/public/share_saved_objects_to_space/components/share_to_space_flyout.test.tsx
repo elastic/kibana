@@ -18,6 +18,7 @@ import { SpacesManager } from '../../spaces_manager';
 import { ToastsApi } from 'src/core/public';
 import { EuiCallOut } from '@elastic/eui';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
+import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -78,7 +79,7 @@ const setup = async (opts: SetupOpts = {}) => {
     ],
     meta: { icon: 'dashboard', title: 'foo' },
     namespaces: opts.namespaces || ['my-active-space', 'space-1'],
-  };
+  } as SavedObjectsManagementRecord;
 
   const wrapper = mountWithIntl(
     <ShareSavedObjectsToSpaceFlyout

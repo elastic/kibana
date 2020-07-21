@@ -1338,6 +1338,9 @@ export interface SavedObjectsMigrationVersion {
     [pluginName: string]: string;
 }
 
+// @public
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+
 // @public (undocumented)
 export interface SavedObjectsStart {
     // (undocumented)

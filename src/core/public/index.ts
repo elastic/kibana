@@ -157,6 +157,7 @@ export {
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
+  SavedObjectsNamespaceType,
 } from './saved_objects';
 
 export {

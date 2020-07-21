@@ -26,8 +26,7 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
     icon: 'share',
     type: 'icon',
     enabled: (object: SavedObjectsManagementRecord) => {
-      // this is only enabled for multi-namespace saved object types
-      return Array.isArray(object.namespaces);
+      return object.meta.namespaceType === 'multiple';
     },
     onClick: (object: SavedObjectsManagementRecord) => {
       this.isDataChanged = false;

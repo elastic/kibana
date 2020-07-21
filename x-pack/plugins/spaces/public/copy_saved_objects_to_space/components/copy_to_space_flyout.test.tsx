@@ -17,6 +17,7 @@ import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { ToastsApi } from 'src/core/public';
+import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -73,8 +74,8 @@ const setup = async (opts: SetupOpts = {}) => {
         name: 'My Viz',
       },
     ],
-    meta: { icon: 'dashboard', title: 'foo' },
-  };
+    meta: { icon: 'dashboard', title: 'foo', namespaceType: 'single' },
+  } as SavedObjectsManagementRecord;
 
   const wrapper = mountWithIntl(
     <CopySavedObjectsToSpaceFlyout

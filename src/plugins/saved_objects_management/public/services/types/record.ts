@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectReference } from 'src/core/public';
+import { SavedObjectReference, SavedObjectsNamespaceType } from 'src/core/public';
 
 export interface SavedObjectsManagementRecord {
   type: string;
@@ -25,6 +25,7 @@ export interface SavedObjectsManagementRecord {
   meta: {
     icon: string;
     title: string;
+    namespaceType: SavedObjectsNamespaceType;
   };
   references: SavedObjectReference[];
   namespaces?: string[];

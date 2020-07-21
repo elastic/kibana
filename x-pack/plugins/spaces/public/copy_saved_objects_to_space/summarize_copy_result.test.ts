@@ -5,7 +5,11 @@
  */
 
 import { summarizeCopyResult } from './summarize_copy_result';
-import { ProcessedImportResponse, FailedImport } from 'src/plugins/saved_objects_management/public';
+import {
+  ProcessedImportResponse,
+  FailedImport,
+  SavedObjectsManagementRecord,
+} from 'src/plugins/saved_objects_management/public';
 
 // Sample data references:
 //
@@ -19,36 +23,36 @@ const OBJECTS = {
   MY_DASHBOARD: {
     type: 'dashboard',
     id: 'foo',
-    meta: { title: 'my-dashboard-title', icon: 'dashboardApp' },
+    meta: { title: 'my-dashboard-title', icon: 'dashboardApp', namespaceType: 'single' },
     references: [
       { type: 'visualization', id: 'foo', name: 'Visualization foo' },
       { type: 'visualization', id: 'bar', name: 'Visualization bar' },
     ],
-  },
+  } as SavedObjectsManagementRecord,
   VISUALIZATION_FOO: {
     type: 'visualization',
     id: 'bar',
-    meta: { title: 'visualization-foo-title', icon: 'visualizeApp' },
+    meta: { title: 'visualization-foo-title', icon: 'visualizeApp', namespaceType: 'single' },
     references: [{ type: 'index-pattern', id: 'foo', name: 'Index pattern foo' }],
-  },
+  } as SavedObjectsManagementRecord,
   VISUALIZATION_BAR: {
     type: 'visualization',
     id: 'baz',
-    meta: { title: 'visualization-bar-title', icon: 'visualizeApp' },
+    meta: { title: 'visualization-bar-title', icon: 'visualizeApp', namespaceType: 'single' },
     references: [{ type: 'index-pattern', id: 'bar', name: 'Index pattern bar' }],
-  },
+  } as SavedObjectsManagementRecord,
   INDEX_PATTERN_FOO: {
     type: 'index-pattern',
     id: 'foo',
-    meta: {},
+    meta: { title: 'index-pattern-foo-title', icon: 'indexPatternApp', namespaceType: 'single' },
     references: [],
-  },
+  } as SavedObjectsManagementRecord,
   INDEX_PATTERN_BAR: {
     type: 'index-pattern',
     id: 'bar',
-    meta: {},
+    meta: { title: 'index-pattern-bar-title', icon: 'indexPatternApp', namespaceType: 'single' },
     references: [],
-  },
+  } as SavedObjectsManagementRecord,
 };
 
 interface ObjectProperties {
@@ -151,14 +155,18 @@ describe('summarizeCopyResult', () => {
               },
               "obj": Object {
                 "id": "foo",
-                "meta": Object {},
+                "meta": Object {
+                  "icon": "indexPatternApp",
+                  "namespaceType": "single",
+                  "title": "index-pattern-foo-title",
+                },
                 "type": "index-pattern",
               },
             },
             "hasUnresolvableErrors": false,
-            "icon": "apps",
+            "icon": "indexPatternApp",
             "id": "foo",
-            "name": "index-pattern [id=foo]",
+            "name": "index-pattern-foo-title",
             "type": "index-pattern",
           },
           Object {
@@ -170,6 +178,7 @@ describe('summarizeCopyResult', () => {
                 "id": "bar",
                 "meta": Object {
                   "icon": "visualizeApp",
+                  "namespaceType": "single",
                   "title": "visualization-foo-title",
                 },
                 "type": "visualization",
@@ -184,9 +193,9 @@ describe('summarizeCopyResult', () => {
           Object {
             "conflict": undefined,
             "hasUnresolvableErrors": false,
-            "icon": "apps",
+            "icon": "indexPatternApp",
             "id": "bar",
-            "name": "index-pattern [id=bar]",
+            "name": "index-pattern-bar-title",
             "type": "index-pattern",
           },
           Object {
@@ -232,9 +241,9 @@ describe('summarizeCopyResult', () => {
           Object {
             "conflict": undefined,
             "hasUnresolvableErrors": false,
-            "icon": "apps",
+            "icon": "indexPatternApp",
             "id": "foo",
-            "name": "index-pattern [id=foo]",
+            "name": "index-pattern-foo-title",
             "type": "index-pattern",
           },
           Object {
@@ -272,17 +281,17 @@ describe('summarizeCopyResult', () => {
           Object {
             "conflict": undefined,
             "hasUnresolvableErrors": false,
-            "icon": "apps",
+            "icon": "indexPatternApp",
             "id": "foo",
-            "name": "index-pattern [id=foo]",
+            "name": "index-pattern-foo-title",
             "type": "index-pattern",
           },
           Object {
             "conflict": undefined,
             "hasUnresolvableErrors": false,
-            "icon": "apps",
+            "icon": "indexPatternApp",
             "id": "bar",
-            "name": "index-pattern [id=bar]",
+            "name": "index-pattern-bar-title",
             "type": "index-pattern",
           },
           Object {

@@ -25,6 +25,9 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
     }),
     icon: 'copy',
     type: 'icon',
+    enabled: (object: SavedObjectsManagementRecord) => {
+      return object.meta.namespaceType !== 'agnostic';
+    },
     onClick: (object: SavedObjectsManagementRecord) => {
       this.start(object);
     },
