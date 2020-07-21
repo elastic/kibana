@@ -20,7 +20,7 @@ import {
   namespace_type,
   tags,
 } from '../common/schemas';
-import { Identity, RequiredKeepUndefined } from '../../types';
+import { RequiredKeepUndefined } from '../../types';
 import { DefaultUuid } from '../../siem_common_deps';
 import { NamespaceType } from '../types';
 
@@ -43,17 +43,15 @@ export const createExceptionListSchema = t.intersection([
   ),
 ]);
 
-export type CreateExceptionListSchemaPartial = Identity<t.TypeOf<typeof createExceptionListSchema>>;
-export type CreateExceptionListSchema = RequiredKeepUndefined<
-  t.TypeOf<typeof createExceptionListSchema>
->;
+export type CreateExceptionListSchema = t.OutputOf<typeof createExceptionListSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type CreateExceptionListSchemaDecoded = Identity<
-  Omit<CreateExceptionListSchema, '_tags' | 'tags' | 'list_id' | 'namespace_type'> & {
-    _tags: _Tags;
-    tags: Tags;
-    list_id: ListId;
-    namespace_type: NamespaceType;
-  }
->;
+export type CreateExceptionListSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof createExceptionListSchema>>,
+  '_tags' | 'tags' | 'list_id' | 'namespace_type'
+> & {
+  _tags: _Tags;
+  tags: Tags;
+  list_id: ListId;
+  namespace_type: NamespaceType;
+};

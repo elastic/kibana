@@ -12,7 +12,7 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
   BrowserFields,
   getBrowserFields,
-  getdocValueFields,
+  getDocValueFields,
   getIndexFields,
   sourceQuery,
   DocValueFields,
@@ -70,7 +70,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
         apolloClient
           .query<SourceQuery.Query, SourceQuery.Variables>({
             query: sourceQuery,
-            fetchPolicy: 'cache-first',
+            fetchPolicy: 'network-only',
             variables: {
               sourceId: 'default',
               defaultIndex: indices,
@@ -89,7 +89,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
                     indices.join(),
                     get('data.source.status.indexFields', result)
                   ),
-                  docValueFields: getdocValueFields(
+                  docValueFields: getDocValueFields(
                     indices.join(),
                     get('data.source.status.indexFields', result)
                   ),

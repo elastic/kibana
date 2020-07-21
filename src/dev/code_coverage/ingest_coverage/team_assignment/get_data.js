@@ -19,13 +19,15 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { fromNullable } from '../either';
+import { tryCatch as tc } from '../either';
 
 const ROOT = resolve(__dirname, '../../../../..');
-const resolveFromRoot = resolve.bind(null, ROOT);
-const path = `
-src/dev/code_coverage/ingest_coverage/team_assignment/ingestion_pipeline_painless.json`;
-const resolved = resolveFromRoot(path.trimStart());
-const getContents = (scriptPath) => readFileSync(scriptPath, 'utf8');
 
-export const fetch = () => fromNullable(resolved).map(getContents);
+const resolveFromRoot = resolve.bind(null, ROOT);
+
+const resolved = (path) => () => resolveFromRoot(path);
+
+const getContents = (path) => tc(() => readFileSync(path, 'utf8'));
+
+// fetch :: String -> Left | Right
+export const fetch = (path) => tc(resolved(path)).chain(getContents);
