@@ -25,11 +25,9 @@ import {
   Operator,
 } from '../../../lists/common/schemas';
 import { getExceptionListItemSchemaMock } from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import {
-  getEntryMatchMock,
-  getEntryExistsMock,
-  getEntryMatchAnyMock,
-} from '../../../lists/common/schemas/types/entries.mock';
+import { getEntryMatchMock } from '../../../lists/common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../lists/common/schemas/types/entry_match_any.mock';
+import { getEntryExistsMock } from '../../../lists/common/schemas/types/entry_exists.mock';
 
 describe('build_exceptions_query', () => {
   let exclude: boolean;

@@ -9,14 +9,12 @@ import { left } from 'fp-ts/lib/Either';
 
 import { foldLeftRight, getPaths } from '../../siem_common_deps';
 
+import { getEntryMatchMock } from './entry_match.mock';
+import { getEntryMatchAnyMock } from './entry_match_any.mock';
+import { getEntryExistsMock } from './entry_exists.mock';
+import { getEntryNestedMock } from './entry_nested.mock';
 import { nonEmptyNestedEntriesArray } from './non_empty_nested_entries_array';
 import { EntriesArray } from './entries';
-import {
-  getEntryExistsMock,
-  getEntryMatchAnyMock,
-  getEntryMatchMock,
-  getEntryNestedMock,
-} from './entries.mock';
 
 describe('non_empty_nested_entries_array', () => {
   test('it should NOT validate an empty array', () => {
@@ -84,7 +82,24 @@ describe('non_empty_nested_entries_array', () => {
     const decoded = nonEmptyNestedEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "operator"',
+      'Invalid value "nested" supplied to "type"',
+      'Invalid value "undefined" supplied to "value"',
+      'Invalid value "undefined" supplied to "operator"',
+      'Invalid value "nested" supplied to "type"',
+      'Invalid value "undefined" supplied to "value"',
+      'Invalid value "undefined" supplied to "operator"',
+      'Invalid value "nested" supplied to "type"',
+      'Invalid value "undefined" supplied to "operator"',
+      'Invalid value "nested" supplied to "type"',
+      'Invalid value "undefined" supplied to "value"',
+      'Invalid value "undefined" supplied to "operator"',
+      'Invalid value "nested" supplied to "type"',
+      'Invalid value "undefined" supplied to "value"',
+      'Invalid value "undefined" supplied to "operator"',
+      'Invalid value "nested" supplied to "type"',
+    ]);
     expect(message.schema).toEqual({});
   });
 
@@ -107,8 +122,6 @@ describe('non_empty_nested_entries_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "1" supplied to "NonEmptyNestedEntriesArray"',
-      'Invalid value "1" supplied to "NonEmptyNestedEntriesArray"',
       'Invalid value "1" supplied to "NonEmptyNestedEntriesArray"',
       'Invalid value "1" supplied to "NonEmptyNestedEntriesArray"',
       'Invalid value "1" supplied to "NonEmptyNestedEntriesArray"',

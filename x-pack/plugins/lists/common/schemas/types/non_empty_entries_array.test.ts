@@ -9,14 +9,14 @@ import { left } from 'fp-ts/lib/Either';
 
 import { foldLeftRight, getPaths } from '../../siem_common_deps';
 
+import { getEntryMatchMock } from './entry_match.mock';
+import { getEntryMatchAnyMock } from './entry_match_any.mock';
+import { getEntryListMock } from './entry_list.mock';
+import { getEntryExistsMock } from './entry_exists.mock';
+import { getEntryNestedMock } from './entry_nested.mock';
+import { getEntriesArrayMock } from './entries.mock';
 import { nonEmptyEntriesArray } from './non_empty_entries_array';
 import { EntriesArray } from './entries';
-import {
-  getEntryExistsMock,
-  getEntryMatchAnyMock,
-  getEntryMatchMock,
-  getEntryNestedMock,
-} from './entries.mock';
 
 describe('non_empty_entries_array', () => {
   test('it should NOT validate an empty array', () => {
@@ -79,6 +79,15 @@ describe('non_empty_entries_array', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should validate an array of "list" entries', () => {
+    const payload: EntriesArray = [{ ...getEntryListMock() }, { ...getEntryListMock() }];
+    const decoded = nonEmptyEntriesArray.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('it should validate an array of "nested" entries', () => {
     const payload: EntriesArray = [{ ...getEntryNestedMock() }, { ...getEntryNestedMock() }];
     const decoded = nonEmptyEntriesArray.decode(payload);
@@ -89,12 +98,7 @@ describe('non_empty_entries_array', () => {
   });
 
   test('it should validate an array of entries', () => {
-    const payload: EntriesArray = [
-      { ...getEntryNestedMock() },
-      { ...getEntryExistsMock() },
-      { ...getEntryMatchAnyMock() },
-      { ...getEntryMatchMock() },
-    ];
+    const payload: EntriesArray = [...getEntriesArrayMock()];
     const decoded = nonEmptyEntriesArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 

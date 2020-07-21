@@ -7,7 +7,12 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-import { NestedEntriesArray, nestedEntriesArray } from './entries';
+import { entriesMatchAny } from './entry_match_any';
+import { entriesMatch } from './entry_match';
+import { entriesExists } from './entry_exists';
+
+export const nestedEntriesArray = t.array(t.union([entriesMatch, entriesMatchAny, entriesExists]));
+export type NestedEntriesArray = t.TypeOf<typeof nestedEntriesArray>;
 
 /**
  * Types the nonEmptyNestedEntriesArray as:

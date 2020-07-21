@@ -40,14 +40,12 @@ import {
 } from '../autocomplete/operators';
 import { OperatorTypeEnum, OperatorEnum, EntryNested } from '../../../lists_plugin_deps';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import {
-  getEntryExistsMock,
-  getEntryListMock,
-  getEntryMatchMock,
-  getEntryMatchAnyMock,
-  getEntriesArrayMock,
-} from '../../../../../lists/common/schemas/types/entries.mock';
+import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/entry_match_any.mock';
+import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
+import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comments.mock';
+import { getEntriesArrayMock } from '../../../../../lists/common/schemas/types/entries.mock';
 import { ENTRIES } from '../../../../../lists/common/constants.mock';
 import {
   CreateExceptionListItemSchema,
