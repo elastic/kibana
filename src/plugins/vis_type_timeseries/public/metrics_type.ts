@@ -78,5 +78,6 @@ export const metricsVisDefinition = {
     showIndexSelection: false,
   },
   requestHandler: metricsRequestHandler,
+  inspectorAdapters: {},
   responseHandler: 'none',
 };

@@ -572,6 +572,22 @@ export const ComponentStrings = {
           pageNumber,
         },
       }),
+    getAddPageTooltip: () =>
+      i18n.translate('xpack.canvas.pageManager.addPageTooltip', {
+        defaultMessage: 'Add a new page to this workpad',
+      }),
+    getConfirmRemoveTitle: () =>
+      i18n.translate('xpack.canvas.pageManager.confirmRemoveTitle', {
+        defaultMessage: 'Remove Page',
+      }),
+    getConfirmRemoveDescription: () =>
+      i18n.translate('xpack.canvas.pageManager.confirmRemoveDescription', {
+        defaultMessage: 'Are you sure you want to remove this page?',
+      }),
+    getConfirmRemoveButtonLabel: () =>
+      i18n.translate('xpack.canvas.pageManager.removeButtonLabel', {
+        defaultMessage: 'Remove',
+      }),
   },
   PagePreviewPageControls: {
     getClonePageAriaLabel: () =>

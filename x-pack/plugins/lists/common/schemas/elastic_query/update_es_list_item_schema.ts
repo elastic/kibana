@@ -21,4 +21,4 @@ export const updateEsListItemSchema = t.intersection([
   esDataTypeUnion,
 ]);
 
-export type UpdateEsListItemSchema = t.TypeOf<typeof updateEsListItemSchema>;
+export type UpdateEsListItemSchema = t.OutputOf<typeof updateEsListItemSchema>;
