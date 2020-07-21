@@ -89,10 +89,10 @@ function buildTemplateVariables(variables: PackageConfigConfigRecord, streamTemp
   return { vars, yamlValues };
 }
 
-function containsHelper(item: string, list: string[], options: any) {
+function containsHelper(this: any, item: string, list: string[], options: any) {
   if (list instanceof Array && list.indexOf(item) > -1) {
     if (options && options.fn) {
-      return options.fn(this as any);
+      return options.fn(this);
     }
   }
   return '';
