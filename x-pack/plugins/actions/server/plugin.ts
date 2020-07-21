@@ -249,10 +249,32 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       includedHiddenTypes,
     });
 
-    const getScopedSavedObjectsClient = (request: KibanaRequest) =>
-      core.savedObjects.getScopedClient(request, {
-        includedHiddenTypes,
+    const getActionsClientWithRequest = async (request: KibanaRequest) => {
+      if (isESOUsingEphemeralEncryptionKey === true) {
+        throw new Error(
+          `Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+        );
+      }
+      return new ActionsClient({
+        savedObjectsClient: core.savedObjects.getScopedClient(request, {
+          excludedWrappers: ['security'],
+          includedHiddenTypes,
+        }),
+        actionTypeRegistry: actionTypeRegistry!,
+        defaultKibanaIndex: await kibanaIndex,
+        scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
+        preconfiguredActions,
+        request,
+        authorization: instantiateAuthorization(request),
+        actionExecutor: actionExecutor!,
+        executionEnqueuer: createExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          actionTypeRegistry: actionTypeRegistry!,
+          isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
+          preconfiguredActions,
+        }),
       });
+    };
 
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
       core.savedObjects.getScopedClient(request);
@@ -261,7 +283,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       logger,
       eventLogger: this.eventLogger!,
       spaces: this.spaces,
-      getScopedSavedObjectsClient,
+      getActionsClientWithRequest,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch
@@ -277,7 +299,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
-      getScopedSavedObjectsClient,
+      getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
     });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
@@ -292,29 +314,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
-      async getActionsClientWithRequest(request: KibanaRequest) {
-        if (isESOUsingEphemeralEncryptionKey === true) {
-          throw new Error(
-            `Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
-          );
-        }
-        return new ActionsClient({
-          savedObjectsClient: getScopedSavedObjectsClient(request),
-          actionTypeRegistry: actionTypeRegistry!,
-          defaultKibanaIndex: await kibanaIndex,
-          scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
-          preconfiguredActions,
-          request,
-          authorization: instantiateAuthorization(request),
-          actionExecutor: actionExecutor!,
-          executionEnqueuer: createExecutionEnqueuerFunction({
-            taskManager: plugins.taskManager,
-            actionTypeRegistry: actionTypeRegistry!,
-            isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
-            preconfiguredActions,
-          }),
-        });
-      },
+      getActionsClientWithRequest,
       preconfiguredActions,
     };
   }
@@ -364,7 +364,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             );
           }
           return new ActionsClient({
-            savedObjectsClient: savedObjects.getScopedClient(request, { includedHiddenTypes }),
+            savedObjectsClient: savedObjects.getScopedClient(request, {
+              excludedWrappers: ['security'],
+              includedHiddenTypes,
+            }),
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
             scopedClusterClient: context.core.elasticsearch.legacy.client,
