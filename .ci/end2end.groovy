@@ -110,6 +110,9 @@ pipeline {
         archiveArtifacts(allowEmptyArchive: true, artifacts: "${E2E_DIR}/kibana.log")
       }
     }
+    cleanup {
+      notifyBuildResult(notifyPRComment: false, analyzeFlakey: false, shouldNotify: false)
+    }
   }
 }
 

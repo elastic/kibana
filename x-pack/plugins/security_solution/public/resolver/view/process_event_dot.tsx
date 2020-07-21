@@ -410,7 +410,7 @@ const UnstyledProcessEventDot = React.memo(
               alignSelf: 'flex-start',
               background: colorMap.resolverBackground,
               display: `${isShowingEventActions ? 'flex' : 'none'}`,
-              margin: 0,
+              margin: '2px 0 0 0',
               padding: 0,
             }}
           >

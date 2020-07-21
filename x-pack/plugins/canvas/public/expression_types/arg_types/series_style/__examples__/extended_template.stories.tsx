@@ -6,7 +6,7 @@
 
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
-import { withKnobs, array, radios, boolean } from '@storybook/addon-knobs';
+import { array, radios, boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
 import { ExtendedTemplate } from '../extended_template';
@@ -64,7 +64,6 @@ storiesOf('arguments/SeriesStyle', module)
   .addDecorator((story) => (
     <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
   ))
-  .addDecorator(withKnobs)
   .add('extended', () => <Interactive />);
 
 storiesOf('arguments/SeriesStyle/components', module)

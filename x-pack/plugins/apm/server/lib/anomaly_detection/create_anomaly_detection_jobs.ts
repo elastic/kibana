@@ -7,6 +7,7 @@
 import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
 import { snakeCase } from 'lodash';
+import { ErrorCode } from '../../../common/anomaly_detection';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { Setup } from '../helpers/setup_request';
 import {
@@ -15,6 +16,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { AnomalyDetectionError } from './anomaly_detection_error';
 
 export type CreateAnomalyDetectionJobsAPIResponse = PromiseReturnType<
   typeof createAnomalyDetectionJobs
@@ -25,21 +27,20 @@ export async function createAnomalyDetectionJobs(
   logger: Logger
 ) {
   const { ml, indices } = setup;
+
   if (!ml) {
-    logger.warn('Anomaly detection plugin is not available.');
-    return [];
+    throw new AnomalyDetectionError(ErrorCode.ML_NOT_AVAILABLE);
   }
+
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    logger.warn('Anomaly detection feature is not enabled for the space.');
-    return [];
+    throw new AnomalyDetectionError(ErrorCode.ML_NOT_AVAILABLE_IN_SPACE);
   }
+
   if (!mlCapabilities.isPlatinumOrTrialLicense) {
-    logger.warn(
-      'Unable to create anomaly detection jobs due to insufficient license.'
-    );
-    return [];
+    throw new AnomalyDetectionError(ErrorCode.INSUFFICIENT_LICENSE);
   }
+
   logger.info(
     `Creating ML anomaly detection jobs for environments: [${environments}].`
   );
@@ -59,9 +60,8 @@ export async function createAnomalyDetectionJobs(
       `Failed to create anomaly detection ML jobs for: [${failedJobIds}]:`
     );
     failedJobs.forEach(({ error }) => logger.error(JSON.stringify(error)));
-    throw new Error(
-      `Failed to create anomaly detection ML jobs for: [${failedJobIds}].`
-    );
+
+    throw new AnomalyDetectionError(ErrorCode.UNEXPECTED);
   }
 
   return jobResponses;
@@ -70,11 +70,11 @@ export async function createAnomalyDetectionJobs(
 async function createAnomalyDetectionJob({
   ml,
   environment,
-  indexPatternName = 'apm-*-transaction-*',
+  indexPatternName,
 }: {
   ml: Required<Setup>['ml'];
   environment: string;
-  indexPatternName?: string | undefined;
+  indexPatternName: string;
 }) {
   const randomToken = uuid().substr(-4);
 

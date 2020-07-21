@@ -51,7 +51,7 @@ export const IGNORE_FILE_GLOBS = [
   '.ci/pipeline-library/**/*',
 
   // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/plugins/canvas/.storybook/*',
+  'x-pack/plugins/canvas/storybook/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
