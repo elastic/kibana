@@ -8,7 +8,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';
-import { TimelinesPageComponent } from './timelines_page';
+import { TimelinesPage } from './timelines_page';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -46,7 +46,7 @@ describe('TimelinesPageComponent', () => {
           },
         },
       });
-      wrapper = shallow(<TimelinesPageComponent />);
+      wrapper = shallow(<TimelinesPage />);
     });
 
     afterAll(() => {
@@ -92,7 +92,7 @@ describe('TimelinesPageComponent', () => {
           },
         },
       });
-      wrapper = shallow(<TimelinesPageComponent />);
+      wrapper = shallow(<TimelinesPage />);
     });
 
     afterAll(() => {
