@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.waitForFilterToNotExist(filterId);
     });
 
-    it(`should not allow user to delete filter by id if no permission`, async () => {
+    it(`should not delete filter for user without required permission`, async () => {
       const { filterId } = validFilters[1];
       const { body } = await supertest
         .delete(`/api/ml/filters/${filterId}`)
@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.waitForFilterToExist(filterId);
     });
 
-    it(`should not allow user to delete filter by id if unauthorized`, async () => {
+    it(`should not delete filter for unauthorized user`, async () => {
       const { filterId } = validFilters[1];
       const { body } = await supertest
         .delete(`/api/ml/filters/${filterId}`)

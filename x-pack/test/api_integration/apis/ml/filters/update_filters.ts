@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.items).to.eql(updateFilterRequest.addItems);
     });
 
-    it(`should not allow user to delete filter by id if no permission`, async () => {
+    it(`should not allow to update filter for user without required permission`, async () => {
       const { filterId } = validFilters[1];
       const { body } = await supertest
         .put(`/api/ml/filters/${filterId}`)
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.error).to.eql('Not Found');
     });
 
-    it(`should not allow user to delete filter by id if unauthorized`, async () => {
+    it(`should not allow to update filter for unauthorized user`, async () => {
       const { filterId, requestBody: oldFilterRequest } = validFilters[1];
       const { body } = await supertest
         .put(`/api/ml/filters/${filterId}`)
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(updatedFilter.items).to.eql(oldFilterRequest.items);
     });
 
-    it(`should not allow user to delete filter if invalid filterId`, async () => {
+    it(`should return appropriate error if invalid filterId`, async () => {
       const { body } = await supertest
         .put(`/api/ml/filters/filter_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))

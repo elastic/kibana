@@ -16,6 +16,12 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   describe('delete_calendars', function () {
+    const calendarId = `test_get_cal`;
+    const testCalendar = {
+      calendar_id: calendarId,
+      job_ids: ['test_job_1', 'test_job_2'],
+      description: `Test calendar`,
+    };
     const testEvents = [
       { description: 'event 1', start_time: 1513641600000, end_time: 1513728000000 },
       { description: 'event 2', start_time: 1513814400000, end_time: 1513900800000 },
@@ -26,65 +32,56 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
-    describe('get multiple calendars', function () {
-      const calendarId = `test_get_cal`;
-      const testCalendar = {
-        calendar_id: calendarId,
-        job_ids: ['test_job_1', 'test_job_2'],
-        description: `Test calendar`,
-      };
+    beforeEach(async () => {
+      await ml.api.createCalendar(calendarId, testCalendar);
+      await ml.api.createCalendarEvents(calendarId, testEvents);
+    });
 
-      beforeEach(async () => {
-        await ml.api.createCalendar(calendarId, testCalendar);
-        await ml.api.createCalendarEvents(calendarId, testEvents);
-      });
+    afterEach(async () => {
+      await ml.api.deleteCalendar(calendarId);
+    });
 
-      afterEach(async () => {
-        await ml.api.deleteCalendar(calendarId);
-      });
+    it('should delete calendar by id', async () => {
+      const { body } = await supertest
+        .delete(`/api/ml/calendars/${calendarId}`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
 
-      it('should delete calendar by id', async () => {
-        const { body } = await supertest
-          .delete(`/api/ml/calendars/${calendarId}`)
-          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+      expect(body.acknowledged).to.eql(true);
+      await ml.api.waitForCalendarNotToExist(calendarId);
+    });
 
-        expect(body.acknowledged).to.eql(true);
-        await ml.api.waitForCalendarNotToExist(calendarId);
-      });
+    it('should not delete calendar for user without required permission', async () => {
+      const { body } = await supertest
+        .delete(`/api/ml/calendars/${calendarId}`)
+        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(404);
 
-      it('should not delete calendar for user without required permission', async () => {
-        const { body } = await supertest
-          .delete(`/api/ml/calendars/${calendarId}`)
-          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+      expect(body.error).to.eql('Not Found');
+      await ml.api.waitForCalendarToExist(calendarId);
+    });
 
-        expect(body.error).to.eql('Not Found');
-        await ml.api.waitForCalendarToExist(calendarId);
-      });
+    it('should not delete calendar for unauthorized user', async () => {
+      const { body } = await supertest
+        .delete(`/api/ml/calendars/${calendarId}`)
+        .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(404);
 
-      it('should not delete calendar for unauthorized user', async () => {
-        const { body } = await supertest
-          .delete(`/api/ml/calendars/${calendarId}`)
-          .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+      expect(body.error).to.eql('Not Found');
+      await ml.api.waitForCalendarToExist(calendarId);
+    });
 
-        expect(body.error).to.eql('Not Found');
-        await ml.api.waitForCalendarToExist(calendarId);
-      });
+    it('should return 404 if invalid calendarId', async () => {
+      const { body } = await supertest
+        .delete(`/api/ml/calendars/calendar_id_dne`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(404);
 
-      it('should return 404 if invalid calendarId', async () => {
-        const { body } = await supertest
-          .delete(`/api/ml/calendars/calendar_id_dne`)
-          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
-
-        expect(body.error).to.eql('Not Found');
-      });
+      expect(body.error).to.eql('Not Found');
     });
   });
 };
