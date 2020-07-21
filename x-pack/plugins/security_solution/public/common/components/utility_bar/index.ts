@@ -8,4 +8,5 @@ export { UtilityBar } from './utility_bar';
 export { UtilityBarAction } from './utility_bar_action';
 export { UtilityBarGroup } from './utility_bar_group';
 export { UtilityBarSection } from './utility_bar_section';
+export { UtilityBarSpacer } from './utility_bar_spacer';
 export { UtilityBarText } from './utility_bar_text';

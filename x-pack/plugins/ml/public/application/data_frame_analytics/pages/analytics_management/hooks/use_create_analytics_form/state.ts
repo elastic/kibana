@@ -23,6 +23,7 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
 }
 
 export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 0;
+export const DEFAULT_MAX_NUM_THREADS = 1;
 export const UNSET_CONFIG_ITEM = '--';
 
 export type EsIndexName = string;
@@ -68,6 +69,7 @@ export interface State {
     jobConfigQueryString: string | undefined;
     lambda: number | undefined;
     loadingFieldOptions: boolean;
+    maxNumThreads: undefined | number;
     maxTrees: undefined | number;
     method: undefined | string;
     modelMemoryLimit: string | undefined;
@@ -92,7 +94,6 @@ export interface State {
     trainingPercent: number;
   };
   disabled: boolean;
-  indexNames: EsIndexName[];
   indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isAdvancedEditorValidJson: boolean;
@@ -134,6 +135,7 @@ export const getInitialState = (): State => ({
     jobConfigQueryString: undefined,
     lambda: undefined,
     loadingFieldOptions: false,
+    maxNumThreads: DEFAULT_MAX_NUM_THREADS,
     maxTrees: undefined,
     method: undefined,
     modelMemoryLimit: undefined,
@@ -162,7 +164,6 @@ export const getInitialState = (): State => ({
     !mlNodesAvailable() ||
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics'),
-  indexNames: [],
   indexPatternsMap: {},
   isAdvancedEditorEnabled: false,
   isAdvancedEditorValidJson: true,
@@ -199,6 +200,10 @@ export const getJobConfigFromFormState = (
     },
     model_memory_limit: formState.modelMemoryLimit,
   };
+
+  if (formState.maxNumThreads !== undefined) {
+    jobConfig.max_num_threads = formState.maxNumThreads;
+  }
 
   const resultsFieldEmpty =
     typeof formState?.resultsField === 'string' && formState?.resultsField.trim() === '';
@@ -291,6 +296,7 @@ export function getCloneFormStateFromJobConfig(
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
+    maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields.includes,
   };
 

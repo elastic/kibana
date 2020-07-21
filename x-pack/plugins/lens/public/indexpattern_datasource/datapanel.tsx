@@ -125,6 +125,7 @@ export function IndexPatternDataPanel({
       id,
       title: indexPatterns[id].title,
       timeFieldName: indexPatterns[id].timeFieldName,
+      fields: indexPatterns[id].fields,
     }));
 
   const dslQuery = buildSafeEsQuery(
@@ -197,6 +198,7 @@ export function IndexPatternDataPanel({
           charts={charts}
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
+          existenceFetchFailed={state.existenceFetchFailed}
         />
       )}
     </>
@@ -231,6 +233,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatternRefs,
   indexPatterns,
+  existenceFetchFailed,
   query,
   dateRange,
   filters,
@@ -249,6 +252,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onChangeIndexPattern: (newId: string) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   charts: ChartsPluginSetup;
+  existenceFetchFailed?: boolean;
 }) {
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
@@ -424,7 +428,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 label: currentIndexPattern.title,
                 title: currentIndexPattern.title,
                 'data-test-subj': 'indexPattern-switch-link',
-                className: 'lnsInnerIndexPatternDataPanel__triggerButton',
+                fontWeight: 'bold',
               }}
               indexPatternId={currentIndexPatternId}
               indexPatternRefs={indexPatternRefs}
@@ -553,9 +557,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               <FieldsAccordion
                 initialIsOpen={localState.isAvailableAccordionOpen}
                 id="lnsIndexPatternAvailableFields"
-                label={i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
-                  defaultMessage: 'Available fields',
-                })}
+                label={
+                  existenceFetchFailed
+                    ? i18n.translate('xpack.lens.indexPattern.allFieldsLabel', {
+                        defaultMessage: 'All fields',
+                      })
+                    : i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
+                        defaultMessage: 'Available fields',
+                      })
+                }
                 exists={true}
                 hasLoaded={!!hasSyncedExistingFields}
                 fieldsCount={filteredFieldGroups.availableFields.length}
@@ -576,6 +586,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                     Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
                   );
                 }}
+                showExistenceFetchError={existenceFetchFailed}
                 renderCallout={
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={!!filters.length}
@@ -588,42 +599,44 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 }
               />
               <EuiSpacer size="m" />
-              <FieldsAccordion
-                initialIsOpen={localState.isEmptyAccordionOpen}
-                isFiltered={
-                  filteredFieldGroups.emptyFields.length !== fieldGroups.emptyFields.length
-                }
-                fieldsCount={filteredFieldGroups.emptyFields.length}
-                paginatedFields={paginatedEmptyFields}
-                hasLoaded={!!hasSyncedExistingFields}
-                exists={false}
-                fieldProps={fieldProps}
-                id="lnsIndexPatternEmptyFields"
-                label={i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
-                  defaultMessage: 'Empty fields',
-                })}
-                onToggle={(open) => {
-                  setLocalState((s) => ({
-                    ...s,
-                    isEmptyAccordionOpen: open,
-                  }));
-                  const displayedFieldLength =
-                    (localState.isAvailableAccordionOpen
-                      ? filteredFieldGroups.availableFields.length
-                      : 0) + (open ? filteredFieldGroups.emptyFields.length : 0);
-                  setPageSize(
-                    Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
-                  );
-                }}
-                renderCallout={
-                  <NoFieldsCallout
-                    isAffectedByFieldFilter={
-                      !!(localState.typeFilter.length || localState.nameFilter.length)
-                    }
-                    existFieldsInIndex={!!fieldGroups.emptyFields.length}
-                  />
-                }
-              />
+              {!existenceFetchFailed && (
+                <FieldsAccordion
+                  initialIsOpen={localState.isEmptyAccordionOpen}
+                  isFiltered={
+                    filteredFieldGroups.emptyFields.length !== fieldGroups.emptyFields.length
+                  }
+                  fieldsCount={filteredFieldGroups.emptyFields.length}
+                  paginatedFields={paginatedEmptyFields}
+                  hasLoaded={!!hasSyncedExistingFields}
+                  exists={false}
+                  fieldProps={fieldProps}
+                  id="lnsIndexPatternEmptyFields"
+                  label={i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
+                    defaultMessage: 'Empty fields',
+                  })}
+                  onToggle={(open) => {
+                    setLocalState((s) => ({
+                      ...s,
+                      isEmptyAccordionOpen: open,
+                    }));
+                    const displayedFieldLength =
+                      (localState.isAvailableAccordionOpen
+                        ? filteredFieldGroups.availableFields.length
+                        : 0) + (open ? filteredFieldGroups.emptyFields.length : 0);
+                    setPageSize(
+                      Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
+                    );
+                  }}
+                  renderCallout={
+                    <NoFieldsCallout
+                      isAffectedByFieldFilter={
+                        !!(localState.typeFilter.length || localState.nameFilter.length)
+                      }
+                      existFieldsInIndex={!!fieldGroups.emptyFields.length}
+                    />
+                  }
+                />
+              )}
               <EuiSpacer size="m" />
             </div>
           </div>

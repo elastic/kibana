@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 
-import { exceptionListType, namespaceType } from '../../lists_common_deps';
+import { exceptionListType, namespaceType } from '../../../shared_imports';
 
 export const list = t.exact(
   t.type({

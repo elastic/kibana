@@ -177,6 +177,7 @@ export interface DataState {
    * The id used for the pending request, if there is one.
    */
   readonly pendingRequestDatabaseDocumentID?: string;
+  readonly resolverComponentInstanceID: string | undefined;
 
   /**
    * The parameters and response from the last successful request.
@@ -269,37 +270,17 @@ export interface ProcessEvent {
 }
 
 /**
- * A map of Process Ids that indicate which processes are adjacent to a given process along
- * directions in two axes: up/down and previous/next.
- */
-export interface AdjacentProcessMap {
-  readonly self: string;
-  parent: string | null;
-  firstChild: string | null;
-  previousSibling: string | null;
-  nextSibling: string | null;
-  /**
-   * To support aria-level, this must be >= 1
-   */
-  level: number;
-}
-
-/**
  * A represention of a process tree with indices for O(1) access to children and values by id.
  */
 export interface IndexedProcessTree {
   /**
-   * Map of ID to a process's children
+   * Map of ID to a process's ordered children
    */
   idToChildren: Map<string | undefined, ResolverEvent[]>;
   /**
    * Map of ID to process
    */
   idToProcess: Map<string, ResolverEvent>;
-  /**
-   * Map of ID to adjacent processes
-   */
-  idToAdjacent: Map<string, AdjacentProcessMap>;
 }
 
 /**
@@ -453,4 +434,9 @@ export interface IsometricTaxiLayout {
    * A map of edgline segments, which graphically connect nodes.
    */
   edgeLineSegments: EdgeLineSegment[];
+
+  /**
+   * defines the aria levels for nodes.
+   */
+  ariaLevels: Map<ResolverEvent, number>;
 }

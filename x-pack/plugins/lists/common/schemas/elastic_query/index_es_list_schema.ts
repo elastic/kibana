@@ -38,4 +38,4 @@ export const indexEsListSchema = t.exact(
   })
 );
 
-export type IndexEsListSchema = t.TypeOf<typeof indexEsListSchema>;
+export type IndexEsListSchema = t.OutputOf<typeof indexEsListSchema>;
