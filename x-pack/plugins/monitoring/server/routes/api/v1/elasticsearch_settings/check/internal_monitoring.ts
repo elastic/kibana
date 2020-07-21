@@ -12,30 +12,14 @@ import { handleError } from '../../../../../lib/errors';
 import { RouteDependencies } from '../../../../../types';
 
 const queryBody = {
-  size: 15,
-  query: {
-    bool: {
-      filter: [
-        {
-          range: {
-            timestamp: {
-              gte: 'now-15m',
-              lte: 'now',
-            },
-          },
-        },
-      ],
-    },
-  },
-  sort: [
-    {
-      timestamp: {
-        order: 'desc',
+  size: 0,
+  aggs: {
+    types: {
+      terms: {
+        field: '_index',
+        size: 10,
       },
     },
-  ],
-  _source: {
-    excludes: ['*'],
   },
 };
 
@@ -46,24 +30,22 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
     body: queryBody,
   });
 
-  const {
-    hits: { hits },
-  } = result;
+  const { aggregations } = result;
   const counts = {
     legacyIndicesCount: 0,
     mbIndicesCount: 0,
   };
 
-  if (!hits?.length) {
+  if (!aggregations) {
     return counts;
   }
 
-  counts.mbIndicesCount = hits.filter(({ _index }: { _index: string }) =>
-    _index.includes('-mb-')
-  ).length;
+  const {
+    types: { buckets },
+  } = aggregations;
+  counts.mbIndicesCount = buckets.filter(({ key }: { key: string }) => key.includes('-mb-')).length;
 
-  counts.legacyIndicesCount = hits.length - counts.mbIndicesCount;
-
+  counts.legacyIndicesCount = buckets.length - counts.mbIndicesCount;
   return counts;
 };
 
