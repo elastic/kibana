@@ -17,7 +17,7 @@ interface BootDeps extends AppDeps {
   I18nContext: any;
 }
 
-export const boot = (bootDeps: BootDeps) => {
+export const renderApp = (bootDeps: BootDeps) => {
   const { I18nContext, element, savedObjects, ...appDeps } = bootDeps;
 
   setHttpClient(appDeps.http);
@@ -29,6 +29,7 @@ export const boot = (bootDeps: BootDeps) => {
     </I18nContext>,
     element
   );
+
   return () => {
     unmountComponentAtNode(element);
   };
