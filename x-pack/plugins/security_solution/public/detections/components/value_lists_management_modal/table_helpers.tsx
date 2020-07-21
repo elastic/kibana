@@ -29,7 +29,7 @@ const ActionButton: React.FC<{
 }> = ({ content, dataTestSubj, icon, item, onClick, isLoading }) => (
   <EuiToolTip content={content}>
     {isLoading ? (
-      <AlignedSpinner size="m" />
+      <AlignedSpinner size="l" />
     ) : (
       <EuiButtonIcon
         aria-label={content}
