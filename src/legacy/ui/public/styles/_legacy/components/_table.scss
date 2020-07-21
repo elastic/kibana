@@ -7,9 +7,8 @@
   }
 }
 
-kbn-table,
-.kbn-table,
-tbody[kbn-rows] {
+kbn-table, .kbn-table, tbody[kbn-rows] {
+  @include dscDocSourceStyle;
   // sub tables should not have a leading border
   .table .table {
     margin-bottom: 0;

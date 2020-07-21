@@ -164,7 +164,7 @@ export function Discover({
                       className="dscTimechart"
                     >
                       {vis && rows.length !== 0 && (
-                        <div className="dscHistogram" data-test-subj="discoverChart">
+                        <div className="dscHistogramGrid" data-test-subj="discoverChart">
                           <DiscoverHistogram
                             chartData={histogramData}
                             timefilterUpdateHandler={timefilterUpdateHandler}
