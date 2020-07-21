@@ -7,9 +7,7 @@
 import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { Alert, AlertActionParams, ActionGroup, AlertTypeParams, AlertTypeState } from '../common';
 import { AlertsClient } from './alerts_client';
-export * from '../common';
 import {
   ILegacyClusterClient,
   ILegacyScopedClusterClient,
@@ -17,7 +15,17 @@ import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '../../../../src/core/server';
+import {
+  Alert,
+  AlertActionParams,
+  ActionGroup,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceContext,
+  AlertInstanceState,
+} from '../common';
 
+export * from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type GetBasePathFunction = (spaceId?: string) => string;
@@ -38,18 +46,25 @@ export interface Services {
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
-export interface AlertServices extends Services {
-  alertInstanceFactory: (id: string) => AlertInstance;
+export interface AlertServices<
+  AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
+  AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
+> extends Services {
+  alertInstanceFactory: (
+    id: string
+  ) => AlertInstance<AlertInstanceStateType, AlertInstanceContextType>;
 }
 
 export interface AlertExecutorOptions<
   Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState
+  State extends AlertTypeState = AlertTypeState,
+  AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
+  AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
 > {
   alertId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceStateType, AlertInstanceContextType>;
   params: Params;
   state: State;
   spaceId: string;
@@ -67,7 +82,9 @@ export interface ActionVariable {
 
 export interface AlertType<
   Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState
+  State extends AlertTypeState = AlertTypeState,
+  AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
+  AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
 > {
   id: string;
   name: string;
@@ -80,7 +97,12 @@ export interface AlertType<
     services,
     params,
     state,
-  }: AlertExecutorOptions<Params, State>) => Promise<State | void>;
+  }: AlertExecutorOptions<
+    Params,
+    State,
+    AlertInstanceStateType,
+    AlertInstanceContextType
+  >) => Promise<State | void>;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];

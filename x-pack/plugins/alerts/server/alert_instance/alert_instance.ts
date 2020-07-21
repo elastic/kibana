@@ -13,19 +13,21 @@ import {
 
 import { parseDuration } from '../lib';
 
-interface ScheduledExecutionOptions {
-  actionGroup: string;
-  context: AlertInstanceContext;
-  state: AlertInstanceState;
-}
 export type AlertInstances = Record<string, AlertInstance>;
-export class AlertInstance {
-  private scheduledExecutionOptions?: ScheduledExecutionOptions;
+export class AlertInstance<
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext
+> {
+  private scheduledExecutionOptions?: {
+    actionGroup: string;
+    context: Context;
+    state: State;
+  };
   private meta: AlertInstanceMeta;
-  private state: AlertInstanceState;
+  private state: State;
 
-  constructor({ state = {}, meta = {} }: RawAlertInstance = {}) {
-    this.state = state;
+  constructor({ state, meta = {} }: RawAlertInstance = {}) {
+    this.state = (state || {}) as State;
     this.meta = meta;
   }
 
@@ -62,15 +64,19 @@ export class AlertInstance {
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context: AlertInstanceContext = {}) {
+  scheduleActions(actionGroup: string, context?: Context) {
     if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
-    this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
+    this.scheduledExecutionOptions = {
+      actionGroup,
+      context: (context || {}) as Context,
+      state: this.state,
+    };
     return this;
   }
 
-  replaceState(state: AlertInstanceState) {
+  replaceState(state: State) {
     this.state = state;
     return this;
   }
