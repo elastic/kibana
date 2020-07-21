@@ -21,6 +21,7 @@ import {
   ExceptionListTypeOrUndefined,
   FilterOrUndefined,
   IdOrUndefined,
+  Immutable,
   ItemId,
   ItemIdOrUndefined,
   ListId,
@@ -36,6 +37,8 @@ import {
   Tags,
   TagsOrUndefined,
   UpdateCommentsArray,
+  Version,
+  VersionOrUndefined,
   _Tags,
   _TagsOrUndefined,
   _VersionOrUndefined,
@@ -61,6 +64,8 @@ export interface CreateExceptionListOptions {
   meta: MetaOrUndefined;
   tags: Tags;
   type: ExceptionListType;
+  immutable: Immutable;
+  version: Version;
 }
 
 export interface UpdateExceptionListOptions {
@@ -74,6 +79,7 @@ export interface UpdateExceptionListOptions {
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
   type: ExceptionListTypeOrUndefined;
+  version: VersionOrUndefined;
 }
 
 export interface DeleteExceptionListOptions {
