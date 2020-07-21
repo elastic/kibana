@@ -20,7 +20,7 @@
 import { map, pick, zipObject } from 'lodash';
 
 import { ExpressionTypeDefinition } from '../types';
-import { PointSeries } from './pointseries';
+import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
 
 const name = 'datatable';
@@ -109,8 +109,8 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
     pointseries: (value: PointSeries) => ({
       type: name,
       rows: value.rows,
-      columns: map(value.columns, (val, colName) => {
-        return { name: colName!, type: val.type };
+      columns: map(value.columns, (val: PointSeriesColumn, colName) => {
+        return { name: colName, type: val.type };
       }),
     }),
   },

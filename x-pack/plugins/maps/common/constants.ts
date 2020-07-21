@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { FeatureCollection } from 'geojson';
 export const EMS_APP_NAME = 'kibana';
 export const EMS_CATALOGUE_PATH = 'ems/catalogue';
 
@@ -89,7 +90,7 @@ export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
 export const DEFAULT_MAX_RESULT_WINDOW = 10000;
 export const DEFAULT_MAX_INNER_RESULT_WINDOW = 100;
-export const DEFAULT_MAX_BUCKETS_LIMIT = 10000;
+export const DEFAULT_MAX_BUCKETS_LIMIT = 65535;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
@@ -124,7 +125,7 @@ export const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
 export const LON_INDEX = 0;
 export const LAT_INDEX = 1;
 
-export const EMPTY_FEATURE_COLLECTION = {
+export const EMPTY_FEATURE_COLLECTION: FeatureCollection = {
   type: 'FeatureCollection',
   features: [],
 };
@@ -221,6 +222,11 @@ export enum SCALING_TYPES {
 }
 
 export const RGBA_0000 = 'rgba(0,0,0,0)';
+
+export enum MVT_FIELD_TYPE {
+  STRING = 'String',
+  NUMBER = 'Number',
+}
 
 export const SPATIAL_FILTERS_LAYER_ID = 'SPATIAL_FILTERS_LAYER_ID';
 

@@ -9,6 +9,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import React from 'react';
 
 import { wait } from '../../../common/lib/helpers';
+import '../../../common/mock/match_media';
 import { TestProviders, apolloClient } from '../../../common/mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../common/mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
@@ -100,7 +101,7 @@ describe('StatefulOpenTimeline', () => {
       );
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
+        .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
       expect(wrapper.find('[data-test-subj="search-row"]').first().prop('query')).toEqual('abcd');
     });
 
@@ -122,7 +123,7 @@ describe('StatefulOpenTimeline', () => {
 
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
+        .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
 
       expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
         'Showing: 11 timelines with'
@@ -147,7 +148,7 @@ describe('StatefulOpenTimeline', () => {
 
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
+        .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
 
       expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual(
         'with "abcd"'

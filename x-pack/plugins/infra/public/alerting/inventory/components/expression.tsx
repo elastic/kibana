@@ -16,20 +16,15 @@ import {
   EuiFormRow,
   EuiButtonEmpty,
   EuiFieldSearch,
-  EuiSelect,
-  EuiButton,
+  EuiCheckbox,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  previewOptions,
-  firedTimeLabel,
-  firedTimesLabel,
-  getInventoryAlertPreview as getAlertPreview,
-} from '../../../alerting/common';
-import { AlertPreviewSuccessResponsePayload } from '../../../../common/alerting/metrics/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getIntervalInSeconds } from '../../../../server/utils/get_interval_in_seconds';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { AlertPreview } from '../../common';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -47,7 +42,6 @@ import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/ap
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
-import { toMetricOpt } from '../../../pages/metrics/inventory_view/components/toolbars/toolbar_wrapper';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
 import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
 import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
@@ -82,6 +76,7 @@ interface Props {
     filterQuery?: string;
     filterQueryText?: string;
     sourceId?: string;
+    alertOnNoData?: boolean;
   };
   alertInterval: string;
   alertsContext: AlertsContextValue<AlertContextMeta>;
@@ -107,31 +102,6 @@ export const Expressions: React.FC<Props> = (props) => {
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
-
-  const [previewLookbackInterval, setPreviewLookbackInterval] = useState<string>('h');
-  const [isPreviewLoading, setIsPreviewLoading] = useState<boolean>(false);
-  const [previewError, setPreviewError] = useState<boolean>(false);
-  const [previewResult, setPreviewResult] = useState<AlertPreviewSuccessResponsePayload | null>(
-    null
-  );
-
-  const previewIntervalError = useMemo(() => {
-    const intervalInSeconds = getIntervalInSeconds(alertInterval);
-    const lookbackInSeconds = getIntervalInSeconds(`1${previewLookbackInterval}`);
-    if (intervalInSeconds >= lookbackInSeconds) {
-      return true;
-    }
-    return false;
-  }, [previewLookbackInterval, alertInterval]);
-
-  const isPreviewDisabled = useMemo(() => {
-    if (previewIntervalError) return true;
-    const validationResult = validateMetricThreshold({ criteria: alertParams.criteria } as any);
-    const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
-      Object.values(result).some((arr) => Array.isArray(arr) && arr.length)
-    );
-    return hasValidationErrors;
-  }, [alertParams.criteria, previewIntervalError]);
 
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
@@ -253,33 +223,6 @@ export const Expressions: React.FC<Props> = (props) => {
     }
   }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
 
-  const onSelectPreviewLookbackInterval = useCallback((e) => {
-    setPreviewLookbackInterval(e.target.value);
-    setPreviewResult(null);
-  }, []);
-
-  const onClickPreview = useCallback(async () => {
-    setIsPreviewLoading(true);
-    setPreviewResult(null);
-    setPreviewError(false);
-    try {
-      const result = await getAlertPreview({
-        fetch: alertsContext.http.fetch,
-        params: {
-          ...pick(alertParams, 'criteria', 'nodeType'),
-          sourceId: alertParams.sourceId,
-          lookback: previewLookbackInterval as Unit,
-          alertInterval,
-        },
-      });
-      setPreviewResult(result);
-    } catch (e) {
-      setPreviewError(true);
-    } finally {
-      setIsPreviewLoading(false);
-    }
-  }, [alertParams, alertInterval, alertsContext, previewLookbackInterval]);
-
   useEffect(() => {
     const md = alertsContext.metadata;
     if (!alertParams.nodeType) {
@@ -368,6 +311,28 @@ export const Expressions: React.FC<Props> = (props) => {
       </div>
 
       <EuiSpacer size={'m'} />
+      <EuiCheckbox
+        id="metrics-alert-no-data-toggle"
+        label={
+          <>
+            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
+              defaultMessage: "Alert me if there's no data",
+            })}{' '}
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
+                defaultMessage:
+                  'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+              })}
+            >
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </EuiToolTip>
+          </>
+        }
+        checked={alertParams.alertOnNoData}
+        onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
+      />
+
+      <EuiSpacer size={'m'} />
 
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
@@ -396,90 +361,14 @@ export const Expressions: React.FC<Props> = (props) => {
       </EuiFormRow>
 
       <EuiSpacer size={'m'} />
-      <EuiFormRow
-        label={i18n.translate('xpack.infra.metrics.alertFlyout.previewLabel', {
-          defaultMessage: 'Preview',
-        })}
-        fullWidth
-        compressed
-      >
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiSelect
-                id="selectPreviewLookbackInterval"
-                value={previewLookbackInterval}
-                onChange={onSelectPreviewLookbackInterval}
-                options={previewOptions}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                isLoading={isPreviewLoading}
-                isDisabled={isPreviewDisabled}
-                onClick={onClickPreview}
-              >
-                {i18n.translate('xpack.infra.metrics.alertFlyout.testAlertTrigger', {
-                  defaultMessage: 'Test alert trigger',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiSpacer size={'s'} />
-          </EuiFlexGroup>
-          {previewResult && (
-            <>
-              <EuiSpacer size={'s'} />
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.infra.metrics.alertFlyout.alertPreviewResult"
-                  defaultMessage="This alert would have fired {fired} {timeOrTimes} in the past {lookback}"
-                  values={{
-                    timeOrTimes:
-                      previewResult.resultTotals.fired === 1 ? firedTimeLabel : firedTimesLabel,
-                    fired: <strong>{previewResult.resultTotals.fired}</strong>,
-                    lookback: previewOptions.find((e) => e.value === previewLookbackInterval)
-                      ?.shortText,
-                  }}
-                />{' '}
-                <FormattedMessage
-                  id="xpack.infra.metrics.alertFlyout.alertPreviewGroups"
-                  defaultMessage="across {numberOfGroups} {groupName}{plural}."
-                  values={{
-                    numberOfGroups: <strong>{previewResult.numberOfGroups}</strong>,
-                    groupName: alertParams.nodeType,
-                    plural: previewResult.numberOfGroups !== 1 ? 's' : '',
-                  }}
-                />
-              </EuiText>
-            </>
-          )}
-          {previewIntervalError && (
-            <>
-              <EuiSpacer size={'s'} />
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.infra.metrics.alertFlyout.previewIntervalTooShort"
-                  defaultMessage="Not enough data to preview. Please select a longer preview length, or increase the amount of time in the {checkEvery} field."
-                  values={{
-                    checkEvery: <strong>check every</strong>,
-                  }}
-                />
-              </EuiText>
-            </>
-          )}
-          {previewError && (
-            <>
-              <EuiSpacer size={'s'} />
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.infra.metrics.alertFlyout.alertPreviewError"
-                  defaultMessage="An error occurred when trying to preview this alert trigger."
-                />
-              </EuiText>
-            </>
-          )}
-        </>
-      </EuiFormRow>
+      <AlertPreview
+        alertInterval={alertInterval}
+        alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
+        alertParams={pick(alertParams as any, 'criteria', 'nodeType', 'sourceId')}
+        validate={validateMetricThreshold}
+        fetch={alertsContext.http.fetch}
+        groupByDisplayName={alertParams.nodeType}
+      />
       <EuiSpacer size={'m'} />
     </>
   );

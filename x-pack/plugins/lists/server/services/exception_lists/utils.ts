@@ -6,15 +6,24 @@
 
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
+import { ErrorWithStatusCode } from '../../error_with_status_code';
 import {
+  Comments,
+  CommentsArray,
   CommentsArrayOrUndefined,
-  CommentsPartialArrayOrUndefined,
+  CreateComments,
+  CreateCommentsArrayOrUndefined,
   ExceptionListItemSchema,
   ExceptionListSchema,
   ExceptionListSoSchema,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   NamespaceType,
+  UpdateCommentsArrayOrUndefined,
+  comments as commentsSchema,
+  exceptionListItemType,
+  exceptionListType,
 } from '../../../common/schemas';
 import {
   SavedObjectType,
@@ -34,12 +43,32 @@ export const getSavedObjectType = ({
   }
 };
 
-export const transformSavedObjectToExceptionList = ({
-  savedObject,
+export const getExceptionListType = ({
+  savedObjectType,
+}: {
+  savedObjectType: string;
+}): NamespaceType => {
+  if (savedObjectType === exceptionListAgnosticSavedObjectType) {
+    return 'agnostic';
+  } else {
+    return 'single';
+  }
+};
+
+export const getSavedObjectTypes = ({
   namespaceType,
 }: {
+  namespaceType: NamespaceTypeArray;
+}): SavedObjectType[] => {
+  return namespaceType.map((singleNamespaceType) =>
+    getSavedObjectType({ namespaceType: singleNamespaceType })
+  );
+};
+
+export const transformSavedObjectToExceptionList = ({
+  savedObject,
+}: {
   savedObject: SavedObject<ExceptionListSoSchema>;
-  namespaceType: NamespaceType;
 }): ExceptionListSchema => {
   const dateNow = new Date().toISOString();
   const {
@@ -71,10 +100,10 @@ export const transformSavedObjectToExceptionList = ({
     list_id,
     meta,
     name,
-    namespace_type: namespaceType,
+    namespace_type: getExceptionListType({ savedObjectType: savedObject.type }),
     tags,
     tie_breaker_id,
-    type,
+    type: exceptionListType.is(type) ? type : 'detection',
     updated_at: updatedAt ?? dateNow,
     updated_by,
   };
@@ -83,11 +112,9 @@ export const transformSavedObjectToExceptionList = ({
 export const transformSavedObjectUpdateToExceptionList = ({
   exceptionList,
   savedObject,
-  namespaceType,
 }: {
   exceptionList: ExceptionListSchema;
   savedObject: SavedObjectsUpdateResponse<ExceptionListSoSchema>;
-  namespaceType: NamespaceType;
 }): ExceptionListSchema => {
   const dateNow = new Date().toISOString();
   const {
@@ -107,10 +134,10 @@ export const transformSavedObjectUpdateToExceptionList = ({
     list_id: exceptionList.list_id,
     meta: meta ?? exceptionList.meta,
     name: name ?? exceptionList.name,
-    namespace_type: namespaceType,
+    namespace_type: getExceptionListType({ savedObjectType: savedObject.type }),
     tags: tags ?? exceptionList.tags,
     tie_breaker_id: exceptionList.tie_breaker_id,
-    type: type ?? exceptionList.type,
+    type: exceptionListType.is(type) ? type : exceptionList.type,
     updated_at: updatedAt ?? dateNow,
     updated_by: updatedBy ?? exceptionList.updated_by,
   };
@@ -118,10 +145,8 @@ export const transformSavedObjectUpdateToExceptionList = ({
 
 export const transformSavedObjectToExceptionListItem = ({
   savedObject,
-  namespaceType,
 }: {
   savedObject: SavedObject<ExceptionListSoSchema>;
-  namespaceType: NamespaceType;
 }): ExceptionListItemSchema => {
   const dateNow = new Date().toISOString();
   const {
@@ -159,10 +184,10 @@ export const transformSavedObjectToExceptionListItem = ({
     list_id,
     meta,
     name,
-    namespace_type: namespaceType,
+    namespace_type: getExceptionListType({ savedObjectType: savedObject.type }),
     tags,
     tie_breaker_id,
-    type,
+    type: exceptionListItemType.is(type) ? type : 'simple',
     updated_at: updatedAt ?? dateNow,
     updated_by,
   };
@@ -171,11 +196,9 @@ export const transformSavedObjectToExceptionListItem = ({
 export const transformSavedObjectUpdateToExceptionListItem = ({
   exceptionListItem,
   savedObject,
-  namespaceType,
 }: {
   exceptionListItem: ExceptionListItemSchema;
   savedObject: SavedObjectsUpdateResponse<ExceptionListSoSchema>;
-  namespaceType: NamespaceType;
 }): ExceptionListItemSchema => {
   const dateNow = new Date().toISOString();
   const {
@@ -196,6 +219,8 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
 
   // TODO: Change this to do a decode and throw if the saved object is not as expected.
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
+  // TODO: Update exception list and item types (perhaps separating out) so as to avoid
+  // defaulting
   return {
     _tags: _tags ?? exceptionListItem._tags,
     comments: comments ?? exceptionListItem.comments,
@@ -208,10 +233,10 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
     list_id: exceptionListItem.list_id,
     meta: meta ?? exceptionListItem.meta,
     name: name ?? exceptionListItem.name,
-    namespace_type: namespaceType,
+    namespace_type: getExceptionListType({ savedObjectType: savedObject.type }),
     tags: tags ?? exceptionListItem.tags,
     tie_breaker_id: exceptionListItem.tie_breaker_id,
-    type: type ?? exceptionListItem.type,
+    type: exceptionListItemType.is(type) ? type : exceptionListItem.type,
     updated_at: updatedAt ?? dateNow,
     updated_by: updatedBy ?? exceptionListItem.updated_by,
   };
@@ -219,14 +244,12 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
 
 export const transformSavedObjectsToFoundExceptionListItem = ({
   savedObjectsFindResponse,
-  namespaceType,
 }: {
   savedObjectsFindResponse: SavedObjectsFindResponse<ExceptionListSoSchema>;
-  namespaceType: NamespaceType;
 }): FoundExceptionListItemSchema => {
   return {
     data: savedObjectsFindResponse.saved_objects.map((savedObject) =>
-      transformSavedObjectToExceptionListItem({ namespaceType, savedObject })
+      transformSavedObjectToExceptionListItem({ savedObject })
     ),
     page: savedObjectsFindResponse.page,
     per_page: savedObjectsFindResponse.per_page,
@@ -236,14 +259,12 @@ export const transformSavedObjectsToFoundExceptionListItem = ({
 
 export const transformSavedObjectsToFoundExceptionList = ({
   savedObjectsFindResponse,
-  namespaceType,
 }: {
   savedObjectsFindResponse: SavedObjectsFindResponse<ExceptionListSoSchema>;
-  namespaceType: NamespaceType;
 }): FoundExceptionListSchema => {
   return {
     data: savedObjectsFindResponse.saved_objects.map((savedObject) =>
-      transformSavedObjectToExceptionList({ namespaceType, savedObject })
+      transformSavedObjectToExceptionList({ savedObject })
     ),
     page: savedObjectsFindResponse.page,
     per_page: savedObjectsFindResponse.per_page,
@@ -251,21 +272,108 @@ export const transformSavedObjectsToFoundExceptionList = ({
   };
 };
 
-export const transformComments = ({
+/*
+ * Determines whether two comments are equal, this is a very
+ * naive implementation, not meant to be used for deep equality of complex objects
+ */
+export const isCommentEqual = (commentA: Comments, commentB: Comments): boolean => {
+  const a = Object.values(commentA).sort().join();
+  const b = Object.values(commentB).sort().join();
+
+  return a === b;
+};
+
+export const transformUpdateCommentsToComments = ({
+  comments,
+  existingComments,
+  user,
+}: {
+  comments: UpdateCommentsArrayOrUndefined;
+  existingComments: CommentsArray;
+  user: string;
+}): CommentsArray => {
+  const newComments = comments ?? [];
+
+  if (newComments.length < existingComments.length) {
+    throw new ErrorWithStatusCode(
+      'Comments cannot be deleted, only new comments may be added',
+      403
+    );
+  } else {
+    return newComments.flatMap((c, index) => {
+      const existingComment = existingComments[index];
+
+      if (commentsSchema.is(existingComment) && !commentsSchema.is(c)) {
+        throw new ErrorWithStatusCode(
+          'When trying to update a comment, "created_at" and "created_by" must be present',
+          403
+        );
+      } else if (existingComment == null && commentsSchema.is(c)) {
+        throw new ErrorWithStatusCode('Only new comments may be added', 403);
+      } else if (
+        commentsSchema.is(c) &&
+        existingComment != null &&
+        isCommentEqual(c, existingComment)
+      ) {
+        return existingComment;
+      } else if (commentsSchema.is(c) && existingComment != null) {
+        return transformUpdateComments({ comment: c, existingComment, user });
+      } else {
+        return transformCreateCommentsToComments({ comments: [c], user }) ?? [];
+      }
+    });
+  }
+};
+
+export const transformUpdateComments = ({
+  comment,
+  existingComment,
+  user,
+}: {
+  comment: Comments;
+  existingComment: Comments;
+  user: string;
+}): Comments => {
+  if (comment.created_by !== user) {
+    // existing comment is being edited, can only be edited by author
+    throw new ErrorWithStatusCode('Not authorized to edit others comments', 401);
+  } else if (existingComment.created_at !== comment.created_at) {
+    throw new ErrorWithStatusCode('Unable to update comment', 403);
+  } else if (comment.comment.trim().length === 0) {
+    throw new ErrorWithStatusCode('Empty comments not allowed', 403);
+  } else if (comment.comment.trim() !== existingComment.comment) {
+    const dateNow = new Date().toISOString();
+
+    return {
+      ...existingComment,
+      comment: comment.comment,
+      updated_at: dateNow,
+      updated_by: user,
+    };
+  } else {
+    return existingComment;
+  }
+};
+
+export const transformCreateCommentsToComments = ({
   comments,
   user,
 }: {
-  comments: CommentsPartialArrayOrUndefined;
+  comments: CreateCommentsArrayOrUndefined;
   user: string;
 }): CommentsArrayOrUndefined => {
   const dateNow = new Date().toISOString();
   if (comments != null) {
-    return comments.map((comment) => {
-      return {
-        comment: comment.comment,
-        created_at: comment.created_at ?? dateNow,
-        created_by: comment.created_by ?? user,
-      };
+    return comments.map((c: CreateComments) => {
+      if (c.comment.trim().length === 0) {
+        throw new ErrorWithStatusCode('Empty comments not allowed', 403);
+      } else {
+        return {
+          comment: c.comment,
+          created_at: dateNow,
+          created_by: user,
+        };
+      }
     });
   } else {
     return comments;

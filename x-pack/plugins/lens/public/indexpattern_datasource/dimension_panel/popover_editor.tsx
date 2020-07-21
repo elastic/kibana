@@ -6,7 +6,7 @@
 
 import './popover_editor.scss';
 import _ from 'lodash';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexItem,
@@ -56,6 +56,31 @@ function asOperationOptions(operationTypes: OperationType[], compatibleWithCurre
     }));
 }
 
+const LabelInput = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
+  const [inputValue, setInputValue] = useState(value);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value, setInputValue]);
+
+  const onChangeDebounced = useMemo(() => _.debounce(onChange, 256), [onChange]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = String(e.target.value);
+    setInputValue(val);
+    onChangeDebounced(val);
+  };
+
+  return (
+    <EuiFieldText
+      compressed
+      data-test-subj="indexPattern-label-edit"
+      value={inputValue}
+      onChange={handleInputChange}
+    />
+  );
+};
+
 export function PopoverEditor(props: PopoverEditorProps) {
   const {
     selectedColumn,
@@ -94,7 +119,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
       validOperationTypes.push(...operationByField[selectedColumn.sourceField]!);
     }
 
-    return _.uniq(
+    return _.uniqBy(
       [
         ...asOperationOptions(validOperationTypes, true),
         ...asOperationOptions(possibleOperationTypes, false),
@@ -131,9 +156,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
         isActive,
         size: 's',
         className: 'lnsIndexPatternDimensionEditor__operation',
-        'data-test-subj': `lns-indexPatternDimension${
-          compatibleWithCurrentField ? '' : 'Incompatible'
-        }-${operationType}`,
+        'data-test-subj': `lns-indexPatternDimension-${operationType}${
+          compatibleWithCurrentField ? '' : ' incompatible'
+        }`,
         onClick() {
           if (!selectedColumn || !compatibleWithCurrentField) {
             const possibleFields = fieldByOperation[operationType] || [];
@@ -200,7 +225,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
           <FieldSelect
             currentIndexPattern={currentIndexPattern}
             existingFields={state.existingFields}
-            showEmptyFields={state.showEmptyFields}
             fieldMap={fieldMap}
             operationFieldSupportMatrix={operationFieldSupportMatrix}
             selectedColumnOperationType={selectedColumn && selectedColumn.operationType}
@@ -275,25 +299,31 @@ export function PopoverEditor(props: PopoverEditorProps) {
             </EuiFlexItem>
             <EuiFlexItem grow={true} className="lnsIndexPatternDimensionEditor__right">
               {incompatibleSelectedOperationType && selectedColumn && (
-                <EuiCallOut
-                  data-test-subj="indexPattern-invalid-operation"
-                  title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
-                    defaultMessage: 'To use this function, select a different field.',
-                  })}
-                  color="warning"
-                  size="s"
-                  iconType="sortUp"
-                />
+                <>
+                  <EuiCallOut
+                    data-test-subj="indexPattern-invalid-operation"
+                    title={i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
+                      defaultMessage: 'To use this function, select a different field.',
+                    })}
+                    color="warning"
+                    size="s"
+                    iconType="sortUp"
+                  />
+                  <EuiSpacer size="m" />
+                </>
               )}
               {incompatibleSelectedOperationType && !selectedColumn && (
-                <EuiCallOut
-                  size="s"
-                  data-test-subj="indexPattern-fieldless-operation"
-                  title={i18n.translate('xpack.lens.indexPattern.fieldlessOperationLabel', {
-                    defaultMessage: 'To use this function, select a field.',
-                  })}
-                  iconType="sortUp"
-                />
+                <>
+                  <EuiCallOut
+                    size="s"
+                    data-test-subj="indexPattern-fieldless-operation"
+                    title={i18n.translate('xpack.lens.indexPattern.fieldlessOperationLabel', {
+                      defaultMessage: 'To use this function, select a field.',
+                    })}
+                    iconType="sortUp"
+                  />
+                  <EuiSpacer size="m" />
+                </>
               )}
               {!incompatibleSelectedOperationType && ParamEditor && (
                 <>
@@ -321,11 +351,9 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   })}
                   display="rowCompressed"
                 >
-                  <EuiFieldText
-                    compressed
-                    data-test-subj="indexPattern-label-edit"
+                  <LabelInput
                     value={selectedColumn.label}
-                    onChange={(e) => {
+                    onChange={(value) => {
                       setState({
                         ...state,
                         layers: {
@@ -336,7 +364,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
                               ...state.layers[layerId].columns,
                               [columnId]: {
                                 ...selectedColumn,
-                                label: e.target.value,
+                                label: value,
                                 customLabel: true,
                               },
                             },

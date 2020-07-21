@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'endpoint',
     'policy',
     'endpointPageUtils',
-    'ingestManagerCreateDatasource',
+    'ingestManagerCreatePackageConfig',
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Protect East Coastrev. 1',
           'elastic',
           'elastic',
-          `${policyInfo.datasource.package?.title} v${policyInfo.datasource.package?.version}`,
+          `${policyInfo.packageConfig.package?.title} v${policyInfo.packageConfig.package?.version}`,
           '',
         ]);
         [policyRow[2], policyRow[4]].forEach((relativeDate) => {
@@ -111,42 +111,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await pageObjects.policy.findHeaderCreateNewButton()).click();
       });
 
-      it('should redirect to ingest management integrations add datasource', async () => {
-        await pageObjects.ingestManagerCreateDatasource.ensureOnCreatePageOrFail();
+      it('should redirect to ingest management integrations add package config', async () => {
+        await pageObjects.ingestManagerCreatePackageConfig.ensureOnCreatePageOrFail();
       });
 
       it('should redirect user back to Policy List if Cancel button is clicked', async () => {
-        await (await pageObjects.ingestManagerCreateDatasource.findCancelButton()).click();
+        await (await pageObjects.ingestManagerCreatePackageConfig.findCancelButton()).click();
         await pageObjects.policy.ensureIsOnPolicyPage();
       });
 
       it('should redirect user back to Policy List if Back link is clicked', async () => {
-        await (await pageObjects.ingestManagerCreateDatasource.findBackLink()).click();
+        await (await pageObjects.ingestManagerCreatePackageConfig.findBackLink()).click();
         await pageObjects.policy.ensureIsOnPolicyPage();
       });
 
       it('should display custom endpoint configuration message', async () => {
-        await pageObjects.ingestManagerCreateDatasource.selectAgentConfig();
-        const endpointConfig = await pageObjects.policy.findDatasourceEndpointCustomConfiguration();
+        await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
+        const endpointConfig = await pageObjects.policy.findPackageConfigEndpointCustomConfiguration();
         expect(endpointConfig).not.to.be(undefined);
       });
 
       it('should redirect user back to Policy List after a successful save', async () => {
         const newPolicyName = `endpoint policy ${Date.now()}`;
-        await pageObjects.ingestManagerCreateDatasource.selectAgentConfig();
-        await pageObjects.ingestManagerCreateDatasource.setDatasourceName(newPolicyName);
-        await (await pageObjects.ingestManagerCreateDatasource.findDSaveButton()).click();
-        await pageObjects.ingestManagerCreateDatasource.waitForSaveSuccessNotification();
+        await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
+        await pageObjects.ingestManagerCreatePackageConfig.setPackageConfigName(newPolicyName);
+        await (await pageObjects.ingestManagerCreatePackageConfig.findDSaveButton()).click();
+        await pageObjects.ingestManagerCreatePackageConfig.waitForSaveSuccessNotification();
         await pageObjects.policy.ensureIsOnPolicyPage();
         await policyTestResources.deletePolicyByName(newPolicyName);
       });
     });
 
     describe('and user clicks on page header create button', () => {
-      it('should direct users to the ingest management integrations add datasource', async () => {
+      it('should direct users to the ingest management integrations add package config', async () => {
         await pageObjects.policy.navigateToPolicyList();
         await (await pageObjects.policy.findOnboardingStartButton()).click();
-        await pageObjects.ingestManagerCreateDatasource.ensureOnCreatePageOrFail();
+        await pageObjects.ingestManagerCreatePackageConfig.ensureOnCreatePageOrFail();
       });
     });
   });

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import React, { useState, useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -198,6 +199,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           showSaveQuery={props.showSaveQuery}
           screenTitle={props.screenTitle}
           indexPatterns={props.indexPatterns}
+          indicateNoData={props.indicateNoData}
           timeHistory={data.query.timefilter.history}
           dateRangeFrom={timeRange.from}
           dateRangeTo={timeRange.to}

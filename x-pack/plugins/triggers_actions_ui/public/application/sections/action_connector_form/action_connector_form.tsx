@@ -53,6 +53,7 @@ interface ActionConnectorProps {
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   docLinks: DocLinksStart;
+  consumer?: string;
 }
 
 export const ActionConnectorForm = ({
@@ -64,6 +65,7 @@ export const ActionConnectorForm = ({
   http,
   actionTypeRegistry,
   docLinks,
+  consumer,
 }: ActionConnectorProps) => {
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -136,7 +138,6 @@ export const ActionConnectorForm = ({
       >
         <EuiFieldText
           fullWidth
-          autoFocus={true}
           isInvalid={errors.name.length > 0 && connector.name !== undefined}
           name="name"
           placeholder="Untitled"
@@ -170,6 +171,7 @@ export const ActionConnectorForm = ({
             editActionSecrets={setActionSecretsProperty}
             http={http}
             docLinks={docLinks}
+            consumer={consumer}
           />
         </Suspense>
       ) : null}

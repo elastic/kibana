@@ -21,6 +21,7 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     offline: 0,
     online: 0,
     total: 0,
+    other: 0,
   },
 });
 
@@ -78,13 +79,20 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     const isCurrentlyOnDetailsPage = isOnPolicyDetailsPage(newState);
     const wasPreviouslyOnDetailsPage = isOnPolicyDetailsPage(state);
 
-    // Did user just enter the Detail page? if so, then set the loading indicator and return new state
-    if (isCurrentlyOnDetailsPage && !wasPreviouslyOnDetailsPage) {
-      return {
-        ...newState,
-        isLoading: true,
-      };
+    if (isCurrentlyOnDetailsPage) {
+      // Did user just enter the Detail page? if so, then
+      // set the loading indicator and return new state
+      if (!wasPreviouslyOnDetailsPage) {
+        return {
+          ...newState,
+          isLoading: true,
+        };
+      }
+      // Else, user was already on the details page,
+      // just return the updated state with new location data
+      return newState;
     }
+
     return {
       ...initialPolicyDetailsState(),
       location: action.payload,

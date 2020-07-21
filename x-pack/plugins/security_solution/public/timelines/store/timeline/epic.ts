@@ -33,7 +33,7 @@ import {
   Filter,
   MatchAllFilter,
 } from '../../../../../../.../../../src/plugins/data/public';
-import { TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineErrorResponse } from '../../../../common/types/timeline';
 import { inputsModel } from '../../../common/store/inputs';
 import {
   TimelineType,
@@ -42,6 +42,10 @@ import {
   TimelineResult,
 } from '../../../graphql/types';
 import { addError } from '../../../common/store/app/actions';
+
+import { persistTimeline } from '../../containers/api';
+import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
+import * as i18n from '../../pages/translations';
 
 import {
   applyKqlFilterQuery,
@@ -54,6 +58,7 @@ import {
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
+  updateDataProviderType,
   updateDescription,
   updateKqlMode,
   updateProviders,
@@ -79,8 +84,6 @@ import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineEpicDependencies } from './types';
-import { persistTimeline } from '../../containers/api';
-import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 
 const timelineActionsType = [
   applyKqlFilterQuery.type,
@@ -94,6 +97,7 @@ const timelineActionsType = [
   updateDataProviderEnabled.type,
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
+  updateDataProviderType.type,
   updateDescription.type,
   updateEventType.type,
   updateKqlMode.type,
@@ -121,6 +125,7 @@ export const createTimelineEpic = <State>(): Epic<
     timelineByIdSelector,
     timelineTimeRangeSelector,
     apolloClient$,
+    kibana$,
   }
 ) => {
   const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
@@ -146,13 +151,24 @@ export const createTimelineEpic = <State>(): Epic<
         if (action.type === addError.type) {
           return true;
         }
-        if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
+        if (
+          isItAtimelineAction(timelineId) &&
+          timelineObj != null &&
+          timelineObj.status != null &&
+          TimelineStatus.immutable === timelineObj.status
+        ) {
+          return false;
+        } else if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
           myEpicTimelineId.setTimelineVersion(null);
           myEpicTimelineId.setTimelineId(null);
+          myEpicTimelineId.setTemplateTimelineId(null);
+          myEpicTimelineId.setTemplateTimelineVersion(null);
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
+          myEpicTimelineId.setTemplateTimelineId(addNewTimeline.templateTimelineId);
+          myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
           return true;
         } else if (
           timelineActionsType.includes(action.type) &&
@@ -176,6 +192,8 @@ export const createTimelineEpic = <State>(): Epic<
         const action: ActionTimeline = get('action', objAction);
         const timelineId = myEpicTimelineId.getTimelineId();
         const version = myEpicTimelineId.getTimelineVersion();
+        const templateTimelineId = myEpicTimelineId.getTemplateTimelineId();
+        const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
 
         if (timelineNoteActionsType.includes(action.type)) {
           return epicPersistNote(
@@ -211,13 +229,37 @@ export const createTimelineEpic = <State>(): Epic<
             persistTimeline({
               timelineId,
               version,
-              timeline: convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+              timeline: {
+                ...convertTimelineAsInput(timeline[action.payload.id], timelineTimeRange),
+                templateTimelineId,
+                templateTimelineVersion,
+              },
             })
           ).pipe(
-            withLatestFrom(timeline$, allTimelineQuery$),
-            mergeMap(([result, recentTimeline, allTimelineQuery]) => {
+            withLatestFrom(timeline$, allTimelineQuery$, kibana$),
+            mergeMap(([result, recentTimeline, allTimelineQuery, kibana]) => {
+              const error = result as TimelineErrorResponse;
+              if (error.status_code != null && error.status_code === 405) {
+                kibana.notifications!.toasts.addDanger({
+                  title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+                  text: error.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+                });
+                return [
+                  endTimelineSaving({
+                    id: action.payload.id,
+                  }),
+                ];
+              }
+
               const savedTimeline = recentTimeline[action.payload.id];
               const response: ResponseTimeline = get('data.persistTimeline', result);
+              if (response == null) {
+                return [
+                  endTimelineSaving({
+                    id: action.payload.id,
+                  }),
+                ];
+              }
               const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
               if (allTimelineQuery.refetch != null) {
@@ -264,6 +306,12 @@ export const createTimelineEpic = <State>(): Epic<
                     myEpicTimelineId.setTimelineVersion(
                       updatedTimeline[get('payload.id', checkAction)].version
                     );
+                    myEpicTimelineId.setTemplateTimelineId(
+                      updatedTimeline[get('payload.id', checkAction)].templateTimelineId
+                    );
+                    myEpicTimelineId.setTemplateTimelineVersion(
+                      updatedTimeline[get('payload.id', checkAction)].templateTimelineVersion
+                    );
                     return true;
                   }
                   return false;
@@ -283,6 +331,7 @@ const timelineInput: TimelineInput = {
   dataProviders: null,
   description: null,
   eventType: null,
+  excludedRowRendererIds: null,
   filters: null,
   kqlMode: null,
   kqlQuery: null,

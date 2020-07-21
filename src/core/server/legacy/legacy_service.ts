@@ -276,7 +276,11 @@ export class LegacyService implements CoreService {
         createSerializer: startDeps.core.savedObjects.createSerializer,
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
+      metrics: {
+        getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
+      },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      auditTrail: startDeps.core.auditTrail,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -297,6 +301,7 @@ export class LegacyService implements CoreService {
         ),
         createRouter: () => router,
         resources: setupDeps.core.httpResources.createRegistrar(router),
+        registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
@@ -311,9 +316,6 @@ export class LegacyService implements CoreService {
       },
       logging: {
         configure: (config$) => setupDeps.core.logging.configure([], config$),
-      },
-      metrics: {
-        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
       },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
@@ -330,6 +332,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
+      auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 

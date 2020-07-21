@@ -12,22 +12,20 @@ import { FrameworkRequest } from '../../../framework';
 import { SavedTimeline, TimelineSavedObject } from '../../../../../common/types/timeline';
 import { SavedNote } from '../../../../../common/types/timeline/note';
 import { NoteResult, ResponseTimeline } from '../../../../graphql/types';
-export const CREATE_TIMELINE_ERROR_MESSAGE =
-  'UPDATE timeline with POST is not allowed, please use PATCH instead';
-export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
-  'UPDATE template timeline with POST is not allowed, please use PATCH instead';
 
 export const saveTimelines = (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,
   timelineSavedObjectId?: string | null,
-  timelineVersion?: string | null
+  timelineVersion?: string | null,
+  isImmutable?: boolean
 ): Promise<ResponseTimeline> => {
   return timelineLib.persistTimeline(
     frameworkRequest,
     timelineSavedObjectId ?? null,
     timelineVersion ?? null,
-    timeline
+    timeline,
+    isImmutable
   );
 };
 
@@ -72,24 +70,36 @@ export const saveNotes = (
   );
 };
 
-export const createTimelines = async (
-  frameworkRequest: FrameworkRequest,
-  timeline: SavedTimeline,
-  timelineSavedObjectId?: string | null,
-  timelineVersion?: string | null,
-  pinnedEventIds?: string[] | null,
-  notes?: NoteResult[],
-  existingNoteIds?: string[]
-): Promise<ResponseTimeline> => {
+interface CreateTimelineProps {
+  frameworkRequest: FrameworkRequest;
+  timeline: SavedTimeline;
+  timelineSavedObjectId?: string | null;
+  timelineVersion?: string | null;
+  pinnedEventIds?: string[] | null;
+  notes?: NoteResult[];
+  existingNoteIds?: string[];
+  isImmutable?: boolean;
+}
+
+export const createTimelines = async ({
+  frameworkRequest,
+  timeline,
+  timelineSavedObjectId = null,
+  timelineVersion = null,
+  pinnedEventIds = null,
+  notes = [],
+  existingNoteIds = [],
+  isImmutable,
+}: CreateTimelineProps): Promise<ResponseTimeline> => {
   const responseTimeline = await saveTimelines(
     frameworkRequest,
     timeline,
     timelineSavedObjectId,
-    timelineVersion
+    timelineVersion,
+    isImmutable
   );
   const newTimelineSavedObjectId = responseTimeline.timeline.savedObjectId;
   const newTimelineVersion = responseTimeline.timeline.version;
-
   let myPromises: unknown[] = [];
   if (pinnedEventIds != null && !isEmpty(pinnedEventIds)) {
     myPromises = [
@@ -143,8 +153,9 @@ export const getTemplateTimeline = async (
       frameworkRequest,
       templateTimelineId
     );
+    // eslint-disable-next-line no-empty
   } catch (e) {
     return null;
   }
-  return templateTimeline.timeline[0];
+  return templateTimeline?.timeline[0] ?? null;
 };

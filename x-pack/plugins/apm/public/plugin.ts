@@ -38,6 +38,10 @@ import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { createStaticIndexPattern } from './services/rest/index_pattern';
+import {
+  fetchOverviewPageData,
+  hasData,
+} from './services/rest/apm_overview_fetchers';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -61,8 +65,9 @@ export interface ApmPluginStartDeps {
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
-  private readonly initializerContext: PluginInitializerContext<ConfigSchema>;
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(
+    private readonly initializerContext: PluginInitializerContext<ConfigSchema>
+  ) {
     this.initializerContext = initializerContext;
   }
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
@@ -72,6 +77,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     pluginSetupDeps.home.environment.update({ apmUi: true });
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+
+    if (plugins.observability) {
+      plugins.observability.dashboard.register({
+        appName: 'apm',
+        fetchData: fetchOverviewPageData,
+        hasData,
+      });
+    }
 
     core.application.register({
       id: 'apm',

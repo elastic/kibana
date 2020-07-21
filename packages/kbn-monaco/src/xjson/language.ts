@@ -52,7 +52,10 @@ export const registerGrammarChecker = (editor: monaco.editor.IEditor) => {
 
   const updateAnnos = async () => {
     const { annotations } = await wps.getAnnos();
-    const model = editor.getModel() as monaco.editor.ITextModel;
+    const model = editor.getModel() as monaco.editor.ITextModel | null;
+    if (!model) {
+      return;
+    }
     monaco.editor.setModelMarkers(
       model,
       OWNER,

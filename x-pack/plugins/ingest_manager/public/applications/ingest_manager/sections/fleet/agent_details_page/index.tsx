@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
-import { useRouteMatch, Switch, Route } from 'react-router-dom';
+import React, { useMemo, useCallback } from 'react';
+import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
@@ -19,14 +19,21 @@ import {
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Agent, AgentConfig } from '../../../types';
+import { Agent, AgentConfig, AgentDetailsReassignConfigAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
-import { useGetOneAgent, useGetOneAgentConfig, useLink, useBreadcrumbs } from '../../../hooks';
+import {
+  useGetOneAgent,
+  useGetOneAgentConfig,
+  useLink,
+  useBreadcrumbs,
+  useCore,
+} from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
 import { AgentRefreshContext } from './hooks';
 import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from './components';
+import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
 const Divider = styled.div`
   width: 0;
@@ -54,6 +61,19 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     sendRequest: sendAgentConfigRequest,
   } = useGetOneAgentConfig(agentData?.item?.config_id);
 
+  const {
+    application: { navigateToApp },
+  } = useCore();
+  const routeState = useIntraAppState<AgentDetailsReassignConfigAction>();
+  const queryParams = new URLSearchParams(useLocation().search);
+  const openReassignFlyoutOpenByDefault = queryParams.get('openReassignFlyout') === 'true';
+
+  const reassignCancelClickHandler = useCallback(() => {
+    if (routeState && routeState.onDoneNavigateTo) {
+      navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
+    }
+  }, [routeState, navigateToApp]);
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
@@ -66,7 +86,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           >
             <FormattedMessage
               id="xpack.ingestManager.agentDetails.viewAgentListTitle"
-              defaultMessage="View all agent configurations"
+              defaultMessage="View all agents"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -124,7 +144,17 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             },
             { isDivider: true },
             {
-              content: <AgentDetailsActionMenu agent={agentData.item} />,
+              content: (
+                <AgentDetailsActionMenu
+                  agent={agentData.item}
+                  assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
+                  onCancelReassign={
+                    routeState && routeState.onDoneNavigateTo
+                      ? reassignCancelClickHandler
+                      : undefined
+                  }
+                />
+              ),
             },
           ].map((item, index) => (
             <EuiFlexItem grow={false} key={index}>

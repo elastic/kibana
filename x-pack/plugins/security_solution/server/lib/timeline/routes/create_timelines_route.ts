@@ -6,7 +6,6 @@
 import { IRouter } from '../../../../../../../src/core/server';
 
 import { TIMELINE_URL } from '../../../../common/constants';
-import { TimelineType } from '../../../../common/types/timeline';
 
 import { ConfigType } from '../../..';
 import { SetupPlugins } from '../../../plugin';
@@ -15,14 +14,12 @@ import { buildRouteValidation } from '../../../utils/build_validation/route_vali
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 
 import { createTimelineSchema } from './schemas/create_timelines_schema';
-import { buildFrameworkRequest } from './utils/common';
 import {
-  createTimelines,
-  getTimeline,
-  getTemplateTimeline,
-  CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
-  CREATE_TIMELINE_ERROR_MESSAGE,
-} from './utils/create_timelines';
+  buildFrameworkRequest,
+  CompareTimelinesStatus,
+  TimelineStatusActions,
+} from './utils/common';
+import { createTimelines } from './utils/create_timelines';
 
 export const createTimelinesRoute = (
   router: IRouter,
@@ -46,40 +43,54 @@ export const createTimelinesRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const { timelineId, timeline, version } = request.body;
-        const { templateTimelineId, timelineType } = timeline;
-        const isHandlingTemplateTimeline = timelineType === TimelineType.template;
-
-        const existTimeline =
-          timelineId != null ? await getTimeline(frameworkRequest, timelineId) : null;
-        const existTemplateTimeline =
-          templateTimelineId != null
-            ? await getTemplateTimeline(frameworkRequest, templateTimelineId)
-            : null;
-
-        if (
-          (!isHandlingTemplateTimeline && existTimeline != null) ||
-          (isHandlingTemplateTimeline && (existTemplateTimeline != null || existTimeline != null))
-        ) {
-          return siemResponse.error({
-            body: isHandlingTemplateTimeline
-              ? CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE
-              : CREATE_TIMELINE_ERROR_MESSAGE,
-            statusCode: 405,
-          });
-        }
+        const {
+          templateTimelineId,
+          templateTimelineVersion,
+          timelineType,
+          title,
+          status,
+        } = timeline;
+        const compareTimelinesStatus = new CompareTimelinesStatus({
+          status,
+          title,
+          timelineType,
+          timelineInput: {
+            id: timelineId,
+            version,
+          },
+          templateTimelineInput: {
+            id: templateTimelineId,
+            version: templateTimelineVersion,
+          },
+          frameworkRequest,
+        });
+        await compareTimelinesStatus.init();
 
         // Create timeline
-        const newTimeline = await createTimelines(frameworkRequest, timeline, null, version);
-        return response.ok({
-          body: {
-            data: {
-              persistTimeline: newTimeline,
+        if (compareTimelinesStatus.isCreatable) {
+          const newTimeline = await createTimelines({
+            frameworkRequest,
+            timeline,
+            timelineVersion: version,
+          });
+
+          return response.ok({
+            body: {
+              data: {
+                persistTimeline: newTimeline,
+              },
             },
-          },
-        });
+          });
+        } else {
+          return siemResponse.error(
+            compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.create) || {
+              statusCode: 405,
+              body: 'update timeline error',
+            }
+          );
+        }
       } catch (err) {
         const error = transformError(err);
-
         return siemResponse.error({
           body: error.message,
           statusCode: error.statusCode,

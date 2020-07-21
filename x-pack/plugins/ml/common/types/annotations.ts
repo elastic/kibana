@@ -58,7 +58,19 @@
 //     ]
 // }
 
+import { PartitionFieldsType } from './anomalies';
 import { ANNOTATION_TYPE } from '../constants/annotations';
+
+export type AnnotationFieldName = 'partition_field_name' | 'over_field_name' | 'by_field_name';
+export type AnnotationFieldValue = 'partition_field_value' | 'over_field_value' | 'by_field_value';
+
+export function getAnnotationFieldName(fieldType: PartitionFieldsType): AnnotationFieldName {
+  return `${fieldType}_name` as AnnotationFieldName;
+}
+
+export function getAnnotationFieldValue(fieldType: PartitionFieldsType): AnnotationFieldValue {
+  return `${fieldType}_value` as AnnotationFieldValue;
+}
 
 export interface Annotation {
   _id?: string;
@@ -73,8 +85,15 @@ export interface Annotation {
   annotation: string;
   job_id: string;
   type: ANNOTATION_TYPE.ANNOTATION | ANNOTATION_TYPE.COMMENT;
+  event?: string;
+  detector_index?: number;
+  partition_field_name?: string;
+  partition_field_value?: string;
+  over_field_name?: string;
+  over_field_value?: string;
+  by_field_name?: string;
+  by_field_value?: string;
 }
-
 export function isAnnotation(arg: any): arg is Annotation {
   return (
     arg.timestamp !== undefined &&
@@ -92,4 +111,28 @@ export function isAnnotations(arg: any): arg is Annotations {
     return false;
   }
   return arg.every((d: Annotation) => isAnnotation(d));
+}
+
+export interface FieldToBucket {
+  field: string;
+  missing?: string | number;
+}
+
+export interface FieldToBucketResult {
+  key: string;
+  doc_count: number;
+}
+
+export interface TermAggregationResult {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: FieldToBucketResult[];
+}
+
+export type EsAggregationResult = Record<string, TermAggregationResult>;
+
+export interface GetAnnotationsResponse {
+  aggregations?: EsAggregationResult;
+  annotations: Record<string, Annotations>;
+  success: boolean;
 }

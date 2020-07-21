@@ -7,12 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_TITLE = i18n.translate('xpack.securitySolution.pages.common.emptyTitle', {
-  defaultMessage: 'Welcome to SIEM. Let’s get you started.',
-});
-
-export const EMPTY_MESSAGE = i18n.translate('xpack.securitySolution.pages.common.emptyMessage', {
-  defaultMessage:
-    'To begin using security information and event management (SIEM), you’ll need to add SIEM-related data, in Elastic Common Schema (ECS) format, to the Elastic Stack. An easy way to get started is by installing and configuring our data shippers, called Beats. Let’s do that now!',
+  defaultMessage: 'Welcome to Security Solution. Let’s get you started.',
 });
 
 export const EMPTY_ACTION_PRIMARY = i18n.translate(
@@ -25,6 +20,13 @@ export const EMPTY_ACTION_PRIMARY = i18n.translate(
 export const EMPTY_ACTION_SECONDARY = i18n.translate(
   'xpack.securitySolution.pages.common.emptyActionSecondary',
   {
-    defaultMessage: 'View getting started guide',
+    defaultMessage: 'getting started guide.',
+  }
+);
+
+export const EMPTY_ACTION_ENDPOINT = i18n.translate(
+  'xpack.securitySolution.pages.common.emptyActionEndpoint',
+  {
+    defaultMessage: 'Add data with Elastic Agent (Beta)',
   }
 );

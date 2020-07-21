@@ -6,51 +6,39 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  Axis,
-  Chart,
-  ScaleType,
-  LineSeries,
-  CurveType,
-  BrushEndListener,
-  Settings,
-  TooltipValueFormatter,
-  TooltipValue,
-} from '@elastic/charts';
-import { Position } from '@elastic/charts/dist/utils/commons';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher } from '../../../../hooks/useFetcher';
-import { ChartWrapper } from '../ChartWrapper';
-import { PercentileAnnotations } from './PercentileAnnotations';
-import {
-  PageLoadDistLabel,
-  PageLoadTimeLabel,
-  PercPageLoadedLabel,
-  ResetZoomLabel,
-} from '../translations';
+import { I18LABELS } from '../translations';
+import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
+import { PageLoadDistChart } from '../Charts/PageLoadDistChart';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
+
+export interface PercentileRange {
+  min?: number | null;
+  max?: number | null;
+}
 
 export const PageLoadDistribution = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, serviceName } = urlParams;
 
-  const [percentileRange, setPercentileRange] = useState<{
-    min: string | null;
-    max: string | null;
-  }>({
+  const [percentileRange, setPercentileRange] = useState<PercentileRange>({
     min: null,
     max: null,
   });
 
+  const [breakdowns, setBreakdowns] = useState<BreakdownItem[]>([]);
+
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-load-distribution',
           params: {
@@ -60,85 +48,71 @@ export const PageLoadDistribution = () => {
               uiFilters: JSON.stringify(uiFilters),
               ...(percentileRange.min && percentileRange.max
                 ? {
-                    minPercentile: percentileRange.min,
-                    maxPercentile: percentileRange.max,
+                    minPercentile: String(percentileRange.min),
+                    maxPercentile: String(percentileRange.max),
                   }
                 : {}),
             },
           },
         });
       }
+      return Promise.resolve(null);
     },
-    [end, start, uiFilters, percentileRange.min, percentileRange.max]
+    [
+      end,
+      start,
+      serviceName,
+      uiFilters,
+      percentileRange.min,
+      percentileRange.max,
+    ]
   );
 
-  const onBrushEnd: BrushEndListener = ({ x }) => {
-    if (!x) {
-      return;
-    }
-    const [minX, maxX] = x;
-    setPercentileRange({ min: String(minX), max: String(maxX) });
-  };
-
-  const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
-    return (
-      <div>
-        <p>{tooltip.value} seconds</p>
-      </div>
-    );
-  };
-
-  const tooltipProps = {
-    headerFormatter,
+  const onPercentileChange = (min: number, max: number) => {
+    setPercentileRange({ min, max });
   };
 
   return (
-    <div>
+    <div data-cy="pageLoadDist">
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">
-            <h3>{PageLoadDistLabel}</h3>
+            <h3>{I18LABELS.pageLoadDistribution}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonEmpty
             iconType="inspect"
             size="s"
             onClick={() => {
               setPercentileRange({ min: null, max: null });
             }}
-            fill={percentileRange.min !== null && percentileRange.max !== null}
+            disabled={
+              percentileRange.min === null && percentileRange.max === null
+            }
           >
-            {ResetZoomLabel}
-          </EuiButton>
+            {I18LABELS.resetZoom}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BreakdownFilter
+            id={'pageLoad'}
+            selectedBreakdowns={breakdowns}
+            onBreakdownChange={setBreakdowns}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <ChartWrapper loading={status !== 'success'} height="200px">
-        <Chart className="story-chart">
-          <Settings onBrushEnd={onBrushEnd} tooltip={tooltipProps} />
-          <PercentileAnnotations percentiles={data?.percentiles} />
-          <Axis
-            id="bottom"
-            title={PageLoadTimeLabel}
-            position={Position.Bottom}
-          />
-          <Axis
-            id="left"
-            title={PercPageLoadedLabel}
-            position={Position.Left}
-            tickFormat={(d) => Number(d).toFixed(1) + ' %'}
-          />
-          <LineSeries
-            id={'PagesPercentage'}
-            name={PercPageLoadedLabel}
-            xScaleType={ScaleType.Linear}
-            yScaleType={ScaleType.Linear}
-            data={data?.pageLoadDistribution ?? []}
-            curve={CurveType.CURVE_NATURAL}
-          />
-        </Chart>
-      </ChartWrapper>
+      <EuiSpacer size="s" />
+      <PageLoadDistChart
+        data={data}
+        onPercentileChange={onPercentileChange}
+        loading={status !== 'success'}
+        breakdowns={breakdowns}
+        percentileRange={{
+          max: percentileRange.max || data?.maxDuration,
+          min: percentileRange.min || data?.minDuration,
+        }}
+      />
     </div>
   );
 };

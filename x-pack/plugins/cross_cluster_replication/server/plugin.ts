@@ -15,12 +15,12 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
-  APICaller,
-  IScopedClusterClient,
+  LegacyAPICaller,
+  ILegacyScopedClusterClient,
 } from 'src/core/server';
 
 import { Index } from '../../index_management/server';
@@ -34,7 +34,7 @@ import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 
 interface CrossClusterReplicationContext {
-  client: IScopedClusterClient;
+  client: ILegacyScopedClusterClient;
 }
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
@@ -44,7 +44,7 @@ async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']
   return core.elasticsearch.legacy.createClient('crossClusterReplication', esClientConfig);
 }
 
-const ccrDataEnricher = async (indicesList: Index[], callWithRequest: APICaller) => {
+const ccrDataEnricher = async (indicesList: Index[], callWithRequest: LegacyAPICaller) => {
   if (!indicesList?.length) {
     return indicesList;
   }
@@ -77,7 +77,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
   private readonly config$: Observable<CrossClusterReplicationConfig>;
   private readonly license: License;
   private readonly logger: Logger;
-  private ccrEsClient?: ICustomClusterClient;
+  private ccrEsClient?: ILegacyCustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();

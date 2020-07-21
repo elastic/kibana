@@ -8,7 +8,8 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { animateProcessIntoView } from './methods';
 import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
-import { ResolverState, ResolverAction, ResolverUIState } from '../types';
+import { ResolverAction } from './actions';
+import { ResolverState, ResolverUIState } from '../types';
 import { uniquePidForProcess } from '../models/process_event';
 
 /**
@@ -23,7 +24,6 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
     activeDescendantId: null,
     selectedDescendantId: null,
     processEntityIdOfSelectedDescendant: null,
-    panelToDisplay: null,
   },
   action
 ) => {
@@ -37,11 +37,6 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
       ...uiState,
       selectedDescendantId: action.payload.nodeId,
       processEntityIdOfSelectedDescendant: action.payload.selectedProcessId,
-    };
-  } else if (action.type === 'appDisplayedDifferentPanel') {
-    return {
-      ...uiState,
-      panelToDisplay: action.payload,
     };
   } else if (
     action.type === 'userBroughtProcessIntoView' ||

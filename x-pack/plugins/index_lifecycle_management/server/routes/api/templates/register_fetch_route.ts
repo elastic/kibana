@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -49,7 +49,7 @@ function filterAndFormatTemplates(templates: any): any {
   return formattedTemplates;
 }
 
-async function fetchTemplates(callAsCurrentUser: APICaller): Promise<any> {
+async function fetchTemplates(callAsCurrentUser: LegacyAPICaller): Promise<any> {
   const params = {
     method: 'GET',
     path: '/_template',

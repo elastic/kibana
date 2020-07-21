@@ -76,7 +76,7 @@ function mergeWithSubFeatures(
   return mergedConfig;
 }
 
-function mergeArrays(input1: string[] | undefined, input2: string[] | undefined) {
+function mergeArrays(input1: readonly string[] | undefined, input2: readonly string[] | undefined) {
   const first = input1 ?? [];
   const second = input2 ?? [];
   return Array.from(new Set([...first, ...second]));

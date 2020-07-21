@@ -11,7 +11,9 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionItem } from './';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getCommentsMock } from '../../../../../../../lists/common/schemas/types/comments.mock';
+import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comments.mock';
+
+jest.mock('../../../../lib/kibana');
 
 describe('ExceptionItem', () => {
   it('it renders ExceptionDetails and ExceptionEntries', () => {
@@ -83,7 +85,7 @@ describe('ExceptionItem', () => {
   it('it renders comment accordion closed to begin with', () => {
     const mockOnDeleteException = jest.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.comments = getCommentsMock();
+    exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem
@@ -102,7 +104,7 @@ describe('ExceptionItem', () => {
   it('it renders comment accordion open when showComments is true', () => {
     const mockOnDeleteException = jest.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.comments = getCommentsMock();
+    exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionItem

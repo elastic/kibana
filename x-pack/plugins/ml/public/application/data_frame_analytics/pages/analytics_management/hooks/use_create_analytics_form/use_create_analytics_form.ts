@@ -8,7 +8,6 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject } from 'kibana/public';
 import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
@@ -19,17 +18,13 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import {
-  extractCloningConfig,
-  isAdvancedConfig,
-} from '../../components/analytics_list/action_clone';
+import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
 
 import { ActionDispatchers, ACTION } from './actions';
 import { reducer } from './reducer';
 import {
   getInitialState,
   getJobConfigFromFormState,
-  EsIndexName,
   FormMessage,
   State,
   SourceIndexMap,
@@ -70,9 +65,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const resetAdvancedEditorMessages = () =>
     dispatch({ type: ACTION.RESET_ADVANCED_EDITOR_MESSAGES });
-
-  const setIndexNames = (indexNames: EsIndexName[]) =>
-    dispatch({ type: ACTION.SET_INDEX_NAMES, indexNames });
 
   const setAdvancedEditorRawString = (advancedEditorRawString: string) =>
     dispatch({ type: ACTION.SET_ADVANCED_EDITOR_RAW_STRING, advancedEditorRawString });
@@ -218,24 +210,10 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
 
     try {
-      setIndexNames((await ml.getIndices()).map((index) => index.name));
-    } catch (e) {
-      addRequestMessage({
-        error: getErrorMessage(e),
-        message: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.errorGettingDataFrameIndexNames',
-          {
-            defaultMessage: 'An error occurred getting the existing index names:',
-          }
-        ),
-      });
-    }
-
-    try {
-      // Set the index pattern titles which the user can choose as the source.
+      // Set the existing index pattern titles.
       const indexPatternsMap: SourceIndexMap = {};
       const savedObjects = (await mlContext.indexPatterns.getCache()) || [];
-      savedObjects.forEach((obj: SimpleSavedObject<Record<string, any>>) => {
+      savedObjects.forEach((obj) => {
         const title = obj?.attributes?.title;
         if (title !== undefined) {
           const id = obj?.id || '';

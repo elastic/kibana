@@ -4,7 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Datasource, NewDatasource } from '../../../ingest_manager/common';
+import { ApplicationStart } from 'kibana/public';
+import { NewPackageConfig, PackageConfig } from '../../../ingest_manager/common';
+import { ManifestSchema } from './schema/manifest';
+
+/**
+ * Supported React-Router state for the Policy Details page
+ */
+export interface PolicyDetailsRouteState {
+  /**
+   * Where the user should be redirected to when the `Save` button is clicked and the update was successful
+   */
+  onSaveNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+  /**
+   * Where the user should be redirected to when the `Cancel` button is clicked
+   */
+  onCancelNavigateTo?: Parameters<ApplicationStart['navigateToApp']>;
+}
 
 /**
  * Object that allows you to maintain stateful information in the location object across navigation events
@@ -16,9 +32,11 @@ export interface AppLocation {
   search: string;
   hash: string;
   key?: string;
-  state?: {
-    isTabChange?: boolean;
-  };
+  state?:
+    | {
+        isTabChange?: boolean;
+      }
+    | PolicyDetailsRouteState;
 }
 
 /**
@@ -76,12 +94,18 @@ export interface ResolverNodeStats {
  */
 export interface ResolverChildNode extends ResolverLifecycleNode {
   /**
-   * A child node's pagination cursor can be null for a couple reasons:
-   * 1. At the time of querying it could have no children in ES, in which case it will be marked as
-   *  null because we know it does not have children during this query.
-   * 2. If the max level was reached we do not know if this node has children or not so we'll mark it as null
+   * nextChild can have 3 different states:
+   *
+   * undefined: This indicates that you should not use this node for additional queries. It does not mean that node does
+   * not have any more direct children. The node could have more direct children but to determine that, use the
+   * ResolverChildren node's nextChild.
+   *
+   * null: Indicates that we have received all the children of the node. There may be more descendants though.
+   *
+   * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
+   * using this node's entity_id
    */
-  nextChild: string | null;
+  nextChild?: string | null;
 }
 
 /**
@@ -91,7 +115,14 @@ export interface ResolverChildNode extends ResolverLifecycleNode {
 export interface ResolverChildren {
   childNodes: ResolverChildNode[];
   /**
-   * This is the children cursor for the origin of a tree.
+   * nextChild can have 2 different states:
+   *
+   * null: Indicates that we have received all the descendants that can be retrieved using this node. To retrieve more
+   * nodes in the tree use a cursor provided in one of the returned children. If no other cursor exists then the tree
+   * is complete.
+   *
+   * string: Indicates this node has more descendants that can be retrieved, pass this cursor in while using this node's
+   * entity_id for the request.
    */
   nextChild: string | null;
 }
@@ -179,6 +210,8 @@ export interface OSFields {
   full: string;
   name: string;
   version: string;
+  platform: string;
+  family: string;
   Ext: OSFieldsExt;
 }
 
@@ -195,8 +228,10 @@ export interface OSFieldsExt {
 export interface Host {
   id: string;
   hostname: string;
+  name: string;
   ip: string[];
   mac: string[];
+  architecture: string;
   os: OSFields;
 }
 
@@ -299,13 +334,13 @@ export interface AlertEvent {
     start: number;
     thread?: ThreadFields[];
     uptime: number;
-    Ext: {
+    Ext?: {
       /*
        * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
        * values towards the end of the array are more distant ancestors (grandparents). Therefore
        * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
        */
-      ancestry: string[];
+      ancestry?: string[];
       code_signature: Array<{
         subject_name: string;
         trusted: boolean;
@@ -395,6 +430,13 @@ export type HostMetadata = Immutable<{
   '@timestamp': number;
   event: {
     created: number;
+    kind: string;
+    id: string;
+    category: string[];
+    type: string[];
+    module: string;
+    action: string;
+    dataset: string;
   };
   elastic: {
     agent: {
@@ -497,8 +539,8 @@ export interface EndpointEvent {
      * values towards the end of the array are more distant ancestors (grandparents). Therefore
      * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
      */
-    Ext: {
-      ancestry: string[];
+    Ext?: {
+      ancestry?: string[];
     };
   };
   user?: {
@@ -510,6 +552,11 @@ export interface EndpointEvent {
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
+
+/**
+ * The response body for the resolver '/entity' index API
+ */
+export type ResolverEntityIndex = Array<{ entity_id: string }>;
 
 /**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
@@ -583,10 +630,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   mac: {
     events: {
@@ -596,10 +641,8 @@ export interface PolicyConfig {
     };
     malware: MalwareFields;
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
   linux: {
     events: {
@@ -608,10 +651,8 @@ export interface PolicyConfig {
       network: boolean;
     };
     logging: {
-      stdout: string;
       file: string;
     };
-    advanced: PolicyConfigAdvancedOptions;
   };
 }
 
@@ -633,20 +674,6 @@ export interface UIPolicyConfig {
   linux: Pick<PolicyConfig['linux'], 'events'>;
 }
 
-interface PolicyConfigAdvancedOptions {
-  elasticsearch: {
-    indices: {
-      control: string;
-      event: string;
-      logging: string;
-    };
-    kernel: {
-      connect: boolean;
-      process: boolean;
-    };
-  };
-}
-
 /** Policy: Malware protection fields */
 export interface MalwareFields {
   mode: ProtectionModes;
@@ -656,25 +683,27 @@ export interface MalwareFields {
 export enum ProtectionModes {
   detect = 'detect',
   prevent = 'prevent',
-  preventNotify = 'preventNotify',
   off = 'off',
 }
 
 /**
- * Endpoint Policy data, which extends Ingest's `Datasource` type
+ * Endpoint Policy data, which extends Ingest's `PackageConfig` type
  */
-export type PolicyData = Datasource & NewPolicyData;
+export type PolicyData = PackageConfig & NewPolicyData;
 
 /**
  * New policy data. Used when updating the policy record via ingest APIs
  */
-export type NewPolicyData = NewDatasource & {
+export type NewPolicyData = NewPackageConfig & {
   inputs: [
     {
       type: 'endpoint';
       enabled: boolean;
       streams: [];
       config: {
+        artifact_manifest: {
+          value: ManifestSchema;
+        };
         policy: {
           value: PolicyConfig;
         };
@@ -762,8 +791,8 @@ export interface HostPolicyResponse {
     created: number;
     kind: string;
     id: string;
-    category: string;
-    type: string;
+    category: string[];
+    type: string[];
     module: string;
     action: string;
     dataset: string;

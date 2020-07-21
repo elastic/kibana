@@ -13,10 +13,16 @@ import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/lin
 import * as i18n from './translations';
 import { TimelineTabsStyle, TimelineTab } from './types';
 
-export const useTimelineTypes = (): {
+export const useTimelineTypes = ({
+  defaultTimelineCount,
+  templateTimelineCount,
+}: {
+  defaultTimelineCount?: number | null;
+  templateTimelineCount?: number | null;
+}): {
   timelineType: TimelineTypeLiteralWithNull;
   timelineTabs: JSX.Element;
-  timelineFilters: JSX.Element;
+  timelineFilters: JSX.Element[];
 } => {
   const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.timelines);
@@ -40,41 +46,61 @@ export const useTimelineTypes = (): {
     },
     [history, urlSearch]
   );
-
-  const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = (
-    timelineTabsStyle: TimelineTabsStyle
-  ) => [
-    {
-      id: TimelineType.default,
-      name:
-        timelineTabsStyle === TimelineTabsStyle.filter
-          ? i18n.FILTER_TIMELINES(i18n.TAB_TIMELINES)
-          : i18n.TAB_TIMELINES,
-      href: formatUrl(getTimelineTabsUrl(TimelineType.default, urlSearch)),
-      disabled: false,
-      onClick: goToTimeline,
-    },
-    {
-      id: TimelineType.template,
-      name:
-        timelineTabsStyle === TimelineTabsStyle.filter
-          ? i18n.FILTER_TIMELINES(i18n.TAB_TEMPLATES)
-          : i18n.TAB_TEMPLATES,
-      href: formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch)),
-      disabled: false,
-      onClick: goToTemplateTimeline,
-    },
-  ];
+  const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = useCallback(
+    (timelineTabsStyle: TimelineTabsStyle) => [
+      {
+        id: TimelineType.default,
+        name:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? i18n.FILTER_TIMELINES(i18n.TAB_TIMELINES)
+            : i18n.TAB_TIMELINES,
+        href: formatUrl(getTimelineTabsUrl(TimelineType.default, urlSearch)),
+        disabled: false,
+        withNext: true,
+        count:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? defaultTimelineCount ?? undefined
+            : undefined,
+        onClick: goToTimeline,
+      },
+      {
+        id: TimelineType.template,
+        name:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? i18n.FILTER_TIMELINES(i18n.TAB_TEMPLATES)
+            : i18n.TAB_TEMPLATES,
+        href: formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch)),
+        disabled: false,
+        withNext: false,
+        count:
+          timelineTabsStyle === TimelineTabsStyle.filter
+            ? templateTimelineCount ?? undefined
+            : undefined,
+        onClick: goToTemplateTimeline,
+      },
+    ],
+    [
+      defaultTimelineCount,
+      templateTimelineCount,
+      urlSearch,
+      formatUrl,
+      goToTimeline,
+      goToTemplateTimeline,
+    ]
+  );
 
   const onFilterClicked = useCallback(
-    (timelineTabsStyle, tabId) => {
-      if (timelineTabsStyle === TimelineTabsStyle.filter && tabId === timelineType) {
-        setTimelineTypes(null);
-      } else {
-        setTimelineTypes(tabId);
-      }
+    (tabId, tabStyle: TimelineTabsStyle) => {
+      setTimelineTypes((prevTimelineTypes) => {
+        if (tabId === prevTimelineTypes && tabStyle === TimelineTabsStyle.filter) {
+          return null;
+        } else if (prevTimelineTypes !== tabId) {
+          setTimelineTypes(tabId);
+        }
+        return prevTimelineTypes;
+      });
     },
-    [timelineType, setTimelineTypes]
+    [setTimelineTypes]
   );
 
   const timelineTabs = useMemo(() => {
@@ -89,7 +115,7 @@ export const useTimelineTypes = (): {
               href={tab.href}
               onClick={(ev) => {
                 tab.onClick(ev);
-                onFilterClicked(TimelineTabsStyle.tab, tab.id);
+                onFilterClicked(tab.id, TimelineTabsStyle.tab);
               }}
             >
               {tab.name}
@@ -103,24 +129,21 @@ export const useTimelineTypes = (): {
   }, [tabName]);
 
   const timelineFilters = useMemo(() => {
-    return (
-      <>
-        {getFilterOrTabs(TimelineTabsStyle.tab).map((tab: TimelineTab) => (
-          <EuiFilterButton
-            hasActiveFilters={tab.id === timelineType}
-            key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
-            onClick={(ev: { preventDefault: () => void }) => {
-              tab.onClick(ev);
-              onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id);
-            }}
-          >
-            {tab.name}
-          </EuiFilterButton>
-        ))}
-      </>
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timelineType]);
+    return getFilterOrTabs(TimelineTabsStyle.filter).map((tab: TimelineTab) => (
+      <EuiFilterButton
+        hasActiveFilters={tab.id === timelineType}
+        key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
+        numFilters={tab.count}
+        onClick={(ev: { preventDefault: () => void }) => {
+          tab.onClick(ev);
+          onFilterClicked(tab.id, TimelineTabsStyle.filter);
+        }}
+        withNext={tab.withNext}
+      >
+        {tab.name}
+      </EuiFilterButton>
+    ));
+  }, [timelineType, getFilterOrTabs, onFilterClicked]);
 
   return {
     timelineType,

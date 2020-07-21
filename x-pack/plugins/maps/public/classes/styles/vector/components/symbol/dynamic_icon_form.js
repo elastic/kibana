@@ -12,11 +12,9 @@ import { IconMapSelect } from './icon_map_select';
 
 export function DynamicIconForm({
   fields,
-  isDarkMode,
   onDynamicStyleChange,
   staticDynamicSelect,
   styleProperty,
-  symbolOptions,
 }) {
   const styleOptions = styleProperty.getOptions();
 
@@ -36,7 +34,8 @@ export function DynamicIconForm({
   };
 
   function renderIconMapSelect() {
-    if (!styleOptions.field || !styleOptions.field.name) {
+    const field = styleProperty.getField();
+    if (!field) {
       return null;
     }
 
@@ -45,8 +44,7 @@ export function DynamicIconForm({
         {...styleOptions}
         styleProperty={styleProperty}
         onChange={onIconMapChange}
-        isDarkMode={isDarkMode}
-        symbolOptions={symbolOptions}
+        isCustomOnly={!field.supportsAutoDomain()}
       />
     );
   }

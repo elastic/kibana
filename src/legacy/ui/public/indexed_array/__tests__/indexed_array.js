@@ -30,8 +30,8 @@ const users = [
 ];
 
 // this is how we used to accomplish this, before IndexedArray
-users.byName = _.indexBy(users, 'name');
-users.byUsername = _.indexBy(users, 'username');
+users.byName = _.keyBy(users, 'name');
+users.byUsername = _.keyBy(users, 'username');
 users.byGroup = _.groupBy(users, 'group');
 users.inIdOrder = _.sortBy(users, 'id');
 
@@ -54,7 +54,7 @@ describe('IndexedArray', function () {
     });
 
     it('clones to an object', function () {
-      expect(_.isPlainObject(_.clone(reg))).to.be(true);
+      expect(_.isObject(_.clone(reg))).to.be(true);
       expect(Array.isArray(_.clone(reg))).to.be(false);
     });
   });
@@ -140,7 +140,7 @@ describe('IndexedArray', function () {
 
       reg.remove({ name: 'John' });
 
-      expect(_.eq(reg.raw, reg.slice(0))).to.be(true);
+      expect(_.isEqual(reg.raw, reg.slice(0))).to.be(true);
       expect(reg.length).to.be(3);
       expect(reg[0].name).to.be('Anon');
     });

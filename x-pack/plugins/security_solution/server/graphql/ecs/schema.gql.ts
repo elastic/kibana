@@ -60,6 +60,10 @@ export const ecsSchema = gql`
     sequence: ToStringArray
   }
 
+  type AgentEcsField {
+    type: ToStringArray
+  }
+
   type AuditdData {
     acct: ToStringArray
     terminal: ToStringArray
@@ -110,6 +114,7 @@ export const ecsSchema = gql`
     name: ToStringArray
     ppid: ToNumberArray
     args: ToStringArray
+    entity_id: ToStringArray
     executable: ToStringArray
     title: ToStringArray
     thread: Thread
@@ -411,6 +416,8 @@ export const ecsSchema = gql`
     updated_by: ToStringArray
     version: ToStringArray
     note: ToStringArray
+    threshold: ToAny
+    exceptions_list: ToAny
   }
 
   type SignalField {
@@ -425,6 +432,7 @@ export const ecsSchema = gql`
   type ECS {
     _id: String!
     _index: String
+    agent: AgentEcsField
     auditd: AuditdEcsFields
     destination: DestinationEcsFields
     dns: DnsEcsFields

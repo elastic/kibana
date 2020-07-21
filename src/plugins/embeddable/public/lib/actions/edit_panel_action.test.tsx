@@ -59,7 +59,7 @@ test('redirects to app using state transfer', async () => {
   const embeddable = new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true);
   embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
   await action.execute({ embeddable });
-  expect(stateTransferMock.navigateToWithOriginatingApp).toHaveBeenCalledWith('ultraVisualize', {
+  expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
     path: '/123',
     state: { originatingApp: 'superCoolCurrentApp' },
   });

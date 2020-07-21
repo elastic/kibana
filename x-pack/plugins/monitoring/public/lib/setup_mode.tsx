@@ -6,14 +6,14 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { get, contains } from 'lodash';
+import { get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from '../legacy_shims';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
 
 function isOnPage(hash: string) {
-  return contains(window.location.hash, hash);
+  return includes(window.location.hash, hash);
 }
 
 interface IAngularState {
@@ -39,11 +39,13 @@ interface ISetupModeState {
   enabled: boolean;
   data: any;
   callback?: (() => void) | null;
+  hideBottomBar: boolean;
 }
 const setupModeState: ISetupModeState = {
   enabled: false,
   data: null,
   callback: null,
+  hideBottomBar: false,
 };
 
 export const getSetupModeState = () => setupModeState;
@@ -126,6 +128,15 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
       setNewlyDiscoveredClusterUuid(liveClusterUuid);
     }
   }
+};
+
+export const hideBottomBar = () => {
+  setupModeState.hideBottomBar = true;
+  notifySetupModeDataChange();
+};
+export const showBottomBar = () => {
+  setupModeState.hideBottomBar = false;
+  notifySetupModeDataChange();
 };
 
 export const disableElasticsearchInternalCollection = async () => {

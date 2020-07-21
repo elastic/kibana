@@ -47,6 +47,9 @@ describe('GET /api/reporting/jobs/download', () => {
         legacy: { client: { callAsInternalUser: jest.fn() } },
       },
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => ({
             id: '123',
@@ -113,6 +116,9 @@ describe('GET /api/reporting/jobs/download', () => {
       // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => undefined,
         },
@@ -136,6 +142,9 @@ describe('GET /api/reporting/jobs/download', () => {
       // @ts-ignore
       ...core.pluginSetupDeps,
       security: {
+        license: {
+          isEnabled: () => true,
+        },
         authc: {
           getCurrentUser: () => ({
             id: '123',

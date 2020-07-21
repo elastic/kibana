@@ -17,6 +17,26 @@ jest.mock('../../utils/apollo_context', () => ({
 }));
 
 describe('Index Fields & Browser Fields', () => {
+  test('At initialization the value of indicesExists should be true', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useWithSource());
+    const initialResult = result.current;
+
+    await waitForNextUpdate();
+
+    return expect(initialResult).toEqual({
+      browserFields: {},
+      docValueFields: [],
+      errorMessage: null,
+      indexPattern: {
+        fields: [],
+        title:
+          'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
+      },
+      indicesExist: true,
+      loading: true,
+    });
+  });
+
   test('returns memoized value', async () => {
     const { result, waitForNextUpdate, rerender } = renderHook(() => useWithSource());
     await waitForNextUpdate();
@@ -37,9 +57,20 @@ describe('Index Fields & Browser Fields', () => {
       current: {
         indicesExist: true,
         browserFields: mockBrowserFields,
+        docValueFields: [
+          {
+            field: '@timestamp',
+            format: 'date_time',
+          },
+          {
+            field: 'event.end',
+            format: 'date_time',
+          },
+        ],
         indexPattern: {
           fields: mockIndexFields,
-          title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+          title:
+            'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
         },
         loading: false,
         errorMessage: null,

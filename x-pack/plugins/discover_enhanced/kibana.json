@@ -2,8 +2,10 @@
   "id": "discoverEnhanced",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["uiActions", "embeddable", "discover"],
-  "optionalPlugins": ["share"]
+  "optionalPlugins": ["share"],
+  "configPath": ["xpack", "discoverEnhanced"],
+  "requiredBundles": ["kibanaUtils", "data"]
 }

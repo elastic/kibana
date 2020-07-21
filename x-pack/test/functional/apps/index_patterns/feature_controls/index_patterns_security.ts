@@ -71,7 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -125,7 +125,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`index pattern listing doesn't show create button`, async () => {
@@ -177,13 +177,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`doesn't show Index Patterns in management side-nav`, async () => {
         await PageObjects.settings.navigateTo();
-        await testSubjects.existOrFail('kibana');
-        await testSubjects.missingOrFail('index_patterns');
+        await testSubjects.existOrFail('managementHome', {
+          timeout: config.get('timeouts.waitFor'),
+        });
+        await testSubjects.missingOrFail('indexPatterns');
       });
 
       it(`does not allow navigation to Index Patterns; redirects to management home`, async () => {

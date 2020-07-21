@@ -8,12 +8,14 @@ import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
   createSecuritySolutionStorageMock,
+  kibanaObservable,
 } from '../../../common/mock';
 
 import { OverviewNetwork } from '.';
@@ -23,10 +25,27 @@ import { GetOverviewHostQuery } from '../../../graphql/types';
 import { wait } from '../../../common/lib/helpers';
 
 jest.mock('../../../common/components/link_to');
-jest.mock('../../../common/lib/kibana');
+const mockNavigateToApp = jest.fn();
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
 
-const startDate = 1579553397080;
-const endDate = 1579639797080;
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: mockNavigateToApp,
+          getUrlForApp: jest.fn(),
+        },
+      },
+    }),
+    useUiSetting$: jest.fn().mockReturnValue([]),
+    useGetUserSavedObjectPermissions: jest.fn(),
+  };
+});
+
+const startDate = '2020-01-20T20:49:57.080Z';
+const endDate = '2020-01-21T20:49:57.080Z';
 
 interface MockedProvidedQuery {
   request: {
@@ -55,6 +74,7 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
           'auditbeat-*',
           'endgame-*',
           'filebeat-*',
+          'logs-*',
           'packetbeat-*',
           'winlogbeat-*',
         ],
@@ -86,11 +106,23 @@ describe('OverviewNetwork', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   test('it renders the expected widget title', () => {
@@ -129,5 +161,35 @@ describe('OverviewNetwork', () => {
     expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
       'Showing: 9 events'
     );
+  });
+
+  it('it renders View Network', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+          <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        </MockedProvider>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="overview-network-go-to-network-page"]')).toBeTruthy();
+  });
+
+  it('when click on View Network we call navigateToApp to make sure to navigate to right page', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+          <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        </MockedProvider>
+      </TestProviders>
+    );
+
+    wrapper
+      .find('[data-test-subj="overview-network-go-to-network-page"] button')
+      .simulate('click', {
+        preventDefault: jest.fn(),
+      });
+
+    expect(mockNavigateToApp).toBeCalledWith('securitySolution:network', { path: '' });
   });
 });

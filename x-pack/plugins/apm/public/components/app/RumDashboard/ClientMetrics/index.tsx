@@ -3,24 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @flow
 import * as React from 'react';
+import numeral from '@elastic/numeral';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { BackEndLabel, FrontEndLabel, PageViewsLabel } from '../translations';
-
-export const formatBigValue = (val?: number | null, fixed?: number): string => {
-  if (val && val >= 1000) {
-    const result = val / 1000;
-    if (fixed) {
-      return result.toFixed(fixed) + 'k';
-    }
-    return result + 'k';
-  }
-  return val + '';
-};
+import { I18LABELS } from '../translations';
 
 const ClFlexGroup = styled(EuiFlexGroup)`
   flex-direction: row;
@@ -30,14 +19,14 @@ const ClFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
-export const ClientMetrics = () => {
+export function ClientMetrics() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, serviceName } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum/client-metrics',
           params: {
@@ -45,8 +34,9 @@ export const ClientMetrics = () => {
           },
         });
       }
+      return Promise.resolve(null);
     },
-    [start, end, uiFilters]
+    [start, end, serviceName, uiFilters]
   );
 
   const STAT_STYLE = { width: '240px' };
@@ -57,7 +47,7 @@ export const ClientMetrics = () => {
         <EuiStat
           titleSize="s"
           title={(data?.backEnd?.value?.toFixed(2) ?? '-') + ' sec'}
-          description={BackEndLabel}
+          description={I18LABELS.backEnd}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
@@ -65,18 +55,22 @@ export const ClientMetrics = () => {
         <EuiStat
           titleSize="s"
           title={(data?.frontEnd?.value?.toFixed(2) ?? '-') + ' sec'}
-          description={FrontEndLabel}
+          description={I18LABELS.frontEnd}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"
-          title={formatBigValue(data?.pageViews?.value, 2) ?? '-'}
-          description={PageViewsLabel}
+          title={
+            <EuiToolTip content={data?.pageViews?.value}>
+              <>{numeral(data?.pageViews?.value).format('0 a') ?? '-'}</>
+            </EuiToolTip>
+          }
+          description={I18LABELS.pageViews}
           isLoading={status !== 'success'}
         />
       </EuiFlexItem>
     </ClFlexGroup>
   );
-};
+}

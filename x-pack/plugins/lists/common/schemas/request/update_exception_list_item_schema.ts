@@ -9,7 +9,6 @@
 import * as t from 'io-ts';
 
 import {
-  NamespaceType,
   Tags,
   _Tags,
   _tags,
@@ -23,10 +22,11 @@ import {
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
 import {
-  CommentsPartialArray,
-  DefaultCommentsPartialArray,
   DefaultEntryArray,
+  DefaultUpdateCommentsArray,
   EntriesArray,
+  NamespaceType,
+  UpdateCommentsArray,
 } from '../types';
 
 export const updateExceptionListItemSchema = t.intersection([
@@ -40,7 +40,7 @@ export const updateExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       _tags, // defaults to empty array if not set during decode
-      comments: DefaultCommentsPartialArray, // defaults to empty array if not set during decode
+      comments: DefaultUpdateCommentsArray, // defaults to empty array if not set during decode
       entries: DefaultEntryArray, // defaults to empty array if not set during decode
       id, // defaults to undefined if not set during decode
       item_id: t.union([t.string, t.undefined]),
@@ -65,7 +65,7 @@ export type UpdateExceptionListItemSchemaDecoded = Identity<
     '_tags' | 'tags' | 'entries' | 'namespace_type' | 'comments'
   > & {
     _tags: _Tags;
-    comments: CommentsPartialArray;
+    comments: UpdateCommentsArray;
     tags: Tags;
     entries: EntriesArray;
     namespace_type: NamespaceType;

@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import classNames from 'classnames';
 import React, { FunctionComponent, useState } from 'react';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 
-import { editorItemMessages } from './messages';
+import { i18nTexts } from './i18n_texts';
 
 interface Props {
   disabled: boolean;
+  hidden: boolean;
   showAddOnFailure: boolean;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -20,8 +22,12 @@ interface Props {
 }
 
 export const ContextMenu: FunctionComponent<Props> = (props) => {
-  const { showAddOnFailure, onDuplicate, onAddOnFailure, onDelete, disabled } = props;
+  const { showAddOnFailure, onDuplicate, onAddOnFailure, onDelete, disabled, hidden } = props;
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const containerClasses = classNames({
+    'pipelineProcessorsEditor__item--displayNone': hidden,
+  });
 
   const contextMenuItems = [
     <EuiContextMenuItem
@@ -33,7 +39,7 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
         onDuplicate();
       }}
     >
-      {editorItemMessages.duplicateButtonLabel}
+      {i18nTexts.duplicateButtonLabel}
     </EuiContextMenuItem>,
     showAddOnFailure ? (
       <EuiContextMenuItem
@@ -45,7 +51,7 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
           onAddOnFailure();
         }}
       >
-        {editorItemMessages.addOnFailureButtonLabel}
+        {i18nTexts.addOnFailureButtonLabel}
       </EuiContextMenuItem>
     ) : undefined,
     <EuiContextMenuItem
@@ -58,28 +64,30 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
         onDelete();
       }}
     >
-      {editorItemMessages.deleteButtonLabel}
+      {i18nTexts.deleteButtonLabel}
     </EuiContextMenuItem>,
   ].filter(Boolean) as JSX.Element[];
 
   return (
-    <EuiPopover
-      data-test-subj={props['data-test-subj']}
-      anchorPosition="leftCenter"
-      panelPaddingSize="none"
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      button={
-        <EuiButtonIcon
-          data-test-subj="button"
-          disabled={disabled}
-          onClick={() => setIsOpen((v) => !v)}
-          iconType="boxesHorizontal"
-          aria-label={editorItemMessages.moreButtonAriaLabel}
-        />
-      }
-    >
-      <EuiContextMenuPanel items={contextMenuItems} />
-    </EuiPopover>
+    <div className={containerClasses}>
+      <EuiPopover
+        data-test-subj={props['data-test-subj']}
+        anchorPosition="leftCenter"
+        panelPaddingSize="none"
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        button={
+          <EuiButtonIcon
+            data-test-subj="button"
+            disabled={disabled}
+            onClick={() => setIsOpen((v) => !v)}
+            iconType="boxesHorizontal"
+            aria-label={i18nTexts.moreButtonAriaLabel}
+          />
+        }
+      >
+        <EuiContextMenuPanel items={contextMenuItems} />
+      </EuiPopover>
+    </div>
   );
 };

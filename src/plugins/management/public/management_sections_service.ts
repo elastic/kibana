@@ -17,17 +17,47 @@
  * under the License.
  */
 
-import { ReactElement } from 'react';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
-import { managementSections } from './components/management_sections';
+import {
+  IngestSection,
+  DataSection,
+  InsightsAndAlertingSection,
+  SecuritySection,
+  KibanaSection,
+  StackSection,
+} from './components/management_sections';
 
-import { ManagementSectionId, SectionsServiceSetup, SectionsServiceStart } from './types';
+import {
+  ManagementSectionId,
+  SectionsServiceSetup,
+  SectionsServiceStartDeps,
+  DefinedSections,
+  ManagementSectionsStartPrivate,
+} from './types';
+import { createGetterSetter } from '../../kibana_utils/public';
+
+const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] = createGetterSetter<
+  ManagementSectionsStartPrivate
+>('SectionsServiceStartPrivate');
+
+export { getSectionsServiceStartPrivate };
 
 export class ManagementSectionsService {
-  private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();
+  definedSections: DefinedSections;
 
-  private getSection = (sectionId: ManagementSectionId | string) =>
-    this.sections.get(sectionId) as ManagementSection;
+  constructor() {
+    // Note on adding sections - sections can be defined in a plugin and exported as a contract
+    // It is not necessary to define all sections here, although we've chose to do it for discovery reasons.
+    this.definedSections = {
+      ingest: this.registerSection(IngestSection),
+      data: this.registerSection(DataSection),
+      insightsAndAlerting: this.registerSection(InsightsAndAlertingSection),
+      security: this.registerSection(SecuritySection),
+      kibana: this.registerSection(KibanaSection),
+      stack: this.registerSection(StackSection),
+    };
+  }
+  private sections: Map<ManagementSectionId | string, ManagementSection> = new Map();
 
   private getAllSections = () => [...this.sections.values()];
 
@@ -43,23 +73,30 @@ export class ManagementSectionsService {
   };
 
   setup(): SectionsServiceSetup {
-    managementSections.forEach(
-      ({ id, title }: { id: ManagementSectionId; title: ReactElement }, idx: number) => {
-        this.registerSection({ id, title, order: idx });
-      }
-    );
-
     return {
       register: this.registerSection,
-      getSection: this.getSection,
+      section: {
+        ...this.definedSections,
+      },
     };
   }
 
-  start(): SectionsServiceStart {
-    return {
-      getSection: this.getSection,
-      getAllSections: this.getAllSections,
+  start({ capabilities }: SectionsServiceStartDeps) {
+    this.getAllSections().forEach((section) => {
+      if (capabilities.management.hasOwnProperty(section.id)) {
+        const sectionCapabilities = capabilities.management[section.id];
+        section.apps.forEach((app) => {
+          if (sectionCapabilities.hasOwnProperty(app.id) && sectionCapabilities[app.id] !== true) {
+            app.disable();
+          }
+        });
+      }
+    });
+
+    setSectionsServiceStartPrivate({
       getSectionsEnabled: () => this.getAllSections().filter((section) => section.enabled),
-    };
+    });
+
+    return {};
   }
 }

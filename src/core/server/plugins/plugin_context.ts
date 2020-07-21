@@ -157,6 +157,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       ),
       createRouter: () => router,
       resources: deps.httpResources.createRegistrar(router),
+      registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
@@ -168,9 +169,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     logging: {
       configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
-    },
-    metrics: {
-      getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
@@ -188,6 +186,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       getInstanceUuid: deps.uuid.getInstanceUuid,
     },
     getStartServices: () => plugin.startDependencies,
+    auditTrail: deps.auditTrail,
   };
 }
 
@@ -212,7 +211,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
-    elasticsearch: deps.elasticsearch,
+    elasticsearch: {
+      legacy: deps.elasticsearch.legacy,
+    },
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,
@@ -225,8 +226,12 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createSerializer: deps.savedObjects.createSerializer,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
     },
+    metrics: {
+      getOpsMetrics$: deps.metrics.getOpsMetrics$,
+    },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
     },
+    auditTrail: deps.auditTrail,
   };
 }

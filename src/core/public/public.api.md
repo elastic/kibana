@@ -6,7 +6,6 @@
 
 import { Action } from 'history';
 import Boom from 'boom';
-import { Breadcrumb } from '@elastic/eui';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
@@ -37,6 +36,7 @@ import { DeleteDocumentByQueryParams } from 'elasticsearch';
 import { DeleteDocumentParams } from 'elasticsearch';
 import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
@@ -116,6 +116,7 @@ import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/ser
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import React from 'react';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
@@ -333,7 +334,7 @@ export interface ChromeBrand {
 }
 
 // @public (undocumented)
-export type ChromeBreadcrumb = Breadcrumb;
+export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
 export interface ChromeDocTitle {
@@ -580,6 +581,12 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
         label: string;
         euiIconType: string;
         order: number;
+    };
+    enterpriseSearch: {
+        id: string;
+        label: string;
+        order: number;
+        euiIconType: string;
     };
     observability: {
         id: string;
@@ -1143,22 +1150,20 @@ export type PluginOpaqueId = symbol;
 // @public
 export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
     legacy: false;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
+    appRoute: string;
 };
 
 // @public
 export type PublicLegacyAppInfo = Omit<LegacyApp, 'updater$'> & {
     legacy: true;
+    status: AppStatus;
+    navLinkStatus: AppNavLinkStatus;
 };
 
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
-
-// Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type RecursiveReadonly<T> = T extends (...args: any[]) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
-    [K in keyof T]: RecursiveReadonly<T[K]>;
-}> : T;
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1277,7 +1282,7 @@ export interface SavedObjectsCreateOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsFindOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
@@ -1288,6 +1293,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
         type: string;
         id: string;
     };
+    // (undocumented)
+    namespaces?: string[];
     // (undocumented)
     page?: number;
     // (undocumented)

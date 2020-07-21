@@ -7,6 +7,7 @@
 import { Ecs } from '../../../../graphql/types';
 
 import { eventHasNotes, eventIsPinned, getPinTooltip, stringifyEvent } from './helpers';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 describe('helpers', () => {
   describe('stringifyEvent', () => {
@@ -192,21 +193,37 @@ describe('helpers', () => {
 
   describe('getPinTooltip', () => {
     test('it indicates the event may NOT be unpinned when `isPinned` is `true` and the event has notes', () => {
-      expect(getPinTooltip({ isPinned: true, eventHasNotes: true })).toEqual(
-        'This event cannot be unpinned because it has notes'
-      );
+      expect(
+        getPinTooltip({ isPinned: true, eventHasNotes: true, timelineType: TimelineType.default })
+      ).toEqual('This event cannot be unpinned because it has notes');
     });
 
     test('it indicates the event is pinned when `isPinned` is `true` and the event does NOT have notes', () => {
-      expect(getPinTooltip({ isPinned: true, eventHasNotes: false })).toEqual('Pinned event');
+      expect(
+        getPinTooltip({ isPinned: true, eventHasNotes: false, timelineType: TimelineType.default })
+      ).toEqual('Pinned event');
     });
 
     test('it indicates the event is NOT pinned when `isPinned` is `false` and the event has notes', () => {
-      expect(getPinTooltip({ isPinned: false, eventHasNotes: true })).toEqual('Unpinned event');
+      expect(
+        getPinTooltip({ isPinned: false, eventHasNotes: true, timelineType: TimelineType.default })
+      ).toEqual('Unpinned event');
     });
 
     test('it indicates the event is NOT pinned when `isPinned` is `false` and the event does NOT have notes', () => {
-      expect(getPinTooltip({ isPinned: false, eventHasNotes: false })).toEqual('Unpinned event');
+      expect(
+        getPinTooltip({ isPinned: false, eventHasNotes: false, timelineType: TimelineType.default })
+      ).toEqual('Unpinned event');
+    });
+
+    test('it indicates the event is disabled if timelineType is template', () => {
+      expect(
+        getPinTooltip({
+          isPinned: false,
+          eventHasNotes: false,
+          timelineType: TimelineType.template,
+        })
+      ).toEqual('This event may not be pinned while editing a template timeline');
     });
   });
 

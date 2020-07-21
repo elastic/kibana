@@ -12,7 +12,7 @@ import moment from 'moment-timezone';
 
 import { ExceptionDetails } from './exception_details';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getCommentsMock } from '../../../../../../../lists/common/schemas/types/comments.mock';
+import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comments.mock';
 
 describe('ExceptionDetails', () => {
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe('ExceptionDetails', () => {
 
   test('it renders comments button if comments exist', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.comments = getCommentsMock();
+    exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionDetails
@@ -60,7 +60,7 @@ describe('ExceptionDetails', () => {
 
   test('it renders correct number of comments', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.comments = [getCommentsMock()[0]];
+    exceptionItem.comments = [getCommentsArrayMock()[0]];
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionDetails
@@ -78,7 +78,7 @@ describe('ExceptionDetails', () => {
 
   test('it renders comments plural if more than one', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.comments = getCommentsMock();
+    exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionDetails
@@ -96,7 +96,7 @@ describe('ExceptionDetails', () => {
 
   test('it renders comments show text if "showComments" is false', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.comments = getCommentsMock();
+    exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionDetails
@@ -114,7 +114,7 @@ describe('ExceptionDetails', () => {
 
   test('it renders comments hide text if "showComments" is true', () => {
     const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.comments = getCommentsMock();
+    exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionDetails
@@ -133,7 +133,7 @@ describe('ExceptionDetails', () => {
   test('it invokes "onCommentsClick" when comments button clicked', () => {
     const mockOnCommentsClick = jest.fn();
     const exceptionItem = getExceptionListItemSchemaMock();
-    exceptionItem.comments = getCommentsMock();
+    exceptionItem.comments = getCommentsArrayMock();
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionDetails

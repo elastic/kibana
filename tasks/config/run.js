@@ -149,6 +149,12 @@ module.exports = function (grunt) {
       args: ['scripts/i18n_check', '--ignore-missing'],
     }),
 
+    telemetryCheck: scriptWithGithubChecks({
+      title: 'Telemetry Schema check',
+      cmd: NODE,
+      args: ['scripts/telemetry_check'],
+    }),
+
     // used by the test:quick task
     //    runs all node.js/server mocha tests
     mocha: scriptWithGithubChecks({
@@ -215,6 +221,12 @@ module.exports = function (grunt) {
       title: 'Node.js hardening tests',
       cmd: NODE,
       args: ['scripts/test_hardening.js'],
+    }),
+
+    test_package_safer_lodash_set: scriptWithGithubChecks({
+      title: '@elastic/safer-lodash-set tests',
+      cmd: YARN,
+      args: ['--cwd', 'packages/elastic-safer-lodash-set', 'test'],
     }),
 
     apiIntegrationTests: scriptWithGithubChecks({

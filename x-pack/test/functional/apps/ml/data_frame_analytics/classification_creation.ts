@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('selects the source data and loads the job wizard page', async () => {
           await ml.jobSourceSelection.selectSourceForAnalyticsJob(testData.source);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
         it('selects the job type', async () => {
@@ -83,13 +84,21 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setTrainingPercent(testData.trainingPercent);
         });
 
+        it('displays the source data preview', async () => {
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
+        });
+
+        it('displays the include fields selection', async () => {
+          await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+        });
+
         it('continues to the additional options step', async () => {
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
         });
 
-        it('inputs the model memory limit', async () => {
+        it('accepts the suggested model memory limit', async () => {
           await ml.dataFrameAnalyticsCreation.assertModelMemoryInputExists();
-          await ml.dataFrameAnalyticsCreation.setModelMemory(testData.modelMemory);
+          await ml.dataFrameAnalyticsCreation.assertModelMemoryInputPopulated();
         });
 
         it('continues to the details step', async () => {

@@ -5,6 +5,7 @@
  */
 
 import { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
+import { featuresPluginMock } from '../../../features/server/mocks';
 import { initAppAuthorization } from './app_authorization';
 
 import {
@@ -16,9 +17,11 @@ import {
 import { authorizationMock } from './index.mock';
 
 const createFeaturesSetupContractMock = (): FeaturesSetupContract => {
-  return {
-    getFeatures: () => [{ id: 'foo', name: 'Foo', app: ['foo'], privileges: {} }],
-  } as FeaturesSetupContract;
+  const mock = featuresPluginMock.createSetup();
+  mock.getFeatures.mockReturnValue([
+    { id: 'foo', name: 'Foo', app: ['foo'], privileges: {} } as any,
+  ]);
+  return mock;
 };
 
 describe('initAppAuthorization', () => {

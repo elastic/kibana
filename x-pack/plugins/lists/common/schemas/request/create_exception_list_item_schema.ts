@@ -10,7 +10,6 @@ import * as t from 'io-ts';
 
 import {
   ItemId,
-  NamespaceType,
   Tags,
   _Tags,
   _tags,
@@ -23,7 +22,12 @@ import {
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
-import { CommentsPartialArray, DefaultCommentsPartialArray, DefaultEntryArray } from '../types';
+import {
+  CreateCommentsArray,
+  DefaultCreateCommentsArray,
+  DefaultEntryArray,
+  NamespaceType,
+} from '../types';
 import { EntriesArray } from '../types/entries';
 import { DefaultUuid } from '../../siem_common_deps';
 
@@ -39,7 +43,7 @@ export const createExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       _tags, // defaults to empty array if not set during decode
-      comments: DefaultCommentsPartialArray, // defaults to empty array if not set during decode
+      comments: DefaultCreateCommentsArray, // defaults to empty array if not set during decode
       entries: DefaultEntryArray, // defaults to empty array if not set during decode
       item_id: DefaultUuid, // defaults to GUID (uuid v4) if not set during decode
       meta, // defaults to undefined if not set during decode
@@ -63,7 +67,7 @@ export type CreateExceptionListItemSchemaDecoded = Identity<
     '_tags' | 'tags' | 'item_id' | 'entries' | 'namespace_type' | 'comments'
   > & {
     _tags: _Tags;
-    comments: CommentsPartialArray;
+    comments: CreateCommentsArray;
     tags: Tags;
     item_id: ItemId;
     entries: EntriesArray;

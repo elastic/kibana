@@ -7,6 +7,5 @@
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 export const metadataIndexPattern = 'metrics-endpoint.metadata-*';
-export const metadataMirrorIndexPattern = 'metrics-endpoint.metadata_mirror-*';
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';

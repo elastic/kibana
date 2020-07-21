@@ -6,12 +6,17 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
+import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
+import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
 import {
-  CommentsPartialArray,
+  CreateCommentsArray,
   Description,
   DescriptionOrUndefined,
   EntriesArray,
   EntriesArrayOrUndefined,
+  ExceptionListItemType,
+  ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
   FilterOrUndefined,
@@ -30,6 +35,7 @@ import {
   SortOrderOrUndefined,
   Tags,
   TagsOrUndefined,
+  UpdateCommentsArray,
   _Tags,
   _TagsOrUndefined,
 } from '../../../common/schemas';
@@ -80,15 +86,25 @@ export interface DeleteExceptionListItemOptions {
   namespaceType: NamespaceType;
 }
 
+export interface DeleteEndpointListItemOptions {
+  id: IdOrUndefined;
+  itemId: ItemIdOrUndefined;
+}
+
 export interface GetExceptionListItemOptions {
   itemId: ItemIdOrUndefined;
   id: IdOrUndefined;
   namespaceType: NamespaceType;
 }
 
+export interface GetEndpointListItemOptions {
+  itemId: ItemIdOrUndefined;
+  id: IdOrUndefined;
+}
+
 export interface CreateExceptionListItemOptions {
   _tags: _Tags;
-  comments: CommentsPartialArray;
+  comments: CreateCommentsArray;
   entries: EntriesArray;
   itemId: ItemId;
   listId: ListId;
@@ -97,12 +113,24 @@ export interface CreateExceptionListItemOptions {
   description: Description;
   meta: MetaOrUndefined;
   tags: Tags;
-  type: ExceptionListType;
+  type: ExceptionListItemType;
+}
+
+export interface CreateEndpointListItemOptions {
+  _tags: _Tags;
+  comments: CreateCommentsArray;
+  entries: EntriesArray;
+  itemId: ItemId;
+  name: Name;
+  description: Description;
+  meta: MetaOrUndefined;
+  tags: Tags;
+  type: ExceptionListItemType;
 }
 
 export interface UpdateExceptionListItemOptions {
   _tags: _TagsOrUndefined;
-  comments: CommentsPartialArray;
+  comments: UpdateCommentsArray;
   entries: EntriesArrayOrUndefined;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
@@ -111,13 +139,44 @@ export interface UpdateExceptionListItemOptions {
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
-  type: ExceptionListTypeOrUndefined;
+  type: ExceptionListItemTypeOrUndefined;
+}
+
+export interface UpdateEndpointListItemOptions {
+  _tags: _TagsOrUndefined;
+  comments: UpdateCommentsArray;
+  entries: EntriesArrayOrUndefined;
+  id: IdOrUndefined;
+  itemId: ItemIdOrUndefined;
+  name: NameOrUndefined;
+  description: DescriptionOrUndefined;
+  meta: MetaOrUndefined;
+  tags: TagsOrUndefined;
+  type: ExceptionListItemTypeOrUndefined;
 }
 
 export interface FindExceptionListItemOptions {
   listId: ListId;
   namespaceType: NamespaceType;
   filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export interface FindEndpointListItemOptions {
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export interface FindExceptionListsItemOptions {
+  listId: NonEmptyStringArrayDecoded;
+  namespaceType: NamespaceTypeArray;
+  filter: EmptyStringArrayDecoded;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
   sortField: SortFieldOrUndefined;

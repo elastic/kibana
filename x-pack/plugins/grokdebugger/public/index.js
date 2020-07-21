@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin } from './plugin';
+import { GrokDebuggerUIPlugin } from './plugin';
 
 export function plugin(initializerContext) {
-  return new Plugin(initializerContext);
+  return new GrokDebuggerUIPlugin(initializerContext);
 }

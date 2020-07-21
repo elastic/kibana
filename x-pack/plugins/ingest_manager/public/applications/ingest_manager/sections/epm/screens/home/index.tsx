@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { useRouteMatch, Switch, Route } from 'react-router-dom';
+import { useRouteMatch, Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
 import { PAGE_ROUTING_PATHS } from '../../../../constants';
@@ -61,7 +61,9 @@ export function EPMHomePage() {
 
 function InstalledPackages() {
   useBreadcrumbs('integrations_installed');
-  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
+  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
+    experimental: true,
+  });
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const title = i18n.translate('xpack.ingestManager.epmList.installedTitle', {
@@ -114,8 +116,12 @@ function InstalledPackages() {
 
 function AvailablePackages() {
   useBreadcrumbs('integrations_all');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
+  const history = useHistory();
+  const queryParams = new URLSearchParams(useLocation().search);
+  const initialCategory = queryParams.get('category') || '';
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const { data: allPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages();
+  const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
     category: selectedCategory,
   });
   const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories();
@@ -123,7 +129,7 @@ function AvailablePackages() {
     categoryPackagesRes && categoryPackagesRes.response ? categoryPackagesRes.response : [];
 
   const title = i18n.translate('xpack.ingestManager.epmList.allTitle', {
-    defaultMessage: 'All integrations',
+    defaultMessage: 'Browse by category',
   });
 
   const categories = [
@@ -132,22 +138,28 @@ function AvailablePackages() {
       title: i18n.translate('xpack.ingestManager.epmList.allPackagesFilterLinkText', {
         defaultMessage: 'All',
       }),
-      count: packages.length,
+      count: allPackagesRes?.response?.length || 0,
     },
     ...(categoriesRes ? categoriesRes.response : []),
   ];
   const controls = categories ? (
     <CategoryFacets
-      isLoading={isLoadingCategories}
+      isLoading={isLoadingCategories || isLoadingAllPackages}
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
+      onCategoryChange={({ id }: CategorySummaryItem) => {
+        // clear category query param in the url
+        if (queryParams.get('category')) {
+          history.push({});
+        }
+        setSelectedCategory(id);
+      }}
     />
   ) : null;
 
   return (
     <PackageListGrid
-      isLoading={isLoadingPackages}
+      isLoading={isLoadingCategoryPackages}
       title={title}
       controls={controls}
       list={packages}

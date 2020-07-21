@@ -7,7 +7,7 @@
 import { Dispatch } from 'redux';
 import { MapStoreState } from '../reducers/store';
 import { getFlyoutDisplay } from '../selectors/ui_selectors';
-import { FLYOUT_STATE, INDEXING_STAGE } from '../reducers/ui';
+import { FLYOUT_STATE } from '../reducers/ui';
 import { trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
 
@@ -20,7 +20,6 @@ export const SET_READ_ONLY = 'SET_READ_ONLY';
 export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
-export const UPDATE_INDEXING_STAGE = 'UPDATE_INDEXING_STAGE';
 
 export function exitFullScreen() {
   return {
@@ -93,12 +92,5 @@ export function hideTOCDetails(layerId: string) {
   return {
     type: HIDE_TOC_DETAILS,
     layerId,
-  };
-}
-
-export function updateIndexingStage(stage: INDEXING_STAGE | null) {
-  return {
-    type: UPDATE_INDEXING_STAGE,
-    stage,
   };
 }

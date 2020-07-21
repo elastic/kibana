@@ -11,5 +11,5 @@ import { Dataset } from '../../../types';
  * {type}-{id}
  */
 export function getDatasetAssetBaseName(dataset: Dataset): string {
-  return `${dataset.type}-${dataset.id}`;
+  return `${dataset.type}-${dataset.name}`;
 }

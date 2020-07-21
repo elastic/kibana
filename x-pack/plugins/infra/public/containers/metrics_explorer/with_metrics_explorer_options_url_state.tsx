@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set, values } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { values } from 'lodash';
 import React, { useContext, useMemo } from 'react';
 import * as t from 'io-ts';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
@@ -97,6 +98,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
     limit: t.number,
     groupBy: t.string,
     filterQuery: t.string,
+    source: t.string,
   });
 
   const Options = t.intersection([OptionsRequired, OptionsOptional]);
@@ -156,6 +158,7 @@ const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
   const finalState = {};
   if (value) {
     if (value.options && isMetricExplorerOptions(value.options)) {
+      value.options.source = 'url';
       set(finalState, 'options', value.options);
     }
     if (value.timerange && isMetricExplorerTimeOption(value.timerange)) {

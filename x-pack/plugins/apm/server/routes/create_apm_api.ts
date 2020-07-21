@@ -13,7 +13,6 @@ import {
   errorDistributionRoute,
   errorGroupsRoute,
   errorsRoute,
-  errorRateRoute,
 } from './errors';
 import {
   serviceAgentNameRoute,
@@ -49,6 +48,7 @@ import {
   transactionGroupsRoute,
   transactionGroupsAvgDurationByCountry,
   transactionGroupsAvgDurationByBrowser,
+  transactionGroupsErrorRateRoute,
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -63,7 +63,6 @@ import {
 } from './ui_filters';
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
-import { indicesPrivilegesRoute } from './security';
 import {
   createCustomLinkRoute,
   updateCustomLinkRoute,
@@ -75,7 +74,19 @@ import {
   rumClientMetricsRoute,
   rumPageViewsTrendRoute,
   rumPageLoadDistributionRoute,
+  rumPageLoadDistBreakdownRoute,
+  rumServicesRoute,
+  rumVisitorsBreakdownRoute,
 } from './rum_client';
+import {
+  observabilityOverviewHasDataRoute,
+  observabilityOverviewRoute,
+} from './observability_overview';
+import {
+  anomalyDetectionJobsRoute,
+  createAnomalyDetectionJobsRoute,
+  anomalyDetectionEnvironmentsRoute,
+} from './settings/anomaly_detection';
 
 const createApmApi = () => {
   const api = createApi()
@@ -88,7 +99,6 @@ const createApmApi = () => {
     .add(errorDistributionRoute)
     .add(errorGroupsRoute)
     .add(errorsRoute)
-    .add(errorRateRoute)
 
     // Services
     .add(serviceAgentNameRoute)
@@ -128,6 +138,7 @@ const createApmApi = () => {
     .add(transactionGroupsRoute)
     .add(transactionGroupsAvgDurationByBrowser)
     .add(transactionGroupsAvgDurationByCountry)
+    .add(transactionGroupsErrorRateRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
@@ -146,9 +157,6 @@ const createApmApi = () => {
     .add(serviceMapRoute)
     .add(serviceMapServiceNodeRoute)
 
-    // security
-    .add(indicesPrivilegesRoute)
-
     // Custom links
     .add(createCustomLinkRoute)
     .add(updateCustomLinkRoute)
@@ -160,7 +168,19 @@ const createApmApi = () => {
     .add(rumOverviewLocalFiltersRoute)
     .add(rumPageViewsTrendRoute)
     .add(rumPageLoadDistributionRoute)
-    .add(rumClientMetricsRoute);
+    .add(rumPageLoadDistBreakdownRoute)
+    .add(rumClientMetricsRoute)
+    .add(rumServicesRoute)
+    .add(rumVisitorsBreakdownRoute)
+
+    // Observability dashboard
+    .add(observabilityOverviewHasDataRoute)
+    .add(observabilityOverviewRoute)
+
+    // Anomaly detection
+    .add(anomalyDetectionJobsRoute)
+    .add(createAnomalyDetectionJobsRoute)
+    .add(anomalyDetectionEnvironmentsRoute);
 
   return api;
 };

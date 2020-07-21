@@ -57,6 +57,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
       resolve(__dirname, './apps/reporting_management'),
+      resolve(__dirname, './apps/management'),
 
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
@@ -230,12 +231,67 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+        global_visualize_read: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_visualize_all: {
+          kibana: [
+            {
+              feature: {
+                visualize: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        global_maps_all: {
+          kibana: [
+            {
+              feature: {
+                maps: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        geoshape_data_reader: {
+          elasticsearch: {
+            indices: [
+              {
+                names: ['geo_shapes*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
 
         global_devtools_read: {
           kibana: [
             {
               feature: {
                 dev_tools: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        global_ccr_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
               },
               spaces: ['*'],
             },

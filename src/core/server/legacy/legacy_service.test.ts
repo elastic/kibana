@@ -29,7 +29,6 @@ import {
 
 import { BehaviorSubject, throwError } from 'rxjs';
 
-// @ts-ignore: implicit any for JS file
 import { ClusterManager as MockClusterManager } from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
@@ -47,12 +46,12 @@ import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mo
 import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
 import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
-import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyVars, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './types';
 import { LegacyService } from './legacy_service';
 import { coreMock } from '../mocks';
 import { statusServiceMock } from '../status/status_service.mock';
+import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
@@ -98,9 +97,9 @@ beforeEach(() => {
         contracts: new Map([['plugin-id', 'plugin-value']]),
       },
       rendering: renderingServiceMock,
-      metrics: metricsServiceMock.createInternalSetupContract(),
       uuid: uuidSetup,
       status: statusServiceMock.createInternalSetupContract(),
+      auditTrail: auditTrailServiceMock.createSetupContract(),
       logging: loggingServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
@@ -110,6 +109,7 @@ beforeEach(() => {
         [
           'plugin-id',
           {
+            requiredBundles: [],
             publicTargetDir: 'path/to/target/public',
             publicAssetsDir: '/plugins/name/assets/',
           },
@@ -122,7 +122,6 @@ beforeEach(() => {
   startDeps = {
     core: {
       ...coreMock.createInternalStart(),
-      savedObjects: savedObjectsServiceMock.createInternalStartContract(),
       plugins: { contracts: new Map() },
     },
     plugins: {},

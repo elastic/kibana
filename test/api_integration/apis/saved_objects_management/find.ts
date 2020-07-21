@@ -49,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
                     title: 'Count of requests',
                   },
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  namespaces: ['default'],
                   references: [
                     {
                       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -287,7 +288,7 @@ export default function ({ getService }: FtrProviderContext) {
               inAppUrl: {
                 path:
                   '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                uiCapabilitiesPath: 'management.kibana.index_patterns',
+                uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
             });
           }));

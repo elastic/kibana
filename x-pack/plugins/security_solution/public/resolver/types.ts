@@ -5,14 +5,9 @@
  */
 
 import { Store } from 'redux';
-
+import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
-export { ResolverAction } from './store/actions';
-import {
-  ResolverEvent,
-  ResolverNodeStats,
-  ResolverRelatedEvents,
-} from '../../common/endpoint/types';
+import { ResolverEvent, ResolverRelatedEvents, ResolverTree } from '../../common/endpoint/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -50,10 +45,6 @@ export interface ResolverUIState {
    * The entity_id of the process for the resolver's currently selected descendant.
    */
   readonly processEntityIdOfSelectedDescendant: string | null;
-  /**
-   * Which panel the ui should display
-   */
-  readonly panelToDisplay: string | null;
 }
 
 /**
@@ -143,18 +134,82 @@ export type CameraState = {
 );
 
 /**
+ * Wrappers around our internal types that make them compatible with `rbush`.
+ */
+export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
+
+/**
+ * The entity stored in rbush for resolver edge lines.
+ */
+export interface IndexedEdgeLineSegment extends BBox {
+  type: 'edgeLine';
+  entity: EdgeLineSegment;
+}
+
+/**
+ * The entity store in rbush for resolver process nodes.
+ */
+export interface IndexedProcessNode extends BBox {
+  type: 'processNode';
+  entity: ResolverEvent;
+  position: Vector2;
+}
+
+/**
+ * A type containing all things to actually be rendered to the DOM.
+ */
+export interface VisibleEntites {
+  processNodePositions: ProcessPositions;
+  connectingEdgeLineSegments: EdgeLineSegment[];
+}
+
+/**
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {
-  readonly results: readonly ResolverEvent[];
-  readonly relatedEventsStats: Readonly<Map<string, ResolverNodeStats>>;
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
   readonly relatedEventsReady: Map<string, boolean>;
-  readonly lineageLimits: Readonly<{ children: string | null; ancestors: string | null }>;
-  isLoading: boolean;
-  hasError: boolean;
+  /**
+   * The `_id` for an ES document. Used to select a process that we'll show the graph for.
+   */
+  readonly databaseDocumentID?: string;
+  /**
+   * The id used for the pending request, if there is one.
+   */
+  readonly pendingRequestDatabaseDocumentID?: string;
+  readonly resolverComponentInstanceID: string | undefined;
+
+  /**
+   * The parameters and response from the last successful request.
+   */
+  readonly lastResponse?: {
+    /**
+     * The id used in the request.
+     */
+    readonly databaseDocumentID: string;
+  } & (
+    | {
+        /**
+         * If a response with a success code was received, this is `true`.
+         */
+        readonly successful: true;
+        /**
+         * The ResolverTree parsed from the response.
+         */
+        readonly result: ResolverTree;
+      }
+    | {
+        /**
+         * If the request threw an exception or the response had a failure code, this will be false.
+         */
+        readonly successful: false;
+      }
+  );
 }
 
+/**
+ * Represents an ordered pair. Used for x-y coordinates and the like.
+ */
 export type Vector2 = readonly [number, number];
 
 /**
@@ -215,37 +270,17 @@ export interface ProcessEvent {
 }
 
 /**
- * A map of Process Ids that indicate which processes are adjacent to a given process along
- * directions in two axes: up/down and previous/next.
- */
-export interface AdjacentProcessMap {
-  readonly self: string;
-  parent: string | null;
-  firstChild: string | null;
-  previousSibling: string | null;
-  nextSibling: string | null;
-  /**
-   * To support aria-level, this must be >= 1
-   */
-  level: number;
-}
-
-/**
  * A represention of a process tree with indices for O(1) access to children and values by id.
  */
 export interface IndexedProcessTree {
   /**
-   * Map of ID to a process's children
+   * Map of ID to a process's ordered children
    */
   idToChildren: Map<string | undefined, ResolverEvent[]>;
   /**
    * Map of ID to process
    */
   idToProcess: Map<string, ResolverEvent>;
-  /**
-   * Map of ID to adjacent processes
-   */
-  idToAdjacent: Map<string, AdjacentProcessMap>;
 }
 
 /**
@@ -287,6 +322,8 @@ export interface DurationDetails {
  */
 export interface EdgeLineMetadata {
   elapsedTime?: DurationDetails;
+  // A string of the two joined process nodes concatted together.
+  uniqueId: string;
 }
 /**
  * A tuple of 2 vector2 points forming a polyline. Used to connect process nodes in the graph.
@@ -298,7 +335,7 @@ export type EdgeLinePoints = Vector2[];
  */
 export interface EdgeLineSegment {
   points: EdgeLinePoints;
-  metadata?: EdgeLineMetadata;
+  metadata: EdgeLineMetadata;
 }
 
 /**
@@ -384,3 +421,22 @@ export type ResolverProcessType =
   | 'unknownEvent';
 
 export type ResolverStore = Store<ResolverState, ResolverAction>;
+
+/**
+ * Describes the basic Resolver graph layout.
+ */
+export interface IsometricTaxiLayout {
+  /**
+   * A map of events to position. each event represents its own node.
+   */
+  processNodePositions: Map<ResolverEvent, Vector2>;
+  /**
+   * A map of edgline segments, which graphically connect nodes.
+   */
+  edgeLineSegments: EdgeLineSegment[];
+
+  /**
+   * defines the aria levels for nodes.
+   */
+  ariaLevels: Map<ResolverEvent, number>;
+}

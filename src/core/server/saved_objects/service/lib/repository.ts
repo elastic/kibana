@@ -19,8 +19,8 @@
 
 import { omit } from 'lodash';
 import uuid from 'uuid';
-import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
-import { APICaller } from '../../../elasticsearch/';
+import { retryCallCluster } from '../../../elasticsearch/legacy';
+import { LegacyAPICaller } from '../../../elasticsearch/';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { getSearchDsl } from './search_dsl';
@@ -74,7 +74,7 @@ const isRight = (either: Either): either is Right => either.tag === 'Right';
 export interface SavedObjectsRepositoryOptions {
   index: string;
   mappings: IndexMapping;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   typeRegistry: SavedObjectTypeRegistry;
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
@@ -117,7 +117,7 @@ export class SavedObjectsRepository {
   private _mappings: IndexMapping;
   private _registry: SavedObjectTypeRegistry;
   private _allowedTypes: string[];
-  private _unwrappedCallCluster: APICaller;
+  private _unwrappedCallCluster: LegacyAPICaller;
   private _serializer: SavedObjectsSerializer;
 
   /**
@@ -132,7 +132,7 @@ export class SavedObjectsRepository {
     migrator: KibanaMigrator,
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
-    callCluster: APICaller,
+    callCluster: LegacyAPICaller,
     includedHiddenTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
@@ -188,7 +188,7 @@ export class SavedObjectsRepository {
     }
     this._allowedTypes = allowedTypes;
 
-    this._unwrappedCallCluster = async (...args: Parameters<APICaller>) => {
+    this._unwrappedCallCluster = async (...args: Parameters<LegacyAPICaller>) => {
       await migrator.runMigrations();
       return callCluster(...args);
     };
@@ -423,7 +423,7 @@ export class SavedObjectsRepository {
         // When method == 'index' the bulkResponse doesn't include the indexed
         // _source so we return rawMigratedDoc but have to spread the latest
         // _seq_no and _primary_term values from the rawResponse.
-        return this._serializer.rawToSavedObject({
+        return this._rawToSavedObject({
           ...rawMigratedDoc,
           ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
         });
@@ -554,7 +554,7 @@ export class SavedObjectsRepository {
         },
         conflicts: 'proceed',
         ...getSearchDsl(this._mappings, this._registry, {
-          namespace,
+          namespaces: namespace ? [namespace] : undefined,
           type: typesToUpdate,
         }),
       },
@@ -590,7 +590,7 @@ export class SavedObjectsRepository {
     sortField,
     sortOrder,
     fields,
-    namespace,
+    namespaces,
     type,
     filter,
     preference,
@@ -651,7 +651,7 @@ export class SavedObjectsRepository {
           type: allowedTypes,
           sortField,
           sortOrder,
-          namespace,
+          namespaces,
           hasReference,
           kueryNode,
         }),
@@ -768,10 +768,16 @@ export class SavedObjectsRepository {
         }
 
         const time = doc._source.updated_at;
+
+        let namespaces = [];
+        if (!this._registry.isNamespaceAgnostic(type)) {
+          namespaces = doc._source.namespaces ?? [getNamespaceString(doc._source.namespace)];
+        }
+
         return {
           id,
           type,
-          ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
+          namespaces,
           ...(time && { updated_at: time }),
           version: encodeHitVersion(doc),
           attributes: doc._source[type],
@@ -817,10 +823,15 @@ export class SavedObjectsRepository {
 
     const { updated_at: updatedAt } = response._source;
 
+    let namespaces = [];
+    if (!this._registry.isNamespaceAgnostic(type)) {
+      namespaces = response._source.namespaces ?? [getNamespaceString(response._source.namespace)];
+    }
+
     return {
       id,
       type,
-      ...(response._source.namespaces && { namespaces: response._source.namespaces }),
+      namespaces,
       ...(updatedAt && { updated_at: updatedAt }),
       version: encodeHitVersion(response),
       attributes: response._source[type],
@@ -874,7 +885,7 @@ export class SavedObjectsRepository {
       body: {
         doc,
       },
-      ...(this._registry.isMultiNamespace(type) && { _sourceIncludes: ['namespaces'] }),
+      _sourceIncludes: ['namespace', 'namespaces'],
     });
 
     if (updateResponse.status === 404) {
@@ -882,14 +893,19 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
+    let namespaces = [];
+    if (!this._registry.isNamespaceAgnostic(type)) {
+      namespaces = updateResponse.get._source.namespaces ?? [
+        getNamespaceString(updateResponse.get._source.namespace),
+      ];
+    }
+
     return {
       id,
       type,
       updated_at: time,
       version: encodeHitVersion(updateResponse),
-      ...(this._registry.isMultiNamespace(type) && {
-        namespaces: updateResponse.get._source.namespaces,
-      }),
+      namespaces,
       references,
       attributes,
     };
@@ -1142,9 +1158,14 @@ export class SavedObjectsRepository {
               },
             };
           }
-          namespaces = actualResult._source.namespaces;
+          namespaces = actualResult._source.namespaces ?? [
+            getNamespaceString(actualResult._source.namespace),
+          ];
           versionProperties = getExpectedVersionProperties(version, actualResult);
         } else {
+          if (this._registry.isSingleNamespace(type)) {
+            namespaces = [getNamespaceString(namespace)];
+          }
           versionProperties = getExpectedVersionProperties(version);
         }
 
@@ -1300,7 +1321,7 @@ export class SavedObjectsRepository {
     };
   }
 
-  private async _writeToCluster(...args: Parameters<APICaller>) {
+  private async _writeToCluster(...args: Parameters<LegacyAPICaller>) {
     try {
       return await this._callCluster(...args);
     } catch (err) {
@@ -1308,7 +1329,7 @@ export class SavedObjectsRepository {
     }
   }
 
-  private async _callCluster(...args: Parameters<APICaller>) {
+  private async _callCluster(...args: Parameters<LegacyAPICaller>) {
     try {
       return await this._unwrappedCallCluster(...args);
     } catch (err) {
@@ -1340,13 +1361,13 @@ export class SavedObjectsRepository {
     return new Date().toISOString();
   }
 
-  // The internal representation of the saved object that the serializer returns
-  // includes the namespace, and we use this for migrating documents. However, we don't
-  // want the namespace to be returned from the repository, as the repository scopes each
-  // method transparently to the specified namespace.
   private _rawToSavedObject<T = unknown>(raw: SavedObjectsRawDoc): SavedObject<T> {
     const savedObject = this._serializer.rawToSavedObject(raw);
-    return omit(savedObject, 'namespace');
+    const { namespace, type } = savedObject;
+    if (this._registry.isSingleNamespace(type)) {
+      savedObject.namespaces = [getNamespaceString(namespace)];
+    }
+    return omit(savedObject, 'namespace') as SavedObject<T>;
   }
 
   /**

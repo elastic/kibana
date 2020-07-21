@@ -18,13 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { noop, identity } from 'lodash';
+import { noop } from 'lodash';
 
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
-
-import { FieldFormat } from '../../../../../common';
 
 const metricAggFilter = [
   '!top_hits',
@@ -71,18 +69,6 @@ export const parentPipelineAggHelper = {
         write: noop,
       },
     ] as Array<MetricAggParam<IMetricAggConfig>>;
-  },
-
-  getFormat(agg: IMetricAggConfig) {
-    let subAgg;
-    const customMetric = agg.getParam('customMetric');
-
-    if (customMetric) {
-      subAgg = customMetric;
-    } else {
-      subAgg = agg.aggConfigs.byId(agg.getParam('metricAgg'));
-    }
-    return subAgg ? subAgg.type.getFormat(subAgg) : new (FieldFormat.from(identity))();
   },
 
   getSerializedFormat(agg: IMetricAggConfig) {

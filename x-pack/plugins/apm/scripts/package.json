@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@elastic/elasticsearch": "^7.6.1",
+    "@elastic/elasticsearch": "7.9.0-rc.1",
     "@octokit/rest": "^16.35.0",
     "@types/console-stamp": "^0.2.32",
     "console-stamp": "^0.2.9",

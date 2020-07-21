@@ -17,18 +17,18 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  EuiTitleProps,
 } from '@elastic/eui';
 import React, { memo, MouseEventHandler, ReactNode, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { gutterTimeline } from '../../lib/helpers';
 
 const StyledEuiPage = styled(EuiPage)`
   &.endpoint--isListView {
-    padding: 0 ${gutterTimeline} 0 ${(props) => props.theme.eui.euiSizeL};
+    padding: 0 ${(props) => props.theme.eui.euiSizeL};
 
     .endpoint-header {
-      padding: ${(props) => props.theme.eui.euiSizeL} 0;
+      padding: ${(props) => props.theme.eui.euiSizeL};
       margin-bottom: 0;
     }
     .endpoint-page-content {
@@ -44,7 +44,10 @@ const StyledEuiPage = styled(EuiPage)`
     }
   }
   .endpoint-navTabs {
-    margin-left: ${(props) => props.theme.eui.euiSizeL};
+    margin-left: ${(props) => props.theme.eui.euiSizeM};
+  }
+  .endpoint-header-leftSection {
+    overflow: hidden;
   }
 `;
 
@@ -55,13 +58,15 @@ const isStringOrNumber = /(string|number)/;
  * Can be used when wanting to customize the `headerLeft` value but still use the standard
  * title component
  */
-export const PageViewHeaderTitle = memo<{ children: ReactNode }>(({ children }) => {
-  return (
-    <EuiTitle size="l">
-      <h1 data-test-subj="pageViewHeaderLeftTitle">{children}</h1>
-    </EuiTitle>
-  );
-});
+export const PageViewHeaderTitle = memo<Omit<EuiTitleProps, 'children'> & { children: ReactNode }>(
+  ({ children, size = 'l', ...otherProps }) => {
+    return (
+      <EuiTitle {...otherProps} size={size}>
+        <h1 data-test-subj="pageViewHeaderLeftTitle">{children}</h1>
+      </EuiTitle>
+    );
+  }
+);
 
 PageViewHeaderTitle.displayName = 'PageViewHeaderTitle';
 
@@ -136,7 +141,10 @@ export const PageView = memo<PageViewProps>(
         <EuiPageBody>
           {(headerLeft || headerRight) && (
             <EuiPageHeader className="endpoint-header">
-              <EuiPageHeaderSection data-test-subj="pageViewHeaderLeft">
+              <EuiPageHeaderSection
+                className="endpoint-header-leftSection"
+                data-test-subj="pageViewHeaderLeft"
+              >
                 {isStringOrNumber.test(typeof headerLeft) ? (
                   <PageViewHeaderTitle>{headerLeft}</PageViewHeaderTitle>
                 ) : (

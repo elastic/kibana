@@ -279,7 +279,7 @@ export class AnomalyDetails extends Component {
           ),
         },
         {
-          id: 'Category examples',
+          id: 'category-examples',
           name: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle', {
             defaultMessage: 'Category examples',
           }),

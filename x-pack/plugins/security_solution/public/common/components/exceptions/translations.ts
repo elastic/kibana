@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
 
 export const DETECTION_LIST = i18n.translate(
@@ -90,7 +91,7 @@ export const ADD_TO_DETECTIONS_LIST = i18n.translate(
 export const EXCEPTION_EMPTY_PROMPT_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.emptyPromptTitle',
   {
-    defaultMessage: 'You have no exceptions',
+    defaultMessage: 'This rule has no exceptions',
   }
 );
 
@@ -98,7 +99,7 @@ export const EXCEPTION_EMPTY_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.emptyPromptBody',
   {
     defaultMessage:
-      'You can add an exception to fine tune the rule so that it suppresses alerts that meet specified conditions. Exceptions leverage detection accuracy, which can help reduce the number of false positives.',
+      'You can add exceptions to fine tune the rule so that detection alerts are not created when exception conditions are met. Exceptions improve detection accuracy, which can help reduce the number of false positives.',
   }
 );
 
@@ -137,3 +138,72 @@ export const SHOWING_EXCEPTIONS = (items: number) =>
     values: { items },
     defaultMessage: 'Showing {items} {items, plural, =1 {exception} other {exceptions}}',
   });
+
+export const FIELD = i18n.translate('xpack.securitySolution.exceptions.fieldDescription', {
+  defaultMessage: 'Field',
+});
+
+export const OPERATOR = i18n.translate('xpack.securitySolution.exceptions.operatorDescription', {
+  defaultMessage: 'Operator',
+});
+
+export const VALUE = i18n.translate('xpack.securitySolution.exceptions.valueDescription', {
+  defaultMessage: 'Value',
+});
+
+export const EXCEPTION_FIELD_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionFieldPlaceholderDescription',
+  {
+    defaultMessage: 'Search',
+  }
+);
+
+export const EXCEPTION_OPERATOR_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionOperatorPlaceholderDescription',
+  {
+    defaultMessage: 'Operator',
+  }
+);
+
+export const EXCEPTION_FIELD_VALUE_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionFieldValuePlaceholderDescription',
+  {
+    defaultMessage: 'Search field value...',
+  }
+);
+
+export const EXCEPTION_FIELD_LISTS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsPlaceholderDescription',
+  {
+    defaultMessage: 'Search for list...',
+  }
+);
+
+export const AND = i18n.translate('xpack.securitySolution.exceptions.andDescription', {
+  defaultMessage: 'AND',
+});
+
+export const OR = i18n.translate('xpack.securitySolution.exceptions.orDescription', {
+  defaultMessage: 'OR',
+});
+
+export const ADD_NESTED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.addNestedDescription',
+  {
+    defaultMessage: 'Add nested condition',
+  }
+);
+
+export const ADD_COMMENT_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.addCommentPlaceholder',
+  {
+    defaultMessage: 'Add a new comment...',
+  }
+);
+
+export const ADD_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.addToClipboard',
+  {
+    defaultMessage: 'Add to clipboard',
+  }
+);

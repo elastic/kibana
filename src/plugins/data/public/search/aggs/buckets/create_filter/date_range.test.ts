@@ -26,9 +26,7 @@ import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { coreMock, notificationServiceMock } from '../../../../../../../core/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
-import { InternalStartServices } from '../../../../types';
+import { coreMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('Date range', () => {
@@ -37,14 +35,7 @@ describe('AggConfig Filters', () => {
     beforeEach(() => {
       const { uiSettings } = coreMock.createSetup();
 
-      aggTypesDependencies = {
-        uiSettings,
-        getInternalStartServices: () =>
-          (({
-            fieldFormats: fieldFormatsServiceMock.createStartContract(),
-            notifications: notificationServiceMock.createStartContract(),
-          } as unknown) as InternalStartServices),
-      };
+      aggTypesDependencies = { uiSettings };
     });
 
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
@@ -76,7 +67,6 @@ describe('AggConfig Filters', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry([getDateRangeBucketAgg(aggTypesDependencies)]),
-          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
         }
       );
     };

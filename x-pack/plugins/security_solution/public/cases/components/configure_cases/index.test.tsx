@@ -125,7 +125,7 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: connectors[0].config.casesConfiguration.mapping,
+        mapping: connectors[0].config.incidentConfiguration.mapping,
         closureType: 'close-by-user',
         connectorId: 'servicenow-1',
         connectorName: 'unchanged',
@@ -165,6 +165,9 @@ describe('ConfigureCases', () => {
         }),
         expect.objectContaining({
           id: '.jira',
+        }),
+        expect.objectContaining({
+          id: '.resilient',
         }),
       ]);
 
@@ -213,7 +216,7 @@ describe('ConfigureCases', () => {
       jest.clearAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: connectors[1].config.casesConfiguration.mapping,
+        mapping: connectors[1].config.incidentConfiguration.mapping,
         closureType: 'close-by-user',
         connectorId: 'servicenow-2',
         connectorName: 'unchanged',
@@ -332,7 +335,7 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping: connectors[0].config.casesConfiguration.mapping,
+        mapping: connectors[0].config.incidentConfiguration.mapping,
         closureType: 'close-by-user',
         connectorId: 'servicenow-1',
         connectorName: 'My connector',
@@ -399,7 +402,7 @@ describe('closure options', () => {
     jest.resetAllMocks();
     useCaseConfigureMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
-      mapping: connectors[0].config.casesConfiguration.mapping,
+      mapping: connectors[0].config.incidentConfiguration.mapping,
       closureType: 'close-by-user',
       connectorId: 'servicenow-1',
       connectorName: 'My connector',
@@ -435,7 +438,7 @@ describe('user interactions', () => {
     jest.resetAllMocks();
     useCaseConfigureMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
-      mapping: connectors[1].config.casesConfiguration.mapping,
+      mapping: connectors[1].config.incidentConfiguration.mapping,
       closureType: 'close-by-user',
       connectorId: 'servicenow-2',
       connectorName: 'unchanged',

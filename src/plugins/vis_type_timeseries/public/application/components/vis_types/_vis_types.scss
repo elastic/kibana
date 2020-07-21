@@ -2,7 +2,11 @@
   display: flex;
   flex-direction: column;
   flex: 1 1 100%;
-  padding: $euiSizeS;
+
+  // border used in lieu of padding to prevent overlapping background-color
+  border-width: $euiSizeS;
+  border-style: solid;
+  border-color: transparent;
 
   .tvbVisTimeSeries {
     overflow: hidden;

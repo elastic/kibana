@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import '../../../common/mock/match_media';
 import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
@@ -15,6 +16,7 @@ import {
   defaultHeaders,
   createSecuritySolutionStorageMock,
   mockIndexPattern,
+  kibanaObservable,
 } from '../../../common/mock';
 
 import { createStore, State } from '../../../common/store';
@@ -38,6 +40,7 @@ import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
 
@@ -50,31 +53,46 @@ const addTimelineInStorageMock = addTimelineInStorage as jest.Mock;
 describe('epicLocalStorage', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   let props = {} as TimelineComponentProps;
   const sort: Sort = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
-  const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
-  const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
+  const startDate = '2018-03-23T18:49:23.132Z';
+  const endDate = '2018-03-24T03:33:52.253Z';
 
   const indexPattern = mockIndexPattern;
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
     props = {
       browserFields: mockBrowserFields,
       columns: defaultHeaders,
       id: 'foo',
       dataProviders: mockDataProviders,
+      docValueFields: [],
       end: endDate,
       eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
       indexPattern,
       indexToAdd: [],
       isLive: false,
+      isLoadingSource: false,
+      isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
@@ -86,10 +104,13 @@ describe('epicLocalStorage', () => {
       onDataProviderRemoved: jest.fn(),
       onToggleDataProviderEnabled: jest.fn(),
       onToggleDataProviderExcluded: jest.fn(),
+      onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
       start: startDate,
+      status: TimelineStatus.active,
       sort,
+      timelineType: TimelineType.default,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };

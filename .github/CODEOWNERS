@@ -24,29 +24,20 @@
 /src/plugins/vis_type_xy/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 
-# Core UI
-# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
-/src/plugins/home/public @elastic/kibana-core-ui
-/src/plugins/home/server/*.ts @elastic/kibana-core-ui
-/src/plugins/home/server/services/ @elastic/kibana-core-ui
-# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
-/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-core-ui
-/src/legacy/core_plugins/kibana/public/home/*.scss @elastic/kibana-core-ui
-/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
-
 # App Architecture
+/examples/bfetch_explorer/ @elastic/kibana-app-arch
+/examples/dashboard_embeddable_examples/ @elastic/kibana-app-arch
+/examples/demo_search/ @elastic/kibana-app-arch
 /examples/developer_examples/ @elastic/kibana-app-arch
+/examples/embeddable_examples/ @elastic/kibana-app-arch
+/examples/embeddable_explorer/ @elastic/kibana-app-arch
+/examples/state_container_examples/ @elastic/kibana-app-arch
+/examples/ui_actions_examples/ @elastic/kibana-app-arch
+/examples/ui_actions_explorer/ @elastic/kibana-app-arch
 /examples/url_generators_examples/ @elastic/kibana-app-arch
 /examples/url_generators_explorer/ @elastic/kibana-app-arch
-/packages/kbn-interpreter/ @elastic/kibana-app-arch
 /packages/elastic-datemath/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/kibana/public/management/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/kibana/server/routes/api/management/ @elastic/kibana-app-arch
-/src/legacy/core_plugins/visualizations/ @elastic/kibana-app-arch
-/src/legacy/server/index_patterns/ @elastic/kibana-app-arch
+/packages/kbn-interpreter/ @elastic/kibana-app-arch
 /src/plugins/advanced_settings/ @elastic/kibana-app-arch
 /src/plugins/bfetch/ @elastic/kibana-app-arch
 /src/plugins/data/ @elastic/kibana-app-arch
@@ -61,9 +52,10 @@
 /src/plugins/share/ @elastic/kibana-app-arch
 /src/plugins/ui_actions/ @elastic/kibana-app-arch
 /src/plugins/visualizations/ @elastic/kibana-app-arch
-/x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
+/x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-arch
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-arch
-/x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
+/x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-arch
+/x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-arch
 
 # APM
 /x-pack/plugins/apm/  @elastic/apm-ui
@@ -79,12 +71,22 @@
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-canvas
 
+# Core UI
+# Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
+/src/plugins/home/public @elastic/kibana-core-ui
+/src/plugins/home/server/*.ts @elastic/kibana-core-ui
+/src/plugins/home/server/services/ @elastic/kibana-core-ui
+# Exclude tutorial resources folder for now because they are not owned by Kibana app and most will move out soon
+/src/legacy/core_plugins/kibana/public/home/*.ts @elastic/kibana-core-ui
+/src/legacy/core_plugins/kibana/public/home/*.scss @elastic/kibana-core-ui
+/src/legacy/core_plugins/kibana/public/home/np_ready/ @elastic/kibana-core-ui
+
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/ingest_manager/ @elastic/ingest-management
 /x-pack/legacy/plugins/ingest_manager/ @elastic/ingest-management
-/x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest-management
+/x-pack/plugins/observability/ @elastic/observability-ui
 /x-pack/legacy/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/uptime @elastic/uptime
@@ -132,6 +134,7 @@
 
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
+/vars/*Coverage.groovy @elastic/kibana-qa
 /test/functional/services/common @elastic/kibana-qa
 /test/functional/services/lib @elastic/kibana-qa
 /test/functional/services/remote @elastic/kibana-qa
@@ -143,6 +146,7 @@
 /x-pack/plugins/licensing/  @elastic/kibana-platform
 /x-pack/plugins/global_search/  @elastic/kibana-platform
 /x-pack/plugins/cloud/ @elastic/kibana-platform
+/x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
 /src/legacy/server/http/ @elastic/kibana-platform
@@ -170,6 +174,7 @@
 
 # Kibana Telemetry
 /packages/kbn-analytics/ @elastic/kibana-telemetry
+/packages/kbn-telemetry-tools/ @elastic/kibana-telemetry
 /src/plugins/kibana_usage_collection/ @elastic/kibana-telemetry
 /src/plugins/newsfeed/ @elastic/kibana-telemetry
 /src/plugins/telemetry/ @elastic/kibana-telemetry
@@ -177,6 +182,11 @@
 /src/plugins/telemetry_management_section/ @elastic/kibana-telemetry
 /src/plugins/usage_collection/ @elastic/kibana-telemetry
 /x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-telemetry
+/.telemetryrc.json @elastic/kibana-telemetry
+/x-pack/.telemetryrc.json @elastic/kibana-telemetry
+src/plugins/telemetry/schema/legacy_oss_plugins.json @elastic/kibana-telemetry
+src/plugins/telemetry/schema/oss_plugins.json @elastic/kibana-telemetry
+x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kibana-telemetry
 
 # Kibana Alerting Services
 /x-pack/plugins/alerts/ @elastic/kibana-alerting-services
@@ -192,6 +202,11 @@
 
 # Design
 **/*.scss  @elastic/kibana-design
+
+# Enterprise Search
+/x-pack/plugins/enterprise_search/ @elastic/app-search-frontend @elastic/workplace-search-frontend
+/x-pack/test/functional_enterprise_search/ @elastic/app-search-frontend @elastic/workplace-search-frontend
+/x-pack/plugins/enterprise_search/**/*.scss @elastic/ent-search-design
 
 # Elasticsearch UI
 /src/plugins/dev_tools/ @elastic/es-ui

@@ -172,4 +172,19 @@ describe('buildFieldList', () => {
       script: '2+2',
     });
   });
+
+  it('handles missing mappings', () => {
+    const fields = buildFieldList(indexPattern, {}, fieldDescriptors);
+    expect(fields.every((f) => f.isAlias === false)).toEqual(true);
+  });
+
+  it('handles empty fieldDescriptors by skipping multi-mappings', () => {
+    const fields = buildFieldList(indexPattern, mappings, []);
+    expect(fields.find((f) => f.name === 'baz')).toMatchObject({
+      isAlias: false,
+      isScript: false,
+      name: 'baz',
+      path: ['baz'],
+    });
+  });
 });

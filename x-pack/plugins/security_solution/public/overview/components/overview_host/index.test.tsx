@@ -9,11 +9,13 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 
@@ -27,8 +29,8 @@ import { wait } from '../../../common/lib/helpers';
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
 
-const startDate = 1579553397080;
-const endDate = 1579639797080;
+const startDate = '2020-01-20T20:49:57.080Z';
+const endDate = '2020-01-21T20:49:57.080Z';
 
 interface MockedProvidedQuery {
   request: {
@@ -57,6 +59,7 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
           'auditbeat-*',
           'endgame-*',
           'filebeat-*',
+          'logs-*',
           'packetbeat-*',
           'winlogbeat-*',
         ],
@@ -95,11 +98,23 @@ describe('OverviewHost', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   test('it renders the expected widget title', () => {

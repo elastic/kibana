@@ -5,8 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-export * from './get_alert_preview';
+export { AlertPreview } from './components/alert_preview';
 
 export const previewOptions = [
   {
