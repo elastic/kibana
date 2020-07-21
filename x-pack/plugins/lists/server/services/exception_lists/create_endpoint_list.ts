@@ -56,7 +56,7 @@ export const createEndpointList = async ({
     );
     return transformSavedObjectToExceptionList({ savedObject });
   } catch (err) {
-    if (err.status === 409) {
+    if (savedObjectsClient.errors.isConflictError(err)) {
       return null;
     } else {
       throw err;
