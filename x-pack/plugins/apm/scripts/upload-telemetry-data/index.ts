@@ -87,7 +87,7 @@ async function uploadData() {
         return client.search(body as any).then((res) => res.body);
       },
       indicesStats: (body) => {
-        return client.indices.stats(body as any);
+        return client.indices.stats(body as any).then((res) => res.body);
       },
       transportRequest: ((params) => {
         return client.transport.request({
