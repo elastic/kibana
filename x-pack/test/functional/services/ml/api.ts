@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -324,19 +325,62 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async getCalendar(calendarId: string) {
-      return await esSupertest.get(`/_ml/calendars/${calendarId}`).expect(200);
+    async getCalendar(calendarId: string, expectedCode = 200) {
+      return await esSupertest.get(`/_ml/calendars/${calendarId}`).expect(expectedCode);
     },
 
-    async createCalendar(calendarId: string, body = { description: '', job_ids: [] }) {
+    async createCalendar(
+      calendarId: string,
+      requestBody: Partial<Calendar> = { description: '', job_ids: [] }
+    ) {
       log.debug(`Creating calendar with id '${calendarId}'...`);
-      await esSupertest.put(`/_ml/calendars/${calendarId}`).send(body).expect(200);
+      await esSupertest.put(`/_ml/calendars/${calendarId}`).send(requestBody).expect(200);
+      await this.waitForCalendarToExist(calendarId);
+    },
 
-      await retry.waitForWithTimeout(`'${calendarId}' to be created`, 30 * 1000, async () => {
-        if (await this.getCalendar(calendarId)) {
+    async deleteCalendar(calendarId: string) {
+      log.debug(`Deleting calendar with id '${calendarId}'...`);
+      await esSupertest.delete(`/_ml/calendars/${calendarId}`);
+
+      await this.waitForCalendarNotToExist(calendarId);
+    },
+
+    async waitForCalendarToExist(calendarId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${calendarId}' to exist`, 5 * 1000, async () => {
+        if (await this.getCalendar(calendarId, 200)) {
           return true;
         } else {
-          throw new Error(`expected calendar '${calendarId}' to be created`);
+          throw new Error(errorMsg || `expected filter '${calendarId}' to exist`);
+        }
+      });
+    },
+
+    async waitForCalendarNotToExist(calendarId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${calendarId}' to exist`, 5 * 1000, async () => {
+        if (await this.getCalendar(calendarId, 404)) {
+          return true;
+        } else {
+          throw new Error(errorMsg || `expected filter '${calendarId}' to not exist`);
+        }
+      });
+    },
+
+    async createCalendarEvents(calendarId: string, events: Calendar['events']) {
+      log.debug(`Creating events for calendar with id '${calendarId}'...`);
+      await esSupertest.post(`/_ml/calendars/${calendarId}/events`).send({ events }).expect(200);
+      await this.waitForCalendarEvents(calendarId);
+    },
+
+    async getCalendarEvents(calendarId: string, expectedCode = 200) {
+      return await esSupertest.get(`/_ml/calendars/${calendarId}/events`).expect(expectedCode);
+    },
+
+    async waitForCalendarEvents(calendarId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${calendarId}' events to exist`, 5 * 1000, async () => {
+        if (await this.getCalendarEvents(calendarId, 200)) {
+          return true;
+        } else {
+          throw new Error(errorMsg || `expected events for calendar '${calendarId}' to exist`);
         }
       });
     },
@@ -548,7 +592,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         if (await this.getFilter(filterId, 404)) {
           return true;
         } else {
-          throw new Error(errorMsg || `expected filter '${filterId}' to exist`);
+          throw new Error(errorMsg || `expected filter '${filterId}' to not exist`);
         }
       });
     },
