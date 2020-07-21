@@ -104,7 +104,11 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
             defaultMessage: 'Name',
           }
         ),
-        truncateText: true,
+        render: (value: string) => (
+          <span className="eui-textTruncate" title={value}>
+            {value}
+          </span>
+        ),
       },
       {
         field: 'description',
@@ -114,7 +118,11 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
             defaultMessage: 'Description',
           }
         ),
-        truncateText: true,
+        render: (value: string) => (
+          <span className="eui-textTruncate" title={value}>
+            {value}
+          </span>
+        ),
       },
       {
         field: 'packageTitle',
