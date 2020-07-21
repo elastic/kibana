@@ -65,6 +65,8 @@ export type ComponentTemplateDetailsTestSubjects =
   | 'componentTemplateDetails'
   | 'componentTemplateDetails.title'
   | 'componentTemplateDetails.footer'
+  | 'title'
+  | 'footer'
   | 'summaryTab'
   | 'mappingsTab'
   | 'settingsTab'

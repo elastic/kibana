@@ -16,7 +16,7 @@ import {
 } from '../../../../../../../../../../src/core/public/mocks';
 
 import { FlyoutMultiContent } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
-
+import { MappingsEditorProvider } from '../../../../mappings_editor';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
 
 import { init as initHttpRequests } from './http_requests';
@@ -45,9 +45,11 @@ export const setupEnvironment = () => {
 };
 
 export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <ComponentTemplatesProvider value={appDependencies}>
-    <FlyoutMultiContentProvider>
-      <Comp {...props} />
-    </FlyoutMultiContentProvider>
-  </ComponentTemplatesProvider>
+  <MappingsEditorProvider>
+    <ComponentTemplatesProvider value={appDependencies}>
+      <FlyoutMultiContentProvider>
+        <Comp {...props} />
+      </FlyoutMultiContentProvider>
+    </ComponentTemplatesProvider>
+  </MappingsEditorProvider>
 );

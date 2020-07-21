@@ -28,7 +28,7 @@ export interface MappingsConfiguration {
 }
 
 export interface MappingsTemplates {
-  dynamic_templates: DynamicTemplate[];
+  dynamic_templates?: DynamicTemplate[];
 }
 
 export interface DynamicTemplate {

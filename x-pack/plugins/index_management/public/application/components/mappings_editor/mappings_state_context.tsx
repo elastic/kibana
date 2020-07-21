@@ -24,10 +24,10 @@ export const StateProvider: React.FC = ({ children }) => {
       validate: () => Promise.resolve(true),
     },
     templates: {
-      defaultValue: { dynamic_templates: [] },
+      defaultValue: {},
       data: {
-        raw: { dynamic_templates: [] },
-        format: () => ({ dynamic_templates: [] }),
+        raw: {},
+        format: () => ({}),
       },
       validate: () => Promise.resolve(true),
     },
