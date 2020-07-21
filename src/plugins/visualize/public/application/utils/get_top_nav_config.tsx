@@ -114,7 +114,9 @@ export const getTopNavConfig = (
             application.navigateToApp(originatingApp);
           }
         } else {
-          setOriginatingApp(undefined);
+          if (setOriginatingApp && originatingApp) {
+            setOriginatingApp(undefined);
+          }
           chrome.docTitle.change(savedVis.lastSavedTitle);
           chrome.setBreadcrumbs(getEditBreadcrumbs(savedVis.lastSavedTitle));
 
