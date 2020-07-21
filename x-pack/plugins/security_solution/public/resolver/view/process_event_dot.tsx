@@ -252,7 +252,7 @@ const UnstyledProcessEventDot = React.memo(
           selectedProcessId: nodeID,
         },
       });
-      pushToQueryParams({ crumbId: nodeID, crumbEvent: 'all' });
+      pushToQueryParams({ crumbId: nodeID, crumbEvent: '' });
     }, [animationTarget, dispatch, pushToQueryParams, nodeID, nodeHTMLID]);
 
     /**
