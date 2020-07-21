@@ -38,7 +38,7 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
     .filter((event) => event?.event?.action)
     .filter((event) => actionsSet.has(event?.event?.action!));
   const foundActions = new Set(
-    events.map((event) => event?.event?.action).filter((event) => !!event)
+    events.map((event) => event?.event?.action).filter((action) => !!action)
   );
 
   for (const action of actions) {
