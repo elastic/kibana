@@ -16,6 +16,7 @@ import * as i18n from './translations';
 import { ActionCallback, TableItem, TableProps } from './table';
 
 const AlignedSpinner = styled(EuiLoadingSpinner)`
+  margin: ${({ theme }) => theme.eui.euiSizeXS};
   vertical-align: middle;
 `;
 
@@ -29,7 +30,7 @@ const ActionButton: React.FC<{
 }> = ({ content, dataTestSubj, icon, item, onClick, isLoading }) => (
   <EuiToolTip content={content}>
     {isLoading ? (
-      <AlignedSpinner size="l" />
+      <AlignedSpinner size="m" />
     ) : (
       <EuiButtonIcon
         aria-label={content}
