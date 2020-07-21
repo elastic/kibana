@@ -462,7 +462,10 @@ describe('SavedObjectsRepository', () => {
         body.push({ [method]: { _index, _id: getId(type, id) } });
         body.push(expect.any(Object));
       }
-      expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+      expect(client.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({ body }),
+        expect.anything()
+      );
     };
 
     const expectObjArgs = ({ type, attributes, references }, overrides) => [
@@ -524,14 +527,20 @@ describe('SavedObjectsRepository', () => {
       it(`formats the ES request`, async () => {
         await bulkCreateSuccess([obj1, obj2]);
         const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
 
       it(`adds namespace to request body for any types that are single-namespace`, async () => {
         await bulkCreateSuccess([obj1, obj2], { namespace });
         const expected = expect.objectContaining({ namespace });
         const body = [expect.any(Object), expected, expect.any(Object), expected];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
 
       it(`doesn't add namespace to request body for any types that are not single-namespace`, async () => {
@@ -542,7 +551,10 @@ describe('SavedObjectsRepository', () => {
         await bulkCreateSuccess(objects, { namespace });
         const expected = expect.not.objectContaining({ namespace: expect.anything() });
         const body = [expect.any(Object), expected, expect.any(Object), expected];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
 
       it(`adds namespaces to request body for any types that are multi-namespace`, async () => {
@@ -552,7 +564,10 @@ describe('SavedObjectsRepository', () => {
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
           const expected = expect.objectContaining({ namespaces });
           const body = [expect.any(Object), expected, expect.any(Object), expected];
-          expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({ body }),
+            expect.anything()
+          );
           client.bulk.mockClear();
           client.mget.mockClear();
         };
@@ -566,7 +581,10 @@ describe('SavedObjectsRepository', () => {
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
           const expected = expect.not.objectContaining({ namespaces: expect.anything() });
           const body = [expect.any(Object), expected, expect.any(Object), expected];
-          expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({ body }),
+            expect.anything()
+          );
           client.bulk.mockClear();
         };
         await test(undefined);
@@ -575,7 +593,10 @@ describe('SavedObjectsRepository', () => {
 
       it(`defaults to a refresh setting of wait_for`, async () => {
         await bulkCreateSuccess([obj1, obj2]);
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ refresh: 'wait_for' }),
+          expect.anything()
+        );
       });
 
       it(`should use default index`, async () => {
@@ -634,7 +655,10 @@ describe('SavedObjectsRepository', () => {
         expect(client.bulk).toHaveBeenCalled();
         const objCall = esError ? expectObjArgs(obj) : [];
         const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
         expect(result).toEqual({
           saved_objects: [expectSuccess(obj1), expectedError, expectSuccess(obj2)],
         });
@@ -679,7 +703,10 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
         const body2 = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body: body2 }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body: body2 }),
+          expect.anything()
+        );
         expect(result).toEqual({
           saved_objects: [expectSuccess(obj1), expectErrorConflict(obj), expectSuccess(obj2)],
         });
@@ -1076,7 +1103,10 @@ describe('SavedObjectsRepository', () => {
         });
         body.push(expect.any(Object));
       }
-      expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+      expect(client.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({ body }),
+        expect.anything()
+      );
     };
 
     const expectObjArgs = ({ type, attributes }) => [
@@ -1111,14 +1141,20 @@ describe('SavedObjectsRepository', () => {
       it(`formats the ES request`, async () => {
         await bulkUpdateSuccess([obj1, obj2]);
         const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
 
       it(`formats the ES request for any types that are multi-namespace`, async () => {
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_TYPE };
         await bulkUpdateSuccess([obj1, _obj2]);
         const body = [...expectObjArgs(obj1), ...expectObjArgs(_obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
 
       it(`doesnt call Elasticsearch if there are no valid objects to update`, async () => {
@@ -1131,7 +1167,10 @@ describe('SavedObjectsRepository', () => {
         await bulkUpdateSuccess([obj1, obj2]);
         const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
         const body = [expect.any(Object), expected, expect.any(Object), expected];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
 
       it(`accepts custom references array`, async () => {
@@ -1140,7 +1179,10 @@ describe('SavedObjectsRepository', () => {
           await bulkUpdateSuccess(objects);
           const expected = { doc: expect.objectContaining({ references }) };
           const body = [expect.any(Object), expected, expect.any(Object), expected];
-          expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({ body }),
+            expect.anything()
+          );
           client.bulk.mockClear();
         };
         await test(references);
@@ -1154,7 +1196,10 @@ describe('SavedObjectsRepository', () => {
           await bulkUpdateSuccess(objects);
           const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
           const body = [expect.any(Object), expected, expect.any(Object), expected];
-          expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({ body }),
+            expect.anything()
+          );
           client.bulk.mockClear();
         };
         await test('string');
@@ -1165,7 +1210,10 @@ describe('SavedObjectsRepository', () => {
 
       it(`defaults to a refresh setting of wait_for`, async () => {
         await bulkUpdateSuccess([obj1, obj2]);
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ refresh: 'wait_for' }),
+          expect.anything()
+        );
       });
 
       it(`defaults to the version of the existing document for multi-namespace types`, async () => {
@@ -1250,7 +1298,10 @@ describe('SavedObjectsRepository', () => {
         expect(client.bulk).toHaveBeenCalled();
         const objCall = esError ? expectObjArgs(obj) : [];
         const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
         expect(result).toEqual({
           saved_objects: [expectSuccess(obj1), expectedError, expectSuccess(obj2)],
         });
@@ -1272,7 +1323,10 @@ describe('SavedObjectsRepository', () => {
         expect(client.bulk).toHaveBeenCalled();
         expect(client.mget).toHaveBeenCalled();
         const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ body }));
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
 
         expect(result).toEqual({
           saved_objects: [expectSuccess(obj1), expectErrorNotFound(_obj), expectSuccess(obj2)],
@@ -1474,20 +1528,25 @@ describe('SavedObjectsRepository', () => {
       it(`defaults to a refresh setting of wait_for`, async () => {
         await createSuccess(type, attributes);
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ refresh: 'wait_for' })
+          expect.objectContaining({ refresh: 'wait_for' }),
+          expect.anything()
         );
       });
 
       it(`should use default index`, async () => {
         await createSuccess(type, attributes, { id });
         expect(client.create).toHaveBeenCalledWith(
-          expect.objectContaining({ index: '.kibana-test' })
+          expect.objectContaining({ index: '.kibana-test' }),
+          expect.anything()
         );
       });
 
       it(`should use custom index`, async () => {
         await createSuccess(CUSTOM_INDEX_TYPE, attributes, { id });
-        expect(client.create).toHaveBeenCalledWith(expect.objectContaining({ index: 'custom' }));
+        expect(client.create).toHaveBeenCalledWith(
+          expect.objectContaining({ index: 'custom' }),
+          expect.anything()
+        );
       });
 
       it(`self-generates an id if none is provided`, async () => {
@@ -1495,7 +1554,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-          })
+          }),
+          expect.anything()
         );
       });
 
@@ -1504,7 +1564,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${namespace}:${type}:${id}`,
-          })
+          }),
+          expect.anything()
         );
       });
 
@@ -1513,7 +1574,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
-          })
+          }),
+          expect.anything()
         );
       });
 
@@ -1522,7 +1584,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}`,
-          })
+          }),
+          expect.anything()
         );
         client.create.mockClear();
 
@@ -1530,7 +1593,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_TYPE}:${id}`,
-          })
+          }),
+          expect.anything()
         );
       });
     });
@@ -2478,7 +2542,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             refresh: 'wait_for',
-          })
+          }),
+          expect.anything()
         );
       });
 
@@ -2487,7 +2552,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${namespace}:${type}:${id}`,
-          })
+          }),
+          expect.anything()
         );
       });
 
@@ -2496,7 +2562,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
-          })
+          }),
+          expect.anything()
         );
       });
 
@@ -2505,7 +2572,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}`,
-          })
+          }),
+          expect.anything()
         );
 
         client.update.mockClear();
@@ -2513,7 +2581,8 @@ describe('SavedObjectsRepository', () => {
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_TYPE}:${id}`,
-          })
+          }),
+          expect.anything()
         );
       });
     });
