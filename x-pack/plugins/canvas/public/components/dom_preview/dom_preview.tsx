@@ -4,15 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { debounce } from 'lodash';
 
-export class DomPreview extends React.Component {
+interface Props {
+  elementId: string;
+  height: number;
+}
+
+export class DomPreview extends PureComponent<Props> {
   static propTypes = {
     elementId: PropTypes.string.isRequired,
     height: PropTypes.number.isRequired,
   };
+
+  _container: HTMLDivElement | null = null;
+  _content: HTMLDivElement | null = null;
+  _observer: MutationObserver | null = null;
+  _original: Element | null = null;
+  _updateTimeout: number = 0;
 
   componentDidMount() {
     this.update();
@@ -20,14 +31,11 @@ export class DomPreview extends React.Component {
 
   componentWillUnmount() {
     clearTimeout(this._updateTimeout);
-    this._observer && this._observer.disconnect(); // observer not guaranteed to exist
-  }
 
-  _container = null;
-  _content = null;
-  _observer = null;
-  _original = null;
-  _updateTimeout = null;
+    if (this._observer) {
+      this._observer.disconnect(); // observer not guaranteed to exist
+    }
+  }
 
   update = () => {
     if (!this._content || !this._container) {
@@ -38,7 +46,10 @@ export class DomPreview extends React.Component {
     const originalChanged = currentOriginal !== this._original;
 
     if (originalChanged) {
-      this._observer && this._observer.disconnect();
+      if (this._observer) {
+        this._observer.disconnect();
+      }
+
       this._original = currentOriginal;
 
       if (this._original) {
@@ -50,12 +61,16 @@ export class DomPreview extends React.Component {
         this._observer.observe(this._original, config);
       } else {
         clearTimeout(this._updateTimeout); // to avoid the assumption that we fully control when `update` is called
-        this._updateTimeout = setTimeout(this.update, 30);
+        this._updateTimeout = window.setTimeout(this.update, 30);
         return;
       }
     }
 
-    const thumb = this._original.cloneNode(true);
+    if (!this._original) {
+      return;
+    }
+
+    const thumb = this._original.cloneNode(true) as HTMLDivElement;
     thumb.id += '-thumb';
 
     const originalStyle = window.getComputedStyle(this._original, null);
@@ -66,9 +81,10 @@ export class DomPreview extends React.Component {
     const scale = thumbHeight / originalHeight;
     const thumbWidth = originalWidth * scale;
 
-    if (this._content.hasChildNodes()) {
+    if (this._content.firstChild) {
       this._content.removeChild(this._content.firstChild);
     }
+
     this._content.appendChild(thumb);
 
     this._content.style.cssText = `transform: scale(${scale}); transform-origin: top left;`;
@@ -76,13 +92,16 @@ export class DomPreview extends React.Component {
 
     // Copy canvas data
     const originalCanvas = this._original.querySelectorAll('canvas');
-    const thumbCanvas = thumb.querySelectorAll('canvas');
+    const thumbCanvas = (thumb as Element).querySelectorAll('canvas');
 
     // Cloned canvas elements are blank and need to be explicitly redrawn
     if (originalCanvas.length > 0) {
-      Array.from(originalCanvas).map((img, i) =>
-        thumbCanvas[i].getContext('2d').drawImage(img, 0, 0)
-      );
+      Array.from(originalCanvas).map((img, i) => {
+        const context = thumbCanvas[i].getContext('2d');
+        if (context) {
+          context.drawImage(img, 0, 0);
+        }
+      });
     }
   };
 
