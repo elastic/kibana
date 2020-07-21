@@ -8,6 +8,7 @@ import { configure, addDecorator, addParameters } from '@storybook/react';
 import { withInfo } from '@storybook/addon-info';
 import { create } from '@storybook/theming';
 
+import { startServices } from '../public/services/stubs';
 import { addDecorators } from './decorators';
 
 // If we're running Storyshots, be sure to register the require context hook.
@@ -32,6 +33,7 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 addDecorators();
+startServices();
 
 function loadStories() {
   require('./dll_contexts');

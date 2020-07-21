@@ -12,6 +12,11 @@ import { platformServiceFactory } from './platform';
 import { navLinkServiceFactory } from './nav_link';
 import { expressionsServiceFactory } from './expressions';
 
+export { NotifyService } from './notify';
+export { PlatformService } from './platform';
+export { NavLinkService } from './nav_link';
+export { ExpressionsService } from '../../../../../src/plugins/expressions/common';
+
 export type CanvasServiceFactory<Service> = (
   coreSetup: CoreSetup,
   coreStart: CoreStart,
@@ -26,6 +31,10 @@ class CanvasServiceProvider<Service> {
 
   constructor(factory: CanvasServiceFactory<Service>) {
     this.factory = factory;
+  }
+
+  setService(service: Service) {
+    this.service = service;
   }
 
   async start(

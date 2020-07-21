@@ -20,16 +20,12 @@ import {
 
 import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
+const { setRecentlyAccessed } = platformService.getService();
+
 export const workpadReducer = handleActions(
   {
     [setWorkpad]: (workpadState, { payload }) => {
-      platformService
-        .getService()
-        .coreStart.chrome.recentlyAccessed.add(
-          `${APP_ROUTE_WORKPAD}/${payload.id}`,
-          payload.name,
-          payload.id
-        );
+      setRecentlyAccessed(`${APP_ROUTE_WORKPAD}/${payload.id}`, payload.name, payload.id);
       return payload;
     },
 

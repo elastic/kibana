@@ -14,6 +14,5 @@ export const expressionsServiceFactory: CanvasServiceFactory<ExpressionsService>
   startPlugins
 ) => {
   await setupPlugins.expressions.__LEGACY.loadLegacyServerFunctionWrappers();
-
   return setupPlugins.expressions.fork();
 };
