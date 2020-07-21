@@ -4,34 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-
 import { euiStyled } from '../../../../../observability/public';
 import { UserManagementLink } from './user_management_link';
 
 export const MissingSetupPrivilegesPrompt: React.FunctionComponent = () => (
   <EmptyPrompt
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.infra.logs.analysis.missingMlSetupPrivilegesTitle"
-          defaultMessage="Additional Machine Learning privileges required"
-        />
-      </h2>
-    }
-    body={
-      <p>
-        <FormattedMessage
-          id="xpack.infra.logs.analysis.missingMlSetupPrivilegesBody"
-          defaultMessage="This feature makes use of Machine Learning jobs, which require the {machineLearningAdminRole} role in order to be set up."
-          values={{
-            machineLearningAdminRole: <EuiCode>machine_learning_admin</EuiCode>,
-          }}
-        />
-      </p>
-    }
+    title={<h2>{missingMlSetupPrivilegesTitle}</h2>}
+    body={<p>{missingMlSetupPrivilegesDescription}</p>}
     actions={<UserManagementLink />}
   />
 );
@@ -39,3 +21,18 @@ export const MissingSetupPrivilegesPrompt: React.FunctionComponent = () => (
 const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
   align-self: center;
 `;
+
+export const missingMlSetupPrivilegesTitle = i18n.translate(
+  'xpack.infra.logs.analysis.missingMlSetupPrivilegesTitle',
+  {
+    defaultMessage: 'Additional Machine Learning privileges required',
+  }
+);
+
+export const missingMlSetupPrivilegesDescription = i18n.translate(
+  'xpack.infra.logs.analysis.missingMlSetupPrivilegesDescription',
+  {
+    defaultMessage:
+      'This feature makes use of Machine Learning jobs, which require all permissions for the Machine Learning App in order to be set up.',
+  }
+);
