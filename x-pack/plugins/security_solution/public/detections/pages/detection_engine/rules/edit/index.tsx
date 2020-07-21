@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
-import { useRule, usePersistRule } from '../../../../containers/detection_engine/rules';
+import { useRule, usePatchRule, PatchRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import {
@@ -113,7 +113,7 @@ const EditRulePageComponent: FC = () => {
     [RuleStep.scheduleRule]: null,
     [RuleStep.ruleActions]: null,
   });
-  const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const [{ isLoading, isSaved }, setRule] = usePatchRule();
   const [tabHasError, setTabHasError] = useState<RuleStep[]>([]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule]);
@@ -276,7 +276,7 @@ const EditRulePageComponent: FC = () => {
             : myActionsRuleForm.data) as ActionsStepRule
         ),
         ...(ruleId ? { id: ruleId } : {}),
-      });
+      } as PatchRule);
     } else {
       setTabHasError(invalidForms);
     }

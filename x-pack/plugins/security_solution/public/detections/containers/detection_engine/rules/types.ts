@@ -88,6 +88,8 @@ export interface PatchRuleProps {
   signal: AbortSignal;
 }
 
+export type PatchRule = PatchRulesSchema;
+
 const MetaRule = t.intersection([
   t.type({
     from: t.string,

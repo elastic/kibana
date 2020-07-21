@@ -20,6 +20,13 @@ export const RULE_ADD_FAILURE = i18n.translate(
   }
 );
 
+export const RULE_PATCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.patchRuleFailDescription',
+  {
+    defaultMessage: 'Failed to modify Rule',
+  }
+);
+
 export const RULE_AND_TIMELINE_PREPACKAGED_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleAndTimelineFailDescription',
   {
