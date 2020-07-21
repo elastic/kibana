@@ -17,6 +17,8 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import {
   ActionParamsType,
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
   getActionType,
   PagerDutyActionType,
   PagerDutyActionTypeExecutorOptions,
@@ -33,7 +35,11 @@ let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get<PagerDutyActionType>(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >(ACTION_TYPE_ID);
   mockedLogger = logger;
 });
 

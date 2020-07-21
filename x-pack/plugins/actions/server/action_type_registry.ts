@@ -8,7 +8,13 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { ExecutorError, TaskRunnerFactory, ILicenseState } from './lib';
-import { ActionType, PreConfiguredAction } from './types';
+import {
+  ActionType,
+  PreConfiguredAction,
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
+} from './types';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 
@@ -77,7 +83,11 @@ export class ActionTypeRegistry {
   /**
    * Registers an action type to the action type registry
    */
-  public register(actionType: ActionType) {
+  public register<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Params extends ActionTypeParams = ActionTypeParams
+  >(actionType: ActionType<Config, Secrets, Params>) {
     if (this.has(actionType.id)) {
       throw new Error(
         i18n.translate(
@@ -91,7 +101,7 @@ export class ActionTypeRegistry {
         )
       );
     }
-    this.actionTypes.set(actionType.id, { ...actionType });
+    this.actionTypes.set(actionType.id, { ...actionType } as ActionType);
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
@@ -112,7 +122,11 @@ export class ActionTypeRegistry {
   /**
    * Returns an action type, throws if not registered
    */
-  public get<Type = ActionType>(id: string): Type {
+  public get<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Params extends ActionTypeParams = ActionTypeParams
+  >(id: string): ActionType<Config, Secrets, Params> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeErrorMessage', {
@@ -123,7 +137,7 @@ export class ActionTypeRegistry {
         })
       );
     }
-    return (this.actionTypes.get(id)! as unknown) as Type;
+    return (this.actionTypes.get(id)! as unknown) as ActionType<Config, Secrets, Params>;
   }
 
   /**

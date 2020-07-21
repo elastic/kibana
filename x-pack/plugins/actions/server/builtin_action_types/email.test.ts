@@ -36,7 +36,11 @@ let mockedLogger: jest.Mocked<Logger>;
 beforeEach(() => {
   jest.resetAllMocks();
   const { actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get<EmailActionType>(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >(ACTION_TYPE_ID);
 });
 
 describe('actionTypeRegistry.get() works', () => {

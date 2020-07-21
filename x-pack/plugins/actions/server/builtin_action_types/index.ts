@@ -7,7 +7,6 @@
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
-import { ActionType } from '../types';
 
 import { getActionType as getEmailActionType } from './email';
 import { getActionType as getIndexActionType } from './es_index';
@@ -28,20 +27,12 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry: ActionTypeRegistry;
   logger: Logger;
 }) {
-  actionTypeRegistry.register(
-    (getEmailActionType({ logger, configurationUtilities }) as unknown) as ActionType
-  );
-  actionTypeRegistry.register((getIndexActionType({ logger }) as unknown) as ActionType);
-  actionTypeRegistry.register(
-    (getPagerDutyActionType({ logger, configurationUtilities }) as unknown) as ActionType
-  );
-  actionTypeRegistry.register((getServerLogActionType({ logger }) as unknown) as ActionType);
-  actionTypeRegistry.register(
-    (getSlackActionType({ configurationUtilities }) as unknown) as ActionType
-  );
-  actionTypeRegistry.register(
-    (getWebhookActionType({ logger, configurationUtilities }) as unknown) as ActionType
-  );
+  actionTypeRegistry.register(getEmailActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getIndexActionType({ logger }));
+  actionTypeRegistry.register(getPagerDutyActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getServerLogActionType({ logger }));
+  actionTypeRegistry.register(getSlackActionType({ configurationUtilities }));
+  actionTypeRegistry.register(getWebhookActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServiceNowActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getJiraActionType({ configurationUtilities }));
   actionTypeRegistry.register(getResilientActionType({ configurationUtilities }));

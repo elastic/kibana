@@ -53,9 +53,9 @@ export interface ActionsConfigType {
 
 // the parameters passed to an action type executor function
 export interface ActionTypeExecutorOptions<
-  Config = ActionTypeConfig,
-  Secrets = ActionTypeSecrets,
-  Params = ActionTypeParams
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
 > {
   actionId: string;
   services: Services;
@@ -64,7 +64,7 @@ export interface ActionTypeExecutorOptions<
   params: Params;
 }
 
-export interface ActionResult<Config = ActionTypeConfig> {
+export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
   id: string;
   actionTypeId: string;
   name: string;
@@ -72,8 +72,10 @@ export interface ActionResult<Config = ActionTypeConfig> {
   isPreconfigured: boolean;
 }
 
-export interface PreConfiguredAction<Config = ActionTypeConfig, Secrets = ActionTypeSecrets>
-  extends ActionResult<Config> {
+export interface PreConfiguredAction<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> extends ActionResult<Config> {
   secrets: Secrets;
 }
 
@@ -93,9 +95,9 @@ export interface ActionTypeExecutorResult<Data = unknown> {
 
 // signature of the action type executor function
 export type ExecutorType<
-  Config = ActionTypeConfig,
-  Secrets = ActionTypeSecrets,
-  Params = ActionTypeParams
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
 > = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
 ) => Promise<ActionTypeExecutorResult | null | undefined | void>;
@@ -110,9 +112,9 @@ export interface ActionValidationService {
 }
 
 export interface ActionType<
-  Config = ActionTypeConfig,
-  Secrets = ActionTypeSecrets,
-  Params = ActionTypeParams
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
 > {
   id: string;
   name: string;

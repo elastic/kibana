@@ -26,7 +26,7 @@ let actionType: ESIndexActionType;
 
 beforeAll(() => {
   const { actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get<ESIndexActionType>(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<ActionTypeConfigType, {}, ActionParamsType>(ACTION_TYPE_ID);
 });
 
 beforeEach(() => {

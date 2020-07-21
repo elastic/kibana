@@ -16,6 +16,7 @@ import { Logger } from '../../../../../src/core/server';
 import { actionsMock } from '../mocks';
 import axios from 'axios';
 import {
+  ActionParamsType,
   ActionTypeConfigType,
   ActionTypeSecretsType,
   getActionType,
@@ -34,7 +35,11 @@ let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get<WebhookActionType>(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >(ACTION_TYPE_ID);
   mockedLogger = logger;
 });
 

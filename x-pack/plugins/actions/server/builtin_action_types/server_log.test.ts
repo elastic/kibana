@@ -8,7 +8,11 @@ import { validateParams } from '../lib';
 import { Logger } from '../../../../../src/core/server';
 import { createActionTypeRegistry } from './index.test';
 import { actionsMock } from '../mocks';
-import { ServerLogActionType, ServerLogActionTypeExecutorOptions } from './server_log';
+import {
+  ActionParamsType,
+  ServerLogActionType,
+  ServerLogActionTypeExecutorOptions,
+} from './server_log';
 
 const ACTION_TYPE_ID = '.server-log';
 
@@ -17,7 +21,7 @@ let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get<ServerLogActionType>(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<{}, {}, ActionParamsType>(ACTION_TYPE_ID);
   mockedLogger = logger;
   expect(actionType).toBeTruthy();
 });
