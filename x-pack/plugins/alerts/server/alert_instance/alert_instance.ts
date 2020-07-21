@@ -8,15 +8,15 @@ import {
   AlertInstanceState,
   RawAlertInstance,
   rawAlertInstance,
+  AlertInstanceContext,
 } from '../../common';
 
-import { State, Context } from '../types';
 import { parseDuration } from '../lib';
 
 interface ScheduledExecutionOptions {
   actionGroup: string;
-  context: Context;
-  state: State;
+  context: AlertInstanceContext;
+  state: AlertInstanceState;
 }
 export type AlertInstances = Record<string, AlertInstance>;
 export class AlertInstance {
@@ -62,7 +62,7 @@ export class AlertInstance {
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context: Context = {}) {
+  scheduleActions(actionGroup: string, context: AlertInstanceContext = {}) {
     if (this.hasScheduledActions()) {
       throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
@@ -70,7 +70,7 @@ export class AlertInstance {
     return this;
   }
 
-  replaceState(state: State) {
+  replaceState(state: AlertInstanceState) {
     this.state = state;
     return this;
   }

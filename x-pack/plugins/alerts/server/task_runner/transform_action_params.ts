@@ -6,7 +6,7 @@
 
 import Mustache from 'mustache';
 import { isString, cloneDeepWith } from 'lodash';
-import { AlertActionParams, State, Context } from '../types';
+import { AlertActionParams, AlertInstanceState, AlertInstanceContext } from '../types';
 
 interface TransformActionParamsOptions {
   alertId: string;
@@ -15,8 +15,8 @@ interface TransformActionParamsOptions {
   tags?: string[];
   alertInstanceId: string;
   actionParams: AlertActionParams;
-  state: State;
-  context: Context;
+  state: AlertInstanceState;
+  context: AlertInstanceContext;
 }
 
 export function transformActionParams({

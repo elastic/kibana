@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
-import { AlertType } from './types';
+import { AlertType, AlertTypeParams, AlertTypeState } from './types';
 
 interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
@@ -29,7 +29,10 @@ export class AlertTypeRegistry {
     return this.alertTypes.has(id);
   }
 
-  public register(alertType: AlertType) {
+  public register<
+    Params extends AlertTypeParams = AlertTypeParams,
+    State extends AlertTypeState = AlertTypeState
+  >(alertType: AlertType<Params, State>) {
     if (this.has(alertType.id)) {
       throw new Error(
         i18n.translate('xpack.alerts.alertTypeRegistry.register.duplicateAlertTypeError', {
@@ -41,18 +44,21 @@ export class AlertTypeRegistry {
       );
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
-    this.alertTypes.set(alertType.id, { ...alertType });
+    this.alertTypes.set(alertType.id, { ...alertType } as AlertType);
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
         type: `alerting:${alertType.id}`,
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(alertType, context),
+          this.taskRunnerFactory.create(alertType as AlertType, context),
       },
     });
   }
 
-  public get(id: string): AlertType {
+  public get<
+    Params extends AlertTypeParams = AlertTypeParams,
+    State extends AlertTypeState = AlertTypeState
+  >(id: string): AlertType<Params, State> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerts.alertTypeRegistry.get.missingAlertTypeError', {
@@ -63,7 +69,7 @@ export class AlertTypeRegistry {
         })
       );
     }
-    return this.alertTypes.get(id)!;
+    return this.alertTypes.get(id)! as AlertType<Params, State>;
   }
 
   public list() {

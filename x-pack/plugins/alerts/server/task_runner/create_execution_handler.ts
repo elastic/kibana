@@ -5,7 +5,7 @@
  */
 
 import { map } from 'lodash';
-import { AlertAction, State, Context, AlertType } from '../types';
+import { AlertAction, AlertInstanceState, AlertInstanceContext, AlertType } from '../types';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
@@ -29,8 +29,8 @@ interface CreateExecutionHandlerOptions {
 interface ExecutionHandlerOptions {
   actionGroup: string;
   alertInstanceId: string;
-  context: Context;
-  state: State;
+  context: AlertInstanceContext;
+  state: AlertInstanceState;
 }
 
 export function createExecutionHandler({

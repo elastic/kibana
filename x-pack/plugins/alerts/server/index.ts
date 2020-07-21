@@ -17,7 +17,8 @@ export {
   AlertExecutorOptions,
   AlertActionParams,
   AlertServices,
-  State,
+  AlertTypeState,
+  AlertTypeParams,
   PartialAlert,
 } from './types';
 export { PluginSetupContract, PluginStartContract } from './plugin';
