@@ -111,7 +111,7 @@ pipeline {
       }
     }
     cleanup {
-      notifyBuildResult()
+      notifyBuildResult(notifyPRComment: false, analyzeFlakey: false)
     }
   }
 }
