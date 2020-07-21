@@ -9,17 +9,11 @@ import { Either } from 'fp-ts/lib/Either';
 
 import { EntriesArray, entriesArray } from './entries';
 
-export type DefaultEntriesArrayC = t.Type<EntriesArray, EntriesArray, unknown>;
-
 /**
  * Types the DefaultEntriesArray as:
  *   - If null or undefined, then a default array of type entry will be set
  */
-export const DefaultEntryArray: DefaultEntriesArrayC = new t.Type<
-  EntriesArray,
-  EntriesArray,
-  unknown
->(
+export const DefaultEntryArray = new t.Type<EntriesArray, EntriesArray, unknown>(
   'DefaultEntryArray',
   entriesArray.is,
   (input): Either<t.Errors, EntriesArray> =>

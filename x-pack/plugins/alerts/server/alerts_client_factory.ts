@@ -65,7 +65,6 @@ export class AlertsClientFactory {
     const spaceId = this.getSpaceId(request);
     const authorization = new AlertsAuthorization({
       authorization: securityPluginSetup?.authz,
-      securityLicense: securityPluginSetup?.license,
       request,
       getSpace: this.getSpace,
       alertTypeRegistry: this.alertTypeRegistry,
