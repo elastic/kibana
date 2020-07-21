@@ -60,7 +60,7 @@ run(
     if (all) {
       log.info('Running all available tests. This will take a while...');
     } else if (storybook) {
-      path = 'plugins/canvas/.storybook';
+      path = 'plugins/canvas/storybook';
       log.info('Running Storybook Snapshot tests...');
     } else {
       log.info('Running tests. This does not include Storybook Snapshots...');
