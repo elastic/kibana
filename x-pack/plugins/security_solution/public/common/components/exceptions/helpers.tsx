@@ -383,6 +383,7 @@ export const defaultEndpointExceptionItems = (
     fieldName: 'file.Ext.code_signature.trusted',
   });
   const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' });
+  const [eventCode] = getMappedNonEcsValue({ data: alertData, fieldName: 'event.code' });
   const namespaceType = 'agnostic';
 
   return [
@@ -395,11 +396,6 @@ export const defaultEndpointExceptionItems = (
           type: 'match',
           value: filePath ?? '',
         },
-      ],
-    },
-    {
-      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
-      entries: [
         {
           field: 'file.Ext.code_signature.subject_name',
           operator: 'included',
@@ -412,27 +408,17 @@ export const defaultEndpointExceptionItems = (
           type: 'match',
           value: signatureTrusted ?? '',
         },
-      ],
-    },
-    {
-      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
-      entries: [
         {
           field: 'file.hash.sha1',
           operator: 'included',
           type: 'match',
           value: sha1Hash ?? '',
         },
-      ],
-    },
-    {
-      ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
-      entries: [
         {
-          field: 'event.category',
+          field: 'event.code',
           operator: 'included',
-          type: 'match_any',
-          value: getMappedNonEcsValue({ data: alertData, fieldName: 'event.category' }),
+          type: 'match',
+          value: eventCode ?? '',
         },
       ],
     },
