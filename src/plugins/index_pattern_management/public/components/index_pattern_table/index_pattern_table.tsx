@@ -88,6 +88,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     application,
     http,
     isMlAvailable,
+    isIngestManagerAvailable,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
@@ -200,6 +201,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           docLinks={docLinks}
           navigateToApp={application.navigateToApp}
           isMlAvailable={isMlAvailable}
+          isIngestManagerAvailable={isIngestManagerAvailable}
           canSave={canSave}
         />
       );

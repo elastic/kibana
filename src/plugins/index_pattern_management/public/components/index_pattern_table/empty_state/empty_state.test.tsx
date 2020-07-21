@@ -42,6 +42,7 @@ describe('EmptyState', () => {
         onRefresh={() => {}}
         navigateToApp={async () => {}}
         isMlAvailable={() => true}
+        isIngestManagerAvailable={() => true}
         canSave={true}
       />
     );
@@ -60,6 +61,7 @@ describe('EmptyState', () => {
             onRefresh={onRefreshHandler}
             navigateToApp={async () => {}}
             isMlAvailable={() => true}
+            isIngestManagerAvailable={() => true}
             canSave={true}
           />
         );

@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "ingestManager"],
-  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects"],
+  "requiredPlugins": ["licensing", "data", "encryptedSavedObjects", "indexPatternManagement"],
   "optionalPlugins": ["security", "features", "cloud", "usageCollection", "home"],
   "extraPublicDirs": ["common"],
   "requiredBundles": ["kibanaReact", "esUiShared"]

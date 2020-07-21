@@ -89,7 +89,8 @@ export class IndexPatternManagementPlugin
         return mountManagementSection(
           core.getStartServices,
           params,
-          () => this.indexPatternManagementService.environmentService.getEnvironment().ml
+          () => this.indexPatternManagementService.environmentService.getEnvironment().ml,
+          () => this.indexPatternManagementService.environmentService.getEnvironment().ingestManager
         );
       },
     });

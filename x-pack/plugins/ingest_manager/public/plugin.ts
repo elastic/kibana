@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 
@@ -45,6 +46,7 @@ export interface IngestManagerStart {
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
+  indexPatternManagement: IndexPatternManagementSetup;
   home?: HomePublicPluginSetup;
 }
 
@@ -96,6 +98,8 @@ export class IngestManagerPlugin
       deps.home.tutorials.registerDirectoryHeaderLink(PLUGIN_ID, TutorialDirectoryHeaderLink);
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
     }
+
+    // deps.indexPatternManagement.environment.update({ ingestManager: true });
 
     return {};
   }
