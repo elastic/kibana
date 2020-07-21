@@ -38,14 +38,13 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   state,
   setCurrentStep,
 }) => {
-  const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(true);
   const {
     services: { docLinks, notifications },
   } = useMlKibana();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   const { setFormState } = actions;
-  const { form, isJobCreated } = state;
+  const { form, cloneJob, isJobCreated } = state;
   const {
     createIndexPattern,
     description,
@@ -61,6 +60,9 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     jobIdValid,
     resultsField,
   } = form;
+
+  const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(cloneJob === undefined);
+
   const forceInput = useRef<HTMLInputElement | null>(null);
 
   const isStepInvalid =
