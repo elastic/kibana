@@ -16,6 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  MLErrorMessages,
+  ErrorCode,
+} from '../../../../../common/anomaly_detection';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
@@ -57,21 +61,12 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
 ];
 
 interface Props {
+  data: AnomalyDetectionApiResponse;
   status: FETCH_STATUS;
   onAddEnvironments: () => void;
-  jobs: Jobs;
-  hasLegacyJobs: boolean;
 }
-export const JobsList = ({
-  status,
-  onAddEnvironments,
-  jobs,
-  hasLegacyJobs,
-}: Props) => {
-  const isLoading =
-    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
-
-  const hasFetchFailure = status === FETCH_STATUS.FAILURE;
+export const JobsList = ({ data, status, onAddEnvironments }: Props) => {
+  const { jobs, hasLegacyJobs, errorCode } = data;
 
   return (
     <EuiPanel>
@@ -120,15 +115,10 @@ export const JobsList = ({
       </EuiText>
       <EuiSpacer size="l" />
       <ManagedTable
-        noItemsMessage={
-          isLoading ? (
-            <LoadingStatePrompt />
-          ) : hasFetchFailure ? (
-            <FailureStatePrompt />
-          ) : (
-            <EmptyStatePrompt />
-          )
-        }
+        noItemsMessage={getNoItemsMessage({
+          status,
+          errorCode,
+        })}
         columns={columns}
         items={jobs}
       />
@@ -139,28 +129,36 @@ export const JobsList = ({
   );
 };
 
-function EmptyStatePrompt() {
-  return (
-    <>
-      {i18n.translate(
-        'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
-        {
-          defaultMessage: 'No anomaly detection jobs.',
-        }
-      )}
-    </>
-  );
-}
+function getNoItemsMessage({
+  status,
+  errorCode,
+}: {
+  status: FETCH_STATUS;
+  errorCode?: ErrorCode;
+}) {
+  // loading state
+  const isLoading =
+    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
+  if (isLoading) {
+    return <LoadingStatePrompt />;
+  }
 
-function FailureStatePrompt() {
-  return (
-    <>
-      {i18n.translate(
-        'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
-        {
-          defaultMessage: 'Unabled to fetch anomaly detection jobs.',
-        }
-      )}
-    </>
+  // A known error occured. Show specific error message
+  if (errorCode) {
+    return MLErrorMessages[errorCode];
+  }
+
+  // An unexpected error occurred. Show default error message
+  if (status === FETCH_STATUS.FAILURE) {
+    return i18n.translate(
+      'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
+      { defaultMessage: 'Unabled to fetch anomaly detection jobs.' }
+    );
+  }
+
+  // no errors occurred
+  return i18n.translate(
+    'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
+    { defaultMessage: 'No anomaly detection jobs.' }
   );
 }
