@@ -34,6 +34,7 @@ import {
   EmbeddableOutput,
   Embeddable,
   IContainer,
+  Adapters,
 } from '../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
 import {
@@ -78,8 +79,6 @@ export interface VisualizeOutput extends EmbeddableOutput {
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
-const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega', 'timelion'];
-
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
@@ -96,6 +95,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
+  private readonly inspectorAdapters?: Adapters;
 
   constructor(
     timefilter: TimefilterContract,
@@ -131,13 +131,20 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         this.handleChanges();
       })
     );
+
+    const inspectorAdapters = this.vis.type.inspectorAdapters;
+
+    if (inspectorAdapters) {
+      this.inspectorAdapters =
+        typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
+    }
   }
   public getVisualizationDescription() {
     return this.vis.description;
   }
 
   public getInspectorAdapters = () => {
-    if (!this.handler || visTypesWithoutInspector.includes(this.vis.type.name)) {
+    if (!this.handler || (this.inspectorAdapters && !Object.keys(this.inspectorAdapters).length)) {
       return undefined;
     }
     return this.handler.inspect();
@@ -351,6 +358,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         filters: this.input.filters,
       },
       uiState: this.vis.uiState,
+      inspectorAdapters: this.inspectorAdapters,
     };
     if (this.abortController) {
       this.abortController.abort();
