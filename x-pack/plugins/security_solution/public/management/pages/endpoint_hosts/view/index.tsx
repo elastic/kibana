@@ -226,7 +226,7 @@ export const HostList = () => {
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpointList.hostStatusValue"
-                defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
+                defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
                 values={{ hostStatus }}
               />
             </EuiHealth>

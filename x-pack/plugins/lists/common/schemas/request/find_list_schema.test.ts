@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
 
 import { getFindListSchemaDecodedMock, getFindListSchemaMock } from './find_list_schema.mock';
-import { FindListSchema, FindListSchemaEncoded, findListSchema } from './find_list_schema';
+import { FindListSchemaEncoded, findListSchema } from './find_list_schema';
 
 describe('find_list_schema', () => {
   test('it should validate a typical find item request', () => {
@@ -28,8 +28,7 @@ describe('find_list_schema', () => {
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: FindListSchema = {};
-    expect(message.schema).toEqual(expected);
+    expect(message.schema).toEqual(payload);
   });
 
   test('it should validate with page missing', () => {

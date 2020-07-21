@@ -18,6 +18,7 @@ import {
   NamespaceType,
   TagsOrUndefined,
   _TagsOrUndefined,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectUpdateToExceptionList } from './utils';
@@ -26,6 +27,7 @@ import { getExceptionList } from './get_exception_list';
 interface UpdateExceptionListOptions {
   id: IdOrUndefined;
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
@@ -40,6 +42,7 @@ interface UpdateExceptionListOptions {
 
 export const updateExceptionList = async ({
   _tags,
+  _version,
   id,
   savedObjectsClient,
   namespaceType,
@@ -67,6 +70,9 @@ export const updateExceptionList = async ({
         tags,
         type,
         updated_by: user,
+      },
+      {
+        version: _version,
       }
     );
     return transformSavedObjectUpdateToExceptionList({ exceptionList, savedObject });
