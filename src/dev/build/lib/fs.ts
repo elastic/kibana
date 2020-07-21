@@ -38,6 +38,8 @@ const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const utimesAsync = promisify(fs.utimes);
+const copyFileAsync = promisify(fs.copyFile);
+const statAsync = promisify(fs.stat);
 
 export function assertAbsolute(path: string) {
   if (!isAbsolute(path)) {
@@ -140,6 +142,23 @@ export async function deleteEmptyFolders(
 
   log.debug('Deleted %d empty folders', deletedEmptyFolders.length);
   log.verbose('Deleted:', longInspect(deletedEmptyFolders));
+}
+
+interface CopyOptions {
+  clone?: boolean;
+}
+export async function copy(source: string, destination: string, options: CopyOptions = {}) {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
+  // ensure source exists before creating destination directory and copying source
+  await statAsync(source);
+  await mkdirp(dirname(destination));
+  return await copyFileAsync(
+    source,
+    destination,
+    options.clone ? fs.constants.COPYFILE_FICLONE : 0
+  );
 }
 
 interface CopyAllOptions {

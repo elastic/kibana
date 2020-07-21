@@ -40,7 +40,7 @@ it('renders help if `--help` passed', () => {
 it('build default and oss dist for current platform, without packages, by default', () => {
   expect(fn()).toMatchInlineSnapshot(`
     Object {
-      "buildArgs": Object {
+      "buildOptions": Object {
         "buildDefaultDist": true,
         "buildOssDist": true,
         "createArchives": true,
@@ -63,7 +63,7 @@ it('build default and oss dist for current platform, without packages, by defaul
 it('builds packages if --all-platforms is passed', () => {
   expect(fn('--all-platforms')).toMatchInlineSnapshot(`
     Object {
-      "buildArgs": Object {
+      "buildOptions": Object {
         "buildDefaultDist": true,
         "buildOssDist": true,
         "createArchives": true,
@@ -86,7 +86,7 @@ it('builds packages if --all-platforms is passed', () => {
 it('limits packages if --rpm passed with --all-platforms', () => {
   expect(fn('--all-platforms', '--rpm')).toMatchInlineSnapshot(`
     Object {
-      "buildArgs": Object {
+      "buildOptions": Object {
         "buildDefaultDist": true,
         "buildOssDist": true,
         "createArchives": true,
@@ -109,7 +109,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
 it('limits packages if --deb passed with --all-platforms', () => {
   expect(fn('--all-platforms', '--deb')).toMatchInlineSnapshot(`
     Object {
-      "buildArgs": Object {
+      "buildOptions": Object {
         "buildDefaultDist": true,
         "buildOssDist": true,
         "createArchives": true,
@@ -132,7 +132,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
 it('limits packages if --docker passed with --all-platforms', () => {
   expect(fn('--all-platforms', '--docker')).toMatchInlineSnapshot(`
     Object {
-      "buildArgs": Object {
+      "buildOptions": Object {
         "buildDefaultDist": true,
         "buildOssDist": true,
         "createArchives": true,
@@ -155,7 +155,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
 it('limits packages if --docker passed with --skip-docker-ubi and --all-platforms', () => {
   expect(fn('--all-platforms', '--docker', '--skip-docker-ubi')).toMatchInlineSnapshot(`
     Object {
-      "buildArgs": Object {
+      "buildOptions": Object {
         "buildDefaultDist": true,
         "buildOssDist": true,
         "createArchives": true,

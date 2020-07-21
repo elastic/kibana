@@ -17,7 +17,15 @@
  * under the License.
  */
 
-import { ToolingLog, ToolingLogCollectingWriter, createStripAnsiSerializer } from '@kbn/dev-utils';
+import Path from 'path';
+
+import {
+  ToolingLog,
+  ToolingLogCollectingWriter,
+  createStripAnsiSerializer,
+  createRecursiveSerializer,
+} from '@kbn/dev-utils';
+
 import { exec } from './exec';
 
 const testWriter = new ToolingLogCollectingWriter();
@@ -25,6 +33,12 @@ const log = new ToolingLog();
 log.setWriters([testWriter]);
 
 expect.addSnapshotSerializer(createStripAnsiSerializer());
+expect.addSnapshotSerializer(
+  createRecursiveSerializer(
+    (v) => v.includes(process.execPath),
+    (v) => v.split(Path.dirname(process.execPath)).join('<nodedir>')
+  )
+);
 
 beforeEach(() => {
   testWriter.messages.length = 0;
@@ -34,7 +48,7 @@ it('executes a command, logs the command, and logs the output', async () => {
   await exec(log, process.execPath, ['-e', 'console.log("hi")']);
   expect(testWriter.messages).toMatchInlineSnapshot(`
     Array [
-      " debg $ /Users/spalger/.nvm/versions/node/v10.21.0/bin/node -e console.log(\\"hi\\")",
+      " debg $ <nodedir>/node -e console.log(\\"hi\\")",
       " debg hi",
     ]
   `);
@@ -46,7 +60,7 @@ it('logs using level: option', async () => {
   });
   expect(testWriter.messages).toMatchInlineSnapshot(`
     Array [
-      " info $ /Users/spalger/.nvm/versions/node/v10.21.0/bin/node -e console.log(\\"hi\\")",
+      " info $ <nodedir>/node -e console.log(\\"hi\\")",
       " info hi",
     ]
   `);

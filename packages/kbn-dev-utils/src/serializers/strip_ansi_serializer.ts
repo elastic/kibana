@@ -19,9 +19,11 @@
 
 import stripAnsi from 'strip-ansi';
 
+import { createRecursiveSerializer } from './recursive_serializer';
+
 export function createStripAnsiSerializer() {
-  return {
-    test: (value: any) => typeof value === 'string' && stripAnsi(value) !== value,
-    serialize: stripAnsi,
-  };
+  return createRecursiveSerializer(
+    (v) => typeof v === 'string' && stripAnsi(v) !== v,
+    (v) => stripAnsi(v)
+  );
 }

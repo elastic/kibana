@@ -17,15 +17,10 @@
  * under the License.
  */
 
-import { dirname, resolve } from 'path';
-import fs from 'fs';
-import { promisify } from 'util';
+import Path from 'path';
 
-import { untar, mkdirp, GlobalTask } from '../../lib';
+import { untar, GlobalTask, copy } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
-
-const statAsync = promisify(fs.stat);
-const copyFileAsync = promisify(fs.copyFile);
 
 export const ExtractNodeBuilds: GlobalTask = {
   global: true,
@@ -34,18 +29,14 @@ export const ExtractNodeBuilds: GlobalTask = {
     await Promise.all(
       config.getNodePlatforms().map(async (platform) => {
         const { downloadPath, extractDir } = getNodeDownloadInfo(config, platform);
-        // windows executable is not extractable, it's just an .exe file
         if (platform.isWindows()) {
-          const destination = resolve(extractDir, 'node.exe');
-          // ensure source exists before creating destination directory
-          await statAsync(downloadPath);
-          await mkdirp(dirname(destination));
-          // for performance reasons, do a copy-on-write by using the fs.constants.COPYFILE_FICLONE flag
-          return await copyFileAsync(downloadPath, destination, fs.constants.COPYFILE_FICLONE);
+          // windows executable is not extractable, it's just an .exe file
+          await copy(downloadPath, Path.resolve(extractDir, 'node.exe'), {
+            clone: true,
+          });
+        } else {
+          await untar(downloadPath, extractDir, { strip: 1 });
         }
-
-        // all other downloads are tarballs
-        return untar(downloadPath, extractDir, { strip: 1 });
       })
     );
   },

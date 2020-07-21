@@ -17,6 +17,13 @@
  * under the License.
  */
 
-export * from './absolute_path_serializer';
-export * from './strip_ansi_serializer';
-export * from './recursive_serializer';
+export function createRecursiveSerializer(test: (v: any) => boolean, print: (v: any) => string) {
+  return {
+    test: (v: any) => test(v),
+    serialize: (v: any, ...rest: any[]) => {
+      const replacement = print(v);
+      const printer = rest.pop()!;
+      return printer(replacement, ...rest);
+    },
+  };
+}
