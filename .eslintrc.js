@@ -1227,6 +1227,12 @@ module.exports = {
       },
     },
     {
+      files: ['x-pack/plugins/canvas/storybook/**'],
+      rules: {
+        'import/no-extraneous-dependencies': 0,
+      },
+    },
+    {
       files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
       rules: {
