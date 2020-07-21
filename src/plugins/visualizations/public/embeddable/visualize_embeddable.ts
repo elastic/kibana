@@ -215,9 +215,16 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       dirty = true;
     }
 
-    if (this.output.title !== this.title || this.title !== this.vis.title) {
-      // Output has priority, but use vis.title as fallback
-      this.title = this.output.title || this.vis.title;
+    // propagate the title to the output embeddable
+    // but only when the visualization is in edit/Visualize mode
+    if (!this.parent && this.vis.title !== this.output.title) {
+      this.updateOutput({ title: this.vis.title });
+    }
+
+    // Keep title depending on the output Embeddable to decouple the
+    // visual appearance of the title and the actual title content (useful in Dashboard)
+    if (this.output.title !== this.title) {
+      this.title = this.output.title;
 
       if (this.domNode) {
         this.domNode.setAttribute('data-title', this.title || '');
@@ -315,7 +322,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       })
     );
 
-    div.setAttribute('data-title', this.title || '');
+    div.setAttribute('data-title', this.output.title || '');
 
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);
