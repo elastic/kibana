@@ -15,14 +15,14 @@ import { mockGetCurrentUser } from './__mocks__/import_timelines';
 import { getTimelineByIdRequest } from './__mocks__/request_responses';
 
 import { getTimeline, getTemplateTimeline } from './utils/create_timelines';
-import { getTimelineByIdRoute } from './get_timeline_by_id_route';
+import { getTimelineRoute } from './get_timeline_route';
 
 jest.mock('./utils/create_timelines', () => ({
   getTimeline: jest.fn(),
   getTemplateTimeline: jest.fn(),
 }));
 
-describe('get timeline by id', () => {
+describe('get timeline', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
@@ -41,7 +41,7 @@ describe('get timeline by id', () => {
       authz: {},
     } as unknown) as SecurityPluginSetup;
 
-    getTimelineByIdRoute(server.router, createMockConfig(), securitySetup);
+    getTimelineRoute(server.router, createMockConfig(), securitySetup);
   });
 
   test('should call getTemplateTimeline if templateTimelineId is given', async () => {

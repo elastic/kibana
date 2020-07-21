@@ -65,7 +65,7 @@ export interface Timeline {
   getAllTimeline: (
     request: FrameworkRequest,
     onlyUserFavorite: boolean | null,
-    pageInfo: PageInfoTimeline | null,
+    pageInfo: PageInfoTimeline,
     search: string | null,
     sort: SortTimeline | null,
     status: TimelineStatusLiteralWithNull,
@@ -163,17 +163,18 @@ const getTimelineTypeFilter = (
 export const getExistingPrepackagedTimelines = async (
   request: FrameworkRequest,
   countsOnly?: boolean,
-  pageInfo?: PageInfoTimeline | null
+  pageInfo?: PageInfoTimeline
 ): Promise<{
   totalCount: number;
   timeline: TimelineSavedObject[];
 }> => {
-  const queryPageInfo = countsOnly
-    ? {
-        perPage: 1,
-        page: 1,
-      }
-    : pageInfo ?? {};
+  const queryPageInfo =
+    countsOnly || pageInfo == null
+      ? {
+          perPage: 1,
+          page: 1,
+        }
+      : pageInfo;
   const elasticTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     ...queryPageInfo,
@@ -190,7 +191,7 @@ export const getExistingPrepackagedTimelines = async (
 export const getAllTimeline = async (
   request: FrameworkRequest,
   onlyUserFavorite: boolean | null,
-  pageInfo: PageInfoTimeline | null,
+  pageInfo: PageInfoTimeline,
   search: string | null,
   sort: SortTimeline | null,
   status: TimelineStatusLiteralWithNull,
@@ -199,8 +200,8 @@ export const getAllTimeline = async (
 ): Promise<AllTimelinesResponse> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
-    perPage: pageInfo?.pageSize ?? undefined,
-    page: pageInfo?.pageIndex ?? undefined,
+    perPage: pageInfo.pageSize,
+    page: pageInfo.pageIndex,
     search: search != null ? search : undefined,
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
@@ -556,14 +557,20 @@ export const timelineWithReduxProperties = (
   pinnedEventsSaveObject: pinnedEvents,
 });
 
-export const getTimelines = async (request: FrameworkRequest, timelineIds?: string[] | null) => {
+export const getSelectedTimelines = async (
+  request: FrameworkRequest,
+  timelineIds?: string[] | null
+) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
   let exportedIds = timelineIds;
   if (timelineIds == null || timelineIds.length === 0) {
     const { timeline: savedAllTimelines } = await getAllTimeline(
       request,
       false,
-      null,
+      {
+        pageIndex: 1,
+        pageSize: timelineIds?.length ?? 0,
+      },
       null,
       null,
       TimelineStatus.active,

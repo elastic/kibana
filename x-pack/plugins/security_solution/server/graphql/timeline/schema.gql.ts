@@ -183,8 +183,8 @@ export const timelineSchema = gql`
   }
 
   input PageInfoTimeline {
-    pageIndex: Float
-    pageSize: Float
+    pageIndex: Float!
+    pageSize: Float!
   }
 
   enum SortFieldTimeline {
@@ -321,7 +321,7 @@ export const timelineSchema = gql`
 
   extend type Query {
     getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, templateTimelineType: TemplateTimelineType, status: TimelineStatus): ResponseTimelines!
+    getAllTimeline(pageInfo: PageInfoTimeline!, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, templateTimelineType: TemplateTimelineType, status: TimelineStatus): ResponseTimelines!
   }
 
   extend type Mutation {

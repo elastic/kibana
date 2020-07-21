@@ -17,8 +17,10 @@ import { buildSiemResponse, transformError } from '../../detection_engine/routes
 import { buildFrameworkRequest } from './utils/common';
 import { getTimelineByIdSchemaQuery } from './schemas/get_timeline_by_id_schema';
 import { getTimeline, getTemplateTimeline } from './utils/create_timelines';
+import { getAllTimeline } from '../saved_object';
+import { TimelineStatus } from '../../../../common/types/timeline';
 
-export const getTimelineByIdRoute = (
+export const getTimelineRoute = (
   router: IRouter,
   config: ConfigType,
   security: SetupPlugins['security']
@@ -36,10 +38,31 @@ export const getTimelineByIdRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const { template_timeline_id: templateTimelineId, id } = request.query;
         let res = null;
-        if (templateTimelineId != null) {
+        if (templateTimelineId != null && id == null) {
           res = await getTemplateTimeline(frameworkRequest, templateTimelineId);
-        } else if (id != null) {
+        } else if (templateTimelineId == null && id != null) {
           res = await getTimeline(frameworkRequest, id);
+        } else if (templateTimelineId == null && id == null) {
+          const { totalCount } = await getAllTimeline(
+            frameworkRequest,
+            false,
+            { pageSize: 1, pageIndex: 1 },
+            null,
+            null,
+            TimelineStatus.active,
+            null,
+            null
+          );
+          res = await getAllTimeline(
+            frameworkRequest,
+            false,
+            { pageSize: totalCount, pageIndex: 1 },
+            null,
+            null,
+            TimelineStatus.active,
+            null,
+            null
+          );
         }
 
         return response.ok({ body: res ?? {} });

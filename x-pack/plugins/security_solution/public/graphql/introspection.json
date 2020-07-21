@@ -229,7 +229,11 @@
               {
                 "name": "pageInfo",
                 "description": "",
-                "type": { "kind": "INPUT_OBJECT", "name": "PageInfoTimeline", "ofType": null },
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "PageInfoTimeline", "ofType": null }
+                },
                 "defaultValue": null
               },
               {
@@ -10911,13 +10915,21 @@
           {
             "name": "pageIndex",
             "description": "",
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           },
           {
             "name": "pageSize",
             "description": "",
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
+            },
             "defaultValue": null
           }
         ],
