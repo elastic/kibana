@@ -76,7 +76,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
 
   const isValid = useMemo((): boolean => {
     const areAnyInvalid = selectedComboOptions.filter(
-      ({ label }) => !validateParams(label, selectedField ? selectedField.type : '')
+      ({ label }) => !validateParams(label, selectedField)
     );
     return areAnyInvalid.length === 0;
   }, [selectedComboOptions, selectedField]);

@@ -40,7 +40,7 @@ export default function (providerContext: FtrProviderContext) {
       await esClient.update({
         index: '.kibana',
         id: 'fleet-agents:agent1',
-        refresh: 'true',
+        refresh: true,
         body: {
           doc: agentDoc,
         },
