@@ -162,14 +162,7 @@ export const transactionGroupsAvgDurationByBrowser = createRoute(() => ({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      t.partial({
-        transactionType: t.string,
-        transactionName: t.string,
-      }),
-      uiFiltersRt,
-      rangeRt,
-    ]),
+    query: t.intersection([uiFiltersRt, rangeRt]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
