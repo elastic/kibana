@@ -52,6 +52,7 @@ export const singleSearchAfter = async ({
       searchAfterSortId,
       timestampOverride,
     });
+
     const start = performance.now();
     const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
       'search',

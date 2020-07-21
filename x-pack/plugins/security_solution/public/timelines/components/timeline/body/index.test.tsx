@@ -7,6 +7,7 @@ import { ReactWrapper } from '@elastic/eui/node_modules/@types/enzyme';
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../graphql/types';
 import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';
@@ -15,7 +16,8 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { Body, BodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
-import { wait } from '../../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
 import { TimelineType } from '../../../../../common/types/timeline';
@@ -129,16 +131,17 @@ describe('Body', () => {
         </TestProviders>
       );
       wrapper.update();
-      await wait();
-      wrapper.update();
-      headersJustTimestamp.forEach(() => {
-        expect(
-          wrapper
-            .find('[data-test-subj="data-driven-columns"]')
-            .first()
-            .find('[data-test-subj="localized-date-tool-tip"]')
-            .exists()
-        ).toEqual(true);
+      await waitFor(() => {
+        wrapper.update();
+        headersJustTimestamp.forEach(() => {
+          expect(
+            wrapper
+              .find('[data-test-subj="data-driven-columns"]')
+              .first()
+              .find('[data-test-subj="localized-date-tool-tip"]')
+              .exists()
+          ).toEqual(true);
+        });
       });
     }, 20000);
 

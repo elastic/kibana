@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import type {
   ApiResponse,
   TransportRequestOptions,
   TransportRequestParams,
+  TransportRequestPromise,
 } from '@elastic/elasticsearch/lib/Transport';
 
 /**
@@ -30,13 +31,13 @@ import type {
  * @public
  */
 export type ElasticsearchClient = Omit<
-  Client,
-  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'helpers' | 'child' | 'close'
+  KibanaClient,
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
 > & {
   transport: {
     request(
       params: TransportRequestParams,
       options?: TransportRequestOptions
-    ): Promise<ApiResponse>;
+    ): TransportRequestPromise<ApiResponse>;
   };
 };
