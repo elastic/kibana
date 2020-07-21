@@ -256,7 +256,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         );
       }
       return new ActionsClient({
-        savedObjectsClient: core.savedObjects.getScopedClient(request, {
+        unsecuredSavedObjectsClient: core.savedObjects.getScopedClient(request, {
           excludedWrappers: ['security'],
           includedHiddenTypes,
         }),
@@ -367,7 +367,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             );
           }
           return new ActionsClient({
-            savedObjectsClient: savedObjects.getScopedClient(request, {
+            unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
               excludedWrappers: ['security'],
               includedHiddenTypes,
             }),

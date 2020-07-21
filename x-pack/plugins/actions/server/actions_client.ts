@@ -54,7 +54,7 @@ interface ConstructorOptions {
   defaultKibanaIndex: string;
   scopedClusterClient: ILegacyScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
-  savedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer;
@@ -70,7 +70,7 @@ interface UpdateOptions {
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
   private readonly scopedClusterClient: ILegacyScopedClusterClient;
-  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly actionExecutor: ActionExecutorContract;
@@ -82,7 +82,7 @@ export class ActionsClient {
     actionTypeRegistry,
     defaultKibanaIndex,
     scopedClusterClient,
-    savedObjectsClient,
+    unsecuredSavedObjectsClient,
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
@@ -90,7 +90,7 @@ export class ActionsClient {
     authorization,
   }: ConstructorOptions) {
     this.actionTypeRegistry = actionTypeRegistry;
-    this.savedObjectsClient = savedObjectsClient;
+    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.scopedClusterClient = scopedClusterClient;
     this.defaultKibanaIndex = defaultKibanaIndex;
     this.preconfiguredActions = preconfiguredActions;
@@ -114,7 +114,7 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.savedObjectsClient.create('action', {
+    const result = await this.unsecuredSavedObjectsClient.create('action', {
       actionTypeId,
       name,
       config: validatedActionTypeConfig as SavedObjectAttributes,
@@ -150,7 +150,7 @@ export class ActionsClient {
         'update'
       );
     }
-    const existingObject = await this.savedObjectsClient.get<RawAction>('action', id);
+    const existingObject = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const { actionTypeId } = existingObject.attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
@@ -159,7 +159,7 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.savedObjectsClient.update<RawAction>('action', id, {
+    const result = await this.unsecuredSavedObjectsClient.update<RawAction>('action', id, {
       actionTypeId,
       name,
       config: validatedActionTypeConfig as SavedObjectAttributes,
@@ -192,7 +192,7 @@ export class ActionsClient {
         isPreconfigured: true,
       };
     }
-    const result = await this.savedObjectsClient.get<RawAction>('action', id);
+    const result = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
 
     return {
       id,
@@ -210,7 +210,7 @@ export class ActionsClient {
     await this.authorization.ensureAuthorized('get');
 
     const savedObjectsActions = (
-      await this.savedObjectsClient.find<RawAction>({
+      await this.unsecuredSavedObjectsClient.find<RawAction>({
         perPage: MAX_ACTIONS_RETURNED,
         type: 'action',
       })
@@ -259,7 +259,7 @@ export class ActionsClient {
     ];
 
     const bulkGetOpts = actionSavedObjectsIds.map((id) => ({ id, type: 'action' }));
-    const bulkGetResult = await this.savedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
+    const bulkGetResult = await this.unsecuredSavedObjectsClient.bulkGet<RawAction>(bulkGetOpts);
 
     for (const action of bulkGetResult.saved_objects) {
       if (action.error) {
@@ -292,7 +292,7 @@ export class ActionsClient {
         'delete'
       );
     }
-    return await this.savedObjectsClient.delete('action', id);
+    return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
   public async execute({
@@ -305,7 +305,7 @@ export class ActionsClient {
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
     await this.authorization.ensureAuthorized('execute');
-    return this.executionEnqueuer(this.savedObjectsClient, options);
+    return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
   public async listTypes(): Promise<ActionType[]> {
