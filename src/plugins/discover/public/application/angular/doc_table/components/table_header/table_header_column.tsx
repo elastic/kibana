@@ -24,7 +24,7 @@ import { SortOrder } from './helpers';
 interface Props {
   colLeftIdx: number; // idx of the column to the left, -1 if moving is not possible
   colRightIdx: number; // idx of the column to the right, -1 if moving is not possible
-  displayName: string;
+  displayName?: string;
   isRemoveable: boolean;
   isSortable: boolean;
   name: string;

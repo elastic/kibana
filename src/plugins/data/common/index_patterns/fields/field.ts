@@ -43,7 +43,7 @@ interface FieldDependencies {
 
 export class Field implements IFieldType {
   name: string;
-  label: string;
+  label?: string;
   type: string;
   script?: string;
   lang?: string;
