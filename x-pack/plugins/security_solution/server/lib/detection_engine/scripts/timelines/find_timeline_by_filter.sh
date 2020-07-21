@@ -15,13 +15,13 @@ TIMELINE_TYPE=${2:-default}
 TEMPLATE_TIMELINE_TYPE=${3:-custom}
 
 # Example get all timelines:
-# ./timelines/find_timeline_by_filter.sh active
+# sh ./timelines/find_timeline_by_filter.sh active
 
 # Example get all prepackaged timeline templates:
-# ./timelines/find_timeline_by_filter.sh immutable template elastic
+# sh ./timelines/find_timeline_by_filter.sh immutable template elastic
 
 # Example get all custom timeline templates:
-# ./timelines/find_timeline_by_filter.sh active template custom
+# sh ./timelines/find_timeline_by_filter.sh active template custom
 
 curl -s -k \
   -H "Content-Type: application/json" \

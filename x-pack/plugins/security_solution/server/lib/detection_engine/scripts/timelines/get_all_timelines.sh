@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./timelines/get_all_timelines.sh
+# Example: sh ./timelines/get_all_timelines.sh
 
 curl -s -k \
   -H "Content-Type: application/json" \

@@ -169,12 +169,12 @@ export const getExistingPrepackagedTimelines = async (
   timeline: TimelineSavedObject[];
 }> => {
   const queryPageInfo =
-    countsOnly || pageInfo == null
+    countsOnly && pageInfo == null
       ? {
           perPage: 1,
           page: 1,
         }
-      : pageInfo;
+      : { perPage: pageInfo?.pageSize, page: pageInfo?.pageIndex } ?? {};
   const elasticTemplateTimelineOptions = {
     type: timelineSavedObjectType,
     ...queryPageInfo,

@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FrameworkRequest } from '../framework';
 
-import { convertStringToBase64 } from './saved_object';
+import { convertStringToBase64, getExistingPrepackagedTimelines } from './saved_object';
 
 describe('saved_object', () => {
   describe('convertStringToBase64', () => {
@@ -20,6 +21,65 @@ describe('saved_object', () => {
 
     test('it should base 64 encode a empty string as an empty string', () => {
       expect(convertStringToBase64('')).toBe('');
+    });
+  });
+});
+
+describe('getExistingPrepackagedTimelines', () => {
+  const mockFindSavedObject = jest.fn();
+  const mockRequest = ({
+    user: {
+      username: 'username',
+    },
+    context: {
+      core: {
+        savedObjects: {
+          client: {
+            find: mockFindSavedObject,
+          },
+        },
+      },
+    },
+  } as unknown) as FrameworkRequest;
+
+  beforeEach(() => {
+    mockFindSavedObject.mockClear();
+  });
+  test('should send correct options if countsOnly is true', () => {
+    const contsOnly = true;
+    getExistingPrepackagedTimelines(mockRequest, contsOnly);
+    expect(mockFindSavedObject).toBeCalledWith({
+      filter:
+        'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.createdBy: "Elastic"',
+      page: 1,
+      perPage: 1,
+      type: 'siem-ui-timeline',
+    });
+  });
+
+  test('should send correct options if countsOnly is false', () => {
+    const contsOnly = false;
+    getExistingPrepackagedTimelines(mockRequest, contsOnly);
+    expect(mockFindSavedObject).toBeCalledWith({
+      filter:
+        'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.createdBy: "Elastic"',
+      type: 'siem-ui-timeline',
+    });
+  });
+
+  test('should send correct options if pageInfo is given', () => {
+    const contsOnly = false;
+    const pageInfo = {
+      pageSize: 10,
+      pageIndex: 1,
+    };
+    getExistingPrepackagedTimelines(mockRequest, contsOnly, pageInfo);
+    expect(mockFindSavedObject).toBeCalledWith({
+      filter:
+        'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.createdBy: "Elastic"',
+      page: 1,
+      perPage: 10,
+      type: 'siem-ui-timeline',
     });
   });
 });
