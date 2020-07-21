@@ -39,6 +39,7 @@ import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
 
 import { REPO_ROOT } from '@kbn/dev-utils';
+import { Socket } from 'net';
 import { pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
@@ -88,6 +89,26 @@ async function attemptToCreateCommand(
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
   const remoteSessionUrl = process.env.REMOTE_SESSION_URL;
+
+  const setDriverService = (builder: Builder, input?: Socket) => {
+    if (remoteSessionUrl) {
+      return builder.usingServer(remoteSessionUrl);
+    } else if (browserType === Browsers.Chrome) {
+      return builder.setChromeService(
+        new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging()
+      );
+    } else if (browserType === Browsers.ChromiumEdge) {
+      builder.setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath));
+    } else if (browserType === Browsers.Firefox) {
+      return input
+        ? builder.setFirefoxService(
+            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
+          )
+        : builder.setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path));
+    }
+
+    return builder;
+  };
 
   const buildDriverInstance = async () => {
     switch (browserType) {
@@ -141,20 +162,9 @@ async function attemptToCreateCommand(
         chromeOptions.set('unexpectedAlertBehaviour', 'accept');
         chromeOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
-        let session;
-        if (remoteSessionUrl) {
-          session = await new Builder()
-            .forBrowser(browserType)
-            .setChromeOptions(chromeOptions)
-            .usingServer(remoteSessionUrl)
-            .build();
-        } else {
-          session = await new Builder()
-            .forBrowser(browserType)
-            .setChromeOptions(chromeOptions)
-            .setChromeService(new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging())
-            .build();
-        }
+        const session = await setDriverService(
+          new Builder().forBrowser(browserType).setChromeOptions(chromeOptions)
+        ).build();
 
         return {
           session,
@@ -188,11 +198,11 @@ async function attemptToCreateCommand(
           // overriding options to include preferences
           Object.assign(options, { prefs: chromiumDownloadPrefs });
           edgeOptions.set('ms:edgeOptions', options);
-          const session = await new Builder()
-            .forBrowser('MicrosoftEdge')
-            .setEdgeOptions(edgeOptions)
-            .setEdgeService(new edge.ServiceBuilder(edgePaths.driverPath))
-            .build();
+
+          const session = await setDriverService(
+            new Builder().forBrowser('MicrosoftEdge').setEdgeOptions(edgeOptions)
+          ).build();
+
           return {
             session,
             consoleLog$: pollForLogEntry$(
@@ -239,11 +249,9 @@ async function attemptToCreateCommand(
 
         // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
         if (process.platform === 'win32') {
-          const session = await new Builder()
-            .forBrowser(browserType)
-            .setFirefoxOptions(firefoxOptions)
-            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
-            .build();
+          const session = await setDriverService(
+            new Builder().forBrowser(browserType).setFirefoxOptions(firefoxOptions)
+          ).build();
           return {
             session,
             consoleLog$: Rx.EMPTY,
@@ -253,13 +261,10 @@ async function attemptToCreateCommand(
         const { input, chunk$, cleanup } = await createStdoutSocket();
         lifecycle.cleanup.add(cleanup);
 
-        const session = await new Builder()
-          .forBrowser(browserType)
-          .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(
-            new firefox.ServiceBuilder(geckoDriver.path).setStdio(['ignore', input, 'ignore'])
-          )
-          .build();
+        const session = await setDriverService(
+          new Builder().forBrowser(browserType).setFirefoxOptions(firefoxOptions),
+          input
+        ).build();
 
         const CONSOLE_LINE_RE = /^console\.([a-z]+): ([\s\S]+)/;
 
