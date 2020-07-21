@@ -32,14 +32,7 @@ describe('EnvironmentService', () => {
   describe('getEnvironment', () => {
     test('returns default values', () => {
       const service = new EnvironmentService();
-      expect(service.getEnvironment()).toEqual({ ml: false, ingestManager: false });
-    });
-
-    test('sets values', () => {
-      const service = new EnvironmentService();
-      const setup = service.setup();
-      setup.update({ ml: true, ingestManager: true });
-      expect(service.getEnvironment()).toEqual({ ml: true, ingestManager: true });
+      expect(service.getEnvironment()).toEqual({ ml: false });
     });
 
     test('returns last state of update calls', () => {
@@ -47,7 +40,7 @@ describe('EnvironmentService', () => {
       const setup = service.setup();
       setup.update({ ml: true });
       setup.update({ ml: false });
-      expect(service.getEnvironment()).toEqual({ ml: false, ingestManager: false });
+      expect(service.getEnvironment()).toEqual({ ml: false });
     });
   });
 });
