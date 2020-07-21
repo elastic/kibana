@@ -36,14 +36,15 @@ export const getTimelineRoute = (
     async (context, request, response) => {
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const { template_timeline_id: templateTimelineId, id } = request.query;
+        const query = request.query ?? {};
+        const { template_timeline_id: templateTimelineId, id } = query;
         let res = null;
         if (templateTimelineId != null && id == null) {
           res = await getTemplateTimeline(frameworkRequest, templateTimelineId);
         } else if (templateTimelineId == null && id != null) {
           res = await getTimeline(frameworkRequest, id);
         } else if (templateTimelineId == null && id == null) {
-          const { totalCount } = await getAllTimeline(
+          const tempResult = await getAllTimeline(
             frameworkRequest,
             false,
             { pageSize: 1, pageIndex: 1 },
@@ -53,10 +54,11 @@ export const getTimelineRoute = (
             null,
             null
           );
+
           res = await getAllTimeline(
             frameworkRequest,
             false,
-            { pageSize: totalCount, pageIndex: 1 },
+            { pageSize: tempResult?.totalCount ?? 0, pageIndex: 1 },
             null,
             null,
             TimelineStatus.active,
