@@ -45,18 +45,15 @@ export const EmptyState = ({
   navigateToApp,
   docLinks,
   isMlAvailable,
-  isIngestManagerAvailable,
   canSave,
 }: {
   onRefresh: () => void;
   navigateToApp: ApplicationStart['navigateToApp'];
   docLinks: DocLinksStart;
   isMlAvailable: () => boolean;
-  isIngestManagerAvailable: () => boolean;
   canSave: boolean;
 }) => {
   const mlIsAvailable = isMlAvailable();
-  const imIsAvailable = isIngestManagerAvailable();
 
   const createAnyway = (
     <EuiText color="subdued" textAlign="center" size="xs">
@@ -103,24 +100,7 @@ export const EmptyState = ({
             <EuiFlexItem>
               <EuiCard
                 className="inpEmptyState__card"
-                betaBadgeLabel={
-                  imIsAvailable
-                    ? undefined
-                    : i18n.translate(
-                        'indexPatternManagement.createIndexPattern.emptyState.basicLicenseLabel',
-                        {
-                          defaultMessage: 'Basic',
-                        }
-                      )
-                }
-                betaBadgeTooltipContent={i18n.translate(
-                  'indexPatternManagement.createIndexPattern.emptyState.basicLicenseDescription',
-                  {
-                    defaultMessage: 'This feature requires a Basic license.',
-                  }
-                )}
                 onClick={() => navigateToApp('home', { path: '#/tutorial_directory' })}
-                isDisabled={!imIsAvailable}
                 icon={<EuiIcon size="xl" type="database" color="subdued" />}
                 title={
                   <FormattedMessage

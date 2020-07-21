@@ -23,19 +23,17 @@ export interface Environment {
    * Flag whether the home app should advertise ml features
    */
   readonly ml: boolean;
-  readonly ingestManager: boolean;
 }
 
 export class EnvironmentService {
   private environment = {
     ml: false,
-    ingestManager: false,
   };
 
   public setup() {
     return {
       /**
-       * Update the environment to influence how index pattern management is presenting available features.
+       * Update the environment to influence how the home app is presenting available features.
        * This API should not be extended for new features and will be removed in future versions
        * in favor of display specific extension apis.
        * @deprecated
