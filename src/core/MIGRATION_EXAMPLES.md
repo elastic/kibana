@@ -1027,23 +1027,33 @@ The most significant changes for the consumers are the following:
 
 - the API now reflects the `Client`'s instead of leveraging the string-based endpoint names the `LegacyAPICaller` was using
 
+before:
+
 ```ts
-// before
 const body = await client.callAsInternalUser('indices.get', { index: 'id' });
-// after
+```
+
+after:
+
+```ts
 const { body } = await client.asInternalUser.indices.get({ index: 'id' });
 ```
 
 - calling any ES endpoint now returns the whole response object instead of only the body payload
 
+before:
+
 ```ts
-// before
 const body = await legacyClient.callAsInternalUser('get', { id: 'id' });
-// after
+```
+
+after:
+
+```ts
 const { body } = await client.asInternalUser.get({ id: 'id' });
 ```
 
-Note that more information from the ES response are available:
+Note that more information from the ES response is available:
 
 ```ts
 const {
@@ -1057,10 +1067,13 @@ const {
 
 - all API methods are now generic to allow specifying the response body type
 
+before:
+
 ```ts
-// before
 const body: GetResponse = await legacyClient.callAsInternalUser('get', { id: 'id' });
 ```
+
+after:
 
 ```ts
 // body is of type `GetResponse`
@@ -1074,8 +1087,9 @@ const { body } = await client.asInternalUser.get({ id: 'id' });
 There are no longer specific errors for every HTTP status code (such as `BadRequest` or `NotFound`). A generic
 `ResponseError` with the specific `statusCode` is thrown instead.
 
+before:
+
 ```ts
-// before
 import { errors } from 'elasticsearch';
 try {
   await legacyClient.callAsInternalUser('ping');
@@ -1086,8 +1100,9 @@ try {
 }
 ``` 
 
+after:
+
 ```ts
-// after
 import { errors } from '@elastic/elasticsearch';
 try {
   await client.asInternalUser.ping();
@@ -1103,6 +1118,52 @@ try {
 }
 ```
 
+- the parameter property names changed from camelCase to snake_case
+
+Even if technically, the javascript client accepts both formats, the typescript definitions are only defining the snake_case
+properties.
+
+before:
+
+```ts
+legacyClient.callAsCurrentUser('get', {
+  id: 'id',
+  storedFields: ['some', 'fields'],
+})
+```
+
+after:
+
+```ts
+client.asCurrentUser.get({
+  id: 'id',
+  stored_fields: ['some', 'fields'],
+})
+```
+
+- the request abortion API changed
+
+All promises returned from the client API calls now have an `abort` method that can be used to cancel the request.
+
+before:
+
+```ts
+const controller = new AbortController();
+legacyClient.callAsCurrentUser('ping', {}, {
+  signal: controller.signal,
+})
+// later
+controller.abort();
+```
+
+after:
+
+```ts
+const request = client.asCurrentUser.ping();
+// later
+request.abort();
+```
+
 Please refer to the  [Breaking changes list](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/breaking-changes.html)
 for more information about the changes between the legacy and new client.
 
@@ -1112,8 +1173,9 @@ Apart from the API format change, accessing the client from within a route handl
 did not change. As it was done for the legacy client, a preconfigured scoped client 
 bound to the request is accessible using `core` context provider:
 
+before:
+
 ```ts
-// before
 router.get(
   {
     path: '/my-route',
@@ -1129,8 +1191,9 @@ router.get(
 );
 ```
 
+after:
+
 ```ts
-// after
 router.get(
   {
     path: '/my-route',
@@ -1148,10 +1211,14 @@ router.get(
 
 ### Creating a custom client
 
+Note that the `plugins` option is now longer available on the new client. As the API is now exhaustive, adding custom
+endpoints using plugins should no longer be necessary.
+
 The API to create custom clients did not change much:
 
+before:
+
 ```ts
-// before
 const customClient = coreStart.elasticsearch.legacy.createClient('my-custom-client', customConfig);
 // do something with the client, such as
 await customClient.callAsInternalUser('ping');
@@ -1159,8 +1226,9 @@ await customClient.callAsInternalUser('ping');
 customClient.close();
 ```
 
+after:
+
 ```ts
-// after
 const customClient = coreStart.elasticsearch.createClient('my-custom-client', customConfig);
 // do something with the client, such as
 await customClient.asInternalUser.ping();
@@ -1168,9 +1236,8 @@ await customClient.asInternalUser.ping();
 customClient.close();
 ```
 
-Note that the `plugins` option is now longer available on the new client. As the API is now exhaustive, adding custom
-endpoints using plugins should no longer be necessary. If, for any reasons, one still needs to reach an 
-endpoint not listed on the client API, using `request.transport` is still possible:
+If, for any reasons, one still needs to reach an endpoint not listed on the client API, using `request.transport` 
+is still possible:
 
 ```ts
 const { body } = await client.asCurrentUser.transport.request({
