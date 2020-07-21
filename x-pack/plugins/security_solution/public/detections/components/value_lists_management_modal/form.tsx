@@ -46,7 +46,6 @@ const options: ListTypeOptions[] = [
 ];
 
 const defaultListType: Type = 'keyword';
-const validFileExtensions = ['.csv', '.txt'];
 const validFileTypes = ['text/csv', 'text/plain'];
 
 export interface ValueListsFormProps {
@@ -62,8 +61,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
   const { http } = useKibana().services;
   const { start: importList, ...importState } = useImportList();
 
-  const fileIsValid =
-    !file || validFileExtensions.some((extension) => file.name.endsWith(extension));
+  const fileIsValid = !file || validFileTypes.some((fileType) => file.type === fileType);
 
   // EuiRadioGroup's onChange only infers 'string' from our options
   const handleRadioChange = useCallback((t: string) => setType(t as Type), [setType]);
@@ -131,7 +129,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
         label={i18n.FILE_PICKER_LABEL}
         fullWidth
         isInvalid={!fileIsValid}
-        error={[i18n.FILE_PICKER_INVALID_EXTENSION]}
+        error={[i18n.FILE_PICKER_INVALID_FILE_TYPE(validFileTypes.join(', '))]}
       >
         <EuiFilePicker
           accept={validFileTypes.join()}

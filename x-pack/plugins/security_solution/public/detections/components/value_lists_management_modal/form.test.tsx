@@ -16,7 +16,7 @@ const mockUseImportList = useImportList as jest.Mock;
 
 const mockFile = ({
   name: 'foo.csv',
-  path: '/home/foo.csv',
+  type: 'text/csv',
 } as unknown) as File;
 
 const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<void> = async (
@@ -85,8 +85,8 @@ describe('ValueListsForm', () => {
 
   it('disables upload and displays an error if file has invalid extension', async () => {
     const badMockFile = ({
-      name: 'foo.unknown',
-      path: '/home/foo.unknown',
+      name: 'foo.pdf',
+      type: 'application/pdf',
     } as unknown) as File;
 
     const container = mount(
@@ -102,7 +102,7 @@ describe('ValueListsForm', () => {
     ).toEqual(true);
 
     expect(container.find('div[data-test-subj="value-list-file-picker-row"]').text()).toContain(
-      'Value list must have a .csv or .txt extension.'
+      'File must be one of the following types: [text/csv, text/plain]'
     );
   });
 
