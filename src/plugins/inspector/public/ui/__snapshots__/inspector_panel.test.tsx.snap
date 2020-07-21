@@ -307,10 +307,10 @@ exports[`InspectorPanel should render as expected 1`] = `
     </div>
   </EuiFlyoutHeader>
   <EuiFlyoutBody
-    className="insFlyoutBody"
+    className="insInspectorPanel__flyoutBody"
   >
     <div
-      className="euiFlyoutBody insFlyoutBody"
+      className="euiFlyoutBody insInspectorPanel__flyoutBody"
     >
       <div
         className="euiFlyoutBody__overflow"
