@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
 
-export { LoadMappingsFromJsonButton } from './load_from_json_button';
-export { LoadMappingsProvider } from './load_mappings_provider';
+import { StateProvider } from './mappings_state_context';
+
+export const MappingsEditorProvider: React.FC = ({ children }) => {
+  return <StateProvider>{children}</StateProvider>;
+};

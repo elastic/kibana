@@ -8,7 +8,7 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useMappingsState, useDispatch } from '../../mappings_state';
+import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import { FieldsList, CreateField } from './fields';
 
 export const DocumentFieldsTreeEditor = () => {

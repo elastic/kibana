@@ -11,8 +11,7 @@ import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
 import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
-import { MappingsConfiguration } from '../../reducer';
-import { ComboBoxOption } from '../../types';
+import { ComboBoxOption, MappingsConfiguration } from '../../types';
 
 const { containsCharsField, isJsonField } = fieldValidators;
 

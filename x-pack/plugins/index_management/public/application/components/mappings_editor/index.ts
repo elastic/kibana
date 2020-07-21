@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './mappings_editor';
+export { MappingsEditor } from './mappings_editor';
 
 // We export both the button & the load mappings provider
 // to give flexibility to the consumer
-export * from './components/load_mappings';
+export { LoadMappingsFromJsonButton, LoadMappingsProvider } from './components/load_mappings';
 
-export { OnUpdateHandler, Types } from './mappings_state';
+export { MappingsEditorProvider } from './mappings_editor_context';
 
-export { IndexSettings } from './types';
+export { IndexSettings, OnUpdateHandler } from './types';

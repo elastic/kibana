@@ -3,24 +3,36 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo, useRef } from 'react';
 
-import { useForm } from '../../../../shared_imports';
-import { useDispatch } from '../../../../mappings_state';
-import { Field, NormalizedField, NormalizedFields } from '../../../../types';
+import { useForm, FlyoutMultiContent } from '../../../../shared_imports';
+import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
+import { Field } from '../../../../types';
 import { fieldSerializer, fieldDeserializer } from '../../../../lib';
-import { EditField } from './edit_field';
+import { ModalConfirmationDeleteFields } from '../modal_confirmation_delete_fields';
+import { EditField, flyoutProps, Props as EditFieldProps } from './edit_field';
+import { useUpdateField } from './use_update_field';
 
-interface Props {
-  field: NormalizedField;
-  allFields: NormalizedFields['byId'];
-}
+const { useFlyoutMultiContent } = FlyoutMultiContent;
 
-export const EditFieldContainer = React.memo(({ field, allFields }: Props) => {
+export const EditFieldContainer = React.memo(() => {
+  const { fields, documentFields } = useMappingsState();
   const dispatch = useDispatch();
+  const { addContent, removeContent } = useFlyoutMultiContent();
+  const { updateField, modal } = useUpdateField();
+  const isMounted = useRef(false);
+
+  const { status, fieldToEdit } = documentFields;
+  const isEditing = status === 'editingField';
+
+  const field = isEditing ? fields.byId[fieldToEdit!] : undefined;
+
+  const formDefaultValue = useMemo(() => {
+    return { ...field?.source };
+  }, [field?.source]);
 
   const { form } = useForm<Field>({
-    defaultValue: { ...field.source },
+    defaultValue: formDefaultValue,
     serializer: fieldSerializer,
     deserializer: fieldDeserializer,
     options: { stripEmptyFields: false },
@@ -40,5 +52,49 @@ export const EditFieldContainer = React.memo(({ field, allFields }: Props) => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });
   }, [dispatch]);
 
-  return <EditField form={form} field={field} allFields={allFields} exitEdit={exitEdit} />;
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isEditing) {
+      // Open the flyout with the <EditField /> content
+      addContent<EditFieldProps>({
+        id: 'mappingsEditField',
+        Component: EditField,
+        props: {
+          form,
+          field: field!,
+          exitEdit,
+          allFields: fields.byId,
+          updateField,
+        },
+        flyoutProps: { ...flyoutProps, onClose: exitEdit },
+        cleanUpFunc: exitEdit,
+      });
+    }
+  }, [isEditing, field, form, addContent, fields.byId, fieldToEdit, exitEdit, updateField]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      removeContent('mappingsEditField');
+    }
+  }, [isEditing, removeContent]);
+
+  useEffect(() => {
+    return () => {
+      if (!isMounted.current) {
+        // When the component unmounts, exit edit mode.
+        exitEdit();
+        // and close the flyout
+        removeContent('mappingsEditField');
+      }
+    };
+  }, [exitEdit, removeContent]);
+
+  return modal.isOpen ? <ModalConfirmationDeleteFields {...modal.props} /> : null;
 });

@@ -16,7 +16,8 @@ import { FlyoutMultiContent } from '../shared_imports';
 import { AppContextProvider, AppDependencies } from './app_context';
 import { App } from './app';
 import { indexManagementStore } from './store';
-import { ComponentTemplatesProvider } from './components';
+import { ComponentTemplatesProvider, MappingsEditorProvider } from './components';
+
 const { FlyoutMultiContentProvider } = FlyoutMultiContent;
 
 export const renderApp = (
@@ -45,11 +46,13 @@ export const renderApp = (
     <I18nContext>
       <Provider store={indexManagementStore(services)}>
         <AppContextProvider value={dependencies}>
-          <ComponentTemplatesProvider value={componentTemplateProviderValues}>
+          <MappingsEditorProvider>
+            <ComponentTemplatesProvider value={componentTemplateProviderValues}>
               <FlyoutMultiContentProvider>
-            <App history={history} />
+                <App history={history} />
               </FlyoutMultiContentProvider>
-          </ComponentTemplatesProvider>
+            </ComponentTemplatesProvider>
+          </MappingsEditorProvider>
         </AppContextProvider>
       </Provider>
     </I18nContext>,

@@ -7,15 +7,13 @@ import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, SerializerFunc } from '../../shared_imports';
-import { GenericObject } from '../../types';
-import { Types, useDispatch } from '../../mappings_state';
+import { GenericObject, MappingsConfiguration } from '../../types';
+import { useDispatch } from '../../mappings_state_context';
 import { DynamicMappingSection } from './dynamic_mapping_section';
 import { SourceFieldSection } from './source_field_section';
 import { MetaFieldSection } from './meta_field_section';
 import { RoutingSection } from './routing_section';
 import { configurationFormSchema } from './configuration_form_schema';
-
-type MappingsConfiguration = Types['MappingsConfiguration'];
 
 interface Props {
   value?: MappingsConfiguration;

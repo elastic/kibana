@@ -6,7 +6,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { useMappingsState, useDispatch } from '../../mappings_state';
+import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import { deNormalize } from '../../lib';
 import { EditFieldContainer } from './fields';
 import { DocumentFieldsHeader } from './document_fields_header';
@@ -18,7 +18,7 @@ export const DocumentFields = React.memo(() => {
   const { fields, search, documentFields } = useMappingsState();
   const dispatch = useDispatch();
 
-  const { status, fieldToEdit, editor: editorType } = documentFields;
+  const { editor: editorType } = documentFields;
 
   const jsonEditorDefaultValue = useMemo(() => {
     if (editorType === 'json') {
@@ -32,14 +32,6 @@ export const DocumentFields = React.memo(() => {
     ) : (
       <DocumentFieldsTreeEditor />
     );
-
-  const renderEditField = () => {
-    if (status !== 'editingField') {
-      return null;
-    }
-    const field = fields.byId[fieldToEdit!];
-    return <EditFieldContainer field={field} allFields={fields.byId} />;
-  };
 
   const onSearchChange = useCallback(
     (value: string) => {
@@ -59,7 +51,7 @@ export const DocumentFields = React.memo(() => {
       ) : (
         editor
       )}
-      {renderEditField()}
+      <EditFieldContainer />
     </div>
   );
 });

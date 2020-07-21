@@ -3,92 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import React, { useReducer, useEffect, createContext, useContext, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import {
-  reducer,
+  Field,
+  Mappings,
   MappingsConfiguration,
-  MappingsFields,
   MappingsTemplates,
-  State,
-  Dispatch,
-} from './reducer';
-import { Field } from './types';
+  OnUpdateHandler,
+} from './types';
 import { normalize, deNormalize, stripUndefinedValues } from './lib';
+import { useMappingsState, useDispatch } from './mappings_state_context';
 
-type Mappings = MappingsTemplates &
-  MappingsConfiguration & {
-    properties?: MappingsFields;
-  };
-
-export interface Types {
-  Mappings: Mappings;
-  MappingsConfiguration: MappingsConfiguration;
-  MappingsFields: MappingsFields;
-  MappingsTemplates: MappingsTemplates;
-}
-
-export interface OnUpdateHandlerArg {
-  isValid?: boolean;
-  getData: () => Mappings | undefined;
-  validate: () => Promise<boolean>;
-}
-
-export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
-
-const StateContext = createContext<State | undefined>(undefined);
-const DispatchContext = createContext<Dispatch | undefined>(undefined);
-
-export interface Props {
-  children: (params: { state: State }) => React.ReactNode;
-  value: {
+interface Args {
+  onChange: OnUpdateHandler;
+  value?: {
     templates: MappingsTemplates;
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
   };
-  onChange: OnUpdateHandler;
 }
 
-export const MappingsState = React.memo(({ children, onChange, value }: Props) => {
-  const didMountRef = useRef(false);
+export const useMappingsStateListener = ({ onChange, value }: Args) => {
+  const state = useMappingsState();
+  const dispatch = useDispatch();
 
-  const parsedFieldsDefaultValue = useMemo(() => normalize(value.fields), [value.fields]);
-
-  const initialState: State = {
-    isValid: true,
-    configuration: {
-      defaultValue: value.configuration,
-      data: {
-        raw: value.configuration,
-        format: () => value.configuration,
-      },
-      validate: () => Promise.resolve(true),
-    },
-    templates: {
-      defaultValue: value.templates,
-      data: {
-        raw: value.templates,
-        format: () => value.templates,
-      },
-      validate: () => Promise.resolve(true),
-    },
-    fields: parsedFieldsDefaultValue,
-    documentFields: {
-      status: parsedFieldsDefaultValue.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
-      editor: 'default',
-    },
-    fieldsJsonEditor: {
-      format: () => ({}),
-      isValid: true,
-    },
-    search: {
-      term: '',
-      result: [],
-    },
-  };
-
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const parsedFieldsDefaultValue = useMemo(() => normalize(value?.fields), [value?.fields]);
 
   useEffect(() => {
     // If we are creating a new field, but haven't entered any name
@@ -158,46 +98,28 @@ export const MappingsState = React.memo(({ children, onChange, value }: Props) =
       },
       isValid: state.isValid,
     });
-  }, [state, onChange]);
+  }, [state, onChange, dispatch]);
 
   useEffect(() => {
     /**
      * If the value has changed that probably means that we have loaded
      * new data from JSON. We need to update our state with the new mappings.
      */
-    if (didMountRef.current) {
-      dispatch({
-        type: 'editor.replaceMappings',
-        value: {
-          configuration: value.configuration,
-          templates: value.templates,
-          fields: parsedFieldsDefaultValue,
-        },
-      });
-    } else {
-      didMountRef.current = true;
+    if (value === undefined) {
+      return;
     }
-  }, [value, parsedFieldsDefaultValue]);
 
-  return (
-    <StateContext.Provider value={state}>
-      <DispatchContext.Provider value={dispatch}>{children({ state })}</DispatchContext.Provider>
-    </StateContext.Provider>
-  );
-});
-
-export const useMappingsState = () => {
-  const ctx = useContext(StateContext);
-  if (ctx === undefined) {
-    throw new Error('useMappingsState must be used within a <MappingsState>');
-  }
-  return ctx;
-};
-
-export const useDispatch = () => {
-  const ctx = useContext(DispatchContext);
-  if (ctx === undefined) {
-    throw new Error('useDispatch must be used within a <MappingsState>');
-  }
-  return ctx;
+    dispatch({
+      type: 'editor.replaceMappings',
+      value: {
+        configuration: value.configuration,
+        templates: value.templates,
+        fields: parsedFieldsDefaultValue,
+        documentFields: {
+          status: parsedFieldsDefaultValue.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
+          editor: 'default',
+        },
+      },
+    });
+  }, [value, parsedFieldsDefaultValue, dispatch]);
 };
