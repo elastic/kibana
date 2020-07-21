@@ -40,6 +40,9 @@ const testBedConfig: TestBedConfig = {
     initialEntries: [`/policies/edit/${POLICY_NAME}`],
     componentRoutePath: `/policies/edit/:policyName`,
   },
+  defaultProps: {
+    getUrlForApp: () => {},
+  },
 };
 
 const initTestBed = registerTestBed(EditPolicy, testBedConfig);
