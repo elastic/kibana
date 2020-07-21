@@ -12,11 +12,12 @@ import { RecreateJobButton } from '../../log_analysis_job_status';
 import { SetupStatus } from '../../../../../common/log_analysis';
 
 export const LogAnalysisModuleListCard: React.FC<{
+  hasSetupCapabilities: boolean;
   moduleDescription: string;
   moduleName: string;
   moduleStatus: SetupStatus;
   onViewSetup: () => void;
-}> = ({ moduleDescription, moduleName, moduleStatus, onViewSetup }) => {
+}> = ({ hasSetupCapabilities, moduleDescription, moduleName, moduleStatus, onViewSetup }) => {
   const icon =
     moduleStatus.type === 'required' ? (
       <EuiIcon size="xxl" type="machineLearningApp" />
@@ -25,14 +26,14 @@ export const LogAnalysisModuleListCard: React.FC<{
     );
   const footerContent =
     moduleStatus.type === 'required' ? (
-      <EuiButton onClick={onViewSetup}>
+      <EuiButton disabled={!hasSetupCapabilities} onClick={onViewSetup}>
         <FormattedMessage
           id="xpack.infra.logs.analysis.enableAnomalyDetectionButtonLabel"
           defaultMessage="Enable anomaly detection"
         />
       </EuiButton>
     ) : (
-      <RecreateJobButton onClick={onViewSetup} />
+      <RecreateJobButton disabled={!hasSetupCapabilities} onClick={onViewSetup} />
     );
 
   return (
