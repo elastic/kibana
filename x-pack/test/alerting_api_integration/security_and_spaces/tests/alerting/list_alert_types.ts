@@ -34,6 +34,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
     actionVariables: {
       state: [],
       context: [],
+      params: [],
     },
     producer: 'alertsRestrictedFixture',
   };
