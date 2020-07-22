@@ -35,7 +35,8 @@ import {
   ExceptionListType,
   EntryNested,
 } from '../../../lists_plugin_deps';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { validate } from '../../../../common/validate';
 import { TimelineNonEcsData } from '../../../graphql/types';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 
@@ -194,11 +195,22 @@ export const filterExceptionItems = (
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
   return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
     (acc, exception) => {
-      const entries = exception.entries.filter((t) => entry.is(t) || entriesNested.is(t));
+      const entries = exception.entries.filter((t) => {
+        const [validatedEntry] = validate(t, entry);
+        const [validatedNestedEntry] = validate(t, entriesNested);
+
+        if (validatedEntry != null || validatedNestedEntry != null) {
+          return true;
+        }
+
+        return false;
+      });
+
       const item = { ...exception, entries };
+
       if (exceptionListItemSchema.is(item)) {
         return [...acc, item];
-      } else if (createExceptionListItemSchema.is(item) && item.meta != null) {
+      } else if (createExceptionListItemSchema.is(item)) {
         const { meta, ...rest } = item;
         const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
         return [...acc, itemSansMetaId];

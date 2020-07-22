@@ -15,7 +15,7 @@ import { getField } from '../../../../../../../src/plugins/data/common/index_pat
 import { ListSchema } from '../../../lists_plugin_deps';
 import { getFoundListSchemaMock } from '../../../../../lists/common/schemas/response/found_list_schema.mock';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { DATE_NOW } from '../../../../../lists/common/constants.mock';
+import { DATE_NOW, VERSION, IMMUTABLE } from '../../../../../lists/common/constants.mock';
 
 import { AutocompleteFieldListsComponent } from './field_value_lists';
 
