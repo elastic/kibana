@@ -8,14 +8,14 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { euiStyled } from '../../../../../observability/public';
 import {
+  missingMlPrivilegesTitle,
   missingMlSetupPrivilegesDescription,
-  missingMlSetupPrivilegesTitle,
 } from './missing_privileges_messages';
 import { UserManagementLink } from './user_management_link';
 
 export const MissingSetupPrivilegesPrompt: React.FunctionComponent = () => (
   <EmptyPrompt
-    title={<h2>{missingMlSetupPrivilegesTitle}</h2>}
+    title={<h2>{missingMlPrivilegesTitle}</h2>}
     body={<p>{missingMlSetupPrivilegesDescription}</p>}
     actions={<UserManagementLink />}
   />

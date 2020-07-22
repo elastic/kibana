@@ -7,8 +7,8 @@
 import { EuiToolTip, PropsOf } from '@elastic/eui';
 import React from 'react';
 import {
+  missingMlPrivilegesTitle,
   missingMlSetupPrivilegesDescription,
-  missingMlSetupPrivilegesTitle,
 } from './missing_privileges_messages';
 
 export const MissingSetupPrivilegesToolTip: React.FC<Omit<
@@ -18,6 +18,6 @@ export const MissingSetupPrivilegesToolTip: React.FC<Omit<
   <EuiToolTip
     {...props}
     content={missingMlSetupPrivilegesDescription}
-    title={missingMlSetupPrivilegesTitle}
+    title={missingMlPrivilegesTitle}
   />
 );

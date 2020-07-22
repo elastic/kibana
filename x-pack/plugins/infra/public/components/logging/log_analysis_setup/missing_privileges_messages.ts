@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const missingMlResultsPrivilegesTitle = i18n.translate(
-  'xpack.infra.logs.analysis.missingMlResultsPrivilegesTitle',
+export const missingMlPrivilegesTitle = i18n.translate(
+  'xpack.infra.logs.analysis.missingMlPrivilegesTitle',
   {
     defaultMessage: 'Additional Machine Learning privileges required',
   }
@@ -18,13 +18,6 @@ export const missingMlResultsPrivilegesDescription = i18n.translate(
   {
     defaultMessage:
       'This feature makes use of Machine Learning jobs, which require at least the read permission for the Machine Learning app in order to access their status and results.',
-  }
-);
-
-export const missingMlSetupPrivilegesTitle = i18n.translate(
-  'xpack.infra.logs.analysis.missingMlSetupPrivilegesTitle',
-  {
-    defaultMessage: 'Additional Machine Learning privileges required',
   }
 );
 
