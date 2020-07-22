@@ -154,7 +154,7 @@ describe.skip('Events Viewer', () => {
     });
   });
 
-  context('Events columns', () => {
+  context.skip('Events columns', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
