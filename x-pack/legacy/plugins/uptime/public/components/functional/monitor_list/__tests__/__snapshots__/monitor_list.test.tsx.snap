@@ -316,7 +316,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1897 Yr ago
+                            1898 Yr ago
                           </div>
                         </div>
                       </span>
@@ -476,7 +476,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1895 Yr ago
+                            1896 Yr ago
                           </div>
                         </div>
                       </span>
