@@ -17,10 +17,7 @@ import { useFetchIndexPatterns } from '../../../containers/detection_engine/rule
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useMlCapabilities } from '../../../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
-import {
-  filterRuleFieldsForType,
-  RuleFields,
-} from '../../../pages/detection_engine/rules/create/helpers';
+import { filterRuleFieldsForType, RuleFields } from '../../../pages/detection_engine/rules/utils';
 import {
   DefineStepRule,
   RuleStep,
