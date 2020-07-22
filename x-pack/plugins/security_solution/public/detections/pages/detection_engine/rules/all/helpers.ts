@@ -23,13 +23,3 @@ export const bucketRulesResponse = (response: BulkRuleResponse) =>
     },
     { rules: [], errors: [] }
   );
-
-export const showRulesTable = ({
-  rulesCustomInstalled,
-  rulesInstalled,
-}: {
-  rulesCustomInstalled: number | null;
-  rulesInstalled: number | null;
-}) =>
-  (rulesCustomInstalled != null && rulesCustomInstalled > 0) ||
-  (rulesInstalled != null && rulesInstalled > 0);
