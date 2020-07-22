@@ -14,6 +14,7 @@ This will run a snapshot of {es} that is usually built nightly. Read more about 
 yarn es snapshot
 ----
 A user with username: `kibana_system` and password `changeme`. This account is used by the Kibana server to authenticate itself to Elasticsearch, and to perform certain actions on behalf of the end user. These credentials should be specified in your `kibana.yml` as described in <<using-kibana-with-security>>
+
 See all available options, like how to specify a specific license, with the `--help` flag.
 
 [source,bash]
