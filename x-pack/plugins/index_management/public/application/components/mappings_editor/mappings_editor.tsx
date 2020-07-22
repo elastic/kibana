@@ -84,7 +84,7 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
   /**
    * Hook that will listen to:
    * 1. "value" prop changes in order to reset the mappings editor
-   * 2. "state" changes in order to communicate to the consumer any updates
+   * 2. "state" changes in order to communicate any updates to the consumer
    */
   useMappingsStateListener({ onChange, value: parsedDefaultValue });
 
