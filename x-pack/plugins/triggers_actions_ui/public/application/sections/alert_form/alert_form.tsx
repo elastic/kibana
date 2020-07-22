@@ -269,10 +269,8 @@ export const AlertForm = ({
           setHasActionsDisabled={setHasActionsDisabled}
           messageVariables={
             alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
-              ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).map(
-                  (av) => av.name
-                ).sort((a, b) =>
-                  a.toUpperCase().localeCompare(b.toUpperCase())
+              ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).sort((a, b) =>
+                  a.name.toUpperCase().localeCompare(b.name.toUpperCase())
                 )
               : undefined
           }
