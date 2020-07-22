@@ -9,7 +9,6 @@ import * as reactTestingLibrary from '@testing-library/react';
 
 import { HostList } from './index';
 import { mockHostDetailsApiResult, mockHostResultList } from '../store/mock_host_result_list';
-import { mockPolicyResultList } from '../../policy/store/policy_list/mock_policy_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   HostInfo,
@@ -20,6 +19,7 @@ import {
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppAction } from '../../../../common/store/actions';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
+import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
 
 jest.mock('../../../../common/components/link_to');
 

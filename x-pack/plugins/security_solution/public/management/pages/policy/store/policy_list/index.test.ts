@@ -143,6 +143,7 @@ describe('policy list store concerns', () => {
       isLoading: false,
       isDeleting: false,
       deleteStatus: undefined,
+      endpointPoackageInfo: undefined,
       pageIndex: 0,
       pageSize: 10,
       total: 0,
@@ -154,6 +155,7 @@ describe('policy list store concerns', () => {
         total: 0,
         other: 0,
       },
+      agentConfigs: {},
     });
   });
   it('uses default pagination params when not included in url', async () => {

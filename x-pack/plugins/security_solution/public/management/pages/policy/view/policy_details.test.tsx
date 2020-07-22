@@ -11,7 +11,7 @@ import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
-import { apiPathMockResponseProviders } from '../store/policy_list/test_mock_utils';
+import { policyListApiPathHandlers } from '../store/policy_list/test_mock_utils';
 
 jest.mock('../../../../common/components/link_to');
 
@@ -80,6 +80,8 @@ describe('Policy Details', () => {
       policyPackageConfig = generator.generatePolicyPackageConfig();
       policyPackageConfig.id = '1';
 
+      const policyListApiHandlers = policyListApiPathHandlers();
+
       http.get.mockImplementation((...args) => {
         const [path] = args;
         if (typeof path === 'string') {
@@ -103,9 +105,9 @@ describe('Policy Details', () => {
 
           // Get package data
           // Used in tests that route back to the list
-          if (apiPathMockResponseProviders[path]) {
+          if (policyListApiHandlers[path]) {
             asyncActions = asyncActions.then(async () => sleep());
-            return apiPathMockResponseProviders[path]();
+            return Promise.resolve(policyListApiHandlers[path]());
           }
         }
 
