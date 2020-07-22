@@ -95,6 +95,13 @@ function createMockFilterManager() {
   };
 }
 
+function createMockQueryString() {
+  return {
+    getQuery: jest.fn(),
+    setQuery: jest.fn(),
+  };
+}
+
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
 
@@ -148,6 +155,7 @@ describe('Lens App', () => {
           timefilter: {
             timefilter: createMockTimefilter(),
           },
+          queryString: createMockQueryString(),
           state$: new Observable(),
         },
         indexPatterns: {
