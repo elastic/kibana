@@ -19,20 +19,20 @@ export default ({ getService }: FtrProviderContext) => {
   const validFilters = [
     {
       filterId: 'filter_power',
-      requestBody: { description: 'Test delete filter #1', items },
+      requestBody: { description: 'Test update filter #1', items },
     },
     {
       filterId: 'filter_viewer',
-      requestBody: { description: 'Test delete filter (viewer)', items },
+      requestBody: { description: 'Test update filter (viewer)', items },
     },
     {
       filterId: 'filter_unauthorized',
-      requestBody: { description: 'Test delete filter (unauthorized)', items },
+      requestBody: { description: 'Test update filter (unauthorized)', items },
     },
   ];
 
   describe('update_filters', function () {
-    const updateFilterRequest = {
+    const updateFilterRequestBody = {
       description: 'Updated filter #1',
       removeItems: items,
       addItems: ['my_new_items_1', 'my_new_items_2'],
@@ -58,32 +58,21 @@ export default ({ getService }: FtrProviderContext) => {
         .put(`/api/ml/filters/${filterId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateFilterRequest)
+        .send(updateFilterRequestBody)
         .expect(200);
 
       expect(body.filter_id).to.eql(filterId);
-      expect(body.description).to.eql(updateFilterRequest.description);
-      expect(body.items).to.eql(updateFilterRequest.addItems);
+      expect(body.description).to.eql(updateFilterRequestBody.description);
+      expect(body.items).to.eql(updateFilterRequestBody.addItems);
     });
 
     it(`should not allow to update filter for user without required permission`, async () => {
-      const { filterId } = validFilters[1];
+      const { filterId, requestBody: oldFilterRequest } = validFilters[1];
       const { body } = await supertest
         .put(`/api/ml/filters/${filterId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateFilterRequest)
-        .expect(404);
-      expect(body.error).to.eql('Not Found');
-    });
-
-    it(`should not allow to update filter for unauthorized user`, async () => {
-      const { filterId, requestBody: oldFilterRequest } = validFilters[1];
-      const { body } = await supertest
-        .put(`/api/ml/filters/${filterId}`)
-        .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
-        .send(updateFilterRequest)
+        .send(updateFilterRequestBody)
         .expect(404);
 
       // response should return not found
@@ -97,12 +86,30 @@ export default ({ getService }: FtrProviderContext) => {
       expect(updatedFilter.items).to.eql(oldFilterRequest.items);
     });
 
+    it(`should not allow to update filter for unauthorized user`, async () => {
+      const { filterId, requestBody: oldFilterRequest } = validFilters[2];
+      const { body } = await supertest
+        .put(`/api/ml/filters/${filterId}`)
+        .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+        .set(COMMON_REQUEST_HEADERS)
+        .send(updateFilterRequestBody)
+        .expect(404);
+
+      expect(body.error).to.eql('Not Found');
+
+      const response = await ml.api.getFilter(filterId);
+      const updatedFilter = response.body.filters[0];
+      expect(updatedFilter.filter_id).to.eql(filterId);
+      expect(updatedFilter.description).to.eql(oldFilterRequest.description);
+      expect(updatedFilter.items).to.eql(oldFilterRequest.items);
+    });
+
     it(`should return appropriate error if invalid filterId`, async () => {
       const { body } = await supertest
         .put(`/api/ml/filters/filter_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateFilterRequest)
+        .send(updateFilterRequestBody)
         .expect(400);
 
       expect(body.message).to.contain('No filter with id');

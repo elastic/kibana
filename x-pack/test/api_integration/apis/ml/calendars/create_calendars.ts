@@ -51,6 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
       expect(createdCalendar.calendar_id).to.eql(requestBody.calendarId);
       expect(createdCalendar.description).to.eql(requestBody.description);
       expect(createdCalendar.job_ids).to.eql(requestBody.job_ids);
+
+      await ml.api.waitForEventsToExistInCalendar(calendarId, requestBody.events);
     });
 
     it('should not create new calendar for user without required permission', async () => {

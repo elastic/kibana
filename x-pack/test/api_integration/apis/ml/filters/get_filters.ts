@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.have.length(validFilters.length);
     });
 
-    it(`should not allow to retrieve for user without required permission`, async () => {
+    it(`should not allow to retrieve filters for user without required permission`, async () => {
       const { body } = await supertest
         .get(`/api/ml/filters`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.message).to.eql('Not Found');
     });
 
-    it(`should fetch single analytics job stats by id`, async () => {
+    it(`should fetch single filter by id`, async () => {
       const { filterId, requestBody } = validFilters[0];
       const { body } = await supertest
         .get(`/api/ml/filters/${filterId}`)

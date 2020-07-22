@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   describe('delete_calendars', function () {
-    const calendarId = `test_get_cal`;
+    const calendarId = `test_delete_cal`;
     const testCalendar = {
       calendar_id: calendarId,
       job_ids: ['test_job_1', 'test_job_2'],

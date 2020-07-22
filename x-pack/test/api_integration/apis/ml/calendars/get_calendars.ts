@@ -6,9 +6,31 @@
 
 import expect from '@kbn/expect';
 
+import { Calendar, CalendarEvent } from '../../../../../plugins/ml/server/models/calendar/index';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+
+const allEventsExistInCalendar = (eventsToCheck: CalendarEvent[], calendar: Calendar): boolean => {
+  const updatedCalendarEvents = calendar.events as CalendarEvent[];
+  let allEventsAreUpdated = true;
+  for (const eventToCheck of eventsToCheck) {
+    // if at least one of the events that we need to check is not in the updated events
+    // no need to continue
+    if (
+      updatedCalendarEvents.findIndex(
+        (updatedEvent) =>
+          updatedEvent.description === eventToCheck.description &&
+          updatedEvent.start_time === eventToCheck.start_time &&
+          updatedEvent.end_time === eventToCheck.end_time
+      ) < 0
+    ) {
+      allEventsAreUpdated = false;
+      break;
+    }
+  }
+  return allEventsAreUpdated;
+};
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -46,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
       });
 
-      it('should fetch all calenders', async () => {
+      it('should fetch all calendars', async () => {
         const { body } = await supertest
           .get(`/api/ml/calendars`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
@@ -55,9 +77,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.have.length(testCalendars.length);
         expect(body[0].events).to.have.length(testEvents.length);
+        expect(allEventsExistInCalendar(testEvents, body[0])).to.eql(true);
       });
 
-      it('should fetch all calenders for user with view permission', async () => {
+      it('should fetch all calendars for user with view permission', async () => {
         const { body } = await supertest
           .get(`/api/ml/calendars`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
@@ -65,9 +88,11 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body).to.have.length(testCalendars.length);
+        expect(body[0].events).to.have.length(testEvents.length);
+        expect(allEventsExistInCalendar(testEvents, body[0])).to.eql(true);
       });
 
-      it('should not fetch calenders for unauthorized user', async () => {
+      it('should not fetch calendars for unauthorized user', async () => {
         const { body } = await supertest
           .get(`/api/ml/calendars`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
@@ -104,16 +129,40 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.job_ids).to.eql(testCalendar.job_ids);
         expect(body.description).to.eql(testCalendar.description);
         expect(body.events).to.have.length(testEvents.length);
+        expect(allEventsExistInCalendar(testEvents, body)).to.eql(true);
       });
 
-      it('should return 404 if invalid calendar id', async () => {
+      it('should fetch calendar & associated events by id for user with view permission', async () => {
         const { body } = await supertest
-          .get(`/api/ml/calendars/calendar_id_dne`)
-          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+          .get(`/api/ml/calendars/${calendarId}`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+
+        expect(body.job_ids).to.eql(testCalendar.job_ids);
+        expect(body.description).to.eql(testCalendar.description);
+        expect(body.events).to.have.length(testEvents.length);
+        expect(allEventsExistInCalendar(testEvents, body)).to.eql(true);
+      });
+
+      it('should not fetch calendars for unauthorized user', async () => {
+        const { body } = await supertest
+          .get(`/api/ml/calendars/${calendarId}`)
+          .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
           .expect(404);
+
         expect(body.error).to.eql('Not Found');
       });
+    });
+
+    it('should return 404 if invalid calendar id', async () => {
+      const { body } = await supertest
+        .get(`/api/ml/calendars/calendar_id_dne`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(404);
+      expect(body.error).to.eql('Not Found');
     });
   });
 };

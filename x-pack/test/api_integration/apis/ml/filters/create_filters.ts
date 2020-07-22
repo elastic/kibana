@@ -62,6 +62,34 @@ export default ({ getService }: FtrProviderContext) => {
         },
       },
     },
+    {
+      testTitle: 'should return 400 bad request if invalid filterId',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        filterId: '@invalid_filter_id',
+        description: '',
+        items: ['104.236.210.185'],
+      },
+      expected: {
+        responseCode: 400,
+        responseBody: {
+          error: 'Bad Request',
+          message: 'Invalid filter_id',
+        },
+      },
+    },
+    {
+      testTitle: 'should return 400 bad request if invalid items',
+      user: USER.ML_POWERUSER,
+      requestBody: { filterId: 'valid_filter', description: '' },
+      expected: {
+        responseCode: 400,
+        responseBody: {
+          error: 'Bad Request',
+          message: 'expected value of type [array] but got [undefined]',
+        },
+      },
+    },
   ];
 
   describe('create_filters', function () {
@@ -90,28 +118,10 @@ export default ({ getService }: FtrProviderContext) => {
           const expectedResponse = testData.expected.responseBody;
           expect(body).to.eql(expectedResponse);
         } else {
-          expect(body.error).to.eql(expected.responseBody.error);
-          expect(body.message).to.eql(expected.responseBody.message);
+          expect(body.error).to.contain(expected.responseBody.error);
+          expect(body.message).to.contain(expected.responseBody.message);
         }
       });
     }
-
-    it(`should return 400 bad request if invalid filterId`, async () => {
-      await supertest
-        .put(`/api/ml/filters`)
-        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .send({ filterId: '@invalid_filter_id', description: '', items: ['104.236.210.185'] })
-        .expect(400);
-    });
-
-    it(`should return 400 bad request if invalid items`, async () => {
-      await supertest
-        .put(`/api/ml/filters`)
-        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .send({ filterId: 'valid_filter', description: '' })
-        .expect(400);
-    });
   });
 };

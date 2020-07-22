@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it(`should not delete filter for unauthorized user`, async () => {
-      const { filterId } = validFilters[1];
+      const { filterId } = validFilters[2];
       const { body } = await supertest
         .delete(`/api/ml/filters/${filterId}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))

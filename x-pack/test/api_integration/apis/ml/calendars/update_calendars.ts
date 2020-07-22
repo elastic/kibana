@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
       { description: 'event 1', start_time: 1513641600000, end_time: 1513728000000 },
     ];
 
-    const updateCalendarRequest = {
+    const updateCalendarRequestBody = {
       calendarId,
       job_ids: ['test_updated_job_1', 'test_updated_job_2'],
       description: 'Updated calendar #1',
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
         .put(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateCalendarRequest)
+        .send(updateCalendarRequestBody)
         .expect(200);
 
       await ml.api.waitForCalendarToExist(calendarId);
@@ -65,11 +65,13 @@ export default ({ getService }: FtrProviderContext) => {
       const updatedCalendar = getCalendarResult.body.calendars[0];
       const updatedEvents = getEventsResult.body.events;
 
-      // TODO: need to implement update description in the API
-      // expect(updatedCalendar.description).to.eql(updateCalendarRequest.description);
-      expect(updatedCalendar.calendar_id).to.eql(updateCalendarRequest.calendarId);
-      expect(updatedCalendar.job_ids).to.have.length(updateCalendarRequest.job_ids.length);
-      expect(updatedEvents).to.have.length(updateCalendarRequest.events.length);
+      expect(updatedCalendar.calendar_id).to.eql(updateCalendarRequestBody.calendarId);
+      expect(updatedCalendar.job_ids).to.have.length(updateCalendarRequestBody.job_ids.length);
+      expect(updatedEvents).to.have.length(updateCalendarRequestBody.events.length);
+      await ml.api.waitForEventsToExistInCalendar(
+        updatedCalendar.calendar_id,
+        updateCalendarRequestBody.events
+      );
     });
 
     it('should not allow to update calendar for user without required permission ', async () => {
@@ -77,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
         .put(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateCalendarRequest)
+        .send(updateCalendarRequestBody)
         .expect(404);
     });
 
@@ -86,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
         .put(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateCalendarRequest)
+        .send(updateCalendarRequestBody)
         .expect(404);
     });
 
@@ -95,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
         .put(`/api/ml/calendars/calendar_id_dne`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(updateCalendarRequest)
+        .send(updateCalendarRequestBody)
         .expect(404);
     });
   });
