@@ -17,6 +17,7 @@ import {
   NameOrUndefined,
   NamespaceType,
   TagsOrUndefined,
+  VersionOrUndefined,
   _TagsOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
@@ -38,6 +39,7 @@ interface UpdateExceptionListOptions {
   tags: TagsOrUndefined;
   tieBreaker?: string;
   type: ExceptionListTypeOrUndefined;
+  version: VersionOrUndefined;
 }
 
 export const updateExceptionList = async ({
@@ -53,12 +55,14 @@ export const updateExceptionList = async ({
   user,
   tags,
   type,
+  version,
 }: UpdateExceptionListOptions): Promise<ExceptionListSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const exceptionList = await getExceptionList({ id, listId, namespaceType, savedObjectsClient });
   if (exceptionList == null) {
     return null;
   } else {
+    const calculatedVersion = version == null ? exceptionList.version + 1 : version;
     const savedObject = await savedObjectsClient.update<ExceptionListSoSchema>(
       savedObjectType,
       exceptionList.id,
@@ -70,6 +74,7 @@ export const updateExceptionList = async ({
         tags,
         type,
         updated_by: user,
+        version: calculatedVersion,
       },
       {
         version: _version,
