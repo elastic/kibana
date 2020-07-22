@@ -12,8 +12,9 @@ import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/const
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import { RuleType } from '../../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
-import { NewRule } from '../../../../containers/detection_engine/rules';
+import { NewRule, Rule } from '../../../../containers/detection_engine/rules';
 
 import {
   AboutStepRule,
@@ -146,7 +147,10 @@ export const formatScheduleStepData = (scheduleData: ScheduleStepRule): Schedule
   };
 };
 
-export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson => {
+export const formatAboutStepData = (
+  aboutStepData: AboutStepRule,
+  exceptionsList?: List[]
+): AboutStepRuleJson => {
   const {
     author,
     falsePositives,
@@ -169,6 +173,9 @@ export const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRule
       ? {
           exceptions_list: [
             { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
+            ...(exceptionsList != null ? exceptionsList : []).filter(
+              (list) => list.type !== 'endpoint'
+            ),
           ] as AboutStepRuleJson['exceptions_list'],
         }
       : {}),
@@ -218,11 +225,12 @@ export const formatRule = (
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
-  actionsData: ActionsStepRule
+  actionsData: ActionsStepRule,
+  rule?: Rule | null
 ): NewRule =>
   deepmerge.all([
     formatDefineStepData(defineStepData),
-    formatAboutStepData(aboutStepData),
+    formatAboutStepData(aboutStepData, rule?.exceptions_list),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
   ]) as NewRule;
