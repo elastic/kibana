@@ -13,8 +13,10 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonIcon,
+  EuiToolTip,
   EuiIcon,
   EuiText,
+  HorizontalAlignment,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -68,15 +70,33 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <div>
+        <EuiToolTip
+          content={
+            state === 'VISIBLE'
+              ? i18n.translate('xpack.ingestManager.enrollmentTokensList.hideTokenButtonLabel', {
+                  defaultMessage: 'Hide token',
+                })
+              : i18n.translate('xpack.ingestManager.enrollmentTokensList.showTokenButtonLabel', {
+                  defaultMessage: 'Show token',
+                })
+          }
+        >
           <EuiButtonIcon
-            size="xs"
+            aria-label={
+              state === 'VISIBLE'
+                ? i18n.translate('xpack.ingestManager.enrollmentTokensList.hideTokenButtonLabel', {
+                    defaultMessage: 'Hide token',
+                  })
+                : i18n.translate('xpack.ingestManager.enrollmentTokensList.showTokenButtonLabel', {
+                    defaultMessage: 'Show token',
+                  })
+            }
             color="text"
             isLoading={state === 'LOADING'}
             onClick={toggleKey}
             iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
           />
-        </div>
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -113,7 +133,23 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
           onConfirm={onConfirm}
         />
       )}
-      <EuiButtonIcon onClick={() => setState('CONFIRM_VISIBLE')} iconType="trash" color="danger" />
+      <EuiToolTip
+        content={i18n.translate('xpack.ingestManager.enrollmentTokensList.revokeTokenButtonLabel', {
+          defaultMessage: 'Revoke token',
+        })}
+      >
+        <EuiButtonIcon
+          aria-label={i18n.translate(
+            'xpack.ingestManager.enrollmentTokensList.revokeTokenButtonLabel',
+            {
+              defaultMessage: 'Revoke token',
+            }
+          )}
+          onClick={() => setState('CONFIRM_VISIBLE')}
+          iconType="trash"
+          color="danger"
+        />
+      </EuiToolTip>
     </>
   );
 };
@@ -194,7 +230,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Active',
       }),
       width: '70px',
-      align: 'center',
+      align: 'center' as HorizontalAlignment,
       render: (active: boolean) => {
         return <EuiIcon size="m" color={active ? 'success' : 'danger'} type="dot" />;
       },
@@ -233,7 +269,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems={'center'}>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <SearchBar
             value={search}
