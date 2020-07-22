@@ -181,7 +181,7 @@ const GraphOverlayComponent = ({
         </EuiFlexItem>
         {timelineId === TimelineId.active && timelineType === TimelineType.default && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <NewCase
                   compact={true}
