@@ -59,10 +59,21 @@ export default ({ getService }: FtrProviderContext) => {
     };
   });
 
+  const editedDescription = 'Edited description';
+
   async function createJobs(mockJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>>) {
     for (const jobConfig of mockJobConfigs) {
       await ml.api.createDataFrameAnalyticsJob(jobConfig as DataFrameAnalyticsConfig);
     }
+  }
+
+  async function getDFAJob(id: string) {
+    const { body } = await supertest
+      .get(`/api/ml/data_frame/analytics/${id}`)
+      .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+      .set(COMMON_REQUEST_HEADERS);
+
+    return body.data_frame_analytics[0];
   }
 
   describe('UPDATE data_frame/analytics', () => {
@@ -81,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
         const analyticsId = `${jobId}_0`;
 
         const requestBody = {
-          description: 'Edited description',
+          description: editedDescription,
           model_memory_limit: '61mb',
           allow_lazy_start: true,
           max_num_threads: 2,
@@ -94,10 +105,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send(requestBody)
           .expect(200);
 
-        expect(body.description).to.eql(requestBody.description);
-        expect(body.allow_lazy_start).to.eql(requestBody.allow_lazy_start);
-        expect(body.model_memory_limit).to.eql(requestBody.model_memory_limit);
-        expect(body.max_num_threads).to.eql(requestBody.max_num_threads);
+        expect(body).not.to.be(undefined);
+
+        const fetchedJob = await getDFAJob(analyticsId);
+
+        expect(fetchedJob.description).to.eql(requestBody.description);
+        expect(fetchedJob.allow_lazy_start).to.eql(requestBody.allow_lazy_start);
+        expect(fetchedJob.model_memory_limit).to.eql(requestBody.model_memory_limit);
+        expect(fetchedJob.max_num_threads).to.eql(requestBody.max_num_threads);
       });
 
       it('should only update description field of analytics job when description is sent in request', async () => {
@@ -114,10 +129,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send(requestBody)
           .expect(200);
 
-        expect(body.description).to.eql(requestBody.description);
-        expect(body.allow_lazy_start).to.eql(commonJobConfig.allow_lazy_start);
-        expect(body.model_memory_limit).to.eql(commonJobConfig.model_memory_limit);
-        expect(body.max_num_threads).to.eql(commonJobConfig.max_num_threads);
+        expect(body).not.to.be(undefined);
+
+        const fetchedJob = await getDFAJob(analyticsId);
+
+        expect(fetchedJob.description).to.eql(requestBody.description);
+        expect(fetchedJob.allow_lazy_start).to.eql(commonJobConfig.allow_lazy_start);
+        expect(fetchedJob.model_memory_limit).to.eql(commonJobConfig.model_memory_limit);
+        expect(fetchedJob.max_num_threads).to.eql(commonJobConfig.max_num_threads);
       });
 
       it('should only update allow_lazy_start field of analytics job when allow_lazy_start is sent in request', async () => {
@@ -134,10 +153,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send(requestBody)
           .expect(200);
 
-        expect(body.allow_lazy_start).to.eql(requestBody.allow_lazy_start);
-        expect(body.description).to.eql(testJobConfigs[2].description);
-        expect(body.model_memory_limit).to.eql(commonJobConfig.model_memory_limit);
-        expect(body.max_num_threads).to.eql(commonJobConfig.max_num_threads);
+        expect(body).not.to.be(undefined);
+
+        const fetchedJob = await getDFAJob(analyticsId);
+
+        expect(fetchedJob.allow_lazy_start).to.eql(requestBody.allow_lazy_start);
+        expect(fetchedJob.description).to.eql(testJobConfigs[2].description);
+        expect(fetchedJob.model_memory_limit).to.eql(commonJobConfig.model_memory_limit);
+        expect(fetchedJob.max_num_threads).to.eql(commonJobConfig.max_num_threads);
       });
 
       it('should only update model_memory_limit field of analytics job when model_memory_limit is sent in request', async () => {
@@ -154,10 +177,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send(requestBody)
           .expect(200);
 
-        expect(body.model_memory_limit).to.eql(requestBody.model_memory_limit);
-        expect(body.allow_lazy_start).to.eql(commonJobConfig.allow_lazy_start);
-        expect(body.description).to.eql(testJobConfigs[3].description);
-        expect(body.max_num_threads).to.eql(commonJobConfig.max_num_threads);
+        expect(body).not.to.be(undefined);
+
+        const fetchedJob = await getDFAJob(analyticsId);
+
+        expect(fetchedJob.model_memory_limit).to.eql(requestBody.model_memory_limit);
+        expect(fetchedJob.allow_lazy_start).to.eql(commonJobConfig.allow_lazy_start);
+        expect(fetchedJob.description).to.eql(testJobConfigs[3].description);
+        expect(fetchedJob.max_num_threads).to.eql(commonJobConfig.max_num_threads);
       });
 
       it('should only update max_num_threads field of analytics job when max_num_threads is sent in request', async () => {
@@ -174,10 +201,14 @@ export default ({ getService }: FtrProviderContext) => {
           .send(requestBody)
           .expect(200);
 
-        expect(body.max_num_threads).to.eql(requestBody.max_num_threads);
-        expect(body.model_memory_limit).to.eql(commonJobConfig.model_memory_limit);
-        expect(body.allow_lazy_start).to.eql(commonJobConfig.allow_lazy_start);
-        expect(body.description).to.eql(testJobConfigs[4].description);
+        expect(body).not.to.be(undefined);
+
+        const fetchedJob = await getDFAJob(analyticsId);
+
+        expect(fetchedJob.max_num_threads).to.eql(requestBody.max_num_threads);
+        expect(fetchedJob.model_memory_limit).to.eql(commonJobConfig.model_memory_limit);
+        expect(fetchedJob.allow_lazy_start).to.eql(commonJobConfig.allow_lazy_start);
+        expect(fetchedJob.description).to.eql(testJobConfigs[4].description);
       });
 
       it('should not allow to update analytics job for unauthorized user', async () => {
@@ -195,6 +226,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.error).to.eql('Not Found');
         expect(body.message).to.eql('Not Found');
+
+        const fetchedJob = await getDFAJob(analyticsId);
+        // Description should not have changed
+        expect(fetchedJob.description).to.eql(editedDescription);
       });
 
       it('should not allow to update analytics job for the user with only view permission', async () => {
@@ -212,6 +247,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.error).to.eql('Not Found');
         expect(body.message).to.eql('Not Found');
+
+        const fetchedJob = await getDFAJob(analyticsId);
+        // Description should not have changed
+        expect(fetchedJob.description).to.eql(editedDescription);
       });
 
       it('should show 404 error if job does not exist', async () => {
