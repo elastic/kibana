@@ -31,6 +31,7 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
     next(action);
 
     const state = getState();
+
     if (
       (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) ||
       action.type === 'serverDeletedPolicy'

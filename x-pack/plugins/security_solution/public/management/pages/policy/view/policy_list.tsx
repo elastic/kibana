@@ -289,8 +289,13 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.securitySolution.endpoint.policyList.agentConfig', {
           defaultMessage: 'Agent Configuration',
         }),
+        // eslint-disable-next-line react/display-name
         render: (item: PolicyData) => {
-          return agentConfigs[item.config_id] ?? '-';
+          return (
+            <span data-test-subj="policyListAgentConfigName">
+              {agentConfigs[item.config_id] ?? ''}
+            </span>
+          );
         },
       },
       {
