@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import React, { FC, useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -21,48 +24,29 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
-
-import { ComponentStrings } from '../../../i18n';
 
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
 import { Asset } from './asset';
 import { AssetType } from '../../../types';
+import { ComponentStrings } from '../../../i18n';
 
-const { AssetModal: strings } = ComponentStrings;
+const { AssetManager: strings } = ComponentStrings;
 
 interface Props {
   /** The assets to display within the modal */
-  assetValues: AssetType[];
-  /** Indicates if assets are being loaded */
-  isLoading: boolean;
+  assets: AssetType[];
   /** Function to invoke when the modal is closed */
   onClose: () => void;
-  /** Function to invoke when a file is uploaded */
-  onFileUpload: (assets: FileList | null) => void;
-  /** Function to invoke when an asset is copied */
-  onAssetCopy: (asset: AssetType) => void;
-  /** Function to invoke when an asset is created */
-  onAssetCreate: (asset: AssetType) => void;
-  /** Function to invoke when an asset is deleted */
-  onAssetDelete: (asset: AssetType) => void;
+  onAddAsset: (file: File) => void;
 }
 
-export const AssetModal: FunctionComponent<Props> = (props) => {
-  const {
-    assetValues,
-    isLoading,
-    onAssetCopy,
-    onAssetCreate,
-    onAssetDelete,
-    onClose,
-    onFileUpload,
-  } = props;
+export const AssetManager: FC<Props> = (props) => {
+  const { assets, onClose, onAddAsset } = props;
+  const [isLoading, setIsLoading] = useState(false);
 
   const assetsTotal = Math.round(
-    assetValues.reduce((total, { value }) => total + value.length, 0) / 1024
+    assets.reduce((total, { value }) => total + value.length, 0) / 1024
   );
 
   const percentageUsed = Math.round((assetsTotal / ASSET_MAX_SIZE) * 100);
@@ -77,10 +61,22 @@ export const AssetModal: FunctionComponent<Props> = (props) => {
     </EuiPanel>
   );
 
+  const onFileUpload = (files: FileList | null) => {
+    if (files === null) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    Promise.all(Array.from(files).map((file) => onAddAsset(file))).finally(() => {
+      setIsLoading(false);
+    });
+  };
+
   return (
     <EuiOverlayMask>
       <EuiModal
-        onClose={onClose}
+        onClose={() => onClose()}
         className="canvasAssetManager canvasModal--fixedSize"
         maxWidth="1000px"
       >
@@ -110,16 +106,10 @@ export const AssetModal: FunctionComponent<Props> = (props) => {
             <p>{strings.getDescription()}</p>
           </EuiText>
           <EuiSpacer />
-          {assetValues.length ? (
+          {assets.length ? (
             <EuiFlexGrid columns={4}>
-              {assetValues.map((asset) => (
-                <Asset
-                  asset={asset}
-                  key={asset.id}
-                  onCopy={onAssetCopy}
-                  onCreate={onAssetCreate}
-                  onDelete={onAssetDelete}
-                />
+              {assets.map((asset) => (
+                <Asset asset={asset} key={asset.id} />
               ))}
             </EuiFlexGrid>
           ) : (
@@ -143,7 +133,7 @@ export const AssetModal: FunctionComponent<Props> = (props) => {
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiButton size="s" onClick={onClose}>
+          <EuiButton size="s" onClick={() => onClose()}>
             {strings.getModalCloseButtonLabel()}
           </EuiButton>
         </EuiModalFooter>
@@ -152,12 +142,8 @@ export const AssetModal: FunctionComponent<Props> = (props) => {
   );
 };
 
-AssetModal.propTypes = {
-  assetValues: PropTypes.array,
-  isLoading: PropTypes.bool,
+AssetManager.propTypes = {
+  assets: PropTypes.arrayOf(PropTypes.object).isRequired,
   onClose: PropTypes.func.isRequired,
-  onFileUpload: PropTypes.func.isRequired,
-  onAssetCopy: PropTypes.func.isRequired,
-  onAssetCreate: PropTypes.func.isRequired,
-  onAssetDelete: PropTypes.func.isRequired,
+  onAddAsset: PropTypes.func.isRequired,
 };

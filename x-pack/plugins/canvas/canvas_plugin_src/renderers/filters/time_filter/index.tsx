@@ -7,14 +7,14 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { toExpression } from '@kbn/interpreter/common';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
-import { syncFilterExpression } from '../../../public/lib/sync_filter_expression';
-import { RendererStrings } from '../../../i18n';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
+import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
+import { RendererStrings } from '../../../../i18n';
 import { TimeFilter } from './components';
-import { StartInitializer } from '../../plugin';
-import { RendererHandlers } from '../../../types';
-import { Arguments } from '../../functions/common/timefilterControl';
-import { RendererFactory } from '../../../types';
+import { StartInitializer } from '../../../plugin';
+import { RendererHandlers } from '../../../../types';
+import { Arguments } from '../../../functions/common/timefilterControl';
+import { RendererFactory } from '../../../../types';
 
 const { timeFilter: strings } = RendererStrings;
 
