@@ -25,3 +25,6 @@ const uiStyles = require.context(
   /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/
 );
 uiStyles.keys().forEach((key) => uiStyles(key));
+
+// Import Canvas CSS
+require('../public/style/index.scss');
