@@ -52,13 +52,6 @@ describe('updateAlertRoute', () => {
     const [config, handler] = router.put.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-all",
-        ],
-      }
-    `);
 
     alertsClient.update.mockResolvedValueOnce(mockedResponse);
 

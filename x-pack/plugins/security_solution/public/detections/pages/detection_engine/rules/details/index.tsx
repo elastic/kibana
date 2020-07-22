@@ -37,7 +37,7 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
-import { useRule } from '../../../../containers/detection_engine/rules';
+import { useRule, Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import { useWithSource } from '../../../../../common/containers/source';
@@ -81,7 +81,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { FILTERS_GLOBAL_HEIGHT } from '../../../../../../common/constants';
+import { DEFAULT_INDEX_PATTERN, FILTERS_GLOBAL_HEIGHT } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../lists_plugin_deps';
@@ -90,6 +90,12 @@ import {
   MIN_EVENTS_VIEWER_BODY_HEIGHT,
 } from '../../../../../timelines/components/timeline/body/helpers';
 import { footerHeight } from '../../../../../timelines/components/timeline/footer';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
+import { showGlobalFilters } from '../../../../../timelines/components/timeline/helpers';
+import { timelineSelectors } from '../../../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../../../../timelines/store/timeline/model';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -97,26 +103,30 @@ enum RuleDetailTabs {
   exceptions = 'exceptions',
 }
 
-const ruleDetailTabs = [
-  {
-    id: RuleDetailTabs.alerts,
-    name: detectionI18n.ALERT,
-    disabled: false,
-  },
-  {
-    id: RuleDetailTabs.exceptions,
-    name: i18n.EXCEPTIONS_TAB,
-    disabled: false,
-  },
-  {
-    id: RuleDetailTabs.failures,
-    name: i18n.FAILURE_HISTORY_TAB,
-    disabled: false,
-  },
-];
+const getRuleDetailsTabs = (rule: Rule | null) => {
+  const canUseExceptions = rule && !isMlRule(rule.type) && !isThresholdRule(rule.type);
+  return [
+    {
+      id: RuleDetailTabs.alerts,
+      name: detectionI18n.ALERT,
+      disabled: false,
+    },
+    {
+      id: RuleDetailTabs.exceptions,
+      name: i18n.EXCEPTIONS_TAB,
+      disabled: !canUseExceptions,
+    },
+    {
+      id: RuleDetailTabs.failures,
+      name: i18n.FAILURE_HISTORY_TAB,
+      disabled: false,
+    },
+  ];
+};
 
 export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   filters,
+  graphEventId,
   query,
   setAbsoluteRangeDatePicker,
 }) => {
@@ -160,6 +170,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions =
     mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+  const ruleDetailTabs = getRuleDetailsTabs(rule);
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(
@@ -345,7 +356,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       {indicesExist ? (
         <StickyContainer>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal>
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
@@ -509,6 +520,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
               <ExceptionsViewer
                 ruleId={ruleId ?? ''}
                 ruleName={rule?.name ?? ''}
+                ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
                 availableListTypes={exceptionLists.allowedExceptionListTypes}
                 commentsAccordionId={'ruleDetailsTabExceptions'}
                 exceptionListsMeta={exceptionLists.lists}
@@ -534,13 +546,19 @@ RuleDetailsPageComponent.displayName = 'RuleDetailsPageComponent';
 
 const makeMapStateToProps = () => {
   const getGlobalInputs = inputsSelectors.globalSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   return (state: State) => {
     const globalInputs: InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
 
+    const timeline: TimelineModel =
+      getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults;
+    const { graphEventId } = timeline;
+
     return {
       query,
       filters,
+      graphEventId,
     };
   };
 };

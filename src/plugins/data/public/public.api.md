@@ -52,7 +52,6 @@ import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiComboBoxProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
-import { EventEmitter } from 'events';
 import { ExclusiveUnion } from '@elastic/eui';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
@@ -148,7 +147,7 @@ import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
 import { Reporter } from '@kbn/analytics';
 import { RequestAdapter } from 'src/plugins/inspector/common';
-import { RequestStatistics as RequestStatistics_2 } from 'src/plugins/inspector/common';
+import { RequestStatistics } from 'src/plugins/inspector/common';
 import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
 import { SavedObject } from 'src/core/server';
@@ -248,6 +247,20 @@ export class AggParamType<TAggConfig extends IAggConfig = IAggConfig> extends Ba
     allowedAggs: string[];
     // (undocumented)
     makeAgg: (agg: TAggConfig, state?: AggConfigSerialized) => TAggConfig;
+}
+
+// Warning: (ae-missing-release-tag) "ApplyGlobalFilterActionContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface ApplyGlobalFilterActionContext {
+    // Warning: (ae-forgotten-export) The symbol "IEmbeddable" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    embeddable?: IEmbeddable;
+    // (undocumented)
+    filters: Filter[];
+    // (undocumented)
+    timeFieldName?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "DateNanosFormat" needs to be exported by the entry point index.d.ts
@@ -1443,18 +1456,16 @@ export type PhrasesFilter = Filter & {
     meta: PhrasesFilterMeta;
 };
 
+// Warning: (ae-forgotten-export) The symbol "DataSetupDependencies" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "DataStartDependencies" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "DataPublicPlugin" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class Plugin implements Plugin_2<DataPublicPluginSetup, DataPublicPluginStart> {
+export class Plugin implements Plugin_2<DataPublicPluginSetup, DataPublicPluginStart, DataSetupDependencies, DataStartDependencies> {
     // Warning: (ae-forgotten-export) The symbol "ConfigSchema" needs to be exported by the entry point index.d.ts
     constructor(initializerContext: PluginInitializerContext_2<ConfigSchema>);
-    // Warning: (ae-forgotten-export) The symbol "DataSetupDependencies" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    setup(core: CoreSetup, { expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
-    // Warning: (ae-forgotten-export) The symbol "DataStartDependencies" needs to be exported by the entry point index.d.ts
-    //
+    setup(core: CoreSetup<DataStartDependencies, DataPublicPluginStart>, { expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
     // (undocumented)
     start(core: CoreStart_2, { uiActions }: DataStartDependencies): DataPublicPluginStart;
     // (undocumented)
