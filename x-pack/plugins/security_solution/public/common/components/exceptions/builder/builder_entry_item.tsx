@@ -9,22 +9,24 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../../autocomplete/field';
 import { OperatorComponent } from '../../autocomplete/operator';
-import { isOperator } from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
 import { AutocompleteFieldMatchComponent } from '../../autocomplete/field_value_match';
 import { AutocompleteFieldMatchAnyComponent } from '../../autocomplete/field_value_match_any';
 import { AutocompleteFieldExistsComponent } from '../../autocomplete/field_value_exists';
 import { FormattedBuilderEntry, BuilderEntry } from '../types';
 import { AutocompleteFieldListsComponent } from '../../autocomplete/field_value_lists';
-import {
-  ListSchema,
-  OperatorTypeEnum,
-  ExceptionListType,
-  entriesList,
-} from '../../../../lists_plugin_deps';
+import { ListSchema, OperatorTypeEnum, ExceptionListType } from '../../../../lists_plugin_deps';
 import { getEmptyValue } from '../../empty_value';
 import * as i18n from './translations';
-import { getValueFromOperator, getFilteredIndexPatterns, getOperatorOptions } from './helpers';
+import {
+  getFilteredIndexPatterns,
+  getOperatorOptions,
+  getEntryOnFieldChange,
+  getEntryOnOperatorChange,
+  getEntryOnMatchChange,
+  getEntryOnMatchAnyChange,
+  getEntryOnListChange,
+} from './helpers';
 
 interface EntryItemProps {
   entry: FormattedBuilderEntry;
@@ -35,7 +37,7 @@ interface EntryItemProps {
   onChange: (arg: BuilderEntry, i: number) => void;
 }
 
-export const EntryItemComponent: React.FC<EntryItemProps> = ({
+export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   entry,
   indexPattern,
   listType,
@@ -45,168 +47,52 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
 }): JSX.Element => {
   const handleFieldChange = useCallback(
     ([newField]: IFieldType[]): void => {
-      if (entry.nested === 'parent') {
-        onChange(
-          {
-            field:
-              newField.subType != null && newField.subType.nested != null
-                ? newField.subType.nested.path
-                : '',
-            type: OperatorTypeEnum.NESTED,
-            entries: [
-              {
-                field: newField.name.split('.').slice(-1)[0],
-                type: OperatorTypeEnum.MATCH,
-                operator: isOperator.operator,
-                value: '',
-              },
-            ],
-          },
-          entry.entryIndex
-        );
-      } else if (entry.nested === 'child' && entry.parent != null) {
-        onChange(
-          {
-            ...entry.parent.parent,
-            entries: [
-              ...entry.parent.parent.entries.slice(0, entry.entryIndex),
-              {
-                field: newField.name.split('.').slice(-1)[0] ?? '',
-                type: OperatorTypeEnum.MATCH,
-                operator: isOperator.operator,
-                value: '',
-              },
-              ...entry.parent.parent.entries.slice(entry.entryIndex + 1),
-            ],
-          },
-          entry.parent.parentIndex
-        );
-      } else {
-        onChange(
-          {
-            field: newField != null ? newField.name : undefined,
-            type: OperatorTypeEnum.MATCH,
-            operator: isOperator.operator,
-            value: undefined,
-          },
-          entry.entryIndex
-        );
-      }
+      const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
+
+      onChange(updatedEntry, index);
     },
-    [onChange, entry.nested, entry.parent, entry.entryIndex]
+    [onChange, entry]
   );
 
   const handleOperatorChange = useCallback(
     ([newOperator]: OperatorOption[]): void => {
-      const newEntry = getValueFromOperator(newOperator, entry);
-      if (!entriesList.is(newEntry) && entry.nested != null && entry.parent != null) {
-        onChange(
-          {
-            ...entry.parent.parent,
-            entries: [
-              ...entry.parent.parent.entries.slice(0, entry.entryIndex),
-              {
-                ...newEntry,
-                field: entry.field != null ? entry.field.name.split('.').slice(-1)[0] : '',
-              },
-              ...entry.parent.parent.entries.slice(entry.entryIndex + 1),
-            ],
-          },
-          entry.parent.parentIndex
-        );
-      } else {
-        onChange(newEntry, entry.entryIndex);
-      }
+      const { updatedEntry, index } = getEntryOnOperatorChange(entry, newOperator);
+
+      onChange(updatedEntry, index);
     },
     [onChange, entry]
   );
 
   const handleFieldMatchValueChange = useCallback(
     (newField: string): void => {
-      if (entry.nested != null && entry.parent != null) {
-        onChange(
-          {
-            ...entry.parent.parent,
-            entries: [
-              ...entry.parent.parent.entries.slice(0, entry.entryIndex),
-              {
-                field: entry.field != null ? entry.field.name.split('.').slice(-1)[0] : '',
-                type: OperatorTypeEnum.MATCH,
-                operator: entry.operator.operator,
-                value: newField,
-              },
-              ...entry.parent.parent.entries.slice(entry.entryIndex + 1),
-            ],
-          },
-          entry.parent.parentIndex
-        );
-      } else {
-        onChange(
-          {
-            field: entry.field != null ? entry.field.name : undefined,
-            type: OperatorTypeEnum.MATCH,
-            operator: entry.operator.operator,
-            value: newField,
-          },
-          entry.entryIndex
-        );
-      }
+      const { updatedEntry, index } = getEntryOnMatchChange(entry, newField);
+
+      onChange(updatedEntry, index);
     },
-    [onChange, entry.field, entry.operator.operator, entry.nested, entry.parent, entry.entryIndex]
+    [onChange, entry]
   );
 
   const handleFieldMatchAnyValueChange = useCallback(
     (newField: string[]): void => {
-      if (entry.nested != null && entry.parent != null) {
-        onChange(
-          {
-            ...entry.parent.parent,
-            entries: [
-              ...entry.parent.parent.entries.slice(0, entry.entryIndex),
-              {
-                field: entry.field != null ? entry.field.name.split('.').slice(-1)[0] : '',
-                type: OperatorTypeEnum.MATCH_ANY,
-                operator: entry.operator.operator,
-                value: newField,
-              },
-              ...entry.parent.parent.entries.slice(entry.entryIndex + 1),
-            ],
-          },
-          entry.parent.parentIndex
-        );
-      } else {
-        onChange(
-          {
-            field: entry.field != null ? entry.field.name : undefined,
-            type: OperatorTypeEnum.MATCH_ANY,
-            operator: entry.operator.operator,
-            value: newField,
-          },
-          entry.entryIndex
-        );
-      }
+      const { updatedEntry, index } = getEntryOnMatchAnyChange(entry, newField);
+
+      onChange(updatedEntry, index);
     },
-    [onChange, entry.entryIndex, entry.field, entry.operator.operator, entry.nested, entry.parent]
+    [onChange, entry]
   );
 
   const handleFieldListValueChange = useCallback(
     (newField: ListSchema): void => {
-      onChange(
-        {
-          field: entry.field != null ? entry.field.name : undefined,
-          type: OperatorTypeEnum.LIST,
-          operator: entry.operator.operator,
-          list: { id: newField.id, type: newField.type },
-        },
-        entry.entryIndex
-      );
+      const { updatedEntry, index } = getEntryOnListChange(entry, newField);
+
+      onChange(updatedEntry, index);
     },
-    [onChange, entry.entryIndex, entry.field, entry.operator.operator]
+    [onChange, entry]
   );
 
   const renderFieldInput = useCallback(
     (isFirst: boolean): JSX.Element => {
-      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry, addNested);
+      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry);
       const comboBox = (
         <FieldComponent
           placeholder={
@@ -234,7 +120,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
         return comboBox;
       }
     },
-    [handleFieldChange, addNested, indexPattern, entry]
+    [handleFieldChange, indexPattern, entry]
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
@@ -369,4 +255,4 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
   );
 };
 
-EntryItemComponent.displayName = 'EntryItem';
+BuilderEntryItem.displayName = 'BuilderEntryItem';

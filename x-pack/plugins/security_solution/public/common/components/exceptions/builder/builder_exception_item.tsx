@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AndOrBadge } from '../../and_or_badge';
-import { EntryItemComponent } from './entry_item';
+import { BuilderEntryItem } from './builder_entry_item';
 import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
 import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } from '../types';
 import { ExceptionListType } from '../../../../../public/lists_plugin_deps';
@@ -91,9 +91,9 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
     const entries = useMemo(
       (): FormattedBuilderEntry[] =>
         indexPattern != null && exceptionItem.entries.length > 0
-          ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries, addNested)
+          ? getFormattedBuilderEntries(indexPattern, exceptionItem.entries)
           : [],
-      [addNested, exceptionItem.entries, indexPattern]
+      [exceptionItem.entries, indexPattern]
     );
 
     const getAndBadge = useCallback((): JSX.Element => {
@@ -160,7 +160,7 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
                   <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
                     {item.nested === 'child' && <MyBeautifulLine grow={false} />}
                     <EuiFlexItem grow={1}>
-                      <EntryItemComponent
+                      <BuilderEntryItem
                         entry={item}
                         indexPattern={indexPattern}
                         listType={listType}

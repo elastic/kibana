@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -23,6 +23,8 @@ import { AndOrBadge } from '../../and_or_badge';
 import { BuilderButtonOptions } from './builder_button_options';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
+import { State, exceptionsBuilderReducer } from './reducer';
+import { getDefaultEmptyEntry, getDefaultNestedEmptyEntry } from './helpers';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import exceptionableFields from '../exceptionable_fields.json';
 
@@ -39,6 +41,15 @@ const MyAndBadge = styled(AndOrBadge)`
 const MyButtonsContainer = styled(EuiFlexItem)`
   margin: 16px 0;
 `;
+
+const initialState: State = {
+  disableAnd: false,
+  disableOr: false,
+  andLogicIncluded: false,
+  addNested: false,
+  exceptions: [],
+  exceptionsToDelete: [],
+};
 
 interface OnChangeProps {
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
@@ -70,18 +81,74 @@ export const ExceptionBuilder = ({
   isNestedDisabled,
   onChange,
 }: ExceptionBuilderProps) => {
-  const [andLogicIncluded, setAndLogicIncluded] = useState(false);
-  const [addNested, setAddNested] = useState(false);
-  const [exceptions, setExceptions] = useState<ExceptionsBuilderExceptionItem[]>(
-    exceptionListItems
-  );
-  const [exceptionsToDelete, setExceptionsToDelete] = useState<ExceptionListItemSchema[]>([]);
+  const [
+    { exceptions, exceptionsToDelete, andLogicIncluded, disableAnd, disableOr, addNested },
+    dispatch,
+  ] = useReducer(exceptionsBuilderReducer(), {
+    ...initialState,
+    disableAnd: isAndDisabled,
+    disableOr: isOrDisabled,
+  });
 
-  const handleCheckAndLogic = useCallback(
+  const setUpdateExceptions = useCallback(
     (items: ExceptionsBuilderExceptionItem[]): void => {
-      setAndLogicIncluded(items.filter(({ entries }) => entries.length > 1).length > 0);
+      dispatch({
+        type: 'setExceptions',
+        exceptions: items,
+      });
     },
-    [setAndLogicIncluded]
+    [dispatch]
+  );
+
+  const setDefaultExceptions = useCallback(
+    (item: ExceptionsBuilderExceptionItem): void => {
+      dispatch({
+        type: 'setDefault',
+        initialState,
+        lastException: item,
+      });
+    },
+    [dispatch]
+  );
+
+  const setUpdateExceptionsToDelete = useCallback(
+    (items: ExceptionListItemSchema[]): void => {
+      dispatch({
+        type: 'setExceptionsToDelete',
+        exceptions: items,
+      });
+    },
+    [dispatch]
+  );
+
+  const setUpdateAndDisabled = useCallback(
+    (shouldDisable: boolean): void => {
+      dispatch({
+        type: 'setDisableAnd',
+        shouldDisable,
+      });
+    },
+    [dispatch]
+  );
+
+  const setUpdateOrDisabled = useCallback(
+    (shouldDisable: boolean): void => {
+      dispatch({
+        type: 'setDisableOr',
+        shouldDisable,
+      });
+    },
+    [dispatch]
+  );
+
+  const setUpdateAddNested = useCallback(
+    (shouldAddNested: boolean): void => {
+      dispatch({
+        type: 'setAddNested',
+        addNested: shouldAddNested,
+      });
+    },
+    [dispatch]
   );
 
   const handleExceptionItemChange = useCallback(
@@ -94,65 +161,61 @@ export const ExceptionBuilder = ({
         ...exceptions.slice(index + 1),
       ];
 
-      handleCheckAndLogic(updatedExceptions);
-      setExceptions(updatedExceptions);
+      setUpdateExceptions(updatedExceptions);
     },
-    [setExceptions, handleCheckAndLogic, exceptions]
+    [setUpdateExceptions, exceptions]
   );
 
   const handleDeleteExceptionItem = useCallback(
     (item: ExceptionsBuilderExceptionItem, itemIndex: number): void => {
       if (item.entries.length === 0) {
-        if (exceptionListItemSchema.is(item)) {
-          setExceptionsToDelete((items) => [...items, item]);
+        const updatedExceptions = [
+          ...exceptions.slice(0, itemIndex),
+          ...exceptions.slice(itemIndex + 1),
+        ];
+
+        // if it's the only exception item left, don't delete it
+        // just add a default entry to it
+        if (updatedExceptions.length === 0) {
+          setDefaultExceptions(item);
+        } else if (updatedExceptions.length > 0 && exceptionListItemSchema.is(item)) {
+          setUpdateExceptionsToDelete([...exceptionsToDelete, item]);
+        } else {
+          setUpdateExceptions([
+            ...exceptions.slice(0, itemIndex),
+            ...exceptions.slice(itemIndex + 1),
+          ]);
         }
-
-        setExceptions((existingExceptions) => {
-          const updatedExceptions = [
-            ...existingExceptions.slice(0, itemIndex),
-            ...existingExceptions.slice(itemIndex + 1),
-          ];
-          const lastExceptionItem = updatedExceptions.slice(-1)[0];
-          const lastItemHasNestedEntries =
-            lastExceptionItem != null
-              ? lastExceptionItem.entries.slice(-1).filter(({ type }) => type === 'nested').length >
-                0
-              : false;
-          setAddNested(lastItemHasNestedEntries);
-          handleCheckAndLogic(updatedExceptions);
-
-          return updatedExceptions;
-        });
       } else {
-        const lastItemHasNestedEntries =
-          item.entries.slice(-1).filter(({ type }) => type === 'nested').length > 0;
-        setAddNested(lastItemHasNestedEntries);
         handleExceptionItemChange(item, itemIndex);
       }
     },
-    [handleExceptionItemChange, handleCheckAndLogic]
+    [
+      handleExceptionItemChange,
+      setUpdateExceptions,
+      setUpdateExceptionsToDelete,
+      exceptions,
+      exceptionsToDelete,
+      setDefaultExceptions,
+    ]
   );
 
-  const handleAddNewExceptionItemEntry = useCallback((): void => {
-    setExceptions((existingExceptions): ExceptionsBuilderExceptionItem[] => {
-      const lastException = existingExceptions[existingExceptions.length - 1];
+  const handleAddNewExceptionItemEntry = useCallback(
+    (isNested = false): void => {
+      const lastException = exceptions[exceptions.length - 1];
       const { entries } = lastException;
+
       const updatedException: ExceptionsBuilderExceptionItem = {
         ...lastException,
-        entries: [
-          ...entries,
-          { field: '', type: OperatorTypeEnum.MATCH, operator: OperatorEnum.INCLUDED, value: '' },
-        ],
+        entries: [...entries, isNested ? getDefaultNestedEmptyEntry() : getDefaultEmptyEntry()],
       };
 
-      setAndLogicIncluded(updatedException.entries.length > 1);
+      // setAndLogicIncluded(updatedException.entries.length > 1);
 
-      return [
-        ...existingExceptions.slice(0, existingExceptions.length - 1),
-        { ...updatedException },
-      ];
-    });
-  }, [setExceptions, setAndLogicIncluded]);
+      setUpdateExceptions([...exceptions.slice(0, exceptions.length - 1), { ...updatedException }]);
+    },
+    [setUpdateExceptions, exceptions]
+  );
 
   const handleAddNewExceptionItem = useCallback((): void => {
     // There is a case where there are numerous exception list items, all with
@@ -164,8 +227,8 @@ export const ExceptionBuilder = ({
       namespaceType: listNamespaceType,
       ruleName,
     });
-    setExceptions((existingExceptions) => [...existingExceptions, { ...newException }]);
-  }, [setExceptions, listType, listId, listNamespaceType, ruleName]);
+    setUpdateExceptions([...exceptions, { ...newException }]);
+  }, [setUpdateExceptions, exceptions, listType, listId, listNamespaceType, ruleName]);
 
   // Filters index pattern fields by exceptionable fields if list type is endpoint
   const filterIndexPatterns = useMemo((): IIndexPattern => {
@@ -193,52 +256,53 @@ export const ExceptionBuilder = ({
   };
 
   const handleAddNestedExceptionItemEntry = useCallback((): void => {
-    setExceptions((existingExceptions): ExceptionsBuilderExceptionItem[] => {
-      const lastException = existingExceptions[existingExceptions.length - 1];
-      const { entries } = lastException;
-      const lastEntry = entries[entries.length - 1];
+    const lastException = exceptions[exceptions.length - 1];
+    const { entries } = lastException;
+    const lastEntry = entries[entries.length - 1];
 
-      if (entriesNested.is(lastEntry)) {
-        const updatedException: ExceptionsBuilderExceptionItem = {
-          ...lastException,
-          entries: [
-            ...entries.slice(0, entries.length - 1),
-            {
-              ...lastEntry,
-              entries: [
-                ...lastEntry.entries,
-                {
-                  field: '',
-                  type: OperatorTypeEnum.MATCH,
-                  operator: OperatorEnum.INCLUDED,
-                  value: '',
-                },
-              ],
-            },
-          ],
-        };
+    if (entriesNested.is(lastEntry)) {
+      const updatedException: ExceptionsBuilderExceptionItem = {
+        ...lastException,
+        entries: [
+          ...entries.slice(0, entries.length - 1),
+          {
+            ...lastEntry,
+            entries: [
+              ...lastEntry.entries,
+              {
+                field: '',
+                type: OperatorTypeEnum.MATCH,
+                operator: OperatorEnum.INCLUDED,
+                value: '',
+              },
+            ],
+          },
+        ],
+      };
 
-        setAndLogicIncluded(updatedException.entries.length > 1);
-
-        return [
-          ...existingExceptions.slice(0, existingExceptions.length - 1),
-          { ...updatedException },
-        ];
-      } else {
-        return existingExceptions;
-      }
-    });
-  }, [setExceptions]);
+      setUpdateExceptions([...exceptions.slice(0, exceptions.length - 1), { ...updatedException }]);
+    } else {
+      setUpdateExceptions(exceptions);
+    }
+  }, [setUpdateExceptions, exceptions]);
 
   const handleAddNestedClick = useCallback((): void => {
-    setAddNested(true);
-    handleAddNewExceptionItemEntry();
-  }, [handleAddNewExceptionItemEntry, setAddNested]);
+    setUpdateAddNested(true);
+    setUpdateOrDisabled(true);
+    setUpdateAndDisabled(true);
+    handleAddNewExceptionItemEntry(true);
+  }, [
+    handleAddNewExceptionItemEntry,
+    setUpdateAndDisabled,
+    setUpdateOrDisabled,
+    setUpdateAddNested,
+  ]);
 
   const handleAddClick = useCallback((): void => {
-    setAddNested(false);
+    setUpdateAddNested(false);
+    setUpdateOrDisabled(false);
     handleAddNewExceptionItemEntry();
-  }, [handleAddNewExceptionItemEntry, setAddNested]);
+  }, [handleAddNewExceptionItemEntry, setUpdateOrDisabled, setUpdateAddNested]);
 
   // Bubble up changes to parent
   useEffect(() => {
@@ -257,13 +321,11 @@ export const ExceptionBuilder = ({
   }, [exceptions, handleAddNewExceptionItem]);
 
   useEffect(() => {
-    // Mainly for when user is editing existing items,
-    // checks to see whether to display the "and" badges
-    // and what state to display the nested button in
     if (exceptionListItems.length > 0) {
-      handleCheckAndLogic(exceptionListItems);
+      setUpdateExceptions(exceptionListItems);
     }
-  }, [exceptionListItems, handleCheckAndLogic]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
@@ -315,8 +377,8 @@ export const ExceptionBuilder = ({
           )}
           <EuiFlexItem grow={1}>
             <BuilderButtonOptions
-              isOrDisabled={isOrDisabled || addNested}
-              isAndDisabled={isAndDisabled}
+              isOrDisabled={disableOr}
+              isAndDisabled={disableAnd}
               isNestedDisabled={isNestedDisabled}
               isNested={addNested}
               showNestedButton

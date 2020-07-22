@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { EntryItemComponent } from './entry_item';
+import { BuilderEntryItem } from './builder_entry_item';
 import {
   isOperator,
   isNotOperator,
@@ -44,10 +44,10 @@ jest.mock('../../../../lists_plugin_deps', () => {
   };
 });
 
-describe('EntryItemComponent', () => {
+describe('BuilderEntryItem', () => {
   test('it renders field labels if "showLabel" is "true"', () => {
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: undefined,
           operator: isOperator,
@@ -73,7 +73,7 @@ describe('EntryItemComponent', () => {
 
   test('it renders field values correctly when operator is "isOperator"', () => {
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isOperator,
@@ -103,7 +103,7 @@ describe('EntryItemComponent', () => {
 
   test('it renders field values correctly when operator is "isNotOperator"', () => {
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isNotOperator,
@@ -135,7 +135,7 @@ describe('EntryItemComponent', () => {
 
   test('it renders field values correctly when operator is "isOneOfOperator"', () => {
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isOneOfOperator,
@@ -167,7 +167,7 @@ describe('EntryItemComponent', () => {
 
   test('it renders field values correctly when operator is "isNotOneOfOperator"', () => {
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isNotOneOfOperator,
@@ -199,7 +199,7 @@ describe('EntryItemComponent', () => {
 
   test('it renders field values correctly when operator is "isInListOperator"', () => {
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isInListOperator,
@@ -231,7 +231,7 @@ describe('EntryItemComponent', () => {
 
   test('it renders field values correctly when operator is "isNotInListOperator"', () => {
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isNotInListOperator,
@@ -263,7 +263,7 @@ describe('EntryItemComponent', () => {
 
   test('it renders field values correctly when operator is "existsOperator"', () => {
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: existsOperator,
@@ -298,7 +298,7 @@ describe('EntryItemComponent', () => {
 
   test('it renders field values correctly when operator is "doesNotExistOperator"', () => {
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: doesNotExistOperator,
@@ -334,7 +334,7 @@ describe('EntryItemComponent', () => {
   test('it invokes "onChange" when new field is selected and resets operator and value fields', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isOperator,
@@ -360,7 +360,7 @@ describe('EntryItemComponent', () => {
     }).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'machine.os', operator: 'included', type: 'match', value: undefined },
+      { field: 'machine.os', operator: 'included', type: 'match', value: '' },
       0
     );
   });
@@ -368,7 +368,7 @@ describe('EntryItemComponent', () => {
   test('it invokes "onChange" when new operator is selected', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isOperator,
@@ -402,7 +402,7 @@ describe('EntryItemComponent', () => {
   test('it invokes "onChange" when new value field is entered for match operator', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isNotOperator,
@@ -436,7 +436,7 @@ describe('EntryItemComponent', () => {
   test('it invokes "onChange" when new value field is entered for match_any operator', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isOneOfOperator,
@@ -470,7 +470,7 @@ describe('EntryItemComponent', () => {
   test('it invokes "onChange" when new value field is entered for list operator', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
-      <EntryItemComponent
+      <BuilderEntryItem
         entry={{
           field: getField('ip'),
           operator: isNotInListOperator,
