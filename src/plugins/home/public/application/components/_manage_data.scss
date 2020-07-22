@@ -1,0 +1,9 @@
+.homManageData .homManageData__container {
+  @include euiBreakpoint('xs', 's') {
+    flex-direction: column;
+  }
+}
+
+.homManageData .euiIcon__fillSecondary {
+  fill: $euiColorDarkestShade;
+}

@@ -33,26 +33,50 @@ export const ChangeHomeRoute: FunctionComponent<Props> = ({ defaultRoute }) => {
   const changeDefaultRoute = () => uiSettings.set('defaultRoute', defaultRoute);
 
   return (
-    <EuiFlexGroup className="homPage__footer" alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="home.changeHomeRouteText"
-              defaultMessage="Would you prefer to have an alternate home page for this Elastic space? "
-            />
-          </p>
-        </EuiText>
+    <EuiFlexGroup
+      className="homPageFooter"
+      alignItems="center"
+      gutterSize="s"
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem grow={1}>
+        <EuiFlexGroup
+          className="homPageFooter__mainAction"
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="home.changeHomeRouteText"
+                  defaultMessage="Would you prefer an alternate landing page? "
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="home"
+              // onClick={changeDefaultRoute}
+              onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
+              size="xs"
+            >
+              <FormattedMessage
+                id="home.changeHomeRouteLink"
+                defaultMessage="Change the landing page for this space"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-          iconType="home"
-          // onClick={changeDefaultRoute}
-          onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
-        >
+        {/* TODO: Hook up link to app directory */}
+        <EuiButtonEmpty href={''} size="xs" flush="right">
           <FormattedMessage
-            id="home.changeHomeRouteLink"
-            defaultMessage="Change your home page route"
+            id="home.appDirectory.appDirectoryButtonLabel"
+            defaultMessage="View app directory"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>

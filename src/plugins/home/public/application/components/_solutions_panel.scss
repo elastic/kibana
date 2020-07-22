@@ -3,8 +3,20 @@
   min-height: $euiSize*16;
   display: flex;
 
-  .homSolutionsPanel--restrictHalfWidth {
+  .homSolutionsPanel__column {
     max-width: 50%;
+  }
+
+  @include euiBreakpoint('xs', 's') {
+    flex-direction: column;
+
+    .homSolutionsPanel__column {
+      max-width: 100%;
+    }
+  }
+
+  .homSolutionPanel__cardSecondary {
+    flex-basis: $euiSizeXL * 4;
   }
 
   .homSolutionsPanel__solutionPanel {
@@ -25,6 +37,10 @@
       flex-direction: column;
       justify-content: center;
       padding: $euiSize;
+
+      @include euiBreakpoint('xs', 's') {
+        height: auto;
+      }
     }
   }
 
@@ -35,6 +51,10 @@
     img {
       position: absolute;
       width: auto;
+    }
+
+    @include euiBreakpoint('xs', 's') {
+      border-radius: $euiBorderRadius $euiBorderRadius 0 0;
     }
   }
 

@@ -274,20 +274,20 @@ export const SolutionsPanel: FunctionComponent<Props> = ({ addBasePath, findDire
     []
   );
 
-  const halfWidthClass = 'homSolutionsPanel--restrictHalfWidth';
+  const halfWidthClass = 'homSolutionsPanel__column';
 
   return enterpriseSearchActions.length ||
     observabilityActions.length ||
     securitySolution ||
     kibanaActions.length ? (
     <Fragment>
-      <EuiFlexGroup className="homSolutionsPanel" justifyContent="spaceAround">
+      <EuiFlexGroup className="homSolutionsPanel" justifyContent="spaceAround" gutterSize="xl">
         {enterpriseSearchActions.length || observabilityActions.length || securitySolution ? (
           <EuiFlexItem className={halfWidthClass}>
             {/* TODO: once app search is merged, register add to feature catalogue and remove hard coded text here */}
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup direction="column" gutterSize="xl">
               {enterpriseSearchActions.length ? (
-                <EuiFlexItem className="homSolutionsPanel__enterpriseSearch">
+                <EuiFlexItem className="homSolutionPanel__cardSecondary homSolutionsPanel__enterpriseSearch">
                   <EuiPanel
                     paddingSize="none"
                     className="homSolutionsPanel__solutionPanel"
@@ -328,7 +328,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({ addBasePath, findDire
                 </EuiFlexItem>
               ) : null}
               {observabilityActions.length ? (
-                <EuiFlexItem className="homSolutionsPanel__observability">
+                <EuiFlexItem className="homSolutionPanel__cardSecondary homSolutionsPanel__observability">
                   <EuiPanel
                     paddingSize="none"
                     className="homSolutionsPanel__solutionPanel"
@@ -361,7 +361,7 @@ export const SolutionsPanel: FunctionComponent<Props> = ({ addBasePath, findDire
                 </EuiFlexItem>
               ) : null}
               {securitySolution ? (
-                <EuiFlexItem className="homSolutionsPanel__securitySolution">
+                <EuiFlexItem className="homSolutionPanel__cardSecondary homSolutionsPanel__securitySolution">
                   <EuiPanel
                     paddingSize="none"
                     className="homSolutionsPanel__solutionPanel"

@@ -1,16 +1,31 @@
 // Local page vars
-$homePageHeaderHeight: $euiSize * 8;
 $homePageWidth: 1200px;
 
 .homPageHeader {
-  height: $homePageHeaderHeight;
   margin: 0 auto;
   max-width: $homePageWidth;
-  padding: $euiSizeXL $euiSize 0;
+  padding: $euiSizeXL $euiSize $euiSizeXXL;
+}
+
+.homPageHeader__title {
+  @include euiBreakpoint('xs', 's') {
+    text-align: center;
+  }  
+}
+
+.homPageHeader__menu {
+
+  @include euiBreakpoint('xs', 's') {
+    margin-top: 0;
+    
+    .homPageHeader__menuItem {
+      margin-bottom: 0 !important;
+      margin-top: 0 !important;
+    }  
+  }
 }
 
 .homPageContainer {
-  min-height: calc(100vh - #{$homePageHeaderHeight});
   background-color: $euiColorEmptyShade;
   border-top: 1px solid $euiColorLightShade;
 }
@@ -24,10 +39,14 @@ $homePageWidth: 1200px;
 
 .homHome__synopsisItem {
   max-width: 50%;
+
+  @include euiBreakpoint('xs', 's') {
+    max-width: 100%;
+  }
 }
 
-@include euiBreakpoint('xs', 's', 'm') {
-  .homHome__synopsisItem {
-    flex-basis: 100% !important;
+.homPageFooter__mainAction {
+  @include euiBreakpoint('xs', 's') {
+    flex-direction: column;
   }
 }

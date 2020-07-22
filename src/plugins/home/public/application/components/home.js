@@ -29,7 +29,6 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiScreenReaderOnly,
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
@@ -161,27 +160,20 @@ export class Home extends Component {
       <Fragment>
         <header className="homPageHeader">
           <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem>
-              <EuiScreenReaderOnly>
+            <EuiFlexItem className="homPageHeader__title">
+              <EuiTitle size="m">
                 <h1>
-                  <FormattedMessage id="home.welcomeHomePageHeader" defaultMessage="Kibana home" />
+                  <FormattedMessage
+                    id="home.pageHeader.welcomeNoUserTitle"
+                    defaultMessage="Welcome to {ELASTIC}!"
+                    values={{ ELASTIC: 'Elastic' }}
+                  />
                 </h1>
-              </EuiScreenReaderOnly>
-              <EuiFlexGroup gutterSize="none">
-                <EuiTitle size="m">
-                  <h1>
-                    <FormattedMessage
-                      id="home.pageHeader.welcomeNoUserTitle"
-                      defaultMessage="Welcome to {ELASTIC}!"
-                      values={{ ELASTIC: 'Elastic' }}
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiFlexGroup>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="flexEnd">
-                <EuiFlexItem>
+              <EuiFlexGroup className="homPageHeader__menu" alignItems="flexEnd">
+                <EuiFlexItem className="homPageHeader__menuItem">
                   <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
                     {i18n.translate('home.pageHeader.addDataButtonLabel', {
                       defaultMessage: 'Add data',
@@ -189,7 +181,7 @@ export class Home extends Component {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 {stackManagement ? (
-                  <EuiFlexItem>
+                  <EuiFlexItem className="homPageHeader__menuItem">
                     <EuiButtonEmpty
                       onClick={createAppNavigationHandler(stackManagement.path)}
                       iconType="gear"
@@ -201,7 +193,7 @@ export class Home extends Component {
                   </EuiFlexItem>
                 ) : null}
                 {devTools ? (
-                  <EuiFlexItem>
+                  <EuiFlexItem className="homPageHeader__menuItem">
                     <EuiButtonEmpty
                       onClick={createAppNavigationHandler(devTools.path)}
                       iconType="wrench"
@@ -230,7 +222,7 @@ export class Home extends Component {
             <EuiSpacer size="s" />
 
             <div className="homAddData">
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
                 <EuiFlexItem grow={1}>
                   <EuiTitle size="s">
                     <h3>
@@ -242,7 +234,12 @@ export class Home extends Component {
                 </EuiFlexItem>
                 {sampleData ? (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty iconType={sampleData.icon} href={sampleData.path} size="xs">
+                    <EuiButtonEmpty
+                      iconType={sampleData.icon}
+                      href={sampleData.path}
+                      size="xs"
+                      flush="right"
+                    >
                       <FormattedMessage
                         id="home.addData.sampleDataButtonLabel"
                         defaultMessage="Try our sample data"
@@ -256,7 +253,9 @@ export class Home extends Component {
 
               <EuiFlexGroup>
                 <EuiFlexItem grow={1}>
-                  <EuiFlexGroup justifyContent="spaceAround">{addDataFeatureCards}</EuiFlexGroup>
+                  <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
+                    {addDataFeatureCards}
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>
@@ -277,7 +276,13 @@ export class Home extends Component {
 
                   <EuiSpacer />
 
-                  <EuiFlexGroup justifyContent="spaceAround">{manageDataFeatureCards}</EuiFlexGroup>
+                  <EuiFlexGroup
+                    className="homManageData__container"
+                    justifyContent="spaceAround"
+                    gutterSize="xl"
+                  >
+                    {manageDataFeatureCards}
+                  </EuiFlexGroup>
                 </div>
               </Fragment>
             ) : null}
