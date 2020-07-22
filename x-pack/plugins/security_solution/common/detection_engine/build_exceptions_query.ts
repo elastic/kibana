@@ -126,7 +126,7 @@ export const buildNested = ({
 }): string => {
   const { field, entries } = item;
   const and = getLanguageBooleanOperator({ language, value: 'and' });
-  const values = entries.map((entry) => `${entry.field}:"${entry.value}"`);
+  const values = entries.map((entry) => evaluateValues({ item: entry, language }));
 
   return `${field}:{ ${values.join(` ${and} `)} }`;
 };

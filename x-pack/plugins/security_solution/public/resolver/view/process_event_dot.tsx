@@ -14,7 +14,7 @@ import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
 import { Vector2, Matrix3 } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
-import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { ResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
 import * as processEventModel from '../models/process_event';
@@ -72,8 +72,6 @@ const UnstyledProcessEventDot = React.memo(
     event,
     projectionMatrix,
     isProcessTerminated,
-    isProcessOrigin,
-    relatedEventsStatsForProcess,
     timeAtRender,
   }: {
     /**
@@ -96,16 +94,6 @@ const UnstyledProcessEventDot = React.memo(
      * Whether or not to show the process as terminated.
      */
     isProcessTerminated: boolean;
-    /**
-     * Whether or not to show the process as the originating event.
-     */
-    isProcessOrigin: boolean;
-    /**
-     * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
-     * to provide the user some visibility regarding the contents thereof.
-     * Statistics for the number of related events and alerts for this process node
-     */
-    relatedEventsStatsForProcess?: ResolverNodeStats;
 
     /**
      * The time (unix epoch) at render.
@@ -124,9 +112,10 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
-    const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
+    const selectedNode = useSelector(selectors.selectedNode);
     const nodeID = processEventModel.uniquePidForProcess(event);
+    const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
@@ -218,23 +207,26 @@ const UnstyledProcessEventDot = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+    } = cubeAssetsForNode(
+      isProcessTerminated,
+      /**
+       * There is no definition for 'trigger process' yet. return false.
+       */ false
+    );
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const isAriaCurrent = nodeID === activeDescendantId;
-    const isAriaSelected = nodeID === selectedDescendantId;
+    const isAriaCurrent = nodeID === ariaActiveDescendant;
+    const isAriaSelected = nodeID === selectedNode;
 
     const dispatch = useResolverDispatch();
 
     const handleFocus = useCallback(() => {
       dispatch({
         type: 'userFocusedOnResolverNode',
-        payload: {
-          nodeId: nodeHTMLID(nodeID),
-        },
+        payload: nodeID,
       });
-    }, [dispatch, nodeHTMLID, nodeID]);
+    }, [dispatch, nodeID]);
 
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
@@ -253,13 +245,10 @@ const UnstyledProcessEventDot = React.memo(
       }
       dispatch({
         type: 'userSelectedResolverNode',
-        payload: {
-          nodeId: nodeHTMLID(nodeID),
-          selectedProcessId: nodeID,
-        },
+        payload: nodeID,
       });
-      pushToQueryParams({ crumbId: nodeID, crumbEvent: 'all' });
-    }, [animationTarget, dispatch, pushToQueryParams, nodeID, nodeHTMLID]);
+      pushToQueryParams({ crumbId: nodeID, crumbEvent: '' });
+    }, [animationTarget, dispatch, pushToQueryParams, nodeID]);
 
     /**
      * Enumerates the stats for related events to display with the node as options,
@@ -270,15 +259,13 @@ const UnstyledProcessEventDot = React.memo(
     const relatedEventOptions = useMemo(() => {
       const relatedStatsList = [];
 
-      if (!relatedEventsStatsForProcess) {
+      if (!relatedEventStats) {
         // Return an empty set of options if there are no stats to report
         return [];
       }
       // If we have entries to show, map them into options to display in the selectable list
 
-      for (const [category, total] of Object.entries(
-        relatedEventsStatsForProcess.events.byCategory
-      )) {
+      for (const [category, total] of Object.entries(relatedEventStats.events.byCategory)) {
         relatedStatsList.push({
           prefix: <EuiI18nNumber value={total || 0} />,
           optionTitle: category,
@@ -296,9 +283,9 @@ const UnstyledProcessEventDot = React.memo(
         });
       }
       return relatedStatsList;
-    }, [relatedEventsStatsForProcess, dispatch, event, pushToQueryParams, nodeID]);
+    }, [relatedEventStats, dispatch, event, pushToQueryParams, nodeID]);
 
-    const relatedEventStatusOrOptions = !relatedEventsStatsForProcess
+    const relatedEventStatusOrOptions = !relatedEventStats
       ? subMenuAssets.initialMenuStatus
       : relatedEventOptions;
 
@@ -418,7 +405,7 @@ const UnstyledProcessEventDot = React.memo(
               alignSelf: 'flex-start',
               background: colorMap.resolverBackground,
               display: `${isShowingEventActions ? 'flex' : 'none'}`,
-              margin: 0,
+              margin: '2px 0 0 0',
               padding: 0,
             }}
           >
@@ -430,6 +417,7 @@ const UnstyledProcessEventDot = React.memo(
                   buttonFill={colorMap.resolverBackground}
                   menuAction={handleRelatedEventRequest}
                   menuTitle={subMenuAssets.relatedEvents.title}
+                  projectionMatrix={projectionMatrix}
                   optionsWithActions={relatedEventStatusOrOptions}
                 />
               )}
