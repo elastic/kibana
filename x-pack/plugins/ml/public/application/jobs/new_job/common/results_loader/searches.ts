@@ -53,78 +53,79 @@ export function getScoresByRecord(
       jobIdFilterStr += `"${String(firstSplitField.value).replace(/\\/g, '\\\\')}"`;
     }
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: 'result_type:record',
+    ml.results
+      .anomalySearch({
+        index: ML_RESULTS_INDEX_PATTERN,
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  query_string: {
+                    query: 'result_type:record',
+                  },
                 },
-              },
-              {
-                bool: {
-                  must: [
-                    {
-                      range: {
-                        timestamp: {
-                          gte: earliestMs,
-                          lte: latestMs,
-                          format: 'epoch_millis',
+                {
+                  bool: {
+                    must: [
+                      {
+                        range: {
+                          timestamp: {
+                            gte: earliestMs,
+                            lte: latestMs,
+                            format: 'epoch_millis',
+                          },
                         },
                       },
+                      {
+                        query_string: {
+                          query: jobIdFilterStr,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            detector_index: {
+              terms: {
+                field: 'detector_index',
+                order: {
+                  recordScore: 'desc',
+                },
+              },
+              aggs: {
+                recordScore: {
+                  max: {
+                    field: 'record_score',
+                  },
+                },
+                byTime: {
+                  date_histogram: {
+                    field: 'timestamp',
+                    interval,
+                    min_doc_count: 1,
+                    extended_bounds: {
+                      min: earliestMs,
+                      max: latestMs,
                     },
-                    {
-                      query_string: {
-                        query: jobIdFilterStr,
+                  },
+                  aggs: {
+                    recordScore: {
+                      max: {
+                        field: 'record_score',
                       },
                     },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          detector_index: {
-            terms: {
-              field: 'detector_index',
-              order: {
-                recordScore: 'desc',
-              },
-            },
-            aggs: {
-              recordScore: {
-                max: {
-                  field: 'record_score',
-                },
-              },
-              byTime: {
-                date_histogram: {
-                  field: 'timestamp',
-                  interval,
-                  min_doc_count: 1,
-                  extended_bounds: {
-                    min: earliestMs,
-                    max: latestMs,
-                  },
-                },
-                aggs: {
-                  recordScore: {
-                    max: {
-                      field: 'record_score',
-                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    })
+      })
       .then((resp: any) => {
         const detectorsByIndex = get(resp, ['aggregations', 'detector_index', 'buckets'], []);
         detectorsByIndex.forEach((dtr: any) => {

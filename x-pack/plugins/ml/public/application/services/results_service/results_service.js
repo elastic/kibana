@@ -66,8 +66,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
+        mlApiServices.results
+          .anomalySearch({
             index: ML_RESULTS_INDEX_PATTERN,
             size: 0,
             body: {
@@ -238,8 +238,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
+        mlApiServices.results
+          .anomalySearch({
             index: ML_RESULTS_INDEX_PATTERN,
             size: 0,
             body: {
@@ -378,8 +378,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
+        mlApiServices.results
+          .anomalySearch({
             index: ML_RESULTS_INDEX_PATTERN,
             size: 0,
             body: {
@@ -560,8 +560,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
+        mlApiServices.results
+          .anomalySearch({
             index: ML_RESULTS_INDEX_PATTERN,
             size: 0,
             body: {
@@ -721,8 +721,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
+        mlApiServices.results
+          .anomalySearch({
             index: ML_RESULTS_INDEX_PATTERN,
             size: maxResults !== undefined ? maxResults : 100,
             rest_total_hits_as_int: true,
@@ -854,8 +854,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         }
 
-        mlApiServices
-          .esSearch({
+        mlApiServices.results
+          .anomalySearch({
             index: ML_RESULTS_INDEX_PATTERN,
             size: maxResults !== undefined ? maxResults : 100,
             rest_total_hits_as_int: true,
@@ -980,8 +980,8 @@ export function resultsServiceProvider(mlApiServices) {
           }
         }
 
-        mlApiServices
-          .esSearch({
+        mlApiServices.results
+          .anomalySearch({
             index: ML_RESULTS_INDEX_PATTERN,
             size: maxResults !== undefined ? maxResults : 100,
             rest_total_hits_as_int: true,
@@ -1307,8 +1307,8 @@ export function resultsServiceProvider(mlApiServices) {
           });
         });
 
-        mlApiServices
-          .esSearch({
+        mlApiServices.results
+          .anomalySearch({
             index: ML_RESULTS_INDEX_PATTERN,
             size: 0,
             body: {
