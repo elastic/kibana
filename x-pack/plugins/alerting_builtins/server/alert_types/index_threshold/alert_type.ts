@@ -72,7 +72,7 @@ export function getAlertType(service: Service): AlertType {
     'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdLabel',
     {
       defaultMessage:
-        "A values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+        "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
     }
   );
 

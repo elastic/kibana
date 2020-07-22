@@ -49,7 +49,7 @@ describe('alertType', () => {
         ],
         "params": Array [
           Object {
-            "description": "A values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+            "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
             "name": "threshold",
           },
           Object {

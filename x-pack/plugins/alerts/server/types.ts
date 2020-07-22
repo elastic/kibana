@@ -20,11 +20,11 @@ import {
 
 // This will have to remain `any` until we can extend Alert Executors with generics
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type State = Record<string, any>;
+export type State = Record<string, unknown>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Context = Record<string, any>;
+export type Context = Record<string, unknown>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AlertParams = Record<string, any>;
+export type AlertParams = Record<string, unknown>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type GetBasePathFunction = (spaceId?: string) => string;

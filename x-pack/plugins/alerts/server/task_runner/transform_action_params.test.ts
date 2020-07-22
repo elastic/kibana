@@ -13,6 +13,7 @@ test('skips non string parameters', () => {
     empty1: null,
     empty2: undefined,
     date: '2019-02-12T21:01:22.479Z',
+    message: 'Value "{{params.foo}}" exists',
   };
   const result = transformActionParams({
     actionParams,
@@ -24,9 +25,7 @@ test('skips non string parameters', () => {
     spaceId: 'spaceId-A',
     alertInstanceId: '2',
     alertParams: {
-      foo: true,
-      contextVal: 'My other {{context.value}} goes here',
-      stateVal: 'My other {{state.value}} goes here',
+      foo: 'test',
     },
   });
   expect(result).toMatchInlineSnapshot(`
@@ -35,6 +34,7 @@ test('skips non string parameters', () => {
           "date": "2019-02-12T21:01:22.479Z",
           "empty1": null,
           "empty2": undefined,
+          "message": "Value \\"test\\" exists",
           "number": 1,
         }
     `);
