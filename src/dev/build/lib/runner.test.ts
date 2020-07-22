@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { ToolingLog, ToolingLogCollectingWriter, createStripAnsiSerializer } from '@kbn/dev-utils';
+import {
+  ToolingLog,
+  ToolingLogCollectingWriter,
+  createStripAnsiSerializer,
+  createRecursiveSerializer,
+} from '@kbn/dev-utils';
 import { Config } from './config';
 import { createRunner } from './runner';
 import { Build } from './build';
@@ -30,6 +35,21 @@ const log = new ToolingLog();
 log.setWriters([testWriter]);
 
 expect.addSnapshotSerializer(createStripAnsiSerializer());
+
+const STACK_TRACE = /(\│\s+)at .+ \(.+\)$/;
+const isStackTrace = (x: any) => typeof x === 'string' && STACK_TRACE.test(x);
+
+expect.addSnapshotSerializer(
+  createRecursiveSerializer(
+    (v) => Array.isArray(v) && v.some(isStackTrace),
+    (v) => {
+      const start = v.findIndex(isStackTrace);
+      v[start] = v[start].replace(STACK_TRACE, '$1<stacktrace>');
+      while (isStackTrace(v[start + 1])) v.splice(start + 1, 1);
+      return v;
+    }
+  )
+);
 
 beforeEach(() => {
   testWriter.messages.length = 0;
@@ -196,8 +216,7 @@ describe('task rejection', () => {
         " info [  kibana  ] foo",
         "   │ERROR failure 0 sec",
         "   │ERROR Error: FOO",
-        "   │          at Object.it (/Users/spalger/kbn-dev/master/kibana/src/dev/build/lib/runner.test.ts:183:19)",
-        "   │          at process._tickCallback (internal/process/next_tick.js:68:7)",
+        "   │          <stacktrace>",
         "",
       ]
     `);
