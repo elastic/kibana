@@ -24,7 +24,7 @@ import { createNewTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
 
-describe('timeline data providers', () => {
+describe.skip('timeline data providers', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
