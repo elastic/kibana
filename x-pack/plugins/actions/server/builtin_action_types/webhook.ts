@@ -15,6 +15,7 @@ import { isOk, promiseResult, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
+import { request } from './lib/axios_utils';
 
 // config definition
 enum WebhookMethods {
@@ -124,13 +125,17 @@ export async function executor(
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
 
+  const axiosInstance = axios.create();
+
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(
-    axios.request({
+    request({
+      axios: axiosInstance,
       method,
       url,
       ...basicAuth,
       headers,
       data,
+      proxySettings: execOptions.proxySettings,
     })
   );
 

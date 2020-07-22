@@ -60,10 +60,13 @@ async function executor(
   const { subAction, subActionParams } = params as ExecutorParams;
   let data: PushToServiceResponse | null = null;
 
-  const externalService = createExternalService({
-    config,
-    secrets,
-  });
+  const externalService = createExternalService(
+    {
+      config,
+      secrets,
+    },
+    execOptions.proxySettings
+  );
 
   if (!api[subAction]) {
     const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;

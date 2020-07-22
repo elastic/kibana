@@ -264,6 +264,7 @@ describe('execute()', () => {
               "message": "a message to you",
               "subject": "the subject",
             },
+            "proxySettings": undefined,
             "routing": Object {
               "bcc": Array [
                 "jimmy@example.com",
@@ -321,6 +322,7 @@ describe('execute()', () => {
           "message": "a message to you",
           "subject": "the subject",
         },
+        "proxySettings": undefined,
         "routing": Object {
           "bcc": Array [
             "jimmy@example.com",

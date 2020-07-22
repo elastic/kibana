@@ -75,10 +75,13 @@ export const createConnectorExecutor = ({
     actionId,
   };
 
-  const externalService = createExternalService({
-    config,
-    secrets,
-  });
+  const externalService = createExternalService(
+    {
+      config,
+      secrets,
+    },
+    execOptions.proxySettings
+  );
 
   if (!api[subAction]) {
     throw new Error('[Action][ExternalService] Unsupported subAction type.');

@@ -59,6 +59,7 @@ export interface ActionTypeExecutorOptions {
   secrets: Record<string, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
+  proxySettings?: ProxySettings;
 }
 
 export interface ActionResult {
@@ -134,4 +135,9 @@ export interface ActionTaskParams extends SavedObjectAttributes {
 export interface ActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
+}
+
+export interface ProxySettings {
+  proxyUrl: string;
+  proxyHeaders?: Record<string, string>;
 }

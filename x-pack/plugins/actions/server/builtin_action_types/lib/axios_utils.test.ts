@@ -53,7 +53,16 @@ describe('request', () => {
   test('it fetch correctly with defaults', async () => {
     const res = await request({ axios, url: '/test' });
 
-    expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'get', data: {} });
+    expect(axiosMock).toHaveBeenCalledWith('/test', {
+      method: 'get',
+      data: {},
+      headers: undefined,
+      httpAgent: undefined,
+      httpsAgent: undefined,
+      params: undefined,
+      proxy: false,
+      validateStatus: undefined,
+    });
     expect(res).toEqual({
       status: 200,
       headers: { 'content-type': 'application/json' },
@@ -64,7 +73,16 @@ describe('request', () => {
   test('it fetch correctly', async () => {
     const res = await request({ axios, url: '/test', method: 'post', data: { id: '123' } });
 
-    expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'post', data: { id: '123' } });
+    expect(axiosMock).toHaveBeenCalledWith('/test', {
+      method: 'post',
+      data: { id: '123' },
+      headers: undefined,
+      httpAgent: undefined,
+      httpsAgent: undefined,
+      params: undefined,
+      proxy: false,
+      validateStatus: undefined,
+    });
     expect(res).toEqual({
       status: 200,
       headers: { 'content-type': 'application/json' },
@@ -93,7 +111,16 @@ describe('patch', () => {
 
   test('it fetch correctly', async () => {
     await patch({ axios, url: '/test', data: { id: '123' } });
-    expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'patch', data: { id: '123' } });
+    expect(axiosMock).toHaveBeenCalledWith('/test', {
+      method: 'patch',
+      data: { id: '123' },
+      headers: undefined,
+      httpAgent: undefined,
+      httpsAgent: undefined,
+      params: undefined,
+      proxy: false,
+      validateStatus: undefined,
+    });
   });
 });
 

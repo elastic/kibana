@@ -5,22 +5,28 @@
  */
 
 import axios, { AxiosResponse } from 'axios';
-import { Services } from '../../types';
+import { Services, ProxySettings } from '../../types';
+import { request } from './axios_utils';
 
 interface PostPagerdutyOptions {
   apiUrl: string;
   data: unknown;
   headers: Record<string, string>;
   services: Services;
+  proxySettings?: ProxySettings;
 }
 
 // post an event to pagerduty
 export async function postPagerduty(options: PostPagerdutyOptions): Promise<AxiosResponse> {
-  const { apiUrl, data, headers } = options;
-  const axiosOptions = {
+  const { apiUrl, data, headers, proxySettings } = options;
+  const axiosInstance = axios.create();
+
+  return await request({
+    axios: axiosInstance,
+    url: apiUrl,
+    data,
+    proxySettings,
     headers,
     validateStatus: () => true,
-  };
-
-  return axios.post(apiUrl, data, axiosOptions);
+  });
 }

@@ -19,6 +19,7 @@ import {
 
 import * as i18n from './translations';
 import { getErrorMessage, request } from '../lib/axios_utils';
+import { ProxySettings } from '../../types';
 
 const BASE_URL = `rest`;
 const INCIDENT_URL = `incidents`;
@@ -57,10 +58,10 @@ export const formatUpdateRequest = ({
   };
 };
 
-export const createExternalService = ({
-  config,
-  secrets,
-}: ExternalServiceCredentials): ExternalService => {
+export const createExternalService = (
+  { config, secrets }: ExternalServiceCredentials,
+  proxySettings?: ProxySettings
+): ExternalService => {
   const { apiUrl: url, orgId } = config as ResilientPublicConfigurationType;
   const { apiKeyId, apiKeySecret } = secrets as ResilientSecretConfigurationType;
 
@@ -91,6 +92,7 @@ export const createExternalService = ({
         params: {
           text_content_output_format: 'objects_convert',
         },
+        proxySettings,
       });
 
       return { ...res.data, description: res.data.description?.content ?? '' };
@@ -115,6 +117,7 @@ export const createExternalService = ({
           },
           discovered_date: Date.now(),
         },
+        proxySettings,
       });
 
       return {
@@ -140,6 +143,7 @@ export const createExternalService = ({
         method: 'patch',
         url: `${incidentUrl}/${incidentId}`,
         data,
+        proxySettings,
       });
 
       if (!res.data.success) {
@@ -171,6 +175,7 @@ export const createExternalService = ({
         method: 'post',
         url: getCommentsURL(incidentId),
         data: { text: { format: 'text', content: comment.comment } },
+        proxySettings,
       });
 
       return {

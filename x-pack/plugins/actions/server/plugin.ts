@@ -233,7 +233,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     };
   }
 
-  public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
+  public async start(core: CoreStart, plugins: ActionsPluginsStart): Promise<PluginStartContract> {
     const {
       logger,
       actionExecutor,
@@ -279,6 +279,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
       core.savedObjects.getScopedClient(request);
 
+    const actionsConfig = (await this.config) as ActionsConfig;
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
@@ -291,6 +292,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
+      proxyUrl: actionsConfig.proxyUrl,
+      proxyHeaders: actionsConfig.proxyHeaders,
     });
 
     taskRunnerFactory!.initialize({

@@ -6,6 +6,7 @@
 
 import { URL } from 'url';
 import { curry } from 'lodash';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
@@ -102,8 +103,24 @@ async function slackExecutor(
   const { webhookUrl } = secrets;
   const { message } = params;
 
+  let proxyAgent: HttpsProxyAgent | undefined;
+  if (execOptions.proxySettings) {
+    const proxyUrl = new URL(execOptions.proxySettings.proxyUrl);
+    proxyAgent = new HttpsProxyAgent({
+      host: proxyUrl.host,
+      port: Number(proxyUrl.port),
+      protocol: proxyUrl.protocol,
+      headers: execOptions.proxySettings.proxyHeaders,
+      // do not fail on invalid certs
+      rejectUnauthorized: false,
+    });
+  }
+
   try {
-    const webhook = new IncomingWebhook(webhookUrl);
+    // https://slack.dev/node-slack-sdk/webhook
+    const webhook = new IncomingWebhook(webhookUrl, {
+      agent: proxyAgent,
+    });
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {

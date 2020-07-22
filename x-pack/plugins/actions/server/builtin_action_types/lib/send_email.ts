@@ -6,10 +6,10 @@
 
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
-
 import { default as MarkdownIt } from 'markdown-it';
 
 import { Logger } from '../../../../../../src/core/server';
+import { ProxySettings } from '../../types';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -18,6 +18,7 @@ export interface SendEmailOptions {
   transport: Transport;
   routing: Routing;
   content: Content;
+  proxySettings?: ProxySettings;
 }
 
 // config validation ensures either service is set or host/port are set
@@ -44,7 +45,7 @@ export interface Content {
 
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
-  const { transport, routing, content } = options;
+  const { transport, routing, content, proxySettings } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
@@ -69,9 +70,15 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.secure = !!secure;
     if (!transportConfig.secure) {
       transportConfig.tls = {
+        // do not fail on invalid certs
         rejectUnauthorized: false,
       };
     }
+  }
+
+  if (proxySettings) {
+    transportConfig.proxy = proxySettings.proxyUrl;
+    transportConfig.headers = proxySettings.proxyHeaders;
   }
 
   const nodemailerTransport = nodemailer.createTransport(transportConfig);

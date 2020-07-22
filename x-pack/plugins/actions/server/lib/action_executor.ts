@@ -12,6 +12,7 @@ import {
   GetServicesFunction,
   RawAction,
   PreConfiguredAction,
+  ProxySettings,
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
@@ -28,6 +29,8 @@ export interface ActionExecutorContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   preconfiguredActions: PreConfiguredAction[];
+  proxyUrl?: string;
+  proxyHeaders?: Record<string, string>;
 }
 
 export interface ExecuteOptions {
@@ -78,6 +81,8 @@ export class ActionExecutor {
       eventLogger,
       preconfiguredActions,
       getActionsClientWithRequest,
+      proxyUrl,
+      proxyHeaders,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
@@ -124,6 +129,14 @@ export class ActionExecutor {
       },
     };
 
+    let proxySettings: ProxySettings | undefined;
+    if (proxyUrl) {
+      proxySettings = {
+        proxyUrl,
+        proxyHeaders,
+      };
+    }
+
     eventLogger.startTiming(event);
     let rawResult: ActionTypeExecutorResult | null | undefined | void;
     try {
@@ -133,6 +146,7 @@ export class ActionExecutor {
         params: validatedParams,
         config: validatedConfig,
         secrets: validatedSecrets,
+        proxySettings,
       });
     } catch (err) {
       rawResult = {

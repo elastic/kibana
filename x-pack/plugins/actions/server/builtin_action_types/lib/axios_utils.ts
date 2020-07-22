@@ -5,6 +5,9 @@
  */
 
 import { AxiosInstance, Method, AxiosResponse } from 'axios';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import HttpProxyAgent from 'http-proxy-agent';
+import { ProxySettings } from '../../types';
 
 export const throwIfNotAlive = (
   status: number,
@@ -22,16 +25,62 @@ export const request = async <T = unknown>({
   method = 'get',
   data,
   params,
+  proxySettings,
+  headers,
+  validateStatus,
 }: {
   axios: AxiosInstance;
   url: string;
   method?: Method;
   data?: T;
   params?: unknown;
+  proxySettings?: ProxySettings;
+  headers?: Record<string, string> | null;
+  validateStatus?: (status: number) => boolean;
 }): Promise<AxiosResponse> => {
-  const res = await axios(url, { method, data: data ?? {}, params });
+  const res = await axios(url, {
+    method,
+    data: data ?? {},
+    params,
+    // use (httpsAgent || httpsAgent)  and embedded proxy: false
+    httpsAgent: getProxyAgent('https', proxySettings),
+    httpAgent: getProxyAgent('http', proxySettings),
+    proxy: false,
+    headers,
+    validateStatus,
+  });
   throwIfNotAlive(res.status, res.headers['content-type']);
   return res;
+};
+
+const getProxyAgent = (
+  agentProtocol: string,
+  proxySettings?: ProxySettings
+): HttpsProxyAgent | HttpProxyAgent | undefined => {
+  if (!proxySettings) {
+    return undefined;
+  }
+  const proxyUrl = new URL(proxySettings.proxyUrl);
+  const proxy = {
+    host: proxyUrl.host,
+    port: proxyUrl.port,
+    protocol: proxyUrl.protocol,
+    headers: proxySettings.proxyHeaders,
+  };
+
+  if (proxyUrl.protocol !== agentProtocol) {
+    return undefined;
+  }
+
+  if (/^https/.test(proxyUrl.protocol)) {
+    return new HttpsProxyAgent({
+      ...proxy,
+      // do not fail on invalid certs
+      rejectUnauthorized: false,
+    });
+  } else {
+    return new HttpProxyAgent(proxy);
+  }
 };
 
 export const patch = async <T = unknown>({
