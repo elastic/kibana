@@ -36,37 +36,37 @@ export const getFriendlyElapsedTime = (
   let pluralType: DurationTypes;
   switch (true) {
     case elapsedTimeInMs >= year:
-      duration = elapsedTimeInMs / year;
+      duration = Math.floor(elapsedTimeInMs / year);
       singularType = 'year';
       pluralType = 'years';
       break;
     case elapsedTimeInMs >= month:
-      duration = elapsedTimeInMs / month;
+      duration = Math.floor(elapsedTimeInMs / month);
       singularType = 'month';
       pluralType = 'months';
       break;
     case elapsedTimeInMs >= week:
-      duration = elapsedTimeInMs / week;
+      duration = Math.floor(elapsedTimeInMs / week);
       singularType = 'week';
       pluralType = 'weeks';
       break;
     case elapsedTimeInMs >= day:
-      duration = elapsedTimeInMs / day;
+      duration = Math.floor(elapsedTimeInMs / day);
       singularType = 'day';
       pluralType = 'days';
       break;
     case elapsedTimeInMs >= hour:
-      duration = elapsedTimeInMs / hour;
+      duration = Math.floor(elapsedTimeInMs / hour);
       singularType = 'hour';
       pluralType = 'hours';
       break;
     case elapsedTimeInMs >= minute:
-      duration = elapsedTimeInMs / minute;
+      duration = Math.floor(elapsedTimeInMs / minute);
       singularType = 'minute';
       pluralType = 'minutes';
       break;
     case elapsedTimeInMs >= second:
-      duration = elapsedTimeInMs / second;
+      duration = Math.floor(elapsedTimeInMs / second);
       singularType = 'second';
       pluralType = 'seconds';
       break;
@@ -77,6 +77,6 @@ export const getFriendlyElapsedTime = (
       break;
   }
 
-  const durationType = duration > 1 ? pluralType : singularType;
-  return { duration: Math.floor(duration), durationType };
+  const durationType = duration === 1 ? singularType : pluralType;
+  return { duration, durationType };
 };
