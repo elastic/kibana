@@ -36,5 +36,10 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
       loadTestFile(require.resolve('./transaction_groups/transaction_charts'));
       loadTestFile(require.resolve('./transaction_groups/error_rate'));
     });
+
+    describe('Observability overview', function () {
+      loadTestFile(require.resolve('./observability_overview/has_data'));
+      loadTestFile(require.resolve('./observability_overview/observability_overview'));
+    });
   });
 }
