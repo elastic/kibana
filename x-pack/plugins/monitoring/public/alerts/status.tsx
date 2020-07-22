@@ -16,9 +16,10 @@ interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
   showBadge: boolean;
   showOnlyCount: boolean;
+  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsStatus: React.FC<Props> = (props: Props) => {
-  const { alerts, showBadge = false, showOnlyCount = false } = props;
+  const { alerts, showBadge = false, showOnlyCount = false, stateFilter = () => true } = props;
 
   if (!alerts) {
     return null;
@@ -26,16 +27,21 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
 
   let atLeastOneDanger = false;
   const count = Object.values(alerts).reduce((cnt, alertStatus) => {
-    if (alertStatus.states.length) {
+    const firingStates = alertStatus.states.filter((state) => state.firing);
+    const firingAndFilterStates = firingStates.filter((state) => stateFilter(state.state));
+    cnt += firingAndFilterStates.length;
+    if (firingStates.length) {
       if (!atLeastOneDanger) {
         for (const state of alertStatus.states) {
-          if ((state.state as AlertState).ui.severity === AlertSeverity.Danger) {
+          if (
+            stateFilter(state.state) &&
+            (state.state as AlertState).ui.severity === AlertSeverity.Danger
+          ) {
             atLeastOneDanger = true;
             break;
           }
         }
       }
-      cnt++;
     }
     return cnt;
   }, 0);
@@ -63,7 +69,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
   }
 
   if (showBadge) {
-    return <AlertsBadge alerts={alerts} />;
+    return <AlertsBadge alerts={alerts} stateFilter={stateFilter} />;
   }
 
   const severity = atLeastOneDanger ? AlertSeverity.Danger : AlertSeverity.Warning;

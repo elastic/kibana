@@ -31,16 +31,17 @@ const TYPES = [
 
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
+  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
-  const { alerts } = props;
+  const { alerts, stateFilter = () => true } = props;
 
   const callouts = TYPES.map((type) => {
     const list = [];
     for (const alertTypeId of Object.keys(alerts)) {
       const alertInstance = alerts[alertTypeId];
-      for (const { state } of alertInstance.states) {
-        if (state.ui.severity === type.severity) {
+      for (const { firing, state } of alertInstance.states) {
+        if (firing && stateFilter(state) && state.ui.severity === type.severity) {
           list.push(state);
         }
       }
