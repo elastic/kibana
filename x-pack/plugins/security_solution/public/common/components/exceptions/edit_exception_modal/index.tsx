@@ -97,9 +97,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const [
     { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : []);
+  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
 
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
+  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    ruleIndices,
+    'rules'
+  );
 
   const onError = useCallback(
     (error) => {
