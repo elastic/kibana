@@ -69,7 +69,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return { registerSearchStrategy: this.registerSearchStrategy, usage };
   }
 
-  private search(context: RequestHandlerContext, searchRequest: IEsSearchRequest, options: any) {
+  private search(
+    context: RequestHandlerContext,
+    searchRequest: IEsSearchRequest,
+    options: Record<string, any>
+  ) {
     return this.getSearchStrategy(options.strategy || ES_SEARCH_STRATEGY).search(
       context,
       searchRequest,
@@ -80,7 +84,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   public start(): ISearchStart {
     return {
       getSearchStrategy: this.getSearchStrategy,
-      search: (context: RequestHandlerContext, searchRequest: IEsSearchRequest, options: any) => {
+      search: (
+        context: RequestHandlerContext,
+        searchRequest: IEsSearchRequest,
+        options: Record<string, any>
+      ) => {
         return this.search(context, searchRequest, options);
       },
     };
