@@ -84,6 +84,11 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dashboards',
       },
+      management: {
+        pathname: '/app/kibana',
+        hash: '/management',
+      },
+      /** @obsolete "management" should be instead of "settings" **/
       settings: {
         pathname: '/app/kibana',
         hash: '/management',
