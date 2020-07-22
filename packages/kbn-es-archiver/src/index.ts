@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/es-archiver').runCli();
+export { EsArchiver } from './es_archiver';
+export * from './cli';
