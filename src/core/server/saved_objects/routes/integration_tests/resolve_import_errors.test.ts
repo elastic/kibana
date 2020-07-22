@@ -214,7 +214,7 @@ describe(`POST ${URL}`, () => {
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
-      successResults: [{ type, id, meta }],
+      successResults: [{ type, id, meta, overwrite: true }],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(

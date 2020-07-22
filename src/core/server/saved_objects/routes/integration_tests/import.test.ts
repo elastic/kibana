@@ -228,6 +228,54 @@ describe(`POST ${URL}`, () => {
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // successResults objects were not created because resolvable errors are present
   });
 
+  it('imports an index pattern and dashboard but has a conflict on the index pattern, with overwrite=true', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+
+    const error = SavedObjectsErrorHelpers.createConflictError('index-pattern', 'my-pattern').output
+      .payload;
+    savedObjectsClient.checkConflicts.mockResolvedValue({
+      errors: [{ type: mockIndexPattern.type, id: mockIndexPattern.id, error }],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [mockIndexPattern, mockDashboard],
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(`${URL}?overwrite=true`)
+      .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
+      .send(
+        [
+          '--EXAMPLE',
+          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+          'Content-Type: application/ndjson',
+          '',
+          '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
+          '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
+          '--EXAMPLE--',
+        ].join('\r\n')
+      )
+      .expect(200);
+
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 2,
+      successResults: [
+        {
+          type: mockIndexPattern.type,
+          id: mockIndexPattern.id,
+          meta: { title: mockIndexPattern.attributes.title, icon: 'index-pattern-icon' },
+          overwrite: true,
+        },
+        {
+          type: mockDashboard.type,
+          id: mockDashboard.id,
+          meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+        },
+      ],
+    });
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
+  });
+
   it('imports a visualization with missing references', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
 
@@ -338,6 +386,70 @@ describe(`POST ${URL}`, () => {
           title: 'my-vis',
           meta: { title: 'my-vis', icon: 'visualization-icon' },
           error: { type: 'conflict' },
+        },
+      ],
+      successResults: [
+        {
+          type: mockDashboard.type,
+          id: mockDashboard.id,
+          meta: { title: mockDashboard.attributes.title, icon: 'dashboard-icon' },
+        },
+      ],
+    });
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+      [{ fields: ['id'], id: 'my-pattern', type: 'index-pattern' }],
+      expect.any(Object) // options
+    );
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
+  });
+
+  it('imports a visualization with missing references and a conflict, with overwrite=true', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+
+    const error1 = SavedObjectsErrorHelpers.createGenericNotFoundError(
+      'index-pattern',
+      'my-pattern-*'
+    ).output.payload;
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [{ ...mockIndexPattern, error: error1 }],
+    });
+    const error2 = SavedObjectsErrorHelpers.createConflictError('index-pattern', 'my-pattern')
+      .output.payload;
+    savedObjectsClient.checkConflicts.mockResolvedValue({
+      errors: [{ type: 'visualization', id: 'my-vis', error: error2 }],
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(`${URL}?overwrite=true`)
+      .set('content-Type', 'multipart/form-data; boundary=EXAMPLE')
+      .send(
+        [
+          '--EXAMPLE',
+          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+          'Content-Type: application/ndjson',
+          '',
+          '{"type":"visualization","id":"my-vis","attributes":{"title":"my-vis"},"references":[{"name":"ref_0","type":"index-pattern","id":"my-pattern"}]}',
+          '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"ref_0","type":"visualization","id":"my-vis"}]}',
+          '--EXAMPLE--',
+        ].join('\r\n')
+      )
+      .expect(200);
+
+    expect(result.body).toEqual({
+      success: false,
+      successCount: 1,
+      errors: [
+        {
+          id: 'my-vis',
+          type: 'visualization',
+          title: 'my-vis',
+          meta: { title: 'my-vis', icon: 'visualization-icon' },
+          overwrite: true,
+          error: {
+            type: 'missing_references',
+            references: [{ type: 'index-pattern', id: 'my-pattern' }],
+          },
         },
       ],
       successResults: [

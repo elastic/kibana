@@ -300,6 +300,7 @@ export function copyToSpaceTestSuiteFactory(
               icon: 'indexPatternApp',
               title: `Copy to Space index pattern 1 from ${spaceId} space`,
             },
+            overwrite: true,
           },
           {
             id: `cts_vis_1_${spaceId}`,
@@ -315,6 +316,7 @@ export function copyToSpaceTestSuiteFactory(
             id: 'cts_vis_3',
             type: 'visualization',
             meta: { icon: 'visualizeApp', title: `CTS vis 3 from ${spaceId} space` },
+            overwrite: true,
           },
           {
             id: 'cts_dashboard',
@@ -323,6 +325,7 @@ export function copyToSpaceTestSuiteFactory(
               icon: 'dashboardApp',
               title: `This is the ${spaceId} test space CTS dashboard`,
             },
+            overwrite: true,
           },
         ],
       },
@@ -472,7 +475,7 @@ export function copyToSpaceTestSuiteFactory(
             if (overwrite) {
               expect(success).to.eql(true);
               expect(successCount).to.eql(1);
-              expect(successResults).to.eql([{ type, id: exactMatchId, meta }]);
+              expect(successResults).to.eql([{ type, id: exactMatchId, meta, overwrite: true }]);
               expect(errors).to.be(undefined);
             } else {
               expect(success).to.eql(false);
@@ -503,7 +506,9 @@ export function copyToSpaceTestSuiteFactory(
             if (overwrite) {
               expect(success).to.eql(true);
               expect(successCount).to.eql(1);
-              expect(successResults).to.eql([{ type, id: inexactMatchId, meta, destinationId }]);
+              expect(successResults).to.eql([
+                { type, id: inexactMatchId, meta, overwrite: true, destinationId },
+              ]);
               expect(errors).to.be(undefined);
             } else {
               expect(success).to.eql(false);

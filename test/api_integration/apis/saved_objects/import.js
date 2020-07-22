@@ -25,7 +25,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('import', () => {
-    // mock results including metadata
+    // mock success results including metadata
     const indexPattern = {
       type: 'index-pattern',
       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -51,21 +51,6 @@ export default function ({ getService }) {
       describe('with basic data existing', () => {
         before(() => esArchiver.load('saved_objects/basic'));
         after(() => esArchiver.unload('saved_objects/basic'));
-
-        it('should return 200', async () => {
-          await supertest
-            .post('/api/saved_objects/_import')
-            .query({ overwrite: true })
-            .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-            .expect(200)
-            .then((resp) => {
-              expect(resp.body).to.eql({
-                success: true,
-                successCount: 3,
-                successResults: [indexPattern, visualization, dashboard],
-              });
-            });
-        });
 
         it('should return 415 when no file passed in', async () => {
           await supertest
@@ -101,16 +86,18 @@ export default function ({ getService }) {
         it('should return 200 when conflicts exist but overwrite is passed in', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .query({
-              overwrite: true,
-            })
+            .query({ overwrite: true })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 3,
-                successResults: [indexPattern, visualization, dashboard],
+                successResults: [
+                  { ...indexPattern, overwrite: true },
+                  { ...visualization, overwrite: true },
+                  { ...dashboard, overwrite: true },
+                ],
               });
             });
         });

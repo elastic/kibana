@@ -62,10 +62,12 @@ describe('#importSavedObjectsFromStream', () => {
       errors: [],
       filteredObjects: [],
       importIdMap: new Map(),
+      pendingOverwrites: new Set(),
     });
     getMockFn(checkOriginConflicts).mockResolvedValue({
       errors: [],
       importIdMap: new Map(),
+      pendingOverwrites: new Set(),
     });
     getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
   });
@@ -197,6 +199,7 @@ describe('#importSavedObjectsFromStream', () => {
           errors: [],
           filteredObjects,
           importIdMap,
+          pendingOverwrites: new Set(),
         });
 
         await importSavedObjectsFromStream(options);
@@ -232,10 +235,12 @@ describe('#importSavedObjectsFromStream', () => {
           errors: [errors[2]],
           filteredObjects,
           importIdMap: new Map([['bar', { id: 'newId1' }]]),
+          pendingOverwrites: new Set(),
         });
         getMockFn(checkOriginConflicts).mockResolvedValue({
           errors: [errors[3]],
           importIdMap: new Map([['baz', { id: 'newId2' }]]),
+          pendingOverwrites: new Set(),
         });
 
         await importSavedObjectsFromStream(options);
@@ -336,7 +341,8 @@ describe('#importSavedObjectsFromStream', () => {
       const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
       const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId
       const createdObjects = [obj1, obj2, obj3];
-      const error = createError();
+      const error1 = createError();
+      const error2 = createError();
       // results
       const success1 = {
         type: obj1.type,
@@ -355,24 +361,42 @@ describe('#importSavedObjectsFromStream', () => {
         meta: { title: obj3.attributes.title, icon: `${obj3.type}-icon` },
         destinationId: obj3.destinationId,
       };
-      const errors = [{ ...error, meta: { ...error.meta, icon: `${error.type}-icon` } }];
+      const errors = [error1, error2];
 
       test('with createNewCopies disabled', async () => {
         const options = setupOptions();
+        getMockFn(checkConflicts).mockResolvedValue({
+          errors: [],
+          filteredObjects: [],
+          importIdMap: new Map(),
+          pendingOverwrites: new Set([
+            `${success2.type}:${success2.id}`, // the success2 object was overwritten
+            `${error2.type}:${error2.id}`, // an attempt was made to overwrite the error2 object
+          ]),
+        });
         getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects });
 
         const result = await importSavedObjectsFromStream(options);
         // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
         const successResults = [
           success1,
-          success2,
+          { ...success2, overwrite: true },
           // `createNewCopies` mode is not enabled, but obj3 ran into an ambiguous source conflict and it was created with an empty
           // originId; hence, this specific object is a new copy -- we would need this information for rendering the appropriate originId
           // in the client UI, and we would need it to construct a retry for this object if other objects had errors that needed to be
           // resolved
           { ...success3, createNewCopy: true },
         ];
-        expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
+        const errorResults = [
+          { ...error1, meta: { ...error1.meta, icon: `${error1.type}-icon` } },
+          { ...error2, meta: { ...error2.meta, icon: `${error2.type}-icon` }, overwrite: true },
+        ];
+        expect(result).toEqual({
+          success: false,
+          successCount: 3,
+          successResults,
+          errors: errorResults,
+        });
       });
 
       test('with createNewCopies enabled', async () => {
@@ -384,7 +408,16 @@ describe('#importSavedObjectsFromStream', () => {
         // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
         // obj2 being created with createNewCopies mode enabled isn't a realistic test case (all objects would have originId omitted)
         const successResults = [success1, success2, success3];
-        expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
+        const errorResults = [
+          { ...error1, meta: { ...error1.meta, icon: `${error1.type}-icon` } },
+          { ...error2, meta: { ...error2.meta, icon: `${error2.type}-icon` } },
+        ];
+        expect(result).toEqual({
+          success: false,
+          successCount: 3,
+          successResults,
+          errors: errorResults,
+        });
       });
     });
 
@@ -401,10 +434,12 @@ describe('#importSavedObjectsFromStream', () => {
         errors: [errors[2]],
         filteredObjects: [],
         importIdMap: new Map(), // doesn't matter
+        pendingOverwrites: new Set(),
       });
       getMockFn(checkOriginConflicts).mockResolvedValue({
         errors: [errors[3]],
         importIdMap: new Map(), // doesn't matter
+        pendingOverwrites: new Set(),
       });
       getMockFn(createSavedObjects).mockResolvedValue({ errors: [errors[4]], createdObjects: [] });
 

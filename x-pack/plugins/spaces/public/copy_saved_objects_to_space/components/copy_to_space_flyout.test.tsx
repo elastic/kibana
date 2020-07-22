@@ -535,8 +535,13 @@ describe('CopyToSpaceFlyout', () => {
       [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id }],
       {
         'space-1': [
-          { type: 'dashboard', id: 'my-dash', overwrite: true },
-          { type: 'visualization', id: 'my-viz-1', overwrite: true, ignoreMissingReferences: true },
+          { type: 'dashboard', id: 'my-dash', overwrite: false },
+          {
+            type: 'visualization',
+            id: 'my-viz-1',
+            overwrite: false,
+            ignoreMissingReferences: true,
+          },
         ],
       },
       true,

@@ -25,7 +25,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('resolve_import_errors', () => {
-    // mock results including metadata
+    // mock success results including metadata
     const indexPattern = {
       type: 'index-pattern',
       id: '91200a00-9efd-11e7-acb3-3dab96693fab',
@@ -89,7 +89,11 @@ export default function ({ getService }) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 3,
-              successResults: [indexPattern, visualization, dashboard],
+              successResults: [
+                { ...indexPattern, overwrite: true },
+                { ...visualization, overwrite: true },
+                { ...dashboard, overwrite: true },
+              ],
             });
           });
       });
@@ -254,7 +258,11 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 3,
-                successResults: [indexPattern, visualization, dashboard],
+                successResults: [
+                  { ...indexPattern, overwrite: true },
+                  { ...visualization, overwrite: true },
+                  { ...dashboard, overwrite: true },
+                ],
               });
             });
         });
@@ -278,7 +286,7 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 1,
-                successResults: [visualization],
+                successResults: [{ ...visualization, overwrite: true }],
               });
             });
         });

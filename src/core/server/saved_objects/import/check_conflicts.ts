@@ -49,10 +49,11 @@ export async function checkConflicts({
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const errors: SavedObjectsImportError[] = [];
   const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
+  const pendingOverwrites = new Set<string>();
 
   // exit early if there are no objects to check
   if (objects.length === 0) {
-    return { filteredObjects, errors, importIdMap };
+    return { filteredObjects, errors, importIdMap, pendingOverwrites };
   }
 
   const retryMap = retries.reduce(
@@ -95,7 +96,10 @@ export async function checkConflicts({
       errors.push({ type, id, title, meta: { title }, error });
     } else {
       filteredObjects.push(object);
+      if (errorObj?.statusCode === 409) {
+        pendingOverwrites.add(`${type}:${id}`);
+      }
     }
   });
-  return { filteredObjects, errors, importIdMap };
+  return { filteredObjects, errors, importIdMap, pendingOverwrites };
 }

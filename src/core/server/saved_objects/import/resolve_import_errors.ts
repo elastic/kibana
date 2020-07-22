@@ -159,6 +159,7 @@ export async function resolveSavedObjectsImportErrors({
           type,
           id,
           meta,
+          ...(overwrite && { overwrite }),
           ...(destinationId && { destinationId }),
           ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
         };
@@ -171,7 +172,14 @@ export async function resolveSavedObjectsImportErrors({
 
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
-    return { ...error, meta: { ...error.meta, icon } };
+    const attemptedOverwrite = retries.some(
+      ({ type, id, overwrite }) => type === error.type && id === error.id && overwrite
+    );
+    return {
+      ...error,
+      meta: { ...error.meta, icon },
+      ...(attemptedOverwrite && { overwrite: true }),
+    };
   });
 
   return {

@@ -161,6 +161,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
 
   const errors: SavedObjectsImportError[] = [];
   const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
+  const pendingOverwrites = new Set<string>();
   checkOriginConflictResults.forEach((result) => {
     if (!isLeft(result)) {
       return;
@@ -175,6 +176,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
       // This is a simple "inexact match" result -- a single import object has a single destination conflict.
       if (params.ignoreRegularConflicts) {
         importIdMap.set(`${type}:${id}`, { id: destinations[0].id });
+        pendingOverwrites.add(`${type}:${id}`);
       } else {
         const { title } = attributes;
         errors.push({
@@ -213,7 +215,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     });
   });
 
-  return { errors, importIdMap };
+  return { errors, importIdMap, pendingOverwrites };
 }
 
 /**

@@ -97,6 +97,7 @@ describe('#checkConflicts', () => {
       filteredObjects: [],
       errors: [],
       importIdMap: new Map(),
+      pendingOverwrites: new Set(),
     });
   });
 
@@ -132,6 +133,7 @@ describe('#checkConflicts', () => {
         },
       ],
       importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: `new-object-id` }]]),
+      pendingOverwrites: new Set(),
     });
   });
 
@@ -152,6 +154,7 @@ describe('#checkConflicts', () => {
             error: { ...obj4Error.error, type: 'unknown' },
           },
         ],
+        pendingOverwrites: new Set([`${obj2.type}:${obj2.id}`]),
       })
     );
   });
@@ -198,6 +201,7 @@ describe('#checkConflicts', () => {
       importIdMap: new Map([
         [`${obj3.type}:${obj3.id}`, { id: `new-object-id`, omitOriginId: true }],
       ]),
+      pendingOverwrites: new Set([`${obj5.type}:${obj5.id}`]),
     });
   });
 

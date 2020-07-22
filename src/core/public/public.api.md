@@ -1253,6 +1253,7 @@ export interface SavedObjectsImportError {
         title?: string;
         icon?: string;
     };
+    overwrite?: boolean;
     // @deprecated (undocumented)
     title?: string;
     // (undocumented)
@@ -1313,6 +1314,7 @@ export interface SavedObjectsImportSuccess {
         title?: string;
         icon?: string;
     };
+    overwrite?: boolean;
     // (undocumented)
     type: string;
 }

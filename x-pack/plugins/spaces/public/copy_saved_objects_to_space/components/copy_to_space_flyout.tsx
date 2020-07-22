@@ -123,15 +123,14 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
         );
 
         // otherwise, some imports failed for this space, so retry any successful imports (if any)
-        const { overwrite } = copyOptions;
         return [
-          ...successfulImports.map(({ type, id, destinationId, createNewCopy }) => {
-            return { type, id, overwrite, destinationId, createNewCopy };
+          ...successfulImports.map(({ type, id, overwrite, destinationId, createNewCopy }) => {
+            return { type, id, overwrite: overwrite === true, destinationId, createNewCopy };
           }),
           ...missingReferencesToRetry.map(({ obj: { type, id } }) => ({
             type,
             id,
-            overwrite,
+            overwrite: false,
             ignoreMissingReferences: true,
           })),
         ];

@@ -205,6 +205,7 @@ describe('#checkOriginConflicts', () => {
         const expectedResult = {
           importIdMap: new Map(),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
@@ -233,6 +234,7 @@ describe('#checkOriginConflicts', () => {
         const expectedResult = {
           importIdMap: new Map(),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
@@ -258,6 +260,7 @@ describe('#checkOriginConflicts', () => {
         const expectedResult = {
           importIdMap: new Map(),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
@@ -286,6 +289,7 @@ describe('#checkOriginConflicts', () => {
           const expectedResult = {
             importIdMap: new Map(),
             errors: [createConflictError(obj1, objA.id), createConflictError(obj2, objB.id)],
+            pendingOverwrites: new Set(),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
@@ -299,6 +303,7 @@ describe('#checkOriginConflicts', () => {
               [`${obj2.type}:${obj2.id}`, { id: objB.id }],
             ]),
             errors: [],
+            pendingOverwrites: new Set([`${obj1.type}:${obj1.id}`, `${obj2.type}:${obj2.id}`]),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
@@ -337,6 +342,7 @@ describe('#checkOriginConflicts', () => {
           const expectedResult = {
             importIdMap: new Map(),
             errors: [createConflictError(obj2, objA.id), createConflictError(obj4, objB.id)],
+            pendingOverwrites: new Set(),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
@@ -350,6 +356,7 @@ describe('#checkOriginConflicts', () => {
               [`${obj4.type}:${obj4.id}`, { id: objB.id }],
             ]),
             errors: [],
+            pendingOverwrites: new Set([`${obj2.type}:${obj2.id}`, `${obj4.type}:${obj4.id}`]),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
@@ -382,6 +389,7 @@ describe('#checkOriginConflicts', () => {
             [`${obj4.type}:${obj4.id}`, { id: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(4);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
@@ -408,6 +416,7 @@ describe('#checkOriginConflicts', () => {
             createAmbiguousConflictError(obj1, [objA, objB]),
             createAmbiguousConflictError(obj2, [objC, objD]),
           ],
+          pendingOverwrites: new Set(),
         };
         expect(mockUuidv4).not.toHaveBeenCalled();
         expect(checkOriginConflictsResult).toEqual(expectedResult);
@@ -440,6 +449,7 @@ describe('#checkOriginConflicts', () => {
             [`${obj4.type}:${obj4.id}`, { id: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [],
+          pendingOverwrites: new Set(),
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(4);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
@@ -491,6 +501,7 @@ describe('#checkOriginConflicts', () => {
             createConflictError(obj5, objA.id),
             createAmbiguousConflictError(obj6, [objB, objC]),
           ],
+          pendingOverwrites: new Set(),
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(2);
         expect(checkOriginConflictsResult).toEqual(expectedResult);
@@ -506,6 +517,7 @@ describe('#checkOriginConflicts', () => {
             [`${obj8.type}:${obj8.id}`, { id: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [createAmbiguousConflictError(obj6, [objB, objC])],
+          pendingOverwrites: new Set([`${obj5.type}:${obj5.id}`]),
         };
         expect(mockUuidv4).toHaveBeenCalledTimes(2);
         expect(checkOriginConflictsResult).toEqual(expectedResult);

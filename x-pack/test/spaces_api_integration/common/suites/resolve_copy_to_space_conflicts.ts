@@ -91,6 +91,7 @@ export function resolveCopyToSpaceConflictsSuite(
               title: `CTS vis 3 from ${sourceSpaceId} space`,
               icon: 'visualizeApp',
             },
+            overwrite: true,
           },
         ],
       },
@@ -119,6 +120,7 @@ export function resolveCopyToSpaceConflictsSuite(
               title: `This is the ${sourceSpaceId} test space CTS dashboard`,
               icon: 'dashboardApp',
             },
+            overwrite: true,
           },
         ],
       },
@@ -335,7 +337,9 @@ export function resolveCopyToSpaceConflictsSuite(
           ? 'A shared saved-object in the default, space_1, and space_2 spaces'
           : 'A shared saved-object in one space';
       const meta = { title, icon: 'beaker' };
-      expect(successResults).to.eql([{ type, id, meta, ...(destinationId && { destinationId }) }]);
+      expect(successResults).to.eql([
+        { type, id, meta, overwrite: true, ...(destinationId && { destinationId }) },
+      ]);
     };
 
     return [

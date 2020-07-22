@@ -71,6 +71,7 @@ describe('#importSavedObjectsFromStream', () => {
       errors: [],
       filteredObjects: [],
       importIdMap: new Map(),
+      pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
     });
     getMockFn(getImportIdMapForRetries).mockReturnValue(new Map());
     getMockFn(splitOverwrites).mockReturnValue({
@@ -175,7 +176,6 @@ describe('#importSavedObjectsFromStream', () => {
 
       await resolveSavedObjectsImportErrors(options);
       expect(typeRegistry.getImportableAndExportableTypes).toHaveBeenCalled();
-      // expect(createObjectsFilter).toHaveBeenCalled();
       const filter = getMockFn(createObjectsFilter).mock.results[0].value;
       const collectSavedObjectsOptions = { readStream, objectLimit, filter, supportedTypes };
       expect(collectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);
@@ -259,6 +259,7 @@ describe('#importSavedObjectsFromStream', () => {
         errors: [],
         filteredObjects,
         importIdMap: new Map(),
+        pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
       });
 
       await resolveSavedObjectsImportErrors(options);
@@ -309,6 +310,7 @@ describe('#importSavedObjectsFromStream', () => {
           errors: [errors[2]],
           filteredObjects: [],
           importIdMap: new Map([['foo', { id: 'someId' }]]),
+          pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
         });
         getMockFn(getImportIdMapForRetries).mockReturnValue(
           new Map([
@@ -383,6 +385,7 @@ describe('#importSavedObjectsFromStream', () => {
           errors: [errors[2]],
           filteredObjects: [],
           importIdMap: new Map([['bar', { id: 'someId' }]]),
+          pendingOverwrites: new Set(), // not used by resolveImportErrors, but is a required return type
         });
         getMockFn(getImportIdMapForRetries).mockReturnValue(
           new Map([
@@ -444,18 +447,21 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('handles a mix of successes and errors and injects metadata', async () => {
-      const options = setupOptions();
-      const error = createError();
+      const error1 = createError();
+      const error2 = createError();
+      const options = setupOptions([
+        { type: error2.type, id: error2.id, overwrite: true, replaceReferences: [] },
+      ]);
       const obj1 = createObject();
       const tmp = createObject();
       const obj2 = { ...tmp, destinationId: 'some-destinationId', originId: tmp.id };
       const obj3 = { ...createObject(), destinationId: 'another-destinationId' }; // empty originId; this is a new copy
       getMockFn(createSavedObjects).mockResolvedValueOnce({
-        errors: [error],
+        errors: [error1],
         createdObjects: [obj1],
       });
       getMockFn(createSavedObjects).mockResolvedValueOnce({
-        errors: [],
+        errors: [error2],
         createdObjects: [obj2, obj3],
       });
 
@@ -466,6 +472,7 @@ describe('#importSavedObjectsFromStream', () => {
           type: obj1.type,
           id: obj1.id,
           meta: { title: obj1.attributes.title, icon: `${obj1.type}-icon` },
+          overwrite: true,
         },
         {
           type: obj2.type,
@@ -481,7 +488,10 @@ describe('#importSavedObjectsFromStream', () => {
           createNewCopy: true,
         },
       ];
-      const errors = [{ ...error, meta: { ...error.meta, icon: `${error.type}-icon` } }];
+      const errors = [
+        { ...error1, meta: { ...error1.meta, icon: `${error1.type}-icon` } },
+        { ...error2, meta: { ...error2.meta, icon: `${error2.type}-icon` }, overwrite: true },
+      ];
       expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
     });
 

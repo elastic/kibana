@@ -233,9 +233,7 @@ export async function resolveImportErrors({
       .map(callMapImportFailure)
       .filter((obj) => !!obj) as RetryObject[];
     const successRetries = successfulImports.map<RetryObject>(
-      ({ type, id, destinationId, createNewCopy }) => {
-        const overwrite =
-          isOverwriteAllChecked || retryDecisionCache.get(`${type}:${id}`)?.options?.overwrite;
+      ({ type, id, overwrite, destinationId, createNewCopy }) => {
         const replaceReferences = replaceReferencesCache.get(`${type}:${id}`);
         return {
           type,

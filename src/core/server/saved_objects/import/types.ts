@@ -106,6 +106,10 @@ export interface SavedObjectsImportError {
    */
   title?: string;
   meta: { title?: string; icon?: string };
+  /**
+   * If `overwrite` is specified, an attempt was made to overwrite an existing object.
+   */
+  overwrite?: boolean;
   error:
     | SavedObjectsImportConflictError
     | SavedObjectsImportAmbiguousConflictError
@@ -136,6 +140,10 @@ export interface SavedObjectsImportSuccess {
     title?: string;
     icon?: string;
   };
+  /**
+   * If `overwrite` is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution).
+   */
+  overwrite?: boolean;
 }
 
 /**

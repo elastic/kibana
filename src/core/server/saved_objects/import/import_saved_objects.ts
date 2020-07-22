@@ -56,6 +56,7 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
   /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
   let importIdMap = collectSavedObjectsResult.importIdMap;
+  let pendingOverwrites = new Set<string>();
 
   // Validate references
   const validateReferencesResult = await validateReferences(
@@ -78,6 +79,7 @@ export async function importSavedObjectsFromStream({
     const checkConflictsResult = await checkConflicts(checkConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
+    pendingOverwrites = checkConflictsResult.pendingOverwrites;
 
     // Check multi-namespace object types for origin conflicts in this namespace
     const checkOriginConflictsParams = {
@@ -91,6 +93,10 @@ export async function importSavedObjectsFromStream({
     const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
+    pendingOverwrites = new Set([
+      ...pendingOverwrites,
+      ...checkOriginConflictsResult.pendingOverwrites,
+    ]);
   }
 
   // Create objects in bulk
@@ -108,10 +114,12 @@ export async function importSavedObjectsFromStream({
   const successResults = createSavedObjectsResult.createdObjects.map(
     ({ type, id, attributes: { title }, destinationId, originId }) => {
       const meta = { title, icon: typeRegistry.getType(type)?.management?.icon };
+      const attemptedOverwrite = pendingOverwrites.has(`${type}:${id}`);
       return {
         type,
         id,
         meta,
+        ...(attemptedOverwrite && { overwrite: true }),
         ...(destinationId && { destinationId }),
         ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
       };
@@ -119,7 +127,12 @@ export async function importSavedObjectsFromStream({
   );
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
-    return { ...error, meta: { ...error.meta, icon } };
+    const attemptedOverwrite = pendingOverwrites.has(`${error.type}:${error.id}`);
+    return {
+      ...error,
+      meta: { ...error.meta, icon },
+      ...(attemptedOverwrite && { overwrite: true }),
+    };
   });
 
   return {
