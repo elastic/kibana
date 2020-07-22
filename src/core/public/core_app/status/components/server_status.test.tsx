@@ -18,15 +18,14 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { mount } from 'enzyme';
 import { ServerStatus } from './server_status';
 import { FormattedStatus } from '../lib';
 
-const getStatus = (parts: Partial<FormattedStatus>): FormattedStatus => ({
+const getStatus = (parts: Partial<FormattedStatus['state']> = {}): FormattedStatus['state'] => ({
   id: 'green',
   title: 'Green',
   uiColor: 'secondary',
-  state: 'green',
   message: '',
   ...parts,
 });
@@ -43,7 +42,6 @@ describe('ServerStatus', () => {
     const status = getStatus({
       id: 'red',
       title: 'Red',
-      state: 'red',
     });
     const component = mount(<ServerStatus serverState={status} name="My Computer" />);
     expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Red"`);
