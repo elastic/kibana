@@ -127,7 +127,7 @@
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "7.9.0-rc.1",
     "@elastic/ems-client": "7.9.3",
-    "@elastic/eui": "27.1.0",
+    "@elastic/eui": "27.2.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "^2.5.0",
