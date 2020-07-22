@@ -93,6 +93,7 @@ export const CertificatesPage: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
           <EuiButtonEmpty
+            aria-label={labels.SETTINGS_ON_CERT}
             color="primary"
             data-test-subj="uptimeCertificatesToOverviewLink"
             iconType="gear"
