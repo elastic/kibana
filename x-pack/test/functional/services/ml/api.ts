@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
 import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
+import { allEventsExistInCalendar } from '../../../api_integration/apis/ml/calendars/helpers';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
@@ -382,24 +383,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         // validate if calendar events have been updated with the requested events
         const { body } = await this.getCalendarEvents(calendarId, 200);
 
-        const updatedCalendarEvents = body.events as CalendarEvent[];
-        let allEventsAreUpdated = true;
-        for (const eventToCheck of eventsToCheck) {
-          // if at least one of the events that we need to check is not in the updated events
-          // no need to continue
-          if (
-            updatedCalendarEvents.findIndex(
-              (updatedEvent) =>
-                updatedEvent.description === eventToCheck.description &&
-                updatedEvent.start_time === eventToCheck.start_time &&
-                updatedEvent.end_time === eventToCheck.end_time
-            ) < 0
-          ) {
-            allEventsAreUpdated = false;
-            break;
-          }
-        }
-        if (allEventsAreUpdated) {
+        if (allEventsExistInCalendar(eventsToCheck, body)) {
           return true;
         } else {
           throw new Error(

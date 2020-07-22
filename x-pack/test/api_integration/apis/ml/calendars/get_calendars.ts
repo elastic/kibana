@@ -5,32 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-
-import { Calendar, CalendarEvent } from '../../../../../plugins/ml/server/models/calendar/index';
+import { allEventsExistInCalendar } from './helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
-
-const allEventsExistInCalendar = (eventsToCheck: CalendarEvent[], calendar: Calendar): boolean => {
-  const updatedCalendarEvents = calendar.events as CalendarEvent[];
-  let allEventsAreUpdated = true;
-  for (const eventToCheck of eventsToCheck) {
-    // if at least one of the events that we need to check is not in the updated events
-    // no need to continue
-    if (
-      updatedCalendarEvents.findIndex(
-        (updatedEvent) =>
-          updatedEvent.description === eventToCheck.description &&
-          updatedEvent.start_time === eventToCheck.start_time &&
-          updatedEvent.end_time === eventToCheck.end_time
-      ) < 0
-    ) {
-      allEventsAreUpdated = false;
-      break;
-    }
-  }
-  return allEventsAreUpdated;
-};
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
