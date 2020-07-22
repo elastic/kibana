@@ -28,7 +28,7 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     node: 'http://localhost',
   }) as any;
 
-  const blackListedProps = [
+  const omittedProps = [
     '_events',
     '_eventsCount',
     '_maxListeners',
@@ -39,9 +39,9 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
     'helpers',
   ];
 
-  const mockify = (obj: Record<string, any>, blacklist: string[] = []) => {
+  const mockify = (obj: Record<string, any>, omitted: string[] = []) => {
     Object.keys(obj)
-      .filter((key) => !blacklist.includes(key))
+      .filter((key) => !omitted.includes(key))
       .forEach((key) => {
         const propType = typeof obj[key];
         if (propType === 'function') {
@@ -52,16 +52,22 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
       });
   };
 
-  mockify(client, blackListedProps);
+  mockify(client, omittedProps);
 
-  client.transport = {
+  // client got some read-only (getter) properties
+  // so we need to extend it to override the getter-only props.
+  const mock: any = { ...client };
+
+  mock.transport = {
     request: jest.fn(),
   };
-  client.on = jest.fn();
-  client.close = jest.fn().mockReturnValue(Promise.resolve());
-  client.child = jest.fn().mockImplementation(() => createInternalClientMock());
+  mock.close = jest.fn().mockReturnValue(Promise.resolve());
+  mock.child = jest.fn().mockImplementation(() => createInternalClientMock());
+  mock.on = jest.fn();
+  mock.off = jest.fn();
+  mock.once = jest.fn();
 
-  return (client as unknown) as DeeplyMockedKeys<Client>;
+  return (mock as unknown) as DeeplyMockedKeys<Client>;
 };
 
 export type ElasticSearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;

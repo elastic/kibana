@@ -213,7 +213,7 @@ describe.skip('<TemplateEdit />', () => {
             aliases: ALIASES,
           },
           _kbnMeta: {
-            isManaged: false,
+            type: 'default',
             isLegacy: templateToEdit._kbnMeta.isLegacy,
           },
         };

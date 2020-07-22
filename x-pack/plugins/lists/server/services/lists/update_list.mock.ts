@@ -16,6 +16,7 @@ import {
 } from '../../../common/constants.mock';
 
 export const getUpdateListOptionsMock = (): UpdateListOptions => ({
+  _version: undefined,
   callCluster: getCallClusterMock(),
   dateNow: DATE_NOW,
   description: DESCRIPTION,

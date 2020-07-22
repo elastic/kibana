@@ -8,6 +8,7 @@ import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 import { LegacyAPICaller } from 'kibana/server';
 
+import { encodeHitVersion } from '../utils/encode_hit_version';
 import {
   Description,
   DeserializerOrUndefined,
@@ -67,8 +68,10 @@ export const createList = async ({
     body,
     id,
     index: listIndex,
+    refresh: 'wait_for',
   });
   return {
+    _version: encodeHitVersion(response),
     id: response._id,
     ...body,
   };

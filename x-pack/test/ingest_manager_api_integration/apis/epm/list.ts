@@ -29,7 +29,23 @@ export default function ({ getService }: FtrProviderContext) {
           return response.body;
         };
         const listResponse = await fetchPackageList();
-        expect(listResponse.response.length).to.be(12);
+        expect(listResponse.response.length).to.be(5);
+      } else {
+        warnAndSkipTest(this, log);
+      }
+    });
+
+    it('lists all limited packages from the registry', async function () {
+      if (server.enabled) {
+        const fetchLimitedPackageList = async () => {
+          const response = await supertest
+            .get('/api/ingest_manager/epm/packages/limited')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+          return response.body;
+        };
+        const listResponse = await fetchLimitedPackageList();
+        expect(listResponse.response).to.eql(['endpoint']);
       } else {
         warnAndSkipTest(this, log);
       }

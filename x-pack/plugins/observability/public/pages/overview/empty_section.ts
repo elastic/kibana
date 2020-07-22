@@ -22,7 +22,7 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.logs.link', {
         defaultMessage: 'Install Filebeat',
       }),
-      href: 'https://www.elastic.co',
+      href: core.http.basePath.prepend('/app/home#/tutorial_directory/logging'),
     },
     {
       id: 'apm',
@@ -35,9 +35,9 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
           'Trace transactions through a distributed architecture and map your services’ interactions to easily spot performance bottlenecks.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.apm.link', {
-        defaultMessage: 'Install agent',
+        defaultMessage: 'Install Agent',
       }),
-      href: 'https://www.elastic.co',
+      href: core.http.basePath.prepend('/app/home#/tutorial/apm'),
     },
     {
       id: 'infra_metrics',
@@ -50,9 +50,9 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
           'Analyze metrics from your infrastructure, apps, and services. Discover trends, forecast behavior, get alerts on anomalies, and more.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.metrics.link', {
-        defaultMessage: 'Install metrics module',
+        defaultMessage: 'Install Metricbeat',
       }),
-      href: 'https://www.elastic.co',
+      href: core.http.basePath.prepend('/app/home#/tutorial_directory/metrics'),
     },
     {
       id: 'uptime',
@@ -67,7 +67,7 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.uptime.link', {
         defaultMessage: 'Install Heartbeat',
       }),
-      href: 'https://www.elastic.co',
+      href: core.http.basePath.prepend('/app/home#/tutorial/uptimeMonitors'),
     },
     {
       id: 'alert',
@@ -77,7 +77,7 @@ export const getEmptySections = ({ core }: { core: AppMountContext['core'] }): I
       icon: 'watchesApp',
       description: i18n.translate('xpack.observability.emptySection.apps.alert.description', {
         defaultMessage:
-          '503 errors stacking up. Applications not responding. CPU and RAM utilization jumping. See these warnings as they happen - not as part of the post-mortem.',
+          'Are 503 errors stacking up? Are services responding? Is CPU and RAM utilization jumping? See warnings as they happen—not as part of the post-mortem.',
       }),
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
         defaultMessage: 'Create alert',

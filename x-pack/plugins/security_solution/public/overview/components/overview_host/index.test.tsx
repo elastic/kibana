@@ -9,6 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,
@@ -23,13 +24,14 @@ import { createStore, State } from '../../../common/store';
 import { overviewHostQuery } from '../../containers/overview_host/index.gql_query';
 import { GetOverviewHostQuery } from '../../../graphql/types';
 
-import { wait } from '../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
 
-const startDate = 1579553397080;
-const endDate = 1579639797080;
+const startDate = '2020-01-20T20:49:57.080Z';
+const endDate = '2020-01-21T20:49:57.080Z';
 
 interface MockedProvidedQuery {
   request: {
@@ -58,9 +60,9 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
           'auditbeat-*',
           'endgame-*',
           'filebeat-*',
+          'logs-*',
           'packetbeat-*',
           'winlogbeat-*',
-          'logs-*',
         ],
         inspect: false,
       },
@@ -146,11 +148,12 @@ describe('OverviewHost', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
-      'Showing: 16 events'
-    );
+      expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
+        'Showing: 16 events'
+      );
+    });
   });
 });

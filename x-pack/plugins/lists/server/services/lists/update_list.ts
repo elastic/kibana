@@ -7,6 +7,8 @@
 import { CreateDocumentResponse } from 'elasticsearch';
 import { LegacyAPICaller } from 'kibana/server';
 
+import { decodeVersion } from '../utils/decode_version';
+import { encodeHitVersion } from '../utils/encode_hit_version';
 import {
   DescriptionOrUndefined,
   Id,
@@ -14,11 +16,13 @@ import {
   MetaOrUndefined,
   NameOrUndefined,
   UpdateEsListSchema,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 
 import { getList } from '.';
 
 export interface UpdateListOptions {
+  _version: _VersionOrUndefined;
   id: Id;
   callCluster: LegacyAPICaller;
   listIndex: string;
@@ -30,6 +34,7 @@ export interface UpdateListOptions {
 }
 
 export const updateList = async ({
+  _version,
   id,
   name,
   description,
@@ -52,11 +57,14 @@ export const updateList = async ({
       updated_by: user,
     };
     const response = await callCluster<CreateDocumentResponse>('update', {
+      ...decodeVersion(_version),
       body: { doc },
       id,
       index: listIndex,
+      refresh: 'wait_for',
     });
     return {
+      _version: encodeHitVersion(response),
       created_at: list.created_at,
       created_by: list.created_by,
       description: description ?? list.description,

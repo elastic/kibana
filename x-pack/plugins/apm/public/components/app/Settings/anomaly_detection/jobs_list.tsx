@@ -16,30 +16,29 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  MLErrorMessages,
+  ErrorCode,
+} from '../../../../../common/anomaly_detection';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { AnomalyDetectionJobByEnv } from '../../../../../typings/anomaly_detection';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MLLink } from '../../../shared/Links/MachineLearningLinks/MLLink';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { LegacyJobsCallout } from './legacy_jobs_callout';
+import { AnomalyDetectionApiResponse } from './index';
 
-const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
+type Jobs = AnomalyDetectionApiResponse['jobs'];
+
+const columns: Array<ITableColumn<Jobs[0]>> = [
   {
     field: 'environment',
     name: i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
       { defaultMessage: 'Environment' }
     ),
-    render: (environment: string) => {
-      if (environment === ENVIRONMENT_NOT_DEFINED) {
-        return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
-          defaultMessage: 'Not defined',
-        });
-      }
-      return environment;
-    },
+    render: getEnvironmentLabel,
   },
   {
     field: 'job_id',
@@ -62,21 +61,12 @@ const columns: Array<ITableColumn<AnomalyDetectionJobByEnv>> = [
 ];
 
 interface Props {
+  data: AnomalyDetectionApiResponse;
   status: FETCH_STATUS;
   onAddEnvironments: () => void;
-  anomalyDetectionJobsByEnv: AnomalyDetectionJobByEnv[];
-  hasLegacyJobs: boolean;
 }
-export const JobsList = ({
-  status,
-  onAddEnvironments,
-  anomalyDetectionJobsByEnv,
-  hasLegacyJobs,
-}: Props) => {
-  const isLoading =
-    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
-
-  const hasFetchFailure = status === FETCH_STATUS.FAILURE;
+export const JobsList = ({ data, status, onAddEnvironments }: Props) => {
+  const { jobs, hasLegacyJobs, errorCode } = data;
 
   return (
     <EuiPanel>
@@ -98,7 +88,7 @@ export const JobsList = ({
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
               {
-                defaultMessage: 'Add environments',
+                defaultMessage: 'Create ML Job',
               }
             )}
           </EuiButton>
@@ -108,7 +98,7 @@ export const JobsList = ({
       <EuiText>
         <FormattedMessage
           id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
-          defaultMessage="Manage existing anomaly detection jobs in {mlJobsLink}."
+          defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
           values={{
             mlJobsLink: (
               <MLLink path="jobs">
@@ -125,17 +115,12 @@ export const JobsList = ({
       </EuiText>
       <EuiSpacer size="l" />
       <ManagedTable
-        noItemsMessage={
-          isLoading ? (
-            <LoadingStatePrompt />
-          ) : hasFetchFailure ? (
-            <FailureStatePrompt />
-          ) : (
-            <EmptyStatePrompt />
-          )
-        }
+        noItemsMessage={getNoItemsMessage({
+          status,
+          errorCode,
+        })}
         columns={columns}
-        items={isLoading || hasFetchFailure ? [] : anomalyDetectionJobsByEnv}
+        items={jobs}
       />
       <EuiSpacer size="l" />
 
@@ -144,28 +129,36 @@ export const JobsList = ({
   );
 };
 
-function EmptyStatePrompt() {
-  return (
-    <>
-      {i18n.translate(
-        'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
-        {
-          defaultMessage: 'No anomaly detection jobs.',
-        }
-      )}
-    </>
-  );
-}
+function getNoItemsMessage({
+  status,
+  errorCode,
+}: {
+  status: FETCH_STATUS;
+  errorCode?: ErrorCode;
+}) {
+  // loading state
+  const isLoading =
+    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
+  if (isLoading) {
+    return <LoadingStatePrompt />;
+  }
 
-function FailureStatePrompt() {
-  return (
-    <>
-      {i18n.translate(
-        'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
-        {
-          defaultMessage: 'Unabled to fetch anomaly detection jobs.',
-        }
-      )}
-    </>
+  // A known error occured. Show specific error message
+  if (errorCode) {
+    return MLErrorMessages[errorCode];
+  }
+
+  // An unexpected error occurred. Show default error message
+  if (status === FETCH_STATUS.FAILURE) {
+    return i18n.translate(
+      'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
+      { defaultMessage: 'Unabled to fetch anomaly detection jobs.' }
+    );
+  }
+
+  // no errors occurred
+  return i18n.translate(
+    'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
+    { defaultMessage: 'No anomaly detection jobs.' }
   );
 }

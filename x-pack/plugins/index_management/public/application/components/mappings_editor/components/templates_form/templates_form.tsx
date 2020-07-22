@@ -22,7 +22,7 @@ interface Props {
 const stringifyJson = (json: { [key: string]: any }) =>
   Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
 
-const formSerializer: SerializerFunc<MappingsTemplates> = (formData) => {
+const formSerializer: SerializerFunc<MappingsTemplates | undefined> = (formData) => {
   const { dynamicTemplates } = formData;
 
   let parsedTemplates;
@@ -34,12 +34,14 @@ const formSerializer: SerializerFunc<MappingsTemplates> = (formData) => {
       parsedTemplates = [parsedTemplates];
     }
   } catch {
-    parsedTemplates = [];
+    // Silently swallow errors
   }
 
-  return {
-    dynamic_templates: parsedTemplates,
-  };
+  return Array.isArray(parsedTemplates) && parsedTemplates.length > 0
+    ? {
+        dynamic_templates: parsedTemplates,
+      }
+    : undefined;
 };
 
 const formDeserializer = (formData: { [key: string]: any }) => {
@@ -53,23 +55,24 @@ const formDeserializer = (formData: { [key: string]: any }) => {
 export const TemplatesForm = React.memo(({ value }: Props) => {
   const isMounted = useRef<boolean | undefined>(undefined);
 
-  const { form } = useForm<MappingsTemplates>({
+  const { form } = useForm<any>({
     schema: templatesFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
     defaultValue: value,
   });
+  const { subscribe, getFormData, submit: submitForm, reset } = form;
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const subscription = form.subscribe(({ data, isValid, validate }) => {
+    const subscription = subscribe(({ data, isValid, validate }) => {
       dispatch({
         type: 'templates.update',
-        value: { data, isValid, validate, submitForm: form.submit },
+        value: { data, isValid, validate, submitForm },
       });
     });
     return subscription.unsubscribe;
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [subscribe, dispatch, submitForm]);
 
   useEffect(() => {
     if (isMounted.current === undefined) {
@@ -85,18 +88,18 @@ export const TemplatesForm = React.memo(({ value }: Props) => {
 
     // If the value has changed (it probably means that we have loaded a new JSON)
     // we need to reset the form to update the fields values.
-    form.reset({ resetValues: true });
-  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+    reset({ resetValues: true });
+  }, [value, reset]);
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
 
       // On unmount => save in the state a snapshot of the current form data.
-      const dynamicTemplatesData = form.getFormData();
+      const dynamicTemplatesData = getFormData();
       dispatch({ type: 'templates.save', value: dynamicTemplatesData });
     };
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [getFormData, dispatch]);
 
   return (
     <div data-test-subj="dynamicTemplates">

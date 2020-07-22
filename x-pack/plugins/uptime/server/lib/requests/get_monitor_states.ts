@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CONTEXT_DEFAULTS } from '../../../common/constants';
-import { fetchPage } from './search';
+import { CONTEXT_DEFAULTS, QUERY } from '../../../common/constants';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { MonitorSummary, SortOrder, CursorDirection } from '../../../common/runtime_types';
-import { QueryContext } from './search';
+import { SortOrder, CursorDirection, MonitorSummariesResult } from '../../../common/runtime_types';
+import { QueryContext, MonitorSummaryIterator } from './search';
+import { HistogramPoint, Histogram } from '../../../common/runtime_types';
+import { getHistogramInterval } from '../helper/get_histogram_interval';
 
 export interface CursorPagination {
   cursorKey?: any;
@@ -25,12 +26,6 @@ export interface GetMonitorStatesParams {
   statusFilter?: string;
 }
 
-export interface GetMonitorStatesResult {
-  summaries: MonitorSummary[];
-  nextPagePagination: string | null;
-  prevPagePagination: string | null;
-}
-
 // To simplify the handling of the group of pagination vars they're passed back to the client as a string
 const jsonifyPagination = (p: any): string | null => {
   if (!p) {
@@ -43,7 +38,7 @@ const jsonifyPagination = (p: any): string | null => {
 // Gets a page of monitor states.
 export const getMonitorStates: UMElasticsearchQueryFn<
   GetMonitorStatesParams,
-  GetMonitorStatesResult
+  MonitorSummariesResult
 > = async ({
   callES,
   dynamicSettings,
@@ -68,11 +63,113 @@ export const getMonitorStates: UMElasticsearchQueryFn<
     statusFilter
   );
 
-  const page = await fetchPage(queryContext);
+  const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
+
+  const iterator = new MonitorSummaryIterator(queryContext);
+  const page = await iterator.nextPage(size);
+
+  const histograms = await getHistogramForMonitors(
+    queryContext,
+    page.monitorSummaries.map((s) => s.monitor_id)
+  );
+
+  page.monitorSummaries.forEach((s) => {
+    s.histogram = histograms[s.monitor_id];
+  });
 
   return {
-    summaries: page.items,
+    summaries: page.monitorSummaries,
     nextPagePagination: jsonifyPagination(page.nextPagePagination),
     prevPagePagination: jsonifyPagination(page.prevPagePagination),
   };
+};
+
+export const getHistogramForMonitors = async (
+  queryContext: QueryContext,
+  monitorIds: string[]
+): Promise<{ [key: string]: Histogram }> => {
+  const params = {
+    index: queryContext.heartbeatIndices,
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                'summary.down': { gt: 0 },
+              },
+            },
+            {
+              terms: {
+                'monitor.id': monitorIds,
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: queryContext.dateRangeStart,
+                  lte: queryContext.dateRangeEnd,
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        histogram: {
+          date_histogram: {
+            field: '@timestamp',
+            // 12 seems to be a good size for performance given
+            // long monitor lists of up to 100 on the overview page
+            fixed_interval:
+              getHistogramInterval(queryContext.dateRangeStart, queryContext.dateRangeEnd, 12) +
+              'ms',
+            missing: 0,
+          },
+          aggs: {
+            by_id: {
+              terms: {
+                field: 'monitor.id',
+                size: Math.max(monitorIds.length, 1),
+              },
+              aggs: {
+                totalDown: {
+                  sum: { field: 'summary.down' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+  const result = await queryContext.search(params);
+
+  const histoBuckets: any[] = result.aggregations.histogram.buckets;
+  const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {
+    const byId: { [key: string]: number } = {};
+    histoBucket.by_id.buckets.forEach((idBucket: any) => {
+      byId[idBucket.key] = idBucket.totalDown.value;
+    });
+    return {
+      timestamp: parseInt(histoBucket.key, 10),
+      byId,
+    };
+  });
+
+  const histosById: { [key: string]: Histogram } = {};
+  monitorIds.forEach((id: string) => {
+    const points: HistogramPoint[] = [];
+    simplified.forEach((simpleHisto) => {
+      points.push({
+        timestamp: simpleHisto.timestamp,
+        up: undefined,
+        down: simpleHisto.byId[id],
+      });
+    });
+    histosById[id] = { points };
+  });
+
+  return histosById;
 };

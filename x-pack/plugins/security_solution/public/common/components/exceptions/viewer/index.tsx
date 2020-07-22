@@ -53,6 +53,7 @@ const initialState: State = {
 interface ExceptionsViewerProps {
   ruleId: string;
   ruleName: string;
+  ruleIndices: string[];
   exceptionListsMeta: ExceptionIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
@@ -61,6 +62,7 @@ interface ExceptionsViewerProps {
 const ExceptionsViewerComponent = ({
   ruleId,
   ruleName,
+  ruleIndices,
   exceptionListsMeta,
   availableListTypes,
   commentsAccordionId,
@@ -104,7 +106,7 @@ const ExceptionsViewerComponent = ({
       lists: newLists,
       exceptions: newExceptions,
       pagination: newPagination,
-    }: UseExceptionListSuccess) => {
+    }: UseExceptionListSuccess): void => {
       dispatch({
         type: 'setExceptions',
         lists: newLists,
@@ -184,7 +186,11 @@ const ExceptionsViewerComponent = ({
     [setCurrentModal]
   );
 
-  const handleCloseExceptionModal = useCallback((): void => {
+  const handleOnCancelExceptionModal = useCallback((): void => {
+    setCurrentModal(null);
+  }, [setCurrentModal]);
+
+  const handleOnConfirmExceptionModal = useCallback((): void => {
     setCurrentModal(null);
     handleFetchList();
   }, [setCurrentModal, handleFetchList]);
@@ -249,24 +255,26 @@ const ExceptionsViewerComponent = ({
   return (
     <>
       {currentModal === 'editModal' &&
-        exceptionToEdit !== null &&
-        exceptionListTypeToEdit !== null && (
+        exceptionToEdit != null &&
+        exceptionListTypeToEdit != null && (
           <EditExceptionModal
             ruleName={ruleName}
+            ruleIndices={ruleIndices}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
-            onCancel={handleCloseExceptionModal}
-            onConfirm={handleCloseExceptionModal}
+            onCancel={handleOnCancelExceptionModal}
+            onConfirm={handleOnConfirmExceptionModal}
           />
         )}
 
       {currentModal === 'addModal' && exceptionListTypeToEdit != null && (
         <AddExceptionModal
           ruleName={ruleName}
+          ruleIndices={ruleIndices}
           ruleId={ruleId}
           exceptionListType={exceptionListTypeToEdit}
-          onCancel={handleCloseExceptionModal}
-          onConfirm={handleCloseExceptionModal}
+          onCancel={handleOnCancelExceptionModal}
+          onConfirm={handleOnConfirmExceptionModal}
         />
       )}
 

@@ -75,7 +75,7 @@ const HEADERS = {
 
 export class IndexTable extends Component {
   static getDerivedStateFromProps(props, state) {
-    // Deselct any indices which no longer exist, e.g. they've been deleted.
+    // Deselect any indices which no longer exist, e.g. they've been deleted.
     const { selectedIndicesMap } = state;
     const indexNames = props.indices.map((index) => index.name);
     const selectedIndexNames = Object.keys(selectedIndicesMap);
