@@ -60,17 +60,6 @@ describe('when on the policies page', () => {
 
     beforeEach(async () => {
       setPolicyListApiMockImplementation(coreStart.http, 3);
-
-      // const policyApiHandlers = policyListApiPathHandlers(3);
-      // coreStart.http.get.mockImplementation(async (...args) => {
-      //   const [path] = args;
-      //   if (typeof path === 'string') {
-      //     if (policyApiHandlers[path]) {
-      //       return policyApiHandlers[path]();
-      //     }
-      //   }
-      //   throw new Error(`no http GET mock implementation for: ${path}`);
-      // });
     });
 
     it('should display rows in the table', async () => {
