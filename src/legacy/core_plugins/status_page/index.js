@@ -21,10 +21,10 @@ export default function (kibana) {
   return new kibana.Plugin({
     uiExports: {
       app: {
-        title: 'Old Server Status',
+        title: 'Legacy Server Status',
         main: 'plugins/status_page/status_page',
         hidden: true,
-        url: '/old-status',
+        url: '/__legacy__/status',
       },
     },
   });
