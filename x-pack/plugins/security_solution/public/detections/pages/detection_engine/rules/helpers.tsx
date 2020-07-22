@@ -14,6 +14,7 @@ import { RuleAlertAction, RuleType } from '../../../../../common/detection_engin
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
+import { ENDPOINT_LIST_ID } from '../../../../shared_imports';
 import { Rule } from '../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
@@ -138,7 +139,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   return {
     isNew: false,
     author,
-    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === 'endpoint_list') ?? false,
+    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === ENDPOINT_LIST_ID) ?? false,
     isBuildingBlock: buildingBlockType !== undefined,
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',

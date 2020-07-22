@@ -335,7 +335,7 @@ describe('test endpoint route', () => {
       expect(result.host_status).toEqual(HostStatus.ERROR);
     });
 
-    it('should return a single endpoint with status error when status is not offline or online', async () => {
+    it('should return a single endpoint with status error when status is not offline, online or enrolling', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -368,7 +368,7 @@ describe('test endpoint route', () => {
       expect(result.host_status).toEqual(HostStatus.ERROR);
     });
 
-    it('should throw error when endpoint egent is not active', async () => {
+    it('should throw error when endpoint agent is not active', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({
