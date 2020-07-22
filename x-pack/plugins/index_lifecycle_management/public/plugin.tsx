@@ -59,7 +59,13 @@ export class IndexLifecycleManagementPlugin {
 
           const { renderApp } = await import('./application');
 
-          const unmountAppCallback = renderApp(element, I18nContext, history, navigateToApp, getUrlForApp);
+          const unmountAppCallback = renderApp(
+            element,
+            I18nContext,
+            history,
+            navigateToApp,
+            getUrlForApp
+          );
 
           return () => {
             docTitle.reset();
