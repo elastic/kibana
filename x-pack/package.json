@@ -45,7 +45,7 @@
     "@storybook/addon-storyshots": "^5.2.6",
     "@storybook/react": "^5.2.6",
     "@storybook/theming": "^5.2.6",
-    "@testing-library/react": "^9.3.2",
+    "@testing-library/react": "^10.4.7",
     "@testing-library/react-hooks": "^3.2.1",
     "@testing-library/jest-dom": "^5.8.0",
     "@types/angular": "^1.6.56",
