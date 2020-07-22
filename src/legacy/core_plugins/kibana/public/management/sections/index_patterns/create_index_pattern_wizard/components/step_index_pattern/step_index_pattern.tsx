@@ -123,7 +123,13 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(
-        getIndices(esService, indexPatternCreationType, query, MAX_SEARCH_SIZE)
+        getIndices(
+          esService,
+          indexPatternCreationType,
+          query,
+          MAX_SEARCH_SIZE,
+          this.props.isIncludingSystemIndices
+        )
       );
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
@@ -134,8 +140,20 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     }
 
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
-      getIndices(esService, indexPatternCreationType, `${query}*`, MAX_SEARCH_SIZE),
-      getIndices(esService, indexPatternCreationType, query, MAX_SEARCH_SIZE),
+      getIndices(
+        esService,
+        indexPatternCreationType,
+        `${query}*`,
+        MAX_SEARCH_SIZE,
+        this.props.isIncludingSystemIndices
+      ),
+      getIndices(
+        esService,
+        indexPatternCreationType,
+        query,
+        MAX_SEARCH_SIZE,
+        this.props.isIncludingSystemIndices
+      ),
     ]);
 
     // If the search changed, discard this state
