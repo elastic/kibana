@@ -11,16 +11,18 @@ import {
   IKibanaResponse,
   SavedObject,
 } from 'src/core/server';
+import LRU from 'lru-cache';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { authenticateAgentWithAccessToken } from '../../../../../ingest_manager/server/services/agents/authenticate';
 import { validate } from '../../../../common/validate';
+import { LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG } from '../../../../common/endpoint/constants';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { ArtifactConstants, ExceptionsCache } from '../../lib/artifacts';
+import { ArtifactConstants } from '../../lib/artifacts';
 import {
   DownloadArtifactRequestParamsSchema,
   downloadArtifactRequestParamsSchema,
   downloadArtifactResponseSchema,
-  InternalArtifactSchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
 import { EndpointAppContext } from '../../types';
 
@@ -32,7 +34,7 @@ const allowlistBaseRoute: string = '/api/endpoint/artifacts';
 export function registerDownloadExceptionListRoute(
   router: IRouter,
   endpointContext: EndpointAppContext,
-  cache: ExceptionsCache
+  cache: LRU<string, Buffer>
 ) {
   router.get(
     {
@@ -43,6 +45,7 @@ export function registerDownloadExceptionListRoute(
           DownloadArtifactRequestParamsSchema
         >(downloadArtifactRequestParamsSchema),
       },
+      options: { tags: [LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG] },
     },
     async (context, req, res) => {
       let scopedSOClient: SavedObjectsClientContract;
@@ -86,8 +89,8 @@ export function registerDownloadExceptionListRoute(
       } else {
         logger.debug(`Cache MISS artifact ${id}`);
         return scopedSOClient
-          .get<InternalArtifactSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
-          .then((artifact: SavedObject<InternalArtifactSchema>) => {
+          .get<InternalArtifactCompleteSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
+          .then((artifact: SavedObject<InternalArtifactCompleteSchema>) => {
             const body = Buffer.from(artifact.attributes.body, 'base64');
             cache.set(id, body);
             return buildAndValidateResponse(artifact.attributes.identifier, body);

@@ -54,7 +54,7 @@ NOTE:
 ////
 
 [[code-exploration]]
-=== Exploring Kibana code
+== Exploring Kibana code
 
 The goals of our folder heirarchy are:
 
@@ -71,14 +71,14 @@ To that aim, we strive to:
 
 [discrete]
 [[kibana-services-applications]]
-==== Services and Applications
+=== Services and Applications
 
 [discrete]
-===== src/plugins
+==== src/plugins
 ${Array.from(printPlugins(ossPlugins)).join('\n')}
 
 [discrete]
-===== x-pack/plugins
+==== x-pack/plugins
 ${Array.from(printPlugins(xpackPlugins)).join('\n')}
 `;
 }

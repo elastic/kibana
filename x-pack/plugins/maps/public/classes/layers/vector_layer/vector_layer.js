@@ -85,7 +85,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _hasJoins() {
+  hasJoins() {
     return this.getValidJoins().length > 0;
   }
 
@@ -159,7 +159,7 @@ export class VectorLayer extends AbstractLayer {
   async getBounds({ startLoading, stopLoading, registerCancelCallback, dataFilters }) {
     const isStaticLayer = !this.getSource().isBoundsAware();
     if (isStaticLayer) {
-      return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this._hasJoins());
+      return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins());
     }
 
     const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
@@ -191,6 +191,11 @@ export class VectorLayer extends AbstractLayer {
       stopLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, bounds, boundsFilters);
     }
     return bounds;
+  }
+
+  isLoadingBounds() {
+    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
+    return !!boundsDataRequest && boundsDataRequest.isLoading();
   }
 
   async getLeftJoinFields() {
@@ -583,7 +588,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async syncData(syncContext) {
-    this._syncData(syncContext, this.getSource(), this.getCurrentStyle());
+    await this._syncData(syncContext, this.getSource(), this.getCurrentStyle());
   }
 
   // TLDR: Do not call getSource or getCurrentStyle in syncData flow. Use 'source' and 'style' arguments instead.
@@ -597,13 +602,16 @@ export class VectorLayer extends AbstractLayer {
   // Given 2 above, which source/style to use can not be pulled from data request state.
   // Therefore, source and style are provided as arugments and must be used instead of calling getSource or getCurrentStyle.
   async _syncData(syncContext, source, style) {
+    if (this.isLoadingBounds()) {
+      return;
+    }
     await this._syncSourceStyleMeta(syncContext, source, style);
     await this._syncSourceFormatters(syncContext, source, style);
     const sourceResult = await this._syncSource(syncContext, source, style);
     if (
       !sourceResult.featureCollection ||
       !sourceResult.featureCollection.features.length ||
-      !this._hasJoins()
+      !this.hasJoins()
     ) {
       return;
     }
@@ -711,7 +719,7 @@ export class VectorLayer extends AbstractLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getPointFilterExpression(this._hasJoins());
+    const filterExpr = getPointFilterExpression(this.hasJoins());
     if (filterExpr !== mbMap.getFilter(pointLayerId)) {
       mbMap.setFilter(pointLayerId, filterExpr);
       mbMap.setFilter(textLayerId, filterExpr);
@@ -747,7 +755,7 @@ export class VectorLayer extends AbstractLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getPointFilterExpression(this._hasJoins());
+    const filterExpr = getPointFilterExpression(this.hasJoins());
     if (filterExpr !== mbMap.getFilter(symbolLayerId)) {
       mbMap.setFilter(symbolLayerId, filterExpr);
     }
@@ -769,7 +777,7 @@ export class VectorLayer extends AbstractLayer {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
-    const hasJoins = this._hasJoins();
+    const hasJoins = this.hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
       const mbLayer = {
         id: fillLayerId,
