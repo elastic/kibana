@@ -49,17 +49,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body).to.eql(expectedBreakdownWithTransactionName);
       });
-      it('returns the kpis sorted by percentage and name', async () => {
+      it('returns the top 4 by percentage and sorts them by name', async () => {
         const response = await supertest.get(
           `/api/apm/services/opbeans-node/transaction_groups/breakdown?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionType=${transactionType}`
         );
 
         expect(response.status).to.be(200);
-        expect(response.body.kpis).to.eql([
-          { name: 'app', percentage: 0.16700861715223636, color: '#54b399' },
-          { name: 'http', percentage: 0.7702092736971686, color: '#6092c0' },
-          { name: 'postgresql', percentage: 0.0508822322527698, color: '#d36086' },
-          { name: 'redis', percentage: 0.011899876897825195, color: '#9170b8' },
+        expect(response.body.kpis.map((kpi) => kpi.name)).to.eql([
+          'app',
+          'http',
+          'postgresql',
+          'redis',
         ]);
       });
     });
