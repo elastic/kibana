@@ -50,7 +50,7 @@ describe('resolveImportErrors', () => {
     const result = await resolveImportErrors({
       http: httpMock,
       getConflictResolutions,
-      state: { importCount: 0 },
+      state: { importCount: 0, importMode: { createNewCopies: false, overwrite: false } },
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -78,6 +78,7 @@ describe('resolveImportErrors', () => {
             error: { type: 'unknown' } as SavedObjectsImportUnknownError,
           },
         ],
+        importMode: { createNewCopies: false, overwrite: false },
       },
     });
     expect(httpMock.post).not.toHaveBeenCalled();
@@ -129,6 +130,7 @@ describe('resolveImportErrors', () => {
           },
           { obj: { type: 'a', id: '3', meta: {} }, error: { type: 'conflict' } },
         ],
+        importMode: { createNewCopies: false, overwrite: false },
       },
     });
     expect(result).toMatchInlineSnapshot(`
@@ -194,6 +196,7 @@ describe('resolveImportErrors', () => {
             },
           },
         ],
+        importMode: { createNewCopies: false, overwrite: false },
       },
     });
     expect(result).toMatchInlineSnapshot(`
@@ -233,6 +236,7 @@ describe('resolveImportErrors', () => {
             error: { type: 'missing_references', references: [{ type: 'index-pattern', id: '2' }] },
           },
         ],
+        importMode: { createNewCopies: false, overwrite: false },
       },
     });
     expect(result).toMatchInlineSnapshot(`

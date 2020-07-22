@@ -62,17 +62,20 @@ const isAnyConflict = (failure: FailedImport): failure is FailedImportConflict =
 async function callResolveImportErrorsApi(
   http: HttpStart,
   file: File,
-  retries: any
+  retries: any,
+  createNewCopies: boolean
 ): Promise<SavedObjectsImportResponse> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('retries', JSON.stringify(retries));
+  const query = createNewCopies ? { createNewCopies } : {};
   return http.post<any>('/api/saved_objects/_resolve_import_errors', {
     headers: {
       // Important to be undefined, it forces proper headers to be set for FormData
       'Content-Type': undefined,
     },
     body: formData,
+    query,
   });
 }
 
@@ -104,17 +107,19 @@ function mapImportFailureToRetryObject({
       replaceReferencesCache.get(`${failure.obj.type}:${failure.obj.id}`) || [];
     const indexPatternRefs = failure.error.references.filter((obj) => obj.type === 'index-pattern');
     for (const reference of indexPatternRefs) {
-      for (const unmatchedReference of unmatchedReferences) {
-        const hasNewValue = !!unmatchedReference.newIndexPatternId;
-        const matchesIndexPatternId = unmatchedReference.existingIndexPatternId === reference.id;
-        if (!hasNewValue || !matchesIndexPatternId) {
+      for (const { existingIndexPatternId: from, newIndexPatternId: to } of unmatchedReferences) {
+        const matchesIndexPatternId = from === reference.id;
+        if (!to || !matchesIndexPatternId) {
           continue;
         }
-        objReplaceReferences.push({
-          type: 'index-pattern',
-          from: unmatchedReference.existingIndexPatternId,
-          to: unmatchedReference.newIndexPatternId!,
-        });
+        const type = 'index-pattern';
+        if (
+          !objReplaceReferences.some(
+            (ref) => ref.type === type && ref.from === from && ref.to === to
+          )
+        ) {
+          objReplaceReferences.push({ type, from, to });
+        }
       }
     }
     replaceReferencesCache.set(`${failure.obj.type}:${failure.obj.id}`, objReplaceReferences);
@@ -147,13 +152,16 @@ export async function resolveImportErrors({
     failedImports?: ProcessedImportResponse['failedImports'];
     successfulImports?: ProcessedImportResponse['successfulImports'];
     file?: File;
-    isOverwriteAllChecked?: boolean;
+    importMode: { createNewCopies: boolean; overwrite: boolean };
   };
 }) {
   const retryDecisionCache = new Map<string, RetryDecision>();
   const replaceReferencesCache = new Map<string, Reference[]>();
   let { importCount, failedImports = [], successfulImports = [] } = state;
-  const { file, isOverwriteAllChecked } = state;
+  const {
+    file,
+    importMode: { createNewCopies, overwrite: isOverwriteAllChecked },
+  } = state;
 
   const doesntHaveRetryDecision = ({ obj }: FailedImport) => {
     return !retryDecisionCache.has(`${obj.type}:${obj.id}`);
@@ -227,7 +235,7 @@ export async function resolveImportErrors({
     }
 
     // Call API
-    const response = await callResolveImportErrorsApi(http, file!, retries);
+    const response = await callResolveImportErrorsApi(http, file!, retries, createNewCopies);
     importCount = response.successCount; // reset the success count since we retry all successful results each time
     failedImports = [];
     for (const { error, ...obj } of response.errors || []) {
