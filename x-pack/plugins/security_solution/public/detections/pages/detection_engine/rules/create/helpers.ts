@@ -169,16 +169,16 @@ export const formatAboutStepData = (
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
     ...(isBuildingBlock ? { building_block_type: 'default' } : {}),
-    ...(isAssociatedToEndpointList
-      ? {
-          exceptions_list: [
-            { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
-            ...(exceptionsList != null ? exceptionsList : []).filter(
-              (list) => list.type !== 'endpoint'
-            ),
-          ] as AboutStepRuleJson['exceptions_list'],
-        }
-      : {}),
+    exceptions_list: (isAssociatedToEndpointList
+      ? [
+          { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
+          ...(exceptionsList != null ? exceptionsList : []).filter(
+            (list) => list.type !== 'endpoint'
+          ),
+        ]
+      : {
+          ...(exceptionsList != null ? exceptionsList : []),
+        }) as AboutStepRuleJson['exceptions_list'],
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore.value,
