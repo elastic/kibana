@@ -595,6 +595,10 @@ export default function ({ getService, getPageObjects }) {
 
         it('should display updated scaled label text after time range is changed', async () => {
           await PageObjects.visEditor.setInterval('Millisecond');
+
+          // Apply interval
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+
           const isHelperScaledLabelExists = await find.existsByCssSelector(
             '[data-test-subj="currentlyScaledText"]'
           );
