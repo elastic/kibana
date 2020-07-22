@@ -17,7 +17,7 @@ export default function ({ loadTestFile }) {
     //loadTestFile(require.resolve('./epm/template'));
     loadTestFile(require.resolve('./epm/ilm'));
     loadTestFile(require.resolve('./epm/install_overrides'));
-    loadTestFile(require.resolve('./epm/install_es_assets'));
+    loadTestFile(require.resolve('./epm/install_remove_assets'));
 
     // Package configs
     loadTestFile(require.resolve('./package_config/create'));
