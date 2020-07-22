@@ -92,7 +92,7 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
                   })
             }
             color="text"
-            isLoading={state === 'LOADING'}
+            isDisabled={state === 'LOADING'}
             onClick={toggleKey}
             iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
           />
