@@ -54,16 +54,16 @@ describe('helpers', () => {
   });
 
   describe('#validateParams', () => {
-    test('returns true if value is undefined', () => {
+    test('returns false if value is undefined', () => {
       const isValid = validateParams(undefined, getField('@timestamp'));
 
-      expect(isValid).toBeTruthy();
+      expect(isValid).toBeFalsy();
     });
 
-    test('returns true if value is empty string', () => {
+    test('returns false if value is empty string', () => {
       const isValid = validateParams('', getField('@timestamp'));
 
-      expect(isValid).toBeTruthy();
+      expect(isValid).toBeFalsy();
     });
 
     test('returns true if type is "date" and value is valid', () => {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 import { uniq } from 'lodash';
 
@@ -22,6 +22,7 @@ interface AutocompleteFieldMatchProps {
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
+  isRequired?: boolean;
   fieldInputWidth?: number;
   onChange: (arg: string) => void;
 }
@@ -34,9 +35,11 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   isLoading,
   isDisabled = false,
   isClearable = false,
+  isRequired = false,
   fieldInputWidth,
   onChange,
 }): JSX.Element => {
+  const [touched, setIsTouched] = useState(false);
   const [isLoadingSuggestions, suggestions, updateSuggestions] = useFieldValueAutocomplete({
     selectedField,
     operatorType: OperatorTypeEnum.MATCH,
@@ -96,7 +99,8 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       singleSelection={{ asPlainText: true }}
       onSearchChange={onSearchChange}
       onCreateOption={onChange}
-      isInvalid={!isValid}
+      isInvalid={isRequired ? touched && !isValid : false}
+      onFocus={() => setIsTouched(true)}
       sortMatchesBy="startsWith"
       data-test-subj="valuesAutocompleteComboBox matchComboxBox"
       style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
