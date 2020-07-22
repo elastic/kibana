@@ -193,7 +193,7 @@ describe('filterEventsAgainstList', () => {
       expect(['1.1.1.1', '3.3.3.3', '5.5.5.5', '7.7.7.7', '8.8.8.8', '9.9.9.9']).toEqual(ipVals);
     });
 
-    it('should respond with less items in the list given one exception item with two entries of type list if some values match', async () => {
+    it('should respond with less items in the list given two exception items, each with one entry of type list if some values match', async () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [
         {

@@ -103,7 +103,7 @@ export const filterEventsAgainstList = async ({
     }
 
     const valueListExceptionItems = exceptionsList.filter((listItem: ExceptionListItemSchema) => {
-      return listItem.entries.some((entry) => entriesList.is(entry));
+      return listItem.entries.every((entry) => entriesList.is(entry));
     });
 
     // now that we have all the exception items which are value lists (whether single entry or have multiple entries)
