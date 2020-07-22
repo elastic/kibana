@@ -112,7 +112,6 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
     const selectedNode = useSelector(selectors.selectedNode);
     const nodeID = processEventModel.uniquePidForProcess(event);
     const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
