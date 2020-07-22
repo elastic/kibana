@@ -37,7 +37,7 @@ export async function mountApp(
   );
 
   const stateTransfer = embeddable?.getStateTransfer(params.history);
-  let { originatingApp } =
+  const { originatingApp } =
     stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
 
   const instance = await createEditorFrame();
@@ -54,9 +54,6 @@ export async function mountApp(
     returnToOrigin?: boolean,
     newlyCreated?: boolean
   ) => {
-    if (!returnToOrigin) {
-      originatingApp = undefined;
-    }
     if (!id) {
       routeProps.history.push('/');
     } else if (!originatingApp) {
