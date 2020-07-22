@@ -9,7 +9,6 @@
 import _ from 'lodash';
 import { map } from 'rxjs/operators';
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ml } from './ml_api_service';
 
 // Gets a basic summary of the most recently run forecasts for the specified
@@ -50,7 +49,6 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
 
     ml.results
       .anomalySearch({
-        index: ML_RESULTS_INDEX_PATTERN,
         size: maxResults,
         rest_total_hits_as_int: true,
         body: {
@@ -109,7 +107,6 @@ function getForecastDateRange(job, forecastId) {
 
     ml.results
       .anomalySearch({
-        index: ML_RESULTS_INDEX_PATTERN,
         size: 0,
         body: {
           query: {
@@ -247,7 +244,6 @@ function getForecastData(
 
   return ml.results
     .anomalySearch$({
-      index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
         query: {
@@ -347,7 +343,6 @@ function getForecastRequestStats(job, forecastId) {
 
     ml.results
       .anomalySearch({
-        index: ML_RESULTS_INDEX_PATTERN,
         size: 1,
         rest_total_hits_as_int: true,
         body: {

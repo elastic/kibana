@@ -11,7 +11,6 @@ import url from 'url';
 
 import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../src/plugins/dashboard/public';
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
@@ -297,7 +296,6 @@ export function getTestUrl(job, customUrl) {
   return new Promise((resolve, reject) => {
     ml.results
       .anomalySearch({
-        index: ML_RESULTS_INDEX_PATTERN,
         rest_total_hits_as_int: true,
         body,
       })
