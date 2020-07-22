@@ -59,10 +59,13 @@ export async function addMessagesToReport(options: {
     log.info(`${classname} - ${name}:${messageList}`);
     const output = `Failed Tests Reporter:${messageList}\n\n`;
 
-    if (!testCase['system-out']) {
-      testCase['system-out'] = [output];
+    if (typeof testCase.failure[0] === 'object' && testCase.failure[0].$.message) {
+      // extend failure message rather than system-out
+      testCase.failure[0].$.message = output + testCase.failure[0].$.message;
+    } else if (!testCase['system-out']) {
+      testCase['system-out'] = [{ _: output }];
     } else if (typeof testCase['system-out'][0] === 'string') {
-      testCase['system-out'][0] = output + String(testCase['system-out'][0]);
+      testCase['system-out'][0] = { _: output + testCase['system-out'][0] };
     } else {
       testCase['system-out'][0]._ = output + testCase['system-out'][0]._;
     }
