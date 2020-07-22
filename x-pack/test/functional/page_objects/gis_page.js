@@ -17,6 +17,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
+  const renderable = getService('renderable');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
@@ -134,6 +135,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
       await this.gotoMapListingPage();
       await testSubjects.click('newMapLink');
+      await renderable.waitForRender();
     }
 
     async saveMap(name) {
