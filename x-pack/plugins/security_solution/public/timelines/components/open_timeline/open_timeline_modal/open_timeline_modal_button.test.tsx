@@ -10,7 +10,8 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-import { wait } from '../../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { TestProviderWithoutDragAndDrop } from '../../../../common/mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../../common/mock/timeline_results';
 import * as i18n from '../translations';
@@ -29,13 +30,13 @@ describe('OpenTimelineModalButton', () => {
       </TestProviderWithoutDragAndDrop>
     );
 
-    await wait();
+    await waitFor(() => {
+      wrapper.update();
 
-    wrapper.update();
-
-    expect(wrapper.find('[data-test-subj="open-timeline-button"]').first().text()).toEqual(
-      i18n.OPEN_TIMELINE
-    );
+      expect(wrapper.find('[data-test-subj="open-timeline-button"]').first().text()).toEqual(
+        i18n.OPEN_TIMELINE
+      );
+    });
   });
 
   describe('onClick prop', () => {
@@ -51,13 +52,13 @@ describe('OpenTimelineModalButton', () => {
         </ThemeProvider>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper.find('[data-test-subj="open-timeline-button"]').first().simulate('click');
 
-      wrapper.find('[data-test-subj="open-timeline-button"]').first().simulate('click');
+        wrapper.update();
 
-      wrapper.update();
-
-      expect(onClick).toBeCalled();
+        expect(onClick).toBeCalled();
+      });
     });
   });
 });

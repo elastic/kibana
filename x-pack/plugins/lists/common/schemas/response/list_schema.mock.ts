@@ -8,12 +8,14 @@ import { ListSchema } from '../../../common/schemas';
 import {
   DATE_NOW,
   DESCRIPTION,
+  IMMUTABLE,
   LIST_ID,
   META,
   NAME,
   TIE_BREAKER,
   TYPE,
   USER,
+  VERSION,
 } from '../../../common/constants.mock';
 
 export const getListResponseMock = (): ListSchema => ({
@@ -23,6 +25,7 @@ export const getListResponseMock = (): ListSchema => ({
   description: DESCRIPTION,
   deserializer: undefined,
   id: LIST_ID,
+  immutable: IMMUTABLE,
   meta: META,
   name: NAME,
   serializer: undefined,
@@ -30,4 +33,5 @@ export const getListResponseMock = (): ListSchema => ({
   type: TYPE,
   updated_at: DATE_NOW,
   updated_by: USER,
+  version: VERSION,
 });

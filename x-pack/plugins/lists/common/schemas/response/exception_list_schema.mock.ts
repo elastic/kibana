@@ -8,9 +8,11 @@ import {
   DATE_NOW,
   DESCRIPTION,
   ENDPOINT_TYPE,
+  IMMUTABLE,
   META,
   TIE_BREAKER,
   USER,
+  VERSION,
   _VERSION,
 } from '../../constants.mock';
 import { ENDPOINT_LIST_ID } from '../..';
@@ -23,6 +25,7 @@ export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   created_by: USER,
   description: DESCRIPTION,
   id: '1',
+  immutable: IMMUTABLE,
   list_id: ENDPOINT_LIST_ID,
   meta: META,
   name: 'Sample Endpoint Exception List',
@@ -32,4 +35,5 @@ export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   type: ENDPOINT_TYPE,
   updated_at: DATE_NOW,
   updated_by: 'user_name',
+  version: VERSION,
 });
