@@ -36,7 +36,7 @@ export const validateParams = (
 ): boolean => {
   // Box would show error state if empty otherwise
   if (params == null || params === '') {
-    return true;
+    return false;
   }
 
   const types = field != null && field.esTypes != null ? field.esTypes : [];

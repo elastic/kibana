@@ -47,6 +47,12 @@ module.exports = async ({ config }) => {
     ],
   });
 
+  config.module.rules.push({
+    test: /\.mjs$/,
+    include: /node_modules/,
+    type: 'javascript/auto',
+  });
+
   // Parse props data for .tsx files
   // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
   // See: https://github.com/storybookjs/storybook/issues/7998
@@ -115,6 +121,15 @@ module.exports = async ({ config }) => {
         loader: 'sass-loader',
       },
     ],
+  });
+
+  // Exclude large-dependency modules that need not be included in Storybook.
+  config.module.rules.push({
+    test: [
+      path.resolve(__dirname, '../public/components/embeddable_flyout'),
+      path.resolve(__dirname, '../../reporting/public'),
+    ],
+    use: 'null-loader',
   });
 
   // Ensure jQuery is global for Storybook, specifically for the runtime.
@@ -215,6 +230,8 @@ module.exports = async ({ config }) => {
   config.resolve.alias['ui/chrome'] = path.resolve(__dirname, '../tasks/mocks/uiChrome');
   config.resolve.alias.ui = path.resolve(KIBANA_ROOT, 'src/legacy/ui/public');
   config.resolve.alias.ng_mock$ = path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock');
+
+  config.resolve.extensions.push('.mjs');
 
   return config;
 };
