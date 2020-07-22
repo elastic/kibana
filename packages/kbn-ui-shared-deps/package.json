@@ -38,10 +38,10 @@
   "devDependencies": {
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
-    "css-loader": "^3.4.2",
+    "css-loader": "^3.6.0",
     "del": "^5.1.0",
-    "loader-utils": "^1.2.3",
-    "val-loader": "^1.1.1",
-    "webpack": "^4.41.5"
+    "loader-utils": "^2.0.0",
+    "val-loader": "^2.1.1",
+    "webpack": "^4.43.0"
   }
 }
