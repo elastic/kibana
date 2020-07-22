@@ -120,9 +120,9 @@ export const getTimelineByTemplateTimelineId = async (
 /** The filter here is able to handle the legacy data,
  * which has no timelineType exists in the savedObject */
 const getTimelineTypeFilter = (
-  timelineType: TimelineTypeLiteralWithNull,
-  templateTimelineType: TemplateTimelineTypeLiteralWithNull,
-  status: TimelineStatusLiteralWithNull
+  timelineType?: TimelineTypeLiteralWithNull,
+  templateTimelineType?: TemplateTimelineTypeLiteralWithNull,
+  status?: TimelineStatusLiteralWithNull
 ) => {
   const typeFilter =
     timelineType == null
@@ -192,11 +192,11 @@ export const getAllTimeline = async (
   request: FrameworkRequest,
   onlyUserFavorite: boolean | null,
   pageInfo: PageInfoTimeline,
-  search: string | null,
-  sort: SortTimeline | null,
-  status: TimelineStatusLiteralWithNull,
-  timelineType: TimelineTypeLiteralWithNull,
-  templateTimelineType: TemplateTimelineTypeLiteralWithNull
+  search?: string | null,
+  sort?: SortTimeline | null,
+  status?: TimelineStatusLiteralWithNull,
+  timelineType?: TimelineTypeLiteralWithNull,
+  templateTimelineType?: TemplateTimelineTypeLiteralWithNull
 ): Promise<AllTimelinesResponse> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
@@ -206,7 +206,7 @@ export const getAllTimeline = async (
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
       : ['title', 'description'],
-    filter: getTimelineTypeFilter(timelineType, templateTimelineType, status),
+    filter: getTimelineTypeFilter(timelineType, templateTimelineType ?? null, status),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
@@ -215,7 +215,7 @@ export const getAllTimeline = async (
     type: timelineSavedObjectType,
     perPage: 1,
     page: 1,
-    filter: getTimelineTypeFilter(TimelineType.default, null, TimelineStatus.active),
+    filter: getTimelineTypeFilter(TimelineType.default, null, status ?? TimelineStatus.active),
   };
 
   const templateTimelineOptions = {
@@ -521,7 +521,6 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
       ]);
     })
   );
-
   return {
     totalCount: savedObjects.total,
     timeline: timelinesWithNotesAndPinnedEvents.map(([notes, pinnedEvents, timeline]) =>
