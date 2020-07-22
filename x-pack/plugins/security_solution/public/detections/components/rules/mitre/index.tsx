@@ -35,7 +35,6 @@ const MyEuiSuperSelect = styled(EuiSuperSelect)`
 `;
 interface AddItemProps {
   field: FieldHook;
-  dataTestSubj: string;
   idAria: string;
   isDisabled: boolean;
 }

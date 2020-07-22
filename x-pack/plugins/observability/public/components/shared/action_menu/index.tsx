@@ -24,7 +24,7 @@ export function SectionTitle({ children }: { children?: ReactNode }) {
   return (
     <>
       <EuiText size={'s'} grow={false}>
-        <h5>{props.children}</h5>
+        <h5>{children}</h5>
       </EuiText>
       <EuiSpacer size={'s'} />
     </>

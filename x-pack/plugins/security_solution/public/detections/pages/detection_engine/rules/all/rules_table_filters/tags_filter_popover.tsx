@@ -22,7 +22,6 @@ interface TagsFilterPopoverProps {
   selectedTags: string[];
   tags: string[];
   onSelectedTagsChanged: Dispatch<SetStateAction<string[]>>;
-  isLoading: boolean; // TO DO reimplement?
 }
 
 const ScrollableDiv = styled.div`
