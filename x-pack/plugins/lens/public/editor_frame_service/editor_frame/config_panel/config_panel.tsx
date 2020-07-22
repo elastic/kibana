@@ -36,32 +36,33 @@ function LayerPanels(
     dispatch,
     activeDatasourceId,
     datasourceMap,
+    dispatch,
   } = props;
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_VISUALIZATION_STATE',
         visualizationId: activeVisualization.id,
         newState,
         clearStagedPreview: false,
       });
     },
-    [props.dispatch, activeVisualization]
+    [dispatch, activeVisualization]
   );
   const updateDatasource = useMemo(
     () => (datasourceId: string, newState: unknown) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
         updater: () => newState,
         datasourceId,
         clearStagedPreview: false,
       });
     },
-    [props.dispatch]
+    [dispatch]
   );
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_STATE',
         subType: 'UPDATE_ALL_STATES',
         updater: (prevState) => {
@@ -83,7 +84,7 @@ function LayerPanels(
         },
       });
     },
-    [props.dispatch]
+    [dispatch]
   );
   const layerIds = activeVisualization.getLayerIds(visualizationState);
 
