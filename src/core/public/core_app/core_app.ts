@@ -71,6 +71,7 @@ export class CoreApp {
       id: 'status',
       title: 'Server Status',
       appRoute: '/status',
+      chromeless: true,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount(params: AppMountParameters) {
         return renderStatusApp(params, { http, notifications });
