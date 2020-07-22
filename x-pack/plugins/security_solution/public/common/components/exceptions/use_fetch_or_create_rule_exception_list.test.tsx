@@ -168,6 +168,24 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         expect(patchRule).toHaveBeenCalledTimes(1);
       });
     });
+    it('invokes onSuccess indicating that the rule changed', async () => {
+      const onSuccess = jest.fn();
+      await act(async () => {
+        const { waitForNextUpdate } = renderHook(() =>
+          useFetchOrCreateRuleExceptionList({
+            http: mockKibanaHttpService,
+            ruleId,
+            exceptionListType: detectionListType,
+            onError,
+            onSuccess,
+          })
+        );
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        expect(onSuccess).toHaveBeenCalledWith(true);
+      });
+    });
   });
 
   describe("when the rule has exception list references and 'detection' is passed in", () => {
@@ -205,6 +223,24 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         expect(result.current[1]).toEqual(detectionExceptionList);
+      });
+    });
+    it('invokes onSuccess indicating that the rule did not change', async () => {
+      const onSuccess = jest.fn();
+      await act(async () => {
+        const { waitForNextUpdate } = renderHook(() =>
+          useFetchOrCreateRuleExceptionList({
+            http: mockKibanaHttpService,
+            ruleId,
+            exceptionListType: detectionListType,
+            onError,
+            onSuccess,
+          })
+        );
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        expect(onSuccess).toHaveBeenCalledWith(false);
       });
     });
 

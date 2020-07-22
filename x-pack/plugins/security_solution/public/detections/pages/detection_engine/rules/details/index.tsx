@@ -37,7 +37,7 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
-import { useRule, Rule } from '../../../../containers/detection_engine/rules';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import { useWithSource } from '../../../../../common/containers/source';
@@ -84,7 +84,7 @@ import { ExceptionsViewer } from '../../../../../common/components/exceptions/vi
 import { DEFAULT_INDEX_PATTERN, FILTERS_GLOBAL_HEIGHT } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
-import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../lists_plugin_deps';
+import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../shared_imports';
 import {
   getEventsViewerBodyHeight,
   MIN_EVENTS_VIEWER_BODY_HEIGHT,
@@ -92,6 +92,7 @@ import {
 import { footerHeight } from '../../../../../timelines/components/timeline/footer';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
+import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -141,7 +142,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams();
-  const [isLoading, rule] = useRule(ruleId);
+  const { rule, refresh: refreshRule, loading: isLoading } = useRuleAsync(ruleId);
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
@@ -519,6 +520,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                 availableListTypes={exceptionLists.allowedExceptionListTypes}
                 commentsAccordionId={'ruleDetailsTabExceptions'}
                 exceptionListsMeta={exceptionLists.lists}
+                onRuleChange={refreshRule}
               />
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
