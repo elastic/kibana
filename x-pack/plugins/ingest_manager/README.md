@@ -45,63 +45,26 @@ One common development workflow is:
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide
 ](https://github.com/elastic/kibana/blob/master/style_guides/architecture_style_guide.md#file-and-folder-structure). We also follow the pattern of developing feature branches under your personal fork of Kibana.
 
-### API Tests
+### Tests
 
-#### Ingest & Fleet
+#### API integration tests
 
-1. In one terminal, change to the `x-pack` directory and start the test server with
+You need to have `docker` to run ingest manager api integration tests
 
-   ```
-   node scripts/functional_tests_server.js --config test/api_integration/config.ts
-   ```
-
-1. in a second terminal, run the tests from the Kibana root directory with
-   ```
-   node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.ts
-   ```
-
-#### EPM
-
-1. In one terminal, change to the `x-pack` directory and start the test server with
+1. In one terminal, run the tests from the Kibana root directory with
 
    ```
-   node scripts/functional_tests_server.js --config test/epm_api_integration/config.ts
+   INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/ingest_manager_api_integration/config.ts
    ```
 
 1. in a second terminal, run the tests from the Kibana root directory with
+
    ```
-   node scripts/functional_test_runner.js --config x-pack/test/epm_api_integration/config.ts
+   INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts
    ```
 
-### Staying up-to-date with `master`
+   Optionally you can filter which tests you want to run using `--grep`
 
-While we're developing in the `feature-ingest` feature branch, here's is more information on keeping up to date with upstream kibana.
-
-<details>
-  <summary>merge upstream <code>master</code> into <code>feature-ingest</code></summary>
-
-```bash
-## checkout feature branch to your fork
-git checkout -B feature-ingest origin/feature-ingest
-
-## make sure your feature branch is current with upstream feature branch
-git pull upstream feature-ingest
-
-## pull in changes from upstream master
-git pull upstream master
-
-## push changes to your remote
-git push origin
-
-# /!\ Open a DRAFT PR /!\
-# Normal PRs will re-notify authors of commits already merged
-# Draft PR will trigger CI run. Once CI is green ...
-# /!\ DO NOT USE THE GITHUB UI TO MERGE THE PR /!\
-
-## push your changes to upstream feature branch from the terminal; not GitHub UI
-git push upstream
-```
-
-</details>
-
-See https://github.com/elastic/kibana/pull/37950 for an example.
+   ```
+   INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/ingest_manager_api_integration/config.ts --grep='fleet'
+   ```

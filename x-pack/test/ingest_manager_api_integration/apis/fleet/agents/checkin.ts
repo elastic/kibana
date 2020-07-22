@@ -7,8 +7,9 @@
 import expect from '@kbn/expect';
 import uuid from 'uuid';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { getSupertestWithoutAuth, setupIngest } from './services';
+import { skipIfNoDockerRegistry } from '../../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -19,6 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   let apiKey: { id: string; api_key: string };
 
   describe('fleet_agents_checkin', () => {
+    skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 

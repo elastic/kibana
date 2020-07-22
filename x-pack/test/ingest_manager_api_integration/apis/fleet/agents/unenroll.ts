@@ -7,8 +7,9 @@
 import expect from '@kbn/expect';
 import uuid from 'uuid';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { setupIngest } from './agents/services';
+import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
+import { setupIngest } from './services';
+import { skipIfNoDockerRegistry } from '../../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -17,6 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
 
   describe('fleet_unenroll_agent', () => {
+    skipIfNoDockerRegistry(providerContext);
     let accessAPIKeyId: string;
     let outputAPIKeyId: string;
     before(async () => {
