@@ -33,7 +33,7 @@ function errorAttempts(task: TaskInstance): Err<OperationError<TaskInstance, Err
   });
 }
 
-describe.skip('Bulk Operation Buffer', () => {
+describe('Bulk Operation Buffer', () => {
   describe('createBuffer()', () => {
     test('batches up multiple Operation calls', async () => {
       const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
@@ -52,48 +52,6 @@ describe.skip('Bulk Operation Buffer', () => {
         incrementAttempts(task2),
       ]);
       expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
-    });
-
-    test('batch updates are executed at most by the next Event Loop tick by default', async () => {
-      const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn((tasks) => {
-        return Promise.resolve(tasks.map(incrementAttempts));
-      });
-
-      const bufferedUpdate = createBuffer(bulkUpdate);
-
-      const task1 = createTask();
-      const task2 = createTask();
-      const task3 = createTask();
-      const task4 = createTask();
-      const task5 = createTask();
-      const task6 = createTask();
-
-      return new Promise((resolve) => {
-        Promise.all([bufferedUpdate(task1), bufferedUpdate(task2)]).then((_) => {
-          expect(bulkUpdate).toHaveBeenCalledTimes(1);
-          expect(bulkUpdate).toHaveBeenCalledWith([task1, task2]);
-          expect(bulkUpdate).not.toHaveBeenCalledWith([task3, task4]);
-        });
-
-        setTimeout(() => {
-          // on next tick
-          setTimeout(() => {
-            // on next tick
-            expect(bulkUpdate).toHaveBeenCalledTimes(2);
-            Promise.all([bufferedUpdate(task5), bufferedUpdate(task6)]).then((_) => {
-              expect(bulkUpdate).toHaveBeenCalledTimes(3);
-              expect(bulkUpdate).toHaveBeenCalledWith([task5, task6]);
-              resolve();
-            });
-          }, 0);
-
-          expect(bulkUpdate).toHaveBeenCalledTimes(1);
-          Promise.all([bufferedUpdate(task3), bufferedUpdate(task4)]).then((_) => {
-            expect(bulkUpdate).toHaveBeenCalledTimes(2);
-            expect(bulkUpdate).toHaveBeenCalledWith([task3, task4]);
-          });
-        }, 0);
-      });
     });
 
     test('batch updates can be customised to execute after a certain period', async () => {
