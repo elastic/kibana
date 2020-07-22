@@ -55,6 +55,7 @@ export const importListItemRoute = (router: IRouter, config: ConfigType): void =
             serializer: list.serializer,
             stream,
             type: list.type,
+            version: 1,
           });
 
           const [validated, errors] = validate(list, listSchema);
@@ -71,6 +72,7 @@ export const importListItemRoute = (router: IRouter, config: ConfigType): void =
             serializer,
             stream,
             type,
+            version: 1,
           });
           if (importedList == null) {
             return siemResponse.error({
