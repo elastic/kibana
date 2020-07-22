@@ -30,9 +30,6 @@ export const createActionRoute = (router: IRouter, licenseState: ILicenseState) 
       validate: {
         body: bodySchema,
       },
-      options: {
-        tags: ['access:actions-all'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
