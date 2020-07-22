@@ -112,7 +112,7 @@ export function App({
         featureFlagConfig.showNewLensFlow &&
         !!embeddableEditorIncomingState?.originatingApp &&
         (!!embeddableEditorIncomingState?.valueInput ||
-          !!embeddableEditorIncomingState?.byValueMode),
+          !embeddableEditorIncomingState?.embeddableId),
       indexPatternsForTopNav: [],
       query: { query: '', language },
       dateRange: {

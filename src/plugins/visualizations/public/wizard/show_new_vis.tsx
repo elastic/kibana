@@ -50,7 +50,6 @@ export function showNewVisModal({
   onClose,
   originatingApp,
   outsideVisualizeApp,
-  createByValue,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
   let isClosed = false;
@@ -71,7 +70,6 @@ export function showNewVisModal({
         isOpen={true}
         onClose={handleClose}
         originatingApp={originatingApp}
-        createByValue={createByValue}
         stateTransfer={getEmbeddable().getStateTransfer()}
         outsideVisualizeApp={outsideVisualizeApp}
         editorParams={editorParams}

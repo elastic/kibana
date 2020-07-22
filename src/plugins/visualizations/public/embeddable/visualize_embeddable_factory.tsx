@@ -136,7 +136,6 @@ export class VisualizeEmbeddableFactory
       showNewVisModal({
         originatingApp: await this.getCurrentAppId(),
         outsideVisualizeApp: true,
-        createByValue: true,
       });
       return undefined;
     }

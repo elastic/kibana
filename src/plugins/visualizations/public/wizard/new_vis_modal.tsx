@@ -43,7 +43,6 @@ interface TypeSelectionProps {
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
-  createByValue?: boolean;
   originatingApp?: string;
 }
 
@@ -177,7 +176,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         path: params,
         state: {
           originatingApp: this.props.originatingApp,
-          byValueMode: this.props.createByValue,
         },
       });
     } else {
