@@ -144,6 +144,7 @@ export const PolicyList = React.memo(() => {
     selectDeleteStatus: deleteStatus,
     selectAgentStatusSummary: agentStatusSummary,
     endpointPackageVersion,
+    agentConfigNames: agentConfigs,
   } = usePolicyListSelector(selector);
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
@@ -284,6 +285,15 @@ export const PolicyList = React.memo(() => {
         },
       },
       {
+        field: '',
+        name: i18n.translate('xpack.securitySolution.endpoint.policyList.agentConfig', {
+          defaultMessage: 'Agent Config',
+        }),
+        render: (item: PolicyData) => {
+          return agentConfigs[item.config_id] ?? '-';
+        },
+      },
+      {
         field: 'created_by',
         name: i18n.translate('xpack.securitySolution.endpoint.policyList.createdBy', {
           defaultMessage: 'Created By',
@@ -376,7 +386,7 @@ export const PolicyList = React.memo(() => {
         ],
       },
     ],
-    [services.application, handleDeleteOnClick, formatUrl, search]
+    [search, formatUrl, agentConfigs, services.application, handleDeleteOnClick]
   );
 
   return (

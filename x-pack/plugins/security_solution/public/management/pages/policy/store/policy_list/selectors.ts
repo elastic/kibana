@@ -98,3 +98,18 @@ export const endpointPackageVersion = createSelector(
   endpointPackageInfo,
   (info) => info?.version ?? undefined
 );
+
+/**
+ * Returns an object with agent config IDs mapped to their associated names
+ */
+export const agentConfigNames: (
+  state: Immutable<PolicyListState>
+) => Immutable<Record<string, string>> = createSelector(
+  (state) => state.agentConfigs,
+  (agentConfigs) => {
+    return Object.values(agentConfigs).reduce<Record<string, string>>((list, agentConfig) => {
+      list[agentConfig.id] = agentConfig.name;
+      return list;
+    }, {});
+  }
+);
