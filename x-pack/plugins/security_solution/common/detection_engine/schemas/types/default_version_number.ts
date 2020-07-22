@@ -19,3 +19,5 @@ export const DefaultVersionNumber = new t.Type<Version, Version | undefined, unk
     input == null ? t.success(1) : version.validate(input, context),
   t.identity
 );
+
+export type DefaultVersionNumberDecoded = t.TypeOf<typeof DefaultVersionNumber>;

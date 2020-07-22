@@ -22,7 +22,7 @@ import { StatefulBody } from '../../../timelines/components/timeline/body/statef
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
 import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
-import { combineQueries } from '../../../timelines/components/timeline/helpers';
+import { combineQueries, resolverIsShowing } from '../../../timelines/components/timeline/helpers';
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
@@ -71,6 +71,16 @@ const TitleFlexGroup = styled(EuiFlexGroup)`
 const EventsContainerLoading = styled.div`
   width: 100%;
   overflow: auto;
+`;
+
+/**
+ * Hides stateful headerFilterGroup implementations, but prevents the component
+ * from being unmounted, to preserve the state of the component
+ */
+const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
+  ${({ show }) => css`
+    ${show ? '' : 'visibility: hidden;'};
+  `}
 `;
 
 interface Props {
@@ -234,14 +244,21 @@ const EventsViewerComponent: React.FC<Props> = ({
               return (
                 <>
                   <HeaderSection
-                    id={id}
+                    id={!resolverIsShowing(graphEventId) ? id : undefined}
                     height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
                     subtitle={utilityBar ? undefined : subtitle}
                     title={inspect ? justTitle : titleWithExitFullScreen}
                   >
-                    {headerFilterGroup}
+                    {headerFilterGroup && (
+                      <HeaderFilterGroupWrapper
+                        data-test-subj="header-filter-group-wrapper"
+                        show={!resolverIsShowing(graphEventId)}
+                      >
+                        {headerFilterGroup}
+                      </HeaderFilterGroupWrapper>
+                    )}
                   </HeaderSection>
-                  {utilityBar && (
+                  {utilityBar && !resolverIsShowing(graphEventId) && (
                     <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
                   )}
                   <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
@@ -307,6 +324,7 @@ export const EventsViewer = React.memo(
     prevProps.deletedEventIds === nextProps.deletedEventIds &&
     prevProps.end === nextProps.end &&
     deepEqual(prevProps.filters, nextProps.filters) &&
+    prevProps.headerFilterGroup === nextProps.headerFilterGroup &&
     prevProps.height === nextProps.height &&
     prevProps.id === nextProps.id &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&

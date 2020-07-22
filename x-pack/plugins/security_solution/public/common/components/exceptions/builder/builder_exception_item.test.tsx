@@ -12,10 +12,8 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { ExceptionListItemComponent } from './builder_exception_item';
 import { fields } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import {
-  getEntryMatchMock,
-  getEntryMatchAnyMock,
-} from '../../../../../../lists/common/schemas/types/entries.mock';
+import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
 
 describe('ExceptionListItemComponent', () => {
   describe('and badge logic', () => {

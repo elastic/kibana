@@ -15,11 +15,17 @@ import { wait as waitFor } from '@testing-library/react';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
+import { EventsViewer } from './events_viewer';
 import { defaultHeaders } from './default_headers';
 import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { mockBrowserFields, mockDocValueFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { inputsModel } from '../../store/inputs';
+import { TimelineId } from '../../../../common/types/timeline';
+import { KqlMode } from '../../../timelines/store/timeline/model';
+import { SortDirection } from '../../../timelines/components/timeline/body/sort';
+import { AlertsTableFilterGroup } from '../../../detections/components/alerts_table/alerts_filter_group';
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
@@ -38,6 +44,39 @@ const defaultMocks = {
   indexPatterns: mockIndexPattern,
   docValueFields: mockDocValueFields,
   isLoading: false,
+};
+
+const utilityBar = (refetch: inputsModel.Refetch, totalCount: number) => (
+  <div data-test-subj="mock-utility-bar" />
+);
+
+const eventsViewerDefaultProps = {
+  browserFields: {},
+  columns: [],
+  dataProviders: [],
+  deletedEventIds: [],
+  docValueFields: [],
+  end: to,
+  filters: [],
+  id: TimelineId.detectionsPage,
+  indexPattern: mockIndexPattern,
+  isLive: false,
+  isLoadingIndexPattern: false,
+  itemsPerPage: 10,
+  itemsPerPageOptions: [],
+  kqlMode: 'filter' as KqlMode,
+  onChangeItemsPerPage: jest.fn(),
+  query: {
+    query: '',
+    language: 'kql',
+  },
+  start: from,
+  sort: {
+    columnId: 'foo',
+    sortDirection: 'none' as SortDirection,
+  },
+  toggleColumn: jest.fn(),
+  utilityBar,
 };
 
 describe('EventsViewer', () => {
@@ -210,6 +249,214 @@ describe('EventsViewer', () => {
             true
           )
         );
+      });
+    });
+  });
+
+  describe('headerFilterGroup', () => {
+    test('it renders the provided headerFilterGroup', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer
+              {...eventsViewerDefaultProps}
+              graphEventId={undefined}
+              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="alerts-table-filter-group"]`).exists()).toBe(true);
+      });
+    });
+
+    test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is undefined', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer
+              {...eventsViewerDefaultProps}
+              graphEventId={undefined}
+              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(
+          wrapper.find(`[data-test-subj="header-filter-group-wrapper"]`).first()
+        ).not.toHaveStyleRule('visibility', 'hidden');
+      });
+    });
+
+    test('it has a visible HeaderFilterGroupWrapper when Resolver is NOT showing, because graphEventId is an empty string', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer
+              {...eventsViewerDefaultProps}
+              graphEventId=""
+              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(
+          wrapper.find(`[data-test-subj="header-filter-group-wrapper"]`).first()
+        ).not.toHaveStyleRule('visibility', 'hidden');
+      });
+    });
+
+    test('it does NOT have a visible HeaderFilterGroupWrapper when Resolver is showing, because graphEventId is a valid id', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer
+              {...eventsViewerDefaultProps}
+              graphEventId="a valid id"
+              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(
+          wrapper.find(`[data-test-subj="header-filter-group-wrapper"]`).first()
+        ).toHaveStyleRule('visibility', 'hidden');
+      });
+    });
+
+    test('it (still) renders an invisible headerFilterGroup (to maintain state while hidden) when Resolver is showing, because graphEventId is a valid id', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer
+              {...eventsViewerDefaultProps}
+              graphEventId="a valid id"
+              headerFilterGroup={<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="alerts-table-filter-group"]`).exists()).toBe(true);
+      });
+    });
+  });
+
+  describe('utilityBar', () => {
+    test('it renders the provided utilityBar when Resolver is NOT showing, because graphEventId is undefined', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer {...eventsViewerDefaultProps} graphEventId={undefined} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="mock-utility-bar"]`).exists()).toBe(true);
+      });
+    });
+
+    test('it renders the provided utilityBar when Resolver is NOT showing, because graphEventId is an empty string', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer {...eventsViewerDefaultProps} graphEventId="" />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="mock-utility-bar"]`).exists()).toBe(true);
+      });
+    });
+
+    test('it does NOT render the provided utilityBar when Resolver is showing, because graphEventId is a valid id', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer {...eventsViewerDefaultProps} graphEventId="a valid id" />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="mock-utility-bar"]`).exists()).toBe(false);
+      });
+    });
+  });
+
+  describe('header inspect button', () => {
+    test('it renders the inspect button when Resolver is NOT showing, because graphEventId is undefined', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer {...eventsViewerDefaultProps} graphEventId={undefined} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="inspect-icon-button"]`).exists()).toBe(true);
+      });
+    });
+
+    test('it renders the inspect button when Resolver is NOT showing, because graphEventId is an empty string', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer {...eventsViewerDefaultProps} graphEventId="" />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="inspect-icon-button"]`).exists()).toBe(true);
+      });
+    });
+
+    test('it does NOT render the inspect button when Resolver is showing, because graphEventId is a valid id', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
+            <EventsViewer {...eventsViewerDefaultProps} graphEventId="a valid id" />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+
+        expect(wrapper.find(`[data-test-subj="inspect-icon-button"]`).exists()).toBe(false);
       });
     });
   });
