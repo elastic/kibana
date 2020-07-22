@@ -137,7 +137,7 @@ const OverviewNetworkStatsComponent: React.FC<OverviewNetworkProps> = ({ data, l
   return (
     <NetworkStatsContainer data-test-subj="overview-network-stats">
       {networkStatGroups.map((statGroup, i) => {
-        const statsForGroup = allNetworkStats.filter(s => statGroup.statIds.includes(s.id));
+        const statsForGroup = allNetworkStats.filter((s) => statGroup.statIds.includes(s.id));
         const statsForGroupCount = statsForGroup.reduce((total, stat) => total + stat.count, 0);
 
         return (
@@ -166,7 +166,7 @@ const OverviewNetworkStatsComponent: React.FC<OverviewNetworkProps> = ({ data, l
               buttonContentClassName="accordion-button"
             >
               <AccordionContent>
-                {statsForGroup.map(stat => (
+                {statsForGroup.map((stat) => (
                   <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
                       <EuiText color="subdued" size="s">

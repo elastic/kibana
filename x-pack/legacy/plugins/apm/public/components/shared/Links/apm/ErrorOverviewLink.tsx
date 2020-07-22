@@ -30,7 +30,7 @@ const ErrorOverviewLink = ({ serviceName, query, ...rest }: Props) => {
       path={`/services/${serviceName}/errors`}
       query={{
         ...persistedFilters,
-        ...query
+        ...query,
       }}
       {...rest}
     />

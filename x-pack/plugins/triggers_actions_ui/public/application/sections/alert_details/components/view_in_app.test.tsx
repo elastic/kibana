@@ -14,7 +14,9 @@ import { useAppDependencies } from '../../../app_context';
 
 jest.mock('../../../app_context', () => {
   const alerting = {
-    getNavigation: jest.fn(async id => (id === 'alert-with-nav' ? { path: '/alert' } : undefined)),
+    getNavigation: jest.fn(async (id) =>
+      id === 'alert-with-nav' ? { path: '/alert' } : undefined
+    ),
   };
   const navigateToApp = jest.fn();
   return {
@@ -79,7 +81,7 @@ describe('view in app', () => {
 });
 
 function waitForUseEffect() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, 0);
   });
 }

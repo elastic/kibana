@@ -32,7 +32,7 @@ export class RemoteClusterAdd extends PureComponent {
     this.props.clearAddClusterErrors();
   }
 
-  save = clusterConfig => {
+  save = (clusterConfig) => {
     this.props.addCluster(clusterConfig);
   };
 

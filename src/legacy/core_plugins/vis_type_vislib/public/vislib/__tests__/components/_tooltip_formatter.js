@@ -23,14 +23,11 @@ import expect from '@kbn/expect';
 
 import { pointSeriesTooltipFormatter } from '../../components/tooltip';
 
-describe('tooltipFormatter', function() {
+describe('tooltipFormatter', function () {
   const tooltipFormatter = pointSeriesTooltipFormatter();
 
   function cell($row, i) {
-    return $row
-      .eq(i)
-      .text()
-      .trim();
+    return $row.eq(i).text().trim();
   }
 
   const baseEvent = {
@@ -60,7 +57,7 @@ describe('tooltipFormatter', function() {
     },
   };
 
-  it('returns html based on the mouse event', function() {
+  it('returns html based on the mouse event', function () {
     const event = _.cloneDeep(baseEvent);
     const $el = $(tooltipFormatter(event));
     const $rows = $el.find('tr');
@@ -79,7 +76,7 @@ describe('tooltipFormatter', function() {
     expect(cell($row3, 1)).to.be('1');
   });
 
-  it('renders correctly on missing extraMetrics in datum', function() {
+  it('renders correctly on missing extraMetrics in datum', function () {
     const event = _.cloneDeep(baseEvent);
     delete event.datum.extraMetrics;
     const $el = $(tooltipFormatter(event));

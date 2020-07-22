@@ -46,7 +46,7 @@ export class SnapshotRestoreUIPlugin {
         defaultMessage: 'Snapshot and Restore',
       }),
       order: 7,
-      mount: async params => {
+      mount: async (params) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
         const services = {
           uiMetricService: this.uiMetricService,

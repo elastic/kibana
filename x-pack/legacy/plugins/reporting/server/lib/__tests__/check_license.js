@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { set } from 'lodash';
 import { checkLicenseFactory } from '../check_license';
 
-describe('check_license', function() {
+describe('check_license', function () {
   let mockLicenseInfo;
   let checkLicense;
 

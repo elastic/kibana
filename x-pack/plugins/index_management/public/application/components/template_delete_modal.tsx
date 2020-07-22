@@ -24,7 +24,7 @@ export const TemplateDeleteModal = ({
   const numTemplatesToDelete = templatesToDelete.length;
 
   const hasSystemTemplate = Boolean(
-    templatesToDelete.find(templateName => templateName.startsWith('.'))
+    templatesToDelete.find((templateName) => templateName.startsWith('.'))
   );
 
   const handleDeleteTemplates = () => {
@@ -120,7 +120,7 @@ export const TemplateDeleteModal = ({
           </p>
 
           <ul>
-            {templatesToDelete.map(template => (
+            {templatesToDelete.map((template) => (
               <li key={template}>
                 {template}
                 {template.startsWith('.') ? (
@@ -165,7 +165,7 @@ export const TemplateDeleteModal = ({
                   />
                 }
                 checked={isDeleteConfirmed}
-                onChange={e => setIsDeleteConfirmed(e.target.checked)}
+                onChange={(e) => setIsDeleteConfirmed(e.target.checked)}
               />
             </EuiCallOut>
           )}

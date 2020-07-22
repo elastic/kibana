@@ -33,10 +33,7 @@ describe('FieldName', () => {
     );
 
     expect(
-      wrapper
-        .find(`[data-test-subj="field-name-${timestampFieldId}"]`)
-        .first()
-        .text()
+      wrapper.find(`[data-test-subj="field-name-${timestampFieldId}"]`).first().text()
     ).toEqual(timestampFieldId);
   });
 
@@ -99,10 +96,7 @@ describe('FieldName', () => {
 
     wrapper.simulate('mouseenter');
     wrapper.update();
-    wrapper
-      .find('[data-test-subj="view-category"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="view-category"]').first().simulate('click');
 
     expect(onUpdateColumns).toBeCalledWith([
       {
@@ -137,11 +131,6 @@ describe('FieldName', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('strong')
-        .first()
-        .text()
-    ).toEqual(highlight);
+    expect(wrapper.find('strong').first().text()).toEqual(highlight);
   });
 });

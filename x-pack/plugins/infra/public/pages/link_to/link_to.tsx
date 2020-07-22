@@ -17,9 +17,9 @@ interface LinkToPageProps {
   match: RouteMatch<{}>;
 }
 
-const ITEM_TYPES = inventoryModels.map(m => m.id).join('|');
+const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
 
-export const LinkToPage: React.FC<LinkToPageProps> = props => {
+export const LinkToPage: React.FC<LinkToPageProps> = (props) => {
   return (
     <Switch>
       <Route

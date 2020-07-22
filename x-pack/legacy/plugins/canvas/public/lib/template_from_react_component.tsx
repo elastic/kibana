@@ -16,7 +16,7 @@ interface Props {
 }
 
 export const templateFromReactComponent = (Component: ComponentType<any>) => {
-  const WrappedComponent: FunctionComponent<Props> = props => (
+  const WrappedComponent: FunctionComponent<Props> = (props) => (
     <ErrorBoundary>
       {({ error }: { error: Error }) => {
         if (error) {

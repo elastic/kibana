@@ -47,7 +47,7 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
       getOr(
         '',
         'id',
-        Object.values(navTabs).find(item => tabName === item.id || pageName === item.id)
+        Object.values(navTabs).find((item) => tabName === item.id || pageName === item.id)
       ),
     [pageName, tabName, navTabs]
   );
@@ -64,7 +64,7 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
 
   const renderTabs = useMemo(
     () =>
-      Object.values(navTabs).map(tab => {
+      Object.values(navTabs).map((tab) => {
         const isSelected = selectedTabId === tab.id;
         const { query, filters, savedQuery, timerange, timeline } = props;
         const hrefWithSearch =

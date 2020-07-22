@@ -60,7 +60,7 @@ export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
           const inFilters: FilterValue[] = aggConfig.params.filters;
           if (!_.size(inFilters)) return;
 
-          inFilters.forEach(filter => {
+          inFilters.forEach((filter) => {
             const persistedLog = getQueryLog(
               uiSettings,
               new Storage(window.localStorage),
@@ -72,7 +72,7 @@ export function getFiltersBucketAgg(deps: { uiSettings: IUiSettingsClient }) {
 
           const outFilters = _.transform(
             inFilters,
-            function(filters, filter) {
+            function (filters, filter) {
               const input = _.cloneDeep(filter.input);
 
               if (!input) {

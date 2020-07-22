@@ -149,7 +149,7 @@ const parseFields = (
         if (Boolean(parametersRemoved.length)) {
           acc.errors = [
             ...acc.errors,
-            ...parametersRemoved.map(paramName => ({
+            ...parametersRemoved.map((paramName) => ({
               code: 'ERR_PARAMETER' as 'ERR_PARAMETER',
               fieldPath,
               paramName,
@@ -232,13 +232,13 @@ export const validateMappingsConfiguration = (
   const isSchemaInvalid = isLeft(result);
 
   const unknownConfigurationParameters = Object.keys(mappingsConfiguration).filter(
-    key => mappingsConfigurationSchemaKeys.includes(key) === false
+    (key) => mappingsConfigurationSchemaKeys.includes(key) === false
   );
 
   const unknownSourceConfigurationParameters =
     mappingsConfiguration._source !== undefined
       ? Object.keys(mappingsConfiguration._source).filter(
-          key => sourceConfigurationSchemaKeys.includes(key) === false
+          (key) => sourceConfigurationSchemaKeys.includes(key) === false
         )
       : [];
 
@@ -247,7 +247,7 @@ export const validateMappingsConfiguration = (
      * To keep the logic simple we will strip out the parameters that contain errors
      */
     const errors = errorReporter.report(result);
-    errors.forEach(error => {
+    errors.forEach((error) => {
       const configurationName = error.path[0];
       configurationRemoved.add(configurationName);
       delete copyOfMappingsConfig[configurationName];
@@ -255,7 +255,7 @@ export const validateMappingsConfiguration = (
   }
 
   if (unknownConfigurationParameters.length > 0) {
-    unknownConfigurationParameters.forEach(configName => configurationRemoved.add(configName));
+    unknownConfigurationParameters.forEach((configName) => configurationRemoved.add(configName));
   }
 
   if (unknownSourceConfigurationParameters.length > 0) {
@@ -266,7 +266,7 @@ export const validateMappingsConfiguration = (
   copyOfMappingsConfig = pick(copyOfMappingsConfig, mappingsConfigurationSchemaKeys);
 
   const errors: MappingsValidationError[] = toArray<string>(ordString)(configurationRemoved)
-    .map(configName => ({
+    .map((configName) => ({
       code: 'ERR_CONFIG',
       configName,
     }))

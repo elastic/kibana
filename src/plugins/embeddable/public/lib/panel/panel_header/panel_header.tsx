@@ -43,7 +43,7 @@ export interface PanelHeaderProps {
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
-  return badges.map(badge => (
+  return badges.map((badge) => (
     <EuiBadge
       key={badge.id}
       className="embPanel__headerBadge"

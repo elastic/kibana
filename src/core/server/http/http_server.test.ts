@@ -163,7 +163,7 @@ test('valid params', async () => {
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.text).toBe('some-string');
     });
 });
@@ -193,7 +193,7 @@ test('invalid params', async () => {
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: 'Bad Request',
         statusCode: 400,
@@ -228,7 +228,7 @@ test('valid query', async () => {
   await supertest(innerServer.listener)
     .get('/foo/?bar=test&quux=123')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', quux: 123 });
     });
 });
@@ -258,7 +258,7 @@ test('invalid query', async () => {
   await supertest(innerServer.listener)
     .get('/foo/?bar=test')
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: 'Bad Request',
         statusCode: 400,
@@ -297,7 +297,7 @@ test('valid body', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
     });
 });
@@ -335,7 +335,7 @@ test('valid body with validate function', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
     });
 });
@@ -378,7 +378,7 @@ test('not inline validation - specifying params', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
     });
 });
@@ -421,7 +421,7 @@ test('not inline validation - specifying validation handler', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
     });
 });
@@ -471,7 +471,7 @@ test('not inline handler - KibanaRequest', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
     });
 });
@@ -520,7 +520,7 @@ test('not inline handler - RequestHandler', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
     });
 });
@@ -551,7 +551,7 @@ test('invalid body', async () => {
     .post('/foo/')
     .send({ bar: 'test' })
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: 'Bad Request',
         statusCode: 400,
@@ -586,7 +586,7 @@ test('handles putting', async () => {
     .put('/foo/')
     .send({ key: 'new value' })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 'new value' });
     });
 });
@@ -616,7 +616,7 @@ test('handles deleting', async () => {
   await supertest(innerServer.listener)
     .delete('/foo/3')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 3 });
     });
 });
@@ -646,28 +646,22 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
   });
 
   test('/bar => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar').expect(404);
   });
 
   test('/bar/ => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar/')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar/').expect(404);
   });
 
   test('/bar/foo => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar/foo')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar/foo').expect(404);
   });
 
   test('/ => /', async () => {
     await supertest(innerServerListener)
       .get('/')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/');
       });
   });
@@ -676,7 +670,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     await supertest(innerServerListener)
       .get('/foo')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/foo');
       });
   });
@@ -710,7 +704,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/');
       });
   });
@@ -719,7 +713,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar/')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/');
       });
   });
@@ -728,21 +722,17 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar/foo')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/foo');
       });
   });
 
   test('/ => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/')
-      .expect(404);
+    await supertest(innerServerListener).get('/').expect(404);
   });
 
   test('/foo => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/foo')
-      .expect(404);
+    await supertest(innerServerListener).get('/foo').expect(404);
   });
 });
 
@@ -787,13 +777,9 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener)
-    .get('/with-tags')
-    .expect(200, { tags });
+  await supertest(innerServer.listener).get('/with-tags').expect(200, { tags });
 
-  await supertest(innerServer.listener)
-    .get('/without-tags')
-    .expect(200, { tags: [] });
+  await supertest(innerServer.listener).get('/without-tags').expect(200, { tags: [] });
 });
 
 test('exposes route details of incoming request to a route handler', async () => {
@@ -835,9 +821,7 @@ describe('conditional compression', () => {
   test('with `compression.enabled: true`', async () => {
     const listener = await setupServer(config);
 
-    const response = await supertest(listener)
-      .get('/')
-      .set('accept-encoding', 'gzip');
+    const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
 
     expect(response.header).toHaveProperty('content-encoding', 'gzip');
   });
@@ -848,9 +832,7 @@ describe('conditional compression', () => {
       compression: { enabled: false },
     });
 
-    const response = await supertest(listener)
-      .get('/')
-      .set('accept-encoding', 'gzip');
+    const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
 
     expect(response.header).not.toHaveProperty('content-encoding');
   });
@@ -865,9 +847,7 @@ describe('conditional compression', () => {
     });
 
     test('enables compression for no referer', async () => {
-      const response = await supertest(listener)
-        .get('/')
-        .set('accept-encoding', 'gzip');
+      const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
 
       expect(response.header).toHaveProperty('content-encoding', 'gzip');
     });
@@ -952,14 +932,11 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(415, {
-        statusCode: 415,
-        error: 'Unsupported Media Type',
-        message: 'Unsupported Media Type',
-      });
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(415, {
+      statusCode: 415,
+      error: 'Unsupported Media Type',
+      message: 'Unsupported Media Type',
+    });
   });
 
   test('should reject the request because the payload is too large', async () => {
@@ -977,14 +954,11 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(413, {
-        statusCode: 413,
-        error: 'Request Entity Too Large',
-        message: 'Payload content length greater than maximum allowed: 1',
-      });
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(413, {
+      statusCode: 413,
+      error: 'Request Entity Too Large',
+      message: 'Payload content length greater than maximum allowed: 1',
+    });
   });
 
   test('should not parse the content in the request', async () => {
@@ -1010,14 +984,11 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(200, {
-        parse: false,
-        maxBytes: 1024, // hapi populates the default
-        output: 'data',
-      });
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
+      parse: false,
+      maxBytes: 1024, // hapi populates the default
+      output: 'data',
+    });
   });
 });
 
@@ -1043,14 +1014,11 @@ test('should return a stream in the body', async () => {
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener)
-    .put('/')
-    .send({ test: 1 })
-    .expect(200, {
-      parse: true,
-      maxBytes: 1024, // hapi populates the default
-      output: 'stream',
-    });
+  await supertest(innerServer.listener).put('/').send({ test: 1 }).expect(200, {
+    parse: true,
+    maxBytes: 1024, // hapi populates the default
+    output: 'stream',
+  });
 });
 
 describe('setup contract', () => {

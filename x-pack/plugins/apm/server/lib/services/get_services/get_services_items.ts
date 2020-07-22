@@ -9,13 +9,13 @@ import {
   PROCESSOR_EVENT,
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
-  TRANSACTION_DURATION
+  TRANSACTION_DURATION,
 } from '../../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../../typings/common';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../../common/projections/services';
 
@@ -34,25 +34,25 @@ export async function getServicesItems(
         services: {
           terms: {
             ...projection.body.aggs.services.terms,
-            size: 500
+            size: 500,
           },
           aggs: {
             avg: {
-              avg: { field: TRANSACTION_DURATION }
+              avg: { field: TRANSACTION_DURATION },
             },
             agents: {
-              terms: { field: AGENT_NAME, size: 1 }
+              terms: { field: AGENT_NAME, size: 1 },
             },
             events: {
-              terms: { field: PROCESSOR_EVENT }
+              terms: { field: PROCESSOR_EVENT },
             },
             environments: {
-              terms: { field: SERVICE_ENVIRONMENT }
-            }
-          }
-        }
-      }
-    }
+              terms: { field: SERVICE_ENVIRONMENT },
+            },
+          },
+        },
+      },
+    },
   });
 
   const resp = await client.search(params);
@@ -60,13 +60,13 @@ export async function getServicesItems(
 
   const serviceBuckets = aggs?.services.buckets || [];
 
-  const items = serviceBuckets.map(bucket => {
+  const items = serviceBuckets.map((bucket) => {
     const eventTypes = bucket.events.buckets;
 
-    const transactions = eventTypes.find(e => e.key === 'transaction');
+    const transactions = eventTypes.find((e) => e.key === 'transaction');
     const totalTransactions = transactions?.doc_count || 0;
 
-    const errors = eventTypes.find(e => e.key === 'error');
+    const errors = eventTypes.find((e) => e.key === 'error');
     const totalErrors = errors?.doc_count || 0;
 
     const deltaAsMinutes = (end - start) / 1000 / 60;
@@ -75,7 +75,7 @@ export async function getServicesItems(
 
     const environmentsBuckets = bucket.environments.buckets;
     const environments = environmentsBuckets.map(
-      environmentBucket => environmentBucket.key as string
+      (environmentBucket) => environmentBucket.key as string
     );
 
     return {
@@ -84,7 +84,7 @@ export async function getServicesItems(
       transactionsPerMinute,
       errorsPerMinute,
       avgResponseTime: bucket.avg.value,
-      environments
+      environments,
     };
   });
 

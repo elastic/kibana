@@ -19,8 +19,8 @@
 
 import explodeBy from './explode_by';
 
-describe('explode_by(dot, flatObject)', function() {
-  it('should explode a flatten object with dots', function() {
+describe('explode_by(dot, flatObject)', function () {
+  it('should explode a flatten object with dots', function () {
     const flatObject = {
       'test.enable': true,
       'test.hosts': ['host-01', 'host-02'],
@@ -33,7 +33,7 @@ describe('explode_by(dot, flatObject)', function() {
     });
   });
 
-  it('should explode a flatten object with slashes', function() {
+  it('should explode a flatten object with slashes', function () {
     const flatObject = {
       'test/enable': true,
       'test/hosts': ['host-01', 'host-02'],

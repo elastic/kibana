@@ -47,7 +47,7 @@ describe('GET case', () => {
     expect(response.status).toEqual(200);
     expect(response.payload).toEqual(
       flattenCaseSavedObject(
-        (mockCases.find(s => s.id === 'mock-id-1') as unknown) as SavedObject<CaseAttributes>,
+        (mockCases.find((s) => s.id === 'mock-id-1') as unknown) as SavedObject<CaseAttributes>,
         []
       )
     );

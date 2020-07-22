@@ -7,14 +7,10 @@
 This page discusses the breaking changes that you need to be aware of when migrating
 your application to Kibana 7.7.
 
-//NOTE: The notable-breaking-changes tagged regions are re-used in the
-//Installation and Upgrade Guide
+// The following section is re-used in the Installation and Upgrade Guide
+// tag::notable-breaking-changes[]
 
-////
-The following section is re-used in the Installation and Upgrade Guide
-[[breaking_70_notable]]
-=== Notable breaking changes
-////
+// end::notable-breaking-changes[]
 
 [float]
 === Breaking changes for users
@@ -29,7 +25,7 @@ There are no user-facing breaking changes in 7.7.
 
 This Info toast will be used for the async search notifications.
 
-*via {pull}60574[#60574]*
+*via {kib-pull}60574[#60574]*
 
 [discrete]
 ==== Goodbye, legacy data plugin
@@ -70,14 +66,14 @@ please refer to the table of
 https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#plugins-for-shared-application-services[plugins for shared application services]
 in `src/core/MIGRATION.md`.
 
-*via {pull}60449[#60449]*
+*via {kib-pull}60449[#60449]*
 
 [discrete]
 ==== Delete FilterStateManager and QueryFilter
 
 Delete unused legacy exports `FilterStateManager`, `QueryFilter`, and `SavedQuery`.
 
-*via {pull}59872[#59872]*
+*via {kib-pull}59872[#59872]*
 
 [discrete]
 ==== Add UiSettings validation & Kibana default route redirection
@@ -95,7 +91,7 @@ uiSettings.register({
 })
 ```
 
-*via {pull}59694[#59694]*
+*via {kib-pull}59694[#59694]*
 
 [discrete]
 ==== Allow disabling xsrf protection per an endpoint
@@ -105,7 +101,7 @@ Route configuration allows to disable xsrf protection for destructive HTTP metho
 ```js
 routet.get({ path: ..., validate: ..., options: { xsrfRequired: false } })
 ```
-*via {pull}58717[#58717]*
+*via {kib-pull}58717[#58717]*
 
 [discrete]
 ==== Add core metrics service
@@ -119,7 +115,7 @@ core.metrics.getOpsMetrics$().subscribe(metrics => {
 })
 ```
 
-*via {pull}58623[#58623]*
+*via {kib-pull}58623[#58623]*
 
 [discrete]
 ==== Add an optional authentication mode for HTTP resources
@@ -129,7 +125,7 @@ A route config accepts `authRequired: 'optional'`. A user can access a resource 
 router.get( { path: '/',  options: { authRequired: 'optional' } }, handler);
 ```
 
-*via {pull}58589[#58589]*
+*via {kib-pull}58589[#58589]*
 
 [discrete]
 ==== Migrate doc view part of discover
@@ -156,7 +152,7 @@ export class MyPlugin implements Plugin<void, void> {
 
 ```
 
-*via {pull}58094[#58094]*
+*via {kib-pull}58094[#58094]*
 
 [discrete]
 ==== [Telemetry] Server backpressure mechanism
@@ -192,7 +188,7 @@ Send `OPTIONS` request before attempting to send telemetry from server. `OPTIONS
 
 * If `OPTIONS` request fails; dont send usage and follow the retry logic above.
 
-*via {pull}57556[#57556]*
+*via {kib-pull}57556[#57556]*
 
 [discrete]
 ==== Expressions server-side
@@ -204,7 +200,7 @@ plugins.expressions.registerFunction(/* ... */);
 const result = await plugins.expressions.run('var_set name="foo" value="bar" | var name="foo"', null);
 ```
 
-*via {pull}57537[#57537]*
+*via {kib-pull}57537[#57537]*
 
 [discrete]
 ==== Local actions
@@ -224,7 +220,7 @@ const trigger = {
 };
 ```
 
-*via {pull}57451[#57451]*
+*via {kib-pull}57451[#57451]*
 
 [discrete]
 ==== Use log4j pattern syntax
@@ -232,7 +228,7 @@ const trigger = {
 Logging output of the New platform plugins can use adjusted
 via https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[new config].
 
-*via {pull}57433[#57433]*
+*via {kib-pull}57433[#57433]*
 
 [discrete]
 ==== Allow savedObjects types registration from NP
@@ -278,7 +274,7 @@ export class Plugin() {
 
 Please check the migration guide for more complete examples and migration procedure.
 
-*via {pull}57430[#57430]*
+*via {kib-pull}57430[#57430]*
 
 [discrete]
 ==== Expose Vis on the contract as it requires visTypes
@@ -296,7 +292,7 @@ new visualizationsStart.Vis(....);
 import { Vis } from '../../../../../core_plugins/visualizations/public';
 ```
 
-*via {pull}56968[#56968]*
+*via {kib-pull}56968[#56968]*
 
 [discrete]
 ==== Add ScopedHistory to AppMountParams
@@ -336,7 +332,7 @@ core.application.register({
 });
 ```
 
-*via {pull}56705[#56705]*
+*via {kib-pull}56705[#56705]*
 
 [discrete]
 ==== Move new_vis_modal to visualizations plugin
@@ -352,7 +348,7 @@ NewVisModal component and showNewVisModal function were statically exported and 
 ```tsx
 npStart.plugins.visualizations.showNewVisModal();
 ```
-*via {pull}56654[#56654]*
+*via {kib-pull}56654[#56654]*
 
 [discrete]
 ==== UiComponent
@@ -382,7 +378,7 @@ const uiToReactComponent: (comp: UiComponent) => React.ComponentType;
 const reactToUiComponent: (comp: React.ComponentType) => UiComponent;
 ```
 
-*via {pull}56555[#56555]*
+*via {kib-pull}56555[#56555]*
 
 [discrete]
 ==== Start consuming np logging config
@@ -390,7 +386,7 @@ const reactToUiComponent: (comp: React.ComponentType) => UiComponent;
 Provides experimental support of new logging format for **new platform plugins**.
 More about https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md[the logging format].
 
-*via {pull}56480[#56480]*
+*via {kib-pull}56480[#56480]*
 
 [discrete]
 ==== [State Management] State syncing utils docs
@@ -398,7 +394,7 @@ More about https://github.com/elastic/kibana/blob/master/src/core/server/logging
 Refer to https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync[these docs]
 on state syncing utils.
 
-*via {pull}56479[#56479]*
+*via {kib-pull}56479[#56479]*
 
 
 [discrete]
@@ -418,7 +414,7 @@ showSaveModal(saveModal, npStart.core.i18n.Context);
 
 ```
 
-*via {pull}56383[#56383]*
+*via {kib-pull}56383[#56383]*
 
 [discrete]
 ==== [State Management] State syncing helpers for query service
@@ -444,7 +440,7 @@ interface QueryStateChange {
 state$: Observable<{ changes: QueryStateChange; state: QueryState }>;
 ```
 
-*via {pull}56128[#56128]*
+*via {kib-pull}56128[#56128]*
 
 [discrete]
 ==== Migrate saved_object_save_as_checkbox directive to Timelion
@@ -464,7 +460,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
  />
 ```
 
-*via {pull}56114[#56114]*
+*via {kib-pull}56114[#56114]*
 
 [discrete]
 ==== `ui/public` cleanup
@@ -529,7 +525,7 @@ In the meantime, if you currently rely on `TimeBuckets`, please copy the relevan
 The `ui/filter_manager` module has been removed and now services and UI components
 are available on the `data` plugin's query infrastructure.
 
-*via {pull}55926[#55926]*
+*via {kib-pull}55926[#55926]*
 
 [discrete]
 ==== Add savedObjects mappings API to core
@@ -562,7 +558,7 @@ export const mappings: SavedObjectsTypeMappingDefinitions = {
  }
 ```
 
-*via {pull}55825[#55825]*
+*via {kib-pull}55825[#55825]*
 
 [discrete]
 ==== Remove the VisEditorTypesRegistryProvider
@@ -583,7 +579,7 @@ a class with your own controller as a value in a vis type definition:
   }
 ```
 
-*via {pull}55370[#55370]*
+*via {kib-pull}55370[#55370]*
 
 [discrete]
 ==== Explicitly test custom appRoutes
@@ -591,7 +587,7 @@ a class with your own controller as a value in a vis type definition:
 Tests for custom `appRoute`s are now more clear and explicitly separate
 from those that test other rendering service interactions.
 
-*via {pull}55405[#55405]*
+*via {kib-pull}55405[#55405]*
 
 [discrete]
 ==== [NP] Platform exposes API to get authenticated user data
@@ -605,7 +601,7 @@ HttpService exposes:
 
 * `auth.isAuthenticated()` - returns true, if `auth` interceptor successfully authenticated a user.
 
-*via {pull}55327[#55327]*
+*via {kib-pull}55327[#55327]*
 
 [discrete]
 ==== Implements `getStartServices` on server-side
@@ -628,7 +624,7 @@ class MyPlugin implements Plugin {
 }
 ```
 
-*via {pull}55156[#55156]*
+*via {kib-pull}55156[#55156]*
 
 [discrete]
 ====  Expressions refactor
@@ -636,7 +632,7 @@ class MyPlugin implements Plugin {
 * `context.types` > `inputTypes`
 * Objects should be registered instead of function wrappers around those objects.
 
-*via {pull}54342[#54342]*
+*via {kib-pull}54342[#54342]*
 
 [discrete]
 ==== Refactor saved object management registry usage
@@ -671,7 +667,7 @@ const savedVisualizations = createSavedVisLoader(servicesForVisualizations);
 const savedDashboards = createSavedDashboardLoader(services);
 ```
 
-*via {pull}54155[#54155]*
+*via {kib-pull}54155[#54155]*
 
 [discrete]
 ==== Enforce camelCase format for a plugin id
@@ -689,7 +685,7 @@ It might not match `pluginPath`, which is recommended to be in snake_case format
 "id": "fooBar"
 ```
 
-*via {pull}53759[#53759]*
+*via {kib-pull}53759[#53759]*
 
 [discrete]
 ==== bfetch (2)
@@ -740,7 +736,7 @@ double({ num: 2 }).then(console.log, console.error); // { num: 4 }
 double({ num: 3 }).then(console.log, console.error); // { num: 6 }
 ```
 
-*via {pull}53711[#53711]*
+*via {kib-pull}53711[#53711]*
 
 [discrete]
 ==== Grouped Kibana nav
@@ -750,7 +746,7 @@ Plugins should now define a category if they have a navigation item:
 * If you want to fit into our default categories, you can use our `DEFAULT_APP_CATEGORIES` defined in `src/core/utils/default_app_categories.ts`.
 * If you want to create their own category, you can also provide any object matching the `AppCategory` interface defined in `src/core/types/app_category.ts`.
 
-*via {pull}53545[#53545]*
+*via {kib-pull}53545[#53545]*
 
 [discrete]
 ==== Expose Elasticsearch from start and deprecate from setup
@@ -760,7 +756,7 @@ contract, and move them to the start contract instead. Deprecate
 the `CoreSetup.elasticsearch` API and expose `CoreStart.elasticsearch` instead.
 
 
-*via {pull}59886[#59886]*
+*via {kib-pull}59886[#59886]*
 
 [discrete]
 ==== Embeddable triggers
@@ -778,7 +774,7 @@ class MyEmbeddable extends Embeddable {
 The returned list of triggers will be used in the drilldowns feature on Dashboard,
 where users will be able to add drilldowns to embeddable triggers.
 
-*via {pull}58440[#58440]*
+*via {kib-pull}58440[#58440]*
 
 [discrete]
 ==== Force savedObject API consumers to define SO type explicitly
@@ -787,14 +783,14 @@ The new interface enforces API consumers to specify SO type explicitly.
 Plugins can use `SavedObjectAttributes` to ensure their type are serializable,
 but it shouldn't be used as their domain-specific type.
 
-*via {pull}58022[#58022]*
+*via {kib-pull}58022[#58022]*
 
 [discrete]
 ==== Trigger context
 
 Improved types for trigger contexts, which are consumed by actions.
 
-*via {pull}57870[#57870]*
+*via {kib-pull}57870[#57870]*
 
 [discrete]
 ==== Expressions debug mode
@@ -803,7 +799,7 @@ Add ability to execute expression in "debug" mode, which would collect execution
 information about each function. This is used in the Expression Explorer
 (developed by Canvas) and in Canvas when the expression editor is open.
 
-*via {pull}57841[#57841]*
+*via {kib-pull}57841[#57841]*
 
 [discrete]
 ==== Move ui/agg_types in to shim data plugin
@@ -814,7 +810,7 @@ information about each function. This is used in the Expression Explorer
 ** Right now these are just re-exporting the class as a type;
 eventually we should put more detailed typings in place.
 
-*via {pull}56353[#56353]*
+*via {kib-pull}56353[#56353]*
 
 [discrete]
 ==== Stateful search bar default behaviors
@@ -823,7 +819,7 @@ The goal of the stateful version of SearchBar / TopNavMenu is to be an easy way
 to consume the services offered by `plugins.data.query` where developers
 should be able to provide minimal configuration and get a fully working SearchBar.
 
-*via {pull}56160[#56160]*
+*via {kib-pull}56160[#56160]*
 
 [discrete]
 ==== Guide for creating alert / action types in the UI
@@ -831,7 +827,7 @@ should be able to provide minimal configuration and get a fully working SearchBa
 Documentation to help developers integrate their alert / action type within
 our Management UIs
 
-*via {pull}55963[#55963]*
+*via {kib-pull}55963[#55963]*
 
 [discrete]
 ==== Move search service code to NP
@@ -839,7 +835,7 @@ our Management UIs
 Move all of the search service code to Kibana new platform. Also deletes `courier` folder
 and moves `getFlattenedObject` to `src/core/utils`.
 
-*via {pull}55430[#55430]*
+*via {kib-pull}55430[#55430]*
 
 [discrete]
 ==== Expose NP FieldFormats service to server side
@@ -848,7 +844,7 @@ The fieldFormats service is used on the server side as well.
 At the moment, it resides in `src/legacy/ui/field_formats/mixin/field_formats_service.ts`
 and only the FE plugin exposes it.
 
-*via {pull}55419[#55419]*
+*via {kib-pull}55419[#55419]*
 
 [discrete]
 ==== Update plugin generator to generate NP plugins
@@ -861,7 +857,7 @@ Add more options for Kibana new platform plugin generator.
 * Generate an optional .eslintrc.js file (for 3rd party plugins mostly)
 * Init git repo (for 3rd party plugins)
 
-*via {pull}55281[#55281]*
+*via {kib-pull}55281[#55281]*
 
 [discrete]
 ==== Run SO migration after plugins setup phase
@@ -877,7 +873,7 @@ SO repository provider when registering the client factory.
 * Adapts the existing plugin calls to the removed APIs from `setup` to be now
 using `getStartServices` to access them on the core `start` contract.
 
-*via {pull}55012[#55012]*
+*via {kib-pull}55012[#55012]*
 
 [discrete]
 ==== Build immutable bundles for new platform plugins
@@ -888,7 +884,7 @@ this new system either pass `--plugin-path` to `node scripts/build_new_platform_
 or use the `@kbn/optimizer` package in the Kibana repo to build your plugin as
 described in the readme for that package.
 
-*via {pull}53976[#53976]*
+*via {kib-pull}53976[#53976]*
 
 
 [discrete]
@@ -897,7 +893,7 @@ described in the readme for that package.
 Adds an async {es} search strategy, which utilizes the async search strategy to
 call the `_async_search` APIs in Elasticsearch, returning an observable over the responses.
 
-*via {pull}53538[#53538]*
+*via {kib-pull}53538[#53538]*
 
 [discrete]
 ==== [Vis: Default editor] EUIficate and Reactify the sidebar
@@ -924,7 +920,7 @@ These tabs should be React components:
   }
 ```
 
-*via {pull}49864[#49864]*
+*via {kib-pull}49864[#49864]*
 
 [discrete]
 ==== [test] Consolidate top-level yarn scripts
@@ -940,4 +936,4 @@ frameworks out and avoid workflow interruptions (`grunt/gulp -> node scripts/*`)
 type (`yarn test:server -> yarn test:mocha`)
 
 
-*via {pull}44679[#44679]*
+*via {kib-pull}44679[#44679]*

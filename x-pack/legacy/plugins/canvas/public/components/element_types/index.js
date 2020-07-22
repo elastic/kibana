@@ -20,11 +20,11 @@ import { ElementTypes as Component } from './element_types';
 
 const customElementAdded = 'elements-custom-added';
 
-const mapStateToProps = state => ({ pageId: getSelectedPage(state) });
+const mapStateToProps = (state) => ({ pageId: getSelectedPage(state) });
 
-const mapDispatchToProps = dispatch => ({
-  selectToplevelNodes: nodes =>
-    dispatch(selectToplevelNodes(nodes.filter(e => !e.position.parent).map(e => e.id))),
+const mapDispatchToProps = (dispatch) => ({
+  selectToplevelNodes: (nodes) =>
+    dispatch(selectToplevelNodes(nodes.filter((e) => !e.position.parent).map((e) => e.id))),
   insertNodes: (selectedNodes, pageId) => dispatch(insertNodes(selectedNodes, pageId)),
   addElement: (pageId, partialElement) => dispatch(addElement(pageId, partialElement)),
 });
@@ -38,12 +38,12 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     ...remainingStateProps,
     ...ownProps,
     // add built-in element to the page
-    addElement: element => {
+    addElement: (element) => {
       addElement(pageId, element);
       onClose();
     },
     // add custom element to the page
-    addCustomElement: customElement => {
+    addCustomElement: (customElement) => {
       const { selectedNodes = [] } = JSON.parse(customElement.content) || {};
       const clonedNodes = selectedNodes && cloneSubgraphs(selectedNodes);
       if (clonedNodes) {
@@ -54,7 +54,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
       trackCanvasUiMetric(METRIC_TYPE.LOADED, customElementAdded);
     },
     // custom element search
-    findCustomElements: async text => {
+    findCustomElements: async (text) => {
       try {
         const { customElements } = await customElementService.find(text);
         setCustomElements(customElements);
@@ -63,7 +63,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
       }
     },
     // remove custom element
-    removeCustomElement: async id => {
+    removeCustomElement: async (id) => {
       try {
         await customElementService.remove(id).then();
         const { customElements } = await customElementService.find(search);

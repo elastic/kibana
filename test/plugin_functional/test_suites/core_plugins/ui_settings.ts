@@ -21,12 +21,12 @@ import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const supertest = getService('supertest');
 
-  describe('ui settings', function() {
+  describe('ui settings', function () {
     before(async () => {
       await PageObjects.common.navigateToApp('settings');
     });
@@ -52,17 +52,14 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       const settingsValueViaObservables = await browser.executeAsync(async (callback: Function) => {
         window.__coreProvider.setup.core.uiSettings
           .get$('ui_settings_plugin')
-          .subscribe(v => callback(v));
+          .subscribe((v) => callback(v));
       });
 
       expect(settingsValueViaObservables).to.be('2');
     });
 
     it('server plugins have access to registered settings', async () => {
-      await supertest
-        .get('/api/ui-settings-plugin')
-        .expect(200)
-        .expect({ uiSettingsValue: 2 });
+      await supertest.get('/api/ui-settings-plugin').expect(200).expect({ uiSettingsValue: 2 });
     });
   });
 }

@@ -78,7 +78,7 @@ test('createPanelState adds a third new panel state', () => {
 });
 
 test('createPanelState adds a new panel state in the top most position', () => {
-  const panelsWithEmptySpace = panels.filter(panel => panel.gridData.x === 0);
+  const panelsWithEmptySpace = panels.filter((panel) => panel.gridData.x === 0);
   const panelState = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,

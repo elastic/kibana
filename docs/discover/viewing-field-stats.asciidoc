@@ -1,5 +1,5 @@
 [[viewing-field-stats]]
-== Viewing Field Data Statistics
+== View field data statistics
 
 From the fields list, you can see how many of the documents in the documents
 table contain a particular field, what the top 5 values are, and what

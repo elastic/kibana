@@ -22,7 +22,7 @@ class Interactive extends React.Component<{}, { hasButtons: boolean; value: stri
           hasButtons={this.state.hasButtons}
           onAddColor={action('onAddColor')}
           onRemoveColor={action('onRemoveColor')}
-          onChange={value => this.setState({ value })}
+          onChange={(value) => this.setState({ value })}
           value={this.state.value}
         />
         <p style={{ marginTop: 20 }}>

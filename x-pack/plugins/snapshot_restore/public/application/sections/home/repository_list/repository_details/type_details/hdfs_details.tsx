@@ -134,7 +134,7 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     });
   }
 
-  Object.keys(rest).forEach(key => {
+  Object.keys(rest).forEach((key) => {
     listItems.push({
       title: <Fragment>{key}</Fragment>,
       description: String(settings[key]),

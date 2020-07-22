@@ -37,7 +37,7 @@ describe('embeddable', () => {
 
   beforeEach(() => {
     mountpoint = document.createElement('div');
-    expressionRenderer = jest.fn(_props => null);
+    expressionRenderer = jest.fn((_props) => null);
   });
 
   afterEach(() => {

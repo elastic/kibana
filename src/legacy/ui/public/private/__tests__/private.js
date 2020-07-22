@@ -20,17 +20,17 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 
-describe('Private module loader', function() {
+describe('Private module loader', function () {
   let Private;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject(function($injector) {
+    ngMock.inject(function ($injector) {
       Private = $injector.get('Private');
     })
   );
 
-  it('accepts a provider that will be called to init a module', function() {
+  it('accepts a provider that will be called to init a module', function () {
     const football = {};
     function Provider() {
       return football;
@@ -40,7 +40,7 @@ describe('Private module loader', function() {
     expect(instance).to.be(football);
   });
 
-  it('injects angular dependencies into the Provider', function() {
+  it('injects angular dependencies into the Provider', function () {
     function Provider(Private) {
       return Private;
     }
@@ -49,8 +49,8 @@ describe('Private module loader', function() {
     expect(instance).to.be(Private);
   });
 
-  it('detects circular dependencies', function() {
-    expect(function() {
+  it('detects circular dependencies', function () {
+    expect(function () {
       function Provider1() {
         Private(Provider2);
       }
@@ -63,7 +63,7 @@ describe('Private module loader', function() {
     }).to.throwException(/circular/i);
   });
 
-  it('always provides the same instance form the Provider', function() {
+  it('always provides the same instance form the Provider', function () {
     function Provider() {
       return {};
     }
@@ -71,8 +71,8 @@ describe('Private module loader', function() {
     expect(Private(Provider)).to.be(Private(Provider));
   });
 
-  describe('#stub', function() {
-    it('accepts a replacement instance for a Provider', function() {
+  describe('#stub', function () {
+    it('accepts a replacement instance for a Provider', function () {
       const replaced = {};
       const replacement = {};
 
@@ -95,8 +95,8 @@ describe('Private module loader', function() {
     });
   });
 
-  describe('#swap', function() {
-    it('accepts a new Provider that should replace an existing Provider', function() {
+  describe('#swap', function () {
+    it('accepts a new Provider that should replace an existing Provider', function () {
       function Provider1() {
         return {};
       }
@@ -120,7 +120,7 @@ describe('Private module loader', function() {
       expect(instance3).to.be(instance1);
     });
 
-    it('gives the new Provider access to the Provider it replaced via an injectable dependency called $decorate', function() {
+    it('gives the new Provider access to the Provider it replaced via an injectable dependency called $decorate', function () {
       function Provider1() {
         return {};
       }

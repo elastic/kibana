@@ -137,8 +137,8 @@ export class DashboardStateManager {
     this.stateContainer = createStateContainer<DashboardAppState, DashboardAppStateTransitions>(
       initialState,
       {
-        set: state => (prop, value) => ({ ...state, [prop]: value }),
-        setOption: state => (option, value) => ({
+        set: (state) => (prop, value) => ({ ...state, [prop]: value }),
+        setOption: (state) => (option, value) => ({
           ...state,
           options: {
             ...state.options,
@@ -160,7 +160,7 @@ export class DashboardStateManager {
 
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.isDirty = this.checkIsDirty();
-      this.changeListeners.forEach(listener => listener({ dirty: this.isDirty }));
+      this.changeListeners.forEach((listener) => listener({ dirty: this.isDirty }));
     });
 
     // make sure url ('_a') matches initial state
@@ -218,7 +218,7 @@ export class DashboardStateManager {
     const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
 
     const input = dashboardContainer.getInput();
-    this.getPanels().forEach(savedDashboardPanel => {
+    this.getPanels().forEach((savedDashboardPanel) => {
       if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
         savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
       } else {
@@ -229,7 +229,7 @@ export class DashboardStateManager {
 
     const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
 
-    Object.values(input.panels).forEach(panelState => {
+    Object.values(input.panels).forEach((panelState) => {
       if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
         dirty = true;
       }
@@ -271,7 +271,7 @@ export class DashboardStateManager {
       this.setQuery(input.query);
     }
 
-    this.changeListeners.forEach(listener => listener({ dirty }));
+    this.changeListeners.forEach((listener) => listener({ dirty }));
   }
 
   public getFullScreenMode() {

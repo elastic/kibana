@@ -31,10 +31,7 @@ describe('JobsTableFilters', () => {
       <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
     );
 
-    wrapper
-      .find('[data-test-subj="show-elastic-jobs-filter-button"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="show-elastic-jobs-filter-button"]').first().simulate('click');
     wrapper.update();
 
     expect(
@@ -51,10 +48,7 @@ describe('JobsTableFilters', () => {
       <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
     );
 
-    wrapper
-      .find('[data-test-subj="show-custom-jobs-filter-button"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
     wrapper.update();
 
     expect(
@@ -71,16 +65,10 @@ describe('JobsTableFilters', () => {
       <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
     );
 
-    wrapper
-      .find('[data-test-subj="show-custom-jobs-filter-button"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
     wrapper.update();
 
-    wrapper
-      .find('[data-test-subj="show-elastic-jobs-filter-button"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="show-elastic-jobs-filter-button"]').first().simulate('click');
     wrapper.update();
 
     expect(
@@ -103,16 +91,10 @@ describe('JobsTableFilters', () => {
       <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
     );
 
-    wrapper
-      .find('[data-test-subj="show-custom-jobs-filter-button"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
     wrapper.update();
 
-    wrapper
-      .find('[data-test-subj="show-custom-jobs-filter-button"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="show-custom-jobs-filter-button"]').first().simulate('click');
     wrapper.update();
 
     expect(

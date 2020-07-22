@@ -59,7 +59,7 @@ export class CrossClusterReplicationHome extends PureComponent {
     };
   }
 
-  onSectionChange = section => {
+  onSectionChange = (section) => {
     routing.navigate(`/${section}`);
   };
 
@@ -79,7 +79,7 @@ export class CrossClusterReplicationHome extends PureComponent {
           <EuiSpacer size="s" />
 
           <EuiTabs>
-            {this.tabs.map(tab => (
+            {this.tabs.map((tab) => (
               <EuiTab
                 onClick={() => this.onSectionChange(tab.id)}
                 isSelected={tab.id === this.state.activeSection}

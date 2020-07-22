@@ -60,7 +60,7 @@ export const ExternalLink = React.memo<{
     const lastVisibleItemIndex = overflowIndexStart - 1;
     const lastItemIndex = allItemsLimit - 1;
     const lastIndexToShow = Math.max(0, Math.min(lastVisibleItemIndex, lastItemIndex));
-    const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+    const inWhitelist = whitelistUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
     return url && inWhitelist && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
         <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
@@ -275,7 +275,7 @@ const ReputationLinkComponent: React.FC<{
           <DefaultFieldRendererOverflow
             rowItems={ipReputationLinks}
             idPrefix="moreReputationLink"
-            render={rowItem => {
+            render={(rowItem) => {
               return (
                 isReputationLink(rowItem) && (
                   <ExternalLink

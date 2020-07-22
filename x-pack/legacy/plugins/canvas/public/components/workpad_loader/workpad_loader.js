@@ -33,7 +33,7 @@ import { uploadWorkpad } from './upload_workpad';
 
 const { WorkpadLoader: strings } = ComponentStrings;
 
-const formatDate = date => date && moment(date).format(AdvancedSettings.get('dateFormat'));
+const formatDate = (date) => date && moment(date).format(AdvancedSettings.get('dateFormat'));
 
 const getDisplayName = (name, workpad, loadedWorkpad) => {
   const workpadName = name.length ? name : <em>{workpad.id}</em>;
@@ -90,14 +90,14 @@ export class WorkpadLoader extends React.PureComponent {
   };
 
   // create new workpad from uploaded JSON
-  onUpload = async workpad => {
+  onUpload = async (workpad) => {
     this.setState({ createPending: true });
     await this.props.createWorkpad(workpad);
     this._isMounted && this.setState({ createPending: false });
   };
 
   // clone existing workpad
-  cloneWorkpad = async workpad => {
+  cloneWorkpad = async (workpad) => {
     this.setState({ createPending: true });
     await this.props.cloneWorkpad(workpad.id);
     this._isMounted && this.setState({ createPending: false });
@@ -111,7 +111,7 @@ export class WorkpadLoader extends React.PureComponent {
   removeWorkpads = () => {
     const { selectedWorkpads } = this.state;
 
-    this.props.removeWorkpads(selectedWorkpads.map(({ id }) => id)).then(remainingIds => {
+    this.props.removeWorkpads(selectedWorkpads.map(({ id }) => id)).then((remainingIds) => {
       const remainingWorkpads =
         remainingIds.length > 0
           ? selectedWorkpads.filter(({ id }) => remainingIds.includes(id))
@@ -130,7 +130,7 @@ export class WorkpadLoader extends React.PureComponent {
     this.state.selectedWorkpads.forEach(({ id }) => this.props.downloadWorkpad(id));
   };
 
-  onSelectionChange = selectedWorkpads => {
+  onSelectionChange = (selectedWorkpads) => {
     this.setState({ selectedWorkpads });
   };
 
@@ -148,7 +148,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     const actions = [
       {
-        render: workpad => (
+        render: (workpad) => (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiToolTip content={strings.getExportToolTip()}>
@@ -205,7 +205,7 @@ export class WorkpadLoader extends React.PureComponent {
         sortable: true,
         dataType: 'date',
         width: '20%',
-        render: date => formatDate(date),
+        render: (date) => formatDate(date),
       },
       {
         field: '@timestamp',
@@ -213,7 +213,7 @@ export class WorkpadLoader extends React.PureComponent {
         sortable: true,
         dataType: 'date',
         width: '20%',
-        render: date => formatDate(date),
+        render: (date) => formatDate(date),
       },
       { name: '', actions, width: '5%' },
     ];
@@ -367,7 +367,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     return (
       <Paginate rows={sortedWorkpads}>
-        {pagination => (
+        {(pagination) => (
           <Fragment>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={2}>
@@ -380,7 +380,7 @@ export class WorkpadLoader extends React.PureComponent {
                   )}
                   <EuiFlexItem grow={1}>
                     <WorkpadSearch
-                      onChange={text => {
+                      onChange={(text) => {
                         pagination.setPage(0);
                         this.props.findWorkpads(text);
                       }}

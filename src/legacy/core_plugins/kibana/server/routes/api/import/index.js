@@ -38,7 +38,7 @@ export function importApi(server) {
       tags: ['api'],
     },
 
-    handler: async req => {
+    handler: async (req) => {
       return await importDashboards(req);
     },
   });

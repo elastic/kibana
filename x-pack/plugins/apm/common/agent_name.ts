@@ -23,7 +23,7 @@ export const AGENT_NAMES: AgentName[] = [
   'java',
   'nodejs',
   'python',
-  'ruby'
+  'ruby',
 ];
 
 export function isAgentName(agentName: string): agentName is AgentName {

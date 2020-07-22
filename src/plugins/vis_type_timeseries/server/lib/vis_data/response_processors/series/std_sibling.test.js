@@ -80,14 +80,14 @@ describe('stdSibling(resp, panel, series)', () => {
 
   test('calls next when std. deviation bands set', () => {
     series.metrics[1].mode = 'band';
-    const next = jest.fn(results => results);
+    const next = jest.fn((results) => results);
     const results = stdSibling(resp, panel, series)(next)([]);
     expect(next.mock.calls.length).toEqual(1);
     expect(results).toHaveLength(0);
   });
 
   test('creates a series', () => {
-    const next = results => results;
+    const next = (results) => results;
     const results = stdSibling(resp, panel, series)(next)([]);
     expect(results).toHaveLength(1);
 

@@ -22,7 +22,7 @@ export class AbstractESAggSource extends AbstractESSource {
     super(descriptor, inspectorAdapters);
     this._metricFields = [];
     if (this._descriptor.metrics) {
-      this._descriptor.metrics.forEach(aggDescriptor => {
+      this._descriptor.metrics.forEach((aggDescriptor) => {
         this._metricFields.push(
           ...esAggFieldsFactory(aggDescriptor, this, this.getOriginForField())
         );
@@ -44,7 +44,7 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   getMetricFieldForName(fieldName) {
-    return this.getMetricFields().find(metricField => {
+    return this.getMetricFields().find((metricField) => {
       return metricField.getName() === fieldName;
     });
   }
@@ -54,7 +54,7 @@ export class AbstractESAggSource extends AbstractESSource {
   }
 
   getMetricFields() {
-    const metrics = this._metricFields.filter(esAggField => esAggField.isValid());
+    const metrics = this._metricFields.filter((esAggField) => esAggField.isValid());
     return metrics.length === 0
       ? esAggFieldsFactory({ type: AGG_TYPE.COUNT }, this, this.getOriginForField())
       : metrics;
@@ -84,7 +84,7 @@ export class AbstractESAggSource extends AbstractESSource {
 
   getValueAggsDsl(indexPattern) {
     const valueAggsDsl = {};
-    this.getMetricFields().forEach(esAggMetric => {
+    this.getMetricFields().forEach((esAggMetric) => {
       const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
       if (aggDsl) {
         valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
@@ -96,7 +96,7 @@ export class AbstractESAggSource extends AbstractESSource {
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
     const metricFields = this.getMetricFields();
     const tooltipPropertiesPromises = [];
-    metricFields.forEach(metricField => {
+    metricFields.forEach((metricField) => {
       let value;
       for (const key in properties) {
         if (properties.hasOwnProperty(key) && metricField.getName() === key) {

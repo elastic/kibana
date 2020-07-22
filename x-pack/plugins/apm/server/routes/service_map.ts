@@ -8,7 +8,7 @@ import Boom from 'boom';
 import * as t from 'io-ts';
 import {
   invalidLicenseMessage,
-  isValidPlatinumLicense
+  isValidPlatinumLicense,
 } from '../../common/service_map';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceMap } from '../lib/service_map/get_service_map';
@@ -22,10 +22,10 @@ export const serviceMapRoute = createRoute(() => ({
     query: t.intersection([
       t.partial({
         environment: t.string,
-        serviceName: t.string
+        serviceName: t.string,
       }),
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
@@ -37,24 +37,24 @@ export const serviceMapRoute = createRoute(() => ({
 
     const setup = await setupRequest(context, request);
     const {
-      query: { serviceName, environment }
+      query: { serviceName, environment },
     } = context.params;
     return getServiceMap({ setup, serviceName, environment });
-  }
+  },
 }));
 
 export const serviceMapServiceNodeRoute = createRoute(() => ({
   path: `/api/apm/service-map/service/{serviceName}`,
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       rangeRt,
       t.partial({
-        environment: t.string
-      })
-    ])
+        environment: t.string,
+      }),
+    ]),
   },
   handler: async ({ context, request }) => {
     if (!context.config['xpack.apm.serviceMapEnabled']) {
@@ -67,13 +67,13 @@ export const serviceMapServiceNodeRoute = createRoute(() => ({
 
     const {
       query: { environment },
-      path: { serviceName }
+      path: { serviceName },
     } = context.params;
 
     return getServiceMapServiceNodeInfo({
       setup,
       serviceName,
-      environment
+      environment,
     });
-  }
+  },
 }));

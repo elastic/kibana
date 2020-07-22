@@ -67,7 +67,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
     updateNetworkTable,
   }) => {
     const updateLimitPagination = useCallback(
-      newLimit =>
+      (newLimit) =>
         updateNetworkTable({
           networkType: type,
           tableType,
@@ -77,7 +77,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
     );
 
     const updateActivePage = useCallback(
-      newPage =>
+      (newPage) =>
         updateNetworkTable({
           networkType: type,
           tableType,

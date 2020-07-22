@@ -10,7 +10,7 @@ import React from 'react';
 import { Overrides } from './overrides';
 
 jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: comp => {
+  withKibana: (comp) => {
     return comp;
   },
 }));

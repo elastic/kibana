@@ -18,7 +18,8 @@
  */
 
 import uuid from 'uuid';
-import { config } from '.';
+import { config, HttpConfig } from './http_config';
+import { CspConfig } from '../csp';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -107,6 +108,23 @@ test('throws if xsrf.whitelist element does not start with a slash', () => {
   );
 });
 
+test('accepts any type of objects for custom headers', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    customResponseHeaders: {
+      string: 'string',
+      bool: true,
+      number: 12,
+      array: [1, 2, 3],
+      nested: {
+        foo: 1,
+        bar: 'dolly',
+      },
+    },
+  };
+  expect(() => httpSchema.validate(obj)).not.toThrow();
+});
+
 describe('with TLS', () => {
   test('throws if TLS is enabled but `redirectHttpFromPort` is equal to `port`', () => {
     const httpSchema = config.schema;
@@ -171,5 +189,32 @@ describe('with compression', () => {
       },
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe('HttpConfig', () => {
+  it('converts customResponseHeaders to strings or arrays of strings', () => {
+    const httpSchema = config.schema;
+    const rawConfig = httpSchema.validate({
+      customResponseHeaders: {
+        string: 'string',
+        bool: true,
+        number: 12,
+        array: [1, 2, 3],
+        nested: {
+          foo: 1,
+          bar: 'dolly',
+        },
+      },
+    });
+    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT);
+
+    expect(httpConfig.customResponseHeaders).toEqual({
+      string: 'string',
+      bool: 'true',
+      number: '12',
+      array: ['1', '2', '3'],
+      nested: '{"foo":1,"bar":"dolly"}',
+    });
   });
 });

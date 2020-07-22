@@ -45,7 +45,7 @@ export class TimeseriesVisualization extends Component {
     getConfig: PropTypes.func,
   };
 
-  xAxisFormatter = interval => val => {
+  xAxisFormatter = (interval) => (val) => {
     const { scaledDataFormat, dateFormat } = this.props.visData;
 
     if (!scaledDataFormat || !dateFormat) {
@@ -57,13 +57,13 @@ export class TimeseriesVisualization extends Component {
     return formatter(val);
   };
 
-  yAxisStackedByPercentFormatter = val => {
+  yAxisStackedByPercentFormatter = (val) => {
     const n = Number(val) * 100;
 
     return `${(Number.isNaN(n) ? 0 : n).toFixed(0)}%`;
   };
 
-  applyDocTo = template => doc => {
+  applyDocTo = (template) => (doc) => {
     const vars = replaceVars(template, null, doc);
 
     if (vars instanceof Error) {
@@ -75,7 +75,7 @@ export class TimeseriesVisualization extends Component {
     return vars;
   };
 
-  static getYAxisDomain = model => {
+  static getYAxisDomain = (model) => {
     const axisMin = get(model, 'axis_min', '').toString();
     const axisMax = get(model, 'axis_max', '').toString();
     const fit = model.series
@@ -100,7 +100,7 @@ export class TimeseriesVisualization extends Component {
     });
   };
 
-  static getAxisScaleType = model =>
+  static getAxisScaleType = (model) =>
     get(model, 'axis_scale') === 'log' ? ScaleType.Log : ScaleType.Linear;
 
   static getTickFormatter = (model, getConfig) =>
@@ -163,9 +163,9 @@ export class TimeseriesVisualization extends Component {
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
     const mainAxisGroupId = yAxisIdGenerator('main_group');
 
-    const seriesModel = model.series.filter(s => !s.hidden).map(s => cloneDeep(s));
+    const seriesModel = model.series.filter((s) => !s.hidden).map((s) => cloneDeep(s));
     const enableHistogramMode = areFieldsDifferent('chart_type')(seriesModel);
-    const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
+    const firstSeries = seriesModel.find((s) => s.formatter && !s.separate_axis);
 
     const mainAxisScaleType = TimeseriesVisualization.getAxisScaleType(model);
     const mainAxisDomain = TimeseriesVisualization.getYAxisDomain(model);
@@ -178,7 +178,7 @@ export class TimeseriesVisualization extends Component {
 
     this.showToastNotification = null;
 
-    seriesModel.forEach(seriesGroup => {
+    seriesModel.forEach((seriesGroup) => {
       const isStackedWithinSeries = seriesGroup.stacked === STACKED_OPTIONS.STACKED_WITHIN_SERIES;
       const hasSeparateAxis = Boolean(seriesGroup.separate_axis);
       const groupId = hasSeparateAxis || isStackedWithinSeries ? seriesGroup.id : mainAxisGroupId;
@@ -203,8 +203,8 @@ export class TimeseriesVisualization extends Component {
       }
 
       series
-        .filter(r => startsWith(r.id, seriesGroup.id))
-        .forEach(seriesDataRow => {
+        .filter((r) => startsWith(r.id, seriesGroup.id))
+        .forEach((seriesDataRow) => {
           seriesDataRow.tickFormatter = seriesGroupTickFormatter;
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;

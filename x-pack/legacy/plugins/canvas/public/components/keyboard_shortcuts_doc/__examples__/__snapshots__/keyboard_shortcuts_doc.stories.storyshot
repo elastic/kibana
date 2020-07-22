@@ -212,7 +212,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Bring forward
+                  Bring to front
                 </dt>
                 <dd
                   className="euiDescriptionList__description"
@@ -234,7 +234,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
                 <dt
                   className="euiDescriptionList__title"
                 >
-                  Bring to front
+                  Bring forward
                 </dt>
                 <dd
                   className="euiDescriptionList__description"

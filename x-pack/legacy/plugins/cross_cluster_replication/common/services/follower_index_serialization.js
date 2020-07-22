@@ -101,7 +101,7 @@ export const deserializeFollowerIndex = ({
 });
 /* eslint-enable camelcase */
 
-export const deserializeListFollowerIndices = followerIndices =>
+export const deserializeListFollowerIndices = (followerIndices) =>
   followerIndices.map(deserializeFollowerIndex);
 
 export const serializeAdvancedSettings = ({
@@ -128,7 +128,7 @@ export const serializeAdvancedSettings = ({
   read_poll_timeout: readPollTimeout,
 });
 
-export const serializeFollowerIndex = followerIndex => ({
+export const serializeFollowerIndex = (followerIndex) => ({
   remote_cluster: followerIndex.remoteCluster,
   leader_index: followerIndex.leaderIndex,
   ...serializeAdvancedSettings(followerIndex),

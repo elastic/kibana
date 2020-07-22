@@ -21,11 +21,10 @@ exports[`FieldName renders a geo field, useShortDots is set to true 1`] = `
     class="euiFlexItem eui-textTruncate"
   >
     <span
-      class="euiToolTipAnchor eui-textTruncate"
+      class="eui-textTruncate"
+      title="test.test.test"
     >
-      <span>
-        t.t.test
-      </span>
+      t.t.test
     </span>
   </div>
 </div>
@@ -52,11 +51,10 @@ exports[`FieldName renders a number field by providing a field record, useShortD
     class="euiFlexItem eui-textTruncate"
   >
     <span
-      class="euiToolTipAnchor eui-textTruncate"
+      class="eui-textTruncate"
+      title="test.test.test"
     >
-      <span>
-        test.test.test
-      </span>
+      test.test.test
     </span>
   </div>
 </div>
@@ -83,11 +81,10 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
     class="euiFlexItem eui-textTruncate"
   >
     <span
-      class="euiToolTipAnchor eui-textTruncate"
+      class="eui-textTruncate"
+      title="test"
     >
-      <span>
-        test
-      </span>
+      test
     </span>
   </div>
 </div>

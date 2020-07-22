@@ -10,7 +10,7 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 export class FeaturePrivilegeApiBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
     if (privilegeDefinition.api) {
-      return privilegeDefinition.api.map(operation => this.actions.api.get(operation));
+      return privilegeDefinition.api.map((operation) => this.actions.api.get(operation));
     }
 
     return [];

@@ -10,7 +10,7 @@ import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/elasticsearch_fie
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../../helpers/setup_request';
 import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
 import { ChartBase } from '../../../types';
@@ -18,20 +18,20 @@ import { ChartBase } from '../../../types';
 const series = {
   [METRIC_JAVA_GC_COUNT]: {
     title: i18n.translate('xpack.apm.agentMetrics.java.gcRate', {
-      defaultMessage: 'GC rate'
+      defaultMessage: 'GC rate',
     }),
-    color: theme.euiColorVis0
-  }
+    color: theme.euiColorVis0,
+  },
 };
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.java.gcRateChartTitle', {
-    defaultMessage: 'Garbage collection per minute'
+    defaultMessage: 'Garbage collection per minute',
   }),
   key: 'gc_rate_line_chart',
   type: 'linemark',
   yUnit: 'integer',
-  series
+  series,
 };
 
 const getGcRateChart = (
@@ -44,7 +44,7 @@ const getGcRateChart = (
     serviceName,
     serviceNodeName,
     chartBase,
-    fieldName: METRIC_JAVA_GC_COUNT
+    fieldName: METRIC_JAVA_GC_COUNT,
   });
 };
 

@@ -183,7 +183,7 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
     }
   }
 
-  registry.getAllTypes().forEach(type => {
+  registry.getAllTypes().forEach((type) => {
     if (type.migrations) {
       assertObject(
         type.migrations,
@@ -209,7 +209,7 @@ function buildActiveMigrations(
 ): ActiveMigrations {
   return typeRegistry
     .getAllTypes()
-    .filter(type => type.migrations && Object.keys(type.migrations).length > 0)
+    .filter((type) => type.migrations && Object.keys(type.migrations).length > 0)
     .reduce((migrations, type) => {
       const transforms = Object.entries(type.migrations!)
         .map(([version, transform]) => ({
@@ -334,7 +334,7 @@ function wrapWithTry(
  * Finds the first unmigrated property in the specified document.
  */
 function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
-  return props(doc).find(p => {
+  return props(doc).find((p) => {
     const latestVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
 
@@ -431,7 +431,7 @@ function assertNoDowngrades(
   }
 
   const downgrade = Object.keys(migrationVersion).find(
-    k => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
+    (k) => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
   );
 
   if (downgrade) {

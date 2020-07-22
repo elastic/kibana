@@ -79,7 +79,7 @@ export class Plugin
           defaultMessage: 'Alerts and Actions',
         }),
         order: 7,
-        mount: params => {
+        mount: (params) => {
           boot({
             dataPlugin: plugins.data,
             charts: plugins.charts,

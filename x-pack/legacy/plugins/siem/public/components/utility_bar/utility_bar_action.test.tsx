@@ -30,11 +30,6 @@ describe('UtilityBarAction', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('.euiPopover')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('.euiPopover').first().exists()).toBe(true);
   });
 });

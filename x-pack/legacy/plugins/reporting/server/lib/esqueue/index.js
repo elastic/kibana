@@ -26,15 +26,15 @@ export class Esqueue extends EventEmitter {
       ...omit(options, ['client']),
     };
     this.client = options.client;
-    this._logger = options.logger || function() {};
+    this._logger = options.logger || function () {};
     this._workers = [];
-    this._initTasks().catch(err => this.emit(constants.EVENT_QUEUE_ERROR, err));
+    this._initTasks().catch((err) => this.emit(constants.EVENT_QUEUE_ERROR, err));
   }
 
   _initTasks() {
     const initTasks = [this.client.callAsInternalUser('ping')];
 
-    return Promise.all(initTasks).catch(err => {
+    return Promise.all(initTasks).catch((err) => {
       this._logger(['initTasks', 'error'], err);
       throw err;
     });
@@ -62,11 +62,11 @@ export class Esqueue extends EventEmitter {
   }
 
   getWorkers() {
-    return this._workers.map(fn => fn);
+    return this._workers.map((fn) => fn);
   }
 
   destroy() {
-    const workers = this._workers.filter(worker => worker.destroy());
+    const workers = this._workers.filter((worker) => worker.destroy());
     this._workers = workers;
   }
 }

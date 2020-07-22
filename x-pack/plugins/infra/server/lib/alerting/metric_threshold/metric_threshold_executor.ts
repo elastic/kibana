@@ -51,7 +51,7 @@ const getCurrentValueFromAggregations = (
 
 const getParsedFilterQuery: (
   filterQuery: string | undefined
-) => Record<string, any> | Array<Record<string, any>> = filterQuery => {
+) => Record<string, any> | Array<Record<string, any>> = (filterQuery) => {
   if (!filterQuery) return {};
   try {
     return JSON.parse(filterQuery).bool;
@@ -177,7 +177,7 @@ export const getElasticsearchMetricQuery = (
 const getIndexPattern: (
   services: AlertServices,
   sourceId?: string
-) => Promise<string> = async function({ savedObjectsClient }, sourceId = 'default') {
+) => Promise<string> = async function ({ savedObjectsClient }, sourceId = 'default') {
   try {
     const sourceConfiguration = await savedObjectsClient.get(
       infraSourceConfigurationSavedObjectType,
@@ -202,7 +202,7 @@ const getMetric: (
   index: string,
   groupBy: string | undefined,
   filterQuery: string | undefined
-) => Promise<Record<string, number>> = async function(
+) => Promise<Record<string, number>> = async function (
   { savedObjectsClient, callCluster },
   params,
   index,
@@ -219,10 +219,10 @@ const getMetric: (
       ) => response.aggregations?.groupings?.buckets || [];
       const afterKeyHandler = createAfterKeyHandler(
         'aggs.groupings.composite.after',
-        response => response.aggregations?.groupings?.after_key
+        (response) => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
-        body => callCluster('search', { body, index }),
+        (body) => callCluster('search', { body, index }),
         searchBody,
         bucketSelector,
         afterKeyHandler
@@ -269,7 +269,7 @@ const mapToConditionsLookup = (
     );
 
 export const createMetricThresholdExecutor = (alertUUID: string) =>
-  async function({ services, params }: AlertExecutorOptions) {
+  async function ({ services, params }: AlertExecutorOptions) {
     const { criteria, groupBy, filterQuery, sourceId } = params as {
       criteria: MetricExpressionParams[];
       groupBy: string | undefined;
@@ -278,13 +278,13 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
     };
 
     const alertResults = await Promise.all(
-      criteria.map(criterion =>
+      criteria.map((criterion) =>
         (async () => {
           const index = await getIndexPattern(services, sourceId);
           const currentValues = await getMetric(services, criterion, index, groupBy, filterQuery);
           const { threshold, comparator } = criterion;
           const comparisonFunction = comparatorMap[comparator];
-          return mapValues(currentValues, value => ({
+          return mapValues(currentValues, (value) => ({
             shouldFire:
               value !== undefined && value !== null && comparisonFunction(value, threshold),
             currentValue: value,
@@ -300,17 +300,17 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
       const alertInstance = services.alertInstanceFactory(`${alertUUID}-${group}`);
 
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = alertResults.every(result => result[group].shouldFire);
+      const shouldAlertFire = alertResults.every((result) => result[group].shouldFire);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some(result => result[group].isNoData);
-      const isError = alertResults.some(result => result[group].isError);
+      const isNoData = alertResults.some((result) => result[group].isNoData);
+      const isError = alertResults.some((result) => result[group].isError);
       if (shouldAlertFire) {
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
-          valueOf: mapToConditionsLookup(alertResults, result => result[group].currentValue),
-          thresholdOf: mapToConditionsLookup(criteria, criterion => criterion.threshold),
-          metricOf: mapToConditionsLookup(criteria, criterion => criterion.metric),
+          valueOf: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
+          thresholdOf: mapToConditionsLookup(criteria, (criterion) => criterion.threshold),
+          metricOf: mapToConditionsLookup(criteria, (criterion) => criterion.metric),
         });
       }
       // Future use: ability to fetch display current alert state

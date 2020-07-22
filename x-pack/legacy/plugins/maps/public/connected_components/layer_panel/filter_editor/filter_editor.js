@@ -45,7 +45,7 @@ export class FilterEditor extends Component {
     // Filter only effects source so only load source indices.
     const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
     const indexPatterns = [];
-    const getIndexPatternPromises = indexPatternIds.map(async indexPatternId => {
+    const getIndexPatternPromises = indexPatternIds.map(async (indexPatternId) => {
       try {
         const indexPattern = await getIndexPatternService().get(indexPatternId);
         indexPatterns.push(indexPattern);
@@ -64,7 +64,7 @@ export class FilterEditor extends Component {
   };
 
   _toggle = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
@@ -78,7 +78,7 @@ export class FilterEditor extends Component {
     this._close();
   };
 
-  _onApplyGlobalQueryChange = applyGlobalQuery => {
+  _onApplyGlobalQueryChange = (applyGlobalQuery) => {
     this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', applyGlobalQuery);
   };
 

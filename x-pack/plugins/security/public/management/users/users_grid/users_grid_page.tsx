@@ -143,7 +143,7 @@ export class UsersGridPage extends Component<Props, State> {
         width: '30%',
         render: (rolenames: string[]) => {
           const roleLinks = rolenames.map((rolename, index) => {
-            const roleDefinition = roles?.find(role => role.name === rolename) ?? rolename;
+            const roleDefinition = roles?.find((role) => role.name === rolename) ?? rolename;
             return <RoleTableDisplay role={roleDefinition} key={rolename} />;
           });
           return <div data-test-subj="userRowRoles">{roleLinks}</div>;
@@ -231,7 +231,7 @@ export class UsersGridPage extends Component<Props, State> {
             {showDeleteConfirmation ? (
               <ConfirmDeleteUsers
                 onCancel={this.onCancelDelete}
-                usersToDelete={selection.map(user => user.username)}
+                usersToDelete={selection.map((user) => user.username)}
                 callback={this.handleDelete}
                 userAPIClient={this.props.userAPIClient}
                 notifications={this.props.notifications}

@@ -37,7 +37,7 @@ class StatusTable extends Component {
     {
       field: 'state',
       name: '',
-      render: state => <EuiIcon type="dot" aria-hidden color={state.uiColor} />,
+      render: (state) => <EuiIcon type="dot" aria-hidden color={state.uiColor} />,
       width: '32px',
     },
     {
@@ -51,7 +51,7 @@ class StatusTable extends Component {
       name: i18n.translate('statusPage.statusTable.columns.statusHeader', {
         defaultMessage: 'Status',
       }),
-      render: state => <span>{state.message}</span>,
+      render: (state) => <span>{state.message}</span>,
     },
   ];
 

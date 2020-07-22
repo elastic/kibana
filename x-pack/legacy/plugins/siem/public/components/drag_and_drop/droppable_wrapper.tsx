@@ -25,10 +25,10 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
   height: ${({ height }) => height};
   .flyout-overlay {
     .euiPanel {
-      background-color: ${props => props.theme.eui.euiFormBackgroundColor};
+      background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
     }
   }
-  ${props =>
+  ${(props) =>
     props.isDraggingOver
       ? `
     .drop-and-provider-timeline {

@@ -8,7 +8,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React from 'react';
@@ -56,7 +56,7 @@ export function Contents({
   isService,
   label,
   onFocusClick,
-  selectedNodeServiceName
+  selectedNodeServiceName,
 }: ContentsProps) {
   const frameworkName = selectedNodeData[SERVICE_FRAMEWORK_NAME];
   return (

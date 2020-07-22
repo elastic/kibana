@@ -29,7 +29,7 @@ interface Props {
 export const App: FC<Props> = ({ workpad, stage }) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
-  renderFunctions.forEach(fn => {
+  renderFunctions.forEach((fn) => {
     const func = fn();
     renderers[func.name] = func;
   });

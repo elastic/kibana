@@ -26,7 +26,7 @@ import { Axis } from '../../lib/axis';
 import { VisConfig } from '../../lib/vis_config';
 import { getMockUiState } from './fixtures/_vis_fixture';
 
-describe('Vislib xAxis Class Test Suite', function() {
+describe('Vislib xAxis Class Test Suite', function () {
   let mockUiState;
   let xAxis;
   let el;
@@ -98,7 +98,7 @@ describe('Vislib xAxis Class Test Suite', function() {
         ],
       },
     ],
-    xAxisFormatter: function(thing) {
+    xAxisFormatter: function (thing) {
       return new Date(thing);
     },
     xAxisLabel: 'Date Histogram',
@@ -107,11 +107,7 @@ describe('Vislib xAxis Class Test Suite', function() {
 
   beforeEach(() => {
     mockUiState = getMockUiState();
-    el = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'visAxis--x')
-      .style('height', '40px');
+    el = d3.select('body').append('div').attr('class', 'visAxis--x').style('height', '40px');
 
     fixture = el.append('div').attr('class', 'x-axis-div');
 
@@ -130,67 +126,67 @@ describe('Vislib xAxis Class Test Suite', function() {
     });
   });
 
-  afterEach(function() {
+  afterEach(function () {
     fixture.remove();
     el.remove();
   });
 
-  describe('render Method', function() {
-    beforeEach(function() {
+  describe('render Method', function () {
+    beforeEach(function () {
       xAxis.render();
     });
 
-    it('should append an svg to div', function() {
+    it('should append an svg to div', function () {
       expect(el.selectAll('svg').length).to.be(1);
     });
 
-    it('should append a g element to the svg', function() {
+    it('should append a g element to the svg', function () {
       expect(el.selectAll('svg').select('g').length).to.be(1);
     });
 
-    it('should append ticks with text', function() {
+    it('should append ticks with text', function () {
       expect(!!el.selectAll('svg').selectAll('.tick text')).to.be(true);
     });
   });
 
-  describe('getScale, getDomain, getTimeDomain, and getRange Methods', function() {
+  describe('getScale, getDomain, getTimeDomain, and getRange Methods', function () {
     let timeScale;
     let width;
     let range;
 
-    beforeEach(function() {
+    beforeEach(function () {
       width = $('.x-axis-div').width();
       xAxis.getAxis(width);
       timeScale = xAxis.getScale();
       range = xAxis.axisScale.getRange(width);
     });
 
-    it('should return a function', function() {
+    it('should return a function', function () {
       expect(_.isFunction(timeScale)).to.be(true);
     });
 
-    it('should return the correct domain', function() {
+    it('should return the correct domain', function () {
       expect(_.isDate(timeScale.domain()[0])).to.be(true);
       expect(_.isDate(timeScale.domain()[1])).to.be(true);
     });
 
-    it('should return the min and max dates', function() {
+    it('should return the min and max dates', function () {
       expect(timeScale.domain()[0].toDateString()).to.be(new Date(1408734060000).toDateString());
       expect(timeScale.domain()[1].toDateString()).to.be(new Date(1408734330000).toDateString());
     });
 
-    it('should return the correct range', function() {
+    it('should return the correct range', function () {
       expect(range[0]).to.be(0);
       expect(range[1]).to.be(width);
     });
   });
 
-  describe('getOrdinalDomain Method', function() {
+  describe('getOrdinalDomain Method', function () {
     let ordinalScale;
     let ordinalDomain;
     let width;
 
-    beforeEach(function() {
+    beforeEach(function () {
       width = $('.x-axis-div').width();
       xAxis.ordered = null;
       xAxis.axisConfig.ordered = null;
@@ -199,56 +195,56 @@ describe('Vislib xAxis Class Test Suite', function() {
       ordinalDomain = ordinalScale.domain(['this', 'should', 'be', 'an', 'array']);
     });
 
-    it('should return an ordinal scale', function() {
+    it('should return an ordinal scale', function () {
       expect(ordinalDomain.domain()[0]).to.be('this');
       expect(ordinalDomain.domain()[4]).to.be('array');
     });
 
-    it('should return an array of values', function() {
+    it('should return an array of values', function () {
       expect(Array.isArray(ordinalDomain.domain())).to.be(true);
     });
   });
 
-  describe('getXScale Method', function() {
+  describe('getXScale Method', function () {
     let width;
     let xScale;
 
-    beforeEach(function() {
+    beforeEach(function () {
       width = $('.x-axis-div').width();
       xAxis.getAxis(width);
       xScale = xAxis.getScale();
     });
 
-    it('should return a function', function() {
+    it('should return a function', function () {
       expect(_.isFunction(xScale)).to.be(true);
     });
 
-    it('should return a domain', function() {
+    it('should return a domain', function () {
       expect(_.isDate(xScale.domain()[0])).to.be(true);
       expect(_.isDate(xScale.domain()[1])).to.be(true);
     });
 
-    it('should return a range', function() {
+    it('should return a range', function () {
       expect(xScale.range()[0]).to.be(0);
       expect(xScale.range()[1]).to.be(width);
     });
   });
 
-  describe('getXAxis Method', function() {
+  describe('getXAxis Method', function () {
     let width;
 
-    beforeEach(function() {
+    beforeEach(function () {
       width = $('.x-axis-div').width();
       xAxis.getAxis(width);
     });
 
-    it('should create an getScale function on the xAxis class', function() {
+    it('should create an getScale function on the xAxis class', function () {
       expect(_.isFunction(xAxis.getScale())).to.be(true);
     });
   });
 
-  describe('draw Method', function() {
-    it('should be a function', function() {
+  describe('draw Method', function () {
+    it('should be a function', function () {
       expect(_.isFunction(xAxis.draw())).to.be(true);
     });
   });

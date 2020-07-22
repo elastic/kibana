@@ -25,9 +25,9 @@ export interface MlStartDependencies {
   share: SharePluginStart;
 }
 export interface MlSetupDependencies {
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
-  management: ManagementSetup;
+  management?: ManagementSetup;
   usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   home: HomePublicPluginSetup;

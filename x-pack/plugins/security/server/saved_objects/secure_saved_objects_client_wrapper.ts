@@ -145,7 +145,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actionsToTypesMap = new Map(
-      types.map(type => [this.actions.savedObject.get(type, action), type])
+      types.map((type) => [this.actions.savedObject.get(type, action), type])
     );
     const actions = Array.from(actionsToTypesMap.keys());
     const { hasAllRequested, username, privileges } = await this.checkPrivileges(
@@ -165,7 +165,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         args
       );
       const msg = `Unable to ${action} ${missingPrivileges
-        .map(privilege => actionsToTypesMap.get(privilege))
+        .map((privilege) => actionsToTypesMap.get(privilege))
         .sort()
         .join(',')}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
@@ -173,10 +173,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private getMissingPrivileges(privileges: Record<string, boolean>) {
-    return Object.keys(privileges).filter(privilege => !privileges[privilege]);
+    return Object.keys(privileges).filter((privilege) => !privileges[privilege]);
   }
 
   private getUniqueObjectTypes(objects: Array<{ type: string }>) {
-    return [...new Set(objects.map(o => o.type))];
+    return [...new Set(objects.map((o) => o.type))];
   }
 }

@@ -21,8 +21,8 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import { getSeries } from '../_get_series';
 
-describe('getSeries', function() {
-  it('produces a single series with points for each row', function() {
+describe('getSeries', function () {
+  it('produces a single series with points for each row', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
       rows: [
@@ -44,9 +44,7 @@ describe('getSeries', function() {
 
     const series = getSeries(table, chart);
 
-    expect(series)
-      .to.be.an('array')
-      .and.to.have.length(1);
+    expect(series).to.be.an('array').and.to.have.length(1);
 
     const siri = series[0];
     expect(siri)
@@ -54,19 +52,14 @@ describe('getSeries', function() {
       .and.have.property('label', chart.aspects.y.title)
       .and.have.property('values');
 
-    expect(siri.values)
-      .to.be.an('array')
-      .and.have.length(5);
+    expect(siri.values).to.be.an('array').and.have.length(5);
 
-    siri.values.forEach(function(point) {
-      expect(point)
-        .to.have.property('x', 1)
-        .and.property('y', 2)
-        .and.property('z', 3);
+    siri.values.forEach(function (point) {
+      expect(point).to.have.property('x', 1).and.property('y', 2).and.property('z', 3);
     });
   });
 
-  it('adds the seriesId to each point', function() {
+  it('adds the seriesId to each point', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
       rows: [
@@ -90,16 +83,16 @@ describe('getSeries', function() {
 
     const series = getSeries(table, chart);
 
-    series[0].values.forEach(function(point) {
+    series[0].values.forEach(function (point) {
       expect(point).to.have.property('seriesId', 1);
     });
 
-    series[1].values.forEach(function(point) {
+    series[1].values.forEach(function (point) {
       expect(point).to.have.property('seriesId', 2);
     });
   });
 
-  it('produces multiple series if there are multiple y aspects', function() {
+  it('produces multiple series if there are multiple y aspects', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
       rows: [
@@ -123,21 +116,17 @@ describe('getSeries', function() {
 
     const series = getSeries(table, chart);
 
-    expect(series)
-      .to.be.an('array')
-      .and.to.have.length(2);
+    expect(series).to.be.an('array').and.to.have.length(2);
 
-    series.forEach(function(siri, i) {
+    series.forEach(function (siri, i) {
       expect(siri)
         .to.be.an('object')
         .and.have.property('label', '' + i)
         .and.have.property('values');
 
-      expect(siri.values)
-        .to.be.an('array')
-        .and.have.length(5);
+      expect(siri.values).to.be.an('array').and.have.length(5);
 
-      siri.values.forEach(function(point) {
+      siri.values.forEach(function (point) {
         expect(point)
           .to.have.property('x', 1)
           .and.property('y', i + 2);
@@ -145,7 +134,7 @@ describe('getSeries', function() {
     });
   });
 
-  it('produces multiple series if there is a series aspect', function() {
+  it('produces multiple series if there is a series aspect', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
       rows: [
@@ -168,27 +157,23 @@ describe('getSeries', function() {
 
     const series = getSeries(table, chart);
 
-    expect(series)
-      .to.be.an('array')
-      .and.to.have.length(2);
+    expect(series).to.be.an('array').and.to.have.length(2);
 
-    series.forEach(function(siri, i) {
+    series.forEach(function (siri, i) {
       expect(siri)
         .to.be.an('object')
         .and.have.property('label', '' + i)
         .and.have.property('values');
 
-      expect(siri.values)
-        .to.be.an('array')
-        .and.have.length(3);
+      expect(siri.values).to.be.an('array').and.have.length(3);
 
-      siri.values.forEach(function(point) {
+      siri.values.forEach(function (point) {
         expect(point).to.have.property('y', 2);
       });
     });
   });
 
-  it('produces multiple series if there is a series aspect and multiple y aspects', function() {
+  it('produces multiple series if there is a series aspect and multiple y aspects', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
       rows: [
@@ -214,9 +199,7 @@ describe('getSeries', function() {
 
     const series = getSeries(table, chart);
 
-    expect(series)
-      .to.be.an('array')
-      .and.to.have.length(4); // two series * two metrics
+    expect(series).to.be.an('array').and.to.have.length(4); // two series * two metrics
 
     checkSiri(series[0], '0: 0', 3);
     checkSiri(series[1], '0: 1', 4);
@@ -224,22 +207,17 @@ describe('getSeries', function() {
     checkSiri(series[3], '1: 1', 4);
 
     function checkSiri(siri, label, y) {
-      expect(siri)
-        .to.be.an('object')
-        .and.have.property('label', label)
-        .and.have.property('values');
+      expect(siri).to.be.an('object').and.have.property('label', label).and.have.property('values');
 
-      expect(siri.values)
-        .to.be.an('array')
-        .and.have.length(3);
+      expect(siri.values).to.be.an('array').and.have.length(3);
 
-      siri.values.forEach(function(point) {
+      siri.values.forEach(function (point) {
         expect(point).to.have.property('y', y);
       });
     }
   });
 
-  it('produces a series list in the same order as its corresponding metric column', function() {
+  it('produces a series list in the same order as its corresponding metric column', function () {
     const table = {
       columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
       rows: [
@@ -270,7 +248,7 @@ describe('getSeries', function() {
 
     // switch the order of the y columns
     chart.aspects.y = chart.aspects.y.reverse();
-    chart.aspects.y.forEach(function(y, i) {
+    chart.aspects.y.forEach(function (y, i) {
       y.i = i;
     });
 

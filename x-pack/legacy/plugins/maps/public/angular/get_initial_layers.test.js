@@ -65,7 +65,7 @@ describe('EMS is enabled', () => {
     require('../meta').getKibanaTileMap = () => {
       return null;
     };
-    require('../kibana_services').getInjectedVarFunc = () => key => {
+    require('../kibana_services').getInjectedVarFunc = () => (key) => {
       switch (key) {
         case 'emsTileLayerId':
           return {
@@ -110,7 +110,7 @@ describe('EMS is not enabled', () => {
       return null;
     };
 
-    require('../kibana_services').getInjectedVarFunc = () => key => {
+    require('../kibana_services').getInjectedVarFunc = () => (key) => {
       switch (key) {
         case 'isEmsEnabled':
           return false;

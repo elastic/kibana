@@ -80,7 +80,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         const responseCodeBlock = await this.find(codeBlockSelector);
         const spans = await find.allDescendantDisplayedByTagName('span', responseCodeBlock);
         const foundInSpans = await Promise.all(
-          spans.map(async span => {
+          spans.map(async (span) => {
             const text = await span.getVisibleText();
             if (text === stringToFind) {
               log.debug(`"${text}" matched "${stringToFind}"!`);
@@ -90,7 +90,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
             }
           })
         );
-        if (!foundInSpans.find(foundInSpan => foundInSpan)) {
+        if (!foundInSpans.find((foundInSpan) => foundInSpan)) {
           throw new Error(`"${stringToFind}" was not found. Trying again...`);
         }
       });

@@ -76,7 +76,7 @@ describe('useQuerySignals', () => {
       const { rerender, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQuerySignals<unknown, unknown>
-      >(args => useQuerySignals(args[0], args[1]), {
+      >((args) => useQuerySignals(args[0], args[1]), {
         initialProps: [mockSignalsQuery, indexName],
       });
       await waitForNextUpdate();
@@ -93,7 +93,7 @@ describe('useQuerySignals', () => {
       const { result, waitForNextUpdate } = renderHook<
         [object, string],
         ReturnQuerySignals<unknown, unknown>
-      >(args => useQuerySignals(args[0], args[1]), {
+      >((args) => useQuerySignals(args[0], args[1]), {
         initialProps: [mockSignalsQuery, indexName],
       });
       await waitForNextUpdate();

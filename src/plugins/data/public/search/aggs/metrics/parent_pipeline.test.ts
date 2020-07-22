@@ -25,7 +25,7 @@ import { AggConfigs } from '../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
-describe('parent pipeline aggs', function() {
+describe('parent pipeline aggs', function () {
   beforeEach(() => {
     mockDataServices();
   });
@@ -39,7 +39,7 @@ describe('parent pipeline aggs', function() {
     { name: 'serial_diff', title: 'Serial Diff', provider: serialDiffMetricAgg },
   ];
 
-  metrics.forEach(metric => {
+  metrics.forEach((metric) => {
     describe(`${metric.title} metric`, () => {
       let aggDsl: Record<string, any>;
       let metricAgg: MetricAggType;
@@ -221,7 +221,7 @@ describe('parent pipeline aggs', function() {
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
         customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
 
-        aggConfig.type.params.forEach(param => {
+        aggConfig.type.params.forEach((param) => {
           param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
         });
         expect(customMetricSpy.mock.calls[0]).toEqual([customMetric, searchSource, {}]);

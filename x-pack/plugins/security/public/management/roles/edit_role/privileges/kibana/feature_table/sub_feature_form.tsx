@@ -64,12 +64,14 @@ export const SubFeatureForm = (props: Props) => {
               id={`${props.featureId}_${privilege.id}`}
               label={privilege.name}
               data-test-subj="independentSubFeaturePrivilegeControl"
-              onChange={e => {
+              onChange={(e) => {
                 const { checked } = e.target;
                 if (checked) {
                   props.onChange([...props.selectedFeaturePrivileges, privilege.id]);
                 } else {
-                  props.onChange(props.selectedFeaturePrivileges.filter(sp => sp !== privilege.id));
+                  props.onChange(
+                    props.selectedFeaturePrivileges.filter((sp) => sp !== privilege.id)
+                  );
                 }
               }}
               checked={isGranted}
@@ -116,10 +118,10 @@ export const SubFeatureForm = (props: Props) => {
         options={options}
         idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
         isDisabled={props.disabled}
-        onChange={selectedPrivilegeId => {
+        onChange={(selectedPrivilegeId) => {
           // Deselect all privileges which belong to this mutually-exclusive group
           const privilegesWithoutGroupEntries = props.selectedFeaturePrivileges.filter(
-            sp => !privilegeGroup.privileges.some(privilege => privilege.id === sp)
+            (sp) => !privilegeGroup.privileges.some((privilege) => privilege.id === sp)
           );
           // fire on-change with the newly selected privilege
           if (selectedPrivilegeId === NO_PRIVILEGE_VALUE) {

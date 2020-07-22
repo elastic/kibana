@@ -10,8 +10,8 @@ import { NoServicesMessage } from '../NoServicesMessage';
 import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 
 describe('NoServicesMessage', () => {
-  Object.values(FETCH_STATUS).forEach(status => {
-    [true, false].forEach(historicalDataFound => {
+  Object.values(FETCH_STATUS).forEach((status) => {
+    [true, false].forEach((historicalDataFound) => {
       it(`status: ${status} and historicalDataFound: ${historicalDataFound}`, () => {
         const wrapper = shallow(
           <NoServicesMessage

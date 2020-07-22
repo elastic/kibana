@@ -29,7 +29,7 @@ export function registerDeleteRoute(server) {
 
       return deletePipeline(callWithRequest, pipelineId)
         .then(() => h.response().code(204))
-        .catch(e => wrapEsError(e));
+        .catch((e) => wrapEsError(e));
     },
     config: {
       pre: [licensePreRouting],

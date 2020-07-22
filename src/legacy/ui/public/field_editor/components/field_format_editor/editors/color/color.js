@@ -54,7 +54,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
     });
   };
 
-  removeColor = index => {
+  removeColor = (index) => {
     const colors = [...this.props.formatParams.colors];
     colors.splice(index, 1);
     this.onChange({
@@ -90,7 +90,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
               return (
                 <EuiFieldText
                   value={value}
-                  onChange={e => {
+                  onChange={(e) => {
                     this.onColorChange(
                       {
                         regex: e.target.value,
@@ -114,7 +114,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
               return (
                 <EuiFieldText
                   value={value}
-                  onChange={e => {
+                  onChange={(e) => {
                     this.onColorChange(
                       {
                         range: e.target.value,
@@ -138,7 +138,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
           return (
             <EuiColorPicker
               color={color}
-              onChange={newColor => {
+              onChange={(newColor) => {
                 this.onColorChange(
                   {
                     text: newColor,
@@ -162,7 +162,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
           return (
             <EuiColorPicker
               color={color}
-              onChange={newColor => {
+              onChange={(newColor) => {
                 this.onColorChange(
                   {
                     background: newColor,
@@ -181,7 +181,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
             defaultMessage="Example"
           />
         ),
-        render: item => {
+        render: (item) => {
           return (
             <div
               style={{
@@ -203,7 +203,7 @@ export class ColorFormatEditor extends DefaultFormatEditor {
             description: i18n.translate('common.ui.fieldEditor.color.deleteTitle', {
               defaultMessage: 'Delete color format',
             }),
-            onClick: item => {
+            onClick: (item) => {
               this.removeColor(item.index);
             },
             type: 'icon',

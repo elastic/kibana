@@ -15,7 +15,7 @@ import { AGG_TYPE } from '../../common/constants';
 export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
   function renderMetrics() {
     return metrics.map((metric, index) => {
-      const onMetricChange = metric => {
+      const onMetricChange = (metric) => {
         onChange([...metrics.slice(0, index), metric, ...metrics.slice(index + 1)]);
       };
 

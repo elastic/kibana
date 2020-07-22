@@ -8,14 +8,14 @@ import { IClusterClient, Logger } from 'src/core/server';
 import { APMConfig } from '../../..';
 import {
   createOrUpdateIndex,
-  Mappings
+  Mappings,
 } from '../../helpers/create_or_update_index';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export const createApmCustomLinkIndex = async ({
   esClient,
   config,
-  logger
+  logger,
 }: {
   esClient: IClusterClient;
   config: APMConfig;
@@ -29,39 +29,39 @@ const mappings: Mappings = {
   dynamic: 'strict',
   properties: {
     '@timestamp': {
-      type: 'date'
+      type: 'date',
     },
     label: {
       type: 'text',
       fields: {
         // Adding keyword type to be able to sort by label alphabetically
         keyword: {
-          type: 'keyword'
-        }
-      }
+          type: 'keyword',
+        },
+      },
     },
     url: {
-      type: 'keyword'
+      type: 'keyword',
     },
     service: {
       properties: {
         name: {
-          type: 'keyword'
+          type: 'keyword',
         },
         environment: {
-          type: 'keyword'
-        }
-      }
+          type: 'keyword',
+        },
+      },
     },
     transaction: {
       properties: {
         name: {
-          type: 'keyword'
+          type: 'keyword',
         },
         type: {
-          type: 'keyword'
-        }
-      }
-    }
-  }
+          type: 'keyword',
+        },
+      },
+    },
+  },
 };

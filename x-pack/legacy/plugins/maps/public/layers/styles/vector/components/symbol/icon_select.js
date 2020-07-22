@@ -34,12 +34,12 @@ export class IconSelect extends Component {
   };
 
   _togglePopover = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };
 
-  _handleKeyboardActivity = e => {
+  _handleKeyboardActivity = (e) => {
     if (isKeyboardEvent(e)) {
       if (e.keyCode === keyCodes.ENTER) {
         e.preventDefault();
@@ -50,8 +50,8 @@ export class IconSelect extends Component {
     }
   };
 
-  _onIconSelect = options => {
-    const selectedOption = options.find(option => {
+  _onIconSelect = (options) => {
+    const selectedOption = options.find((option) => {
       return option.checked === 'on';
     });
 

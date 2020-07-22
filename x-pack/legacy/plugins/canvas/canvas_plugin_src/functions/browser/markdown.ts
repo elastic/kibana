@@ -62,7 +62,7 @@ export function markdown(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const compileFunctions = args.content.map(str =>
+      const compileFunctions = args.content.map((str) =>
         Handlebars.compile(String(str), { knownHelpersOnly: true })
       );
       const ctx = {
@@ -76,7 +76,7 @@ export function markdown(): ExpressionFunctionDefinition<
         type: 'render',
         as: 'markdown',
         value: {
-          content: compileFunctions.map(fn => fn(ctx)).join(''),
+          content: compileFunctions.map((fn) => fn(ctx)).join(''),
           font: args.font,
           openLinksInNewTab: args.openLinksInNewTab,
         },

@@ -64,7 +64,7 @@ const getJobsTableColumns = (
     name: i18n.COLUMN_GROUPS,
     render: ({ groups }: SiemJob) => (
       <EuiFlexGroup wrap responsive={true} gutterSize="xs">
-        {groups.map(group => (
+        {groups.map((group) => (
           <EuiFlexItem grow={false} key={group}>
             <EuiBadge color={'hollow'}>{group}</EuiBadge>
           </EuiFlexItem>

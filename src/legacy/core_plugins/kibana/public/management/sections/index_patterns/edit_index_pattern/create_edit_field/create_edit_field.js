@@ -84,7 +84,7 @@ uiRoutes
     template,
     mapBreadcrumbs($route, breadcrumbs) {
       const { indexPattern } = $route.current.locals;
-      return breadcrumbs.map(crumb => {
+      return breadcrumbs.map((crumb) => {
         if (crumb.id !== indexPattern.id) {
           return crumb;
         }
@@ -96,7 +96,7 @@ uiRoutes
       });
     },
     resolve: {
-      indexPattern: function($route, Promise, redirectWhenMissing) {
+      indexPattern: function ($route, Promise, redirectWhenMissing) {
         const { indexPatterns } = npStart.plugins.data;
         return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
           redirectWhenMissing('/management/kibana/index_patterns')

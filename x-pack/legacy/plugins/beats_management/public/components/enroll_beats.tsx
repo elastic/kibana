@@ -60,7 +60,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
       return beats;
     } catch (err) {
       if (this.pinging) {
-        const timeout = (ms: number) => new Promise(res => setTimeout(res, ms));
+        const timeout = (ms: number) => new Promise((res) => setTimeout(res, ms));
         await timeout(5000);
         return await this.pingForBeatWithToken(token);
       }

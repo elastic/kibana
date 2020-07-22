@@ -160,10 +160,7 @@ describe('QueryStringInput', () => {
       )
     );
 
-    component
-      .find(QueryLanguageSwitcher)
-      .props()
-      .onSelectLanguage('lucene');
+    component.find(QueryLanguageSwitcher).props().onSelectLanguage('lucene');
     expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
     expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
   });

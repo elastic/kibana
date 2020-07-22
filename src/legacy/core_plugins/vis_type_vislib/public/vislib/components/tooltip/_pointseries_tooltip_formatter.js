@@ -26,11 +26,12 @@ export function pointSeriesTooltipFormatter() {
 
     const details = [];
 
-    const currentSeries = data.series && data.series.find(serie => serie.rawId === datum.seriesId);
+    const currentSeries =
+      data.series && data.series.find((serie) => serie.rawId === datum.seriesId);
     const addDetail = (label, value) => details.push({ label, value });
 
     if (datum.extraMetrics) {
-      datum.extraMetrics.forEach(metric => {
+      datum.extraMetrics.forEach((metric) => {
         addDetail(metric.label, metric.value);
       });
     }

@@ -46,7 +46,7 @@ function TimeBuckets(uiSettings, data) {
  *
  * @returns {undefined}
  */
-TimeBuckets.prototype.setBounds = function(input) {
+TimeBuckets.prototype.setBounds = function (input) {
   if (!input) return this.clearBounds();
 
   let bounds;
@@ -57,9 +57,7 @@ TimeBuckets.prototype.setBounds = function(input) {
     bounds = Array.isArray(input) ? input : [];
   }
 
-  const moments = _(bounds)
-    .map(_.ary(moment, 1))
-    .sortBy(Number);
+  const moments = _(bounds).map(_.ary(moment, 1)).sortBy(Number);
 
   const valid = moments.size() === 2 && moments.every(isValidMoment);
   if (!valid) {
@@ -79,7 +77,7 @@ TimeBuckets.prototype.setBounds = function(input) {
  *
  * @return {undefined}
  */
-TimeBuckets.prototype.clearBounds = function() {
+TimeBuckets.prototype.clearBounds = function () {
   this._lb = this._ub = null;
 };
 
@@ -88,7 +86,7 @@ TimeBuckets.prototype.clearBounds = function() {
  *
  * @return {Boolean}
  */
-TimeBuckets.prototype.hasBounds = function() {
+TimeBuckets.prototype.hasBounds = function () {
   return isValidMoment(this._ub) && isValidMoment(this._lb);
 };
 
@@ -106,7 +104,7 @@ TimeBuckets.prototype.hasBounds = function() {
  *                      object
  *
  */
-TimeBuckets.prototype.getBounds = function() {
+TimeBuckets.prototype.getBounds = function () {
   if (!this.hasBounds()) return;
   return {
     min: this._lb,
@@ -121,7 +119,7 @@ TimeBuckets.prototype.getBounds = function() {
  *
  * @return {moment.duration|undefined}
  */
-TimeBuckets.prototype.getDuration = function() {
+TimeBuckets.prototype.getDuration = function () {
   if (!this.hasBounds()) return;
   return moment.duration(this._ub - this._lb, 'ms');
 };
@@ -138,7 +136,7 @@ TimeBuckets.prototype.getDuration = function() {
  *
  * @param {object|string|moment.duration} input - see desc
  */
-TimeBuckets.prototype.setInterval = function(input) {
+TimeBuckets.prototype.setInterval = function (input) {
   // Preserve the original units because they're lost when the interval is converted to a
   // moment duration object.
   this.originalInterval = input;
@@ -206,7 +204,7 @@ TimeBuckets.prototype.setInterval = function(input) {
  *
  * @return {[type]} [description]
  */
-TimeBuckets.prototype.getInterval = function(useNormalizedEsInterval = true) {
+TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
   const self = this;
   const duration = self.getDuration();
   const parsedInterval = readInterval();
@@ -280,7 +278,7 @@ TimeBuckets.prototype.getInterval = function(useNormalizedEsInterval = true) {
  *
  * @return {string}
  */
-TimeBuckets.prototype.getScaledDateFormat = function() {
+TimeBuckets.prototype.getScaledDateFormat = function () {
   const interval = this.getInterval();
   const rules = this.getConfig('dateFormat:scaled');
 
@@ -294,7 +292,7 @@ TimeBuckets.prototype.getScaledDateFormat = function() {
   return this.getConfig('dateFormat');
 };
 
-TimeBuckets.prototype.getScaledDateFormatter = function() {
+TimeBuckets.prototype.getScaledDateFormatter = function () {
   const fieldFormats = this.data.fieldFormats;
   const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
 
@@ -306,7 +304,7 @@ TimeBuckets.prototype.getScaledDateFormatter = function() {
   );
 };
 
-TimeBuckets.__cached__ = function(self) {
+TimeBuckets.__cached__ = function (self) {
   let cache = {};
   const sameMoment = same(moment.isMoment);
   const sameDuration = same(moment.isDuration);
@@ -325,18 +323,18 @@ TimeBuckets.__cached__ = function(self) {
 
   const resources = {
     bounds: {
-      setup: function() {
+      setup: function () {
         return [self._lb, self._ub];
       },
-      changes: function(prev) {
+      changes: function (prev) {
         return !sameMoment(prev[0], self._lb) || !sameMoment(prev[1], self._ub);
       },
     },
     interval: {
-      setup: function() {
+      setup: function () {
         return self._i;
       },
-      changes: function(prev) {
+      changes: function (prev) {
         return !sameDuration(prev, this._i);
       },
     },
@@ -375,14 +373,14 @@ TimeBuckets.__cached__ = function(self) {
   }
 
   function same(checkType) {
-    return function(a, b) {
+    return function (a, b) {
       if (a === b) return true;
       if (checkType(a) === checkType(b)) return +a === +b;
       return false;
     };
   }
 
-  _.forOwn(TimeBuckets.prototype, function(fn, prop) {
+  _.forOwn(TimeBuckets.prototype, function (fn, prop) {
     if (prop[0] === '_') return;
 
     if (breakers.hasOwnProperty(prop)) {

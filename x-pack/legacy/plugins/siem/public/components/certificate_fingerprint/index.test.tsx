@@ -25,12 +25,9 @@ describe('CertificateFingerprint', () => {
         />
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="fingerprint-label"]')
-        .first()
-        .text()
-    ).toEqual('client cert');
+    expect(wrapper.find('[data-test-subj="fingerprint-label"]').first().text()).toEqual(
+      'client cert'
+    );
   });
 
   test('renders the fingerprint as text', () => {
@@ -45,12 +42,9 @@ describe('CertificateFingerprint', () => {
         />
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="certificate-fingerprint-link"]')
-        .first()
-        .text()
-    ).toEqual('3f4c57934e089f02ae7511200aee2d7e7aabd272');
+    expect(wrapper.find('[data-test-subj="certificate-fingerprint-link"]').first().text()).toEqual(
+      '3f4c57934e089f02ae7511200aee2d7e7aabd272'
+    );
   });
 
   test('it renders a hyperlink to an external site to compare the fingerprint against a known set of signatures', () => {
@@ -67,10 +61,7 @@ describe('CertificateFingerprint', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="certificate-fingerprint-link"]')
-        .first()
-        .props().href
+      wrapper.find('[data-test-subj="certificate-fingerprint-link"]').first().props().href
     ).toEqual(
       'https://sslbl.abuse.ch/ssl-certificates/sha1/3f4c57934e089f02ae7511200aee2d7e7aabd272'
     );

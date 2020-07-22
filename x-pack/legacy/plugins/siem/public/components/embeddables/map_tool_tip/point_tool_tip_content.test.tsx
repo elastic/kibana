@@ -6,29 +6,26 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { FeatureProperty } from '../types';
 import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../mock';
 import { getEmptyStringTag } from '../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 import { FlowTarget } from '../../../graphql/types';
+import {
+  ITooltipProperty,
+  TooltipProperty,
+} from '../../../../../maps/public/layers/tooltips/tooltip_property';
 
 describe('PointToolTipContent', () => {
   const mount = useMountAppended();
 
-  const mockFeatureProps: FeatureProperty[] = [
-    {
-      _propertyKey: 'host.name',
-      _rawValue: 'testPropValue',
-    },
+  const mockFeatureProps: ITooltipProperty[] = [
+    new TooltipProperty('host.name', 'host.name', 'testPropValue'),
   ];
 
-  const mockFeaturePropsArrayValue: FeatureProperty[] = [
-    {
-      _propertyKey: 'host.name',
-      _rawValue: ['testPropValue1', 'testPropValue2'],
-    },
+  const mockFeaturePropsArrayValue: ITooltipProperty[] = [
+    new TooltipProperty('host.name', 'host.name', ['testPropValue1', 'testPropValue2']),
   ];
 
   test('renders correctly against snapshot', () => {

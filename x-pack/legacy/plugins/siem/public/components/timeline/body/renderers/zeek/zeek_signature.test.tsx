@@ -71,12 +71,7 @@ describe('ZeekSignature', () => {
   describe('#TotalVirusLinkSha', () => {
     test('should return null if value is null', () => {
       const wrapper = mount(<TotalVirusLinkSha value={null} />);
-      expect(
-        wrapper
-          .find('TotalVirusLinkSha')
-          .children()
-          .exists()
-      ).toBeFalsy();
+      expect(wrapper.find('TotalVirusLinkSha').children().exists()).toBeFalsy();
     });
 
     test('should render', () => {
@@ -88,12 +83,7 @@ describe('ZeekSignature', () => {
   describe('#Link', () => {
     test('should return null if value is null', () => {
       const wrapper = mount(<Link value={null} />);
-      expect(
-        wrapper
-          .find('Link')
-          .children()
-          .exists()
-      ).toBeFalsy();
+      expect(wrapper.find('Link').children().exists()).toBeFalsy();
     });
 
     test('should render value', () => {
@@ -116,12 +106,7 @@ describe('ZeekSignature', () => {
           <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
         </TestProviders>
       );
-      expect(
-        wrapper
-          .find('DraggableZeekElement')
-          .children()
-          .exists()
-      ).toBeFalsy();
+      expect(wrapper.find('DraggableZeekElement').children().exists()).toBeFalsy();
     });
 
     test('it renders the default ZeekSignature', () => {
@@ -140,7 +125,7 @@ describe('ZeekSignature', () => {
             id="id-123"
             field="zeek.notice"
             value={'mynote'}
-            stringRenderer={value => `->${value}<-`}
+            stringRenderer={(value) => `->${value}<-`}
           />
         </TestProviders>
       );
@@ -156,12 +141,9 @@ describe('ZeekSignature', () => {
           </TestProviders>
         );
 
-        expect(
-          wrapper
-            .find('[data-test-subj="badge-tooltip"]')
-            .first()
-            .props().content
-        ).toEqual(field);
+        expect(wrapper.find('[data-test-subj="badge-tooltip"]').first().props().content).toEqual(
+          field
+        );
       });
     });
   });

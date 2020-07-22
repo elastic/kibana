@@ -17,7 +17,7 @@ const expectNamespaceSpecifiedBadRequest = (resp: { [key: string]: any }) => {
   });
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');

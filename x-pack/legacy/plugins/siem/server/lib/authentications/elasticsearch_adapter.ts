@@ -57,7 +57,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       failures: bucket.failures.doc_count,
       successes: bucket.successes.doc_count,
     }));
-    const authenticationEdges: AuthenticationsEdges[] = hits.map(hit =>
+    const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
       formatAuthenticationData(options.fields, hit, auditdFieldsMap)
     );
 

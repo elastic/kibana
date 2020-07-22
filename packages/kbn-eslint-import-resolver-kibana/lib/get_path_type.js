@@ -49,10 +49,10 @@ function getPathType(path) {
   return type;
 }
 
-exports.isDirectory = function(path) {
+exports.isDirectory = function (path) {
   return getPathType(path) === DIR;
 };
 
-exports.isFile = function(path) {
+exports.isFile = function (path) {
   return getPathType(path) === FILE;
 };

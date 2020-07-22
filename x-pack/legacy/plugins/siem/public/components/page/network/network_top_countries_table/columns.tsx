@@ -91,7 +91,7 @@ export const getNetworkTopCountriesColumns = (
     field: 'node.network.bytes_in',
     name: i18n.BYTES_IN,
     sortable: true,
-    render: bytes => {
+    render: (bytes) => {
       if (bytes != null) {
         return <PreferenceFormattedBytes value={bytes} />;
       } else {
@@ -104,7 +104,7 @@ export const getNetworkTopCountriesColumns = (
     field: 'node.network.bytes_out',
     name: i18n.BYTES_OUT,
     sortable: true,
-    render: bytes => {
+    render: (bytes) => {
       if (bytes != null) {
         return <PreferenceFormattedBytes value={bytes} />;
       } else {
@@ -117,7 +117,7 @@ export const getNetworkTopCountriesColumns = (
     field: `node.${flowTarget}.flows`,
     name: i18n.FLOWS,
     sortable: true,
-    render: flows => {
+    render: (flows) => {
       if (flows != null) {
         return numeral(flows).format('0,000');
       } else {
@@ -130,7 +130,7 @@ export const getNetworkTopCountriesColumns = (
     field: `node.${flowTarget}.${flowTarget}_ips`,
     name: flowTarget === FlowTargetSourceDest.source ? i18n.SOURCE_IPS : i18n.DESTINATION_IPS,
     sortable: true,
-    render: ips => {
+    render: (ips) => {
       if (ips != null) {
         return numeral(ips).format('0,000');
       } else {
@@ -146,7 +146,7 @@ export const getNetworkTopCountriesColumns = (
         ? i18n.SOURCE_IPS
         : i18n.DESTINATION_IPS,
     sortable: true,
-    render: ips => {
+    render: (ips) => {
       if (ips != null) {
         return numeral(ips).format('0,000');
       } else {

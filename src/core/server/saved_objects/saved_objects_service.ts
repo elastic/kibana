@@ -300,7 +300,7 @@ export class SavedObjectsService
       setupDeps.legacyPlugins.uiExports,
       setupDeps.legacyPlugins.pluginExtendedConfig
     );
-    legacyTypes.forEach(type => this.typeRegistry.registerType(type));
+    legacyTypes.forEach((type) => this.typeRegistry.registerType(type));
     this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
 
     const savedObjectsConfig = await this.coreContext.configService
@@ -321,7 +321,7 @@ export class SavedObjectsService
     });
 
     return {
-      setClientFactoryProvider: provider => {
+      setClientFactoryProvider: (provider) => {
         if (this.started) {
           throw new Error('cannot call `setClientFactoryProvider` after service startup.');
         }
@@ -340,7 +340,7 @@ export class SavedObjectsService
           factory,
         });
       },
-      registerType: type => {
+      registerType: (type) => {
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
@@ -401,7 +401,7 @@ export class SavedObjectsService
       });
 
       await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
-        filter(nodes => nodes.isCompatible),
+        filter((nodes) => nodes.isCompatible),
         take(1)
       ).toPromise();
 

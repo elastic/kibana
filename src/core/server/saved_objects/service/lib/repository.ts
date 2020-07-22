@@ -142,9 +142,9 @@ export class SavedObjectsRepository {
     const mappings = migrator.getActiveMappings();
     const allTypes = Object.keys(getRootPropertiesObjects(mappings));
     const serializer = new SavedObjectsSerializer(typeRegistry);
-    const visibleTypes = allTypes.filter(type => !typeRegistry.isHidden(type));
+    const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
 
-    const missingTypeMappings = extraTypes.filter(type => !allTypes.includes(type));
+    const missingTypeMappings = extraTypes.filter((type) => !allTypes.includes(type));
     if (missingTypeMappings.length > 0) {
       throw new Error(
         `Missing mappings for saved objects types: '${missingTypeMappings.join(', ')}'`
@@ -284,7 +284,7 @@ export class SavedObjectsRepository {
     const bulkCreateParams: object[] = [];
 
     let requestIndexCounter = 0;
-    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+    const expectedResults: Array<Either<any, any>> = objects.map((object) => {
       if (!this._allowedTypes.includes(object.type)) {
         return {
           tag: 'Left' as 'Left',
@@ -332,7 +332,7 @@ export class SavedObjectsRepository {
     });
 
     return {
-      saved_objects: expectedResults.map(expectedResult => {
+      saved_objects: expectedResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           return expectedResult.error;
         }
@@ -428,7 +428,7 @@ export class SavedObjectsRepository {
 
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
 
-    const typesToDelete = allTypes.filter(type => !this._registry.isNamespaceAgnostic(type));
+    const typesToDelete = allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type));
 
     const esOptions = {
       index: this.getIndicesForTypes(typesToDelete),
@@ -483,7 +483,7 @@ export class SavedObjectsRepository {
     }
 
     const types = Array.isArray(type) ? type : [type];
-    const allowedTypes = types.filter(t => this._allowedTypes.includes(t));
+    const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
       return {
         page,
@@ -586,7 +586,7 @@ export class SavedObjectsRepository {
     }
 
     const unsupportedTypeObjects = objects
-      .filter(o => !this._allowedTypes.includes(o.type))
+      .filter((o) => !this._allowedTypes.includes(o.type))
       .map(({ type, id }) => {
         return ({
           id,
@@ -595,7 +595,7 @@ export class SavedObjectsRepository {
         } as any) as SavedObject<T>;
       });
 
-    const supportedTypeObjects = objects.filter(o => this._allowedTypes.includes(o.type));
+    const supportedTypeObjects = objects.filter((o) => this._allowedTypes.includes(o.type));
 
     const response = await this._callCluster('mget', {
       body: {
@@ -759,7 +759,7 @@ export class SavedObjectsRepository {
     const bulkUpdateParams: object[] = [];
 
     let requestIndexCounter = 0;
-    const expectedResults: Array<Either<any, any>> = objects.map(object => {
+    const expectedResults: Array<Either<any, any>> = objects.map((object) => {
       const { type, id } = object;
 
       if (!this._allowedTypes.includes(type)) {
@@ -816,7 +816,7 @@ export class SavedObjectsRepository {
       : {};
 
     return {
-      saved_objects: expectedResults.map(expectedResult => {
+      saved_objects: expectedResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           return expectedResult.error;
         }
@@ -959,7 +959,7 @@ export class SavedObjectsRepository {
    */
   private getIndicesForTypes(types: string[]) {
     const unique = (array: string[]) => [...new Set(array)];
-    return unique(types.map(t => this.getIndexForType(t)));
+    return unique(types.map((t) => this.getIndexForType(t)));
   }
 
   private _getCurrentTime() {

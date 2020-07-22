@@ -35,9 +35,7 @@ const isWindows = /^win/.test(process.platform);
 
 // get the mode of a file as a string, like 777, or 644,
 function getCommonMode(path) {
-  return statSync(path)
-    .mode.toString(8)
-    .slice(-3);
+  return statSync(path).mode.toString(8).slice(-3);
 }
 
 function assertNonAbsoluteError(error) {

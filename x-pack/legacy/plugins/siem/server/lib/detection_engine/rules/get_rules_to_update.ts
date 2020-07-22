@@ -11,8 +11,8 @@ export const getRulesToUpdate = (
   rulesFromFileSystem: PrepackagedRules[],
   installedRules: RuleAlertType[]
 ): PrepackagedRules[] => {
-  return rulesFromFileSystem.filter(rule =>
-    installedRules.some(installedRule => {
+  return rulesFromFileSystem.filter((rule) =>
+    installedRules.some((installedRule) => {
       return (
         rule.rule_id === installedRule.params.ruleId && rule.version > installedRule.params.version
       );

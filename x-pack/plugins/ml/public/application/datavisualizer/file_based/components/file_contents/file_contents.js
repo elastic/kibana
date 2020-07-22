@@ -54,8 +54,5 @@ export function FileContents({ data, format, numberOfLines }) {
 }
 
 function limitByNumberOfLines(data, numberOfLines) {
-  return data
-    .split('\n')
-    .slice(0, numberOfLines)
-    .join('\n');
+  return data.split('\n').slice(0, numberOfLines).join('\n');
 }

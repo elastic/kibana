@@ -26,12 +26,12 @@ describe('empty_column_renderer', () => {
 
   test('renders correctly against snapshot', () => {
     mockDatum = deleteItemIdx(mockDatum, findItem(mockDatum, 'source.ip'));
-    const sourceObj = mockDatum.find(d => d.field === 'source.ip');
+    const sourceObj = mockDatum.find((d) => d.field === 'source.ip');
     const emptyColumn = emptyColumnRenderer.renderColumn({
       columnName: 'source.ip',
       eventId: _id,
       values: sourceObj != null ? sourceObj.value : undefined,
-      field: defaultHeaders.find(h => h.id === 'source.ip')!,
+      field: defaultHeaders.find((h) => h.id === 'source.ip')!,
       timelineId: 'test',
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
@@ -62,7 +62,7 @@ describe('empty_column_renderer', () => {
       columnName: 'source.ip',
       eventId: _id,
       values: null,
-      field: defaultHeaders.find(h => h.id === 'source.ip')!,
+      field: defaultHeaders.find((h) => h.id === 'source.ip')!,
       timelineId: 'test',
     });
     const wrapper = mount(

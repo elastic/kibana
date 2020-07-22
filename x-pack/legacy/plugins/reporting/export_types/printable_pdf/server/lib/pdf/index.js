@@ -31,7 +31,7 @@ function getFont(text) {
 
 class PdfMaker {
   constructor(layout, logo) {
-    const fontPath = filename => path.resolve(assetPath, 'fonts', filename);
+    const fontPath = (filename) => path.resolve(assetPath, 'fonts', filename);
     const fonts = {
       Roboto: {
         normal: fontPath('roboto/Roboto-Regular.ttf'),
@@ -146,7 +146,7 @@ class PdfMaker {
       );
     }
     return new Promise((resolve, reject) => {
-      const concatStream = concat(function(pdfBuffer) {
+      const concatStream = concat(function (pdfBuffer) {
         resolve(pdfBuffer);
       });
 
@@ -198,7 +198,7 @@ function getTemplate(layout, logo, title) {
     }),
     pageMargins: [pageMarginWidth, pageMarginTop, pageMarginWidth, pageMarginBottom],
 
-    header: function() {
+    header: function () {
       return {
         margin: [pageMarginWidth, pageMarginTop / 4, pageMarginWidth, 0],
         text: title,
@@ -211,7 +211,7 @@ function getTemplate(layout, logo, title) {
       };
     },
 
-    footer: function(currentPage, pageCount) {
+    footer: function (currentPage, pageCount) {
       const logoPath = path.resolve(assetPath, 'img', 'logo-grey.png');
       return {
         margin: [pageMarginWidth, pageMarginBottom / 4, pageMarginWidth, 0],

@@ -89,7 +89,7 @@ describe('ManagementSection', () => {
       expect(section.register('about').parent).toBe(section);
     });
 
-    it('adds item', function() {
+    it('adds item', function () {
       section.register('about', { description: 'test' });
 
       expect(section.items).toHaveLength(1);
@@ -203,7 +203,7 @@ describe('ManagementSection', () => {
     });
 
     it('can be ordered', () => {
-      const ids = section.items.inOrder.map(i => {
+      const ids = section.items.inOrder.map((i) => {
         return i.id;
       });
       expect(ids).toEqual(['one', 'two', 'three']);
@@ -259,7 +259,7 @@ describe('ManagementSection', () => {
     });
 
     it('maintains the order', () => {
-      const ids = section.visibleItems.map(i => {
+      const ids = section.visibleItems.map((i) => {
         return i.id;
       });
       expect(ids).toEqual(['one', 'two', 'three']);
@@ -268,7 +268,7 @@ describe('ManagementSection', () => {
     it('does not include hidden items', () => {
       section.getSection('two').hide();
 
-      const ids = section.visibleItems.map(i => {
+      const ids = section.visibleItems.map((i) => {
         return i.id;
       });
       expect(ids).toEqual(['one', 'three']);
@@ -276,7 +276,7 @@ describe('ManagementSection', () => {
 
     it('does not include visible items hidden via uiCapabilities', () => {
       section.register('sampleFeature2', { order: 4, visible: true });
-      const ids = section.visibleItems.map(i => {
+      const ids = section.visibleItems.map((i) => {
         return i.id;
       });
       expect(ids).toEqual(['one', 'two', 'three']);

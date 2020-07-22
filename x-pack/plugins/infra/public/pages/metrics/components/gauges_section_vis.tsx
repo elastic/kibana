@@ -54,7 +54,7 @@ export const GaugesSectionVis = ({
     <EuiPageContentBody>
       <EuiSpacer size="m" />
       <GroupBox>
-        {metric.series.map(series => {
+        {metric.series.map((series) => {
           const lastDataPoint = last(series.data);
           if (!lastDataPoint) {
             return null;
@@ -67,7 +67,7 @@ export const GaugesSectionVis = ({
           );
           const value = formatterFn(lastDataPoint.value || 0);
           const name = getChartName(seriesOverrides, series.id, series.id);
-          const dataMax = max(series.data.map(d => d.value || 0));
+          const dataMax = max(series.data.map((d) => d.value || 0));
           const gaugeMax = get(seriesOverrides, [series.id, 'gaugeMax'], dataMax);
           return (
             <EuiFlexItem key={`${id}-${series.id}`} style={{ margin: '0.4rem' }}>

@@ -96,7 +96,7 @@ export class TagBadgeList extends React.Component<TagBadgeListProps, ComponentSt
   }
   private onButtonClick = async () => {
     this.props.actionHandler(AssignmentActionType.Reload);
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };

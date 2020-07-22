@@ -17,14 +17,14 @@ import { TimelineResultNote } from '../types';
 
 const NotePreviewGroup = styled.article`
   & + & {
-    margin-top: ${props => props.theme.eui.euiSizeL};
+    margin-top: ${(props) => props.theme.eui.euiSizeL};
   }
 `;
 
 NotePreviewGroup.displayName = 'NotePreviewGroup';
 
 const NotePreviewHeader = styled.header`
-  margin-bottom: ${props => props.theme.eui.euiSizeS};
+  margin-bottom: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 NotePreviewHeader.displayName = 'NotePreviewHeader';

@@ -44,7 +44,7 @@ export class FollowerIndicesTable extends PureComponent {
     });
   };
 
-  editFollowerIndex = id => {
+  editFollowerIndex = (id) => {
     const uri = routing.getFollowerIndexPath(id, '/edit', false);
     routing.navigate(uri);
   };
@@ -54,7 +54,7 @@ export class FollowerIndicesTable extends PureComponent {
     const { queryText } = this.state;
 
     if (queryText) {
-      return followerIndices.filter(followerIndex => {
+      return followerIndices.filter((followerIndex) => {
         const { name, remoteCluster, leaderIndex } = followerIndex;
 
         const inName = name.toLowerCase().includes(queryText);
@@ -74,7 +74,7 @@ export class FollowerIndicesTable extends PureComponent {
     const actions = [
       /* Pause or resume follower index */
       {
-        render: followerIndex => {
+        render: (followerIndex) => {
           const { name, isPaused } = followerIndex;
           const label = isPaused
             ? i18n.translate(
@@ -92,7 +92,7 @@ export class FollowerIndicesTable extends PureComponent {
 
           return isPaused ? (
             <FollowerIndexResumeProvider>
-              {resumeFollowerIndex => (
+              {(resumeFollowerIndex) => (
                 <span onClick={() => resumeFollowerIndex(name)} data-test-subj="resumeButton">
                   <EuiIcon aria-label={label} type="play" className="euiContextMenu__icon" />
                   <span>{label}</span>
@@ -101,7 +101,7 @@ export class FollowerIndicesTable extends PureComponent {
             </FollowerIndexResumeProvider>
           ) : (
             <FollowerIndexPauseProvider>
-              {pauseFollowerIndex => (
+              {(pauseFollowerIndex) => (
                 <span
                   onClick={() => pauseFollowerIndex(followerIndex)}
                   data-test-subj="pauseButton"
@@ -144,7 +144,7 @@ export class FollowerIndicesTable extends PureComponent {
 
           return (
             <FollowerIndexUnfollowProvider>
-              {unfollowLeaderIndex => (
+              {(unfollowLeaderIndex) => (
                 <span onClick={() => unfollowLeaderIndex(name)} data-test-subj="unfollowButton">
                   <EuiIcon aria-label={label} type="indexFlush" className="euiContextMenu__icon" />
                   <span>{label}</span>
@@ -167,7 +167,7 @@ export class FollowerIndicesTable extends PureComponent {
         ),
         sortable: true,
         truncateText: false,
-        render: name => {
+        render: (name) => {
           return (
             <EuiLink
               onClick={() => {
@@ -191,7 +191,7 @@ export class FollowerIndicesTable extends PureComponent {
         ),
         truncateText: true,
         sortable: true,
-        render: isPaused => {
+        render: (isPaused) => {
           return isPaused ? (
             <EuiHealth color="subdued">
               <FormattedMessage
@@ -273,15 +273,13 @@ export class FollowerIndicesTable extends PureComponent {
     };
 
     const selection = {
-      onSelectionChange: selectedItems => this.setState({ selectedItems }),
+      onSelectionChange: (selectedItems) => this.setState({ selectedItems }),
     };
 
     const search = {
       toolsLeft: selectedItems.length ? (
         <ContextMenu followerIndices={selectedItems} testSubj="contextMenuButton" />
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       onChange: this.onSearch,
       box: {
         incremental: true,

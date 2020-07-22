@@ -45,7 +45,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     initialSortDirection = 'asc',
     hidePerPageOptions = true,
     noItemsMessage,
-    sortItems = true
+    sortItems = true,
   } = props;
 
   const {
@@ -53,8 +53,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
       page = initialPageIndex,
       pageSize = initialPageSize,
       sortField = initialSortField,
-      sortDirection = initialSortDirection
-    }
+      sortDirection = initialSortDirection,
+    },
   } = useUrlParams();
 
   const renderedItems = useMemo(() => {
@@ -70,8 +70,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     return {
       sort: {
         field: sortField as keyof T,
-        direction: sortDirection as 'asc' | 'desc'
-      }
+        direction: sortDirection as 'asc' | 'desc',
+      },
     };
   }, [sortField, sortDirection]);
 
@@ -87,8 +87,8 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
           page: options.page.index,
           pageSize: options.page.size,
           sortField: options.sort!.field,
-          sortDirection: options.sort!.direction
-        })
+          sortDirection: options.sort!.direction,
+        }),
       });
     },
     []
@@ -99,7 +99,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
       hidePerPageOptions,
       totalItemCount: items.length,
       pageIndex: page,
-      pageSize
+      pageSize,
     };
   }, [hidePerPageOptions, items, page, pageSize]);
 

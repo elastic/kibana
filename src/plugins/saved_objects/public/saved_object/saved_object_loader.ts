@@ -69,7 +69,7 @@ export class SavedObjectLoader {
   async delete(ids: string | string[]) {
     const idsUsed = !Array.isArray(ids) ? [ids] : ids;
 
-    const deletions = idsUsed.map(id => {
+    const deletions = idsUsed.map((id) => {
       // @ts-ignore
       const savedObject = new this.Class(id);
       return savedObject.delete();
@@ -83,11 +83,11 @@ export class SavedObjectLoader {
     coreNavLinks
       .getAll()
       .filter(
-        link =>
+        (link) =>
           link.linkToLastSubUrl &&
-          idsUsed.find(deletedId => link.url && link.url.includes(deletedId)) !== undefined
+          idsUsed.find((deletedId) => link.url && link.url.includes(deletedId)) !== undefined
       )
-      .forEach(link => coreNavLinks.update(link.id, { url: link.baseUrl }));
+      .forEach((link) => coreNavLinks.update(link.id, { url: link.baseUrl }));
   }
 
   /**
@@ -133,19 +133,19 @@ export class SavedObjectLoader {
         defaultSearchOperator: 'AND',
         fields,
       } as SavedObjectsFindOptions)
-      .then(resp => {
+      .then((resp) => {
         return {
           total: resp.total,
-          hits: resp.savedObjects.map(savedObject => this.mapSavedObjectApiHits(savedObject)),
+          hits: resp.savedObjects.map((savedObject) => this.mapSavedObjectApiHits(savedObject)),
         };
       });
   }
 
   find(search: string = '', size: number = 100) {
-    return this.findAll(search, size).then(resp => {
+    return this.findAll(search, size).then((resp) => {
       return {
         total: resp.total,
-        hits: resp.hits.filter(savedObject => !savedObject.error),
+        hits: resp.hits.filter((savedObject) => !savedObject.error),
       };
     });
   }

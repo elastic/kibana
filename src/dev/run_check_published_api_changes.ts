@@ -260,12 +260,12 @@ async function run(
 
   const folders = ['core/public', 'core/server', 'plugins/data/server', 'plugins/data/public'];
 
-  const results = await Promise.all(folders.map(folder => run(folder, { log, opts })));
+  const results = await Promise.all(folders.map((folder) => run(folder, { log, opts })));
 
-  if (results.find(r => r === false) !== undefined) {
+  if (results.find((r) => r === false) !== undefined) {
     process.exitCode = 1;
   }
-})().catch(e => {
+})().catch((e) => {
   console.log(e);
   process.exitCode = 1;
 });

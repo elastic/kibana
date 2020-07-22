@@ -13,7 +13,7 @@ import {
   units,
   fontSizes,
   px,
-  truncate
+  truncate,
 } from '../../../../style/variables';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
@@ -78,7 +78,7 @@ export default function Legends({
   truncateLegends,
   hasAnnotations,
   showAnnotations,
-  onAnnotationsToggle
+  onAnnotationsToggle,
 }) {
   if (noHits && !hasAnnotations) {
     return null;
@@ -123,7 +123,7 @@ export default function Legends({
           text={
             <LegendContent>
               {i18n.translate('xpack.apm.serviceVersion', {
-                defaultMessage: 'Service version'
+                defaultMessage: 'Service version',
               })}
             </LegendContent>
           }
@@ -150,5 +150,5 @@ Legends.propTypes = {
   truncateLegends: PropTypes.bool.isRequired,
   hasAnnotations: PropTypes.bool,
   showAnnotations: PropTypes.bool,
-  onAnnotationsToggle: PropTypes.func
+  onAnnotationsToggle: PropTypes.func,
 };

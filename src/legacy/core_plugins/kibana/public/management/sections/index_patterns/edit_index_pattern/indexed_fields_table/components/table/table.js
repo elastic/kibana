@@ -133,7 +133,7 @@ export class Table extends PureComponent {
         }),
         dataType: 'string',
         sortable: true,
-        render: value => {
+        render: (value) => {
           return this.renderFieldType(value, value === 'conflict');
         },
         'data-test-subj': 'indexedFieldType',
@@ -157,7 +157,7 @@ export class Table extends PureComponent {
         ),
         dataType: 'boolean',
         sortable: true,
-        render: value =>
+        render: (value) =>
           this.renderBooleanTemplate(
             value,
             i18n.translate('kbn.management.editIndexPattern.fields.table.isSearchableAria', {
@@ -176,7 +176,7 @@ export class Table extends PureComponent {
         ),
         dataType: 'boolean',
         sortable: true,
-        render: value =>
+        render: (value) =>
           this.renderBooleanTemplate(
             value,
             i18n.translate('kbn.management.editIndexPattern.fields.table.isAggregatableAria', {
@@ -195,7 +195,7 @@ export class Table extends PureComponent {
         ),
         dataType: 'boolean',
         sortable: true,
-        render: value =>
+        render: (value) =>
           this.renderBooleanTemplate(
             value,
             i18n.translate('kbn.management.editIndexPattern.fields.table.isExcludedAria', {

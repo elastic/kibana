@@ -46,25 +46,16 @@ describe('FieldMappingRow', () => {
 
   test('it renders', () => {
     expect(
-      wrapper
-        .find('[data-test-subj="case-configure-third-party-select"]')
-        .first()
-        .exists()
+      wrapper.find('[data-test-subj="case-configure-third-party-select"]').first().exists()
     ).toBe(true);
 
     expect(
-      wrapper
-        .find('[data-test-subj="case-configure-action-type-select"]')
-        .first()
-        .exists()
+      wrapper.find('[data-test-subj="case-configure-action-type-select"]').first().exists()
     ).toBe(true);
   });
 
   test('it passes thirdPartyOptions correctly', () => {
-    const selectProps = wrapper
-      .find(EuiSuperSelect)
-      .first()
-      .props();
+    const selectProps = wrapper.find(EuiSuperSelect).first().props();
 
     expect(selectProps.options).toEqual(
       expect.arrayContaining([
@@ -81,10 +72,7 @@ describe('FieldMappingRow', () => {
   });
 
   test('it passes the correct actionTypeOptions', () => {
-    const selectProps = wrapper
-      .find(EuiSuperSelect)
-      .at(1)
-      .props();
+    const selectProps = wrapper.find(EuiSuperSelect).at(1).props();
 
     expect(selectProps.options).toEqual(
       expect.arrayContaining([

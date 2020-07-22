@@ -18,7 +18,7 @@ import { TagStrings } from '../../i18n';
 export const applyTemplateStrings = (templates: CanvasTemplate[]) => {
   const templateStrings = getTemplateStrings();
 
-  return templates.map(template => {
+  return templates.map((template) => {
     const { name: templateName } = template;
     const strings = templateStrings[templateName];
 
@@ -36,7 +36,7 @@ export const applyTemplateStrings = (templates: CanvasTemplate[]) => {
     }
 
     if (template.tags) {
-      template.tags = template.tags.map(tag => {
+      template.tags = template.tags.map((tag) => {
         if (TagStrings[tag]) {
           return TagStrings[tag]();
         }

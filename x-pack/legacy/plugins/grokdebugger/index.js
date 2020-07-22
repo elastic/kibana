@@ -9,7 +9,7 @@ import { PLUGIN } from './common/constants';
 import { registerGrokdebuggerRoutes } from './server/routes/api/grokdebugger';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 
-export const grokdebugger = kibana =>
+export const grokdebugger = (kibana) =>
   new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
@@ -24,7 +24,7 @@ export const grokdebugger = kibana =>
       devTools: ['plugins/grokdebugger/register'],
       home: ['plugins/grokdebugger/register_feature'],
     },
-    init: server => {
+    init: (server) => {
       registerLicenseChecker(server);
       registerGrokdebuggerRoutes(server);
     },

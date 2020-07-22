@@ -109,7 +109,7 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 });
 -----------
 
-Full details are {repo}tree/master/packages/kbn-i18n#vanilla-js[here].
+Full details are {kib-repo}tree/master/packages/kbn-i18n#vanilla-js[here].
 
 [float]
 ===== i18n for React
@@ -133,7 +133,7 @@ export const Component = () => {
 };
 -----------
 
-Full details are {repo}tree/master/packages/kbn-i18n#react[here].
+Full details are {kib-repo}tree/master/packages/kbn-i18n#react[here].
 
 
 
@@ -153,7 +153,7 @@ The translation directive has the following syntax:
 ></ANY>
 -----------
 
-Full details are {repo}tree/master/packages/kbn-i18n#angularjs[here].
+Full details are {kib-repo}tree/master/packages/kbn-i18n#angularjs[here].
 
 
 [float]

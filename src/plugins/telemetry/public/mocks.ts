@@ -59,7 +59,7 @@ export function mockTelemetryService({
   });
 
   const originalReportOptInStatus = telemetryService['reportOptInStatus'];
-  telemetryService['reportOptInStatus'] = jest.fn().mockImplementation(optInPayload => {
+  telemetryService['reportOptInStatus'] = jest.fn().mockImplementation((optInPayload) => {
     return originalReportOptInStatus(optInPayload); // Actually calling the original method
   });
 

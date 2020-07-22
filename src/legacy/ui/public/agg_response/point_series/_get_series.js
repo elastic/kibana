@@ -32,7 +32,7 @@ export function getSeries(table, chart) {
   const partGetPoint = _.partial(getPoint, table, xAspect, aspects.series, yScale);
 
   let series = _(table.rows)
-    .transform(function(series, row, rowIndex) {
+    .transform(function (series, row, rowIndex) {
       if (!multiY) {
         const point = partGetPoint(row, rowIndex, yAspect, zAspect);
         if (point) {
@@ -51,7 +51,7 @@ export function getSeries(table, chart) {
         return;
       }
 
-      aspects.y.forEach(function(y) {
+      aspects.y.forEach(function (y) {
         const point = partGetPoint(row, rowIndex, y, zAspect);
         if (!point) return;
 
@@ -79,16 +79,16 @@ export function getSeries(table, chart) {
         );
       });
     }, new Map())
-    .thru(series => [...series.values()])
+    .thru((series) => [...series.values()])
     .value();
 
   if (multiY) {
-    series = _.sortBy(series, function(siri) {
+    series = _.sortBy(series, function (siri) {
       const firstVal = siri.values[0];
       let y;
 
       if (firstVal) {
-        y = _.find(aspects.y, function(y) {
+        y = _.find(aspects.y, function (y) {
           return y.accessor === firstVal.accessor;
         });
       }

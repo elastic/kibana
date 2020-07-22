@@ -26,12 +26,7 @@ describe('Ja3Fingerprint', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="ja3-fingerprint-label"]')
-        .first()
-        .text()
-    ).toEqual('ja3');
+    expect(wrapper.find('[data-test-subj="ja3-fingerprint-label"]').first().text()).toEqual('ja3');
   });
 
   test('renders the fingerprint as text', () => {
@@ -46,12 +41,9 @@ describe('Ja3Fingerprint', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="ja3-fingerprint-link"]')
-        .first()
-        .text()
-    ).toEqual('fff799d91b7c01ae3fe6787cfc895552');
+    expect(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().text()).toEqual(
+      'fff799d91b7c01ae3fe6787cfc895552'
+    );
   });
 
   test('it renders a hyperlink to an external site to compare the fingerprint against a known set of signatures', () => {
@@ -66,11 +58,8 @@ describe('Ja3Fingerprint', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="ja3-fingerprint-link"]')
-        .first()
-        .props().href
-    ).toEqual('https://sslbl.abuse.ch/ja3-fingerprints/fff799d91b7c01ae3fe6787cfc895552');
+    expect(wrapper.find('[data-test-subj="ja3-fingerprint-link"]').first().props().href).toEqual(
+      'https://sslbl.abuse.ch/ja3-fingerprints/fff799d91b7c01ae3fe6787cfc895552'
+    );
   });
 });

@@ -241,7 +241,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     const actualThreshold = getThreshold();
     let maxY = actualThreshold[actualThreshold.length - 1] as any;
 
-    (Object.values(visualizationData) as number[][][]).forEach(data => {
+    (Object.values(visualizationData) as number[][][]).forEach((data) => {
       data.forEach(([, y]) => {
         if (y > maxY) {
           maxY = y;
@@ -333,7 +333,7 @@ async function getVisualizationData(model: any, visualizeOptions: any, http: Htt
   const result: Record<string, Array<[number, number]>> = {};
 
   for (const groupMetrics of vizData.results) {
-    result[groupMetrics.group] = groupMetrics.metrics.map(metricResult => [
+    result[groupMetrics.group] = groupMetrics.metrics.map((metricResult) => [
       Date.parse(metricResult[0]),
       metricResult[1],
     ]);

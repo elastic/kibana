@@ -49,7 +49,7 @@ const getCustomAnalyzers = (indexSettings: IndexSettings): SelectOption[] | unde
   // We wrap inside a try catch as the index settings are written in JSON
   // and who knows what the user has entered.
   try {
-    return Object.keys(settings.analysis!.analyzer).map(value => ({ value, text: value }));
+    return Object.keys(settings.analysis!.analyzer).map((value) => ({ value, text: value }));
   } catch {
     return undefined;
   }
@@ -148,7 +148,7 @@ export const AnalyzerParameter = ({
 
   return (
     <UseField path={path} config={fieldConfigWithLabel}>
-      {field => (
+      {(field) => (
         <div className="mappingsEditor__selectWithCustom">
           <EuiButtonEmpty
             size="xs"

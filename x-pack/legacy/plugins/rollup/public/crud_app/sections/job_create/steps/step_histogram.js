@@ -36,7 +36,7 @@ export class StepHistogram extends Component {
     histogramFields: PropTypes.array.isRequired,
   };
 
-  onSelectField = field => {
+  onSelectField = (field) => {
     const {
       fields: { histogram },
       onFieldsChange,
@@ -45,13 +45,13 @@ export class StepHistogram extends Component {
     onFieldsChange({ histogram: histogram.concat(field) });
   };
 
-  onRemoveField = field => {
+  onRemoveField = (field) => {
     const {
       fields: { histogram },
       onFieldsChange,
     } = this.props;
 
-    onFieldsChange({ histogram: histogram.filter(histogramField => histogramField !== field) });
+    onFieldsChange({ histogram: histogram.filter((histogramField) => histogramField !== field) });
   };
 
   render() {
@@ -191,7 +191,7 @@ export class StepHistogram extends Component {
           >
             <EuiFieldNumber
               value={!histogramInterval && histogramInterval !== 0 ? '' : Number(histogramInterval)}
-              onChange={e => onFieldsChange({ histogramInterval: e.target.value })}
+              onChange={(e) => onFieldsChange({ histogramInterval: e.target.value })}
               isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
               fullWidth
               data-test-subj="rollupJobCreateHistogramInterval"

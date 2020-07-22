@@ -25,7 +25,7 @@ export class SecurityLicenseService {
   public setup({ license$ }: SetupDeps) {
     let rawLicense: Readonly<ILicense> | undefined;
 
-    this.licenseSubscription = license$.subscribe(nextRawLicense => {
+    this.licenseSubscription = license$.subscribe((nextRawLicense) => {
       rawLicense = nextRawLicense;
     });
 
@@ -36,7 +36,7 @@ export class SecurityLicenseService {
         getFeatures: () => this.calculateFeaturesFromRawLicense(rawLicense),
 
         features$: license$.pipe(
-          map(nextRawLicense => this.calculateFeaturesFromRawLicense(nextRawLicense))
+          map((nextRawLicense) => this.calculateFeaturesFromRawLicense(nextRawLicense))
         ),
       }),
     };

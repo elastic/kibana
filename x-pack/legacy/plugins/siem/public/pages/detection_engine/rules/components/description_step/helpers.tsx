@@ -121,7 +121,7 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
         description: (
           <ThreatEuiFlexGroup direction="column">
             {threat.map((singleThreat, index) => {
-              const tactic = tacticsOptions.find(t => t.id === singleThreat.tactic.id);
+              const tactic = tacticsOptions.find((t) => t.id === singleThreat.tactic.id);
               return (
                 <EuiFlexItem key={`${singleThreat.tactic.name}-${index}`}>
                   <EuiLink
@@ -132,8 +132,8 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                     {tactic != null ? tactic.text : ''}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {singleThreat.technique.map(technique => {
-                      const myTechnique = techniquesOptions.find(t => t.id === technique.id);
+                    {singleThreat.technique.map((technique) => {
+                      const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
                       return (
                         <EuiFlexItem>
                           <TechniqueLinkItem
@@ -174,7 +174,7 @@ export const buildUnorderedListArrayDescription = (
         description: (
           <EuiText size="s">
             <ul>
-              {values.map(val =>
+              {values.map((val) =>
                 isEmpty(val) ? null : (
                   <li data-test-subj="unorderedListArrayDescriptionItem" key={`${field}-${val}`}>
                     {val}
@@ -234,7 +234,7 @@ export const buildUrlsDescription = (label: string, values: string[]): ListItems
           <EuiText size="s">
             <ul>
               {values
-                .filter(v => !isEmpty(v))
+                .filter((v) => !isEmpty(v))
                 .map((val, index) => (
                   <li data-test-subj="urlsDescriptionReferenceLinkItem" key={`${index}-${val}`}>
                     <EuiLink href={val} external target="_blank">

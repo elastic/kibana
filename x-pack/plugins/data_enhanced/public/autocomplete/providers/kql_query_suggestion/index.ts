@@ -51,7 +51,7 @@ export const setupKqlQuerySuggestionProvider = (core: CoreSetup): QuerySuggestio
     }
   };
 
-  return querySuggestionsArgs => {
+  return (querySuggestionsArgs) => {
     const { query, selectionStart, selectionEnd } = querySuggestionsArgs;
     const cursoredQuery = `${query.substr(0, selectionStart)}${cursorSymbol}${query.substr(
       selectionEnd
@@ -59,6 +59,6 @@ export const setupKqlQuerySuggestionProvider = (core: CoreSetup): QuerySuggestio
 
     return Promise.all(
       getSuggestionsByType(cursoredQuery, querySuggestionsArgs)
-    ).then(suggestionsByType => dedup(flatten(suggestionsByType)));
+    ).then((suggestionsByType) => dedup(flatten(suggestionsByType)));
   };
 };

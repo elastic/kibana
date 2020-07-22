@@ -43,7 +43,7 @@ class InstructionSetUi extends React.Component {
   constructor(props) {
     super(props);
 
-    this.tabs = props.instructionVariants.map(variant => {
+    this.tabs = props.instructionVariants.map((variant) => {
       return {
         id: variant.id,
         name: getDisplayText(variant.id),
@@ -60,10 +60,10 @@ class InstructionSetUi extends React.Component {
   }
 
   handleToggleVisibility = () => {
-    this.setState(prevState => ({ isParamFormVisible: !prevState.isParamFormVisible }));
+    this.setState((prevState) => ({ isParamFormVisible: !prevState.isParamFormVisible }));
   };
 
-  onSelectedTabChanged = id => {
+  onSelectedTabChanged = (id) => {
     this.setState({
       selectedTabId: id,
     });
@@ -182,7 +182,7 @@ class InstructionSetUi extends React.Component {
   }
 
   renderInstructions = () => {
-    const instructionVariant = this.props.instructionVariants.find(variant => {
+    const instructionVariant = this.props.instructionVariants.find((variant) => {
       return variant.id === this.state.selectedTabId;
     });
     if (!instructionVariant) {

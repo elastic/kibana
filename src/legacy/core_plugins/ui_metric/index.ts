@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     id: 'ui_metric',
     require: ['kibana', 'elasticsearch'],

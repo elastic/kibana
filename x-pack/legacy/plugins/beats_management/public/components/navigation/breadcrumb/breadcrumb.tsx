@@ -50,7 +50,7 @@ interface BreadcrumbProps extends RouteProps {
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, path, parentBreadcrumbs }) => (
   <BreadcrumbConsumer>
-    {context => (
+    {(context) => (
       <BreadcrumbManager
         text={title}
         href={`#${BASE_PATH}${path}`}

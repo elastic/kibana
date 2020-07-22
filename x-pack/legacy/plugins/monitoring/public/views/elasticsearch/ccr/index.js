@@ -18,7 +18,7 @@ import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 uiRoutes.when('/elasticsearch/ccr', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
@@ -39,7 +39,7 @@ uiRoutes.when('/elasticsearch/ccr', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           this.renderReact(data);
         }
       );

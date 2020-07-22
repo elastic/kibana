@@ -17,9 +17,9 @@ import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
-export const SiemNavigationComponent: React.FC<SiemNavigationComponentProps &
-  SiemNavigationProps &
-  RouteSpyState> = ({
+export const SiemNavigationComponent: React.FC<
+  SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState
+> = ({
   detailName,
   display,
   navTabs,
@@ -86,7 +86,7 @@ export const SiemNavigationRedux = compose<
   )
 );
 
-const SiemNavigationContainer: React.FC<SiemNavigationProps> = props => {
+const SiemNavigationContainer: React.FC<SiemNavigationProps> = (props) => {
   const [routeProps] = useRouteSpy();
   const stateNavReduxProps: RouteSpyState & SiemNavigationProps = {
     ...routeProps,

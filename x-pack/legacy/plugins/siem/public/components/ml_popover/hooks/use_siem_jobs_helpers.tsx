@@ -57,7 +57,7 @@ export const getAugmentedFields = (
   moduleJobs: SiemJob[],
   compatibleModuleIds: string[]
 ): AugmentedSiemJobFields => {
-  const moduleJob = moduleJobs.find(mj => mj.id === jobId);
+  const moduleJob = moduleJobs.find((mj) => mj.id === jobId);
   return moduleJob !== undefined
     ? {
         moduleId: moduleJob.moduleId,
@@ -82,9 +82,9 @@ export const getAugmentedFields = (
  */
 export const getModuleJobs = (modulesData: Module[], compatibleModuleIds: string[]): SiemJob[] =>
   modulesData
-    .filter(module => mlModules.includes(module.id))
-    .map(module => [
-      ...module.jobs.map(moduleJob =>
+    .filter((module) => mlModules.includes(module.id))
+    .map((module) => [
+      ...module.jobs.map((moduleJob) =>
         moduleToSiemJob(module, moduleJob, compatibleModuleIds.includes(module.id))
       ),
     ])
@@ -105,7 +105,7 @@ export const getInstalledJobs = (
 ): SiemJob[] =>
   jobSummaryData
     .filter(({ groups }) => groups.includes('siem'))
-    .map<SiemJob>(jobSummary => ({
+    .map<SiemJob>((jobSummary) => ({
       ...jobSummary,
       ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),
       isInstalled: true,
@@ -121,11 +121,11 @@ export const composeModuleAndInstalledJobs = (
   installedJobs: SiemJob[],
   moduleSiemJobs: SiemJob[]
 ): SiemJob[] => {
-  const installedJobsIds = installedJobs.map(installedJob => installedJob.id);
+  const installedJobsIds = installedJobs.map((installedJob) => installedJob.id);
 
   return [
     ...installedJobs,
-    ...moduleSiemJobs.filter(mj => !installedJobsIds.includes(mj.id)),
+    ...moduleSiemJobs.filter((mj) => !installedJobsIds.includes(mj.id)),
   ].sort((a, b) => a.id.localeCompare(b.id));
 };
 /**
@@ -142,7 +142,7 @@ export const createSiemJobs = (
   compatibleModules: RecognizerModule[]
 ): SiemJob[] => {
   // Create lookup of compatible modules
-  const compatibleModuleIds = compatibleModules.map(module => module.id);
+  const compatibleModuleIds = compatibleModules.map((module) => module.id);
 
   // Process modulesData: Filter to SIEM specific modules, and unpack jobs from modules
   const moduleSiemJobs = getModuleJobs(modulesData, compatibleModuleIds);

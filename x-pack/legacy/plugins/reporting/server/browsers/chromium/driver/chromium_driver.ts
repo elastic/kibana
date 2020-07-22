@@ -157,7 +157,7 @@ export class HeadlessChromiumDriver {
     // Even though 3xx redirects go through our request
     // handler, we should probably inspect responses just to
     // avoid being bamboozled by some malicious request
-    this.page.on('response', interceptedResponse => {
+    this.page.on('response', (interceptedResponse) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
 
@@ -259,7 +259,7 @@ export class HeadlessChromiumDriver {
           `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
         );
       }
-      await new Promise(r => setTimeout(r, WAIT_FOR_DELAY_MS));
+      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
     }
   }
 

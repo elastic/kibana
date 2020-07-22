@@ -55,7 +55,7 @@ export class RestTagsAdapter implements CMTagsAdapter {
     try {
       return (
         await this.REST.get<ReturnTypeBulkGet<BeatTag>>(
-          `/api/beats/tags/assignable/${beats.map(beat => beat.id).join(',')}`
+          `/api/beats/tags/assignable/${beats.map((beat) => beat.id).join(',')}`
         )
       ).items;
     } catch (e) {

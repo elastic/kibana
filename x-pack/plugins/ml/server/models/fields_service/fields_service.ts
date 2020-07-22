@@ -42,7 +42,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       fields: fieldNames,
     });
     const aggregatableFields: string[] = [];
-    fieldNames.forEach(fieldName => {
+    fieldNames.forEach((fieldName) => {
       const fieldInfo = fieldCapsResp.fields[fieldName];
       const typeKeys = fieldInfo !== undefined ? Object.keys(fieldInfo) : [];
       if (typeKeys.length > 0) {
@@ -88,7 +88,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;
@@ -276,7 +276,7 @@ export function fieldsServiceProvider(callAsCurrentUser: APICaller) {
       ) ?? {};
 
     // No need to perform aggregation over the cached fields
-    const fieldsToAgg = aggregatableFields.filter(field => !cachedValues.hasOwnProperty(field));
+    const fieldsToAgg = aggregatableFields.filter((field) => !cachedValues.hasOwnProperty(field));
 
     if (fieldsToAgg.length === 0) {
       return cachedValues;

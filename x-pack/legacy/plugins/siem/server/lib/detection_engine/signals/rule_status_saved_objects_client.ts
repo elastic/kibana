@@ -29,9 +29,9 @@ export interface RuleStatusSavedObjectsClient {
 export const ruleStatusSavedObjectsClientFactory = (
   savedObjectsClient: SavedObjectsClientContract
 ): RuleStatusSavedObjectsClient => ({
-  find: options =>
+  find: (options) =>
     savedObjectsClient.find<IRuleStatusAttributes>({ ...options, type: ruleStatusSavedObjectType }),
-  create: attributes => savedObjectsClient.create(ruleStatusSavedObjectType, attributes),
+  create: (attributes) => savedObjectsClient.create(ruleStatusSavedObjectType, attributes),
   update: (id, attributes) => savedObjectsClient.update(ruleStatusSavedObjectType, id, attributes),
-  delete: id => savedObjectsClient.delete(ruleStatusSavedObjectType, id),
+  delete: (id) => savedObjectsClient.delete(ruleStatusSavedObjectType, id),
 });

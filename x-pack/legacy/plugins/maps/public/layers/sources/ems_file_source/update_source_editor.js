@@ -36,9 +36,9 @@ export class UpdateSourceEditor extends Component {
     try {
       const emsClient = getEMSClient();
       const emsFiles = await emsClient.getFileLayers();
-      const emsFile = emsFiles.find(emsFile => emsFile.getId() === this.props.layerId);
+      const emsFile = emsFiles.find((emsFile) => emsFile.getId() === this.props.layerId);
       const emsFields = emsFile.getFieldsInLanguage();
-      fields = emsFields.map(field => this.props.source.createField({ fieldName: field.name }));
+      fields = emsFields.map((field) => this.props.source.createField({ fieldName: field.name }));
     } catch (e) {
       //swallow this error. when a matching EMS-config cannot be found, the source already will have thrown errors during the data request. This will propagate to the vector-layer and be displayed in the UX
       fields = [];
@@ -49,7 +49,7 @@ export class UpdateSourceEditor extends Component {
     }
   }
 
-  _onTooltipPropertiesSelect = propertyNames => {
+  _onTooltipPropertiesSelect = (propertyNames) => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 

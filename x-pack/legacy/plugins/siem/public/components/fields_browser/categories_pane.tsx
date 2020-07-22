@@ -84,7 +84,7 @@ export const CategoriesPane = React.memo<Props>(
           })}
           items={Object.keys(filteredBrowserFields)
             .sort()
-            .map(categoryId => ({ categoryId }))}
+            .map((categoryId) => ({ categoryId }))}
           message={i18n.NO_FIELDS_MATCH}
           pagination={false}
           sorting={false}

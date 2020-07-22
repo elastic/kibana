@@ -79,7 +79,7 @@ export const BorderForm: FunctionComponent<Props> = ({
           <EuiFieldNumber
             compressed
             value={Number(borderWidthVal)}
-            onChange={e => namedChange('borderWidth')(Number(e.target.value))}
+            onChange={(e) => namedChange('borderWidth')(Number(e.target.value))}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -89,7 +89,7 @@ export const BorderForm: FunctionComponent<Props> = ({
           <EuiSuperSelect
             compressed
             valueOfSelected={borderStyleVal || 'none'}
-            options={Object.values(BorderStyle).map(style => ({
+            options={Object.values(BorderStyle).map((style) => ({
               value: style,
               inputDisplay: <div style={{ height: 16, border: `4px ${style}` }} />,
             }))}
@@ -103,7 +103,7 @@ export const BorderForm: FunctionComponent<Props> = ({
           <EuiFieldNumber
             compressed
             value={Number(radiusVal)}
-            onChange={e => namedChange('borderRadius')(e.target.value)}
+            onChange={(e) => namedChange('borderRadius')(e.target.value)}
           />
         </EuiFormRow>
       </EuiFlexItem>

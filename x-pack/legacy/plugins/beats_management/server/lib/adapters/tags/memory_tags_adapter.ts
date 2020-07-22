@@ -19,16 +19,16 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     return this.tagsDB;
   }
   public async delete(user: FrameworkUser, tagIds: string[]) {
-    this.tagsDB = this.tagsDB.filter(tag => !tagIds.includes(tag.id));
+    this.tagsDB = this.tagsDB.filter((tag) => !tagIds.includes(tag.id));
 
     return true;
   }
   public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
-    return this.tagsDB.filter(tag => tagIds.includes(tag.id));
+    return this.tagsDB.filter((tag) => tagIds.includes(tag.id));
   }
 
   public async upsertTag(user: FrameworkUser, tag: BeatTag) {
-    const existingTagIndex = this.tagsDB.findIndex(t => t.id === tag.id);
+    const existingTagIndex = this.tagsDB.findIndex((t) => t.id === tag.id);
     if (existingTagIndex !== -1) {
       this.tagsDB[existingTagIndex] = tag;
     } else {
@@ -41,7 +41,7 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     user: FrameworkUser,
     blockTypes: string[]
   ): Promise<BeatTag[]> {
-    return this.tagsDB.filter(tag => tag.hasConfigurationBlocksTypes.includes(blockTypes[0]));
+    return this.tagsDB.filter((tag) => tag.hasConfigurationBlocksTypes.includes(blockTypes[0]));
   }
 
   public setDB(tagsDB: BeatTag[]) {

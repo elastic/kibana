@@ -50,7 +50,7 @@ export const upsertConfigurationRoute = (libs: CMServerLibs) => ({
     );
 
     return {
-      results: result.map(r => ({
+      results: result.map((r) => ({
         success: r.success as boolean,
         // TODO: we need to surface this data, not hard coded
         action: 'created' as 'created' | 'updated',

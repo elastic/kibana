@@ -138,7 +138,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     return await this.client.find<T>({
       ...options,
       type: (options.type ? coerceToArray(options.type) : this.types).filter(
-        type => type !== 'space'
+        (type) => type !== 'space'
       ),
       namespace: spaceIdToNamespace(this.spaceId),
     });

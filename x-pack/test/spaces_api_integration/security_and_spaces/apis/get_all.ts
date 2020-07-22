@@ -73,7 +73,7 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           monitoringUser: AUTHENTICATION.MONITORING_USER,
         },
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       getAllTest(`user with no access can't access any spaces from ${scenario.spaceId}`, {
         spaceId: scenario.spaceId,
         user: scenario.users.noAccess,

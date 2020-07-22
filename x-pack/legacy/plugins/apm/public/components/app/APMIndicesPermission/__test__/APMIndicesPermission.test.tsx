@@ -11,21 +11,21 @@ import { APMIndicesPermission } from '../';
 import * as hooks from '../../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 describe('APMIndicesPermission', () => {
   it('returns empty component when api status is loading', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
-      status: hooks.FETCH_STATUS.LOADING
+      status: hooks.FETCH_STATUS.LOADING,
     });
     const component = shallow(<APMIndicesPermission />);
     expect(component.isEmptyRender()).toBeTruthy();
   });
   it('returns empty component when api status is pending', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
-      status: hooks.FETCH_STATUS.PENDING
+      status: hooks.FETCH_STATUS.PENDING,
     });
     const component = shallow(<APMIndicesPermission />);
     expect(component.isEmptyRender()).toBeTruthy();
@@ -34,8 +34,8 @@ describe('APMIndicesPermission', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-*': { read: false }
-      }
+        'apm-*': { read: false },
+      },
     });
     const component = render(
       <MockApmPluginContextWrapper>
@@ -45,7 +45,7 @@ describe('APMIndicesPermission', () => {
     expectTextsInDocument(component, [
       'Missing permissions to access APM',
       'Dismiss',
-      'apm-*'
+      'apm-*',
     ]);
   });
   it('shows escape hatch button when at least one indice has read privileges', () => {
@@ -55,8 +55,8 @@ describe('APMIndicesPermission', () => {
         'apm-7.5.1-error-*': { read: false },
         'apm-7.5.1-metric-*': { read: false },
         'apm-7.5.1-transaction-*': { read: false },
-        'apm-7.5.1-span-*': { read: true }
-      }
+        'apm-7.5.1-span-*': { read: true },
+      },
     });
     const component = render(
       <MockApmPluginContextWrapper>
@@ -68,7 +68,7 @@ describe('APMIndicesPermission', () => {
       'apm-7.5.1-error-*',
       'apm-7.5.1-metric-*',
       'apm-7.5.1-transaction-*',
-      'Dismiss'
+      'Dismiss',
     ]);
     expectTextsNotInDocument(component, ['apm-7.5.1-span-*']);
   });
@@ -80,8 +80,8 @@ describe('APMIndicesPermission', () => {
         'apm-7.5.1-error-*': { read: true },
         'apm-7.5.1-metric-*': { read: true },
         'apm-7.5.1-transaction-*': { read: true },
-        'apm-7.5.1-span-*': { read: true }
-      }
+        'apm-7.5.1-span-*': { read: true },
+      },
     });
     const component = render(
       <MockApmPluginContextWrapper>
@@ -95,7 +95,7 @@ describe('APMIndicesPermission', () => {
       'apm-7.5.1-error-*',
       'apm-7.5.1-metric-*',
       'apm-7.5.1-transaction-*',
-      'apm-7.5.1-span-*'
+      'apm-7.5.1-span-*',
     ]);
     expectTextsInDocument(component, ['My amazing component']);
   });
@@ -107,8 +107,8 @@ describe('APMIndicesPermission', () => {
         'apm-7.5.1-error-*': { read: false },
         'apm-7.5.1-metric-*': { read: false },
         'apm-7.5.1-transaction-*': { read: false },
-        'apm-7.5.1-span-*': { read: true }
-      }
+        'apm-7.5.1-span-*': { read: true },
+      },
     });
     const component = render(
       <MockApmPluginContextWrapper>

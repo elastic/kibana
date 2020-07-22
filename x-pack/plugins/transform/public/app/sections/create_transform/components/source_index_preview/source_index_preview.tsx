@@ -61,8 +61,8 @@ interface Props {
 
 export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, query }) => {
   const toastNotifications = useToastNotifications();
-  const allFields = indexPattern.fields.map(f => f.name);
-  const indexPatternFields: string[] = allFields.filter(f => {
+  const allFields = indexPattern.fields.map((f) => f.name);
+  const indexPatternFields: string[] = allFields.filter((f) => {
     if (indexPattern.metaFields.includes(f)) {
       return false;
     }
@@ -97,7 +97,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
 
   // EuiDataGrid State
   const dataGridColumns = [
-    ...indexPatternFields.map(id => {
+    ...indexPatternFields.map((id) => {
       const field = indexPattern.fields.getByName(id);
 
       // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
@@ -128,7 +128,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
     (sc: Array<{ id: string; direction: 'asc' | 'desc' }>) => {
       // Check if an unsupported column type for sorting was selected.
       const invalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
-        const columnType = dataGridColumns.find(dgc => dgc.id === current.id);
+        const columnType = dataGridColumns.find((dgc) => dgc.id === current.id);
         if (columnType?.schema === 'json') {
           arr.push(current.id);
         }
@@ -137,7 +137,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
       if (invalidSortingColumnns.length === 0) {
         setSortingColumns(sc);
       } else {
-        invalidSortingColumnns.forEach(columnId => {
+        invalidSortingColumnns.forEach((columnId) => {
           toastNotifications.addDanger(
             i18n.translate('xpack.transform.sourceIndexPreview.invalidSortingColumnError', {
               defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
@@ -151,8 +151,8 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   );
 
   const onChangeItemsPerPage = useCallback(
-    pageSize => {
-      setPagination(p => {
+    (pageSize) => {
+      setPagination((p) => {
         const pageIndex = Math.floor((p.pageSize * p.pageIndex) / pageSize);
         return { pageIndex, pageSize };
       });
@@ -160,7 +160,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
     [setPagination]
   );
 
-  const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
+  const onChangePage = useCallback((pageIndex) => setPagination((p) => ({ ...p, pageIndex })), [
     setPagination,
   ]);
 

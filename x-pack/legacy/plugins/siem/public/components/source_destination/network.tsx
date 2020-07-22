@@ -50,7 +50,7 @@ export const Network = React.memo<{
 }>(({ bytes, communityId, contextId, direction, eventId, packets, protocol, transport }) => (
   <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
     {direction != null
-      ? uniq(direction).map(dir => (
+      ? uniq(direction).map((dir) => (
           <EuiFlexItemMarginRight grow={false} key={dir}>
             <DirectionBadge contextId={contextId} eventId={eventId} direction={dir} />
           </EuiFlexItemMarginRight>
@@ -58,7 +58,7 @@ export const Network = React.memo<{
       : null}
 
     {protocol != null
-      ? uniq(protocol).map(proto => (
+      ? uniq(protocol).map((proto) => (
           <EuiFlexItemMarginRight grow={false} key={proto}>
             <DraggableBadge
               contextId={contextId}
@@ -72,7 +72,7 @@ export const Network = React.memo<{
       : null}
 
     {bytes != null
-      ? uniq(bytes).map(b =>
+      ? uniq(bytes).map((b) =>
           !isNaN(Number(b)) ? (
             <EuiFlexItemMarginRight grow={false} key={b}>
               <DefaultDraggable
@@ -92,7 +92,7 @@ export const Network = React.memo<{
       : null}
 
     {packets != null
-      ? uniq(packets).map(p => (
+      ? uniq(packets).map((p) => (
           <EuiFlexItemMarginRight grow={false} key={p}>
             <DefaultDraggable
               field={NETWORK_PACKETS_FIELD_NAME}
@@ -108,7 +108,7 @@ export const Network = React.memo<{
       : null}
 
     {transport != null
-      ? uniq(transport).map(trans => (
+      ? uniq(transport).map((trans) => (
           <EuiFlexItemMarginRight grow={false} key={trans}>
             <DraggableBadge
               contextId={contextId}
@@ -122,7 +122,7 @@ export const Network = React.memo<{
       : null}
 
     {communityId != null
-      ? uniq(communityId).map(trans => (
+      ? uniq(communityId).map((trans) => (
           <EuiFlexItem grow={false} key={trans}>
             <DraggableBadge
               contextId={contextId}

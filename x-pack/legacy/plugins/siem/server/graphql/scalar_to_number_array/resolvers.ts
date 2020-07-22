@@ -65,7 +65,9 @@ const convertToNumber = (value: object | number | boolean | string): number => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convertArrayToNumber = (values: any[]): number[] | number => {
   if (Array.isArray(values)) {
-    return values.filter(item => item != null).map(item => convertArrayToNumber(item)) as number[];
+    return values
+      .filter((item) => item != null)
+      .map((item) => convertArrayToNumber(item)) as number[];
   }
   return convertToNumber(values);
 };

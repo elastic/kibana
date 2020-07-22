@@ -365,14 +365,14 @@ describe('#bulkUpdate', () => {
     ];
 
     const mockedResponse = {
-      saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
+      saved_objects: docs.map((doc) => ({ ...doc, references: undefined })),
     };
 
     mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
 
     await expect(
       wrapper.bulkUpdate(
-        docs.map(doc => ({ ...doc })),
+        docs.map((doc) => ({ ...doc })),
         {}
       )
     ).resolves.toEqual({
@@ -447,7 +447,7 @@ describe('#bulkUpdate', () => {
     ];
 
     mockBaseClient.bulkUpdate.mockResolvedValue({
-      saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
+      saved_objects: docs.map((doc) => ({ ...doc, references: undefined })),
     });
 
     await expect(wrapper.bulkUpdate(docs, { namespace: 'some-namespace' })).resolves.toEqual({

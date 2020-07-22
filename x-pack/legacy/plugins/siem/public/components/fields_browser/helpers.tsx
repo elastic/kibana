@@ -91,7 +91,7 @@ export const filterBrowserFieldsByFieldName = ({
       [categoryId]: {
         ...browserFields[categoryId],
         fields: filter(
-          f => f.name != null && f.name.includes(trimmedSubstring),
+          (f) => f.name != null && f.name.includes(trimmedSubstring),
           browserFields[categoryId].fields
         ).reduce((filtered, field) => ({ ...filtered, [field.name!]: field }), {}),
       },
@@ -101,7 +101,7 @@ export const filterBrowserFieldsByFieldName = ({
 
   // only pick non-empty categories from the filtered browser fields
   const nonEmptyCategories: BrowserFields = pickBy(
-    category => categoryHasFields(category),
+    (category) => categoryHasFields(category),
     filteredBrowserFields
   );
 
@@ -138,6 +138,6 @@ export const mergeBrowserFieldsWithDefaultCategory = (
   ...browserFields,
   [DEFAULT_CATEGORY_NAME]: createVirtualCategory({
     browserFields,
-    fieldIds: defaultHeaders.map(header => header.id),
+    fieldIds: defaultHeaders.map((header) => header.id),
   }),
 });

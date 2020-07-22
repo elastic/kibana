@@ -37,7 +37,7 @@ export function healthRoute(
       path: '/api/alert/_health',
       validate: false,
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory

@@ -20,7 +20,7 @@ export class EMSFileCreateSourceEditor extends React.Component {
   _loadFileOptions = async () => {
     const emsClient = getEMSClient();
     const fileLayers = await emsClient.getFileLayers();
-    const options = fileLayers.map(fileLayer => {
+    const options = fileLayers.map((fileLayer) => {
       return {
         id: fileLayer.getId(),
         name: fileLayer.getDisplayName(),
@@ -42,7 +42,7 @@ export class EMSFileCreateSourceEditor extends React.Component {
     this._loadFileOptions();
   }
 
-  _onChange = selectedOptions => {
+  _onChange = (selectedOptions) => {
     if (selectedOptions.length === 0) {
       return;
     }

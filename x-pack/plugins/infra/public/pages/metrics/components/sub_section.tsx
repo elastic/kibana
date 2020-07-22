@@ -23,13 +23,13 @@ export const SubSection: FunctionComponent<SubSectionProps> = ({
   isLiveStreaming,
   stopLiveStreaming,
 }) => {
-  const metric = useMemo(() => metrics?.find(m => m.id === id), [id, metrics]);
+  const metric = useMemo(() => metrics?.find((m) => m.id === id), [id, metrics]);
 
   if (!children || !metric) {
     return null;
   }
 
-  const childrenWithProps = Children.map(children, child => {
+  const childrenWithProps = Children.map(children, (child) => {
     if (isValidElement(child)) {
       return cloneElement(child, {
         metric,

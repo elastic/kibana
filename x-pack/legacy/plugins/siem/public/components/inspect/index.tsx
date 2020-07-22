@@ -30,7 +30,7 @@ export const InspectButtonContainer = styled.div<{ show?: boolean }>`
   .${BUTTON_CLASS} {
     pointer-events: none;
     opacity: 0;
-    transition: opacity ${props => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
+    transition: opacity ${(props) => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
   }
 
   ${({ show }) =>

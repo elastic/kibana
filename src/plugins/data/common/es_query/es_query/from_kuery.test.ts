@@ -46,7 +46,7 @@ describe('build query', () => {
         { query: 'machine.os:osx', language: 'kuery' },
       ] as Query[];
 
-      const expectedESQueries = queries.map(query => {
+      const expectedESQueries = queries.map((query) => {
         return toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
       });
 
@@ -57,7 +57,7 @@ describe('build query', () => {
 
     test("should accept a specific date format for a kuery query into an ES query in the bool's filter clause", () => {
       const queries = [{ query: '@timestamp:"2018-04-03T19:04:17"', language: 'kuery' }] as Query[];
-      const expectedESQueries = queries.map(query => {
+      const expectedESQueries = queries.map((query) => {
         return toElasticsearchQuery(fromKueryExpression(query.query), indexPattern, {
           dateFormatTZ: 'America/Phoenix',
         });
@@ -72,7 +72,7 @@ describe('build query', () => {
       const queries = [
         { query: '@timestamp:"2018-04-03T19:04:17Z"', language: 'kuery' },
       ] as Query[];
-      const expectedESQueries = queries.map(query => {
+      const expectedESQueries = queries.map((query) => {
         return toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
       });
 

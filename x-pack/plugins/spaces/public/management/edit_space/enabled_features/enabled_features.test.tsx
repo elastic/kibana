@@ -62,16 +62,10 @@ describe('EnabledFeatures', () => {
     );
 
     // expand section panel
-    wrapper
-      .find(SectionPanel)
-      .find(EuiLink)
-      .simulate('click');
+    wrapper.find(SectionPanel).find(EuiLink).simulate('click');
 
     // Click the "Change all" link
-    wrapper
-      .find('.spcToggleAllFeatures__changeAllLink')
-      .first()
-      .simulate('click');
+    wrapper.find('.spcToggleAllFeatures__changeAllLink').first().simulate('click');
 
     // Ask to show all features
     wrapper.find('button[data-test-subj="spc-toggle-all-features-show"]').simulate('click');
@@ -96,16 +90,10 @@ describe('EnabledFeatures', () => {
     );
 
     // expand section panel
-    wrapper
-      .find(SectionPanel)
-      .find(EuiLink)
-      .simulate('click');
+    wrapper.find(SectionPanel).find(EuiLink).simulate('click');
 
     // Click the "Change all" link
-    wrapper
-      .find('.spcToggleAllFeatures__changeAllLink')
-      .first()
-      .simulate('click');
+    wrapper.find('.spcToggleAllFeatures__changeAllLink').first().simulate('click');
 
     // Ask to hide all features
     wrapper.find('button[data-test-subj="spc-toggle-all-features-hide"]').simulate('click');

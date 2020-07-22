@@ -29,7 +29,7 @@ import { ObjectType } from '@kbn/config-schema';
 
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();

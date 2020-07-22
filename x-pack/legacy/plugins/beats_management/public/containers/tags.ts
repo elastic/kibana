@@ -39,7 +39,7 @@ export class TagsContainer extends Container<ContainerState> {
     const success = await this.libs.tags.delete(tagIds);
     if (success) {
       this.setState({
-        list: this.state.list.filter(tag => tagIds.includes(tag.id)),
+        list: this.state.list.filter((tag) => tagIds.includes(tag.id)),
       });
     }
     return success;

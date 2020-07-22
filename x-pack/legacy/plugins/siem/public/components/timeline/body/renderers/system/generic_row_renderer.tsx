@@ -25,7 +25,7 @@ export const createGenericSystemRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  isInstance: ecs => {
+  isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
     return (
@@ -55,7 +55,7 @@ export const createEndgameProcessRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  isInstance: ecs => {
+  isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const category: string | null | undefined = get('event.category[0]', ecs);
     return (
@@ -86,7 +86,7 @@ export const createFimRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  isInstance: ecs => {
+  isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     const category: string | null | undefined = get('event.category[0]', ecs);
     const dataset: string | null | undefined = get('event.dataset[0]', ecs);
@@ -117,7 +117,7 @@ export const createGenericFileRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  isInstance: ecs => {
+  isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
     return (
@@ -147,7 +147,7 @@ export const createSocketRowRenderer = ({
   actionName: string;
   text: string;
 }): RowRenderer => ({
-  isInstance: ecs => {
+  isInstance: (ecs) => {
     const action: string | null | undefined = get('event.action[0]', ecs);
     return action != null && action.toLowerCase() === actionName;
   },
@@ -169,7 +169,7 @@ export const createSecurityEventRowRenderer = ({
 }: {
   actionName: string;
 }): RowRenderer => ({
-  isInstance: ecs => {
+  isInstance: (ecs) => {
     const category: string | null | undefined = get('event.category[0]', ecs);
     const action: string | null | undefined = get('event.action[0]', ecs);
     return (
@@ -192,7 +192,7 @@ export const createSecurityEventRowRenderer = ({
 });
 
 export const createDnsRowRenderer = (): RowRenderer => ({
-  isInstance: ecs => {
+  isInstance: (ecs) => {
     const dnsQuestionType: string | null | undefined = get('dns.question.type[0]', ecs);
     const dnsQuestionName: string | null | undefined = get('dns.question.name[0]', ecs);
     return !isNillEmptyOrNotFinite(dnsQuestionType) && !isNillEmptyOrNotFinite(dnsQuestionName);

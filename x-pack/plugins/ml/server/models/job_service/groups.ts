@@ -35,10 +35,10 @@ export function groupsProvider(callAsCurrentUser: APICaller) {
     ]);
 
     if (jobs) {
-      jobs.forEach(job => {
+      jobs.forEach((job) => {
         jobIds[job.job_id] = null;
         if (job.groups !== undefined) {
-          job.groups.forEach(g => {
+          job.groups.forEach((g) => {
             if (groups[g] === undefined) {
               groups[g] = {
                 id: g,
@@ -53,8 +53,8 @@ export function groupsProvider(callAsCurrentUser: APICaller) {
       });
     }
     if (calendars) {
-      calendars.forEach(cal => {
-        cal.job_ids.forEach(jId => {
+      calendars.forEach((cal) => {
+        cal.job_ids.forEach((jId) => {
           // don't include _all in the calendar groups list
           if (jId !== GLOBAL_CALENDAR && jobIds[jId] === undefined) {
             if (groups[jId] === undefined) {
@@ -71,7 +71,7 @@ export function groupsProvider(callAsCurrentUser: APICaller) {
       });
     }
 
-    return Object.keys(groups).map(g => groups[g]);
+    return Object.keys(groups).map((g) => groups[g]);
   }
 
   async function updateGroups(jobs: Job[]) {

@@ -23,10 +23,10 @@ import { EventEmitter } from 'events';
 
 const ORIENTATIONS = {
   single: () => 0,
-  'right angled': tag => {
+  'right angled': (tag) => {
     return hashWithinRange(tag.text, 2) * 90;
   },
-  multiple: tag => {
+  multiple: (tag) => {
     return hashWithinRange(tag.text, 12) * 15 - 90; //fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
   },
 };
@@ -167,7 +167,7 @@ export class TagCloud extends EventEmitter {
   }
 
   async _pickPendingJob() {
-    return await new Promise(resolve => {
+    return await new Promise((resolve) => {
       this._setTimeoutId = setTimeout(async () => {
         const job = this._pendingJob;
         this._pendingJob = null;
@@ -201,7 +201,7 @@ export class TagCloud extends EventEmitter {
     const svgTextNodes = this._svgGroup.selectAll('text');
     const stage = svgTextNodes.data(job.words, getText);
 
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       const enterSelection = stage.enter();
       const enteringTags = enterSelection.append('text');
       enteringTags.style('font-size', getSizeInPixels);
@@ -216,13 +216,13 @@ export class TagCloud extends EventEmitter {
 
       const self = this;
       enteringTags.on({
-        click: function(event) {
+        click: function (event) {
           self.emit('select', event);
         },
-        mouseover: function() {
+        mouseover: function () {
           d3.select(this).style('cursor', 'pointer');
         },
-        mouseout: function() {
+        mouseout: function () {
           d3.select(this).style('cursor', 'default');
         },
       });
@@ -288,7 +288,7 @@ export class TagCloud extends EventEmitter {
     return {
       refreshLayout: false,
       size: this._size.slice(),
-      words: this._completedJob.words.map(tag => {
+      words: this._completedJob.words.map((tag) => {
         return {
           x: tag.x,
           y: tag.y,
@@ -329,7 +329,7 @@ export class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.font(this._fontFamily);
     tagCloudLayoutGenerator.fontStyle(this._fontStyle);
     tagCloudLayoutGenerator.fontWeight(this._fontWeight);
-    tagCloudLayoutGenerator.fontSize(tag => mapSizeToFontSize(tag.value));
+    tagCloudLayoutGenerator.fontSize((tag) => mapSizeToFontSize(tag.value));
     tagCloudLayoutGenerator.random(seed);
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
@@ -337,7 +337,7 @@ export class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.timeInterval(this._timeInterval);
 
     this._layoutIsUpdating = true;
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       tagCloudLayoutGenerator.on('end', () => {
         this._layoutIsUpdating = false;
         resolve(true);
@@ -353,7 +353,7 @@ export class TagCloud extends EventEmitter {
   getDebugInfo() {
     const debug = {};
     debug.positions = this._completedJob
-      ? this._completedJob.words.map(tag => {
+      ? this._completedJob.words.map((tag) => {
           return {
             displayText: tag.displayText,
             rawText: tag.rawText || tag.text,

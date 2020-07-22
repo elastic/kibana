@@ -17,7 +17,7 @@ import 'plugins/logstash/services/monitoring';
 
 const app = uiModules.get('xpack/logstash');
 
-app.directive('pipelineList', function($injector) {
+app.directive('pipelineList', function ($injector) {
   const pipelinesService = $injector.get('pipelinesService');
   const licenseService = $injector.get('logstashLicenseService');
   const clusterService = $injector.get('xpackLogstashClusterService');
@@ -27,11 +27,11 @@ app.directive('pipelineList', function($injector) {
   return {
     restrict: 'E',
     link: (scope, el) => {
-      const openPipeline = id =>
+      const openPipeline = (id) =>
         scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit`));
       const createPipeline = () =>
         scope.$evalAsync(kbnUrl.change('management/logstash/pipelines/new-pipeline'));
-      const clonePipeline = id =>
+      const clonePipeline = (id) =>
         scope.$evalAsync(kbnUrl.change(`management/logstash/pipelines/pipeline/${id}/edit?clone`));
       render(
         <I18nContext>

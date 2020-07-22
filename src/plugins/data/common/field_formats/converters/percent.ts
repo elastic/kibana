@@ -36,7 +36,7 @@ export class PercentFormat extends NumeralFormat {
     fractional: true,
   });
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     const formatted = super.getConvertedValue(val);
 
     if (this.param('fractional')) {

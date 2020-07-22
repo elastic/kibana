@@ -28,11 +28,7 @@ describe('#getMaybeDate', () => {
   });
 
   test('returns plain string number as the date we expect', () => {
-    expect(
-      getMaybeDate('1559084770612')
-        .toDate()
-        .toISOString()
-    ).toBe('2019-05-28T23:06:10.612Z');
+    expect(getMaybeDate('1559084770612').toDate().toISOString()).toBe('2019-05-28T23:06:10.612Z');
   });
 
   test('returns plain number as epoch as valid date', () => {
@@ -40,18 +36,10 @@ describe('#getMaybeDate', () => {
   });
 
   test('returns plain number as epoch as the date we expect', () => {
-    expect(
-      getMaybeDate(1559084770612)
-        .toDate()
-        .toISOString()
-    ).toBe('2019-05-28T23:06:10.612Z');
+    expect(getMaybeDate(1559084770612).toDate().toISOString()).toBe('2019-05-28T23:06:10.612Z');
   });
 
   test('returns a short date time string as an epoch (sadly) so this is ambiguous', () => {
-    expect(
-      getMaybeDate('20190101')
-        .toDate()
-        .toISOString()
-    ).toBe('1970-01-01T05:36:30.101Z');
+    expect(getMaybeDate('20190101').toDate().toISOString()).toBe('1970-01-01T05:36:30.101Z');
   });
 });

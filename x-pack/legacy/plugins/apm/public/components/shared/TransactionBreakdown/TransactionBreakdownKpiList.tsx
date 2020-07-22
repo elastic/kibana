@@ -10,12 +10,12 @@ import {
   EuiFlexGroup,
   EuiText,
   EuiTitle,
-  EuiIcon
+  EuiIcon,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import {
   FORMATTERS,
-  InfraFormatterType
+  InfraFormatterType,
 } from '../../../../../../../plugins/infra/public';
 
 interface TransactionBreakdownKpi {
@@ -60,7 +60,7 @@ const KpiDescription: React.FC<{
 const TransactionBreakdownKpiList: React.FC<Props> = ({ kpis }) => {
   return (
     <EuiFlexGrid>
-      {kpis.map(kpi => (
+      {kpis.map((kpi) => (
         <EuiFlexItem key={kpi.name} grow={false}>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>

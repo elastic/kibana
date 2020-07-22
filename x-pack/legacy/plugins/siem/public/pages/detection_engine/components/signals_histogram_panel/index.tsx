@@ -117,7 +117,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
 
     const setSelectedOptionCallback = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
-        stackByOptions?.find(co => co.value === event.target.value) ?? defaultStackByOption
+        stackByOptions?.find((co) => co.value === event.target.value) ?? defaultStackByOption
       );
     }, []);
 
@@ -170,7 +170,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
       const converted = esQuery.buildEsQuery(
         undefined,
         query != null ? [query] : [],
-        filters?.filter(f => f.meta.disabled === false) ?? [],
+        filters?.filter((f) => f.meta.disabled === false) ?? [],
         {
           ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
           dateFormatTZ: undefined,

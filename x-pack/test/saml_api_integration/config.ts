@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaAPITestsConfig = await readConfigFile(
     require.resolve('../../../test/api_integration/config.js')
   );

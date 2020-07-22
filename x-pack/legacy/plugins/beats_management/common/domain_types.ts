@@ -14,7 +14,7 @@ export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka', 'redis'];
 // can be used to validate blocs on the API and UI
 export const createConfigurationBlockInterface = (
   configType: t.LiteralType<string> | t.KeyofC<Record<string, null>> = t.keyof(
-    Object.fromEntries(configBlockSchemas.map(s => [s.id, null])) as Record<string, null>
+    Object.fromEntries(configBlockSchemas.map((s) => [s.id, null])) as Record<string, null>
   ),
   beatConfigInterface: t.Mixed = t.Dictionary
 ) =>

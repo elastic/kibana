@@ -61,7 +61,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
   });
 
   useEffect(() => {
-    const subscription = form.subscribe(updatedFieldForm => {
+    const subscription = form.subscribe((updatedFieldForm) => {
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
     });
 
@@ -120,9 +120,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
       let subTypeOptions = hasSubTypes
         ? typeDefinition
-            .subTypes!.types.map(subType => TYPE_DEFINITION[subType])
+            .subTypes!.types.map((subType) => TYPE_DEFINITION[subType])
             .map(
-              subType =>
+              (subType) =>
                 ({ value: subType.value as SubType, label: subType.label } as ComboBoxOption)
             )
         : undefined;
@@ -195,7 +195,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                     defaultValue: subTypeOptions[0].value,
                   }}
                 >
-                  {subTypeField => {
+                  {(subTypeField) => {
                     const error = subTypeField.getErrorsMessages();
                     const isInvalid = error ? Boolean(error.length) : false;
 
@@ -211,7 +211,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                           singleSelection={{ asPlainText: true }}
                           options={subTypeOptions}
                           selectedOptions={subTypeField.value as ComboBoxOption[]}
-                          onChange={newSubType => subTypeField.setValue(newSubType)}
+                          onChange={(newSubType) => subTypeField.setValue(newSubType)}
                           isClearable={false}
                         />
                       </EuiFormRow>

@@ -24,7 +24,7 @@ import classNames from 'classnames';
 
 const ICON_TYPES = ['create', 'delete', 'previous', 'next', 'loading', 'settings', 'menu'];
 
-const KuiButtonIcon = props => {
+const KuiButtonIcon = (props) => {
   const typeToClassNameMap = {
     create: 'fa-plus',
     delete: 'fa-trash',

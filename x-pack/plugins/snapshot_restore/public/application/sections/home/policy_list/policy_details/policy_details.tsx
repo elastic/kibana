@@ -96,7 +96,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
 
   const renderTabs = () => (
     <EuiTabs>
-      {tabOptions.map(tab => (
+      {tabOptions.map((tab) => (
         <EuiTab
           onClick={() => {
             uiMetricService.trackUiMetric(tabToUiMetricMap[tab.id]);
@@ -189,10 +189,10 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
         {policyDetails ? (
           <EuiFlexItem grow={false}>
             <PolicyExecuteProvider>
-              {executePolicyPrompt => {
+              {(executePolicyPrompt) => {
                 return (
                   <PolicyDeleteProvider>
-                    {deletePolicyPrompt => {
+                    {(deletePolicyPrompt) => {
                       return (
                         <EuiPopover
                           id="policyActionMenu"

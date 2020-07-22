@@ -18,7 +18,7 @@ import { checkParam } from '../error_missing_required';
 export function handleResponse(response, clusters) {
   const hits = get(response, 'hits.hits', []);
 
-  hits.forEach(hit => {
+  hits.forEach((hit) => {
     const currentCluster = get(hit, '_source', {});
 
     if (currentCluster) {
@@ -43,8 +43,8 @@ export function getClustersState(req, esIndexPattern, clusters) {
   checkParam(esIndexPattern, 'esIndexPattern in cluster/getClustersHealth');
 
   const clusterUuids = clusters
-    .filter(cluster => !cluster.cluster_state)
-    .map(cluster => cluster.cluster_uuid);
+    .filter((cluster) => !cluster.cluster_state)
+    .map((cluster) => cluster.cluster_uuid);
 
   // we only need to fetch the cluster state if we don't already have it
   //  newer documents (those from the version 6 schema and later already have the cluster state with cluster stats)
@@ -76,7 +76,7 @@ export function getClustersState(req, esIndexPattern, clusters) {
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
-  return callWithRequest(req, 'search', params).then(response =>
+  return callWithRequest(req, 'search', params).then((response) =>
     handleResponse(response, clusters)
   );
 }

@@ -13,7 +13,7 @@ import getos from 'getos';
 
 function defaultTest(os, expectedDefault) {
   test(`${expectedDefault ? 'disabled' : 'enabled'} on ${JSON.stringify(os)}`, async () => {
-    getos.mockImplementation(cb => cb(null, os));
+    getos.mockImplementation((cb) => cb(null, os));
     const actualDefault = await getDefaultChromiumSandboxDisabled();
     expect(actualDefault).toBe(expectedDefault);
   });

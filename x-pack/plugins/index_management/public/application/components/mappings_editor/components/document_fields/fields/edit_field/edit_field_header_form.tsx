@@ -35,8 +35,8 @@ export const EditFieldHeaderForm = React.memo(
 
     const subTypeOptions = hasSubType
       ? typeDefinition
-          .subTypes!.types.map(_subType => TYPE_DEFINITION[_subType])
-          .map(_subType => ({ value: _subType.value, label: _subType.label }))
+          .subTypes!.types.map((_subType) => TYPE_DEFINITION[_subType])
+          .map((_subType) => ({ value: _subType.value, label: _subType.label }))
       : undefined;
 
     const defaultValueSubType = hasSubType
@@ -98,7 +98,7 @@ export const EditFieldHeaderForm = React.memo(
                   defaultValue: defaultValueSubType,
                 }}
               >
-                {subTypeField => {
+                {(subTypeField) => {
                   return (
                     <EuiFormRow label={subTypeField.label}>
                       <EuiComboBox
@@ -117,7 +117,7 @@ export const EditFieldHeaderForm = React.memo(
                             : filterTypesForNonRootFields(subTypeOptions!)
                         }
                         selectedOptions={subTypeField.value as ComboBoxOption[]}
-                        onChange={subType => subTypeField.setValue(subType)}
+                        onChange={(subType) => subTypeField.setValue(subType)}
                         isClearable={false}
                       />
                     </EuiFormRow>
@@ -131,7 +131,7 @@ export const EditFieldHeaderForm = React.memo(
         <FieldDescriptionSection isMultiField={isMultiField}>
           {hasSubType ? (
             <FormDataProvider pathsToWatch="subType">
-              {formData => {
+              {(formData) => {
                 if (formData.subType) {
                   const subTypeDefinition = TYPE_DEFINITION[formData.subType as SubType];
                   return (subTypeDefinition?.description?.() as JSX.Element) ?? null;

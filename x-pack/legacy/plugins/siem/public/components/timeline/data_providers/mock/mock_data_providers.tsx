@@ -39,7 +39,7 @@ export const getEventCount = (dataProviderName: string): number =>
  * in the browser, and also used as mocks in unit and functional tests.
  */
 export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEventCount).map(
-  name =>
+  (name) =>
     ({
       id: `id-${name}`,
       name,

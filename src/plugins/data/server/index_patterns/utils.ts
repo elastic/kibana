@@ -25,7 +25,7 @@ export const getFieldByName = (
   indexPattern: IIndexPattern
 ): IFieldType | undefined => {
   const fields: IFieldType[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
-  const field = fields && fields.find(f => f.name === fieldName);
+  const field = fields && fields.find((f) => f.name === fieldName);
 
   return field;
 };

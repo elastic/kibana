@@ -29,12 +29,9 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="field-browser-title"]')
-        .first()
-        .text()
-    ).toEqual('Customize Columns');
+    expect(wrapper.find('[data-test-subj="field-browser-title"]').first().text()).toEqual(
+      'Customize Columns'
+    );
   });
 
   test('it renders the Reset Fields button', () => {
@@ -52,12 +49,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="reset-fields"]')
-        .first()
-        .text()
-    ).toEqual('Reset Fields');
+    expect(wrapper.find('[data-test-subj="reset-fields"]').first().text()).toEqual('Reset Fields');
   });
 
   test('it invokes onUpdateColumns when the user clicks the Reset Fields button', () => {
@@ -77,10 +69,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    wrapper
-      .find('[data-test-subj="reset-fields"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
 
     expect(onUpdateColumns).toBeCalledWith(defaultHeaders);
   });
@@ -102,10 +91,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    wrapper
-      .find('[data-test-subj="reset-fields"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
 
     expect(onOutsideClick).toBeCalled();
   });
@@ -125,12 +111,9 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="field-search"]')
-        .first()
-        .props().placeholder
-    ).toEqual('Field name');
+    expect(wrapper.find('[data-test-subj="field-search"]').first().props().placeholder).toEqual(
+      'Field name'
+    );
   });
 
   test('it renders the "current" search value in the input when searchInput is not empty', () => {
@@ -168,12 +151,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('.euiLoadingSpinner')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('.euiLoadingSpinner').first().exists()).toBe(true);
   });
 
   test('it invokes onSearchInputChange when the user types in the search field', () => {
@@ -217,12 +195,9 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="categories-count"]')
-        .first()
-        .text()
-    ).toEqual('0 categories');
+    expect(wrapper.find('[data-test-subj="categories-count"]').first().text()).toEqual(
+      '0 categories'
+    );
   });
 
   test('it returns the expected categories count when filteredBrowserFields is NOT empty', () => {
@@ -240,12 +215,9 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="categories-count"]')
-        .first()
-        .text()
-    ).toEqual('9 categories');
+    expect(wrapper.find('[data-test-subj="categories-count"]').first().text()).toEqual(
+      '9 categories'
+    );
   });
 
   test('it returns the expected fields count when filteredBrowserFields is empty', () => {
@@ -263,12 +235,7 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="fields-count"]')
-        .first()
-        .text()
-    ).toEqual('0 fields');
+    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('0 fields');
   });
 
   test('it returns the expected fields count when filteredBrowserFields is NOT empty', () => {
@@ -286,11 +253,6 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="fields-count"]')
-        .first()
-        .text()
-    ).toEqual('25 fields');
+    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('25 fields');
   });
 });

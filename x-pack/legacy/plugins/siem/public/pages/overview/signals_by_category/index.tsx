@@ -52,7 +52,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   );
 
   const defaultStackByOption =
-    signalsHistogramOptions.find(o => o.text === DEFAULT_STACK_BY) ?? signalsHistogramOptions[0];
+    signalsHistogramOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? signalsHistogramOptions[0];
 
   return (
     <SignalsHistogramPanel

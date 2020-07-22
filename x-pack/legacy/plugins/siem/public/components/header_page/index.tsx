@@ -25,13 +25,13 @@ const Header = styled.header.attrs({
     margin-bottom: ${theme.eui.euiSizeL};
 
     ${border &&
-      css`
-        border-bottom: ${theme.eui.euiBorderThin};
-        padding-bottom: ${theme.eui.paddingSizes.l};
-        .euiProgress {
-          top: ${theme.eui.paddingSizes.l};
-        }
-      `}
+    css`
+      border-bottom: ${theme.eui.euiBorderThin};
+      padding-bottom: ${theme.eui.paddingSizes.l};
+      .euiProgress {
+        top: ${theme.eui.paddingSizes.l};
+      }
+    `}
   `}
 `;
 Header.displayName = 'Header';

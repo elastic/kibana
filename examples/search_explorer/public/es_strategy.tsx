@@ -92,7 +92,7 @@ export class EsSearchTest extends React.Component<Props, State> {
             <EuiFormRow label="Index pattern">
               <EuiFieldText
                 value={this.state.index}
-                onChange={e => this.setState({ index: e.target.value, changes: true })}
+                onChange={(e) => this.setState({ index: e.target.value, changes: true })}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -101,7 +101,7 @@ export class EsSearchTest extends React.Component<Props, State> {
             <EuiFormRow label="Query string query">
               <EuiFieldText
                 value={this.state.query}
-                onChange={e => this.setState({ query: e.target.value, changes: true })}
+                onChange={(e) => this.setState({ query: e.target.value, changes: true })}
               />
             </EuiFormRow>
           </EuiFlexItem>

@@ -17,6 +17,6 @@ export class RestTokensAdapter implements CMTokensAdapter {
         num_tokens: numTokens,
       })
     ).results;
-    return results.map(result => result.item);
+    return results.map((result) => result.item);
   }
 }

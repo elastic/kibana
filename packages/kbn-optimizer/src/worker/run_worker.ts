@@ -82,10 +82,10 @@ Rx.defer(() => {
 
   return runCompilers(workerConfig, bundles);
 }).subscribe(
-  msg => {
+  (msg) => {
     send(msg);
   },
-  error => {
+  (error) => {
     if (isWorkerMsg(error)) {
       send(error);
     } else {

@@ -38,7 +38,7 @@ export class DataLoader {
   ): Promise<any> {
     const aggregatableFields: string[] = [];
     const nonAggregatableFields: string[] = [];
-    this._indexPattern.fields.forEach(field => {
+    this._indexPattern.fields.forEach((field) => {
       const fieldName = field.displayName !== undefined ? field.displayName : field.name;
       if (this.isDisplayField(fieldName) === true) {
         if (field.aggregatable === true) {

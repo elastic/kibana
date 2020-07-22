@@ -100,8 +100,8 @@ const METRIC_FORMATTERS: MetricFormatters = {
 };
 
 const calculateBoundsFromNodes = (nodes: SnapshotNode[]): InfraWaffleMapBounds => {
-  const maxValues = nodes.map(node => node.metric.max);
-  const minValues = nodes.map(node => node.metric.value);
+  const maxValues = nodes.map((node) => node.metric.max);
+  const minValues = nodes.map((node) => node.metric.value);
   // if there is only one value then we need to set the bottom range to zero for min
   // otherwise the legend will look silly since both values are the same for top and
   // bottom.
@@ -239,11 +239,11 @@ const MainContainer = euiStyled.div`
 `;
 
 const TableContainer = euiStyled.div`
-  padding: ${props => props.theme.eui.paddingSizes.l};
+  padding: ${(props) => props.theme.eui.paddingSizes.l};
 `;
 
 const ViewSwitcherContainer = euiStyled.div`
-  padding: ${props => props.theme.eui.paddingSizes.l};
+  padding: ${(props) => props.theme.eui.paddingSizes.l};
 `;
 
 const MapContainer = euiStyled.div`

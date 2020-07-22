@@ -20,7 +20,7 @@ export async function fetchStatus(
   // See https://github.com/elastic/kibana/issues/48442
   const statuses = await Promise.all(
     ALERT_TYPES.map(
-      type =>
+      (type) =>
         new Promise(async (resolve, reject) => {
           try {
             const params = {

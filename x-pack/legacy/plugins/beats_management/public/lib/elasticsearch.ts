@@ -38,7 +38,7 @@ export class ElasticsearchLib {
   ): Promise<QuerySuggestion[]> {
     const suggestions = await this.adapter.getSuggestions(kuery, selectionStart);
 
-    const filteredSuggestions = suggestions.filter(suggestion => {
+    const filteredSuggestions = suggestions.filter((suggestion) => {
       const hiddenFieldsCheck = this.hiddenFields;
 
       if (fieldPrefix) {

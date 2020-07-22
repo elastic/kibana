@@ -46,13 +46,13 @@ describe('Signal detection rules', () => {
     cy.get(RULE_NAME)
       .eq(FIFTH_RULE)
       .invoke('text')
-      .then(fifthRuleName => {
+      .then((fifthRuleName) => {
         activateRule(FIFTH_RULE);
         waitForRuleToBeActivated();
         cy.get(RULE_NAME)
           .eq(SEVENTH_RULE)
           .invoke('text')
-          .then(seventhRuleName => {
+          .then((seventhRuleName) => {
             activateRule(SEVENTH_RULE);
             waitForRuleToBeActivated();
             sortByActivatedRules();
@@ -60,23 +60,19 @@ describe('Signal detection rules', () => {
             cy.get(RULE_NAME)
               .eq(FIRST_RULE)
               .invoke('text')
-              .then(firstRuleName => {
+              .then((firstRuleName) => {
                 cy.get(RULE_NAME)
                   .eq(SECOND_RULE)
                   .invoke('text')
-                  .then(secondRuleName => {
+                  .then((secondRuleName) => {
                     const expectedRulesNames = `${firstRuleName} ${secondRuleName}`;
                     cy.wrap(expectedRulesNames).should('include', fifthRuleName);
                     cy.wrap(expectedRulesNames).should('include', seventhRuleName);
                   });
               });
 
-            cy.get(RULE_SWITCH)
-              .eq(FIRST_RULE)
-              .should('have.attr', 'role', 'switch');
-            cy.get(RULE_SWITCH)
-              .eq(SECOND_RULE)
-              .should('have.attr', 'role', 'switch');
+            cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
+            cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
           });
       });
   });

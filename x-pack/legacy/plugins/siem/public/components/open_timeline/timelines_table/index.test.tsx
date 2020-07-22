@@ -34,12 +34,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('thead tr th input')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('thead tr th input').first().exists()).toBe(true);
   });
 
   test('it does NOT render the select all timelines header checkbox when actionTimelineToShow has not the action selectable', () => {
@@ -53,12 +48,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('thead tr th input')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('thead tr th input').first().exists()).toBe(false);
   });
 
   test('it renders the Modified By column when showExtendedColumns is true ', () => {
@@ -72,12 +62,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('thead tr th')
-        .at(4)
-        .text()
-    ).toContain(i18n.MODIFIED_BY);
+    expect(wrapper.find('thead tr th').at(4).text()).toContain(i18n.MODIFIED_BY);
   });
 
   test('it renders the notes column in the position of the Modified By column when showExtendedColumns is false', () => {
@@ -108,12 +93,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="delete-timeline"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="delete-timeline"]').first().exists()).toBe(true);
   });
 
   test('it does NOT render the delete timeline (trash icon) when actionTimelineToShow has NOT the delete action', () => {
@@ -127,12 +107,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="delete-timeline"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="delete-timeline"]').first().exists()).toBe(false);
   });
 
   test('it renders the rows per page selector when showExtendedColumns is true', () => {
@@ -142,12 +117,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('EuiTablePagination EuiPopover')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('EuiTablePagination EuiPopover').first().exists()).toBe(true);
   });
 
   test('it does NOT render the rows per page selector when showExtendedColumns is false', () => {
@@ -161,12 +131,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('EuiTablePagination EuiPopover')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('EuiTablePagination EuiPopover').first().exists()).toBe(false);
   });
 
   test('it renders the default page size specified by the defaultPageSize prop', () => {
@@ -182,12 +147,9 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('EuiTablePagination EuiPopover')
-        .first()
-        .text()
-    ).toEqual('Rows per page: 123');
+    expect(wrapper.find('EuiTablePagination EuiPopover').first().text()).toEqual(
+      'Rows per page: 123'
+    );
   });
 
   test('it sorts the Last Modified column in descending order when showExtendedColumns is true ', () => {
@@ -197,12 +159,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[aria-sort="descending"]')
-        .first()
-        .text()
-    ).toContain(i18n.LAST_MODIFIED);
+    expect(wrapper.find('[aria-sort="descending"]').first().text()).toContain(i18n.LAST_MODIFIED);
   });
 
   test('it sorts the Last Modified column in descending order when showExtendedColumns is false ', () => {
@@ -216,12 +173,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('[aria-sort="descending"]')
-        .first()
-        .text()
-    ).toContain(i18n.LAST_MODIFIED);
+    expect(wrapper.find('[aria-sort="descending"]').first().text()).toContain(i18n.LAST_MODIFIED);
   });
 
   test('it displays the expected message when no search results are found', () => {
@@ -235,12 +187,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    expect(
-      wrapper
-        .find('tbody tr td div')
-        .first()
-        .text()
-    ).toEqual(i18n.ZERO_TIMELINES_MATCH);
+    expect(wrapper.find('tbody tr td div').first().text()).toEqual(i18n.ZERO_TIMELINES_MATCH);
   });
 
   test('it invokes onTableChange with the expected parameters when a table header is clicked to sort it', () => {
@@ -255,10 +202,7 @@ describe('TimelinesTable', () => {
       </ThemeProvider>
     );
 
-    wrapper
-      .find('thead tr th button')
-      .at(0)
-      .simulate('click');
+    wrapper.find('thead tr th button').at(0).simulate('click');
 
     wrapper.update();
 

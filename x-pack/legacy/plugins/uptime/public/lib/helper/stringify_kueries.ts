@@ -11,7 +11,7 @@
  */
 export const stringifyKueries = (kueries: Map<string, Array<number | string>>): string =>
   Array.from(kueries.keys())
-    .map(key => {
+    .map((key) => {
       const value = kueries.get(key);
       if (!value || value.length === 0) return '';
       return value.reduce(

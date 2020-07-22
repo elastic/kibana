@@ -66,8 +66,9 @@ export const CanvasComponent = ({
   const { height: stageHeight, width: stageWidth, page } = stage;
   const { height: workpadHeight, width: workpadWidth } = workpad;
   const ratio = Math.max(workpadWidth / stageWidth, workpadHeight / stageHeight);
-  const transform = `scale3d(${stageHeight / (stageHeight * ratio)}, ${stageWidth /
-    (stageWidth * ratio)}, 1)`;
+  const transform = `scale3d(${stageHeight / (stageHeight * ratio)}, ${
+    stageWidth / (stageWidth * ratio)
+  }, 1)`;
 
   const pageStyle = {
     height: workpadHeight,

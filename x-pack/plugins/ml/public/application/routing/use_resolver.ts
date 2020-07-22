@@ -34,7 +34,7 @@ export const useResolver = (
   useEffect(() => {
     (async () => {
       try {
-        const res = await Promise.all(funcs.map(r => r()));
+        const res = await Promise.all(funcs.map((r) => r()));
         res.forEach((r, i) => (tempResults[funcNames[i]] = r));
         setResults(tempResults);
 

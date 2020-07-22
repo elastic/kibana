@@ -9,7 +9,7 @@ import {
   CoreSetup,
   KibanaRequest,
   RequestHandlerContext,
-  Logger
+  Logger,
 } from 'src/core/server';
 import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';

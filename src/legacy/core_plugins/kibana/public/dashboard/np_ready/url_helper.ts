@@ -56,7 +56,7 @@ export function addEmbeddableToDashboardUrl(
   const dashboardParsedUrl = absoluteToParsedUrl(dashboardUrl, basePath);
   if (urlVars) {
     const keys = Object.keys(urlVars).sort();
-    keys.forEach(key => {
+    keys.forEach((key) => {
       dashboardParsedUrl.addQueryParameter(key, urlVars[key]);
     });
   }

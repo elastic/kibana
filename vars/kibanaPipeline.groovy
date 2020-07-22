@@ -161,7 +161,18 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+  retryWithDelay(2, 15) {
+    try {
+      runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+    } catch (ex) {
+      try {
+        // Setup expects this directory to be missing, so we need to remove it before we do a retry
+        bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+      } finally {
+        throw ex
+      }
+    }
+  }
 }
 
 def buildOss() {
@@ -186,13 +197,18 @@ def runErrorReporter() {
 }
 
 def call(Map params = [:], Closure closure) {
-  def config = [timeoutMinutes: 135, checkPrChanges: false] + params
+  def config = [timeoutMinutes: 135, checkPrChanges: false, setCommitStatus: false] + params
 
   stage("Kibana Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
       timestamps {
         ansiColor('xterm') {
+          if (config.setCommitStatus) {
+            buildState.set('shouldSetCommitStatus', true)
+          }
           if (config.checkPrChanges && githubPr.isPr()) {
+            pipelineLibraryTests()
+
             print "Checking PR for changes to determine if CI needs to be run..."
 
             if (prChanges.areChangesSkippable()) {
@@ -200,8 +216,24 @@ def call(Map params = [:], Closure closure) {
               return
             }
           }
-          closure()
+          try {
+            closure()
+          } finally {
+            if (config.setCommitStatus) {
+              githubCommitStatus.onFinish()
+            }
+          }
         }
+      }
+    }
+  }
+}
+
+def pipelineLibraryTests() {
+  whenChanged(['vars/', '.ci/pipeline-library/']) {
+    workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
+      dir('.ci/pipeline-library') {
+        sh './gradlew test'
       }
     }
   }

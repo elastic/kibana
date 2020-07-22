@@ -10,10 +10,10 @@ import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { Ping, PingResults } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 
 const expectPingFixtureEql = (data: { allPings: PingResults }, fixtureName: string) => {
-  expectFixtureEql(data, fixtureName, d => d.allPings.pings.forEach((p: Ping) => delete p.id));
+  expectFixtureEql(data, fixtureName, (d) => d.allPings.pings.forEach((p: Ping) => delete p.id));
 };
 
-export default function({ getService }: any) {
+export default function ({ getService }: any) {
   describe('pingList query', () => {
     before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
     after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));

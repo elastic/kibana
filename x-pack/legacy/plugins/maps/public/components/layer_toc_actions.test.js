@@ -48,7 +48,7 @@ describe('LayerTocActions', () => {
     const component = shallowWithIntl(<LayerTocActions {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -59,7 +59,7 @@ describe('LayerTocActions', () => {
     const component = shallowWithIntl(<LayerTocActions {...defaultProps} isReadOnly={true} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -71,7 +71,7 @@ describe('LayerTocActions', () => {
     const component = shallowWithIntl(<LayerTocActions {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 

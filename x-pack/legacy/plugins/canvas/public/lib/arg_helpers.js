@@ -19,7 +19,7 @@ import { getType } from '@kbn/interpreter/common';
 const allowedTypes = ['string', 'number', 'boolean'];
 const badType = () => new Error(`Arg setting helpers only support ${allowedTypes.join(',')}`);
 
-const isAllowed = type => includes(allowedTypes, type);
+const isAllowed = (type) => includes(allowedTypes, type);
 
 export function validateArg(value) {
   const type = getType(value);
@@ -33,7 +33,7 @@ export function getSimpleArg(name, args) {
   if (!args[name]) {
     return [];
   }
-  return args[name].map(astVal => {
+  return args[name].map((astVal) => {
     if (!isAllowed(getType(astVal))) {
       throw badType();
     }

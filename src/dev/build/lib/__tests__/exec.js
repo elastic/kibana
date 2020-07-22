@@ -31,7 +31,7 @@ describe('dev/build/lib/exec', () => {
   const log = new ToolingLog({
     level: 'verbose',
     writeTo: {
-      write: chunk => {
+      write: (chunk) => {
         onLogLine(stripAnsi(chunk));
       },
     },

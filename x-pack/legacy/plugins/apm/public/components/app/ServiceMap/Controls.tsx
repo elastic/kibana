@@ -50,8 +50,8 @@ function doZoom(cy: cytoscape.Core | undefined, increment: number) {
       duration,
       zoom: {
         level,
-        position: primaryCenter || graphCenter
-      }
+        position: primaryCenter || graphCenter,
+      },
     });
   }
 }
@@ -64,7 +64,7 @@ export function Controls() {
 
   useEffect(() => {
     if (cy) {
-      cy.on('zoom', event => {
+      cy.on('zoom', (event) => {
         setZoom(event.cy.zoom());
       });
     }
@@ -76,7 +76,7 @@ export function Controls() {
       cy.animate({
         ...animationOptions,
         center: { eles },
-        fit: { eles, padding: nodeHeight }
+        fit: { eles, padding: nodeHeight },
       });
     }
   }
@@ -100,16 +100,16 @@ export function Controls() {
   const increment = (maxZoom - minZoom) / steps;
 
   const centerLabel = i18n.translate('xpack.apm.serviceMap.center', {
-    defaultMessage: 'Center'
+    defaultMessage: 'Center',
   });
   const viewFullMapLabel = i18n.translate('xpack.apm.serviceMap.viewFullMap', {
-    defaultMessage: 'View full service map'
+    defaultMessage: 'View full service map',
   });
   const zoomInLabel = i18n.translate('xpack.apm.serviceMap.zoomIn', {
-    defaultMessage: 'Zoom in'
+    defaultMessage: 'Zoom in',
   });
   const zoomOutLabel = i18n.translate('xpack.apm.serviceMap.zoomOut', {
-    defaultMessage: 'Zoom out'
+    defaultMessage: 'Zoom out',
   });
 
   const showViewFullMapButton = cy.nodes('.primary').length > 0;

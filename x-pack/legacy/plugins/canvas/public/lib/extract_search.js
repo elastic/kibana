@@ -6,12 +6,12 @@
 
 // EUI helper
 // extracts search text and array of selected tags from EuiSearchBar
-export const extractSearch = queryText => {
+export const extractSearch = (queryText) => {
   const filterTags = [];
   const searchTerms = [];
   const parts = queryText.split(' ');
 
-  parts.forEach(part => {
+  parts.forEach((part) => {
     if (part.indexOf(':') >= 0) {
       const [key, value] = part.split(':');
       if (key === 'tag') {

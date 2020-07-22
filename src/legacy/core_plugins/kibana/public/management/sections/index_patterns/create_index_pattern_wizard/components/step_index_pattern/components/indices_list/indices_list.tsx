@@ -114,7 +114,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
       </EuiButtonEmpty>
     );
 
-    const items = PER_PAGE_INCREMENTS.map(increment => {
+    const items = PER_PAGE_INCREMENTS.map((increment) => {
       return (
         <EuiContextMenuItem
           key={increment}

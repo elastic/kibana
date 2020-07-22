@@ -45,7 +45,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
       : asyncSearch(caller, { ...request, params }, options);
   };
 
-  const cancel: ISearchCancel<typeof ES_SEARCH_STRATEGY> = async id => {
+  const cancel: ISearchCancel<typeof ES_SEARCH_STRATEGY> = async (id) => {
     const method = 'DELETE';
     const path = encodeURI(`/_async_search/${id}`);
     await caller('transport.request', { method, path });

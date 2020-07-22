@@ -15,7 +15,7 @@ import { rawRules } from './prepackaged_rules';
  * aspects such as default interval of 5 minutes, default arrays, etc...
  */
 export const validateAllPrepackagedRules = (rules: PrepackagedRules[]): PrepackagedRules[] => {
-  return rules.map(rule => {
+  return rules.map((rule) => {
     const validatedRule = addPrepackagedRulesSchema.validate(rule);
     if (validatedRule.error != null) {
       const ruleName = rule.name ? rule.name : '(rule name unknown)';

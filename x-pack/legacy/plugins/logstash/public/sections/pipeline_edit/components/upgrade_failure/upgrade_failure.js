@@ -13,7 +13,7 @@ import { UpgradeFailure } from '../../../../components/upgrade_failure';
 
 const app = uiModules.get('xpack/logstash');
 
-app.directive('upgradeFailure', $injector => {
+app.directive('upgradeFailure', ($injector) => {
   const $route = $injector.get('$route');
   const kbnUrl = $injector.get('kbnUrl');
 

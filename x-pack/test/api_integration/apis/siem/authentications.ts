@@ -18,7 +18,7 @@ const HOST_NAME = 'zeek-newyork-sha-aa8df15';
 const TOTAL_COUNT = 3;
 const EDGE_LENGTH = 1;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
 
@@ -47,7 +47,7 @@ export default function({ getService }: FtrProviderContext) {
             inspect: false,
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const authentications = resp.data.source.Authentications;
           expect(authentications.edges.length).to.be(EDGE_LENGTH);
           expect(authentications.totalCount).to.be(TOTAL_COUNT);
@@ -76,7 +76,7 @@ export default function({ getService }: FtrProviderContext) {
             inspect: false,
           },
         })
-        .then(resp => {
+        .then((resp) => {
           const authentications = resp.data.source.Authentications;
           expect(authentications.edges.length).to.be(EDGE_LENGTH);
           expect(authentications.totalCount).to.be(TOTAL_COUNT);

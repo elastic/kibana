@@ -55,10 +55,7 @@ describe('AddNote', () => {
       />
     );
 
-    wrapper
-      .find('[data-test-subj="cancel"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
 
     expect(onCancelAddNote).toBeCalled();
   });
@@ -77,10 +74,7 @@ describe('AddNote', () => {
       />
     );
 
-    wrapper
-      .find('[data-test-subj="cancel"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="cancel"]').first().simulate('click');
 
     expect(associateNote).not.toBeCalled();
   });
@@ -111,12 +105,7 @@ describe('AddNote', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="add-a-note"]')
-        .first()
-        .text()
-    ).toEqual(note);
+    expect(wrapper.find('[data-test-subj="add-a-note"]').first().text()).toEqual(note);
   });
 
   test('it invokes associateNote when the Add Note button is clicked', () => {
@@ -133,10 +122,7 @@ describe('AddNote', () => {
       />
     );
 
-    wrapper
-      .find('[data-test-subj="add-note"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
     expect(associateNote).toBeCalled();
   });
@@ -155,10 +141,7 @@ describe('AddNote', () => {
       />
     );
 
-    wrapper
-      .find('[data-test-subj="add-note"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
     expect(getNewNoteId).toBeCalled();
   });
@@ -177,10 +160,7 @@ describe('AddNote', () => {
       />
     );
 
-    wrapper
-      .find('[data-test-subj="add-note"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
     expect(updateNewNote).toBeCalled();
   });
@@ -199,10 +179,7 @@ describe('AddNote', () => {
       />
     );
 
-    wrapper
-      .find('[data-test-subj="add-note"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="add-note"]').first().simulate('click');
 
     expect(updateNote).toBeCalled();
   });

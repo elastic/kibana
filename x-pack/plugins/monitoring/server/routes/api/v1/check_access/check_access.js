@@ -15,7 +15,7 @@ export function checkAccessRoute(server) {
   server.route({
     method: 'GET',
     path: '/api/monitoring/v1/check_access',
-    handler: async req => {
+    handler: async (req) => {
       const response = {};
       try {
         await verifyMonitoringAuth(req);

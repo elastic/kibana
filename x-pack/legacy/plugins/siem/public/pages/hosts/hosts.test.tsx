@@ -94,7 +94,7 @@ describe('Hosts - rendering', () => {
       </TestProviders>
     );
     // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise(resolve => setTimeout(resolve));
+    await new Promise((resolve) => setTimeout(resolve));
     wrapper.update();
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
   });
@@ -111,7 +111,7 @@ describe('Hosts - rendering', () => {
       </TestProviders>
     );
     // Why => https://github.com/apollographql/react-apollo/issues/1711
-    await new Promise(resolve => setTimeout(resolve));
+    await new Promise((resolve) => setTimeout(resolve));
     wrapper.update();
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
   });

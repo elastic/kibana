@@ -8,7 +8,7 @@ import { Unionize } from 'utility-types';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ChartBase } from './types';
@@ -41,7 +41,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
   serviceNodeName,
   chartBase,
   aggs,
-  additionalFilters = []
+  additionalFilters = [],
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
@@ -55,7 +55,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
   const projection = getMetricsProjection({
     setup,
     serviceName,
-    serviceNodeName
+    serviceNodeName,
   });
 
   const params = mergeProjection(projection, {
@@ -63,17 +63,17 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
       size: 0,
       query: {
         bool: {
-          filter: [...projection.body.query.bool.filter, ...additionalFilters]
-        }
+          filter: [...projection.body.query.bool.filter, ...additionalFilters],
+        },
       },
       aggs: {
         timeseriesData: {
           date_histogram: getMetricsDateHistogramParams(start, end),
-          aggs
+          aggs,
         },
-        ...aggs
-      }
-    }
+        ...aggs,
+      },
+    },
   });
 
   const response = await client.search(params);

@@ -13,7 +13,7 @@ import { RowRenderer, RowRendererContainer } from '../row_renderer';
 import { ZeekDetails } from './zeek_details';
 
 export const zeekRowRenderer: RowRenderer = {
-  isInstance: ecs => {
+  isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'zeek';
   },

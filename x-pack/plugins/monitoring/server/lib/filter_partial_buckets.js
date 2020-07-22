@@ -18,7 +18,7 @@ function getDelta(t1, t2) {
 }
 
 export function filterPartialBuckets(min, max, bucketSize, options = {}) {
-  return bucket => {
+  return (bucket) => {
     const bucketTime = getTime(bucket);
     // timestamp is too late to be complete
     if (getDelta(max, bucketTime.add(bucketSize, 'seconds')) < 0) {

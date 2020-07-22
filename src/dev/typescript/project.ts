@@ -27,7 +27,7 @@ import { REPO_ROOT } from '../constants';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
-    pattern =>
+    (pattern) =>
       new Minimatch(resolve(directory, pattern), {
         dot: true,
       })
@@ -45,7 +45,7 @@ function parseTsConfig(path: string) {
 }
 
 function testMatchers(matchers: IMinimatch[], path: string) {
-  return matchers.some(matcher => matcher.match(path));
+  return matchers.some((matcher) => matcher.match(path));
 }
 
 export class Project {

@@ -45,12 +45,9 @@ describe('Category', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="selected-category-title"]')
-        .first()
-        .text()
-    ).toEqual(selectedCategoryId);
+    expect(wrapper.find('[data-test-subj="selected-category-title"]').first().text()).toEqual(
+      selectedCategoryId
+    );
   });
 
   test('it renders the Field column header', () => {
@@ -77,12 +74,7 @@ describe('Category', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('.euiTableCellContent__text')
-        .at(0)
-        .text()
-    ).toEqual(i18n.FIELD);
+    expect(wrapper.find('.euiTableCellContent__text').at(0).text()).toEqual(i18n.FIELD);
   });
 
   test('it renders the Description column header', () => {
@@ -109,11 +101,6 @@ describe('Category', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('.euiTableCellContent__text')
-        .at(1)
-        .text()
-    ).toEqual(i18n.DESCRIPTION);
+    expect(wrapper.find('.euiTableCellContent__text').at(1).text()).toEqual(i18n.DESCRIPTION);
   });
 });

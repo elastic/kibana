@@ -14,7 +14,7 @@ import * as GenerationUrls from './generation_urls';
  * a major change in a major release, we handle it properly.
  */
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');

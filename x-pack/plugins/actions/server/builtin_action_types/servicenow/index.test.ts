@@ -110,7 +110,7 @@ describe('validateConfig()', () => {
     actionType = getActionType({
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: url => {
+        ensureWhitelistedUri: (url) => {
           expect(url).toEqual(mockOptions.config.apiUrl);
         },
       },
@@ -123,7 +123,7 @@ describe('validateConfig()', () => {
     actionType = getActionType({
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: _ => {
+        ensureWhitelistedUri: (_) => {
           throw new Error(`target url is not whitelisted`);
         },
       },

@@ -65,8 +65,8 @@ const observeCompiler = (
    * Called by webpack as a single run compilation is starting
    */
   const started$ = Rx.merge(
-    Rx.fromEventPattern(cb => beforeRun.tap(PLUGIN_NAME, cb)),
-    Rx.fromEventPattern(cb => watchRun.tap(PLUGIN_NAME, cb))
+    Rx.fromEventPattern((cb) => beforeRun.tap(PLUGIN_NAME, cb)),
+    Rx.fromEventPattern((cb) => watchRun.tap(PLUGIN_NAME, cb))
   ).pipe(mapTo(compilerMsgs.running()));
 
   /**
@@ -74,8 +74,8 @@ const observeCompiler = (
    * needAdditionalPass property is set then another compilation
    * is about to be started, so we shouldn't send complete quite yet
    */
-  const complete$ = Rx.fromEventPattern<Stats>(cb => done.tap(PLUGIN_NAME, cb)).pipe(
-    maybeMap(stats => {
+  const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
+    maybeMap((stats) => {
       // @ts-ignore not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
       if (stats.compilation.needAdditionalPass) {
         return undefined;
@@ -134,7 +134,7 @@ const observeCompiler = (
         );
       }
 
-      const files = Array.from(referencedFiles).sort(ascending(p => p));
+      const files = Array.from(referencedFiles).sort(ascending((p) => p));
       const mtimes = new Map(
         files.map((path): [string, number | undefined] => {
           try {
@@ -167,8 +167,10 @@ const observeCompiler = (
    * prevets assets from being emitted, and prevents watching
    * from continuing.
    */
-  const error$ = Rx.fromEventPattern<Error>(cb => compiler.hooks.failed.tap(PLUGIN_NAME, cb)).pipe(
-    map(error => {
+  const error$ = Rx.fromEventPattern<Error>((cb) =>
+    compiler.hooks.failed.tap(PLUGIN_NAME, cb)
+  ).pipe(
+    map((error) => {
       throw compilerMsgs.error(error);
     })
   );
@@ -184,7 +186,7 @@ const observeCompiler = (
  * Run webpack compilers
  */
 export const runCompilers = (workerConfig: WorkerConfig, bundles: Bundle[]) => {
-  const multiCompiler = webpack(bundles.map(def => getWebpackConfig(def, workerConfig)));
+  const multiCompiler = webpack(bundles.map((def) => getWebpackConfig(def, workerConfig)));
 
   return Rx.merge(
     /**

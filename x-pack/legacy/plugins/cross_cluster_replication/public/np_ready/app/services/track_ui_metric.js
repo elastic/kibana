@@ -18,7 +18,7 @@ export { METRIC_TYPE };
  */
 export function trackUserRequest(request, actionType) {
   // Only track successful actions.
-  return request.then(response => {
+  return request.then((response) => {
     trackUiMetric(METRIC_TYPE.LOADED, actionType);
     // We return the response immediately without waiting for the tracking request to resolve,
     // to avoid adding additional latency.

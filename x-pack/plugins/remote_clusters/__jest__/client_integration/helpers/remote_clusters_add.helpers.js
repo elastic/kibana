@@ -14,13 +14,13 @@ import { registerRouter } from '../../../public/application/services/routing';
 const testBedConfig = {
   store: createRemoteClustersStore,
   memoryRouter: {
-    onRouter: router => registerRouter(router),
+    onRouter: (router) => registerRouter(router),
   },
 };
 
 const initTestBed = registerTestBed(RemoteClusterAdd, testBedConfig);
 
-export const setup = props => {
+export const setup = (props) => {
   const testBed = initTestBed(props);
 
   // User actions

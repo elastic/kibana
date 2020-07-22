@@ -20,11 +20,11 @@ interface LegacyAPIOpts {
 }
 
 export const createLegacyAPI = ({
-  spaces = createSpaces().map(s => ({ id: s.id, ...s.attributes })),
+  spaces = createSpaces().map((s) => ({ id: s.id, ...s.attributes })),
 }: LegacyAPIOpts = {}) => {
   const mockSavedObjectsClientContract = {
     get: jest.fn((type, id) => {
-      const result = spaces.filter(s => s.id === id);
+      const result = spaces.filter((s) => s.id === id);
       if (!result.length) {
         throw new Error(`not found: [${type}:${id}]`);
       }
@@ -37,13 +37,13 @@ export const createLegacyAPI = ({
       };
     }),
     create: jest.fn((type, attributes, { id }) => {
-      if (spaces.find(s => s.id === id)) {
+      if (spaces.find((s) => s.id === id)) {
         throw new Error('conflict');
       }
       return {};
     }),
     update: jest.fn((type, id) => {
-      if (!spaces.find(s => s.id === id)) {
+      if (!spaces.find((s) => s.id === id)) {
         throw new Error('not found: during update');
       }
       return {};

@@ -81,7 +81,7 @@ describe('Flyout', () => {
     const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -92,7 +92,7 @@ describe('Flyout', () => {
     const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -105,7 +105,7 @@ describe('Flyout', () => {
     const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -134,7 +134,7 @@ describe('Flyout', () => {
     const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -191,7 +191,7 @@ describe('Flyout', () => {
       const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -226,7 +226,7 @@ describe('Flyout', () => {
       const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -246,7 +246,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       expect(resolveImportErrors).toMatchSnapshot();
     });
 
@@ -254,7 +254,7 @@ describe('Flyout', () => {
       const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -285,7 +285,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
 
       expect(component.state('failedImports')).toEqual([
         {
@@ -406,7 +406,7 @@ describe('Flyout', () => {
         },
         obj: {
           searchSource: {
-            getOwnField: field => {
+            getOwnField: (field) => {
               if (field === 'index') {
                 return 'MyIndexPattern*';
               }
@@ -440,7 +440,7 @@ describe('Flyout', () => {
       const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -450,7 +450,7 @@ describe('Flyout', () => {
       expect(importLegacyFile).toHaveBeenCalledWith(legacyMockFile);
       // Remove the last element from data since it should be filtered out
       expect(resolveSavedObjects).toHaveBeenCalledWith(
-        mockData.slice(0, 2).map(doc => ({ ...doc, _migrationVersion: {} })),
+        mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
         true,
         defaultProps.services,
         defaultProps.indexPatterns,
@@ -495,7 +495,7 @@ describe('Flyout', () => {
       const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -515,7 +515,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       expect(resolveIndexPatternConflicts).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
@@ -537,7 +537,7 @@ describe('Flyout', () => {
       const component = shallowWithI18nProvider(<Flyout {...defaultProps} />);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -556,7 +556,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
 
       expect(component.state('error')).toEqual('foobar');
       expect(component.find('EuiFlyoutBody EuiCallOut')).toMatchSnapshot();

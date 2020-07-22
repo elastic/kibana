@@ -36,16 +36,16 @@ export class ConfigBlocksLib {
     // NOTE: The perk of this, is that as we support more features via controls
     // vs yaml editing, it should "just work", and things that were in YAML
     // will now be in the UI forms...
-    return blocks.map(block => {
+    return blocks.map((block) => {
       const { type, config } = block;
 
-      const thisConfigSchema = this.configSchemas.find(conf => conf.id === type);
+      const thisConfigSchema = this.configSchemas.find((conf) => conf.id === type);
       const thisConfigBlockSchema = thisConfigSchema ? thisConfigSchema.configs : null;
       if (!thisConfigBlockSchema) {
         throw new Error('No config block schema ');
       }
 
-      const knownConfigIds: string[] = thisConfigBlockSchema.map(schema => schema.id);
+      const knownConfigIds: string[] = thisConfigBlockSchema.map((schema) => schema.id);
 
       const convertedConfig: ConfigurationBlock['config'] = knownConfigIds.reduce(
         (blockObj: any, configKey: string, index: number) => {
@@ -76,9 +76,9 @@ export class ConfigBlocksLib {
     // configurations is the JS representation of the config yaml,
     // so here we take that JS and convert it into a YAML string.
     // we do so while also flattening "other" into the flat yaml beats expect
-    return blocks.map(block => {
+    return blocks.map((block) => {
       const { type, config } = block;
-      const thisConfigSchema = this.configSchemas.find(conf => conf.id === type);
+      const thisConfigSchema = this.configSchemas.find((conf) => conf.id === type);
       const thisConfigBlockSchema = thisConfigSchema ? thisConfigSchema.configs : null;
       if (!thisConfigBlockSchema) {
         throw new Error('No config block schema ');
@@ -109,7 +109,7 @@ export class ConfigBlocksLib {
 
   private pickDeep(obj: { [key: string]: any }, keys: string[]) {
     const copy = {};
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (has(obj, key)) {
         const val = get(obj, key);
         set(copy, key, val);

@@ -52,7 +52,7 @@ export const getStringArray = (field: string, data: unknown, localConsole = cons
     return [];
   } else if (typeof value === 'string') {
     return [value];
-  } else if (Array.isArray(value) && value.every(element => typeof element === 'string')) {
+  } else if (Array.isArray(value) && value.every((element) => typeof element === 'string')) {
     return value;
   } else {
     localConsole.trace(
@@ -118,7 +118,7 @@ export const replaceTemplateFieldFromQuery = (query: string, ecsData: Ecs): stri
 };
 
 export const replaceTemplateFieldFromMatchFilters = (filters: Filter[], ecsData: Ecs): Filter[] =>
-  filters.map(filter => {
+  filters.map((filter) => {
     if (
       filter.meta.type === 'phrase' &&
       filter.meta.key != null &&
@@ -154,10 +154,10 @@ export const replaceTemplateFieldFromDataProviders = (
   dataProviders: DataProvider[],
   ecsData: Ecs
 ): DataProvider[] =>
-  dataProviders.map(dataProvider => {
+  dataProviders.map((dataProvider) => {
     const newDataProvider = reformatDataProviderWithNewValue(dataProvider, ecsData);
     if (newDataProvider.and != null && !isEmpty(newDataProvider.and)) {
-      newDataProvider.and = newDataProvider.and.map(andDataProvider =>
+      newDataProvider.and = newDataProvider.and.map((andDataProvider) =>
         reformatDataProviderWithNewValue(andDataProvider, ecsData)
       );
     }

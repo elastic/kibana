@@ -35,10 +35,7 @@ describe('FlyoutHeaderWithCloseButton', () => {
         />
       </TestProviders>
     );
-    wrapper
-      .find('[data-test-subj="close-timeline"] button')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="close-timeline"] button').first().simulate('click');
 
     expect(closeMock).toBeCalled();
   });

@@ -39,26 +39,26 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   const stats = {};
   const results = [];
 
-  const getDuration = node =>
+  const getDuration = (node) =>
     node.startTime && node.endTime ? ((node.endTime - node.startTime) / 1000).toFixed(3) : null;
 
-  const findAllTests = suite =>
+  const findAllTests = (suite) =>
     suite.suites.reduce((acc, suite) => acc.concat(findAllTests(suite)), suite.tests);
 
-  const setStartTime = node => {
+  const setStartTime = (node) => {
     node.startTime = dateNow();
   };
 
-  const setEndTime = node => {
+  const setEndTime = (node) => {
     node.endTime = dateNow();
   };
 
-  const getFullTitle = node => {
+  const getFullTitle = (node) => {
     const parentTitle = node.parent && getFullTitle(node.parent);
     return parentTitle ? `${parentTitle} ${node.title}` : node.title;
   };
 
-  const getPath = node => {
+  const getPath = (node) => {
     if (node.file) {
       return relative(rootDirectory, node.file);
     }
@@ -75,7 +75,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   runner.on('hook', setStartTime);
   runner.on('hook end', setEndTime);
   runner.on('test', setStartTime);
-  runner.on('pass', node => results.push({ node }));
+  runner.on('pass', (node) => results.push({ node }));
   runner.on('pass', setEndTime);
   runner.on('fail', (node, error) => results.push({ failed: true, error, node }));
   runner.on('fail', setEndTime);
@@ -89,16 +89,16 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     }
 
     // filter out just the failures
-    const failures = results.filter(result => result.failed);
+    const failures = results.filter((result) => result.failed);
 
     // any failure that isn't for a test is for a hook
-    const failedHooks = failures.filter(result => !allTests.includes(result.node));
+    const failedHooks = failures.filter((result) => !allTests.includes(result.node));
 
     // mocha doesn't emit 'pass' or 'fail' when it skips a test
     // or a test is pending, so we find them ourselves
     const skippedResults = allTests
-      .filter(node => node.pending || !results.find(result => result.node === node))
-      .map(node => ({ skipped: true, node }));
+      .filter((node) => node.pending || !results.find((result) => result.node === node))
+      .map((node) => ({ skipped: true, node }));
 
     const builder = xmlBuilder.create(
       'testsuites',
@@ -124,7 +124,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       });
     }
 
-    [...results, ...skippedResults].forEach(result => {
+    [...results, ...skippedResults].forEach((result) => {
       const el = addTestcaseEl(result.node);
 
       if (result.failed) {

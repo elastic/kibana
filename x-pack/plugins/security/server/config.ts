@@ -14,7 +14,7 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
   schema.conditional(
     schema.siblingRef('providers'),
     schema.arrayOf(schema.string(), {
-      validate: providers => (!providers.includes(providerType) ? 'error' : undefined),
+      validate: (providers) => (!providers.includes(providerType) ? 'error' : undefined),
     }),
     optionsSchema,
     schema.never()
@@ -41,7 +41,7 @@ function getUniqueProviderSchema(
   return schema.maybe(
     schema.recordOf(schema.string(), schema.object(getCommonProviderSchemaProperties(overrides)), {
       validate(config) {
-        if (Object.values(config).filter(provider => provider.enabled).length > 1) {
+        if (Object.values(config).filter((provider) => provider.enabled).length > 1) {
           return `Only one "${providerType}" provider can be configured.`;
         }
       },
@@ -60,7 +60,7 @@ const providersConfigSchema = schema.object(
       ),
       showInSelector: schema.boolean({
         defaultValue: true,
-        validate: value => {
+        validate: (value) => {
           if (!value) {
             return '`basic` provider only supports `true` in `showInSelector`.';
           }
@@ -75,7 +75,7 @@ const providersConfigSchema = schema.object(
       ),
       showInSelector: schema.boolean({
         defaultValue: true,
-        validate: value => {
+        validate: (value) => {
           if (!value) {
             return '`token` provider only supports `true` in `showInSelector`.';
           }
@@ -148,6 +148,9 @@ export const ConfigSchema = schema.object({
     hostname: schema.maybe(schema.string({ hostname: true })),
     port: schema.maybe(schema.number({ min: 0, max: 65535 })),
   }),
+  sameSiteCookies: schema.maybe(
+    schema.oneOf([schema.literal('Strict'), schema.literal('Lax'), schema.literal('None')])
+  ),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
@@ -258,7 +261,7 @@ export function createConfig(
     typeof config.authc.selector.enabled === 'boolean'
       ? config.authc.selector.enabled
       : !isUsingLegacyProvidersFormat &&
-        sortedProviders.filter(provider => provider.options.showInSelector).length > 1;
+        sortedProviders.filter((provider) => provider.options.showInSelector).length > 1;
 
   return {
     ...config,

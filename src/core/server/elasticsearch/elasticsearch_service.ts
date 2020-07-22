@@ -69,7 +69,7 @@ export class ElasticsearchService
     this.log = coreContext.logger.get('elasticsearch-service');
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
-      .pipe(map(rawConfig => new ElasticsearchConfig(rawConfig)));
+      .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
   }
 
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
@@ -85,8 +85,8 @@ export class ElasticsearchService
         return true;
       }),
       switchMap(
-        config =>
-          new Observable<CoreClusterClients>(subscriber => {
+        (config) =>
+          new Observable<CoreClusterClients>((subscriber) => {
             this.log.debug(`Creating elasticsearch clients`);
 
             const coreClients = {
@@ -112,8 +112,8 @@ export class ElasticsearchService
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    const adminClient$ = clients$.pipe(map(clients => clients.adminClient));
-    const dataClient$ = clients$.pipe(map(clients => clients.dataClient));
+    const adminClient$ = clients$.pipe(map((clients) => clients.adminClient));
+    const dataClient$ = clients$.pipe(map((clients) => clients.dataClient));
 
     this.adminClient = {
       async callAsInternalUser(
@@ -181,7 +181,7 @@ export class ElasticsearchService
     };
 
     return {
-      legacy: { config$: clients$.pipe(map(clients => clients.config)) },
+      legacy: { config$: clients$.pipe(map((clients) => clients.config)) },
       esNodesCompatibility$,
       adminClient: this.adminClient,
       dataClient,

@@ -93,7 +93,7 @@ export class Header extends Component<HeaderProps, State> {
     super(props);
 
     let isLocked = false;
-    props.isLocked$.subscribe(initialIsLocked => (isLocked = initialIsLocked));
+    props.isLocked$.subscribe((initialIsLocked) => (isLocked = initialIsLocked));
 
     this.state = {
       appTitle: 'Kibana',
@@ -135,7 +135,7 @@ export class Header extends Component<HeaderProps, State> {
           appTitle,
           isVisible,
           forceNavigation,
-          navLinks: navLinks.filter(navLink => !navLink.hidden),
+          navLinks: navLinks.filter((navLink) => !navLink.hidden),
           recentlyAccessed,
           navControlsLeft,
           navControlsRight,
@@ -175,7 +175,7 @@ export class Header extends Component<HeaderProps, State> {
       kibanaDocLink,
       kibanaVersion,
     } = this.props;
-    const navLinks = this.state.navLinks.map(link =>
+    const navLinks = this.state.navLinks.map((link) =>
       euiNavLink(
         link,
         this.props.legacyMode,

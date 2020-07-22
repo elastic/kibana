@@ -35,7 +35,7 @@ describe('telemetry_application_usage', () => {
   let collector: CollectorOptions;
 
   const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = {
-    makeUsageCollector: jest.fn().mockImplementation(config => (collector = config)),
+    makeUsageCollector: jest.fn().mockImplementation((config) => (collector = config)),
     registerCollector: jest.fn(),
   } as any;
 
@@ -77,7 +77,7 @@ describe('telemetry_application_usage', () => {
   test('paging in findAll works', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
     let total = 201;
-    savedObjectClient.find.mockImplementation(async opts => {
+    savedObjectClient.find.mockImplementation(async (opts) => {
       if (opts.type === SAVED_OBJECTS_TOTAL_TYPE) {
         return {
           saved_objects: [

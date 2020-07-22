@@ -125,7 +125,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         </EuiPageContentHeader>
 
         <EuiTabs>
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}

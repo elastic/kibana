@@ -78,7 +78,7 @@ export const RuleSwitchComponent = ({
               : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(1);
             displayErrorToast(
               title,
-              errors.map(e => e.error.message),
+              errors.map((e) => e.error.message),
               dispatchToaster
             );
           } else {

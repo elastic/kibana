@@ -105,10 +105,10 @@ export class QueryStringInputUI extends Component<Props, State> {
 
   private fetchIndexPatterns = async () => {
     const stringPatterns = this.props.indexPatterns.filter(
-      indexPattern => typeof indexPattern === 'string'
+      (indexPattern) => typeof indexPattern === 'string'
     ) as string[];
     const objectPatterns = this.props.indexPatterns.filter(
-      indexPattern => typeof indexPattern !== 'string'
+      (indexPattern) => typeof indexPattern !== 'string'
     ) as IIndexPattern[];
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
@@ -175,11 +175,11 @@ export class QueryStringInputUI extends Component<Props, State> {
       return [];
     }
     const recentSearches = this.persistedLog.get();
-    const matchingRecentSearches = recentSearches.filter(recentQuery => {
+    const matchingRecentSearches = recentSearches.filter((recentQuery) => {
       const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
       return recentQueryString.includes(query);
     });
-    return matchingRecentSearches.map(recentSearch => {
+    return matchingRecentSearches.map((recentSearch) => {
       const text = toUser(recentSearch);
       const start = 0;
       const end = query.length;
@@ -536,7 +536,7 @@ export class QueryStringInputUI extends Component<Props, State> {
                 onClick={this.onClickInput}
                 fullWidth
                 autoFocus={!this.props.disableAutoFocus}
-                inputRef={node => {
+                inputRef={(node) => {
                   if (node) {
                     this.inputRef = node;
                   }

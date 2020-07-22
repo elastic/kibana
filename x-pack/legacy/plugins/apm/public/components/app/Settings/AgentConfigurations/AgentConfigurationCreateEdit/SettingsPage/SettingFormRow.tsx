@@ -14,21 +14,21 @@ import {
   EuiFlexItem,
   EuiCode,
   EuiSpacer,
-  EuiIconTip
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SettingDefinition } from '../../../../../../../../../../plugins/apm/common/agent_configuration/setting_definitions/types';
 import { isValid } from '../../../../../../../../../../plugins/apm/common/agent_configuration/setting_definitions';
 import {
   amountAndUnitToString,
-  amountAndUnitToObject
+  amountAndUnitToObject,
 } from '../../../../../../../../../../plugins/apm/common/agent_configuration/amount_and_unit';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
 function FormRow({
   setting,
   value,
-  onChange
+  onChange,
 }: {
   setting: SettingDefinition;
   value?: string;
@@ -41,7 +41,7 @@ function FormRow({
         <EuiFieldText
           placeholder={setting.placeholder}
           value={value || ''}
-          onChange={e => onChange(setting.key, e.target.value)}
+          onChange={(e) => onChange(setting.key, e.target.value)}
         />
       );
     }
@@ -53,7 +53,7 @@ function FormRow({
           value={(value as any) || ''}
           min={setting.min}
           max={setting.max}
-          onChange={e => onChange(setting.key, e.target.value)}
+          onChange={(e) => onChange(setting.key, e.target.value)}
         />
       );
     }
@@ -64,7 +64,7 @@ function FormRow({
           placeholder={setting.placeholder}
           options={setting.options}
           value={value}
-          onChange={e => onChange(setting.key, e.target.value)}
+          onChange={(e) => onChange(setting.key, e.target.value)}
         />
       );
     }
@@ -75,10 +75,10 @@ function FormRow({
           placeholder={setting.placeholder}
           options={[
             { text: 'true', value: 'true' },
-            { text: 'false', value: 'false' }
+            { text: 'false', value: 'false' },
           ]}
           value={value}
-          onChange={e => onChange(setting.key, e.target.value)}
+          onChange={(e) => onChange(setting.key, e.target.value)}
         />
       );
     }
@@ -94,7 +94,7 @@ function FormRow({
               placeholder={setting.placeholder}
               value={(amount as unknown) as number}
               min={'min' in setting ? setting.min : 1}
-              onChange={e =>
+              onChange={(e) =>
                 onChange(
                   setting.key,
                   amountAndUnitToString({ amount: e.target.value, unit })
@@ -105,11 +105,11 @@ function FormRow({
           <EuiFlexItem grow={false}>
             <SelectWithPlaceholder
               placeholder={i18n.translate('xpack.apm.unitLabel', {
-                defaultMessage: 'Select unit'
+                defaultMessage: 'Select unit',
               })}
               value={unit}
-              options={setting.units?.map(text => ({ text, value: text }))}
-              onChange={e =>
+              options={setting.units?.map((text) => ({ text, value: text }))}
+              onChange={(e) =>
                 onChange(
                   setting.key,
                   amountAndUnitToString({ amount, unit: e.target.value })
@@ -130,7 +130,7 @@ export function SettingFormRow({
   isUnsaved,
   setting,
   value,
-  onChange
+  onChange,
 }: {
   isUnsaved: boolean;
   setting: SettingDefinition;

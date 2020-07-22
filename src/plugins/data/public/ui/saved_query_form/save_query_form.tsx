@@ -121,7 +121,7 @@ export function SaveQueryForm({
     }
     if (
       !!savedQueries.find(
-        existingSavedQuery => !savedQuery && existingSavedQuery.attributes.title === title
+        (existingSavedQuery) => !savedQuery && existingSavedQuery.attributes.title === title
       )
     ) {
       errors.push(titleConflictErrorText);
@@ -157,7 +157,7 @@ export function SaveQueryForm({
           disabled={!!savedQuery}
           value={title}
           name="title"
-          onChange={event => {
+          onChange={(event) => {
             setTitle(event.target.value);
           }}
           data-test-subj="saveQueryFormTitle"
@@ -174,7 +174,7 @@ export function SaveQueryForm({
         <EuiFieldText
           value={description}
           name="description"
-          onChange={event => {
+          onChange={(event) => {
             setDescription(event.target.value);
           }}
           data-test-subj="saveQueryFormDescription"

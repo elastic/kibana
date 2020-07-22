@@ -57,13 +57,13 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
         helpText={type !== undefined ? helpText[type] : ''}
       >
         <EuiSelect
-          options={Object.values(ANALYSIS_CONFIG_TYPE).map(jobType => ({
+          options={Object.values(ANALYSIS_CONFIG_TYPE).map((jobType) => ({
             value: jobType,
             text: jobType.replace(/_/g, ' '),
           }))}
           value={type}
           hasNoInitialSelection={true}
-          onChange={e => {
+          onChange={(e) => {
             const value = e.target.value as AnalyticsJobType;
             setFormState({
               previousJobType: type,

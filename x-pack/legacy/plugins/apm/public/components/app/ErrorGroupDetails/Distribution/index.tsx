@@ -45,7 +45,7 @@ export function getFormattedBuckets(
     return {
       x0: key,
       x: key + bucketSize,
-      y: count
+      y: count,
     };
   });
 }
@@ -68,17 +68,15 @@ export function ErrorDistribution({ distribution, title }: Props) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
-          defaultMessage: 'No errors were found'
+          defaultMessage: 'No errors were found',
         })}
       />
     );
   }
 
-  const xMin = d3.min(buckets, d => d.x0);
-  const xMax = d3.max(buckets, d => d.x);
-  const tickFormat = scaleUtc()
-    .domain([xMin, xMax])
-    .tickFormat();
+  const xMin = d3.min(buckets, (d) => d.x0);
+  const xMax = d3.max(buckets, (d) => d.x);
+  const tickFormat = scaleUtc().domain([xMin, xMax]).tickFormat();
 
   return (
     <div>
@@ -98,13 +96,13 @@ export function ErrorDistribution({ distribution, title }: Props) {
         formatYShort={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesShortLabel', {
             defaultMessage: '{occCount} occ.',
-            values: { occCount: value }
+            values: { occCount: value },
           })
         }
         formatYLong={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
             defaultMessage: '{occCount} occurrences',
-            values: { occCount: value }
+            values: { occCount: value },
           })
         }
       />

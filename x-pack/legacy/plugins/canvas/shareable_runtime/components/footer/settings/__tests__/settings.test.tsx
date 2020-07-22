@@ -77,9 +77,7 @@ describe('<Settings />', () => {
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
 
     // Click the Hide Toolbar switch
-    portal(wrapper)
-      .find('button[data-test-subj="hideToolbarSwitch"]')
-      .simulate('click');
+    portal(wrapper).find('button[data-test-subj="hideToolbarSwitch"]').simulate('click');
 
     portal(wrapper).update();
 

@@ -22,7 +22,7 @@ type Memo = ((server: ServerFacade) => any) & MemoizedFunction;
  * @return {any}
  */
 export function oncePerServer(fn: ServerFn) {
-  const memoized: Memo = memoize(function(server: ServerFacade) {
+  const memoized: Memo = memoize(function (server: ServerFacade) {
     if (arguments.length !== 1) {
       throw new TypeError('This function expects to be called with a single argument');
     }

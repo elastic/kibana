@@ -10,7 +10,7 @@ import { Assigned } from './assigned';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-const ShardRow = props => {
+const ShardRow = (props) => {
   let unassigned;
   if (props.data.unassigned && props.data.unassigned.length) {
     unassigned = <Unassigned shards={props.data.unassigned} />;

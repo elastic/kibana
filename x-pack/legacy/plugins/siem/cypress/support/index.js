@@ -26,7 +26,7 @@ Cypress.Cookies.defaults({
   whitelist: 'sid',
 });
 
-Cypress.on('uncaught:exception', err => {
+Cypress.on('uncaught:exception', (err) => {
   if (err.message.includes('ResizeObserver loop limit exceeded')) {
     return false;
   }

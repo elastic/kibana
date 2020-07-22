@@ -67,10 +67,10 @@ export async function getIndicesUnassignedShardStats(req, esIndexPattern, cluste
     const index = bucket.key;
     const states = get(bucket, 'state.primary.buckets', []);
     const unassignedReplica = states
-      .filter(state => state.key_as_string === 'false')
+      .filter((state) => state.key_as_string === 'false')
       .reduce((total, state) => total + state.doc_count, 0);
     const unassignedPrimary = states
-      .filter(state => state.key_as_string === 'true')
+      .filter((state) => state.key_as_string === 'true')
       .reduce((total, state) => total + state.doc_count, 0);
 
     let status = 'green';

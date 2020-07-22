@@ -1,13 +1,13 @@
 [role="xpack"]
 [[graph-getting-started]]
-== Using Graph
+== Create a graph
 
 You must index data into {es} before you can create a graph.
 <<index-patterns, Learn how>> or get started with a <<add-sample-data, sample data set>>.
 
 [float]
 [[exploring-connections]]
-=== Graph connections in your data
+=== Graph a data connection
 
 . From the side navigation, open *Graph*.
 +

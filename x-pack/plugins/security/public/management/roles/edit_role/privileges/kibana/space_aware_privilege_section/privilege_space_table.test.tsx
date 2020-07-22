@@ -176,7 +176,7 @@ const getTableFromComponent = (
     return [
       ...acc,
       {
-        spaces: spacesBadge.map(badge => badge.text().trim()),
+        spaces: spacesBadge.map((badge) => badge.text().trim()),
         privileges: {
           summary: privilegesDisplay.text().trim(),
           overridden:

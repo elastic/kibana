@@ -70,7 +70,7 @@ function DefaultEditorAggGroup({
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = (search.aggs.aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
-  const schemaNames = getSchemasByGroup(schemas, groupName).map(s => s.name);
+  const schemaNames = getSchemasByGroup(schemas, groupName).map((s) => s.name);
   const group: IAggConfig[] = useMemo(
     () =>
       state.data.aggs!.aggs.filter(
@@ -98,7 +98,7 @@ function DefaultEditorAggGroup({
         })
       : undefined;
 
-  const isGroupValid = !bucketsError && Object.values(aggsState).every(item => item.valid);
+  const isGroupValid = !bucketsError && Object.values(aggsState).every((item) => item.valid);
   const isAllAggsTouched = isInvalidAggsTouched(aggsState);
   const isMetricAggregationDisabled = useMemo(
     () => groupName === AggGroupNames.Metrics && getEnabledMetricAggsCount(group) === 1,
@@ -163,7 +163,7 @@ function DefaultEditorAggGroup({
                 draggableId={`agg_group_dnd_${groupName}_${agg.id}`}
                 customDragHandle={true}
               >
-                {provided => (
+                {(provided) => (
                   <DefaultEditorAgg
                     agg={agg}
                     aggIndex={index}

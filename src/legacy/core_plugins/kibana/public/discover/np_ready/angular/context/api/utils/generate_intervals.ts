@@ -50,5 +50,5 @@ export function generateIntervals(
       ? 1
       : -1;
   // ending with `null` opens the last interval
-  return asPairs([...offsets.map(offset => startTime + offset * offsetSign), null]);
+  return asPairs([...offsets.map((offset) => startTime + offset * offsetSign), null]);
 }

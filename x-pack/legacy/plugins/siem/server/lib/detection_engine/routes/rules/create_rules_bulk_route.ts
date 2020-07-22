@@ -53,8 +53,8 @@ export const createRulesBulkRoute = (router: IRouter) => {
 
       const rules = await Promise.all(
         ruleDefinitions
-          .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
-          .map(async payloadRule => {
+          .filter((rule) => rule.rule_id == null || !dupes.includes(rule.rule_id))
+          .map(async (payloadRule) => {
             const {
               actions,
               anomaly_threshold: anomalyThreshold,
@@ -165,7 +165,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
       );
       const rulesBulk = [
         ...rules,
-        ...dupes.map(ruleId =>
+        ...dupes.map((ruleId) =>
           createBulkErrorObject({
             ruleId,
             statusCode: 409,

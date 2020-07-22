@@ -26,18 +26,18 @@ import '../../components/timelionhelp_tabs_directive';
 
 const app = uiModules.get('apps/timelion', []);
 
-app.directive('timelionHelp', function($http) {
+app.directive('timelionHelp', function ($http) {
   return {
     restrict: 'E',
     template,
-    controller: function($scope) {
+    controller: function ($scope) {
       $scope.functions = {
         list: [],
         details: null,
       };
 
       $scope.activeTab = 'funcref';
-      $scope.activateTab = function(tabName) {
+      $scope.activateTab = function (tabName) {
         $scope.activeTab = tabName;
       };
 
@@ -123,19 +123,19 @@ app.directive('timelionHelp', function($http) {
       }
 
       function getFunctions() {
-        return $http.get('../api/timelion/functions').then(function(resp) {
+        return $http.get('../api/timelion/functions').then(function (resp) {
           $scope.functions.list = resp.data;
         });
       }
-      $scope.recheckElasticsearch = function() {
+      $scope.recheckElasticsearch = function () {
         $scope.es.valid = null;
-        checkElasticsearch().then(function(valid) {
+        checkElasticsearch().then(function (valid) {
           if (!valid) $scope.es.invalidCount++;
         });
       };
 
       function checkElasticsearch() {
-        return $http.get('../api/timelion/validate/es').then(function(resp) {
+        return $http.get('../api/timelion/validate/es').then(function (resp) {
           if (resp.data.ok) {
             $scope.es.valid = true;
             $scope.es.stats = {
@@ -145,7 +145,7 @@ app.directive('timelionHelp', function($http) {
             };
           } else {
             $scope.es.valid = false;
-            $scope.es.invalidReason = (function() {
+            $scope.es.invalidReason = (function () {
               try {
                 const esResp = JSON.parse(resp.data.resp.response);
                 return _.get(esResp, 'error.root_cause[0].reason');

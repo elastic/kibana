@@ -128,8 +128,8 @@ describe('ML - validateModelMemoryLimit', () => {
     const job = getJobConfig();
     const duration = undefined;
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual([]);
     });
   });
@@ -140,8 +140,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = '31mb';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_greater_than_max_mml']);
     });
   });
@@ -157,8 +157,8 @@ describe('ML - validateModelMemoryLimit', () => {
       getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '66mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['estimated_mml_greater_than_max_mml']);
     });
   });
@@ -174,8 +174,8 @@ describe('ML - validateModelMemoryLimit', () => {
       getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '24mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['success_mml']);
     });
   });
@@ -191,8 +191,8 @@ describe('ML - validateModelMemoryLimit', () => {
       getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '22mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['half_estimated_mml_greater_than_mml']);
     });
   });
@@ -205,8 +205,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = '10mb';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['half_estimated_mml_greater_than_mml']);
     });
   });
@@ -222,8 +222,8 @@ describe('ML - validateModelMemoryLimit', () => {
       getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '19mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['success_mml']);
     });
   });
@@ -235,8 +235,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = '0mb';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -248,8 +248,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = '10mbananas';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -261,8 +261,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = '10';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -274,8 +274,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = 'mb';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -287,8 +287,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = 'asdf';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -300,8 +300,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = '1023KB';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['mml_value_invalid']);
     });
   });
@@ -313,8 +313,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = '1024KB';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['half_estimated_mml_greater_than_mml']);
     });
   });
@@ -326,8 +326,8 @@ describe('ML - validateModelMemoryLimit', () => {
     // @ts-ignore
     job.analysis_limits.model_memory_limit = '6MB';
 
-    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['half_estimated_mml_greater_than_mml']);
     });
   });
@@ -343,8 +343,8 @@ describe('ML - validateModelMemoryLimit', () => {
       getMockCallWithRequest({ 'ml.estimateModelMemory': { model_memory_estimate: '20mb' } }),
       job,
       duration
-    ).then(messages => {
-      const ids = messages.map(m => m.id);
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).toEqual(['success_mml']);
     });
   });

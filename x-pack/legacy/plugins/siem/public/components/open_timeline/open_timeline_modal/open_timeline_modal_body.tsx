@@ -50,7 +50,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
         onDeleteSelected != null && deleteTimelines != null
           ? ['delete', 'duplicate']
           : ['duplicate'];
-      return actions.filter(action => !hideActions.includes(action));
+      return actions.filter((action) => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions]);
     return (
       <>

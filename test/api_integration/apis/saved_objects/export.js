@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -37,7 +37,7 @@ export default function({ getService }) {
               type: ['index-pattern', 'search', 'visualization', 'dashboard'],
             })
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
               expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
@@ -60,7 +60,7 @@ export default function({ getService }) {
               excludeExportDetails: true,
             })
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
               expect(objects).to.have.length(3);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
@@ -85,7 +85,7 @@ export default function({ getService }) {
               ],
             })
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
               expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
@@ -108,7 +108,7 @@ export default function({ getService }) {
               type: ['dashboard'],
             })
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
               expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
@@ -132,7 +132,7 @@ export default function({ getService }) {
               search: 'Requests*',
             })
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
               expect(objects).to.have.length(4);
               expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
@@ -159,7 +159,7 @@ export default function({ getService }) {
               ],
             })
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -187,7 +187,7 @@ export default function({ getService }) {
               type: ['wigwags'],
             })
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -208,7 +208,7 @@ export default function({ getService }) {
               ],
             })
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -226,7 +226,7 @@ export default function({ getService }) {
           await supertest
             .post('/api/saved_objects/_export')
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -243,7 +243,7 @@ export default function({ getService }) {
               excludeExportDetails: true,
             })
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.headers['content-disposition']).to.eql(
                 'attachment; filename="export.ndjson"'
               );
@@ -302,7 +302,7 @@ export default function({ getService }) {
               excludeExportDetails: true,
             })
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.headers['content-disposition']).to.eql(
                 'attachment; filename="export.ndjson"'
               );
@@ -366,7 +366,7 @@ export default function({ getService }) {
               excludeExportDetails: true,
             })
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.headers['content-disposition']).to.eql(
                 'attachment; filename="export.ndjson"'
               );
@@ -431,7 +431,7 @@ export default function({ getService }) {
               excludeExportDetails: true,
             })
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -453,7 +453,7 @@ export default function({ getService }) {
               },
             })
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               customVisId = resp.body.id;
             });
         });
@@ -470,7 +470,7 @@ export default function({ getService }) {
               excludeExportDetails: true,
             })
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -499,7 +499,7 @@ export default function({ getService }) {
             excludeExportDetails: true,
           })
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.text).to.eql('');
           });
       });

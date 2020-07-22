@@ -68,7 +68,7 @@ function getUnitsAriaLabelForPhase(phase) {
   }
 }
 
-export const MinAgeInput = props => {
+export const MinAgeInput = (props) => {
   const { rolloverEnabled, errors, phaseData, phase, setPhaseData, isShowingErrors } = props;
 
   let daysOptionLabel;
@@ -166,7 +166,7 @@ export const MinAgeInput = props => {
           <EuiFieldNumber
             id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
             value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE]}
-            onChange={async e => {
+            onChange={async (e) => {
               setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
             }}
             min={0}
@@ -178,7 +178,7 @@ export const MinAgeInput = props => {
           <EuiSelect
             aria-label={getUnitsAriaLabelForPhase(phase)}
             value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
-            onChange={e => setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)}
+            onChange={(e) => setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)}
             options={[
               {
                 value: 'd',

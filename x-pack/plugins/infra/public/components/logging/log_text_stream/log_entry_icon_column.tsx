@@ -29,9 +29,11 @@ export const LogEntryIconColumn: React.FunctionComponent<LogEntryIconColumnProps
   );
 };
 
-export const LogEntryDetailsIconColumn: React.FunctionComponent<LogEntryIconColumnProps & {
-  openFlyout: () => void;
-}> = ({ isHighlighted, isHovered, openFlyout }) => {
+export const LogEntryDetailsIconColumn: React.FunctionComponent<
+  LogEntryIconColumnProps & {
+    openFlyout: () => void;
+  }
+> = ({ isHighlighted, isHovered, openFlyout }) => {
   const label = i18n.translate('xpack.infra.logEntryItemView.viewDetailsToolTip', {
     defaultMessage: 'View Details',
   });
@@ -53,11 +55,11 @@ interface IconColumnContentProps {
 }
 
 const IconColumnContent = euiStyled(LogEntryColumnContent)<IconColumnContentProps>`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   overflow: hidden;
   user-select: none;
 
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
+  ${(props) => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
 `;
 
 // this prevents the button from influencing the line height

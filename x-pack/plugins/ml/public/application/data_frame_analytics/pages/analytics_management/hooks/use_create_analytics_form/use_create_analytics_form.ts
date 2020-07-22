@@ -214,7 +214,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     }
 
     try {
-      setIndexNames((await ml.getIndices()).map(index => index.name));
+      setIndexNames((await ml.getIndices()).map((index) => index.name));
     } catch (e) {
       addRequestMessage({
         error: getErrorMessage(e),

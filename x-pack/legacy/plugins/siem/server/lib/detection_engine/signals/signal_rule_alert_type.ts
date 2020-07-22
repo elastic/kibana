@@ -140,7 +140,7 @@ export const signalRulesAlertType = ({
           const summaryJobs = await ml
             .jobServiceProvider(ml.mlClient.callAsInternalUser)
             .jobsSummary([machineLearningJobId]);
-          const jobSummary = summaryJobs.find(job => job.id === machineLearningJobId);
+          const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
 
           if (jobSummary == null || !isJobStarted(jobSummary.jobState, jobSummary.datafeedState)) {
             const errorMessage = buildRuleMessage(

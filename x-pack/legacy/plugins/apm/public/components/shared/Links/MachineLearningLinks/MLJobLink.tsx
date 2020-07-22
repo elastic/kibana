@@ -16,11 +16,11 @@ interface Props {
 export const MLJobLink: React.FC<Props> = ({
   serviceName,
   transactionType,
-  children
+  children,
 }) => {
   const jobId = getMlJobId(serviceName, transactionType);
   const query = {
-    ml: { jobIds: [jobId] }
+    ml: { jobIds: [jobId] },
   };
 
   return (

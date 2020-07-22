@@ -153,7 +153,7 @@ export const stopDatafeeds = async ({
     {
       method: 'POST',
       body: JSON.stringify({
-        jobIds: datafeedIds.map(dataFeedId =>
+        jobIds: datafeedIds.map((dataFeedId) =>
           dataFeedId.startsWith(datafeedPrefix)
             ? dataFeedId.substring(datafeedPrefix.length)
             : dataFeedId

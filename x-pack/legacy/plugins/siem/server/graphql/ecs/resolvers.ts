@@ -66,7 +66,9 @@ const convertToString = (value: object | number | boolean | string): string => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convertArrayToString = (values: any[]): string[] | string => {
   if (Array.isArray(values)) {
-    return values.filter(item => item != null).map(item => convertArrayToString(item)) as string[];
+    return values
+      .filter((item) => item != null)
+      .map((item) => convertArrayToString(item)) as string[];
   }
   return convertToString(values);
 };

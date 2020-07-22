@@ -19,9 +19,7 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     fields: Joi.object({
       container: Joi.string(),
       host: Joi.string(),
-      message: Joi.array()
-        .items(Joi.string())
-        .single(),
+      message: Joi.array().items(Joi.string()).single(),
       pod: Joi.string(),
       tiebreaker: Joi.string(),
       timestamp: Joi.string(),

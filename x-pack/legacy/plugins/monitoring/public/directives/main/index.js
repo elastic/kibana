@@ -15,7 +15,7 @@ import { shortenPipelineHash } from '../../../common/formatting';
 import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 import { Subscription } from 'rxjs';
 
-const setOptions = controller => {
+const setOptions = (controller) => {
   if (
     !controller.pipelineVersions ||
     !controller.pipelineVersions.length ||
@@ -36,7 +36,7 @@ const setOptions = controller => {
       <EuiFlexItem grow={false}>
         <EuiSelect
           value={controller.pipelineHash}
-          options={controller.pipelineVersions.map(option => {
+          options={controller.pipelineVersions.map((option) => {
             return {
               text: i18n.translate(
                 'xpack.monitoring.logstashNavigation.pipelineVersionDescription',
@@ -216,7 +216,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
         const $route = $injector.get('$route');
         const globalState = $injector.get('globalState');
         scope.cluster = ($route.current.locals.clusters || []).find(
-          cluster => cluster.cluster_uuid === globalState.cluster_uuid
+          (cluster) => cluster.cluster_uuid === globalState.cluster_uuid
         );
       }
 
@@ -245,7 +245,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
 
       const setupObj = getSetupObj();
       controller.setup(setupObj);
-      Object.keys(setupObj.attributes).forEach(key => {
+      Object.keys(setupObj.attributes).forEach((key) => {
         attributes.$observe(key, () => controller.setup(getSetupObj()));
       });
       scope.$on('$destroy', () => {
@@ -253,7 +253,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) =
           unmountComponentAtNode(controller.pipelineDropdownElement);
         controller.subscriptions && controller.subscriptions.unsubscribe();
       });
-      scope.$watch('pageData.versions', versions => {
+      scope.$watch('pageData.versions', (versions) => {
         controller.pipelineVersions = versions;
         setOptions(controller);
       });

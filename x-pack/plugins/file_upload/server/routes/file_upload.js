@@ -115,7 +115,7 @@ const finishValidationAndProcessReq = () => {
   };
 };
 
-export const initRoutes = router => {
+export const initRoutes = (router) => {
   router.post(
     {
       path: `${IMPORT_ROUTE}{id?}`,

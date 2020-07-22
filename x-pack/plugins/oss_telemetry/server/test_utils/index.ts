@@ -58,7 +58,7 @@ export const getMockTaskFetch = (
   docs: ConcreteTaskInstance[] = defaultMockTaskDocs
 ): Partial<jest.Mocked<TaskManagerStartContract>> => {
   return {
-    fetch: jest.fn(fetchOpts => {
+    fetch: jest.fn((fetchOpts) => {
       return Promise.resolve({ docs, searchAfter: [] });
     }),
   } as Partial<jest.Mocked<TaskManagerStartContract>>;
@@ -68,7 +68,7 @@ export const getMockThrowingTaskFetch = (
   throws: Error
 ): Partial<jest.Mocked<TaskManagerStartContract>> => {
   return {
-    fetch: jest.fn(fetchOpts => {
+    fetch: jest.fn((fetchOpts) => {
       throw throws;
     }),
   } as Partial<jest.Mocked<TaskManagerStartContract>>;

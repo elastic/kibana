@@ -25,10 +25,7 @@ import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.moc
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
 
 async function getCurrentToasts(toasts: ToastsApi) {
-  return await toasts
-    .get$()
-    .pipe(take(1))
-    .toPromise();
+  return await toasts.get$().pipe(take(1)).toPromise();
 }
 
 function uiSettingsMock() {

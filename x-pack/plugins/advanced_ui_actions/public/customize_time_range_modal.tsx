@@ -55,7 +55,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
   };
 
   onInheritToggle = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       inheritTimeRange: !prevState.inheritTimeRange,
     }));
   };

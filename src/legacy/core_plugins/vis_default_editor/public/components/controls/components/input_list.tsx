@@ -93,7 +93,7 @@ const validateValue = (inputValue: string | undefined, config: InputListConfig) 
 function InputList({ config, list, onChange, setValidity }: InputListProps) {
   const [models, setModels] = useState(() =>
     list.map(
-      item =>
+      (item) =>
         ({
           id: generateId(),
           ...config.getModelValue(item),
@@ -123,7 +123,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
       )
     );
   };
-  const onDelete = (id: string) => updateValues(models.filter(model => model.id !== id));
+  const onDelete = (id: string) => updateValues(models.filter((model) => model.id !== id));
   const onAdd = () =>
     updateValues([
       ...models,
@@ -163,7 +163,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
     ) {
       setModels(
         list.map(
-          item =>
+          (item) =>
             ({
               id: generateId(),
               ...config.getModelValue(item),

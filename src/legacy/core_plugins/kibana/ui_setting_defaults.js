@@ -31,7 +31,7 @@ export function getUiSettingDefaults() {
   // default fallback in case the locale is not found.
   const numeralLanguageIds = [
     'en',
-    ...numeralLanguages.map(function(numeralLanguage) {
+    ...numeralLanguages.map(function (numeralLanguage) {
       return numeralLanguage.id;
     }),
   ];
@@ -813,7 +813,7 @@ export function getUiSettingDefaults() {
       type: 'select',
       options: numeralLanguageIds,
       optionLabels: Object.fromEntries(
-        numeralLanguages.map(language => [language.id, language.name])
+        numeralLanguages.map((language) => [language.id, language.name])
       ),
       description: i18n.translate('kbn.advancedSettings.format.formattingLocaleText', {
         defaultMessage: `{numeralLanguageLink} locale`,

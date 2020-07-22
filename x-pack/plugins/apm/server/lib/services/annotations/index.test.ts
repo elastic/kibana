@@ -6,7 +6,7 @@
 import { getServiceAnnotations } from '.';
 import {
   SearchParamsMock,
-  inspectSearchParams
+  inspectSearchParams,
 } from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
 import noVersions from './__fixtures__/no_versions.json';
 import oneVersion from './__fixtures__/one_version.json';
@@ -23,14 +23,14 @@ describe('getServiceAnnotations', () => {
   describe('with 0 versions', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
-        setup =>
+        (setup) =>
           getServiceAnnotations({
             setup,
             serviceName: 'foo',
-            environment: 'bar'
+            environment: 'bar',
           }),
         {
-          mockResponse: () => noVersions
+          mockResponse: () => noVersions,
         }
       );
 
@@ -41,14 +41,14 @@ describe('getServiceAnnotations', () => {
   describe('with 1 version', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
-        setup =>
+        (setup) =>
           getServiceAnnotations({
             setup,
             serviceName: 'foo',
-            environment: 'bar'
+            environment: 'bar',
           }),
         {
-          mockResponse: () => oneVersion
+          mockResponse: () => oneVersion,
         }
       );
 
@@ -61,17 +61,17 @@ describe('getServiceAnnotations', () => {
       const responses = [
         multipleVersions,
         versionsFirstSeen,
-        versionsFirstSeen
+        versionsFirstSeen,
       ];
       mock = await inspectSearchParams(
-        setup =>
+        (setup) =>
           getServiceAnnotations({
             setup,
             serviceName: 'foo',
-            environment: 'bar'
+            environment: 'bar',
           }),
         {
-          mockResponse: () => responses.shift()
+          mockResponse: () => responses.shift(),
         }
       );
 
@@ -83,15 +83,15 @@ describe('getServiceAnnotations', () => {
             id: '8.0.0',
             text: '8.0.0',
             time: 1.5281138e12,
-            type: 'version'
+            type: 'version',
           },
           {
             id: '7.5.0',
             text: '7.5.0',
             time: 1.5281138e12,
-            type: 'version'
-          }
-        ]
+            type: 'version',
+          },
+        ],
       });
     });
   });

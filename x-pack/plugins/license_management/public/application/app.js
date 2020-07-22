@@ -85,7 +85,7 @@ export class App extends Component {
       );
     }
 
-    const withTelemetry = Component => props => <Component {...props} telemetry={telemetry} />;
+    const withTelemetry = (Component) => (props) => <Component {...props} telemetry={telemetry} />;
     return (
       <EuiPageBody>
         <Switch>

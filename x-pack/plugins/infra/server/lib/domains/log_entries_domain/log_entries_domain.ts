@@ -131,7 +131,7 @@ export class InfraLogEntriesDomain {
       params
     );
 
-    const entries = documents.map(doc => {
+    const entries = documents.map((doc) => {
       return {
         id: doc.gid,
         cursor: doc.key,
@@ -205,7 +205,7 @@ export class InfraLogEntriesDomain {
     const requiredFields = getRequiredFields(configuration, messageFormattingRules);
 
     const summaries = await Promise.all(
-      highlightQueries.map(async highlightQueryPhrase => {
+      highlightQueries.map(async (highlightQueryPhrase) => {
         const highlightQuery = createHighlightQueryDsl(highlightQueryPhrase, requiredFields);
         const query = filterQuery
           ? {

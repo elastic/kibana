@@ -26,7 +26,7 @@ describe('Empty', () => {
         </TestProviders>
       );
 
-      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
+      dropMessage.forEach((word) => expect(wrapper.text()).toContain(word));
     });
   });
 });

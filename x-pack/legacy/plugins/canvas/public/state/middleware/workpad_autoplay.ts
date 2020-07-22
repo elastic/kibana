@@ -14,7 +14,7 @@ import { routerProvider } from '../../lib/router_provider';
 import { setAutoplayInterval } from '../../lib/app_state';
 import { createTimeInterval } from '../../lib/time_interval';
 
-export const workpadAutoplay: Middleware<{}, State> = ({ getState }) => next => {
+export const workpadAutoplay: Middleware<{}, State> = ({ getState }) => (next) => {
   let playTimeout: number | undefined;
   let displayInterval = 0;
 
@@ -62,7 +62,7 @@ export const workpadAutoplay: Middleware<{}, State> = ({ getState }) => next => 
     }
   }
 
-  return action => {
+  return (action) => {
     next(action);
 
     const isFullscreen = getFullscreen(getState());

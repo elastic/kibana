@@ -102,7 +102,7 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
     },
 
     getPasswordForUser(user: USER): string {
-      const userConfig = users.find(u => u.name === user);
+      const userConfig = users.find((u) => u.name === user);
       if (userConfig === undefined) {
         throw new Error(`Can't log in user ${user} - not defined`);
       }

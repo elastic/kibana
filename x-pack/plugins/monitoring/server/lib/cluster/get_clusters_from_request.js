@@ -153,7 +153,7 @@ export async function getClustersFromRequest(
         clusters,
         checkLicenseForAlerts
       );
-      clusters.forEach(cluster => {
+      clusters.forEach((cluster) => {
         cluster.alerts = {
           alertsMeta: {
             enabled: clustersAlerts.alertsMeta.enabled,
@@ -171,7 +171,7 @@ export async function getClustersFromRequest(
       ? await getKibanasForClusters(req, kbnIndexPattern, clusters)
       : [];
   // add the kibana data to each cluster
-  kibanas.forEach(kibana => {
+  kibanas.forEach((kibana) => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: kibana.clusterUuid });
     set(clusters[clusterIndex], 'kibana', kibana.stats);
   });
@@ -180,7 +180,7 @@ export async function getClustersFromRequest(
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
     const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
     const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, 1);
-    logstashes.forEach(logstash => {
+    logstashes.forEach((logstash) => {
       const clusterIndex = findIndex(clusters, { cluster_uuid: logstash.clusterUuid });
 
       // withhold LS overview stats until there is at least 1 pipeline
@@ -195,7 +195,7 @@ export async function getClustersFromRequest(
   const beatsByCluster = isInCodePath(codePaths, [CODE_PATH_BEATS])
     ? await getBeatsForClusters(req, beatsIndexPattern, clusters)
     : [];
-  beatsByCluster.forEach(beats => {
+  beatsByCluster.forEach((beats) => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: beats.clusterUuid });
     set(clusters[clusterIndex], 'beats', beats.stats);
   });
@@ -204,7 +204,7 @@ export async function getClustersFromRequest(
   const apmsByCluster = isInCodePath(codePaths, [CODE_PATH_APM])
     ? await getApmsForClusters(req, apmIndexPattern, clusters)
     : [];
-  apmsByCluster.forEach(apm => {
+  apmsByCluster.forEach((apm) => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: apm.clusterUuid });
     set(clusters[clusterIndex], 'apm', apm.stats);
   });

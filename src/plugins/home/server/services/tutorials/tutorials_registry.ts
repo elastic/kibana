@@ -45,7 +45,7 @@ export class TutorialsRegistry {
         );
 
         return res.ok({
-          body: this.tutorialProviders.map(tutorialProvider => {
+          body: this.tutorialProviders.map((tutorialProvider) => {
             return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
           }),
         });

@@ -14,7 +14,7 @@ export type UMLicenseCheck = (
   license?: Pick<ILicense, 'isActive' | 'hasAtLeast'> | null
 ) => UMLicenseStatusResponse;
 
-export const licenseCheck: UMLicenseCheck = license => {
+export const licenseCheck: UMLicenseCheck = (license) => {
   if (license === null || license === undefined) {
     return {
       message: 'Missing license information',

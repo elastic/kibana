@@ -22,7 +22,7 @@ export const createDeleteConfidurationsRoute = (libs: CMServerLibs) => ({
 
     return {
       success: true,
-      results: results.map(result => ({
+      results: results.map((result) => ({
         success: result.success,
         action: 'deleted',
         error: result.success ? undefined : { message: result.reason },

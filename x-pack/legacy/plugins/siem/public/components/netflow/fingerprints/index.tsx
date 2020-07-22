@@ -41,7 +41,7 @@ export const Fingerprints = React.memo<{
       gutterSize="none"
     >
       {tlsFingerprintsJa3Hash != null
-        ? uniq(tlsFingerprintsJa3Hash).map(ja3 => (
+        ? uniq(tlsFingerprintsJa3Hash).map((ja3) => (
             <EuiFlexItem grow={false} key={ja3}>
               <Ja3Fingerprint
                 eventId={eventId}
@@ -53,7 +53,7 @@ export const Fingerprints = React.memo<{
           ))
         : null}
       {tlsClientCertificateFingerprintSha1 != null
-        ? uniq(tlsClientCertificateFingerprintSha1).map(clientCert => (
+        ? uniq(tlsClientCertificateFingerprintSha1).map((clientCert) => (
             <EuiFlexItem grow={false} key={clientCert}>
               <CertificateFingerprint
                 eventId={eventId}
@@ -66,7 +66,7 @@ export const Fingerprints = React.memo<{
           ))
         : null}
       {tlsServerCertificateFingerprintSha1 != null
-        ? uniq(tlsServerCertificateFingerprintSha1).map(serverCert => (
+        ? uniq(tlsServerCertificateFingerprintSha1).map((serverCert) => (
             <EuiFlexItem grow={false} key={serverCert}>
               <CertificateFingerprint
                 eventId={eventId}

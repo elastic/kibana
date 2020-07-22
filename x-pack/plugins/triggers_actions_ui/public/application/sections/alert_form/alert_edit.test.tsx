@@ -153,10 +153,7 @@ describe('alert_edit', () => {
     err.body.message = 'Fail message';
     mockedCoreSetup.http.put.mockRejectedValue(err);
     await act(async () => {
-      wrapper
-        .find('[data-test-subj="saveEditedAlertButton"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="saveEditedAlertButton"]').first().simulate('click');
     });
     expect(mockedCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith('Fail message');
   });

@@ -15,7 +15,7 @@ export function createFormatCsvValues(
 ) {
   return function formatCsvValues(values: Record<string, RawValue>) {
     return fields
-      .map(field => {
+      .map((field) => {
         let value;
         if (field === '_source') {
           value = values;
@@ -34,8 +34,8 @@ export function createFormatCsvValues(
 
         return formattedValue;
       })
-      .map(value => (isObject(value) ? JSON.stringify(value) : value))
-      .map(value => (value ? value.toString() : value))
+      .map((value) => (isObject(value) ? JSON.stringify(value) : value))
+      .map((value) => (value ? value.toString() : value))
       .map(escapeValue)
       .join(separator);
   };

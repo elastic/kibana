@@ -11,7 +11,7 @@ import { makeChecksWithStatus } from './helpers/make_checks';
 import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
 import { MonitorSummary } from '../../../../../legacy/plugins/uptime/common/graphql/types';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   let dateRangeStart: string;
   let dateRangeEnd: string;
@@ -108,7 +108,7 @@ export default function({ getService }: FtrProviderContext) {
         before(async () => {
           const es = getService('legacyEs');
           dateRangeStart = new Date().toISOString();
-          checks = await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', d => {
+          checks = await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', (d) => {
             // turn an all up status into having at least one down
             if (d.summary) {
               d.monitor.status = 'down';

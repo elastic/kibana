@@ -59,7 +59,7 @@ export function getAutoDate(deps: {
         params: { interval: string };
       }>;
 
-      const updatedConfigs = configs.map(c => {
+      const updatedConfigs = configs.map((c) => {
         if (c.type !== 'date_histogram' || !c.params || c.params.interval !== 'auto') {
           return c;
         }

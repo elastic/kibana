@@ -31,7 +31,7 @@ import { start as visualizationsStart } from '../../../../visualizations/public/
 
 const { tabifyAggResponse } = search;
 
-describe('Table Vis - AggTableGroup Directive', function() {
+describe('Table Vis - AggTableGroup Directive', function () {
   let $rootScope;
   let $compile;
   let indexPattern;
@@ -39,7 +39,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
 
   const init = () => {
     const searchSource = {
-      getField: name => {
+      getField: (name) => {
         if (name === 'index') {
           return indexPattern;
         }
@@ -63,7 +63,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
         searchSource,
       },
     });
-    vis2.data.aggs.aggs.forEach(function(agg, i) {
+    vis2.data.aggs.aggs.forEach(function (agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
     tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.data.aggs, threeTermBuckets);
@@ -78,7 +78,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
 
   beforeEach(ngMock.module('kibana/table_vis'));
   beforeEach(
-    ngMock.inject(function($injector, Private) {
+    ngMock.inject(function ($injector, Private) {
       // this is provided in table_vis_controller.js
       // tech debt that will be resolved through further deangularization and moving tests to jest
       /*
@@ -99,14 +99,14 @@ describe('Table Vis - AggTableGroup Directive', function() {
   );
 
   let $scope;
-  beforeEach(function() {
+  beforeEach(function () {
     $scope = $rootScope.$new();
   });
-  afterEach(function() {
+  afterEach(function () {
     $scope.$destroy();
   });
 
-  it('renders a simple split response properly', function() {
+  it('renders a simple split response properly', function () {
     $scope.dimensions = {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
@@ -127,7 +127,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
     expect($el.find('kbn-agg-table').length).to.be(1);
   });
 
-  it('renders nothing if the table list is empty', function() {
+  it('renders nothing if the table list is empty', function () {
     const $el = $(
       '<kbn-agg-table-group dimensions="dimensions" group="group"></kbn-agg-table-group>'
     );
@@ -143,7 +143,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
     expect($subTables.length).to.be(0);
   });
 
-  it('renders a complex response properly', function() {
+  it('renders a complex response properly', function () {
     $scope.dimensions = {
       splitRow: [{ accessor: 0, params: {} }],
       buckets: [
@@ -172,7 +172,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
     const $subTableHeaders = $el.find('.kbnAggTable__groupHeader');
     expect($subTableHeaders.length).to.be(3);
 
-    $subTableHeaders.each(function(i) {
+    $subTableHeaders.each(function (i) {
       expect($(this).text()).to.be(group.tables[i].title);
     });
   });

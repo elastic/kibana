@@ -49,6 +49,7 @@ export function savedSearch(): ExpressionFunctionDefinition<
           ...buildEmbeddableFilters(filters),
         },
         embeddableType: EmbeddableTypes.search,
+        generatedAt: Date.now(),
       };
     },
   };

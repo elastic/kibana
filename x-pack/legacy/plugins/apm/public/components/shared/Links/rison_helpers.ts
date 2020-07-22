@@ -23,16 +23,16 @@ export function getTimepickerRisonData(currentSearch: Location['search']) {
   const currentQuery = toQuery(currentSearch);
   const nextQuery = {
     ...TIMEPICKER_DEFAULTS,
-    ...currentQuery
+    ...currentQuery,
   };
   return {
     time: {
       from: encodeURIComponent(nextQuery.rangeFrom),
-      to: encodeURIComponent(nextQuery.rangeTo)
+      to: encodeURIComponent(nextQuery.rangeTo),
     },
     refreshInterval: {
       pause: String(nextQuery.refreshPaused),
-      value: String(nextQuery.refreshInterval)
-    }
+      value: String(nextQuery.refreshInterval),
+    },
   };
 }

@@ -84,7 +84,7 @@ export const calculateMetricInterval = async (
     return;
   }
 
-  const intervals = resp.aggregations.modules.buckets.map(a => a.period.value).filter(v => !!v);
+  const intervals = resp.aggregations.modules.buckets.map((a) => a.period.value).filter((v) => !!v);
   if (!intervals.length) {
     return;
   }

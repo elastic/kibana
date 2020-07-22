@@ -51,7 +51,7 @@ export class DatasourceComponent extends PureComponent {
   state = { defaultIndex: '' };
 
   componentDidMount() {
-    getDefaultIndex().then(defaultIndex => this.setState({ defaultIndex }));
+    getDefaultIndex().then((defaultIndex) => this.setState({ defaultIndex }));
   }
 
   componentDidUpdate(prevProps) {
@@ -71,7 +71,7 @@ export class DatasourceComponent extends PureComponent {
     type: 'function',
   });
 
-  setSelectedDatasource = value => {
+  setSelectedDatasource = (value) => {
     const {
       datasource,
       resetArgs,
@@ -88,7 +88,7 @@ export class DatasourceComponent extends PureComponent {
       // otherwise, clear the arguments, the form will update them
       updateArgs && updateArgs({});
     }
-    selectDatasource && selectDatasource(datasources.find(d => d.name === value));
+    selectDatasource && selectDatasource(datasources.find((d) => d.name === value));
     setSelecting(false);
   };
 

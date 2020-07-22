@@ -28,7 +28,7 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
         `mlInfluencerEntry field-${influencerField} > mlInfluencerEntryFieldLabel`
       );
       const influencerFieldLabels = await Promise.all(
-        influencerFieldLabelElements.map(async elmnt => await elmnt.getVisibleText())
+        influencerFieldLabelElements.map(async (elmnt) => await elmnt.getVisibleText())
       );
       return influencerFieldLabels;
     },

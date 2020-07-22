@@ -52,7 +52,7 @@ export const syncSettingsSaga = ({ getWorkspace, notifyAngular }: GraphStoreDepe
     notifyAngular();
   }
 
-  return function*() {
+  return function* () {
     yield takeLatest(updateSettings.match, syncSettings);
   };
 };

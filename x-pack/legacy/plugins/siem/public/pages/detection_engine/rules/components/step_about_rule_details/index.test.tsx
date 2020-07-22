@@ -104,18 +104,8 @@ describe('StepAboutRuleToggleDetails', () => {
       );
 
       expect(wrapper.find(EuiButtonGroup).exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('EuiButtonToggle[id="details"]')
-          .at(0)
-          .prop('isSelected')
-      ).toBeTruthy();
-      expect(
-        wrapper
-          .find('EuiButtonToggle[id="notes"]')
-          .at(0)
-          .prop('isSelected')
-      ).toBeFalsy();
+      expect(wrapper.find('EuiButtonToggle[id="details"]').at(0).prop('isSelected')).toBeTruthy();
+      expect(wrapper.find('EuiButtonToggle[id="notes"]').at(0).prop('isSelected')).toBeFalsy();
     });
 
     test('it allows users to toggle between "details" and "note"', () => {

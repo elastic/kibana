@@ -58,7 +58,7 @@ function prepareForEUI(
 ) {
   return recentlyAccessed.map(({ link, label }) => {
     const href = relativeToAbsolute(basePath.prepend(link));
-    const navLink = navLinks.find(nl => href.startsWith(nl.baseUrl ?? nl.subUrlBase));
+    const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl ?? nl.subUrlBase));
     let titleAndAriaLabel = label;
 
     if (navLink) {

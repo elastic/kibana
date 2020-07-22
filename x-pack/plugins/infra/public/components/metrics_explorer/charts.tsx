@@ -76,7 +76,7 @@ export const MetricsExplorerCharts = ({
   return (
     <div style={{ width: '100%' }}>
       <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
-        {data.series.map(series => (
+        {data.series.map((series) => (
           <EuiFlexItem key={series.id} style={{ minWidth: 0 }}>
             <MetricsExplorerChart
               key={`chart-${series.id}`}

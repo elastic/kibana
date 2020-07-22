@@ -139,7 +139,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     );
 
     const refetchQuery = (newQueries: inputsModel.GlobalGraphqlQuery[]) => {
-      newQueries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
+      newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
     };
 
     const onTimeChange = useCallback(
@@ -164,7 +164,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
             ...take(
               MAX_RECENTLY_USED_RANGES,
               recentlyUsedRanges.filter(
-                recentlyUsedRange =>
+                (recentlyUsedRange) =>
                   !(recentlyUsedRange.start === newStart && recentlyUsedRange.end === newEnd)
               )
             ),

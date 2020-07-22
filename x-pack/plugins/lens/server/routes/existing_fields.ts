@@ -171,7 +171,7 @@ export function buildFieldList(
 ): Field[] {
   const aliasMap = Object.entries(Object.values(mappings)[0].mappings.properties)
     .map(([name, v]) => ({ ...v, name }))
-    .filter(f => f.type === 'alias')
+    .filter((f) => f.type === 'alias')
     .reduce((acc, f) => {
       acc[f.name] = f.path;
       return acc;
@@ -236,7 +236,7 @@ async function fetchIndexPatternStats({
     },
   };
 
-  const scriptedFields = fields.filter(f => f.isScript);
+  const scriptedFields = fields.filter((f) => f.isScript);
   const result = await client.callAsCurrentUser('search', {
     index,
     body: {
@@ -268,7 +268,7 @@ function exists(obj: unknown, path: string[], i = 0): boolean {
   }
 
   if (Array.isArray(obj)) {
-    return obj.some(child => exists(child, path, i));
+    return obj.some((child) => exists(child, path, i));
   }
 
   if (typeof obj === 'object') {
@@ -292,12 +292,12 @@ export function existingFields(
       break;
     }
 
-    missingFields.forEach(field => {
+    missingFields.forEach((field) => {
       if (exists(field.isScript ? doc.fields : doc._source, field.path)) {
         missingFields.delete(field);
       }
     });
   }
 
-  return fields.filter(field => !missingFields.has(field)).map(f => f.name);
+  return fields.filter((field) => !missingFields.has(field)).map((f) => f.name);
 }

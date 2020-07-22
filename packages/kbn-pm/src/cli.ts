@@ -28,8 +28,8 @@ import { log } from './utils/log';
 
 function help() {
   const availableCommands = Object.keys(commands)
-    .map(commandName => commands[commandName])
-    .map(command => `${command.name} - ${command.description}`);
+    .map((commandName) => commands[commandName])
+    .map((command) => `${command.name} - ${command.description}`);
 
   log.write(dedent`
     usage: kbn <command> [<args>]

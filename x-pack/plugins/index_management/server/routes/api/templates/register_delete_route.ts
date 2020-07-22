@@ -28,7 +28,7 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
       };
 
       await Promise.all(
-        templateNames.map(async name => {
+        templateNames.map(async (name) => {
           try {
             await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.deleteTemplate', {
               name,

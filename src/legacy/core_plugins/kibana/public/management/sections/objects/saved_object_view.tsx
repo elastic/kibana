@@ -67,7 +67,7 @@ export class SavedObjectEdition extends Component<
   componentDidMount() {
     const { id, savedObjectsClient } = this.props;
     const { type } = this.state;
-    savedObjectsClient.get(type, id).then(object => {
+    savedObjectsClient.get(type, id).then((object) => {
       this.setState({
         object,
       });

@@ -70,7 +70,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     registerWatchesRoutes(routeDependencies);
     registerWatchRoutes(routeDependencies);
 
-    licensing.license$.subscribe(async license => {
+    licensing.license$.subscribe(async (license) => {
       const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
       const hasMinimumLicense = state === 'valid';
       if (hasMinimumLicense && license.getFeature(PLUGIN.ID)) {

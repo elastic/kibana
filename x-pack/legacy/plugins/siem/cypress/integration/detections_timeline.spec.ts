@@ -33,11 +33,9 @@ describe('Detections timeline', () => {
     cy.get(SIGNAL_ID)
       .first()
       .invoke('text')
-      .then(eventId => {
+      .then((eventId) => {
         investigateFirstSignalInTimeline();
-        cy.get(PROVIDER_BADGE)
-          .invoke('text')
-          .should('eql', `_id: "${eventId}"`);
+        cy.get(PROVIDER_BADGE).invoke('text').should('eql', `_id: "${eventId}"`);
       });
   });
 });

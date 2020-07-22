@@ -156,7 +156,7 @@ export class DashboardAppController {
       {
         set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
         get: () => ({ filters: dashboardStateManager.appState.filters }),
-        state$: dashboardStateManager.appState$.pipe(map(state => ({ filters: state.filters }))),
+        state$: dashboardStateManager.appState$.pipe(map((state) => ({ filters: state.filters }))),
       },
       {
         filters: esFilters.FilterStateStore.APP_STATE,
@@ -221,7 +221,7 @@ export class DashboardAppController {
       }
 
       let panelIndexPatterns: IndexPattern[] = [];
-      Object.values(container.getChildIds()).forEach(id => {
+      Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
         if (isErrorEmbeddable(embeddableInstance)) return;
         const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
@@ -235,7 +235,7 @@ export class DashboardAppController {
           $scope.indexPatterns = panelIndexPatterns;
         });
       } else {
-        indexPatterns.getDefault().then(defaultIndexPattern => {
+        indexPatterns.getDefault().then((defaultIndexPattern) => {
           $scope.$evalAsync(() => {
             $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
           });
@@ -403,7 +403,7 @@ export class DashboardAppController {
       dirty: !dash.id,
     };
 
-    dashboardStateManager.registerChangeListener(status => {
+    dashboardStateManager.registerChangeListener((status) => {
       this.appStatus.dirty = status.dirty || !dash.id;
       updateState();
     });
@@ -466,7 +466,7 @@ export class DashboardAppController {
         differences.filters = appStateDashboardInput.filters;
       }
 
-      Object.keys(_.omit(containerInput, 'filters')).forEach(key => {
+      Object.keys(_.omit(containerInput, 'filters')).forEach((key) => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
@@ -488,7 +488,7 @@ export class DashboardAppController {
       }
     };
 
-    $scope.updateQueryAndFetch = function({ query, dateRange }) {
+    $scope.updateQueryAndFetch = function ({ query, dateRange }) {
       if (dateRange) {
         timefilter.setTime(dateRange);
       }
@@ -506,23 +506,23 @@ export class DashboardAppController {
       }
     };
 
-    $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
+    $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
       timefilter.setRefreshInterval({
         pause: isPaused,
         value: refreshInterval ? refreshInterval : $scope.model.refreshInterval.value,
       });
     };
 
-    $scope.onFiltersUpdated = filters => {
+    $scope.onFiltersUpdated = (filters) => {
       // The filters will automatically be set when the queryFilter emits an update event (see below)
       queryFilter.setFilters(filters);
     };
 
-    $scope.onQuerySaved = savedQuery => {
+    $scope.onQuerySaved = (savedQuery) => {
       $scope.savedQuery = savedQuery;
     };
 
-    $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.onSavedQueryUpdated = (savedQuery) => {
       $scope.savedQuery = { ...savedQuery };
     };
 
@@ -577,7 +577,7 @@ export class DashboardAppController {
       () => {
         return dashboardStateManager.getSavedQueryId();
       },
-      newSavedQueryId => {
+      (newSavedQueryId) => {
         if (!newSavedQueryId) {
           $scope.savedQuery = undefined;
           return;
@@ -602,7 +602,7 @@ export class DashboardAppController {
 
     $scope.$watch(
       () => dashboardCapabilities.saveQuery,
-      newCapability => {
+      (newCapability) => {
         $scope.showSaveQuery = newCapability as boolean;
       }
     );
@@ -693,7 +693,7 @@ export class DashboardAppController {
             }),
           }
         )
-        .then(isConfirmed => {
+        .then((isConfirmed) => {
           if (isConfirmed) {
             revertChangesAndExitEditMode();
           }
@@ -714,7 +714,7 @@ export class DashboardAppController {
      */
     function save(saveOptions: SavedObjectSaveOpts): Promise<SaveResult> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
-        .then(function(id) {
+        .then(function (id) {
           if (id) {
             notifications.toasts.addSuccess({
               title: i18n.translate('kbn.dashboard.dashboardWasSavedSuccessMessage', {
@@ -737,7 +737,7 @@ export class DashboardAppController {
           }
           return { id };
         })
-        .catch(error => {
+        .catch((error) => {
           notifications.toasts.addDanger({
             title: i18n.translate('kbn.dashboard.dashboardWasNotSavedDangerMessage', {
               defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
@@ -881,7 +881,7 @@ export class DashboardAppController {
       }
     };
 
-    navActions[TopNavIds.OPTIONS] = anchorElement => {
+    navActions[TopNavIds.OPTIONS] = (anchorElement) => {
       showOptionsPopover({
         anchorElement,
         useMargins: dashboardStateManager.getUseMargins(),
@@ -894,7 +894,7 @@ export class DashboardAppController {
         },
       });
     };
-    navActions[TopNavIds.SHARE] = anchorElement => {
+    navActions[TopNavIds.SHARE] = (anchorElement) => {
       share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
@@ -923,7 +923,7 @@ export class DashboardAppController {
       },
     });
 
-    const visibleSubscription = chrome.getIsVisible$().subscribe(isVisible => {
+    const visibleSubscription = chrome.getIsVisible$().subscribe((isVisible) => {
       $scope.$evalAsync(() => {
         $scope.isVisible = isVisible;
       });

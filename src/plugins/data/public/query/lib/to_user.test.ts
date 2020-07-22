@@ -19,27 +19,27 @@
 
 import { toUser } from '../';
 
-describe('user input helpers', function() {
-  describe('model presentation formatter', function() {
-    it('should present objects as strings', function() {
+describe('user input helpers', function () {
+  describe('model presentation formatter', function () {
+    it('should present objects as strings', function () {
       expect(toUser({ foo: 'bar' })).toBe('{"foo":"bar"}');
     });
 
-    it('should present query_string queries as strings', function() {
+    it('should present query_string queries as strings', function () {
       expect(toUser({ query_string: { query: 'lucene query string' } })).toBe(
         'lucene query string'
       );
     });
 
-    it('should present query_string queries without a query as an empty string', function() {
+    it('should present query_string queries without a query as an empty string', function () {
       expect(toUser({ query_string: {} })).toBe('');
     });
 
-    it('should present string as strings', function() {
+    it('should present string as strings', function () {
       expect(toUser('foo')).toBe('foo');
     });
 
-    it('should present numbers as strings', function() {
+    it('should present numbers as strings', function () {
       expect(toUser(400)).toBe('400');
     });
   });

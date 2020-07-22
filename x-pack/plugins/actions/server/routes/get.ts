@@ -30,7 +30,7 @@ export const getActionRoute = (router: IRouter, licenseState: ILicenseState) => 
         tags: ['access:actions-read'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
       res: KibanaResponseFactory

@@ -205,7 +205,7 @@ const getFieldSettingValue = (wrapper: ReactWrapper, name: string, type: string)
 };
 
 describe('Field', () => {
-  Object.keys(settings).forEach(type => {
+  Object.keys(settings).forEach((type) => {
     const setting = settings[type];
 
     describe(`for ${type} setting`, () => {
@@ -325,10 +325,10 @@ describe('Field', () => {
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
         // @ts-ignore
-        const values = select.find('option').map(option => option.prop('value'));
+        const values = select.find('option').map((option) => option.prop('value'));
         expect(values).toEqual(['apple', 'orange', 'banana']);
         // @ts-ignore
-        const labels = select.find('option').map(option => option.text());
+        const labels = select.find('option').map((option) => option.text());
         expect(labels).toEqual(['Apple', 'Orange', 'banana']);
       });
     }

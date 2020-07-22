@@ -62,7 +62,7 @@ export const dispatchSetInitialStateFromUrl = (
     if (urlKey === CONSTANTS.savedQuery) {
       const savedQueryId = decodeRisonUrlState<string>(newUrlStateString);
       if (savedQueryId != null && savedQueryId !== '') {
-        savedQueries.getSavedQuery(savedQueryId).then(savedQueryData => {
+        savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
           filterManager.setFilters(savedQueryData.attributes.filters || []);
           dispatch(
             inputsActions.setFilterQuery({

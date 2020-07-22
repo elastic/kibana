@@ -75,7 +75,7 @@ export class ActionTypeRegistry {
         )
       );
     }
-    this.actionTypes.set(actionType.id, actionType);
+    this.actionTypes.set(actionType.id, { ...actionType });
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,

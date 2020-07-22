@@ -44,7 +44,7 @@ export const ModelMemoryLimitInput: FC = () => {
       <EuiFieldText
         value={modelMemoryLimit}
         placeholder={modelMemoryLimitDefault}
-        onChange={e => setModelMemoryLimit(e.target.value)}
+        onChange={(e) => setModelMemoryLimit(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputModelMemoryLimit"
       />

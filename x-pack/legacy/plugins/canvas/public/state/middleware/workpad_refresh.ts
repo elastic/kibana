@@ -16,7 +16,7 @@ import { getRefreshInterval } from '../selectors/workpad';
 import { setRefreshInterval as setAppStateRefreshInterval } from '../../lib/app_state';
 import { createTimeInterval } from '../../lib/time_interval';
 
-export const workpadRefresh: Middleware<{}, State> = ({ dispatch, getState }) => next => {
+export const workpadRefresh: Middleware<{}, State> = ({ dispatch, getState }) => (next) => {
   let refreshTimeout: number | undefined;
   let refreshInterval = 0;
 
@@ -52,7 +52,7 @@ export const workpadRefresh: Middleware<{}, State> = ({ dispatch, getState }) =>
     }
   }
 
-  return action => {
+  return (action) => {
     const previousRefreshInterval = getRefreshInterval(getState());
     next(action);
 

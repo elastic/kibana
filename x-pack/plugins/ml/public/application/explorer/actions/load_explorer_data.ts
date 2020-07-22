@@ -40,7 +40,7 @@ import { ExplorerState } from '../reducers';
 // the original function.
 const memoizeIsEqual = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 const wrapWithLastRefreshArg = <T extends (...a: any[]) => any>(func: T) => {
-  return function(lastRefresh: number, ...args: Parameters<T>): ReturnType<T> {
+  return function (lastRefresh: number, ...args: Parameters<T>): ReturnType<T> {
     return func.apply(null, args);
   };
 };
@@ -265,5 +265,5 @@ const explorerData$ = loadExplorerData$.pipe(
 
 export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
   const explorerData = useObservable(explorerData$);
-  return [explorerData, c => loadExplorerData$.next(c)];
+  return [explorerData, (c) => loadExplorerData$.next(c)];
 };

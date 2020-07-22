@@ -102,8 +102,10 @@ export class TelemetryPlugin implements Plugin {
       telemetryCollectionManager,
     });
 
-    this.registerMappings(opts => savedObjects.registerType(opts));
-    this.registerUsageCollectors(usageCollection, metrics, opts => savedObjects.registerType(opts));
+    this.registerMappings((opts) => savedObjects.registerType(opts));
+    this.registerUsageCollectors(usageCollection, metrics, (opts) =>
+      savedObjects.registerType(opts)
+    );
   }
 
   public async start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsStart) {

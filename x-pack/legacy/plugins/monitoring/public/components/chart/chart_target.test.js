@@ -51,7 +51,7 @@ jest.mock('../../np_imports/ui/chrome', () => {
 
 // TODO: Skipping for now, seems flaky in New Platform (needs more investigation)
 describe.skip('Test legends to toggle series: ', () => {
-  const ids = props.series.map(item => item.id);
+  const ids = props.series.map((item) => item.id);
 
   describe('props.series: ', () => {
     it('should toggle based on seriesToShow array', () => {

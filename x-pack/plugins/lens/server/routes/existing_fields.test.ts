@@ -125,7 +125,7 @@ describe('buildFieldList', () => {
 
   it('uses field descriptors to determine the path', () => {
     const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find(f => f.name === 'baz')).toMatchObject({
+    expect(fields.find((f) => f.name === 'baz')).toMatchObject({
       isAlias: false,
       isScript: false,
       name: 'baz',
@@ -135,7 +135,7 @@ describe('buildFieldList', () => {
 
   it('uses aliases to determine the path', () => {
     const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find(f => f.isAlias)).toMatchObject({
+    expect(fields.find((f) => f.isAlias)).toMatchObject({
       isAlias: true,
       isScript: false,
       name: '@bar',
@@ -145,7 +145,7 @@ describe('buildFieldList', () => {
 
   it('supports scripted fields', () => {
     const fields = buildFieldList(indexPattern, mappings, fieldDescriptors);
-    expect(fields.find(f => f.isScript)).toMatchObject({
+    expect(fields.find((f) => f.isScript)).toMatchObject({
       isAlias: false,
       isScript: true,
       name: 'foo',

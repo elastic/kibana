@@ -35,7 +35,7 @@ const DEFAULT_STACK_BY = 'dns.question.registered_domain';
 
 export const histogramConfigs: Omit<MatrixHisrogramConfigs, 'title'> = {
   defaultStackByOption:
-    dnsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? dnsStackByOptions[0],
+    dnsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? dnsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_DNS_DATA,
   histogramType: HistogramType.dns,
   stackByOptions: dnsStackByOptions,

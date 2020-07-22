@@ -19,7 +19,7 @@
 
 import { setup } from 'test_utils/http_test_setup';
 
-export const { http } = setup(injectedMetadata => {
+export const { http } = setup((injectedMetadata) => {
   injectedMetadata.getBasePath.mockReturnValue('/hola/daro/');
 });
 

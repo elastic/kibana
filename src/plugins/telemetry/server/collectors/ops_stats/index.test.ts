@@ -29,7 +29,7 @@ describe('telemetry_ops_stats', () => {
   let collector: CollectorOptions;
 
   const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = {
-    makeStatsCollector: jest.fn().mockImplementation(config => (collector = config)),
+    makeStatsCollector: jest.fn().mockImplementation((config) => (collector = config)),
     registerCollector: jest.fn(),
   } as any;
 

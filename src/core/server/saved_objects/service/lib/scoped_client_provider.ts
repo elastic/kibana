@@ -104,7 +104,7 @@ export class SavedObjectsClientProvider {
     id: string,
     factory: SavedObjectsClientWrapperFactory
   ): void {
-    if (this._wrapperFactories.has(entry => entry.id === id)) {
+    if (this._wrapperFactories.has((entry) => entry.id === id)) {
       throw new Error(`wrapper factory with id ${id} is already defined`);
     }
 

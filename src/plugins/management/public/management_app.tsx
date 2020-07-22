@@ -77,7 +77,7 @@ export class ManagementApp {
             getSections={getSections}
             selectedId={id}
             legacySections={getLegacyManagementSections().items}
-            onMounted={async element => {
+            onMounted={async (element) => {
               appUnmount = await mount({
                 basePath,
                 element,

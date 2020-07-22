@@ -37,7 +37,7 @@ export class Job extends events.EventEmitter {
     }
 
     this.debug = (msg, err) => {
-      const logger = options.logger || function() {};
+      const logger = options.logger || function () {};
       const message = `${this.id} - ${msg}`;
       const tags = ['debug'];
 
@@ -79,7 +79,7 @@ export class Job extends events.EventEmitter {
 
     this.ready = createIndex(this._client, this.index, this.indexSettings)
       .then(() => this._client.callAsInternalUser('index', indexParams))
-      .then(doc => {
+      .then((doc) => {
         this.document = {
           id: doc._id,
           index: doc._index,
@@ -97,7 +97,7 @@ export class Job extends events.EventEmitter {
             this.emit(constants.EVENT_JOB_CREATED, this.document);
           });
       })
-      .catch(err => {
+      .catch((err) => {
         this.debug('Job creation failed', err);
         this.emit(constants.EVENT_JOB_CREATE_ERROR, err);
       });
@@ -116,7 +116,7 @@ export class Job extends events.EventEmitter {
           id: this.id,
         });
       })
-      .then(doc => {
+      .then((doc) => {
         return Object.assign(doc._source, {
           index: doc._index,
           id: doc._id,

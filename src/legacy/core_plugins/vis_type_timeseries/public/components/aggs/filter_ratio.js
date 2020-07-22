@@ -38,7 +38,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
 
-export const FilterRatioAgg = props => {
+export const FilterRatioAgg = (props) => {
   const { series, fields, panel } = props;
 
   const handleChange = createChangeHandler(props.onChange, props.model);

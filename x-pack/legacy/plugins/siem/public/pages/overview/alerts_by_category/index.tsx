@@ -90,7 +90,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     () => ({
       ...histogramConfigs,
       defaultStackByOption:
-        alertsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? alertsStackByOptions[0],
+        alertsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? alertsStackByOptions[0],
       subtitle: (totalCount: number) =>
         `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
       legendPosition: Position.Right,

@@ -48,7 +48,7 @@ export const getRulesFromObjects = async (
 ): Promise<RulesErrors> => {
   const alertsAndErrors = await Promise.all(
     objects.reduce<Array<Promise<ExportRules>>>((accumPromise, object) => {
-      const exportWorkerPromise = new Promise<ExportRules>(async resolve => {
+      const exportWorkerPromise = new Promise<ExportRules>(async (resolve) => {
         try {
           const rule = await readRules({ alertsClient, ruleId: object.rule_id });
           if (rule != null && isAlertType(rule) && rule.params.immutable !== true) {
@@ -75,15 +75,15 @@ export const getRulesFromObjects = async (
   );
 
   const missingRules = alertsAndErrors.filter(
-    resp => resp.statusCode === 404
+    (resp) => resp.statusCode === 404
   ) as ExportFailedRule[];
   const exportedRules = alertsAndErrors.filter(
-    resp => resp.statusCode === 200
+    (resp) => resp.statusCode === 200
   ) as ExportSuccesRule[];
 
   return {
     exportedCount: exportedRules.length,
-    missingRules: missingRules.map(mr => mr.missingRuleId),
-    rules: exportedRules.map(er => er.rule),
+    missingRules: missingRules.map((mr) => mr.missingRuleId),
+    rules: exportedRules.map((er) => er.rule),
   };
 };

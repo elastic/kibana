@@ -50,7 +50,7 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
             field: {
               displayName: 'bytes',
               format: {
-                convert: jest.fn(x => `${x}th`),
+                convert: jest.fn((x) => `${x}th`),
               },
             },
             customLabel: 'prince',

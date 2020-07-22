@@ -12,7 +12,7 @@ const getApiPath = (dateRangeStart: string, dateRangeEnd: string, filters?: stri
     filters ? `&filters=${filters}` : ''
   }`;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('filter group endpoint', () => {

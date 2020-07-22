@@ -149,9 +149,7 @@ export const validateTaskDefinition = Joi.object({
   title: Joi.string().optional(),
   description: Joi.string().optional(),
   timeout: Joi.string().default('5m'),
-  maxAttempts: Joi.number()
-    .min(1)
-    .optional(),
+  maxAttempts: Joi.number().min(1).optional(),
   createTaskRunner: Joi.func().required(),
   getRetry: Joi.func().optional(),
 }).default();

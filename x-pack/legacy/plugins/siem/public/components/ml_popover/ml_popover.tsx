@@ -102,7 +102,7 @@ export const MlPopover = React.memo(() => {
     ...filterProperties,
   });
 
-  const incompatibleJobCount = siemJobs.filter(j => !j.isCompatible).length;
+  const incompatibleJobCount = siemJobs.filter((j) => !j.isCompatible).length;
 
   if (!capabilities.isPlatinumOrTrialLicense) {
     // If the user does not have platinum show upgrade UI
@@ -234,10 +234,7 @@ const enableDatafeed = async (
   }
 
   // Max start time for job is no more than two weeks ago to ensure job performance
-  const maxStartTime = moment
-    .utc()
-    .subtract(14, 'days')
-    .valueOf();
+  const maxStartTime = moment.utc().subtract(14, 'days').valueOf();
 
   if (enable) {
     const startTime = Math.max(latestTimestampMs, maxStartTime);

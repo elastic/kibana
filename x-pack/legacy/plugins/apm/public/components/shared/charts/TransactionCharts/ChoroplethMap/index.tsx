@@ -9,7 +9,7 @@ import React, {
   useEffect,
   useRef,
   useCallback,
-  useMemo
+  useMemo,
 } from 'react';
 import { Map, NavigationControl, Popup } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -60,12 +60,12 @@ export function getProgressionColor(scale: number) {
 }
 
 const getMin = (items: ChoroplethItem[]) =>
-  Math.min(...items.map(item => item.value));
+  Math.min(...items.map((item) => item.value));
 
 const getMax = (items: ChoroplethItem[]) =>
-  Math.max(...items.map(item => item.value));
+  Math.max(...items.map((item) => item.value));
 
-export const ChoroplethMap: React.FC<Props> = props => {
+export const ChoroplethMap: React.FC<Props> = (props) => {
   const { items } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -104,7 +104,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
       }
       (popupRef.current as Popup).setLngLat(event.lngLat);
       const hoverFeatures = (map as Map).queryRenderedFeatures(event.point, {
-        layers: [CHOROPLETH_LAYER_ID]
+        layers: [CHOROPLETH_LAYER_ID],
       });
 
       if (tooltipState && hoverFeatures.length === 0) {
@@ -127,7 +127,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
         return setTooltipState({
           name: featureProperties.name,
           value: item.value,
-          docCount: item.docCount
+          docCount: item.docCount,
         });
       }
 
@@ -154,7 +154,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
       touchZoomRotate: false,
       zoom: 0.85,
       center: { lng: 0, lat: 30 },
-      style: MAPBOX_STYLE
+      style: MAPBOX_STYLE,
     });
 
     mapboxMap.addControl(
@@ -165,7 +165,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
     // set up Popup object
     popupRef.current = new Popup({
       closeButton: false,
-      closeOnClick: false
+      closeOnClick: false,
     });
 
     // always use the current handler which changes with component state
@@ -183,7 +183,7 @@ export const ChoroplethMap: React.FC<Props> = props => {
     mapboxMap.on('load', () => {
       mapboxMap.addSource(CHOROPLETH_POLYGONS_SOURCE_ID, {
         type: 'geojson',
-        data: GEOJSON_SOURCE
+        data: GEOJSON_SOURCE,
       });
       setMap(mapboxMap);
     });
@@ -215,14 +215,14 @@ export const ChoroplethMap: React.FC<Props> = props => {
 
     const stops = items.map(({ key, value }) => [
       key,
-      getProgressionColor(getValueScale(value))
+      getProgressionColor(getValueScale(value)),
     ]);
 
     const fillColor: mapboxgl.FillPaint['fill-color'] = {
       property: GEOJSON_KEY_PROPERTY,
       stops,
       type: 'categorical',
-      default: 'transparent'
+      default: 'transparent',
     };
 
     map.addLayer(
@@ -233,8 +233,8 @@ export const ChoroplethMap: React.FC<Props> = props => {
         layout: {},
         paint: {
           'fill-opacity': 0.75,
-          'fill-color': fillColor
-        }
+          'fill-color': fillColor,
+        },
       },
       symbolLayer ? symbolLayer.id : undefined
     );

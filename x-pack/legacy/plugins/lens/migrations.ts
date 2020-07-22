@@ -54,14 +54,14 @@ export const migrations = {
     const datasourceState = newDoc.attributes.state?.datasourceStates?.indexpattern;
     const datasourceLayers = datasourceState?.layers ?? {};
     const xyState = newDoc.attributes.state?.visualization;
-    newDoc.attributes.state.visualization.layers = xyState.layers.map(layer => {
+    newDoc.attributes.state.visualization.layers = xyState.layers.map((layer) => {
       const layerId = layer.layerId;
       const datasource = datasourceLayers[layerId];
       return {
         ...layer,
         xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
         splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
-        accessors: layer.accessors.filter(accessor => !!datasource?.columns[accessor]),
+        accessors: layer.accessors.filter((accessor) => !!datasource?.columns[accessor]),
       };
     }) as typeof xyState.layers;
     return newDoc;

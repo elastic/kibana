@@ -15,7 +15,7 @@ import {
   fontSize,
   px,
   unit,
-  units
+  units,
 } from '../../../../../../../style/variables';
 import { Span } from '../../../../../../../../../../../plugins/apm/typings/es_schemas/ui/span';
 

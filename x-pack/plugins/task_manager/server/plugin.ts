@@ -41,7 +41,7 @@ export class TaskManagerPlugin
     const elasticsearch = core.elasticsearch.adminClient;
     return {
       registerLegacyAPI: once((__LEGACY: PluginLegacyDependencies) => {
-        config$.subscribe(async config => {
+        config$.subscribe(async (config) => {
           const [{ savedObjects }] = await core.getStartServices();
           const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
           this.legacyTaskManager$.next(
@@ -58,26 +58,26 @@ export class TaskManagerPlugin
         return this.taskManager;
       }),
       addMiddleware: (middleware: Middleware) => {
-        this.taskManager.then(tm => tm.addMiddleware(middleware));
+        this.taskManager.then((tm) => tm.addMiddleware(middleware));
       },
       registerTaskDefinitions: (taskDefinition: TaskDictionary<TaskDefinition>) => {
-        this.taskManager.then(tm => tm.registerTaskDefinitions(taskDefinition));
+        this.taskManager.then((tm) => tm.registerTaskDefinitions(taskDefinition));
       },
     };
   }
 
   public start(): TaskManagerStartContract {
     return {
-      fetch: (...args) => this.taskManager.then(tm => tm.fetch(...args)),
-      get: (...args) => this.taskManager.then(tm => tm.get(...args)),
-      remove: (...args) => this.taskManager.then(tm => tm.remove(...args)),
-      schedule: (...args) => this.taskManager.then(tm => tm.schedule(...args)),
-      runNow: (...args) => this.taskManager.then(tm => tm.runNow(...args)),
-      ensureScheduled: (...args) => this.taskManager.then(tm => tm.ensureScheduled(...args)),
+      fetch: (...args) => this.taskManager.then((tm) => tm.fetch(...args)),
+      get: (...args) => this.taskManager.then((tm) => tm.get(...args)),
+      remove: (...args) => this.taskManager.then((tm) => tm.remove(...args)),
+      schedule: (...args) => this.taskManager.then((tm) => tm.schedule(...args)),
+      runNow: (...args) => this.taskManager.then((tm) => tm.runNow(...args)),
+      ensureScheduled: (...args) => this.taskManager.then((tm) => tm.ensureScheduled(...args)),
     };
   }
   public stop() {
-    this.taskManager.then(tm => {
+    this.taskManager.then((tm) => {
       tm.stop();
     });
   }

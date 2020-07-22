@@ -72,7 +72,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
   const updateTactic = useCallback(
     (index: number, value: string) => {
       const values = field.value as IMitreEnterpriseAttack[];
-      const { id, reference, name } = tacticsOptions.find(t => t.value === value) || {
+      const { id, reference, name } = tacticsOptions.find((t) => t.value === value) || {
         id: '',
         name: '',
         reference: '',
@@ -119,7 +119,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
               },
             ]
           : []),
-        ...tacticsOptions.map(t => ({
+        ...tacticsOptions.map((t) => ({
           inputDisplay: <>{t.text}</>,
           value: t.value,
           disabled,
@@ -135,8 +135,10 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
 
   const getSelectTechniques = (item: IMitreEnterpriseAttack, index: number, disabled: boolean) => {
     const invalid = isMitreAttackInvalid(item.tactic.name, item.technique);
-    const options = techniquesOptions.filter(t => t.tactics.includes(kebabCase(item.tactic.name)));
-    const selectedOptions = item.technique.map(technic => ({
+    const options = techniquesOptions.filter((t) =>
+      t.tactics.includes(kebabCase(item.tactic.name))
+    );
+    const selectedOptions = item.technique.map((technic) => ({
       ...technic,
       label: `${technic.name} (${technic.id})`, // API doesn't allow for label field
     }));

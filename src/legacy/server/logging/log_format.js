@@ -38,7 +38,7 @@ function serializeError(err = {}) {
   };
 }
 
-const levelColor = function(code) {
+const levelColor = function (code) {
   if (code < 299) return chalk.green(code);
   if (code < 399) return chalk.yellow(code);
   if (code < 499) return chalk.magentaBright(code);
@@ -128,7 +128,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.message += ' ';
       data.message += chalk.gray('load: [');
       data.message += get(data, 'os.load', [])
-        .map(function(val) {
+        .map(function (val) {
           return numeral(val).format('0.00');
         })
         .join(' ');

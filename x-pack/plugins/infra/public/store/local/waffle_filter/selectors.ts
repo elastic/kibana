@@ -19,7 +19,7 @@ export const selectWaffleFilterQueryDraft = (state: WaffleFilterState) => state.
 
 export const selectIsWaffleFilterQueryDraftValid = createSelector(
   selectWaffleFilterQueryDraft,
-  filterQueryDraft => {
+  (filterQueryDraft) => {
     if (filterQueryDraft && filterQueryDraft.kind === 'kuery') {
       try {
         esKuery.fromKueryExpression(filterQueryDraft.expression);

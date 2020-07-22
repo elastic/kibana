@@ -8,13 +8,13 @@ import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-  TRACE_ID
+  TRACE_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import {
   Connection,
   ConnectionNode,
   ExternalConnectionNode,
-  ServiceConnectionNode
+  ServiceConnectionNode,
 } from '../../../common/service_map';
 import { Setup } from '../helpers/setup_request';
 
@@ -22,7 +22,7 @@ export async function getServiceMapFromTraceIds({
   setup,
   traceIds,
   serviceName,
-  environment
+  environment,
 }: {
   setup: Setup;
   traceIds: string[];
@@ -34,7 +34,7 @@ export async function getServiceMapFromTraceIds({
   const serviceMapParams = {
     index: [
       indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices']
+      indices['apm_oss.transactionIndices'],
     ],
     body: {
       size: 0,
@@ -43,16 +43,16 @@ export async function getServiceMapFromTraceIds({
           filter: [
             {
               terms: {
-                [PROCESSOR_EVENT]: ['span', 'transaction']
-              }
+                [PROCESSOR_EVENT]: ['span', 'transaction'],
+              },
             },
             {
               terms: {
-                [TRACE_ID]: traceIds
-              }
-            }
-          ]
-        }
+                [TRACE_ID]: traceIds,
+              },
+            },
+          ],
+        },
       },
       aggs: {
         service_map: {
@@ -72,7 +72,7 @@ export async function getServiceMapFromTraceIds({
                   'span.subtype',
                   'agent.name'
                 };
-                state.fieldsToCopy = fieldsToCopy;`
+                state.fieldsToCopy = fieldsToCopy;`,
             },
             map_script: {
               lang: 'painless',
@@ -92,11 +92,11 @@ export async function getServiceMapFromTraceIds({
                   }
                 }
 
-                state.eventsById[id] = copy`
+                state.eventsById[id] = copy`,
             },
             combine_script: {
               lang: 'painless',
-              source: `return state.eventsById;`
+              source: `return state.eventsById;`,
             },
             reduce_script: {
               lang: 'painless',
@@ -215,12 +215,12 @@ export async function getServiceMapFromTraceIds({
               }
               response.discoveredServices = discoveredServices;
 
-              return response;`
-            }
-          }
-        }
-      }
-    }
+              return response;`,
+            },
+          },
+        },
+      },
+    },
   };
 
   const serviceMapResponse = await client.search(serviceMapParams);
@@ -236,8 +236,8 @@ export async function getServiceMapFromTraceIds({
   let paths = scriptResponse.paths;
 
   if (serviceName || environment) {
-    paths = paths.filter(path => {
-      return path.some(node => {
+    paths = paths.filter((path) => {
+      return path.some((node) => {
         let matches = true;
         if (serviceName) {
           matches =
@@ -258,13 +258,13 @@ export async function getServiceMapFromTraceIds({
   }
 
   const connections = uniq(
-    paths.flatMap(path => {
+    paths.flatMap((path) => {
       return path.reduce((conns, location, index) => {
         const prev = path[index - 1];
         if (prev) {
           return conns.concat({
             source: prev,
-            destination: location
+            destination: location,
           });
         }
         return conns;
@@ -277,6 +277,6 @@ export async function getServiceMapFromTraceIds({
 
   return {
     connections,
-    discoveredServices: scriptResponse.discoveredServices
+    discoveredServices: scriptResponse.discoveredServices,
   };
 }

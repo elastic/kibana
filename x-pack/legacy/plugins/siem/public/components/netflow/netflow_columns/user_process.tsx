@@ -32,7 +32,7 @@ export const UserProcess = React.memo<{
     gutterSize="none"
   >
     {userName != null
-      ? uniq(userName).map(user => (
+      ? uniq(userName).map((user) => (
           <EuiFlexItem grow={false} key={user}>
             <DraggableBadge
               contextId={contextId}
@@ -47,7 +47,7 @@ export const UserProcess = React.memo<{
       : null}
 
     {processName != null
-      ? uniq(processName).map(process => (
+      ? uniq(processName).map((process) => (
           <EuiFlexItem grow={false} key={process}>
             <DraggableBadge
               contextId={contextId}

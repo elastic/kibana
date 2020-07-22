@@ -40,7 +40,7 @@ describe('field_items', () => {
   const mount = useMountAppended();
 
   describe('getFieldItems', () => {
-    Object.keys(selectedCategoryFields!).forEach(fieldId => {
+    Object.keys(selectedCategoryFields!).forEach((fieldId) => {
       test(`it renders the name of the ${fieldId} field`, () => {
         const wrapper = mount(
           <TestProviders>
@@ -65,16 +65,13 @@ describe('field_items', () => {
           </TestProviders>
         );
 
-        expect(
-          wrapper
-            .find(`[data-test-subj="field-name-${fieldId}"]`)
-            .first()
-            .text()
-        ).toEqual(fieldId);
+        expect(wrapper.find(`[data-test-subj="field-name-${fieldId}"]`).first().text()).toEqual(
+          fieldId
+        );
       });
     });
 
-    Object.keys(selectedCategoryFields!).forEach(fieldId => {
+    Object.keys(selectedCategoryFields!).forEach((fieldId) => {
       test(`it renders a checkbox for the ${fieldId} field`, () => {
         const wrapper = mount(
           <TestProviders>
@@ -99,12 +96,9 @@ describe('field_items', () => {
           </TestProviders>
         );
 
-        expect(
-          wrapper
-            .find(`[data-test-subj="field-${fieldId}-checkbox"]`)
-            .first()
-            .exists()
-        ).toBe(true);
+        expect(wrapper.find(`[data-test-subj="field-${fieldId}-checkbox"]`).first().exists()).toBe(
+          true
+        );
       });
     });
 
@@ -133,10 +127,8 @@ describe('field_items', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="field-${timestampFieldId}-checkbox"]`)
-          .first()
-          .props().checked
+        wrapper.find(`[data-test-subj="field-${timestampFieldId}-checkbox"]`).first().props()
+          .checked
       ).toBe(true);
     });
 
@@ -151,7 +143,7 @@ describe('field_items', () => {
               browserFields: mockBrowserFields,
               category: mockBrowserFields[selectedCategoryId],
               categoryId: selectedCategoryId,
-              columnHeaders: columnHeaders.filter(header => header.id !== timestampFieldId),
+              columnHeaders: columnHeaders.filter((header) => header.id !== timestampFieldId),
               highlight: '',
               onUpdateColumns: jest.fn(),
               timelineId,
@@ -165,10 +157,8 @@ describe('field_items', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="field-${timestampFieldId}-checkbox"]`)
-          .first()
-          .props().checked
+        wrapper.find(`[data-test-subj="field-${timestampFieldId}-checkbox"]`).first().props()
+          .checked
       ).toBe(false);
     });
 
@@ -238,10 +228,7 @@ describe('field_items', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="field-${timestampFieldId}-icon"]`)
-          .first()
-          .props().type
+        wrapper.find(`[data-test-subj="field-${timestampFieldId}-icon"]`).first().props().type
       ).toEqual('clock');
     });
 
@@ -270,10 +257,7 @@ describe('field_items', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="field-${timestampFieldId}-description"]`)
-          .first()
-          .text()
+        wrapper.find(`[data-test-subj="field-${timestampFieldId}-description"]`).first().text()
       ).toEqual(
         'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
       );
@@ -282,7 +266,7 @@ describe('field_items', () => {
 
   describe('getFieldColumns', () => {
     test('it returns the expected column definitions', () => {
-      expect(getFieldColumns().map(column => omit('render', column))).toEqual([
+      expect(getFieldColumns().map((column) => omit('render', column))).toEqual([
         { field: 'field', name: 'Field', sortable: true, width: '250px' },
         {
           field: 'description',

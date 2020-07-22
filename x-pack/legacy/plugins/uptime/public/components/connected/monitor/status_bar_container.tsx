@@ -64,8 +64,8 @@ const mapStateToProps = (state: AppState, ownProps: OwnProps) => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
-  loadSelectedMonitor: params => dispatch(getSelectedMonitorAction(params)),
-  loadMonitorStatus: params => dispatch(getMonitorStatusAction(params)),
+  loadSelectedMonitor: (params) => dispatch(getSelectedMonitorAction(params)),
+  loadMonitorStatus: (params) => dispatch(getMonitorStatusAction(params)),
 });
 
 // @ts-ignore TODO: Investigate typescript issues here

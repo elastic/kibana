@@ -47,7 +47,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
       }
 
       const rules = await Promise.all(
-        request.body.map(async payloadRule => {
+        request.body.map(async (payloadRule) => {
           const {
             actions,
             description,
@@ -120,6 +120,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
               version,
               anomalyThreshold,
               machineLearningJobId,
+              actions,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleActions = await updateRulesNotifications({

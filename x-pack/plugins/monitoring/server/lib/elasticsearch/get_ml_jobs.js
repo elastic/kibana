@@ -16,7 +16,7 @@ import { ML_SUPPORTED_LICENSES } from '../../../common/constants';
  */
 export function handleResponse(response) {
   const hits = get(response, 'hits.hits', []);
-  return hits.map(hit => get(hit, '_source.job_stats'));
+  return hits.map((hit) => get(hit, '_source.job_stats'));
 }
 
 export function getMlJobs(req, esIndexPattern) {
@@ -80,7 +80,7 @@ export function getMlJobsForCluster(req, esIndexPattern, cluster) {
 
     const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
-    return callWithRequest(req, 'search', params).then(response => {
+    return callWithRequest(req, 'search', params).then((response) => {
       return get(response, 'aggregations.jobs_count.value', 0);
     });
   }

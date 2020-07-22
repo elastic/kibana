@@ -21,7 +21,7 @@ function getForFeature(
   type AdditionalType = { [K in keyof typeof additional]: K };
   const filledAdditional: AdditionalType = {};
   if (additional) {
-    Object.keys(additional).forEach(k => {
+    Object.keys(additional).forEach((k) => {
       filledAdditional[k] = { ...additional[k], ...jobType[k] };
     });
   }

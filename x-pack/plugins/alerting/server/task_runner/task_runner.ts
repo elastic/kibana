@@ -24,12 +24,13 @@ import {
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { AlertInstances } from '../alert_instance/alert_instance';
+import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
-  runAt: Date;
+  runAt: Date | undefined;
 }
 
 interface AlertTaskInstance extends ConcreteTaskInstance {
@@ -103,8 +104,8 @@ export class TaskRunner {
     references: SavedObject['references']
   ) {
     // Inject ids into actions
-    const actionsWithIds = actions.map(action => {
-      const actionReference = references.find(obj => obj.name === action.actionRef);
+    const actionsWithIds = actions.map((action) => {
+      const actionReference = references.find((obj) => obj.name === action.actionRef);
       if (!actionReference) {
         throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
       }
@@ -162,7 +163,7 @@ export class TaskRunner {
 
     const alertInstances = mapValues<RawAlertInstance, AlertInstance>(
       alertRawInstances,
-      rawAlertInstance => new AlertInstance(rawAlertInstance)
+      (rawAlertInstance) => new AlertInstance(rawAlertInstance)
     );
 
     const updatedAlertTypeState = await this.alertType.executor({
@@ -210,7 +211,7 @@ export class TaskRunner {
       alertTypeState: updatedAlertTypeState || undefined,
       alertInstances: mapValues<AlertInstance, RawAlertInstance>(
         instancesWithScheduledActions,
-        alertInstance => alertInstance.toRaw()
+        (alertInstance) => alertInstance.toRaw()
       ),
     };
   }
@@ -293,22 +294,29 @@ export class TaskRunner {
           };
         },
         (err: Error) => {
-          this.logger.error(`Executing Alert "${alertId}" has resulted in Error: ${err.message}`);
+          const message = `Executing Alert "${alertId}" has resulted in Error: ${err.message}`;
+          if (isAlertSavedObjectNotFoundError(err, alertId)) {
+            this.logger.debug(message);
+          } else {
+            this.logger.error(message);
+          }
           return {
             ...originalState,
             previousStartedAt,
           };
         }
       ),
-      runAt: resolveErr<Date, Error>(runAt, () =>
-        getNextRunAt(
-          new Date(),
-          // if we fail at this point we wish to recover but don't have access to the Alert's
-          // attributes, so we'll use a default interval to prevent the underlying task from
-          // falling into a failed state
-          FALLBACK_RETRY_INTERVAL
-        )
-      ),
+      runAt: resolveErr<Date | undefined, Error>(runAt, (err) => {
+        return isAlertSavedObjectNotFoundError(err, alertId)
+          ? undefined
+          : getNextRunAt(
+              new Date(),
+              // if we fail at this point we wish to recover but don't have access to the Alert's
+              // attributes, so we'll use a default interval to prevent the underlying task from
+              // falling into a failed state
+              FALLBACK_RETRY_INTERVAL
+            );
+      }),
     };
   }
 }

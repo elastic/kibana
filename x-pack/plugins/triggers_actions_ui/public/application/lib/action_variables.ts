@@ -17,7 +17,7 @@ export function actionVariablesFromAlertType(alertType: AlertType): ActionVariab
 }
 
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
-  return actionVariables.map(actionVariable => {
+  return actionVariables.map((actionVariable) => {
     return { name: `${prefix}${actionVariable.name}`, description: actionVariable.description };
   });
 }

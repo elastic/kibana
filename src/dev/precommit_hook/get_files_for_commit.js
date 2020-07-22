@@ -33,16 +33,16 @@ import { File } from '../file';
 export async function getFilesForCommit() {
   const simpleGit = new SimpleGit(REPO_ROOT);
 
-  const output = await fcb(cb => simpleGit.diff(['--name-status', '--cached'], cb));
+  const output = await fcb((cb) => simpleGit.diff(['--name-status', '--cached'], cb));
 
   return (
     output
       .split('\n')
       // Ignore blank lines
-      .filter(line => line.trim().length > 0)
+      .filter((line) => line.trim().length > 0)
       // git diff --name-status outputs lines with two OR three parts
       // separated by a tab character
-      .map(line => line.trim().split('\t'))
+      .map((line) => line.trim().split('\t'))
       .map(([status, ...paths]) => {
         // ignore deleted files
         if (status === 'D') {

@@ -47,8 +47,8 @@ export const useAnalysisSetupState = <JobType extends string>({
         return await validateSetupIndices(sourceConfiguration);
       },
       onResolve: ({ data: { errors } }) => {
-        setValidatedIndices(previousValidatedIndices =>
-          sourceConfiguration.indices.map(indexName => {
+        setValidatedIndices((previousValidatedIndices) =>
+          sourceConfiguration.indices.map((indexName) => {
             const previousValidatedIndex = previousValidatedIndices.filter(
               ({ name }) => name === indexName
             )[0];
@@ -86,8 +86,8 @@ export const useAnalysisSetupState = <JobType extends string>({
   const selectedIndexNames = useMemo(
     () =>
       validatedIndices
-        .filter(index => index.validity === 'valid' && index.isSelected)
-        .map(i => i.name),
+        .filter((index) => index.validity === 'valid' && index.isSelected)
+        .map((i) => i.name),
     [validatedIndices]
   );
 

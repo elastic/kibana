@@ -21,7 +21,7 @@ function fetchPipelines(callWithRequest) {
     ignore: [404],
   };
 
-  return callWithRequest('search', params).then(response =>
+  return callWithRequest('search', params).then((response) =>
     fetchAllFromScroll(response, callWithRequest)
   );
 }
@@ -32,18 +32,18 @@ export function registerListRoute(server) {
   server.route({
     path: '/api/logstash/pipelines',
     method: 'GET',
-    handler: request => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       return fetchPipelines(callWithRequest)
         .then((pipelinesHits = []) => {
-          const pipelines = pipelinesHits.map(pipeline => {
+          const pipelines = pipelinesHits.map((pipeline) => {
             return PipelineListItem.fromUpstreamJSON(pipeline).downstreamJSON;
           });
 
           return { pipelines };
         })
-        .catch(e => wrapEsError(e));
+        .catch((e) => wrapEsError(e));
     },
     config: {
       pre: [licensePreRouting],

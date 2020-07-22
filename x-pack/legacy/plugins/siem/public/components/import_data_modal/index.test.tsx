@@ -24,7 +24,7 @@ describe('ImportDataModal', () => {
         showCheckBox={true}
         submitBtnText="submitBtnText"
         subtitle="subtitle"
-        successMessage={jest.fn(totalCount => 'successMessage')}
+        successMessage={jest.fn((totalCount) => 'successMessage')}
         title="title"
       />
     );

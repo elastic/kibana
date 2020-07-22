@@ -38,7 +38,7 @@ export const GroupByBar: React.FunctionComponent<GroupByBarProps> = ({
   return (
     <EuiFlexItem grow={false}>
       <EuiFilterGroup>
-        {availableGroupByOptions.map(option => (
+        {availableGroupByOptions.map((option) => (
           <EuiFilterButton
             key={option}
             onClick={onGroupByChange.bind(null, option)}

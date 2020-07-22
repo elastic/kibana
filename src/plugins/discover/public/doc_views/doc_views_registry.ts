@@ -53,7 +53,7 @@ export class DocViewsRegistry {
    */
   getDocViewsSorted(hit: ElasticSearchHit) {
     return this.docViews
-      .filter(docView => docView.shouldShow(hit))
+      .filter((docView) => docView.shouldShow(hit))
       .sort((a, b) => (Number(a.order) > Number(b.order) ? 1 : -1));
   }
 }

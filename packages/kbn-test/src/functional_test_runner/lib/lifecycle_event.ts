@@ -57,7 +57,7 @@ export class LifecycleEvent<Args extends readonly any[]> {
     }
 
     try {
-      await Promise.all(this.handlers.map(async fn => await fn(...args)));
+      await Promise.all(this.handlers.map(async (fn) => await fn(...args)));
     } finally {
       this.afterSubj.next(undefined);
       if (this.options.singular) {

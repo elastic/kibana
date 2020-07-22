@@ -27,7 +27,7 @@ interface GenerateOpts {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: { getService: any }) {
+export default function ({ getService }: { getService: any }) {
   const esArchiver = getService('esArchiver');
   const supertestSvc = getService('supertest');
   const generateAPI = {
@@ -415,7 +415,7 @@ export default function({ getService }: { getService: any }) {
           };
         };
 
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           setTimeout(async () => {
             const { status, text, type } = await downloadFromPath(jobDownloadPath);
             expect(status).to.eql(200);

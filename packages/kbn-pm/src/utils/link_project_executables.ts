@@ -55,9 +55,7 @@ export async function linkProjectExecutables(
         const dest = resolve(binsDir, name);
 
         // Get relative project path with normalized path separators.
-        const projectRelativePath = relative(project.path, srcPath)
-          .split(sep)
-          .join('/');
+        const projectRelativePath = relative(project.path, srcPath).split(sep).join('/');
 
         log.write(chalk`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`);
 

@@ -32,8 +32,8 @@ import { get } from './get';
 export function unset<OBJ extends { [k: string]: any }>(obj: OBJ, atPath: string) {
   const paths = atPath
     .split('.')
-    .map(s => s.trim())
-    .filter(v => v !== '');
+    .map((s) => s.trim())
+    .filter((v) => v !== '');
   if (paths.length === 0) {
     return;
   }

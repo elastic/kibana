@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
 
-  describe('empty dashboard', function() {
+  describe('empty dashboard', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('lens/basic');

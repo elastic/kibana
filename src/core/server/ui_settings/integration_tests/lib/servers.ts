@@ -46,7 +46,7 @@ let services: AllServices;
 
 export async function startServers() {
   servers = createTestServers({
-    adjustTimeout: t => jest.setTimeout(t),
+    adjustTimeout: (t) => jest.setTimeout(t),
     settings: {
       kbn: {
         uiSettings: {

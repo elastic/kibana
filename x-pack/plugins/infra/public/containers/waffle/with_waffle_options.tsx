@@ -127,7 +127,7 @@ export const WithWaffleOptionsUrlState = () => (
         urlState={urlState}
         urlStateKey="waffleOptions"
         mapToUrlState={mapToUrlState}
-        onChange={newUrlState => {
+        onChange={(newUrlState) => {
           if (newUrlState && newUrlState.metric) {
             changeMetric(newUrlState.metric);
           }
@@ -159,7 +159,7 @@ export const WithWaffleOptionsUrlState = () => (
             changeCustomMetrics(newUrlState.customMetrics);
           }
         }}
-        onInitialize={initialUrlState => {
+        onInitialize={(initialUrlState) => {
           if (initialUrlState && initialUrlState.metric) {
             changeMetric(initialUrlState.metric);
           }
@@ -251,7 +251,9 @@ const mapToCustomOptionsUrlState = (subject: any) => {
 };
 
 const mapToCustomMetricsUrlState = (subject: any) => {
-  return subject && Array.isArray(subject) && subject.every(s => SnapshotCustomMetricInputRT.is(s))
+  return subject &&
+    Array.isArray(subject) &&
+    subject.every((s) => SnapshotCustomMetricInputRT.is(s))
     ? subject
     : [];
 };

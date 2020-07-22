@@ -102,12 +102,9 @@ describe('SlackActionFields renders', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="slackWebhookUrlInput"]')
-        .first()
-        .prop('value')
-    ).toBe('http:\\test');
+    expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').first().prop('value')).toBe(
+      'http:\\test'
+    );
   });
 });
 
@@ -133,10 +130,7 @@ describe('SlackParamsFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="slackMessageTextArea"]').length > 0).toBeTruthy();
     expect(
-      wrapper
-        .find('[data-test-subj="slackMessageTextArea"]')
-        .first()
-        .prop('value')
+      wrapper.find('[data-test-subj="slackMessageTextArea"]').first().prop('value')
     ).toStrictEqual('test message');
   });
 

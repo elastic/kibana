@@ -53,7 +53,7 @@ const alertExecutorOptions: LicenseExpirationAlertExecutorOptions = {
   alertId: '',
   startedAt: new Date(),
   services: {
-    callCluster: (path: string, opts: any) => new Promise(resolve => resolve()),
+    callCluster: (path: string, opts: any) => new Promise((resolve) => resolve()),
     alertInstanceFactory: (id: string) => new AlertInstance(),
     savedObjectsClient: {} as jest.Mocked<SavedObjectsClientContract>,
   },
@@ -71,7 +71,7 @@ describe('getLicenseExpiration', () => {
   const emailAddress = 'foo@foo.com';
   const getUiSettingsService: any = () => ({
     asScopedToClient: (): any => ({
-      get: () => new Promise(resolve => resolve(emailAddress)),
+      get: () => new Promise((resolve) => resolve(emailAddress)),
     }),
   });
   const monitoringCluster: any = null;
@@ -144,15 +144,13 @@ describe('getLicenseExpiration', () => {
     const services = {
       callCluster: jest.fn(
         (method: string, { filterPath }): Promise<any> => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
                 fillLicense({
                   status: 'good',
                   type: 'basic',
-                  expiry_date_in_millis: moment()
-                    .add(7, 'days')
-                    .valueOf(),
+                  expiry_date_in_millis: moment().add(7, 'days').valueOf(),
                 })
               );
             }
@@ -198,7 +196,7 @@ describe('getLicenseExpiration', () => {
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         const savedObject: SavedObject<SavedObjectAttributes> = {
           id: '',
           type: '',
@@ -213,16 +211,14 @@ describe('getLicenseExpiration', () => {
     const services = {
       callCluster: jest.fn(
         (method: string, { filterPath }): Promise<any> => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
                 fillLicense(
                   {
                     status: 'active',
                     type: 'gold',
-                    expiry_date_in_millis: moment()
-                      .add(7, 'days')
-                      .valueOf(),
+                    expiry_date_in_millis: moment().add(7, 'days').valueOf(),
                   },
                   clusterUuid
                 )
@@ -273,7 +269,7 @@ describe('getLicenseExpiration', () => {
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         const savedObject: SavedObject<SavedObjectAttributes> = {
           id: '',
           type: '',
@@ -288,16 +284,14 @@ describe('getLicenseExpiration', () => {
     const services = {
       callCluster: jest.fn(
         (method: string, { filterPath }): Promise<any> => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
                 fillLicense(
                   {
                     status: 'active',
                     type: 'gold',
-                    expiry_date_in_millis: moment()
-                      .add(120, 'days')
-                      .valueOf(),
+                    expiry_date_in_millis: moment().add(120, 'days').valueOf(),
                   },
                   clusterUuid
                 )
@@ -313,9 +307,7 @@ describe('getLicenseExpiration', () => {
 
     const state: AlertState = {
       [clusterUuid]: {
-        expiredCheckDateMS: moment()
-          .subtract(1, 'day')
-          .valueOf(),
+        expiredCheckDateMS: moment().subtract(1, 'day').valueOf(),
         ui: { isFiring: true, severity: 0, message: null, resolvedMS: 0, expirationTime: 0 },
       },
     };
@@ -354,7 +346,7 @@ describe('getLicenseExpiration', () => {
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         const savedObject: SavedObject<SavedObjectAttributes> = {
           id: '',
           type: '',
@@ -369,16 +361,14 @@ describe('getLicenseExpiration', () => {
     const services = {
       callCluster: jest.fn(
         (method: string, { filterPath }): Promise<any> => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
                 fillLicense(
                   {
                     status: 'active',
                     type: 'trial',
-                    expiry_date_in_millis: moment()
-                      .add(15, 'days')
-                      .valueOf(),
+                    expiry_date_in_millis: moment().add(15, 'days').valueOf(),
                   },
                   clusterUuid
                 )
@@ -423,7 +413,7 @@ describe('getLicenseExpiration', () => {
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         const savedObject: SavedObject<SavedObjectAttributes> = {
           id: '',
           type: '',
@@ -438,16 +428,14 @@ describe('getLicenseExpiration', () => {
     const services = {
       callCluster: jest.fn(
         (method: string, { filterPath }): Promise<any> => {
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             if (filterPath.includes('hits.hits._source.license.*')) {
               resolve(
                 fillLicense(
                   {
                     status: 'active',
                     type: 'trial',
-                    expiry_date_in_millis: moment()
-                      .add(13, 'days')
-                      .valueOf(),
+                    expiry_date_in_millis: moment().add(13, 'days').valueOf(),
                   },
                   clusterUuid
                 )

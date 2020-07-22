@@ -23,6 +23,6 @@ export function doFn(): ExpressionFunctionDefinition<'do', unknown, Arguments, u
         help: argHelp.fn,
       },
     },
-    fn: context => context,
+    fn: (context) => context,
   };
 }

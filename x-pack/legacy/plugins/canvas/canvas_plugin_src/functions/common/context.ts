@@ -14,6 +14,6 @@ export function context(): ExpressionFunctionDefinition<'context', unknown, {}, 
     name: 'context',
     help,
     args: {},
-    fn: obj => obj,
+    fn: (obj) => obj,
   };
 }

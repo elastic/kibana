@@ -26,7 +26,7 @@ class Routes {
   };
 
   public addToProvider = ($routeProvider: any) => {
-    this._routes.forEach(args => {
+    this._routes.forEach((args) => {
       $routeProvider.when.apply(this, args);
     });
 

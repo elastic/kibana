@@ -19,7 +19,7 @@ export async function getLocalUIFilters({
   setup,
   projection,
   uiFilters,
-  localFilterNames
+  localFilterNames,
 }: {
   setup: Setup;
   projection: Projection;
@@ -33,12 +33,12 @@ export async function getLocalUIFilters({
   delete projectionWithoutAggs.body.aggs;
 
   return Promise.all(
-    localFilterNames.map(async name => {
+    localFilterNames.map(async (name) => {
       const query = getLocalFilterQuery({
         indexPattern: dynamicIndexPattern,
         uiFilters,
         projection,
-        localUIFilterName: name
+        localUIFilterName: name,
       });
 
       const response = await client.search(query);
@@ -48,18 +48,18 @@ export async function getLocalUIFilters({
       return {
         ...filter,
         options: sortByOrder(
-          response.aggregations?.by_terms.buckets.map(bucket => {
+          response.aggregations?.by_terms.buckets.map((bucket) => {
             return {
               name: bucket.key as string,
               count:
                 'bucket_count' in bucket
                   ? bucket.bucket_count.value
-                  : bucket.doc_count
+                  : bucket.doc_count,
             };
           }) || [],
           'count',
           'desc'
-        )
+        ),
       };
     })
   );

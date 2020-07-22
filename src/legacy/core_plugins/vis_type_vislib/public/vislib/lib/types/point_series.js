@@ -29,7 +29,7 @@ const createSeriesFromParams = (cfg, seri) => {
   //up to match with ids in cfg.seriesParams entry that contain only {mainId}
   const seriId = getSeriId(seri);
   const matchingSeriesParams = cfg.seriesParams
-    ? cfg.seriesParams.find(seriConfig => {
+    ? cfg.seriesParams.find((seriConfig) => {
         return seriId === seriConfig.data.id;
       })
     : null;
@@ -63,7 +63,7 @@ const createSeries = (cfg, series) => {
   return {
     type: 'point_series',
     addTimeMarker: cfg.addTimeMarker,
-    series: _.map(series, seri => {
+    series: _.map(series, (seri) => {
       return createSeriesFromParams(cfg, seri);
     }),
   };
@@ -72,7 +72,7 @@ const createSeries = (cfg, series) => {
 const createCharts = (cfg, data) => {
   if (data.rows || data.columns) {
     const charts = data.rows ? data.rows : data.columns;
-    return charts.map(chart => {
+    return charts.map((chart) => {
       return createSeries(cfg, chart.series);
     });
   }
@@ -86,7 +86,7 @@ const createCharts = (cfg, data) => {
 function create(opts) {
   opts = opts || {};
 
-  return function(cfg, data) {
+  return function (cfg, data) {
     const isUserDefinedYAxis = cfg.setYExtents;
     const defaultYExtents = cfg.defaultYExtents;
     const config = _.cloneDeep(cfg);
@@ -132,17 +132,17 @@ function create(opts) {
         },
       ];
     } else {
-      config.valueAxes.forEach(axis => {
+      config.valueAxes.forEach((axis) => {
         if (axis.labels) {
           axis.labels.axisFormatter = data.data.yAxisFormatter || data.get('yAxisFormatter');
           const seriesParams =
             config.seriesParams &&
-            config.seriesParams.find(seriesParams => seriesParams.valueAxis === axis.id);
+            config.seriesParams.find((seriesParams) => seriesParams.valueAxis === axis.id);
           // if there are series assigned to this axis, get the format from the first one
           if (seriesParams) {
             const seriesDataId = seriesParams.data.id;
             const series = (data.data.series || data.get('series')).find(
-              series => getSeriId(series) === seriesDataId
+              (series) => getSeriId(series) === seriesDataId
             );
             if (series) {
               axis.labels.axisFormatter = series.yAxisFormatter;
@@ -169,7 +169,7 @@ function create(opts) {
         },
       ];
     } else {
-      const categoryAxis1 = config.categoryAxes.find(categoryAxis => {
+      const categoryAxis1 = config.categoryAxes.find((categoryAxis) => {
         return categoryAxis.id === 'CategoryAxis-1';
       });
       if (categoryAxis1) {
@@ -202,7 +202,7 @@ export const vislibPointSeriesTypes = {
           'Positive and negative values are not accurately represented by stacked ' +
           'area charts. Either changing the chart mode to "overlap" or using a ' +
           'bar chart is recommended.',
-        test: function(_, data) {
+        test: function (_, data) {
           if (!data.shouldBeStacked() || data.maxNumberOfSeries() < 2) return;
 
           const hasPos = data.getYMax(data._getY) > 0;
@@ -216,7 +216,7 @@ export const vislibPointSeriesTypes = {
           'Parts of or the entire area chart might not be displayed due to null ' +
           'values in the data. A line chart is recommended when displaying data ' +
           'with null values.',
-        test: function(_, data) {
+        test: function (_, data) {
           return data.hasNullValues();
         },
       },
@@ -254,7 +254,7 @@ export const vislibPointSeriesTypes = {
       },
       labels: {
         filter: false,
-        axisFormatter: function(val) {
+        axisFormatter: function (val) {
           return val;
         },
       },

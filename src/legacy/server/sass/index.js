@@ -41,9 +41,9 @@ export async function sassMixin(kbnServer, server, config) {
   let trackedFiles = new Set();
 
   const log = {
-    info: msg => server.log(['info', 'scss'], msg),
-    warn: msg => server.log(['warn', 'scss'], msg),
-    error: msg => server.log(['error', 'scss'], msg),
+    info: (msg) => server.log(['info', 'scss'], msg),
+    warn: (msg) => server.log(['warn', 'scss'], msg),
+    error: (msg) => server.log(['error', 'scss'], msg),
   };
 
   try {
@@ -53,8 +53,8 @@ export async function sassMixin(kbnServer, server, config) {
       buildDir: fromRoot('built_assets/css'),
     });
 
-    scssBundles.forEach(bundle => {
-      bundle.includedFiles.forEach(file => trackedFiles.add(file));
+    scssBundles.forEach((bundle) => {
+      bundle.includedFiles.forEach((file) => trackedFiles.add(file));
       server.log(['info', 'scss'], `Compiled CSS: ${bundle.sourcePath} (theme=${bundle.theme})`);
     });
   } catch (error) {
@@ -89,13 +89,13 @@ export async function sassMixin(kbnServer, server, config) {
 
     // build bundles containing the changed file
     await Promise.all(
-      scssBundles.map(async bundle => {
+      scssBundles.map(async (bundle) => {
         try {
           if (await bundle.buildIfIncluded(path)) {
             server.log(['info', 'scss'], `Compiled ${bundle.sourcePath} due to change in ${path}`);
           }
           // if the bundle rebuilt, includedFiles is the new set; otherwise includedFiles is unchanged and remains tracked
-          bundle.includedFiles.forEach(file => currentlyTrackedFiles.add(file));
+          bundle.includedFiles.forEach((file) => currentlyTrackedFiles.add(file));
         } catch (error) {
           const { message, line, file } = error;
           if (!file) {
@@ -113,7 +113,7 @@ export async function sassMixin(kbnServer, server, config) {
      */
 
     // un-watch files no longer included in any bundle
-    trackedFiles.forEach(file => {
+    trackedFiles.forEach((file) => {
       if (currentlyTrackedFiles.has(file)) {
         return;
       }
@@ -123,7 +123,7 @@ export async function sassMixin(kbnServer, server, config) {
     });
 
     // watch files not previously included in any bundle
-    currentlyTrackedFiles.forEach(file => {
+    currentlyTrackedFiles.forEach((file) => {
       if (trackedFiles.has(file)) {
         return;
       }

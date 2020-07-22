@@ -726,7 +726,7 @@ describe('Timeline', () => {
         provider: andProviderToAdd,
         timelineById: newTimeline,
       });
-      const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
+      const indexProvider = update.foo.dataProviders.findIndex((i) => i.id === '567');
       const addedAndDataProvider = update.foo.dataProviders[indexProvider].and[0];
       const { and, ...expectedResult } = andProviderToAdd;
       expect(addedAndDataProvider).toEqual(expectedResult);
@@ -1297,13 +1297,13 @@ describe('Timeline', () => {
         timelineById: timelineByIdwithAndMock,
         andProviderId: '568',
       });
-      const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
+      const indexProvider = update.foo.dataProviders.findIndex((i) => i.id === '567');
       expect(update.foo.dataProviders[indexProvider].and[0].enabled).toEqual(false);
     });
 
     test('should update only one and data provider and not two and data providers', () => {
       const indexProvider = timelineByIdwithAndMock.foo.dataProviders.findIndex(
-        i => i.id === '567'
+        (i) => i.id === '567'
       );
       const multiAndDataProvider = timelineByIdwithAndMock.foo.dataProviders[
         indexProvider
@@ -1332,8 +1332,12 @@ describe('Timeline', () => {
         timelineById: multiAndDataProviderMock,
         andProviderId: '568',
       });
-      const oldAndProvider = update.foo.dataProviders[indexProvider].and.find(i => i.id === '568');
-      const newAndProvider = update.foo.dataProviders[indexProvider].and.find(i => i.id === '456');
+      const oldAndProvider = update.foo.dataProviders[indexProvider].and.find(
+        (i) => i.id === '568'
+      );
+      const newAndProvider = update.foo.dataProviders[indexProvider].and.find(
+        (i) => i.id === '456'
+      );
       expect(oldAndProvider!.enabled).toEqual(false);
       expect(newAndProvider!.enabled).toEqual(true);
     });
@@ -1587,13 +1591,13 @@ describe('Timeline', () => {
         timelineById: timelineByIdwithAndMock,
         andProviderId: '568',
       });
-      const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
+      const indexProvider = update.foo.dataProviders.findIndex((i) => i.id === '567');
       expect(update.foo.dataProviders[indexProvider].and[0].enabled).toEqual(true);
     });
 
     test('should update only one and data provider and not two and data providers', () => {
       const indexProvider = timelineByIdwithAndMock.foo.dataProviders.findIndex(
-        i => i.id === '567'
+        (i) => i.id === '567'
       );
       const multiAndDataProvider = timelineByIdwithAndMock.foo.dataProviders[
         indexProvider
@@ -1622,8 +1626,12 @@ describe('Timeline', () => {
         timelineById: multiAndDataProviderMock,
         andProviderId: '568',
       });
-      const oldAndProvider = update.foo.dataProviders[indexProvider].and.find(i => i.id === '568');
-      const newAndProvider = update.foo.dataProviders[indexProvider].and.find(i => i.id === '456');
+      const oldAndProvider = update.foo.dataProviders[indexProvider].and.find(
+        (i) => i.id === '568'
+      );
+      const newAndProvider = update.foo.dataProviders[indexProvider].and.find(
+        (i) => i.id === '456'
+      );
       expect(oldAndProvider!.excluded).toEqual(true);
       expect(newAndProvider!.excluded).toEqual(false);
     });

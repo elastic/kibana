@@ -72,12 +72,12 @@ export const WithWaffleFilterUrlState: React.FC<WithWaffleFilterUrlStateProps> =
         urlState={filterQuery}
         urlStateKey="waffleFilter"
         mapToUrlState={mapToUrlState}
-        onChange={urlState => {
+        onChange={(urlState) => {
           if (urlState) {
             applyFilterQuery(urlState);
           }
         }}
-        onInitialize={urlState => {
+        onInitialize={(urlState) => {
           if (urlState) {
             applyFilterQuery(urlState);
           }

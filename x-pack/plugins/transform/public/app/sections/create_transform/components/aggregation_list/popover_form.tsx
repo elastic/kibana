@@ -119,13 +119,13 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   if (!isUnsupportedAgg) {
     const optionsArr = dictionaryToArray(options);
     optionsArr
-      .filter(o => o.agg === defaultData.agg)
-      .forEach(o => {
+      .filter((o) => o.agg === defaultData.agg)
+      .forEach((o) => {
         availableFields.push({ text: o.field });
       });
     optionsArr
-      .filter(o => isPivotAggsConfigWithUiSupport(defaultData) && o.field === defaultData.field)
-      .forEach(o => {
+      .filter((o) => isPivotAggsConfigWithUiSupport(defaultData) && o.field === defaultData.field)
+      .forEach((o) => {
         availableAggs.push({ text: o.agg });
       });
   }
@@ -180,7 +180,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         <EuiFieldText
           defaultValue={aggName}
           isInvalid={!validAggName}
-          onChange={e => setAggName(e.target.value)}
+          onChange={(e) => setAggName(e.target.value)}
         />
       </EuiFormRow>
       {availableAggs.length > 0 && (
@@ -192,7 +192,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           <EuiSelect
             options={availableAggs}
             value={agg}
-            onChange={e => updateAgg(e.target.value as PIVOT_SUPPORTED_AGGS)}
+            onChange={(e) => updateAgg(e.target.value as PIVOT_SUPPORTED_AGGS)}
           />
         </EuiFormRow>
       )}
@@ -205,7 +205,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           <EuiSelect
             options={availableFields}
             value={field}
-            onChange={e => setField(e.target.value)}
+            onChange={(e) => setField(e.target.value)}
           />
         </EuiFormRow>
       )}
@@ -225,7 +225,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         >
           <EuiFieldText
             defaultValue={percentsText}
-            onChange={e => updatePercents(e.target.value)}
+            onChange={(e) => updatePercents(e.target.value)}
           />
         </EuiFormRow>
       )}

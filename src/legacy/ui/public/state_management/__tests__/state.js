@@ -46,18 +46,15 @@ describe('State Management', () => {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(
-      ngMock.inject(function(_$rootScope_, _$location_, Private, config) {
+      ngMock.inject(function (_$rootScope_, _$location_, Private, config) {
         const State = Private(StateProvider);
         $location = _$location_;
         $rootScope = _$rootScope_;
         Events = Private(EventsProvider);
 
-        setup = opts => {
+        setup = (opts) => {
           const { param, initial, storeInHash } = opts || {};
-          sinon
-            .stub(config, 'get')
-            .withArgs('state:storeInSessionStorage')
-            .returns(!!storeInHash);
+          sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(!!storeInHash);
           const store = new StubBrowserStorage();
           const hashedItemStore = new HashedItemStore(store);
           const state = new State(param, initial, hashedItemStore);
@@ -89,9 +86,9 @@ describe('State Management', () => {
         expect(state).to.be.an(Events);
       });
 
-      it('should emit an event if reset with changes', done => {
+      it('should emit an event if reset with changes', (done) => {
         const { state } = setup({ initial: { message: ['test'] } });
-        state.on('reset_with_changes', keys => {
+        state.on('reset_with_changes', (keys) => {
           expect(keys).to.eql(['message']);
           done();
         });
@@ -122,9 +119,9 @@ describe('State Management', () => {
         expect(search._s).to.equal('(test:foo)');
       });
 
-      it('should emit an event if changes are saved', done => {
+      it('should emit an event if changes are saved', (done) => {
         const { state, getUnhashedSearch } = setup();
-        state.on('save_with_changes', keys => {
+        state.on('save_with_changes', (keys) => {
           expect(keys).to.eql(['test']);
           done();
         });
@@ -136,9 +133,9 @@ describe('State Management', () => {
     });
 
     describe('Fetch', () => {
-      it('should emit an event if changes are fetched', done => {
+      it('should emit an event if changes are fetched', (done) => {
         const { state } = setup();
-        state.on('fetch_with_changes', keys => {
+        state.on('fetch_with_changes', (keys) => {
           expect(keys).to.eql(['foo']);
           done();
         });
@@ -148,9 +145,9 @@ describe('State Management', () => {
         $rootScope.$apply();
       });
 
-      it('should have events that attach to scope', done => {
+      it('should have events that attach to scope', (done) => {
         const { state } = setup();
-        state.on('test', message => {
+        state.on('test', (message) => {
           expect(message).to.equal('foo');
           done();
         });
@@ -158,9 +155,9 @@ describe('State Management', () => {
         $rootScope.$apply();
       });
 
-      it('should fire listeners for #onUpdate() on #fetch()', done => {
+      it('should fire listeners for #onUpdate() on #fetch()', (done) => {
         const { state } = setup();
-        state.on('fetch_with_changes', keys => {
+        state.on('fetch_with_changes', (keys) => {
           expect(keys).to.eql(['foo']);
           done();
         });
@@ -230,7 +227,7 @@ describe('State Management', () => {
 
       it('does not replace the state value on read', () => {
         const { state } = setup();
-        sinon.stub($location, 'search').callsFake(newSearch => {
+        sinon.stub($location, 'search').callsFake((newSearch) => {
           if (newSearch) {
             return $location;
           } else {
@@ -310,7 +307,7 @@ describe('State Management', () => {
           sinon.assert.calledOnce(fatalErrorStub);
           sinon.assert.calledWith(
             fatalErrorStub,
-            sinon.match(error => error instanceof Error && error.message.includes('github.com'))
+            sinon.match((error) => error instanceof Error && error.message.includes('github.com'))
           );
         });
 
@@ -344,20 +341,17 @@ describe('State Management', () => {
     };
 
     beforeEach(
-      ngMock.module('kibana', function(stateManagementConfigProvider) {
+      ngMock.module('kibana', function (stateManagementConfigProvider) {
         stateManagementConfigProvider.disable();
       })
     );
     beforeEach(
-      ngMock.inject(function(_$rootScope_, _$location_, Private, config) {
+      ngMock.inject(function (_$rootScope_, _$location_, Private, config) {
         const State = Private(StateProvider);
         $location = _$location_;
         $rootScope = _$rootScope_;
 
-        sinon
-          .stub(config, 'get')
-          .withArgs('state:storeInSessionStorage')
-          .returns(false);
+        sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(false);
 
         class MockPersistedState extends State {
           _persistAcrossApps = true;
@@ -372,7 +366,7 @@ describe('State Management', () => {
     describe('changing state', () => {
       const methods = ['save', 'replace', 'reset'];
 
-      methods.forEach(method => {
+      methods.forEach((method) => {
         it(`${method} should not change the URL`, () => {
           $location.search({ _s: '(foo:bar)' });
           state[method]();

@@ -61,7 +61,7 @@ describe('IndexedFieldsTable', () => {
       />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
 
     expect(component).toMatchSnapshot();
@@ -77,7 +77,7 @@ describe('IndexedFieldsTable', () => {
       />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ fieldFilter: 'Elast' });
     component.update();
 
@@ -94,7 +94,7 @@ describe('IndexedFieldsTable', () => {
       />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.setProps({ indexedFieldTypeFilter: 'date' });
     component.update();
 

@@ -88,7 +88,7 @@ export function timelion(): ExpressionFunctionDefinition<
     fn: (input, args): Promise<Datatable> => {
       // Timelion requires a time range. Use the time range from the timefilter element in the
       // workpad, if it exists. Otherwise fall back on the function args.
-      const timeFilter = input.and.find(and => and.type === 'time');
+      const timeFilter = input.and.find((and) => and.type === 'time');
       const range = timeFilter
         ? { min: timeFilter.from, max: timeFilter.to }
         : parseDateMath({ from: args.from, to: args.to }, args.timezone);
@@ -116,11 +116,11 @@ export function timelion(): ExpressionFunctionDefinition<
         method: 'POST',
         responseType: 'json',
         data: body,
-      }).then(resp => {
+      }).then((resp) => {
         const seriesList = resp.data.sheet[0].list;
         const rows = flatten(
           seriesList.map((series: { data: any[]; label: string }) =>
-            series.data.map(row => ({ '@timestamp': row[0], value: row[1], label: series.label }))
+            series.data.map((row) => ({ '@timestamp': row[0], value: row[1], label: series.label }))
           )
         ) as DatatableRow[];
 

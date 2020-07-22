@@ -25,12 +25,9 @@ describe('CategoryTitle', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="selected-category-title"]')
-        .first()
-        .text()
-    ).toEqual(categoryId);
+    expect(wrapper.find('[data-test-subj="selected-category-title"]').first().text()).toEqual(
+      categoryId
+    );
   });
 
   test('when `categoryId` specifies a valid category in `filteredBrowserFields`, a count of the field is displayed in the badge', () => {
@@ -43,12 +40,9 @@ describe('CategoryTitle', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="selected-category-count-badge"]`)
-        .first()
-        .text()
-    ).toEqual(`${getFieldCount(mockBrowserFields[validCategoryId])}`);
+    expect(wrapper.find(`[data-test-subj="selected-category-count-badge"]`).first().text()).toEqual(
+      `${getFieldCount(mockBrowserFields[validCategoryId])}`
+    );
   });
 
   test('when `categoryId` specifies an INVALID category in `filteredBrowserFields`, a count of zero is displayed in the badge', () => {
@@ -61,11 +55,8 @@ describe('CategoryTitle', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="selected-category-count-badge"]`)
-        .first()
-        .text()
-    ).toEqual('0');
+    expect(wrapper.find(`[data-test-subj="selected-category-count-badge"]`).first().text()).toEqual(
+      '0'
+    );
   });
 });

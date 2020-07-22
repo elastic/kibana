@@ -56,7 +56,7 @@ export function parse(command, options, kbnPackage) {
   settings.workingPath = resolve(settings.pluginDir, '.plugin.installing');
   settings.tempArchiveFile = resolve(settings.workingPath, 'archive.part');
   settings.tempPackageFile = resolve(settings.workingPath, 'package.json');
-  settings.setPlugin = function(plugin) {
+  settings.setPlugin = function (plugin) {
     settings.plugin = plugin;
     settings.pluginPath = resolve(settings.pluginDir, settings.plugin.name);
   };

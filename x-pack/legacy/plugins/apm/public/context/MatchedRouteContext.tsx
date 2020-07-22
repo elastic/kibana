@@ -16,14 +16,14 @@ interface MatchedRouteProviderProps {
 }
 export function MatchedRouteProvider({
   children,
-  routes
+  routes,
 }: MatchedRouteProviderProps) {
   const { pathname } = useLocation();
 
   const contextValue = useMemo(() => {
-    return routes.filter(route => {
+    return routes.filter((route) => {
       return matchPath(pathname, {
-        path: route.path
+        path: route.path,
       });
     });
   }, [pathname, routes]);

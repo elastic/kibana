@@ -10,5 +10,5 @@ export function getEligibleTypes({
   types,
   schema,
 }: Pick<SavedObjectsLegacyService, 'schema' | 'types'>) {
-  return types.filter(type => !schema.isNamespaceAgnostic(type));
+  return types.filter((type) => !schema.isNamespaceAgnostic(type));
 }

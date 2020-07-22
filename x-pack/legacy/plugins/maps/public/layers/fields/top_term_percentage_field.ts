@@ -48,7 +48,7 @@ export class TopTermPercentageField implements IESAggField {
     return 'number';
   }
 
-  async createTooltipProperty(value: string | undefined): Promise<ITooltipProperty> {
+  async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     return new TooltipProperty(this.getName(), await this.getLabel(), value);
   }
 

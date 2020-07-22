@@ -39,7 +39,7 @@ const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
  * license is basic, IsClusterSupported makes the status col hidden
  * completely
  */
-const IsAlertsSupported = props => {
+const IsAlertsSupported = (props) => {
   const { alertsMeta = { enabled: true }, clusterMeta = { enabled: true } } = props.cluster.alerts;
   if (alertsMeta.enabled && clusterMeta.enabled) {
     return <span>{props.children}</span>;
@@ -404,7 +404,7 @@ export class Listing extends Component {
     const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
     const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
     const hasStandaloneCluster = !!clusters.find(
-      cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
+      (cluster) => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
     );
 
     return (
@@ -423,7 +423,7 @@ export class Listing extends Component {
                 _handleClickIncompatibleLicense,
                 _handleClickInvalidLicense
               )}
-              rowProps={item => {
+              rowProps={(item) => {
                 return {
                   'data-test-subj': `clusterRow_${item.cluster_uuid}`,
                 };

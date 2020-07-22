@@ -38,7 +38,7 @@ export const combineRangeWithFilters = (
     ? // i.e. {"bool":{"filter":{ ...some nested filter objects }}}
       filters.bool.filter
     : // i.e. {"bool":{"filter":[ ...some listed filter objects ]}}
-      Object.keys(filters?.bool?.filter ?? {}).map(key => ({
+      Object.keys(filters?.bool?.filter ?? {}).map((key) => ({
         ...filters?.bool?.filter?.[key],
       }));
   filters.bool.filter = [...clientFiltersList, range];
@@ -57,7 +57,7 @@ export const extractFilterAggsResults = (
     schemes: [],
     tags: [],
   };
-  keys.forEach(key => {
+  keys.forEach((key) => {
     const buckets = responseAggregations?.[key]?.term?.buckets ?? [];
     values[key] = buckets.map((item: { key: string | number }) => item.key);
   });

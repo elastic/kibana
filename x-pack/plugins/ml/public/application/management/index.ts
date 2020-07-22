@@ -24,9 +24,12 @@ export function initManagementSection(
   core: CoreSetup<MlStartDependencies>
 ) {
   const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-  licensing.subscribe(license => {
-    if (license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === 'valid') {
-      const management = pluginsSetup.management;
+  licensing.subscribe((license) => {
+    const management = pluginsSetup.management;
+    if (
+      management !== undefined &&
+      license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === 'valid'
+    ) {
       const mlSection = management.sections.register({
         id: PLUGIN_ID,
         title: i18n.translate('xpack.ml.management.mlTitle', {

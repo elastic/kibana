@@ -29,7 +29,7 @@ export async function fetchIndexPatterns(
     return [];
   }
 
-  const searchString = indexPatternStrings.map(string => `"${string}"`).join(' | ');
+  const searchString = indexPatternStrings.map((string) => `"${string}"`).join(' | ');
   const indexPatternsFromSavedObjects = await savedObjectsClient.find<IndexPatternAttributes>({
     type: 'index-pattern',
     fields: ['title', 'fields'],
@@ -37,7 +37,7 @@ export async function fetchIndexPatterns(
     searchFields: ['title'],
   });
 
-  const exactMatches = indexPatternsFromSavedObjects.savedObjects.filter(savedObject => {
+  const exactMatches = indexPatternsFromSavedObjects.savedObjects.filter((savedObject) => {
     return indexPatternStrings.includes(savedObject.attributes.title);
   });
 

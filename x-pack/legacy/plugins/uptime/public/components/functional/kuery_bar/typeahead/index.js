@@ -40,7 +40,7 @@ export class Typeahead extends Component {
     return null;
   }
 
-  incrementIndex = currentIndex => {
+  incrementIndex = (currentIndex) => {
     let nextIndex = currentIndex + 1;
     if (currentIndex === null || nextIndex >= this.props.suggestions.length) {
       nextIndex = 0;
@@ -48,7 +48,7 @@ export class Typeahead extends Component {
     this.setState({ index: nextIndex });
   };
 
-  decrementIndex = currentIndex => {
+  decrementIndex = (currentIndex) => {
     let previousIndex = currentIndex - 1;
     if (previousIndex < 0) {
       previousIndex = null;
@@ -56,7 +56,7 @@ export class Typeahead extends Component {
     this.setState({ index: previousIndex });
   };
 
-  onKeyUp = event => {
+  onKeyUp = (event) => {
     const { selectionStart } = event.target;
     const { value } = this.state;
     switch (event.keyCode) {
@@ -71,7 +71,7 @@ export class Typeahead extends Component {
     }
   };
 
-  onKeyDown = event => {
+  onKeyDown = (event) => {
     const { isSuggestionsVisible, index, value } = this.state;
     switch (event.keyCode) {
       case KEY_CODES.DOWN:
@@ -107,7 +107,7 @@ export class Typeahead extends Component {
     }
   };
 
-  selectSuggestion = suggestion => {
+  selectSuggestion = (suggestion) => {
     const nextInputValue =
       this.state.value.substr(0, suggestion.start) +
       suggestion.text +
@@ -121,7 +121,7 @@ export class Typeahead extends Component {
     this.setState({ isSuggestionsVisible: false });
   };
 
-  onChangeInputValue = event => {
+  onChangeInputValue = (event) => {
     const { value, selectionStart } = event.target;
     const hasValue = Boolean(value.trim());
     this.setState({
@@ -137,17 +137,17 @@ export class Typeahead extends Component {
     this.props.onChange(value, selectionStart);
   };
 
-  onClickInput = event => {
+  onClickInput = (event) => {
     const { selectionStart } = event.target;
     this.props.onChange(this.state.value, selectionStart);
   };
 
-  onClickSuggestion = suggestion => {
+  onClickSuggestion = (suggestion) => {
     this.selectSuggestion(suggestion);
     this.inputRef.focus();
   };
 
-  onMouseEnterSuggestion = index => {
+  onMouseEnterSuggestion = (index) => {
     this.setState({ index });
   };
 
@@ -172,7 +172,7 @@ export class Typeahead extends Component {
             placeholder={i18n.translate('xpack.uptime.kueryBar.searchPlaceholder', {
               defaultMessage: 'Search monitor IDs, names, and protocol types...',
             })}
-            inputRef={node => {
+            inputRef={(node) => {
               if (node) {
                 this.inputRef = node;
               }

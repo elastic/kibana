@@ -24,7 +24,7 @@ export function setupSavedObjects({ auditLogger, authz, savedObjects }: SetupSav
   const getKibanaRequest = (request: KibanaRequest | LegacyRequest) =>
     request instanceof KibanaRequest ? request : KibanaRequest.from(request);
 
-  savedObjects.setClientFactoryProvider(repositoryFactory => ({ request }) => {
+  savedObjects.setClientFactoryProvider((repositoryFactory) => ({ request }) => {
     const kibanaRequest = getKibanaRequest(request);
     return new SavedObjectsClient(
       authz.mode.useRbacForRequest(kibanaRequest)

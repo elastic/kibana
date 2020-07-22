@@ -25,10 +25,8 @@ describe('EventCounts', () => {
     );
 
     expect(
-      (wrapper
-        .find('[data-test-subj="overview-host-query"]')
-        .first()
-        .props() as OverviewHostProps).filterQuery
+      (wrapper.find('[data-test-subj="overview-host-query"]').first().props() as OverviewHostProps)
+        .filterQuery
     ).toContain('[{"bool":{"should":[{"exists":{"field":"host.name"}}]');
   });
 

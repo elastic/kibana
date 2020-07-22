@@ -53,7 +53,7 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
         tags: ['access:alerting-read'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, TypeOf<typeof querySchema>, any, any>,
       res: KibanaResponseFactory

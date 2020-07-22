@@ -25,13 +25,13 @@ class FollowerIndexResumeProviderUi extends PureComponent {
     ids: null,
   };
 
-  onMouseOverModal = event => {
+  onMouseOverModal = (event) => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
   };
 
-  resumeFollowerIndex = id => {
+  resumeFollowerIndex = (id) => {
     this.setState({ isModalOpen: true, ids: arrify(id) });
   };
 
@@ -124,7 +124,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
               </p>
 
               <ul>
-                {ids.map(id => (
+                {ids.map((id) => (
                   <li key={id}>{id}</li>
                 ))}
               </ul>
@@ -148,8 +148,8 @@ class FollowerIndexResumeProviderUi extends PureComponent {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
-  resumeFollowerIndex: id => dispatch(resumeFollowerIndex(id)),
+const mapDispatchToProps = (dispatch) => ({
+  resumeFollowerIndex: (id) => dispatch(resumeFollowerIndex(id)),
 });
 
 export const FollowerIndexResumeProvider = connect(

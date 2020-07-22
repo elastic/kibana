@@ -343,7 +343,7 @@ describe('FeatureRegistry', () => {
     );
   });
 
-  ['contains space', 'contains_invalid()_chars', ''].forEach(prohibitedChars => {
+  ['contains space', 'contains_invalid()_chars', ''].forEach((prohibitedChars) => {
     it(`prevents features from being registered with a navLinkId of "${prohibitedChars}"`, () => {
       const featureRegistry = new FeatureRegistry();
       expect(() =>
@@ -386,7 +386,7 @@ describe('FeatureRegistry', () => {
     });
   });
 
-  ['catalogue', 'management', 'navLinks', `doesn't match valid regex`].forEach(prohibitedId => {
+  ['catalogue', 'management', 'navLinks', `doesn't match valid regex`].forEach((prohibitedId) => {
     it(`prevents features from being registered with an ID of "${prohibitedId}"`, () => {
       const featureRegistry = new FeatureRegistry();
       expect(() =>

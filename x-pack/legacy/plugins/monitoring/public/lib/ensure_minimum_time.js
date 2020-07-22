@@ -41,7 +41,7 @@ export async function ensureMinimumTime(
   if (asyncActionDuration < bufferedMinimumTimeMs) {
     const additionalWaitingTime =
       bufferedMinimumTimeMs - (asyncActionCompletionTime - asyncActionStartTime);
-    await new Promise(resolve => setTimeout(resolve, additionalWaitingTime));
+    await new Promise((resolve) => setTimeout(resolve, additionalWaitingTime));
   }
 
   return returnValue;

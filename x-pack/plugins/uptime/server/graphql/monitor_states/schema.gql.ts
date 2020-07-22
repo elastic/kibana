@@ -12,15 +12,15 @@ export const monitorStatesSchema = gql`
     "The time at which these data were collected."
     timestamp: UnsignedInteger!
     "The number of _up_ documents."
-    up: Int!
+    up: Int
     "The number of _down_ documents."
-    down: Int!
+    down: Int
   }
 
   "Monitor status data over time."
   type SummaryHistogram {
     "The number of documents used to assemble the histogram."
-    count: Int!
+    count: Int
     "The individual histogram data points."
     points: [SummaryHistogramPoint!]!
   }

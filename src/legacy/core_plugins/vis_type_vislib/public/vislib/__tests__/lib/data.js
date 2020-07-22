@@ -151,25 +151,25 @@ const colsData = {
   ],
 };
 
-describe('Vislib Data Class Test Suite', function() {
+describe('Vislib Data Class Test Suite', function () {
   let mockUiState;
 
   beforeEach(() => {
     mockUiState = getMockUiState();
   });
 
-  describe('Data Class (main)', function() {
-    it('should be a function', function() {
+  describe('Data Class (main)', function () {
+    it('should be a function', function () {
       expect(_.isFunction(Data)).to.be(true);
     });
 
-    it('should return an object', function() {
+    it('should return an object', function () {
       const rowIn = new Data(rowsData, mockUiState, () => undefined);
       expect(_.isObject(rowIn)).to.be(true);
     });
   });
 
-  describe('_removeZeroSlices', function() {
+  describe('_removeZeroSlices', function () {
     let data;
     const pieData = {
       slices: {
@@ -177,26 +177,26 @@ describe('Vislib Data Class Test Suite', function() {
       },
     };
 
-    beforeEach(function() {
+    beforeEach(function () {
       data = new Data(pieData, mockUiState, () => undefined);
     });
 
-    it('should remove zero values', function() {
+    it('should remove zero values', function () {
       const slices = data._removeZeroSlices(data.data.slices);
       expect(slices.children.length).to.be(2);
     });
   });
 
-  describe('Data.flatten', function() {
+  describe('Data.flatten', function () {
     let serIn;
     let serOut;
 
-    beforeEach(function() {
+    beforeEach(function () {
       serIn = new Data(seriesData, mockUiState, () => undefined);
       serOut = serIn.flatten();
     });
 
-    it('should return an array of value objects from every series', function() {
+    it('should return an array of value objects from every series', function () {
       expect(serOut.every(_.isObject)).to.be(true);
     });
 
@@ -205,14 +205,14 @@ describe('Vislib Data Class Test Suite', function() {
     it('should return all points from every series in the columns', testLength(colsData));
 
     function testLength(inputData) {
-      return function() {
+      return function () {
         const data = new Data(inputData, mockUiState, () => undefined);
         const len = _.reduce(
           data.chartData(),
-          function(sum, chart) {
+          function (sum, chart) {
             return (
               sum +
-              chart.series.reduce(function(sum, series) {
+              chart.series.reduce(function (sum, series) {
                 return sum + series.values.length;
               }, 0)
             );
@@ -225,7 +225,7 @@ describe('Vislib Data Class Test Suite', function() {
     }
   });
 
-  describe('geohashGrid methods', function() {
+  describe('geohashGrid methods', function () {
     let data;
     const geohashGridData = {
       hits: 3954,
@@ -261,19 +261,19 @@ describe('Vislib Data Class Test Suite', function() {
       ],
     };
 
-    beforeEach(function() {
+    beforeEach(function () {
       data = new Data(geohashGridData, mockUiState, () => undefined);
     });
 
-    describe('getVisData', function() {
-      it('should return the rows property', function() {
+    describe('getVisData', function () {
+      it('should return the rows property', function () {
         const visData = data.getVisData();
         expect(visData[0].title).to.eql(geohashGridData.rows[0].title);
       });
     });
 
-    describe('getGeoExtents', function() {
-      it('should return the min and max geoJson properties', function() {
+    describe('getGeoExtents', function () {
+      it('should return the min and max geoJson properties', function () {
         const minMax = data.getGeoExtents();
         expect(minMax.min).to.be(1);
         expect(minMax.max).to.be(331);
@@ -281,13 +281,13 @@ describe('Vislib Data Class Test Suite', function() {
     });
   });
 
-  describe('null value check', function() {
-    it('should return false', function() {
+  describe('null value check', function () {
+    it('should return false', function () {
       const data = new Data(rowsData, mockUiState, () => undefined);
       expect(data.hasNullValues()).to.be(false);
     });
 
-    it('should return true', function() {
+    it('should return true', function () {
       const nullRowData = { rows: rowsData.rows.slice(0) };
       nullRowData.rows.push({
         label: 'e',

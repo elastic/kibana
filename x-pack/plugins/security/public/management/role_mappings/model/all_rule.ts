@@ -50,13 +50,13 @@ export class AllRule extends RuleGroup {
 
   /** {@see RuleGroup.clone} */
   public clone() {
-    return new AllRule(this.rules.map(r => r.clone()));
+    return new AllRule(this.rules.map((r) => r.clone()));
   }
 
   /** {@see RuleGroup.toRaw} */
   public toRaw() {
     return {
-      all: [...this.rules.map(rule => rule.toRaw())],
+      all: [...this.rules.map((rule) => rule.toRaw())],
     };
   }
 }

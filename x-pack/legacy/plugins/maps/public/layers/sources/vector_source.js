@@ -81,7 +81,7 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   _getTooltipPropertyNames() {
-    return this._tooltipFields.map(field => field.getName());
+    return this._tooltipFields.map((field) => field.getName());
   }
 
   createDefaultLayer(options, mapColors) {

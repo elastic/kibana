@@ -13,7 +13,7 @@ const MUST_RUN_FROM_DIR = 'kibana';
 const OUTPUT_DIR = 'target';
 const OUTPUT_FILE = `${OUTPUT_DIR}/loop-cypress-tests.txt`;
 const createOutputDir = () => {
-  fs.mkdir(OUTPUT_DIR, { recursive: true }, err => {
+  fs.mkdir(OUTPUT_DIR, { recursive: true }, (err) => {
     if (err) throw err;
   });
 };
@@ -31,7 +31,7 @@ const exitIfIncorrectWorkingDir = () => {
     process.exit(1);
   }
 };
-const exitIfTimesToRunIsInvalid = timesToRun => {
+const exitIfTimesToRunIsInvalid = (timesToRun) => {
   if (!timesToRun > 0) {
     console.error(
       '\nERROR: You must specify a valid number of times to run the SIEM Cypress tests.'
@@ -54,21 +54,23 @@ const spawnChild = async () => {
     console.log(chunk.toString());
     fs.appendFileSync(OUTPUT_FILE, chunk.toString());
   }
-  const exitCode = await new Promise(resolve => {
+  const exitCode = await new Promise((resolve) => {
     child.on('close', resolve);
   });
   return exitCode;
 };
 
-const runNTimes = async timesToRun => {
+const runNTimes = async (timesToRun) => {
   for (let i = 0; i < timesToRun; i++) {
-    const startingRun = `\n\n*** Starting test run ${i +
-      1} of ${timesToRun} on host ${os.hostname()} at ${new Date()} ***\n\n`;
+    const startingRun = `\n\n*** Starting test run ${
+      i + 1
+    } of ${timesToRun} on host ${os.hostname()} at ${new Date()} ***\n\n`;
     console.log(startingRun);
     fs.appendFileSync(OUTPUT_FILE, startingRun);
     const exitCode = await spawnChild();
-    const testRunCompleted = `\n\n*** Test run ${i +
-      1} of ${timesToRun} on host ${os.hostname()} exited with code ${exitCode} at ${new Date()} ***`;
+    const testRunCompleted = `\n\n*** Test run ${
+      i + 1
+    } of ${timesToRun} on host ${os.hostname()} exited with code ${exitCode} at ${new Date()} ***`;
     console.log(testRunCompleted);
     fs.appendFileSync(OUTPUT_FILE, testRunCompleted);
   }

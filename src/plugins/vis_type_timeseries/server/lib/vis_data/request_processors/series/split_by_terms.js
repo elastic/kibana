@@ -23,10 +23,10 @@ import { getBucketsPath } from '../../helpers/get_buckets_path';
 import { bucketTransform } from '../../helpers/bucket_transform';
 
 export function splitByTerms(req, panel, series) {
-  return next => doc => {
+  return (next) => (doc) => {
     if (series.split_mode === 'terms' && series.terms_field) {
       const direction = series.terms_direction || 'desc';
-      const metric = series.metrics.find(item => item.id === series.terms_order_by);
+      const metric = series.metrics.find((item) => item.id === series.terms_order_by);
       overwrite(doc, `aggs.${series.id}.terms.field`, series.terms_field);
       overwrite(doc, `aggs.${series.id}.terms.size`, series.terms_size);
       if (series.terms_include) {

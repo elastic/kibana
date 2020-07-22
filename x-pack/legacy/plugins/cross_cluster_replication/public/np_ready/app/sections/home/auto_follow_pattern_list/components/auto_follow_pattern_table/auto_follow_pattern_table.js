@@ -48,7 +48,7 @@ export class AutoFollowPatternTable extends PureComponent {
     const { queryText } = this.state;
 
     if (queryText) {
-      return autoFollowPatterns.filter(autoFollowPattern => {
+      return autoFollowPatterns.filter((autoFollowPattern) => {
         const {
           name,
           remoteCluster,
@@ -82,7 +82,7 @@ export class AutoFollowPatternTable extends PureComponent {
         ),
         sortable: true,
         truncateText: false,
-        render: name => {
+        render: (name) => {
           return (
             <EuiLink
               onClick={() => {
@@ -105,7 +105,7 @@ export class AutoFollowPatternTable extends PureComponent {
             defaultMessage: 'Status',
           }
         ),
-        render: active => {
+        render: (active) => {
           const statusText = active
             ? i18n.translate(
                 'xpack.crossClusterReplication.autoFollowPatternList.table.statusTextActive',
@@ -144,7 +144,7 @@ export class AutoFollowPatternTable extends PureComponent {
             defaultMessage: 'Leader patterns',
           }
         ),
-        render: leaderPatterns => leaderPatterns.join(', '),
+        render: (leaderPatterns) => leaderPatterns.join(', '),
       },
       {
         field: 'followIndexPatternPrefix',
@@ -192,7 +192,7 @@ export class AutoFollowPatternTable extends PureComponent {
 
               return (
                 <span
-                  onClick={event => {
+                  onClick={(event) => {
                     if (event.stopPropagation) {
                       event.stopPropagation();
                     }
@@ -245,7 +245,7 @@ export class AutoFollowPatternTable extends PureComponent {
 
               return (
                 <AutoFollowPatternDeleteProvider>
-                  {deleteAutoFollowPattern => (
+                  {(deleteAutoFollowPattern) => (
                     <span
                       onClick={() => deleteAutoFollowPattern(name)}
                       data-test-subj="contextMenuDeleteButton"
@@ -293,7 +293,7 @@ export class AutoFollowPatternTable extends PureComponent {
     };
 
     const selection = {
-      onSelectionChange: selectedItems =>
+      onSelectionChange: (selectedItems) =>
         this.setState({ selectedItems: selectedItems.map(({ name }) => name) }),
     };
 
@@ -303,11 +303,11 @@ export class AutoFollowPatternTable extends PureComponent {
       toolsLeft: selectedItems.length ? (
         <AutoFollowPatternActionMenu
           arrowDirection="down"
-          patterns={this.state.selectedItems.map(name => items.find(item => item.name === name))}
+          patterns={this.state.selectedItems.map((name) =>
+            items.find((item) => item.name === name)
+          )}
         />
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       onChange: this.onSearch,
       box: {
         incremental: true,

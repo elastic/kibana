@@ -19,7 +19,7 @@ interface Props {
   triggersActionsUI: TriggersAndActionsUIPublicPluginSetup;
 }
 
-export const TriggersActionsProvider: React.FC<Props> = props => {
+export const TriggersActionsProvider: React.FC<Props> = (props) => {
   return (
     <TriggerActionsContext.Provider
       value={{

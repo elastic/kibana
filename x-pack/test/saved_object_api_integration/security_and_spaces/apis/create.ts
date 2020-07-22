@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createTestSuiteFactory } from '../../common/suites/create';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -56,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
           allAtOtherSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
         },
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       createTest(`user with no access within the ${scenario.spaceId} space`, {
         user: scenario.users.noAccess,
         spaceId: scenario.spaceId,

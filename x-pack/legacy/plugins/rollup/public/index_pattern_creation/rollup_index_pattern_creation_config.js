@@ -90,7 +90,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       : null;
   }
 
-  isRollupIndex = indexName => {
+  isRollupIndex = (indexName) => {
     return this.rollupIndices.includes(indexName);
   };
 
@@ -105,14 +105,14 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       : [];
   }
 
-  checkIndicesForErrors = indices => {
+  checkIndicesForErrors = (indices) => {
     this.rollupIndex = null;
 
     if (!indices || !indices.length) {
       return;
     }
 
-    const rollupIndices = indices.filter(index => this.isRollupIndex(index.name));
+    const rollupIndices = indices.filter((index) => this.isRollupIndex(index.name));
 
     if (!rollupIndices.length) {
       return [rollupIndexPatternNoMatchError];

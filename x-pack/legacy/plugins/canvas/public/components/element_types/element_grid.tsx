@@ -70,7 +70,7 @@ export const ElementGrid = ({
           textMatch = true;
         }
 
-        if (!filterTags.length || filterTags.every(tag => tags.includes(tag))) {
+        if (!filterTags.length || filterTags.every((tag) => tags.includes(tag))) {
           tagsMatch = true;
         }
 

@@ -60,7 +60,7 @@ export const BarChartBaseComponent = ({
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} />
-      {data.map(series => {
+      {data.map((series) => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid ? (
           <BarSeries

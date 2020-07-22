@@ -22,7 +22,7 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     cancelLayerPanel: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));

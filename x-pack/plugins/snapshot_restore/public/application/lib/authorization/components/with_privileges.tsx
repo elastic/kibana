@@ -31,7 +31,7 @@ const toArray = (value: string | string[]): string[] =>
 export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Props) => {
   const { isLoading, privileges } = useContext(AuthorizationContext);
 
-  const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map(p => {
+  const privilegesToArray: Privilege[] = toArray(requiredPrivileges).map((p) => {
     const [section, privilege] = p.split('.');
     if (!privilege) {
       // Oh! we forgot to use the dot "." notation.
@@ -42,7 +42,7 @@ export const WithPrivileges = ({ privileges: requiredPrivileges, children }: Pro
 
   const hasPrivileges = isLoading
     ? false
-    : privilegesToArray.every(privilege => {
+    : privilegesToArray.every((privilege) => {
         const [section, requiredPrivilege] = privilege;
         if (!privileges.missingPrivileges[section]) {
           // if the section does not exist in our missingPriviledges, everything is OK

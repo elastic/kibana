@@ -14,7 +14,7 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext
+  PluginInitializerContext,
 } from '../../../../../../src/core/public';
 import { DataPublicPluginSetup } from '../../../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
@@ -24,7 +24,7 @@ import { AlertType } from '../../../../../plugins/apm/common/alert_types';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
 import {
   AlertsContextProvider,
-  TriggersAndActionsUIPublicPluginSetup
+  TriggersAndActionsUIPublicPluginSetup,
 } from '../../../../../plugins/triggers_actions_ui/public';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { routes } from '../components/app/Main/route_config';
@@ -132,31 +132,31 @@ export class ApmPlugin
     const apmPluginContextValue = {
       config,
       core,
-      plugins
+      plugins,
     };
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({
       id: AlertType.ErrorRate,
       name: i18n.translate('xpack.apm.alertTypes.errorRate', {
-        defaultMessage: 'Error rate'
+        defaultMessage: 'Error rate',
       }),
       iconClass: 'bell',
       alertParamsExpression: ErrorRateAlertTrigger,
       validate: () => ({
-        errors: []
-      })
+        errors: [],
+      }),
     });
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({
       id: AlertType.TransactionDuration,
       name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
-        defaultMessage: 'Transaction duration'
+        defaultMessage: 'Transaction duration',
       }),
       iconClass: 'bell',
       alertParamsExpression: TransactionDurationAlertTrigger,
       validate: () => ({
-        errors: []
-      })
+        errors: [],
+      }),
     });
 
     ReactDOM.render(
@@ -167,7 +167,7 @@ export class ApmPlugin
             docLinks: core.docLinks,
             toastNotifications: core.notifications.toasts,
             actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
-            alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry
+            alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
           }}
         >
           <KibanaContextProvider services={{ ...core, ...plugins }}>
@@ -193,7 +193,7 @@ export class ApmPlugin
     );
 
     // create static index pattern and store as saved object. Not needed by APM UI but for legacy reasons in Discover, Dashboard etc.
-    createStaticIndexPattern().catch(e => {
+    createStaticIndexPattern().catch((e) => {
       // eslint-disable-next-line no-console
       console.log('Error fetching static index pattern', e);
     });

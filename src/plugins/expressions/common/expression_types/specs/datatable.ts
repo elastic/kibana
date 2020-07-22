@@ -72,7 +72,7 @@ interface RenderedDatatable {
 
 export const datatable: ExpressionTypeDefinition<typeof name, Datatable, SerializedDatatable> = {
   name,
-  validate: table => {
+  validate: (table) => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
     if (!table.columns) {
       throw new Error('datatable must have a columns array, even if it is empty');
@@ -82,20 +82,20 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
       throw new Error('datatable must have a rows array, even if it is empty');
     }
   },
-  serialize: table => {
+  serialize: (table) => {
     const { columns, rows } = table;
     return {
       ...table,
-      rows: rows.map(row => {
-        return columns.map(column => row[column.name]);
+      rows: rows.map((row) => {
+        return columns.map((column) => row[column.name]);
       }),
     };
   },
-  deserialize: table => {
+  deserialize: (table) => {
     const { columns, rows } = table;
     return {
       ...table,
-      rows: rows.map(row => {
+      rows: rows.map((row) => {
         return zipObject(map(columns, 'name'), row);
       }),
     };
@@ -127,8 +127,8 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
     }),
     pointseries: (table: Datatable): PointSeries => {
       const validFields = ['x', 'y', 'color', 'size', 'text'];
-      const columns = table.columns.filter(column => validFields.includes(column.name));
-      const rows = table.rows.map(row => pick(row, validFields));
+      const columns = table.columns.filter((column) => validFields.includes(column.name));
+      const rows = table.rows.map((row) => pick(row, validFields));
       return {
         type: 'pointseries',
         columns: columns.reduce<Record<string, PointSeries['columns']>>((acc, column) => {

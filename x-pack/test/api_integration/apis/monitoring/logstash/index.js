@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
+export default function ({ loadTestFile }) {
   // FAILING: https://github.com/elastic/kibana/issues/52476
   describe.skip('Logstash', () => {
     loadTestFile(require.resolve('./overview'));

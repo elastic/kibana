@@ -261,7 +261,7 @@ export class SearchSource {
       }
     }
 
-    return Promise.all(handlers.map(fn => fn(this, options)));
+    return Promise.all(handlers.map((fn) => fn(this, options)));
   }
 
   /**
@@ -402,13 +402,13 @@ export class SearchSource {
     // re-write filters within filter aggregations
     (function recurse(aggBranch) {
       if (!aggBranch) return;
-      Object.keys(aggBranch).forEach(function(id) {
+      Object.keys(aggBranch).forEach(function (id) {
         const agg = aggBranch[id];
 
         if (agg.filters) {
           // translate filters aggregations
           const { filters: aggFilters } = agg.filters;
-          Object.keys(aggFilters).forEach(filterId => {
+          Object.keys(aggFilters).forEach((filterId) => {
             aggFilters[filterId] = translateToQuery(aggFilters[filterId]);
           });
         }

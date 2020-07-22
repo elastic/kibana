@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-const upperFirst = (str = '') => str.replace(/^./, strng => strng.toUpperCase());
+const upperFirst = (str = '') => str.replace(/^./, (strng) => strng.toUpperCase());
 
 const names: Record<string, string> = {
   general: i18n.translate('advancedSettings.categoryNames.generalLabel', {

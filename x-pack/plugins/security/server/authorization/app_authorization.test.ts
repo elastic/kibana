@@ -117,7 +117,7 @@ describe('initAppAuthorization', () => {
 
     const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: true });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
-    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation(request => {
+    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
       // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
       expect(request.headers).toMatchObject(headers);
@@ -157,7 +157,7 @@ describe('initAppAuthorization', () => {
 
     const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: false });
     mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
-    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation(request => {
+    mockAuthz.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
       // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
       // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
       expect(request.headers).toMatchObject(headers);

@@ -80,7 +80,7 @@ export class Bundle {
     return {
       spec: this.toSpec(),
       mtimes: entriesToObject(
-        files.map(p => [p, mtimes.get(p)] as const).sort(ascending(e => e[0]))
+        files.map((p) => [p, mtimes.get(p)] as const).sort(ascending((e) => e[0]))
       ),
     };
   }

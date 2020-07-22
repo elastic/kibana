@@ -60,7 +60,7 @@ export function buildConfig(record) {
     jobId: record.job_id,
     aggregationInterval: config.interval,
     chartFunction: functionLabel,
-    entityFields: config.entityFields.map(f => ({
+    entityFields: config.entityFields.map((f) => ({
       fieldName: f.fieldName,
       fieldValue: f.fieldValue,
     })),

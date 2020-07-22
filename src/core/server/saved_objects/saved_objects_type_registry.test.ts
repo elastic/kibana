@@ -44,7 +44,7 @@ describe('SavedObjectTypeRegistry', () => {
     expect(
       registry
         .getAllTypes()
-        .map(type => type.name)
+        .map((type) => type.name)
         .sort()
     ).toEqual(['typeA', 'typeB', 'typeC']);
   });
@@ -250,7 +250,7 @@ describe('SavedObjectTypeRegistry', () => {
 
       const types = registry.getImportableAndExportableTypes();
       expect(types.length).toEqual(2);
-      expect(types.map(t => t.name)).toEqual(['typeA', 'typeD']);
+      expect(types.map((t) => t.name)).toEqual(['typeA', 'typeD']);
     });
   });
 });

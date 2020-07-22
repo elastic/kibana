@@ -307,11 +307,13 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-export const FixedEuiFieldSearch: React.FC<React.InputHTMLAttributes<HTMLInputElement> &
-  EuiFieldSearchProps & {
-    inputRef?: (element: HTMLInputElement | null) => void;
-    onSearch: (value: string) => void;
-  }> = EuiFieldSearch as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+export const FixedEuiFieldSearch: React.FC<
+  React.InputHTMLAttributes<HTMLInputElement> &
+    EuiFieldSearchProps & {
+      inputRef?: (element: HTMLInputElement | null) => void;
+      onSearch: (value: string) => void;
+    }
+> = EuiFieldSearch as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 const AutocompleteContainer = euiStyled.div`
   position: relative;
@@ -327,7 +329,7 @@ const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   width: 100%;
   margin-top: 2px;
   overflow: hidden;
-  z-index: ${props => props.theme.eui.euiZLevel1};
+  z-index: ${(props) => props.theme.eui.euiZLevel1};
 `;
 
 SuggestionsPanel.displayName = 'SuggestionsPanel';

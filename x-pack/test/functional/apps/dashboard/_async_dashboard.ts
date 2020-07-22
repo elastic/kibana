@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 // import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   // const find = getService('find');
   const log = getService('log');
@@ -41,7 +41,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await appMenu.clickLink('Discover');
       await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
       await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Last_1 year');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
@@ -68,7 +68,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await pieChart.expectPieSliceCount(4);
 
       await appMenu.clickLink('Discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
@@ -81,7 +81,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('toggle from Discover to Dashboard attempt 1', async () => {
       await appMenu.clickLink('Discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
@@ -94,7 +94,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('toggle from Discover to Dashboard attempt 2', async () => {
       await appMenu.clickLink('Discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });

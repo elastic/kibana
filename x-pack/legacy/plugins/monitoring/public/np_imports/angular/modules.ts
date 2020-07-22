@@ -67,10 +67,10 @@ function createLocalStateModule() {
       'monitoring/KbnUrl',
       'monitoring/Promise',
     ])
-    .factory('AppState', function(Private: IPrivate) {
+    .factory('AppState', function (Private: IPrivate) {
       return Private(AppStateProvider);
     })
-    .service('globalState', function(Private: IPrivate) {
+    .service('globalState', function (Private: IPrivate) {
       return Private(GlobalStateProvider);
     });
 }
@@ -132,7 +132,7 @@ function createHrefModule(core: AppMountContext['core']) {
       restrict: 'A',
       link: {
         pre: (_$scope, _$el, $attr) => {
-          $attr.$observe(name, val => {
+          $attr.$observe(name, (val) => {
             if (val) {
               $attr.$set('href', core.http.basePath.prepend(val as string));
             }

@@ -7,11 +7,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('regression creation', function() {
+  describe('regression creation', function () {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/egs_regression');
@@ -48,7 +48,7 @@ export default function({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
         });
@@ -140,7 +140,7 @@ export default function({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.jobId);
           const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
-          const filteredRows = rows.filter(row => row.id === testData.jobId);
+          const filteredRows = rows.filter((row) => row.id === testData.jobId);
           expect(filteredRows).to.have.length(
             1,
             `Filtered analytics table should have 1 row for job id '${testData.jobId}' (got matching items '${filteredRows}')`

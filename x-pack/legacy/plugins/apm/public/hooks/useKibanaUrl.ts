@@ -14,6 +14,6 @@ export function useKibanaUrl(
   const { core } = useApmPluginContext();
   return url.format({
     pathname: core.http.basePath.prepend(path),
-    hash
+    hash,
   });
 }

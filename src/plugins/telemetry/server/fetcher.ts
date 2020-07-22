@@ -178,9 +178,7 @@ export class FetcherTask {
   private async fetchTelemetry() {
     return await this.telemetryCollectionManager!.getStats({
       unencrypted: false,
-      start: moment()
-        .subtract(20, 'minutes')
-        .toISOString(),
+      start: moment().subtract(20, 'minutes').toISOString(),
       end: moment().toISOString(),
     });
   }

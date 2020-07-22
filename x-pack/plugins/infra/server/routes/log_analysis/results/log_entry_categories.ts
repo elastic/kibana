@@ -60,7 +60,7 @@ export const initGetLogEntryCategoriesRoute = ({
           endTime,
           categoryCount,
           datasets ?? [],
-          histograms.map(histogram => ({
+          histograms.map((histogram) => ({
             bucketCount: histogram.bucketCount,
             endTime: histogram.timeRange.endTime,
             id: histogram.id,

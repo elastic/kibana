@@ -54,8 +54,8 @@ function getArgumentsHelp(
   const argsHelp = functionHelp.chainable ? functionHelp.args.slice(1) : functionHelp.args.slice(0);
 
   // ignore arguments that are already provided in function declaration
-  const functionArgNames = functionArgs.map(arg => arg.name);
-  return argsHelp.filter(arg => !functionArgNames.includes(arg.name));
+  const functionArgNames = functionArgs.map((arg) => arg.name);
+  return argsHelp.filter((arg) => !functionArgNames.includes(arg.name));
 }
 
 async function extractSuggestionsFromParsedResult(
@@ -111,7 +111,7 @@ async function extractSuggestionsFromParsedResult(
       );
     } else {
       const { suggestions: staticSuggestions } =
-        functionHelp.args.find(arg => arg.name === activeArg.name) || {};
+        functionHelp.args.find((arg) => arg.name === activeArg.name) || {};
       valueSuggestions = argValueSuggestions.getStaticSuggestionsForInput(
         partialInput,
         staticSuggestions
@@ -125,7 +125,7 @@ async function extractSuggestionsFromParsedResult(
 
   // return argument suggestions
   const argsHelp = getArgumentsHelp(functionHelp, activeFunc.arguments);
-  const argumentSuggestions = argsHelp.filter(arg => {
+  const argumentSuggestions = argsHelp.filter((arg) => {
     if (get(activeArg, 'type') === 'namedArg') {
       return startsWith(arg.name, activeArg.name);
     } else if (activeArg) {
@@ -170,7 +170,7 @@ export async function suggest(
         if (message.function) {
           // The user has start typing a function name, so we'll filter the list down to only
           // possible matches.
-          list = functionList.filter(func => startsWith(func.name, message.function));
+          list = functionList.filter((func) => startsWith(func.name, message.function));
         } else {
           // The user hasn't typed anything yet, so we'll just return the entire list.
           list = functionList;
@@ -179,7 +179,7 @@ export async function suggest(
       }
       case 'incompleteArgument': {
         const { currentFunction: functionName, currentArgs: functionArgs } = message;
-        const functionHelp = functionList.find(func => func.name === functionName);
+        const functionHelp = functionList.find((func) => func.name === functionName);
         return {
           list: getArgumentsHelp(functionHelp, functionArgs),
           type: SUGGESTION_TYPE.ARGUMENTS,
@@ -195,9 +195,9 @@ export async function suggest(
             functionArgs
           );
         } else {
-          const functionHelp = functionList.find(func => func.name === functionName);
+          const functionHelp = functionList.find((func) => func.name === functionName);
           if (functionHelp) {
-            const argHelp = functionHelp.args.find(arg => arg.name === argName);
+            const argHelp = functionHelp.args.find((arg) => arg.name === argName);
             if (argHelp && argHelp.suggestions) {
               valueSuggestions = argHelp.suggestions;
             }

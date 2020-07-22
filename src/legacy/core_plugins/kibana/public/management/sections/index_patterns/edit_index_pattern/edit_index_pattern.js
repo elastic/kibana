@@ -181,7 +181,7 @@ uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
   template,
   k7Breadcrumbs: getEditBreadcrumbs,
   resolve: {
-    indexPattern: function($route, Promise, redirectWhenMissing) {
+    indexPattern: function ($route, Promise, redirectWhenMissing) {
       const { indexPatterns } = npStart.plugins.data;
       return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
         redirectWhenMissing('/management/kibana/index_patterns')
@@ -192,7 +192,7 @@ uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
 
 uiModules
   .get('apps/management')
-  .controller('managementIndexPatternsEdit', function(
+  .controller('managementIndexPatternsEdit', function (
     $scope,
     $location,
     $route,
@@ -249,11 +249,11 @@ uiModules
     );
     docTitle.change($scope.indexPattern.title);
 
-    const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
+    const otherPatterns = _.filter($route.current.locals.indexPatterns, (pattern) => {
       return pattern.id !== $scope.indexPattern.id;
     });
 
-    $scope.$watch('indexPattern.fields', function() {
+    $scope.$watch('indexPattern.fields', function () {
       $scope.editSections = $scope.editSectionsProvider(
         $scope.indexPattern,
         $scope.fieldFilter,
@@ -267,7 +267,7 @@ uiModules
       isMigrating: false,
       newTitle: $scope.indexPattern.getIndex(),
     };
-    $scope.migrate = async function() {
+    $scope.migrate = async function () {
       $scope.migration.isMigrating = true;
       await $scope.indexPattern.migrate($scope.migration.newTitle);
       $scope.$evalAsync(() => {
@@ -275,10 +275,10 @@ uiModules
       });
     };
 
-    $scope.refreshFilters = function() {
+    $scope.refreshFilters = function () {
       const indexedFieldTypes = [];
       const scriptedFieldLanguages = [];
-      $scope.indexPattern.fields.forEach(field => {
+      $scope.indexPattern.fields.forEach((field) => {
         if (field.scripted) {
           scriptedFieldLanguages.push(field.lang);
         } else {
@@ -290,15 +290,17 @@ uiModules
       $scope.scriptedFieldLanguages = _.unique(scriptedFieldLanguages);
     };
 
-    $scope.changeFilter = function(filter, val) {
+    $scope.changeFilter = function (filter, val) {
       $scope[filter] = val || ''; // null causes filter to check for null explicitly
     };
 
-    $scope.$watchCollection('indexPattern.fields', function() {
-      $scope.conflictFields = $scope.indexPattern.fields.filter(field => field.type === 'conflict');
+    $scope.$watchCollection('indexPattern.fields', function () {
+      $scope.conflictFields = $scope.indexPattern.fields.filter(
+        (field) => field.type === 'conflict'
+      );
     });
 
-    $scope.refreshFields = function() {
+    $scope.refreshFields = function () {
       const confirmMessage = i18n.translate('kbn.management.editIndexPattern.refreshLabel', {
         defaultMessage: 'This action resets the popularity counter of each field.',
       });
@@ -313,7 +315,7 @@ uiModules
 
       npStart.core.overlays
         .openConfirm(confirmMessage, confirmModalOptions)
-        .then(async isConfirmed => {
+        .then(async (isConfirmed) => {
           if (isConfirmed) {
             await $scope.indexPattern.init(true);
             $scope.fields = $scope.indexPattern.getNonScriptedFields();
@@ -321,7 +323,7 @@ uiModules
         });
     };
 
-    $scope.removePattern = function() {
+    $scope.removePattern = function () {
       function doRemove() {
         if ($scope.indexPattern.id === config.get('defaultIndex')) {
           config.remove('defaultIndex');
@@ -332,7 +334,7 @@ uiModules
         }
 
         Promise.resolve($scope.indexPattern.destroy())
-          .then(function() {
+          .then(function () {
             $location.url('/management/kibana/index_patterns');
           })
           .catch(fatalError);
@@ -347,18 +349,18 @@ uiModules
         }),
       };
 
-      npStart.core.overlays.openConfirm('', confirmModalOptions).then(isConfirmed => {
+      npStart.core.overlays.openConfirm('', confirmModalOptions).then((isConfirmed) => {
         if (isConfirmed) {
           doRemove();
         }
       });
     };
 
-    $scope.setDefaultPattern = function() {
+    $scope.setDefaultPattern = function () {
       config.set('defaultIndex', $scope.indexPattern.id);
     };
 
-    $scope.setIndexPatternsTimeField = function(field) {
+    $scope.setIndexPatternsTimeField = function (field) {
       if (field.type !== 'date') {
         const errorMessage = i18n.translate('kbn.management.editIndexPattern.notDateErrorMessage', {
           defaultMessage: 'That field is a {fieldType} not a date.',

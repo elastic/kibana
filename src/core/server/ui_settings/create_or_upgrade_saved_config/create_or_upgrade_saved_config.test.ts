@@ -27,7 +27,7 @@ import { getUpgradeableConfigMock } from './get_upgradeable_config.test.mock';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 const chance = new Chance();
-describe('uiSettings/createOrUpgradeSavedConfig', function() {
+describe('uiSettings/createOrUpgradeSavedConfig', function () {
   afterEach(() => jest.resetAllMocks());
 
   const version = '4.0.1';
@@ -73,7 +73,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
     };
   }
 
-  describe('nothing is upgradeable', function() {
+  describe('nothing is upgradeable', function () {
     it('should create config with current version and buildNum', async () => {
       const { run, savedObjectsClient } = setup();
 

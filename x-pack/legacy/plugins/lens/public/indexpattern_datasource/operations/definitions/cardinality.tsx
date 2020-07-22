@@ -40,7 +40,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
     }
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find(field => field.name === column.sourceField);
+    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
 
     return Boolean(
       newField &&

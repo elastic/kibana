@@ -67,7 +67,7 @@ export class TimeseriesVisualization extends React.Component {
     props = props || this.props;
     const values = {};
 
-    props.series.forEach(row => {
+    props.series.forEach((row) => {
       // we need a valid identifier
       if (!row.id) {
         row.id = row.label;

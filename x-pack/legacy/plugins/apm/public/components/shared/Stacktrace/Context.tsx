@@ -39,7 +39,7 @@ const LineHighlight = styled.div<{ lineNumber: number }>`
   position: absolute;
   width: 100%;
   height: ${px(units.eighth * 9)};
-  top: ${props => px(props.lineNumber * LINE_HEIGHT)};
+  top: ${(props) => px(props.lineNumber * LINE_HEIGHT)};
   pointer-events: none;
   background-color: ${tint(0.1, theme.euiColorWarning)};
 `;
@@ -49,7 +49,7 @@ const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
   top: 0;
   left: 0;
   border-radius: ${borderRadius};
-  background: ${props =>
+  background: ${(props) =>
     props.isLibraryFrame
       ? theme.euiColorEmptyShade
       : theme.euiColorLightestShade};
@@ -64,7 +64,7 @@ const LineNumber = styled.div<{ highlight: boolean }>`
   line-height: ${px(unit + units.eighth)};
   text-align: right;
   border-right: 1px solid ${theme.euiColorLightShade};
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.highlight ? tint(0.1, theme.euiColorWarning) : null};
 
   &:last-of-type {

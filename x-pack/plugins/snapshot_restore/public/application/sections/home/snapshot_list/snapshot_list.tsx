@@ -205,7 +205,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           </h1>
         }
         body={
-          <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}>
+          <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
             {({ hasPrivileges }) =>
               hasPrivileges ? (
                 <Fragment>

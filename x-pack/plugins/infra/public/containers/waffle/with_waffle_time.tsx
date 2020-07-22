@@ -47,7 +47,7 @@ export const WithWaffleTimeUrlState = () => (
         urlState={urlState}
         urlStateKey="waffleTime"
         mapToUrlState={mapToUrlState}
-        onChange={newUrlState => {
+        onChange={(newUrlState) => {
           if (newUrlState && newUrlState.time) {
             jumpToTime(newUrlState.time);
           }
@@ -61,7 +61,7 @@ export const WithWaffleTimeUrlState = () => (
             stopAutoReload();
           }
         }}
-        onInitialize={initialUrlState => {
+        onInitialize={(initialUrlState) => {
           if (initialUrlState) {
             jumpToTime(initialUrlState.time ? initialUrlState.time : Date.now());
           }

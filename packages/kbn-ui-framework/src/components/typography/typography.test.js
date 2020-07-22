@@ -35,7 +35,7 @@ describe('KuiTitle', () => {
   });
 
   describe('renders size', () => {
-    SIZES.forEach(size => {
+    SIZES.forEach((size) => {
       test(size, () => {
         const component = render(
           <KuiTitle size={size}>

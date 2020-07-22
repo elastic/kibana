@@ -108,7 +108,7 @@ describe('explorerChartsContainerService', () => {
     explorerService.setCharts.mockClear();
   });
 
-  test('call anomalyChangeListener with empty series config', done => {
+  test('call anomalyChangeListener with empty series config', (done) => {
     anomalyDataChange([], 1486656000000, 1486670399999);
 
     setImmediate(() => {
@@ -121,7 +121,7 @@ describe('explorerChartsContainerService', () => {
     });
   });
 
-  test('call anomalyChangeListener with actual series config', done => {
+  test('call anomalyChangeListener with actual series config', (done) => {
     anomalyDataChange(mockAnomalyChartRecords, 1486656000000, 1486670399999);
 
     setImmediate(() => {
@@ -132,8 +132,8 @@ describe('explorerChartsContainerService', () => {
     });
   });
 
-  test('filtering should skip values of null', done => {
-    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map(d => {
+  test('filtering should skip values of null', (done) => {
+    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map((d) => {
       d.job_id = 'mock-job-id-distribution';
       return d;
     });
@@ -150,13 +150,13 @@ describe('explorerChartsContainerService', () => {
       // it should remove the datapoint with `null` and keep the one with `0`.
       const chartData = explorerService.setCharts.mock.calls[1][0].seriesToPlot[0].chartData;
       expect(chartData).toHaveLength(114);
-      expect(chartData.filter(d => d.value === 0)).toHaveLength(1);
-      expect(chartData.filter(d => d.value === null)).toHaveLength(0);
+      expect(chartData.filter((d) => d.value === 0)).toHaveLength(1);
+      expect(chartData.filter((d) => d.value === null)).toHaveLength(0);
       done();
     });
   });
 
-  test('field value with trailing dot should not throw an error', done => {
+  test('field value with trailing dot should not throw an error', (done) => {
     const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords);
     mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';
 

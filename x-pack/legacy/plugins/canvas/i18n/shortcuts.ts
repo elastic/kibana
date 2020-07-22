@@ -41,11 +41,11 @@ export const ShortcutStrings = {
     DELETE: i18n.translate('xpack.canvas.keyboardShortcuts.deleteShortcutHelpText', {
       defaultMessage: 'Delete',
     }),
-    BRING_FORWARD: i18n.translate('xpack.canvas.keyboardShortcuts.bringFowardShortcutHelpText', {
-      defaultMessage: 'Bring to front',
+    BRING_FORWARD: i18n.translate('xpack.canvas.keyboardShortcuts.bringForwardShortcutHelpText', {
+      defaultMessage: 'Bring forward',
     }),
     BRING_TO_FRONT: i18n.translate('xpack.canvas.keyboardShortcuts.bringToFrontShortcutHelpText', {
-      defaultMessage: 'Bring forward',
+      defaultMessage: 'Bring to front',
     }),
     SEND_BACKWARD: i18n.translate('xpack.canvas.keyboardShortcuts.sendBackwardShortcutHelpText', {
       defaultMessage: 'Send backward',

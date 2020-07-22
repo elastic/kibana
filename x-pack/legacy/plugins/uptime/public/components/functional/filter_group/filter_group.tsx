@@ -42,7 +42,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
     // add new term to filter map, toggle it off if already present
     const updatedFilterMap = new Map<string, string[]>(filterKueries);
     updatedFilterMap.set(fieldName, values);
-    Array.from(updatedFilterMap.keys()).forEach(key => {
+    Array.from(updatedFilterMap.keys()).forEach((key) => {
       const value = updatedFilterMap.get(key);
       if (value && value.length === 0) {
         updatedFilterMap.delete(key);
@@ -122,7 +122,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
         value="down"
         withNext={false}
       />
-      {filterPopoverProps.map(item => (
+      {filterPopoverProps.map((item) => (
         <FilterPopover key={item.id} {...item} />
       ))}
     </EuiFilterGroup>

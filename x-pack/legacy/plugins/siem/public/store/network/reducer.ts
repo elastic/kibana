@@ -170,7 +170,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
-  .case(setNetworkTablesActivePageToZero, state => ({
+  .case(setNetworkTablesActivePageToZero, (state) => ({
     ...state,
     page: {
       ...state.page,
@@ -181,7 +181,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: setNetworkDetailsQueriesActivePageToZero(state),
     },
   }))
-  .case(setIpDetailsTablesActivePageToZero, state => ({
+  .case(setIpDetailsTablesActivePageToZero, (state) => ({
     ...state,
     details: {
       ...state.details,

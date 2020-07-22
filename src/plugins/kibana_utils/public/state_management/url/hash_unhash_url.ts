@@ -56,5 +56,5 @@ function createQueryReplacer(
   queryMapper: (q: IParsedUrlQuery, options?: IUrlQueryMapperOptions) => IParsedUrlQuery,
   options?: IUrlQueryReplacerOptions
 ) {
-  return (url: string) => replaceUrlHashQuery(url, query => queryMapper(query, options));
+  return (url: string) => replaceUrlHashQuery(url, (query) => queryMapper(query, options));
 }

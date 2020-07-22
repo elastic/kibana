@@ -130,7 +130,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         <EuiSpacer size="s" />
 
         <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
-          {copy => (
+          {(copy) => (
             <EuiButton fullWidth onClick={copy} size="s">
               <FormattedMessage
                 id="xpack.reporting.panelContent.copyUrlButtonLabel"

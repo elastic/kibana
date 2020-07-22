@@ -73,7 +73,7 @@ export const mlJobTypeAriaLabels = {
 
 export const getMLJobTypeAriaLabel = (type: string) => {
   const requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES).find(
-    k => ML_JOB_FIELD_TYPES[k as keyof typeof ML_JOB_FIELD_TYPES] === type
+    (k) => ML_JOB_FIELD_TYPES[k as keyof typeof ML_JOB_FIELD_TYPES] === type
   );
   if (requestedFieldType === undefined) {
     return null;

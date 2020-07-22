@@ -25,7 +25,7 @@ export const WalkthroughLayout: React.FC<LayoutProps> = ({
   goTo,
   children,
 }) => {
-  const indexOfCurrent = walkthroughSteps.findIndex(step => activePath === step.id);
+  const indexOfCurrent = walkthroughSteps.findIndex((step) => activePath === step.id);
   return (
     <EuiPageContent>
       <EuiTitle>

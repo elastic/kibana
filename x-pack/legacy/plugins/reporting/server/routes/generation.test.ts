@@ -48,7 +48,7 @@ const mockPlugins = {
 
 const getErrorsFromRequest = (request: Hapi.Request) => {
   // @ts-ignore error property doesn't exist on RequestLog
-  return request.logs.filter(log => log.tags.includes('error')).map(log => log.error); // NOTE: error stack is available
+  return request.logs.filter((log) => log.tags.includes('error')).map((log) => log.error); // NOTE: error stack is available
 };
 
 test(`returns 400 if there are no job params`, async () => {

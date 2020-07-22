@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function StaticLabelForm({ onStaticStyleChange, staticDynamicSelect, styleProperty }) {
-  const onValueChange = event => {
+  const onValueChange = (event) => {
     onStaticStyleChange(styleProperty.getStyleName(), { value: event.target.value });
   };
 

@@ -1,5 +1,5 @@
 [[index-patterns]]
-== Creating an index pattern
+== Create an index pattern
 
 To explore and visualize data in {kib}, you must create an index pattern.
 An index pattern tells {kib} which {es} indices contain the data that

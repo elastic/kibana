@@ -17,7 +17,7 @@ routes.enable();
 
 routes
   .defaults(/.*/, {
-    badge: uiCapabilities => {
+    badge: (uiCapabilities) => {
       if (uiCapabilities.maps.save) {
         return undefined;
       }
@@ -37,20 +37,20 @@ routes
     template: listingTemplate,
     controller($scope, gisMapSavedObjectLoader, config) {
       $scope.listingLimit = config.get('savedObjects:listingLimit');
-      $scope.find = search => {
+      $scope.find = (search) => {
         return gisMapSavedObjectLoader.find(search, $scope.listingLimit);
       };
-      $scope.delete = ids => {
+      $scope.delete = (ids) => {
         return gisMapSavedObjectLoader.delete(ids);
       };
       $scope.readOnly = !capabilities.get().maps.save;
     },
     resolve: {
-      hasMaps: function(kbnUrl) {
+      hasMaps: function (kbnUrl) {
         chrome
           .getSavedObjectsClient()
           .find({ type: 'map', perPage: 1 })
-          .then(resp => {
+          .then((resp) => {
             // Do not show empty listing page, just redirect to a new map
             if (resp.savedObjects.length === 0) {
               kbnUrl.redirect('/map');
@@ -65,7 +65,7 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function(gisMapSavedObjectLoader, redirectWhenMissing) {
+      map: function (gisMapSavedObjectLoader, redirectWhenMissing) {
         return gisMapSavedObjectLoader.get().catch(
           redirectWhenMissing({
             map: '/',
@@ -78,11 +78,11 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function(gisMapSavedObjectLoader, redirectWhenMissing, $route) {
+      map: function (gisMapSavedObjectLoader, redirectWhenMissing, $route) {
         const id = $route.current.params.id;
         return gisMapSavedObjectLoader
           .get(id)
-          .then(savedMap => {
+          .then((savedMap) => {
             npStart.core.chrome.recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
             docTitle.change(savedMap.title);
             return savedMap;

@@ -102,13 +102,13 @@ const legacyAppToNavItem = (app: LegacyApp, selectedId: string) => ({
 const sectionVisible = (section: LegacySection | LegacyApp) => !section.disabled && section.visible;
 
 const sideNavItems = (sections: ManagementSection[], selectedId: string) =>
-  sections.map(section => ({
+  sections.map((section) => ({
     items: section.getAppsEnabled().map(managementAppToNavItem(selectedId, section.id)),
     ...managementSectionToNavSection(section),
   }));
 
 const findOrAddSection = (navItems: NavSection[], legacySection: LegacySection): NavSection => {
-  const foundSection = navItems.find(sec => sec.id === legacySection.id);
+  const foundSection = navItems.find((sec) => sec.id === legacySection.id);
 
   if (foundSection) {
     return foundSection;
@@ -127,11 +127,11 @@ export const mergeLegacyItems = (
 ) => {
   const filteredLegacySections = legacySections
     .filter(sectionVisible)
-    .filter(section => section.visibleItems.length);
+    .filter((section) => section.visibleItems.length);
 
-  filteredLegacySections.forEach(legacySection => {
+  filteredLegacySections.forEach((legacySection) => {
     const section = findOrAddSection(navItems, legacySection);
-    legacySection.visibleItems.forEach(app => {
+    legacySection.visibleItems.forEach((app) => {
       section.items.push(legacyAppToNavItem(app, selectedId));
       return section.items.sort((a, b) => a.order - b.order);
     });

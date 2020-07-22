@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-const zoomOutBtn = zoomInfo => {
+const zoomOutBtn = (zoomInfo) => {
   if (!zoomInfo || !zoomInfo.showZoomOutBtn()) {
     return null;
   }
@@ -64,7 +64,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
         bucketSize,
       },
     }),
-  ].concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
+  ].concat(series.map((item) => `${item.metric.label}: ${item.metric.description}`));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" className="monRhythmChart__wrapper">

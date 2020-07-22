@@ -184,7 +184,7 @@ export const registerAutoFollowPatternRoutes = ({ router, __LEGACY }: RouteDepen
         const errors: Array<{ id: string; error: any }> = [];
 
         await Promise.all(
-          ids.map(_id =>
+          ids.map((_id) =>
             callWithRequest('ccr.deleteAutoFollowPattern', { id: _id })
               .then(() => itemsDeleted.push(_id))
               .catch((err: Error) => {
@@ -230,7 +230,7 @@ export const registerAutoFollowPatternRoutes = ({ router, __LEGACY }: RouteDepen
         const errors: Array<{ id: string; error: any }> = [];
 
         await Promise.all(
-          ids.map(_id =>
+          ids.map((_id) =>
             callWithRequest('ccr.pauseAutoFollowPattern', { id: _id })
               .then(() => itemsPaused.push(_id))
               .catch((err: Error) => {
@@ -276,7 +276,7 @@ export const registerAutoFollowPatternRoutes = ({ router, __LEGACY }: RouteDepen
         const errors: Array<{ id: string; error: any }> = [];
 
         await Promise.all(
-          ids.map(_id =>
+          ids.map((_id) =>
             callWithRequest('ccr.resumeAutoFollowPattern', { id: _id })
               .then(() => itemsResumed.push(_id))
               .catch((err: Error) => {

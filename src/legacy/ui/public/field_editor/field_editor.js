@@ -124,7 +124,7 @@ export class FieldEditor extends PureComponent {
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.map(f => f.name),
+      existingFieldNames: indexPattern.fields.map((f) => f.name),
       field: copyField(field, indexPattern, Field),
       fieldFormatId: undefined,
       fieldFormatParams: {},
@@ -177,7 +177,7 @@ export class FieldEditor extends PureComponent {
     this.forceUpdate();
   };
 
-  onTypeChange = type => {
+  onTypeChange = (type) => {
     const { getConfig } = this.props.helpers;
     const { field } = this.state;
     const fieldFormats = getFieldFormats();
@@ -193,7 +193,7 @@ export class FieldEditor extends PureComponent {
     });
   };
 
-  onLangChange = lang => {
+  onLangChange = (lang) => {
     const { field } = this.state;
     const fieldTypes = get(FIELD_TYPES_BY_LANG, lang, DEFAULT_FIELD_TYPES);
     field.lang = lang;
@@ -219,12 +219,12 @@ export class FieldEditor extends PureComponent {
     });
   };
 
-  onFormatParamsChange = newParams => {
+  onFormatParamsChange = (newParams) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId, newParams);
   };
 
-  onFormatParamsError = error => {
+  onFormatParamsError = (error) => {
     this.setState({
       hasFormatError: !!error,
     });
@@ -281,7 +281,7 @@ export class FieldEditor extends PureComponent {
             defaultMessage: 'New scripted field',
           })}
           data-test-subj="editorFieldName"
-          onChange={e => {
+          onChange={(e) => {
             this.onFieldChange('name', e.target.value);
           }}
           isInvalid={isInvalid}
@@ -332,11 +332,11 @@ export class FieldEditor extends PureComponent {
       >
         <EuiSelect
           value={field.lang}
-          options={scriptingLangs.map(lang => {
+          options={scriptingLangs.map((lang) => {
             return { value: lang, text: lang };
           })}
           data-test-subj="editorFieldLang"
-          onChange={e => {
+          onChange={(e) => {
             this.onLangChange(e.target.value);
           }}
         />
@@ -354,11 +354,11 @@ export class FieldEditor extends PureComponent {
         <EuiSelect
           value={field.type}
           disabled={!field.scripted}
-          options={fieldTypes.map(type => {
+          options={fieldTypes.map((type) => {
             return { value: type, text: type };
           })}
           data-test-subj="editorFieldType"
-          onChange={e => {
+          onChange={(e) => {
             this.onTypeChange(e.target.value);
           }}
         />
@@ -453,11 +453,11 @@ export class FieldEditor extends PureComponent {
         >
           <EuiSelect
             value={fieldFormatId}
-            options={fieldTypeFormats.map(format => {
+            options={fieldTypeFormats.map((format) => {
               return { value: format.id || '', text: format.title };
             })}
             data-test-subj="editorSelectedFormatId"
-            onChange={e => {
+            onChange={(e) => {
               this.onFormatChange(e.target.value);
             }}
           />
@@ -491,7 +491,7 @@ export class FieldEditor extends PureComponent {
         <EuiFieldNumber
           value={field.count}
           data-test-subj="editorFieldCount"
-          onChange={e => {
+          onChange={(e) => {
             this.onFieldChange('count', e.target.value ? Number(e.target.value) : '');
           }}
         />
@@ -499,7 +499,7 @@ export class FieldEditor extends PureComponent {
     );
   }
 
-  onScriptChange = value => {
+  onScriptChange = (value) => {
     this.setState({
       hasScriptError: false,
     });
@@ -756,7 +756,7 @@ export class FieldEditor extends PureComponent {
     }
 
     const { redirectAway } = this.props.helpers;
-    const index = indexPattern.fields.findIndex(f => f.name === field.name);
+    const index = indexPattern.fields.findIndex((f) => f.name === field.name);
 
     if (index > -1) {
       indexPattern.fields.update(field);
@@ -770,7 +770,7 @@ export class FieldEditor extends PureComponent {
       indexPattern.fieldFormatMap[field.name] = field.format;
     }
 
-    return indexPattern.save().then(function() {
+    return indexPattern.save().then(function () {
       const message = i18n.translate('common.ui.fieldEditor.deleteField.savedHeader', {
         defaultMessage: "Saved '{fieldName}'",
         values: { fieldName: field.name },

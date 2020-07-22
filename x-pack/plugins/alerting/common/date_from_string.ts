@@ -17,10 +17,10 @@ export const DateFromString = new t.Type<Date, string, unknown>(
       // validate this is a string
       t.string.validate(valueToDecode, context),
       // decode
-      value => {
+      (value) => {
         const decoded = new Date(value);
         return isNaN(decoded.getTime()) ? t.failure(valueToDecode, context) : t.success(decoded);
       }
     ),
-  valueToEncode => valueToEncode.toISOString()
+  (valueToEncode) => valueToEncode.toISOString()
 );

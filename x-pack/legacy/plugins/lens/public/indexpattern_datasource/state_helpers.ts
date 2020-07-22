@@ -52,7 +52,7 @@ function adjustColumnReferencesForChangedColumn(
   columnId: string
 ) {
   const newColumns = { ...columns };
-  Object.keys(newColumns).forEach(currentColumnId => {
+  Object.keys(newColumns).forEach((currentColumnId) => {
     if (currentColumnId !== columnId) {
       const currentColumn = newColumns[currentColumnId];
       const operationDefinition = operationDefinitionMap[currentColumn.operationType];
@@ -156,16 +156,16 @@ export function updateLayerIndexPattern(
   layer: IndexPatternLayer,
   newIndexPattern: IndexPattern
 ): IndexPatternLayer {
-  const keptColumns: IndexPatternLayer['columns'] = _.pick(layer.columns, column =>
+  const keptColumns: IndexPatternLayer['columns'] = _.pick(layer.columns, (column) =>
     isColumnTransferable(column, newIndexPattern)
   );
-  const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, column => {
+  const newColumns: IndexPatternLayer['columns'] = _.mapValues(keptColumns, (column) => {
     const operationDefinition = operationDefinitionMap[column.operationType];
     return operationDefinition.transfer
       ? operationDefinition.transfer(column, newIndexPattern)
       : column;
   });
-  const newColumnOrder = layer.columnOrder.filter(columnId => newColumns[columnId]);
+  const newColumnOrder = layer.columnOrder.filter((columnId) => newColumns[columnId]);
 
   return {
     ...layer,

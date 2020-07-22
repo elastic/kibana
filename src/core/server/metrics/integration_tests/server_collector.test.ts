@@ -34,7 +34,7 @@ describe('ServerMetricsCollector', () => {
   let hapiServer: HapiServer;
   let router: IRouter;
 
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
@@ -81,7 +81,7 @@ describe('ServerMetricsCollector', () => {
   });
 
   it('collect disconnects requests infos', async () => {
-    const never = new Promise(resolve => undefined);
+    const never = new Promise((resolve) => undefined);
     const hitSubject = new BehaviorSubject(0);
 
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
@@ -100,7 +100,7 @@ describe('ServerMetricsCollector', () => {
 
     await hitSubject
       .pipe(
-        filter(count => count >= 2),
+        filter((count) => count >= 2),
         take(1)
       )
       .toPromise();
@@ -177,7 +177,7 @@ describe('ServerMetricsCollector', () => {
     const waitForHits = (hits: number) =>
       hitSubject
         .pipe(
-          filter(count => count >= hits),
+          filter((count) => count >= hits),
           take(1)
         )
         .toPromise();

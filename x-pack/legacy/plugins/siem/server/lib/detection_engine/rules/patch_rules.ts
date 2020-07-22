@@ -6,6 +6,7 @@
 
 import { defaults } from 'lodash/fp';
 import { PartialAlert } from '../../../../../../../plugins/alerting/server';
+import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { readRules } from './read_rules';
 import { PatchRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
 import { addTags } from './add_tags';
@@ -47,6 +48,7 @@ export const patchRules = async ({
   lists,
   anomalyThreshold,
   machineLearningJobId,
+  actions,
 }: PatchRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
@@ -125,7 +127,7 @@ export const patchRules = async ({
       schedule: {
         interval: calculateInterval(interval, rule.schedule.interval),
       },
-      actions: rule.actions,
+      actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
       params: nextParams,
     },
   });

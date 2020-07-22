@@ -84,7 +84,7 @@ describe('connector_edit_flyout', () => {
           <ConnectorEditFlyout
             initialConnector={connector}
             editFlyoutVisible={true}
-            setEditFlyoutVisibility={state => {}}
+            setEditFlyoutVisibility={(state) => {}}
           />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>

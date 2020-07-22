@@ -27,7 +27,7 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ getArgValue, setArgVa
   <div style={{ fontSize: 0 }}>
     <ColorPickerPopover
       value={getArgValue('backgroundColor')}
-      onChange={color => setArgValue('backgroundColor', color)}
+      onChange={(color) => setArgValue('backgroundColor', color)}
       colors={workpad.colors}
       anchorPosition="leftCenter"
       ariaLabel={strings.getDisplayName()}

@@ -187,10 +187,7 @@ describe('#getCommonColumns', () => {
         </ThemeProvider>
       );
 
-      wrapper
-        .find('[data-test-subj="expand-notes"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
 
       expect(onToggleShowNotes).toBeCalledWith({
         abc: <div />,
@@ -219,10 +216,7 @@ describe('#getCommonColumns', () => {
         </ThemeProvider>
       );
 
-      wrapper
-        .find('[data-test-subj="expand-notes"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
 
       expect(onToggleShowNotes).toBeCalledWith({
         abc: <div />,
@@ -241,12 +235,7 @@ describe('#getCommonColumns', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('thead tr th')
-          .at(1)
-          .text()
-      ).toContain(i18n.TIMELINE_NAME);
+      expect(wrapper.find('thead tr th').at(1).text()).toContain(i18n.TIMELINE_NAME);
     });
 
     test('it renders the title when the timeline has a title and a saved object id', () => {
@@ -260,10 +249,7 @@ describe('#getCommonColumns', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`)
-          .first()
-          .text()
+        wrapper.find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`).first().text()
       ).toEqual(mockResults[0].title);
     });
 
@@ -302,10 +288,7 @@ describe('#getCommonColumns', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="title-${missingTitle[0].savedObjectId}"]`)
-          .first()
-          .text()
+        wrapper.find(`[data-test-subj="title-${missingTitle[0].savedObjectId}"]`).first().text()
       ).toEqual(i18n.UNTITLED_TIMELINE);
     });
 
@@ -324,10 +307,7 @@ describe('#getCommonColumns', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="title-no-saved-object-id-no-title"]')
-          .first()
-          .text()
+        wrapper.find('[data-test-subj="title-no-saved-object-id-no-title"]').first().text()
       ).toEqual(i18n.UNTITLED_TIMELINE);
     });
 
@@ -383,10 +363,7 @@ describe('#getCommonColumns', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`)
-          .first()
-          .exists()
+        wrapper.find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`).first().exists()
       ).toBe(true);
     });
 
@@ -405,10 +382,7 @@ describe('#getCommonColumns', () => {
       );
 
       expect(
-        wrapper
-          .find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`)
-          .first()
-          .exists()
+        wrapper.find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`).first().exists()
       ).toBe(false);
     });
 
@@ -445,12 +419,7 @@ describe('#getCommonColumns', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('thead tr th')
-          .at(2)
-          .text()
-      ).toContain(i18n.DESCRIPTION);
+      expect(wrapper.find('thead tr th').at(2).text()).toContain(i18n.DESCRIPTION);
     });
 
     test('it renders the description when the timeline has a description', () => {
@@ -460,12 +429,9 @@ describe('#getCommonColumns', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="description"]')
-          .first()
-          .text()
-      ).toEqual(mockResults[0].description);
+      expect(wrapper.find('[data-test-subj="description"]').first().text()).toEqual(
+        mockResults[0].description
+      );
     });
 
     test('it renders a placeholder when the timeline has no description', () => {
@@ -476,12 +442,9 @@ describe('#getCommonColumns', () => {
           <TimelinesTable {...getMockTimelinesTableProps(missingDescription)} />
         </ThemeProvider>
       );
-      expect(
-        wrapper
-          .find('[data-test-subj="description"]')
-          .first()
-          .text()
-      ).toEqual(getEmptyValue());
+      expect(wrapper.find('[data-test-subj="description"]').first().text()).toEqual(
+        getEmptyValue()
+      );
     });
 
     test('it renders a placeholder when the timeline description is just whitespace', () => {
@@ -497,12 +460,9 @@ describe('#getCommonColumns', () => {
           <TimelinesTable {...testProps} />
         </ThemeProvider>
       );
-      expect(
-        wrapper
-          .find('[data-test-subj="description"]')
-          .first()
-          .text()
-      ).toEqual(getEmptyValue());
+      expect(wrapper.find('[data-test-subj="description"]').first().text()).toEqual(
+        getEmptyValue()
+      );
     });
   });
 
@@ -514,12 +474,7 @@ describe('#getCommonColumns', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('thead tr th')
-          .at(3)
-          .text()
-      ).toContain(i18n.LAST_MODIFIED);
+      expect(wrapper.find('thead tr th').at(3).text()).toContain(i18n.LAST_MODIFIED);
     });
 
     test('it renders the last modified (updated) date when the timeline has an updated property', () => {
@@ -529,12 +484,9 @@ describe('#getCommonColumns', () => {
         </ThemeProvider>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="updated"]')
-          .first()
-          .text().length
-      ).toBeGreaterThan(getEmptyValue().length);
+      expect(wrapper.find('[data-test-subj="updated"]').first().text().length).toBeGreaterThan(
+        getEmptyValue().length
+      );
     });
   });
 
@@ -546,11 +498,6 @@ describe('#getCommonColumns', () => {
         <TimelinesTable {...getMockTimelinesTableProps(missingUpdated)} />
       </ThemeProvider>
     );
-    expect(
-      wrapper
-        .find('[data-test-subj="updated"]')
-        .first()
-        .text()
-    ).toEqual(getEmptyValue());
+    expect(wrapper.find('[data-test-subj="updated"]').first().text()).toEqual(getEmptyValue());
   });
 });

@@ -22,7 +22,7 @@ import {
   CLEAR_ADD_CLUSTER_ERRORS,
 } from '../action_types';
 
-export const addCluster = cluster => async dispatch => {
+export const addCluster = (cluster) => async (dispatch) => {
   dispatch({
     type: ADD_CLUSTER_START,
   });
@@ -31,7 +31,7 @@ export const addCluster = cluster => async dispatch => {
     await Promise.all([
       sendAddClusterRequest(cluster),
       // Wait at least half a second to avoid a weird flicker of the saving feedback.
-      new Promise(resolve => setTimeout(resolve, 500)),
+      new Promise((resolve) => setTimeout(resolve, 500)),
     ]);
   } catch (error) {
     if (error) {
@@ -114,7 +114,7 @@ export const addCluster = cluster => async dispatch => {
   }
 };
 
-export const clearAddClusterErrors = () => dispatch => {
+export const clearAddClusterErrors = () => (dispatch) => {
   dispatch({
     type: CLEAR_ADD_CLUSTER_ERRORS,
   });

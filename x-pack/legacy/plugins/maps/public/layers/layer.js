@@ -24,7 +24,7 @@ export class AbstractLayer {
     this._source = source;
     if (this._descriptor.__dataRequests) {
       this._dataRequests = this._descriptor.__dataRequests.map(
-        dataRequest => new DataRequest(dataRequest)
+        (dataRequest) => new DataRequest(dataRequest)
       );
     } else {
       this._dataRequests = [];
@@ -65,7 +65,7 @@ export class AbstractLayer {
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
     if (clonedDescriptor.joins) {
-      clonedDescriptor.joins.forEach(joinDescriptor => {
+      clonedDescriptor.joins.forEach((joinDescriptor) => {
         // right.id is uuid used to track requests in inspector
         joinDescriptor.right.id = uuid();
       });
@@ -259,7 +259,7 @@ export class AbstractLayer {
       return [];
     }
 
-    const requestTokens = this._dataRequests.map(dataRequest => dataRequest.getRequestToken());
+    const requestTokens = this._dataRequests.map((dataRequest) => dataRequest.getRequestToken());
     return _.compact(requestTokens);
   }
 
@@ -268,11 +268,11 @@ export class AbstractLayer {
   }
 
   getDataRequest(id) {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
+    return this._dataRequests.find((dataRequest) => dataRequest.getDataId() === id);
   }
 
   isLayerLoading() {
-    return this._dataRequests.some(dataRequest => dataRequest.isLoading());
+    return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
   hasErrors() {

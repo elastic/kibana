@@ -38,7 +38,7 @@ export const RangePicker = React.memo<Props>(({ selected, onRangeSelected }) => 
       <EuiSelect
         data-test-subj="rangePicker"
         value={selected}
-        options={Ranges.map(range => ({
+        options={Ranges.map((range) => ({
           text: range,
         }))}
         onChange={onChange}

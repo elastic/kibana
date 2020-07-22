@@ -15,20 +15,23 @@ export function getDurationRt({ min }: { min: number }) {
     'durationRt',
     t.string.is,
     (input, context) => {
-      return either.chain(t.string.validate(input, context), inputAsString => {
-        const { amount, unit } = amountAndUnitToObject(inputAsString);
-        const amountAsInt = parseInt(amount, 10);
-        const isValidUnit = DURATION_UNITS.includes(unit);
-        const isValid = amountAsInt >= min && isValidUnit;
+      return either.chain(
+        t.string.validate(input, context),
+        (inputAsString) => {
+          const { amount, unit } = amountAndUnitToObject(inputAsString);
+          const amountAsInt = parseInt(amount, 10);
+          const isValidUnit = DURATION_UNITS.includes(unit);
+          const isValid = amountAsInt >= min && isValidUnit;
 
-        return isValid
-          ? t.success(inputAsString)
-          : t.failure(
-              input,
-              context,
-              `Must have numeric amount and a valid unit (${DURATION_UNITS})`
-            );
-      });
+          return isValid
+            ? t.success(inputAsString)
+            : t.failure(
+                input,
+                context,
+                `Must have numeric amount and a valid unit (${DURATION_UNITS})`
+              );
+        }
+      );
     },
     t.identity
   );

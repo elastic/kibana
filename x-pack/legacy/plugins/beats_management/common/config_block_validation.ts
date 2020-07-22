@@ -20,7 +20,7 @@ export const validateConfigurationBlocks = (configurationBlocks: ConfigurationBl
   };
 
   for (const [index, block] of configurationBlocks.entries()) {
-    const blockSchema = configBlockSchemas.find(s => s.id === block.type);
+    const blockSchema = configBlockSchemas.find((s) => s.id === block.type);
     if (!blockSchema) {
       throw new Error(
         `Invalid config type of ${block.type} used in 'configuration_blocks' at index ${index}`
@@ -30,7 +30,7 @@ export const validateConfigurationBlocks = (configurationBlocks: ConfigurationBl
     const interfaceConfig = blockSchema.configs.reduce((props, config) => {
       if (config.options) {
         props[config.id] = t.keyof(
-          Object.fromEntries(config.options.map(opt => [opt.value, null])) as Record<string, null>
+          Object.fromEntries(config.options.map((opt) => [opt.value, null])) as Record<string, null>
         );
       } else if (config.validation) {
         props[config.id] = validationMap[config.validation];

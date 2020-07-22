@@ -11,7 +11,7 @@ import { useUiFilters } from '../context/UrlParamsContext';
 import { useFetcher } from './useFetcher';
 
 const INITIAL_DATA: MetricsChartsByAgentAPIResponse = {
-  charts: []
+  charts: [],
 };
 
 export function useServiceMetricCharts(
@@ -21,7 +21,7 @@ export function useServiceMetricCharts(
   const { serviceName, start, end, serviceNodeName } = urlParams;
   const uiFilters = useUiFilters(urlParams);
   const { data = INITIAL_DATA, error, status } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end && agentName) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/metrics/charts',
@@ -32,9 +32,9 @@ export function useServiceMetricCharts(
               end,
               agentName,
               serviceNodeName,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -44,6 +44,6 @@ export function useServiceMetricCharts(
   return {
     data,
     status,
-    error
+    error,
   };
 }

@@ -87,15 +87,15 @@ describe('<DetailPanel />', () => {
     const tabActive = JOB_DETAILS_TAB_SUMMARY;
     const { component } = initTestBed({ panelType: tabActive });
     const tabs = component.find('EuiTab');
-    const getTab = id => {
-      const found = tabs.findWhere(tab => {
+    const getTab = (id) => {
+      const found = tabs.findWhere((tab) => {
         return tab.text() === tabToHumanizedMap[id].props.defaultMessage;
       });
       return found.first();
     };
 
     it('should have 5 tabs visible', () => {
-      const tabsLabel = tabs.map(tab => tab.text());
+      const tabsLabel = tabs.map((tab) => tab.text());
 
       expect(tabsLabel).toEqual(['Summary', 'Terms', 'Histogram', 'Metrics', 'JSON']);
     });
@@ -154,7 +154,7 @@ describe('<DetailPanel />', () => {
         });
 
         it('should set the correct job value for each of the subsection', () => {
-          LOGISTICS_SUBSECTIONS.forEach(subSection => {
+          LOGISTICS_SUBSECTIONS.forEach((subSection) => {
             const wrapper = find(`rollupJobDetailLogistics${subSection}Description`);
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
@@ -199,7 +199,7 @@ describe('<DetailPanel />', () => {
         });
 
         it('should set the correct job value for each of the subsection', () => {
-          DATE_HISTOGRAMS_SUBSECTIONS.forEach(subSection => {
+          DATE_HISTOGRAMS_SUBSECTIONS.forEach((subSection) => {
             const wrapper = find(`rollupJobDetailDateHistogram${subSection}Description`);
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
@@ -243,7 +243,7 @@ describe('<DetailPanel />', () => {
         });
 
         it('should set the correct job value for each of the subsection', () => {
-          STATS_SUBSECTIONS.forEach(subSection => {
+          STATS_SUBSECTIONS.forEach((subSection) => {
             const wrapper = find(`rollupJobDetailStats${subSection}Description`);
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
@@ -286,7 +286,7 @@ describe('<DetailPanel />', () => {
       const { tableCellsValues } = table.getMetaData('detailPanelTermsTabTable');
 
       it('should list the Job terms fields', () => {
-        const expected = defaultJob.terms.map(term => [term.name]);
+        const expected = defaultJob.terms.map((term) => [term.name]);
         expect(tableCellsValues).toEqual(expected);
       });
     });
@@ -298,7 +298,7 @@ describe('<DetailPanel />', () => {
       const { tableCellsValues } = table.getMetaData('detailPanelHistogramTabTable');
 
       it('should list the Job histogram fields', () => {
-        const expected = defaultJob.histogram.map(h => [h.name]);
+        const expected = defaultJob.histogram.map((h) => [h.name]);
         expect(tableCellsValues).toEqual(expected);
       });
     });
@@ -310,7 +310,7 @@ describe('<DetailPanel />', () => {
       const { tableCellsValues } = table.getMetaData('detailPanelMetricsTabTable');
 
       it('should list the Job metrics fields and their types', () => {
-        const expected = defaultJob.metrics.map(metric => [metric.name, metric.types.join(', ')]);
+        const expected = defaultJob.metrics.map((metric) => [metric.name, metric.types.join(', ')]);
         expect(tableCellsValues).toEqual(expected);
       });
     });

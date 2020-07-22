@@ -31,16 +31,16 @@ describe('isConfirmAction', () => {
 
 describe('getLeaveAction', () => {
   it('returns the default action provided by the handler', () => {
-    expect(getLeaveAction(actions => actions.default())).toEqual({
+    expect(getLeaveAction((actions) => actions.default())).toEqual({
       type: AppLeaveActionType.default,
     });
   });
   it('returns the confirm action provided by the handler', () => {
-    expect(getLeaveAction(actions => actions.confirm('some message'))).toEqual({
+    expect(getLeaveAction((actions) => actions.confirm('some message'))).toEqual({
       type: AppLeaveActionType.confirm,
       text: 'some message',
     });
-    expect(getLeaveAction(actions => actions.confirm('another message', 'a title'))).toEqual({
+    expect(getLeaveAction((actions) => actions.confirm('another message', 'a title'))).toEqual({
       type: AppLeaveActionType.confirm,
       text: 'another message',
       title: 'a title',

@@ -31,7 +31,7 @@ const flightsDescription = i18n.translate('home.sampleData.flightsSpecDescriptio
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
-export const flightsSpecProvider = function(): SampleDatasetSchema {
+export const flightsSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'flights',
     name: flightsName,

@@ -149,7 +149,7 @@ export class TimeBuckets {
     }
 
     function same(checkType: any) {
-      return function(a: any, b: any) {
+      return function (a: any, b: any) {
         if (a === b) return true;
         if (checkType(a) === checkType(b)) return +a === +b;
         return false;
@@ -211,9 +211,7 @@ export class TimeBuckets {
       bounds = Array.isArray(input) ? input : [];
     }
 
-    const moments = _(bounds)
-      .map(_.ary(moment, 1))
-      .sortBy(Number);
+    const moments = _(bounds).map(_.ary(moment, 1)).sortBy(Number);
 
     const valid = moments.size() === 2 && moments.every(isValidMoment);
     if (!valid) {

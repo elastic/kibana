@@ -130,10 +130,7 @@ describe('draggables', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="source.bytes-tooltip"]')
-          .first()
-          .props().content
+        wrapper.find('[data-test-subj="source.bytes-tooltip"]').first().props().content
       ).toEqual('source.bytes');
     });
 
@@ -150,10 +147,7 @@ describe('draggables', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="source.bytes-tooltip"]')
-          .first()
-          .props().content
+        wrapper.find('[data-test-subj="source.bytes-tooltip"]').first().props().content
       ).toEqual('default draggable string tooltip');
     });
 
@@ -170,10 +164,7 @@ describe('draggables', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="source.bytes-tooltip"]')
-          .first()
-          .props().content
+        wrapper.find('[data-test-subj="source.bytes-tooltip"]').first().props().content
       ).toEqual(<span>{'default draggable tooltip'}</span>);
     });
 
@@ -189,12 +180,7 @@ describe('draggables', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="source.bytes-tooltip"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="source.bytes-tooltip"]').first().exists()).toBe(false);
     });
   });
 
@@ -268,12 +254,9 @@ describe('draggables', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="some-field-tooltip"]')
-          .first()
-          .props().content
-      ).toEqual('some-field');
+      expect(wrapper.find('[data-test-subj="some-field-tooltip"]').first().props().content).toEqual(
+        'some-field'
+      );
     });
 
     test('it renders the tooltipContent when a string is provided as content', () => {
@@ -290,12 +273,9 @@ describe('draggables', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="some-field-tooltip"]')
-          .first()
-          .props().content
-      ).toEqual('draggable badge string tooltip');
+      expect(wrapper.find('[data-test-subj="some-field-tooltip"]').first().props().content).toEqual(
+        'draggable badge string tooltip'
+      );
     });
 
     test('it renders the tooltipContent when an element is provided as content', () => {
@@ -312,12 +292,9 @@ describe('draggables', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="some-field-tooltip"]')
-          .first()
-          .props().content
-      ).toEqual(<span>{'draggable badge tooltip'}</span>);
+      expect(wrapper.find('[data-test-subj="some-field-tooltip"]').first().props().content).toEqual(
+        <span>{'draggable badge tooltip'}</span>
+      );
     });
 
     test('it does NOT render a tooltip when tooltipContent is null', () => {
@@ -334,12 +311,7 @@ describe('draggables', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="some-field-tooltip"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="some-field-tooltip"]').first().exists()).toBe(false);
     });
   });
 });

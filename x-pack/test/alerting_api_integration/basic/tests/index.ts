@@ -11,7 +11,7 @@ export default function alertingApiIntegrationTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  describe('alerting api integration basic license', function() {
+  describe('alerting api integration basic license', function () {
     this.tags('ciGroup3');
 
     loadTestFile(require.resolve('./actions'));

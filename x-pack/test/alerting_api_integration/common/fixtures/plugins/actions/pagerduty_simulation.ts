@@ -28,11 +28,9 @@ export function initPlugin(server: Hapi.Server, path: string) {
           .unknown(true)
           .keys({
             dedup_key: Joi.string(),
-            payload: Joi.object()
-              .unknown(true)
-              .keys({
-                summary: Joi.string(),
-              }),
+            payload: Joi.object().unknown(true).keys({
+              summary: Joi.string(),
+            }),
           }),
       },
     },
@@ -72,8 +70,5 @@ function jsonResponse(h: any, code: number, object?: any) {
     return h.response('').code(code);
   }
 
-  return h
-    .response(JSON.stringify(object))
-    .type('application/json')
-    .code(code);
+  return h.response(JSON.stringify(object)).type('application/json').code(code);
 }

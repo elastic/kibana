@@ -79,8 +79,8 @@ export const useField = (
       ? (validationTypeToFilterOut as string[])
       : ([validationTypeToFilterOut] as string[]);
 
-    return _errors.filter(error =>
-      validationTypeToArray.every(_type => error.validationType !== _type)
+    return _errors.filter((error) =>
+      validationTypeToArray.every((_type) => error.validationType !== _type)
     );
   };
 
@@ -275,7 +275,7 @@ export const useField = (
   // -- API
   // ----------------------------------
   const clearErrors: FieldHook['clearErrors'] = (validationType = VALIDATION_TYPES.FIELD) => {
-    setErrors(previousErrors => filterErrors(previousErrors, validationType));
+    setErrors((previousErrors) => filterErrors(previousErrors, validationType));
   };
 
   /**
@@ -331,7 +331,7 @@ export const useField = (
    *
    * @param newValue The new value to assign to the field
    */
-  const setValue: FieldHook['setValue'] = newValue => {
+  const setValue: FieldHook['setValue'] = (newValue) => {
     if (isPristine) {
       setPristine(false);
     }
@@ -340,8 +340,8 @@ export const useField = (
     setStateValue(formattedValue);
   };
 
-  const _setErrors: FieldHook['setErrors'] = _errors => {
-    setErrors(_errors.map(error => ({ validationType: VALIDATION_TYPES.FIELD, ...error })));
+  const _setErrors: FieldHook['setErrors'] = (_errors) => {
+    setErrors(_errors.map((error) => ({ validationType: VALIDATION_TYPES.FIELD, ...error })));
   };
 
   /**
@@ -349,7 +349,7 @@ export const useField = (
    *
    * @param event Form input change event
    */
-  const onChange: FieldHook['onChange'] = event => {
+  const onChange: FieldHook['onChange'] = (event) => {
     const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
       ? event.target.checked
       : event.target.value;

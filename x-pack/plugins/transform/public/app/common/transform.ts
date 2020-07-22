@@ -78,7 +78,7 @@ export const useRefreshTransformList = (
 
       subscriptions.push(
         distinct$
-          .pipe(filter(state => state === REFRESH_TRANSFORM_LIST_STATE.REFRESH))
+          .pipe(filter((state) => state === REFRESH_TRANSFORM_LIST_STATE.REFRESH))
           .subscribe(() => typeof callback.onRefresh === 'function' && callback.onRefresh())
       );
     }
@@ -86,7 +86,7 @@ export const useRefreshTransformList = (
     if (typeof callback.isLoading === 'function') {
       subscriptions.push(
         distinct$.subscribe(
-          state =>
+          (state) =>
             typeof callback.isLoading === 'function' &&
             callback.isLoading(state === REFRESH_TRANSFORM_LIST_STATE.LOADING)
         )
@@ -94,7 +94,7 @@ export const useRefreshTransformList = (
     }
 
     return () => {
-      subscriptions.map(sub => sub.unsubscribe());
+      subscriptions.map((sub) => sub.unsubscribe());
     };
     // The effect should only be called once.
     // eslint-disable-next-line react-hooks/exhaustive-deps

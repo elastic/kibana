@@ -41,22 +41,20 @@ export function registerScrollForExportRoute(server) {
       validate: {
         payload: Joi.object()
           .keys({
-            typesToInclude: Joi.array()
-              .items(Joi.string())
-              .required(),
+            typesToInclude: Joi.array().items(Joi.string()).required(),
           })
           .required(),
       },
     },
 
-    handler: async req => {
+    handler: async (req) => {
       const savedObjectsClient = req.getSavedObjectsClient();
       const objects = await findAll(savedObjectsClient, {
         perPage: 1000,
         type: req.payload.typesToInclude,
       });
 
-      return objects.map(hit => {
+      return objects.map((hit) => {
         const type = hit.type;
         return {
           _id: hit.id,
@@ -81,16 +79,14 @@ export function registerScrollForCountRoute(server) {
       validate: {
         payload: Joi.object()
           .keys({
-            typesToInclude: Joi.array()
-              .items(Joi.string())
-              .required(),
+            typesToInclude: Joi.array().items(Joi.string()).required(),
             searchString: Joi.string(),
           })
           .required(),
       },
     },
 
-    handler: async req => {
+    handler: async (req) => {
       const savedObjectsClient = req.getSavedObjectsClient();
       const findOptions = {
         type: req.payload.typesToInclude,

@@ -25,7 +25,7 @@ export const useDeleteTransforms = () => {
   const api = useApi();
 
   return async (transforms: TransformListRow[]) => {
-    const transformsInfo: TransformEndpointRequest[] = transforms.map(tf => ({
+    const transformsInfo: TransformEndpointRequest[] = transforms.map((tf) => ({
       id: tf.config.id,
       state: tf.stats.state,
     }));

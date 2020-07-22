@@ -68,7 +68,7 @@ export class HeatmapChart extends PointSeries {
     const labels = [];
     const maxColorCnt = 10;
     if (cfg.get('setColorRange')) {
-      colorsRange.forEach(range => {
+      colorsRange.forEach((range) => {
         const from = isFinite(range.from) ? zAxisFormatter(range.from) : range.from;
         const to = isFinite(range.to) ? zAxisFormatter(range.to) : range.to;
         labels.push(`${from} - ${to}`);
@@ -150,9 +150,7 @@ export class HeatmapChart extends PointSeries {
     if (this.getCategoryAxis().axisConfig.isTimeDomain()) {
       const { min, interval } = this.handler.data.get('ordered');
       const start = min;
-      const end = moment(min)
-        .add(interval)
-        .valueOf();
+      const end = moment(min).add(interval).valueOf();
 
       barWidth = xScale(end) - xScale(start);
       if (!isHorizontal) barWidth *= -1;
@@ -170,7 +168,7 @@ export class HeatmapChart extends PointSeries {
     function getColorBucket(d) {
       let val = 0;
       if (setColorRange && colorsRange.length) {
-        const bucket = _.find(colorsRange, range => {
+        const bucket = _.find(colorsRange, (range) => {
           return range.from <= d.y && range.to > d.y;
         });
         return bucket ? colorsRange.indexOf(bucket) : -1;
@@ -205,10 +203,7 @@ export class HeatmapChart extends PointSeries {
     const squareWidth = barWidth || xScale.rangeBand();
     const squareHeight = yScale.rangeBand();
 
-    squares
-      .enter()
-      .append('g')
-      .attr('class', 'square');
+    squares.enter().append('g').attr('class', 'square');
 
     squares
       .append('rect')
@@ -219,7 +214,7 @@ export class HeatmapChart extends PointSeries {
       .attr('data-label', label)
       .attr('fill', z)
       .attr('style', 'cursor: pointer; stroke: black; stroke-width: 0.1px')
-      .style('display', d => {
+      .style('display', (d) => {
         return d.hide ? 'none' : 'initial';
       });
 
@@ -247,7 +242,7 @@ export class HeatmapChart extends PointSeries {
         labelColor = zAxisConfig.get('labels.color');
       } else {
         // Otherwise provide a function that will calculate a light or dark color
-        labelColor = d => {
+        labelColor = (d) => {
           const bgColor = z(d);
           const color = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(bgColor);
           return color && isColorDark(parseInt(color[1]), parseInt(color[2]), parseInt(color[3]))
@@ -259,8 +254,8 @@ export class HeatmapChart extends PointSeries {
       let hiddenLabels = false;
       squares
         .append('text')
-        .text(d => zAxisFormatter(d.y))
-        .style('display', function(d) {
+        .text((d) => zAxisFormatter(d.y))
+        .style('display', function (d) {
           const textLength = this.getBBox().width;
           const textHeight = this.getBBox().height;
           const textTooLong = textLength > maxLength;
@@ -273,15 +268,15 @@ export class HeatmapChart extends PointSeries {
         .style('dominant-baseline', 'central')
         .style('text-anchor', 'middle')
         .style('fill', labelColor)
-        .attr('x', function(d) {
+        .attr('x', function (d) {
           const center = x(d) + squareWidth / 2;
           return center;
         })
-        .attr('y', function(d) {
+        .attr('y', function (d) {
           const center = y(d) + squareHeight / 2;
           return center;
         })
-        .attr('transform', function(d) {
+        .attr('transform', function (d) {
           const horizontalCenter = x(d) + squareWidth / 2;
           const verticalCenter = y(d) + squareHeight / 2;
           return `rotate(${rotate},${horizontalCenter},${verticalCenter})`;
@@ -307,8 +302,8 @@ export class HeatmapChart extends PointSeries {
   draw() {
     const self = this;
 
-    return function(selection) {
-      selection.each(function() {
+    return function (selection) {
+      selection.each(function () {
         const svg = self.chartEl.append('g');
         svg.data([self.chartData]);
 

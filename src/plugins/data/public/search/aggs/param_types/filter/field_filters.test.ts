@@ -50,11 +50,11 @@ describe('AggTypeFieldFilters', () => {
     expect(filtered).toEqual(fields);
 
     registry.addFilter(() => true);
-    registry.addFilter(field => field.name !== 'foo');
+    registry.addFilter((field) => field.name !== 'foo');
     filtered = registry.filter(fields, aggConfig);
     expect(filtered).toEqual([fields[1]]);
 
-    registry.addFilter(field => field.name !== 'bar');
+    registry.addFilter((field) => field.name !== 'bar');
     filtered = registry.filter(fields, aggConfig);
     expect(filtered).toEqual([]);
   });

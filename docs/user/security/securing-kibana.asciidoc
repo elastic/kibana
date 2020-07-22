@@ -1,8 +1,8 @@
 [role="xpack"]
 [[using-kibana-with-security]]
-== Configuring security in {kib}
+== Configure security in {kib}
 ++++
-<titleabbrev>Configuring security</titleabbrev>
+<titleabbrev>Configure security</titleabbrev>
 ++++
 
 {kib} users have to log in when {security} is enabled on your cluster. You

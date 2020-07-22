@@ -35,7 +35,7 @@ export function filterrows(): ExpressionFunctionDefinition<
       },
     },
     fn(input, { fn }) {
-      const checks = input.rows.map(row =>
+      const checks = input.rows.map((row) =>
         fn({
           ...input,
           rows: [row],
@@ -43,9 +43,9 @@ export function filterrows(): ExpressionFunctionDefinition<
       );
 
       return Promise.all(checks)
-        .then(results => input.rows.filter((row, i) => results[i]))
+        .then((results) => input.rows.filter((row, i) => results[i]))
         .then(
-          rows =>
+          (rows) =>
             ({
               ...input,
               rows,

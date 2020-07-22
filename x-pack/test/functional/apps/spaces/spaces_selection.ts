@@ -20,7 +20,7 @@ export default function spaceSelectorFunctonalTests({
     'spaceSelector',
   ]);
 
-  describe('Spaces', function() {
+  describe('Spaces', function () {
     this.tags('smoke');
     describe('Space Selector', () => {
       before(async () => {

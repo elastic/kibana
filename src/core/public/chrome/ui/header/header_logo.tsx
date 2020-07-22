@@ -48,7 +48,7 @@ function onClick(
     return;
   }
 
-  const navLink = navLinks.find(item => item.href === anchor.href);
+  const navLink = navLinks.find((item) => item.href === anchor.href);
   if (navLink && navLink.isDisabled) {
     event.preventDefault();
     return;
@@ -94,7 +94,7 @@ export function HeaderLogo({ href, forceNavigation, navLinks }: Props) {
     <EuiHeaderLogo
       data-test-subj="logo"
       iconType="logoKibana"
-      onClick={e => onClick(e, forceNavigation, navLinks)}
+      onClick={(e) => onClick(e, forceNavigation, navLinks)}
       href={href}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',

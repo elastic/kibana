@@ -5,10 +5,10 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const transform = getService('transform');
 
-  describe('transform', function() {
+  describe('transform', function () {
     this.tags(['ciGroup9', 'transform']);
 
     before(async () => {

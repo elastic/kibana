@@ -108,7 +108,7 @@ export class Table extends React.Component<TableProps, TableState> {
       <TableContainer>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           {actions &&
-            actions.map(action => (
+            actions.map((action) => (
               <EuiFlexItem grow={false} key={action.name}>
                 <OptionControl
                   {...action}

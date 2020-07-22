@@ -41,7 +41,7 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
         const valuesToWatchArray = Array.isArray(pathsToWatch)
           ? (pathsToWatch as string[])
           : ([pathsToWatch] as string[]);
-        if (valuesToWatchArray.some(value => previousRawData.current[value] !== raw[value])) {
+        if (valuesToWatchArray.some((value) => previousRawData.current[value] !== raw[value])) {
           previousRawData.current = raw;
           setFormData(raw);
         }

@@ -46,8 +46,8 @@ export const getGroupings = async (
         bool: {
           should: [
             ...options.metrics
-              .filter(m => m.field)
-              .map(m => ({
+              .filter((m) => m.field)
+              .map((m) => ({
                 exists: { field: m.field },
               })),
           ],
@@ -112,7 +112,7 @@ export const getGroupings = async (
   const { groupings, groupingsCount } = response.aggregations;
   const { after_key: afterKey } = groupings;
   return {
-    series: groupings.buckets.map(bucket => {
+    series: groupings.buckets.map((bucket) => {
       return { id: bucket.key.groupBy, rows: [], columns: [] };
     }),
     pageInfo: {

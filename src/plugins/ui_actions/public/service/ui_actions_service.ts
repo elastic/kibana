@@ -117,7 +117,7 @@ export class UiActionsService {
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    if (!actionIds!.find(id => id === action.id)) {
+    if (!actionIds!.find((id) => id === action.id)) {
       this.triggerToActions.set(triggerId, [...actionIds!, action.id]);
     }
   };
@@ -135,7 +135,7 @@ export class UiActionsService {
 
     this.triggerToActions.set(
       triggerId,
-      actionIds!.filter(id => id !== actionId)
+      actionIds!.filter((id) => id !== actionId)
     );
   };
 
@@ -147,9 +147,9 @@ export class UiActionsService {
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    const actions = actionIds!.map(actionId => this.actions.get(actionId)).filter(Boolean) as Array<
-      Action<TriggerContextMapping[T]>
-    >;
+    const actions = actionIds!
+      .map((actionId) => this.actions.get(actionId))
+      .filter(Boolean) as Array<Action<TriggerContextMapping[T]>>;
 
     return actions as Array<Action<TriggerContext<T>>>;
   };
@@ -159,7 +159,7 @@ export class UiActionsService {
     context: TriggerContextMapping[T]
   ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
     const actions = this.getTriggerActions!(triggerId);
-    const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
+    const isCompatibles = await Promise.all(actions.map((action) => action.isCompatible(context)));
     return actions.reduce(
       (acc: Array<Action<TriggerContextMapping[T]>>, action, i) =>
         isCompatibles[i] ? [...acc, action] : acc,

@@ -29,7 +29,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'status',
     sortable: true,
-    render: severity => {
+    render: (severity) => {
       const severityIconDefaults = {
         title: i18n.translate('xpack.monitoring.alerts.severityTitle.unknown', {
           defaultMessage: 'Unknown',
@@ -60,7 +60,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'resolved_timestamp',
     sortable: true,
-    render: resolvedTimestamp => {
+    render: (resolvedTimestamp) => {
       const notResolvedLabel = i18n.translate('xpack.monitoring.alerts.notResolvedDescription', {
         defaultMessage: 'Not Resolved',
       });
@@ -100,7 +100,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
         suffix={alert.suffix}
         message={message}
         metadata={alert.metadata}
-        changeUrl={target => {
+        changeUrl={(target) => {
           scope.$evalAsync(() => {
             kbnUrl.changePath(target);
           });
@@ -114,7 +114,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'category',
     sortable: true,
-    render: link =>
+    render: (link) =>
       linkToCategories[link]
         ? linkToCategories[link]
         : i18n.translate('xpack.monitoring.alerts.categoryColumn.generalLabel', {
@@ -127,7 +127,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'update_timestamp',
     sortable: true,
-    render: timestamp => formatDateTimeLocal(timestamp, timezone),
+    render: (timestamp) => formatDateTimeLocal(timestamp, timezone),
   },
   {
     name: i18n.translate('xpack.monitoring.alerts.triggeredColumnTitle', {
@@ -135,7 +135,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
     }),
     field: 'timestamp',
     sortable: true,
-    render: timestamp =>
+    render: (timestamp) =>
       i18n.translate('xpack.monitoring.alerts.triggeredColumnValue', {
         defaultMessage: '{timestamp} ago',
         values: {
@@ -146,7 +146,7 @@ const getColumns = (kbnUrl, scope, timezone) => [
 ];
 
 export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) => {
-  const alertsFlattened = alerts.map(alert => ({
+  const alertsFlattened = alerts.map((alert) => ({
     ...alert,
     status: alert.metadata.severity,
     category: alert.metadata.link,

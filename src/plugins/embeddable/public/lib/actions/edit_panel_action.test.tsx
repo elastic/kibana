@@ -84,7 +84,7 @@ test('is not compatible when edit url is not available', async () => {
 
 test('is not visible when edit url is available but in view mode', async () => {
   embeddableFactories.clear();
-  const action = new EditPanelAction((type =>
+  const action = new EditPanelAction(((type) =>
     embeddableFactories.get(type)) as EmbeddableStart['getEmbeddableFactory']);
   expect(
     await action.isCompatible({
@@ -101,7 +101,7 @@ test('is not visible when edit url is available but in view mode', async () => {
 
 test('is not compatible when edit url is available, in edit mode, but not editable', async () => {
   embeddableFactories.clear();
-  const action = new EditPanelAction((type =>
+  const action = new EditPanelAction(((type) =>
     embeddableFactories.get(type)) as EmbeddableStart['getEmbeddableFactory']);
   expect(
     await action.isCompatible({

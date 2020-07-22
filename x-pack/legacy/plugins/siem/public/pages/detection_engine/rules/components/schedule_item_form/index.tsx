@@ -74,7 +74,7 @@ export const ScheduleItem = ({
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const onChangeTimeType = useCallback(
-    e => {
+    (e) => {
       setTimeType(e.target.value);
       field.setValue(`${timeVal}${e.target.value}`);
     },
@@ -82,7 +82,7 @@ export const ScheduleItem = ({
   );
 
   const onChangeTimeVal = useCallback(
-    e => {
+    (e) => {
       const sanitizedValue: number = parseInt(e.target.value, 10);
       setTimeVal(sanitizedValue);
       field.setValue(`${sanitizedValue}${timeType}`);

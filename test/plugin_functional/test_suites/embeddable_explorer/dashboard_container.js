@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const testSubjects = getService('testSubjects');
   const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');

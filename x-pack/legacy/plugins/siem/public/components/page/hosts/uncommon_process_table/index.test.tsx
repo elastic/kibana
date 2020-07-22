@@ -67,14 +67,9 @@ describe('Uncommon Process Table Component', () => {
           />
         </TestProviders>
       );
-      expect(
-        wrapper
-          .find('.euiTableRow')
-          .at(0)
-          .find('.euiTableRowCell')
-          .at(3)
-          .text()
-      ).toBe(`Host names${getEmptyValue()}`);
+      expect(wrapper.find('.euiTableRow').at(0).find('.euiTableRowCell').at(3).text()).toBe(
+        `Host names${getEmptyValue()}`
+      );
     });
 
     test('it has a single host without any extra comma when the number of hosts is exactly 1', () => {
@@ -98,14 +93,9 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('.euiTableRow')
-          .at(1)
-          .find('.euiTableRowCell')
-          .at(3)
-          .text()
-      ).toBe('Host nameshello-world ');
+      expect(wrapper.find('.euiTableRow').at(1).find('.euiTableRowCell').at(3).text()).toBe(
+        'Host nameshello-world '
+      );
     });
 
     test('it has a single link when the number of hosts is exactly 1', () => {
@@ -130,12 +120,7 @@ describe('Uncommon Process Table Component', () => {
       );
 
       expect(
-        wrapper
-          .find('.euiTableRow')
-          .at(1)
-          .find('.euiTableRowCell')
-          .at(3)
-          .find('a').length
+        wrapper.find('.euiTableRow').at(1).find('.euiTableRowCell').at(3).find('a').length
       ).toBe(1);
     });
 
@@ -160,14 +145,9 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('.euiTableRow')
-          .at(2)
-          .find('.euiTableRowCell')
-          .at(3)
-          .text()
-      ).toBe('Host nameshello-world,hello-world-2 ');
+      expect(wrapper.find('.euiTableRow').at(2).find('.euiTableRowCell').at(3).text()).toBe(
+        'Host nameshello-world,hello-world-2 '
+      );
     });
 
     test('it has 2 links when the number of hosts is equal to 2', () => {
@@ -192,12 +172,7 @@ describe('Uncommon Process Table Component', () => {
       );
 
       expect(
-        wrapper
-          .find('.euiTableRow')
-          .at(2)
-          .find('.euiTableRowCell')
-          .at(3)
-          .find('a').length
+        wrapper.find('.euiTableRow').at(2).find('.euiTableRowCell').at(3).find('a').length
       ).toBe(2);
     });
 
@@ -221,14 +196,9 @@ describe('Uncommon Process Table Component', () => {
           />
         </TestProviders>
       );
-      expect(
-        wrapper
-          .find('.euiTableRow')
-          .at(3)
-          .find('.euiTableRowCell')
-          .at(3)
-          .text()
-      ).toBe(`Host names${getEmptyValue()}`);
+      expect(wrapper.find('.euiTableRow').at(3).find('.euiTableRowCell').at(3).text()).toBe(
+        `Host names${getEmptyValue()}`
+      );
     });
 
     test('it has no link when all hosts are invalid because they do not contain an id and a name', () => {
@@ -252,12 +222,7 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
       expect(
-        wrapper
-          .find('.euiTableRow')
-          .at(3)
-          .find('.euiTableRowCell')
-          .at(3)
-          .find('a').length
+        wrapper.find('.euiTableRow').at(3).find('.euiTableRowCell').at(3).find('a').length
       ).toBe(0);
     });
 
@@ -281,14 +246,9 @@ describe('Uncommon Process Table Component', () => {
           />
         </TestProviders>
       );
-      expect(
-        wrapper
-          .find('.euiTableRow')
-          .at(4)
-          .find('.euiTableRowCell')
-          .at(3)
-          .text()
-      ).toBe('Host nameshello-world,hello-world-2 ');
+      expect(wrapper.find('.euiTableRow').at(4).find('.euiTableRowCell').at(3).text()).toBe(
+        'Host nameshello-world,hello-world-2 '
+      );
     });
   });
 
@@ -324,22 +284,22 @@ describe('Uncommon Process Table Component', () => {
 
     test('on host page, we should have hosts', () => {
       const columns = getUncommonColumnsCurated(HostsType.page);
-      expect(columns.some(col => col.name === i18n.HOSTS)).toEqual(true);
+      expect(columns.some((col) => col.name === i18n.HOSTS)).toEqual(true);
     });
 
     test('on host page, we should have number of hosts', () => {
       const columns = getUncommonColumnsCurated(HostsType.page);
-      expect(columns.some(col => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(true);
+      expect(columns.some((col) => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(true);
     });
 
     test('on host details page, we should not have hosts', () => {
       const columns = getUncommonColumnsCurated(HostsType.details);
-      expect(columns.some(col => col.name === i18n.HOSTS)).toEqual(false);
+      expect(columns.some((col) => col.name === i18n.HOSTS)).toEqual(false);
     });
 
     test('on host details page, we should not have number of hosts', () => {
       const columns = getUncommonColumnsCurated(HostsType.details);
-      expect(columns.some(col => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(false);
+      expect(columns.some((col) => col.name === i18n.NUMBER_OF_HOSTS)).toEqual(false);
     });
   });
 });

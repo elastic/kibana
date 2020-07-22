@@ -52,7 +52,7 @@ describe('uiSettingsMixin()', () => {
       log: sinon.stub(),
       route: sinon.stub(),
       addMemoizedFactoryToRequest(name: string, factory: (...args: any[]) => any) {
-        this.decorate('request', name, function(this: typeof server) {
+        this.decorate('request', name, function (this: typeof server) {
           return factory(this);
         });
       },
@@ -103,9 +103,7 @@ describe('uiSettingsMixin()', () => {
   describe('server.uiSettingsServiceFactory()', () => {
     it('decorates server with "uiSettingsServiceFactory"', () => {
       const { decorations } = setup();
-      expect(decorations.server)
-        .to.have.property('uiSettingsServiceFactory')
-        .a('function');
+      expect(decorations.server).to.have.property('uiSettingsServiceFactory').a('function');
 
       const uiSettingsServiceFactoryStub = sandbox.stub(
         uiSettingsServiceFactoryNS,
@@ -118,9 +116,7 @@ describe('uiSettingsMixin()', () => {
 
     it('passes `server` and `options` argument to factory', () => {
       const { decorations, server } = setup();
-      expect(decorations.server)
-        .to.have.property('uiSettingsServiceFactory')
-        .a('function');
+      expect(decorations.server).to.have.property('uiSettingsServiceFactory').a('function');
 
       const uiSettingsServiceFactoryStub = sandbox.stub(
         uiSettingsServiceFactoryNS,
@@ -143,9 +139,7 @@ describe('uiSettingsMixin()', () => {
   describe('request.getUiSettingsService()', () => {
     it('exposes "getUiSettingsService" on requests', () => {
       const { decorations } = setup();
-      expect(decorations.request)
-        .to.have.property('getUiSettingsService')
-        .a('function');
+      expect(decorations.request).to.have.property('getUiSettingsService').a('function');
 
       const getUiSettingsServiceForRequestStub = sandbox.stub(
         getUiSettingsServiceForRequestNS,
@@ -158,9 +152,7 @@ describe('uiSettingsMixin()', () => {
 
     it('passes request to getUiSettingsServiceForRequest', () => {
       const { server, decorations } = setup();
-      expect(decorations.request)
-        .to.have.property('getUiSettingsService')
-        .a('function');
+      expect(decorations.request).to.have.property('getUiSettingsService').a('function');
 
       const getUiSettingsServiceForRequestStub = sandbox.stub(
         getUiSettingsServiceForRequestNS,
@@ -176,9 +168,7 @@ describe('uiSettingsMixin()', () => {
   describe('server.uiSettings()', () => {
     it('throws an error, links to pr', () => {
       const { decorations } = setup();
-      expect(decorations.server)
-        .to.have.property('uiSettings')
-        .a('function');
+      expect(decorations.server).to.have.property('uiSettings').a('function');
       expect(() => {
         decorations.server.uiSettings();
       }).to.throwError('http://github.com' as any); // incorrect typings

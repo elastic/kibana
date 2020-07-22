@@ -49,7 +49,7 @@ function getItemIdToExpandedRowMap(
   transforms: TransformListRow[]
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
-    const item = transforms.find(transform => transform.config.id === transformId);
+    const item = transforms.find((transform) => transform.config.id === transformId);
     if (item !== undefined) {
       m[transformId] = <ExpandedRow item={item} />;
     }
@@ -139,7 +139,7 @@ export const TransformList: FC<Props> = ({
       return p;
     }, {});
 
-    clauses.forEach(c => {
+    clauses.forEach((c) => {
       // the search term could be negated with a minus, e.g. -bananas
       const bool = c.match === 'must';
       let ts = [];
@@ -150,13 +150,13 @@ export const TransformList: FC<Props> = ({
         // if the term has been negated, AND the matches
         if (bool === true) {
           ts = transforms.filter(
-            transform =>
+            (transform) =>
               stringMatch(transform.id, c.value) === bool ||
               stringMatch(transform.config.description, c.value) === bool
           );
         } else {
           ts = transforms.filter(
-            transform =>
+            (transform) =>
               stringMatch(transform.id, c.value) === bool &&
               stringMatch(transform.config.description, c.value) === bool
           );
@@ -165,19 +165,21 @@ export const TransformList: FC<Props> = ({
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = transforms.filter(transform => (c.value as Value[]).includes(transform.stats.state));
+          ts = transforms.filter((transform) =>
+            (c.value as Value[]).includes(transform.stats.state)
+          );
         } else {
-          ts = transforms.filter(transform => transform.mode === c.value);
+          ts = transforms.filter((transform) => transform.mode === c.value);
         }
       }
 
-      ts.forEach(t => matches[t.id].count++);
+      ts.forEach((t) => matches[t.id].count++);
     });
 
     // loop through the matches and return only transforms which have match all the clauses
     const filtered = Object.values(matches)
-      .filter(m => (m && m.count) >= clauses.length)
-      .map(m => m.transform);
+      .filter((m) => (m && m.count) >= clauses.length)
+      .map((m) => m.transform);
 
     setFilteredTransforms(filtered);
     setIsLoading(false);
@@ -330,7 +332,7 @@ export const TransformList: FC<Props> = ({
         field: 'state.state',
         name: i18n.translate('xpack.transform.statusFilter', { defaultMessage: 'Status' }),
         multiSelect: 'or' as const,
-        options: Object.values(TRANSFORM_STATE).map(val => ({
+        options: Object.values(TRANSFORM_STATE).map((val) => ({
           value: val,
           name: val,
           view: getTaskStateBadge(val),
@@ -341,7 +343,7 @@ export const TransformList: FC<Props> = ({
         field: 'mode',
         name: i18n.translate('xpack.transform.modeFilter', { defaultMessage: 'Mode' }),
         multiSelect: false,
-        options: Object.values(TRANSFORM_MODE).map(val => ({
+        options: Object.values(TRANSFORM_MODE).map((val) => ({
           value: val,
           name: val,
           view: (
@@ -387,7 +389,7 @@ export const TransformList: FC<Props> = ({
         loading={isLoading || transformsLoading}
         onTableChange={onTableChange}
         pagination={pagination}
-        rowProps={item => ({
+        rowProps={(item) => ({
           'data-test-subj': `transformListRow row-${item.id}`,
         })}
         selection={selection}

@@ -19,7 +19,7 @@ export const ccrDataEnricher = async (indicesList: Index[], callWithRequest: API
       'transport.request',
       params
     );
-    return indicesList.map(index => {
+    return indicesList.map((index) => {
       const isFollowerIndex = !!followerIndices.find(
         (followerIndex: { follower_index: string }) => {
           return followerIndex.follower_index === index.name;

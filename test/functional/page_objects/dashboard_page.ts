@@ -186,9 +186,9 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async expectToolbarPaginationDisplayed({ displayed = true }) {
       const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
       if (displayed) {
-        await Promise.all(subjects.map(async subj => await testSubjects.existOrFail(subj)));
+        await Promise.all(subjects.map(async (subj) => await testSubjects.existOrFail(subj)));
       } else {
-        await Promise.all(subjects.map(async subj => await testSubjects.missingOrFail(subj)));
+        await Promise.all(subjects.map(async (subj) => await testSubjects.missingOrFail(subj)));
       }
     }
 
@@ -374,13 +374,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async getPanelTitles() {
       log.debug('in getPanelTitles');
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
-      return await Promise.all(titleObjects.map(async title => await title.getVisibleText()));
+      return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
     }
 
     public async getPanelDimensions() {
       const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
       return await Promise.all(
-        panels.map(async panel => {
+        panels.map(async (panel) => {
           const size = await panel.getSize();
           return {
             width: size.width,
@@ -409,11 +409,11 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public getTestVisualizationNames() {
-      return this.getTestVisualizations().map(visualization => visualization.name);
+      return this.getTestVisualizations().map((visualization) => visualization.name);
     }
 
     public getTestVisualizationDescriptions() {
-      return this.getTestVisualizations().map(visualization => visualization.description);
+      return this.getTestVisualizations().map((visualization) => visualization.description);
     }
 
     public async getDashboardPanels() {
@@ -480,7 +480,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       const $ = await sharedItemscontainer.parseDomContent();
       return $('[data-shared-item]')
         .toArray()
-        .map(item => {
+        .map((item) => {
           return {
             title: $(item).attr('data-title'),
             description: $(item).attr('data-description'),
@@ -508,7 +508,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         checkList.push({ name, isPresent });
       }
 
-      return checkList.filter(viz => viz.isPresent === false).map(viz => viz.name);
+      return checkList.filter((viz) => viz.isPresent === false).map((viz) => viz.name);
     }
   }
 

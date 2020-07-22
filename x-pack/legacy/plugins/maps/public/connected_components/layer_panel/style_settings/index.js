@@ -17,7 +17,7 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    updateStyleDescriptor: styleDescriptor => {
+    updateStyleDescriptor: (styleDescriptor) => {
       dispatch(updateLayerStyleForSelectedLayer(styleDescriptor));
     },
   };

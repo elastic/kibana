@@ -70,12 +70,7 @@ describe('ColumnHeaders', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="field-browser"]')
-          .first()
-          .exists()
-      ).toEqual(true);
+      expect(wrapper.find('[data-test-subj="field-browser"]').first().exists()).toEqual(true);
     });
 
     test('it renders every column header', () => {
@@ -100,13 +95,8 @@ describe('ColumnHeaders', () => {
         </TestProviders>
       );
 
-      defaultHeaders.forEach(h => {
-        expect(
-          wrapper
-            .find('[data-test-subj="headers-group"]')
-            .first()
-            .text()
-        ).toContain(h.id);
+      defaultHeaders.forEach((h) => {
+        expect(wrapper.find('[data-test-subj="headers-group"]').first().text()).toContain(h.id);
       });
     });
   });

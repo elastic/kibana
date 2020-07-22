@@ -36,7 +36,7 @@ describe('use_list_keys', () => {
     });
 
     expect(instance.find('li').length).toEqual(5);
-    instance.find('li').forEach(el => {
+    instance.find('li').forEach((el) => {
       expect(ids.has(el.key())).toEqual(true);
     });
   });
@@ -72,7 +72,7 @@ describe('use_list_keys', () => {
     });
 
     expect(instance.find('li').length).toEqual(4);
-    instance.find('li').forEach(el => {
+    instance.find('li').forEach((el) => {
       expect(ids.has(el.key())).toEqual(true);
     });
   });
@@ -80,7 +80,7 @@ describe('use_list_keys', () => {
 
 function collectIds(instance: ReactWrapper) {
   const ids = new Set<string>();
-  instance.find('li').forEach(el => {
+  instance.find('li').forEach((el) => {
     ids.add(el.key());
   });
   return ids;

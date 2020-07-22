@@ -81,7 +81,7 @@ describe('Buckets wrapper', () => {
 
       expect(buckets).toHaveLength(2);
 
-      buckets._keys.forEach(key => {
+      buckets._keys.forEach((key) => {
         expect(typeof key).toBe('string');
       });
     });
@@ -111,7 +111,7 @@ describe('Buckets wrapper', () => {
 
       expect(buckets).toHaveLength(2);
 
-      buckets._keys.forEach(key => {
+      buckets._keys.forEach((key) => {
         expect(typeof key).toBe('string');
       });
     });
@@ -136,7 +136,7 @@ describe('Buckets wrapper', () => {
 
       expect(buckets).toHaveLength(1);
 
-      buckets._keys.forEach(key => {
+      buckets._keys.forEach((key) => {
         expect(typeof key).toBe('string');
       });
     });

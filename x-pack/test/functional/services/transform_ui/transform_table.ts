@@ -73,11 +73,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
           $(tr)
             .find('.euiDataGridRowCell__truncate')
             .toArray()
-            .map(cell =>
-              $(cell)
-                .text()
-                .trim()
-            )
+            .map((cell) => $(cell).text().trim())
         );
       }
 
@@ -95,7 +91,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
         // reduce the rows data to an array of unique values in the specified column
         const uniqueColumnValues = rows
-          .map(row => row[column])
+          .map((row) => row[column])
           .flat()
           .filter((v, i, a) => a.indexOf(v) === i);
 
@@ -126,7 +122,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
     public async assertTransformRowFields(transformId: string, expectedRow: object) {
       const rows = await this.parseTransformTable();
-      const transformRow = rows.filter(row => row.id === transformId)[0];
+      const transformRow = rows.filter((row) => row.id === transformId)[0];
       expect(transformRow).to.eql(expectedRow);
     }
 

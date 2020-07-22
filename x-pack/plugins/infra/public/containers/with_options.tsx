@@ -18,10 +18,7 @@ const initialState = {
     timerange: {
       interval: '1m',
       to: moment.utc().valueOf(),
-      from: moment
-        .utc()
-        .subtract(1, 'h')
-        .valueOf(),
+      from: moment.utc().subtract(1, 'h').valueOf(),
     },
     wafflemap: {
       formatter: InfraFormatterType.percent,
@@ -52,7 +49,7 @@ interface WithOptionsProps {
 type State = Readonly<typeof initialState>;
 
 export const withOptions = (WrappedComponent: React.ComponentType<InfraOptions>) => (
-  <WithOptions>{args => <WrappedComponent {...args} />}</WithOptions>
+  <WithOptions>{(args) => <WrappedComponent {...args} />}</WithOptions>
 );
 
 export class WithOptions extends React.Component<WithOptionsProps, State> {

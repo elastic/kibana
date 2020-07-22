@@ -32,7 +32,7 @@ export default new Chainable('first', {
     defaultMessage: `This is an internal function that simply returns the input seriesList. Don't use this`,
   }),
   fn: function firstFn(args) {
-    return alter(args, function(eachSeries) {
+    return alter(args, function (eachSeries) {
       return eachSeries;
     });
   },

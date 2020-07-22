@@ -45,7 +45,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
     });
   };
 
-  removeLookup = index => {
+  removeLookup = (index) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];
     lookupEntries.splice(index, 1);
     this.onChange({
@@ -77,7 +77,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
           return (
             <EuiFieldText
               value={value || ''}
-              onChange={e => {
+              onChange={(e) => {
                 this.onLookupChange(
                   {
                     key: e.target.value,
@@ -101,7 +101,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
           return (
             <EuiFieldText
               value={value || ''}
-              onChange={e => {
+              onChange={(e) => {
                 this.onLookupChange(
                   {
                     value: e.target.value,
@@ -122,7 +122,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
             description: i18n.translate('common.ui.fieldEditor.staticLookup.deleteTitle', {
               defaultMessage: 'Delete entry',
             }),
-            onClick: item => {
+            onClick: (item) => {
               this.removeLookup(item.index);
             },
             type: 'icon',
@@ -162,7 +162,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor {
                 defaultMessage: 'Leave blank to keep value as-is',
               }
             )}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ unknownKeyValue: e.target.value });
             }}
           />

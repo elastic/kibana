@@ -30,7 +30,7 @@ describe('derivative.js', () => {
   });
 
   it('gets the change in the set', () => {
-    return invoke(fn, [seriesList]).then(r => {
+    return invoke(fn, [seriesList]).then((r) => {
       expect(_.map(r.output.list[1].data, 1)).to.eql([null, -50, 0, -30]);
     });
   });

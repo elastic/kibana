@@ -101,7 +101,7 @@ const registerPrivilegesWithClusterTest = (
 
   test(description, async () => {
     const mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    mockClusterClient.callAsInternalUser.mockImplementation(async api => {
+    mockClusterClient.callAsInternalUser.mockImplementation(async (api) => {
       switch (api) {
         case 'shield.getPrivilege': {
           if (throwErrorWhenGettingPrivileges) {

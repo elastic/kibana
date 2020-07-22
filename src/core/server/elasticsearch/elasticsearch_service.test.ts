@@ -34,7 +34,7 @@ import { elasticsearchServiceMock } from './elasticsearch_service.mock';
 import { duration } from 'moment';
 
 const delay = async (durationMs: number) =>
-  await new Promise(resolve => setTimeout(resolve, durationMs));
+  await new Promise((resolve) => setTimeout(resolve, durationMs));
 
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
@@ -217,7 +217,7 @@ describe('#setup', () => {
     });
   });
 
-  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async done => {
+  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
     const mockAdminClusterClientInstance = elasticsearchServiceMock.createClusterClient();
     const mockDataClusterClientInstance = elasticsearchServiceMock.createClusterClient();
     MockClusterClient.mockImplementationOnce(
@@ -236,7 +236,7 @@ describe('#setup', () => {
     });
   });
 
-  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async done => {
+  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
     const mockAdminClusterClientInstance = elasticsearchServiceMock.createClusterClient();
     const mockDataClusterClientInstance = elasticsearchServiceMock.createClusterClient();
     MockClusterClient.mockImplementationOnce(
@@ -272,7 +272,7 @@ describe('#stop', () => {
     expect(mockDataClusterClientInstance.close).toHaveBeenCalledTimes(1);
   });
 
-  it('stops pollEsNodeVersions even if there are active subscriptions', async done => {
+  it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
     expect.assertions(2);
     const mockAdminClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();
     const mockDataClusterClientInstance = elasticsearchServiceMock.createCustomClusterClient();

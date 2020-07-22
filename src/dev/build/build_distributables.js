@@ -35,6 +35,7 @@ import {
   CreateArchivesTask,
   CreateDebPackageTask,
   CreateDockerPackageTask,
+  CreateDockerUbiPackageTask,
   CreateEmptyDirsAndFilesTask,
   CreateNoticeFileTask,
   CreatePackageJsonTask,
@@ -68,6 +69,7 @@ export async function buildDistributables(options) {
     createRpmPackage,
     createDebPackage,
     createDockerPackage,
+    createDockerUbiPackage,
     versionQualifier,
     targetAllPlatforms,
   } = options;
@@ -156,8 +158,11 @@ export async function buildDistributables(options) {
     await run(CreateRpmPackageTask);
   }
   if (createDockerPackage) {
-    // control w/ --docker or --skip-os-packages
+    // control w/ --docker or --skip-docker-ubi or --skip-os-packages
     await run(CreateDockerPackageTask);
+    if (createDockerUbiPackage) {
+      await run(CreateDockerUbiPackageTask);
+    }
   }
 
   /**

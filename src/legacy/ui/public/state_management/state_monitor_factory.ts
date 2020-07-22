@@ -57,7 +57,7 @@ function stateMonitor<TStateDefault extends { [key: string]: unknown }>(
   }
 
   function removeIgnoredProps(innerState: TStateDefault) {
-    ignoredProps.forEach(path => {
+    ignoredProps.forEach((path) => {
       set(innerState, path, true);
     });
     return innerState;
@@ -79,7 +79,7 @@ function stateMonitor<TStateDefault extends { [key: string]: unknown }>(
     if (!changeHandlers) {
       throw new Error('Change handlers is undefined, this object has been destroyed');
     }
-    changeHandlers.forEach(changeHandler => {
+    changeHandlers.forEach((changeHandler) => {
       changeHandler(status, type, keys);
     });
   }

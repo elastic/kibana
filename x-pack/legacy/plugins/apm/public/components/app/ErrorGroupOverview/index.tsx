@@ -9,7 +9,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -27,20 +27,20 @@ const ErrorGroupOverview: React.FC = () => {
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
 
   const { data: errorDistributionData } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/errors/distribution',
           params: {
             path: {
-              serviceName
+              serviceName,
             },
             query: {
               start,
               end,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -48,7 +48,7 @@ const ErrorGroupOverview: React.FC = () => {
   );
 
   const { data: errorGroupListData } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
       if (serviceName && start && end) {
@@ -56,16 +56,16 @@ const ErrorGroupOverview: React.FC = () => {
           pathname: '/api/apm/services/{serviceName}/errors',
           params: {
             path: {
-              serviceName
+              serviceName,
             },
             query: {
               start,
               end,
               sortField,
               sortDirection: normalizedSortDirection,
-              uiFilters: JSON.stringify(uiFilters)
-            }
-          }
+              uiFilters: JSON.stringify(uiFilters),
+            },
+          },
         });
       }
     },
@@ -74,7 +74,7 @@ const ErrorGroupOverview: React.FC = () => {
 
   useTrackPageview({
     app: 'apm',
-    path: 'error_group_overview'
+    path: 'error_group_overview',
   });
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
@@ -82,9 +82,9 @@ const ErrorGroupOverview: React.FC = () => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['host', 'containerId', 'podName', 'serviceVersion'],
       params: {
-        serviceName
+        serviceName,
       },
-      projection: PROJECTION.ERROR_GROUPS
+      projection: PROJECTION.ERROR_GROUPS,
     };
 
     return config;
@@ -110,7 +110,7 @@ const ErrorGroupOverview: React.FC = () => {
                   title={i18n.translate(
                     'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
                     {
-                      defaultMessage: 'Error occurrences'
+                      defaultMessage: 'Error occurrences',
                     }
                   )}
                 />

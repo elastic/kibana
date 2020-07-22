@@ -153,7 +153,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       }),
       truncateText: true,
       render: (shards: SnapshotRestore['shards']) => {
-        return shards.filter(shard => Boolean(shard.stopTimeInMillis)).length;
+        return shards.filter((shard) => Boolean(shard.stopTimeInMillis)).length;
       },
     },
     {
@@ -163,7 +163,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
       }),
       truncateText: true,
       render: (shards: SnapshotRestore['shards']) => {
-        return shards.filter(shard => !Boolean(shard.stopTimeInMillis)).length;
+        return shards.filter((shard) => !Boolean(shard.stopTimeInMillis)).length;
       },
     },
     {

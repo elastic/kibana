@@ -63,35 +63,30 @@ const buildQueryMatch = (
       : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
   }`.trim();
 
-const buildQueryForAndProvider = (
-  dataAndProviders: DataProvidersAnd[],
-  browserFields: BrowserFields
-) =>
-  dataAndProviders
-    .reduce((andQuery, andDataProvider) => {
-      const prepend = (q: string) => `${q !== '' ? `${q} and ` : ''}`;
-      return andDataProvider.enabled
-        ? `${prepend(andQuery)} ${buildQueryMatch(andDataProvider, browserFields)}`
-        : andQuery;
-    }, '')
-    .trim();
-
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
-    .reduce((query, dataProvider: DataProvider, i) => {
-      const prepend = (q: string) => `${q !== '' ? `(${q}) or ` : ''}`;
-      const openParen = i > 0 ? '(' : '';
-      const closeParen = i > 0 ? ')' : '';
-      return dataProvider.enabled
-        ? `${prepend(query)}${openParen}${buildQueryMatch(dataProvider, browserFields)}
-        ${
-          dataProvider.and.length > 0
-            ? ` and ${buildQueryForAndProvider(dataProvider.and, browserFields)}`
-            : ''
-        }${closeParen}`.trim()
-        : query;
-    }, '')
-    .trim();
+    .reduce((queries: string[], dataProvider: DataProvider) => {
+      const flatDataProviders = [dataProvider, ...dataProvider.and];
+      const activeDataProviders = flatDataProviders.filter(
+        (flatDataProvider) => flatDataProvider.enabled
+      );
+
+      if (!activeDataProviders.length) return queries;
+
+      const activeDataProvidersQueries = activeDataProviders.map((activeDataProvider) =>
+        buildQueryMatch(activeDataProvider, browserFields)
+      );
+
+      const activeDataProvidersQueryMatch = activeDataProvidersQueries.join(' and ');
+
+      return [...queries, activeDataProvidersQueryMatch];
+    }, [])
+    .filter((queriesItem) => !isEmpty(queriesItem))
+    .reduce((globalQuery: string, queryMatch: string, index: number, queries: string[]) => {
+      if (queries.length <= 1) return queryMatch;
+
+      return !index ? `(${queryMatch})` : `${globalQuery} or (${queryMatch})`;
+    }, '');
 
 export const combineQueries = ({
   config,

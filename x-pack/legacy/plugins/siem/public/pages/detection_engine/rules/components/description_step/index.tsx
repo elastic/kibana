@@ -34,6 +34,8 @@ import {
 } from './helpers';
 import { useSiemJobs } from '../../../../../components/ml_popover/hooks/use_siem_jobs';
 import { buildMlJobDescription } from './ml_job_description';
+import { buildActionsDescription } from './actions_description';
+import { buildThrottleDescription } from './throttle_description';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -73,6 +75,15 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
         ),
       ];
     }
+
+    if (key === 'throttle') {
+      return [...acc, buildThrottleDescription(get(key, data), get([key, 'label'], schema))];
+    }
+
+    if (key === 'actions') {
+      return [...acc, buildActionsDescription(get(key, data), get([key, 'label'], schema))];
+    }
+
     return [...acc, ...buildListItems(data, pick(key, schema), filterManager, indexPatterns)];
   }, []);
 
@@ -131,7 +142,7 @@ export const buildListItems = (
   );
 
 export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
-  return filters.map(filter => {
+  return filters.map((filter) => {
     if (filter.$state == null) {
       return { $state: { store: esFilters.FilterStateStore.APP_STATE }, ...filter };
     } else {

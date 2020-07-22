@@ -98,7 +98,7 @@ export const MonitorPageComponent: React.FC<Props> = ({
   );
 };
 
-const mapStateToProps: MapStateToPropsParam<StateProps, {}, AppState> = state => ({
+const mapStateToProps: MapStateToPropsParam<StateProps, {}, AppState> = (state) => ({
   selectedMonitor: selectSelectedMonitor(state),
 });
 

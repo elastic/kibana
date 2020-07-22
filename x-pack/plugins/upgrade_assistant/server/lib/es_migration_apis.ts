@@ -37,13 +37,13 @@ export async function getUpgradeAssistantStatus(
       indexNames
     );
 
-    indices.forEach(indexData => {
+    indices.forEach((indexData) => {
       indexData.blockerForReindexing =
         indexStates[indexData.index!] === 'close' ? 'index-closed' : undefined;
     });
   }
 
-  const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');
+  const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
 
   return {
     readyForUpgrade: criticalWarnings.length === 0,
@@ -62,11 +62,11 @@ const getCombinedIndexInfos = (
   return (
     Object.keys(deprecations.index_settings)
       // prevent APM indices from showing up for general re-indexing
-      .filter(indexName => !apmIndices.has(indexName))
+      .filter((indexName) => !apmIndices.has(indexName))
       .reduce((indexDeprecations, indexName) => {
         return indexDeprecations.concat(
           deprecations.index_settings[indexName].map(
-            d =>
+            (d) =>
               ({
                 ...d,
                 index: indexName,
@@ -80,7 +80,7 @@ const getCombinedIndexInfos = (
       }, [] as EnrichedDeprecationInfo[])
       // Filter out warnings for system indices until we know more about what changes are required for the
       // next upgrade in a future minor version. Note, we're still including APM depercations below.
-      .filter(deprecation => !isSystemIndex(deprecation.index!))
+      .filter((deprecation) => !isSystemIndex(deprecation.index!))
       .concat(apmIndexDeprecations)
   );
 };
@@ -92,7 +92,7 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
 
   if (isCloudEnabled) {
     // In Cloud, this is changed at upgrade time. Filter it out to improve upgrade UX.
-    return combined.filter(d => d.message !== 'Security realm settings structure changed');
+    return combined.filter((d) => d.message !== 'Security realm settings structure changed');
   } else {
     return combined;
   }

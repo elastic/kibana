@@ -10,6 +10,11 @@ your application to Kibana 7.6.
 * <<user-facing-changes, Breaking changes for users>>
 * <<general-plugin-API-changes, Breaking changes for plugin developers>>
 
+// The following section is re-used in the Installation and Upgrade Guide
+//tag::notable-breaking-changes[]
+
+// end::notable-breaking-changes[]
+
 [float]
 [[user-facing-changes]]
 === Breaking changes for users
@@ -22,14 +27,14 @@ There are no user-facing breaking changes in 7.6.
 
 [float]
 ==== {kib} no longer crashes when a plugin version does not match the server
-{pull}54404[#54404]
+{kib-pull}54404[#54404]
 
 {kib} no longer crashes when a plugin is used against an incompatible {kib} version.
 A warning is now displayed in the console instead of throwing and crashing.
 
 [float]
 ==== Generate legacy vars when rendering all applications
-{pull}54768[#54768]
+{kib-pull}54768[#54768]
 
 Rendering any type of application, even ones for the new platform,
 should still generate legacy vars injected into the page metadata.
@@ -37,7 +42,7 @@ This ensures these vars are injected for HTTP route rendering as well.
 
 [float]
 ==== `uiSettings` image upload field config
-{pull}54522[#54522]
+{kib-pull}54522[#54522]
 
 In `uiSettings`, the image upload field required specifying `maxSize`
 via the `options` field. This was in conflict with the stated use and
@@ -46,7 +51,7 @@ type of `options`, which is a `string[]` used to populate select fields.
 
 [float]
 ==== Replaced `map.manifestServiceUrl` setting in kibana.yml with `map.emsTileApiUrl` and `map.emsFileApiUrl`
-{pull}54399[#54399]
+{kib-pull}54399[#54399]
 
 The undocumented `map.manifestServiceUrl` setting in kibana.yml has been replaced
 by `map.emsTileApiUrl` and `map.emsFileApiUrl`. These settings configure the
@@ -55,7 +60,7 @@ Elastic Maps and the region map and coordinate map.visualizations.
 
 [float]
 ==== Don't expose {es} client as Observable
-{pull}53824[#53824]
+{kib-pull}53824[#53824]
 
 {es} clients aren't exposed via the Observable interface anymore.
 {es} client provides a static API that handles all {es} config updates under the hood,
@@ -71,7 +76,7 @@ const data = await client.callAsInternalUser('endpoint');
 
 [float]
 ==== Reduce license plugin API
-{pull}53489[#53489]
+{kib-pull}53489[#53489]
 
 License method `isOneOf` was superseded by `hasAtLeast`, which checks
 the current license is not less than passes minimal required license.
@@ -90,7 +95,7 @@ license.hasAtLeast('platinum')
 
 [float]
 ==== State containers
-{pull}52384[#52384]
+{kib-pull}52384[#52384]
 
 State containers have now been rewritten and to create state container you
 use `createStateContainer` instead of previous `createStore`.
@@ -121,7 +126,7 @@ console.log(container.get()); // 10
 
 [float]
 ==== Add pre-response HTTP interceptor
-{pull}52366[#52366]
+{kib-pull}52366[#52366]
 
 HttpService provides `onPreResponse` interceptor. Interceptor supports extending a response with custom headers.
 
@@ -151,7 +156,7 @@ HttpService provides `onPreResponse` interceptor. Interceptor supports extending
 
 [float]
 ==== Add server rendering service to enable standalone route rendering
-{pull}52161[#52161]
+{kib-pull}52161[#52161]
 
 Render a bootstrapped HTML page from a route handler using the `RenderingService` from your server plugin:
 
@@ -183,7 +188,7 @@ router.get(
 
 [float]
 ==== Disabled actions
-{pull}51975[#51975]
+{kib-pull}51975[#51975]
 
 Embeddable input now has `disabledActions` property. Actions with ID listed
 in `disabledActions` will not be rendered by embeddable panel in drop down context menu and badge list.
@@ -210,7 +215,7 @@ const embeddable = await embeddableFactory.createFromState(
 
 [float]
 ==== Allow chromeless applications to render via non-/app routes
-{pull}51527[#51527]
+{kib-pull}51527[#51527]
 
 Allow applications to routable from paths that do not start with `/app`.
 This is first enabled via the `appRoute` flag during UI application registration.
@@ -247,7 +252,7 @@ export class MyPlugin implements Plugin {
 
 [float]
 ==== Add compatibility wrapper for Boom errors thrown from route handler
-{pull}51157[#51157]
+{kib-pull}51157[#51157]
 
 Added a new `handleLegacyErrors` method to core `HttpService` router. The method wraps a `RequestHandler` to intercept any thrown `Boom` errors and converts them into proper NP error response.
 
@@ -293,7 +298,7 @@ class Plugin {
 
 [float]
 ==== Move SavedQuery to New Platform
-{pull}51024[#51024]
+{kib-pull}51024[#51024]
 
 **Saved Query Service**
 
@@ -337,7 +342,7 @@ image::images/breaking_changes_save_query.png[Save Query Form]
 
 [float]
 ==== Kibana app migration: Remove old APIs
-{pull}50881[#50881]
+{kib-pull}50881[#50881]
 
 
 The following undocumented APIs for scroll search and index document count have been removed:
@@ -350,7 +355,7 @@ The following undocumented APIs for scroll search and index document count have 
 
 [float]
 ==== ChromeHelpExtension
-{pull}50736[#50736]
+{kib-pull}50736[#50736]
 
 The `chrome.helpExtension` has been updated to where it no longer just accepts a function to spit out any content. Now, the extension looks like:
 
@@ -372,7 +377,7 @@ export interface ChromeHelpExtension {
 
 [float]
 ==== Allows plugins to define validation schema for "enabled" flag
-{pull}50286[#50286]
+{kib-pull}50286[#50286]
 
 If you want your plugin to be disabled by default you can specify it via config:
 
@@ -388,7 +393,7 @@ export const config = {
 
 [float]
 ==== Add getStartServices API
-{pull}50231[#50231]
+{kib-pull}50231[#50231]
 
 Context is being deprecated on the front-end and replaced by the `core.getStartServices()` API.
 
@@ -426,7 +431,7 @@ class Plugin {
 
 [float]
 ==== Relocated `@kbn/es-query` package to `data` plugin
-{pull}50182[#50182]
+{kib-pull}50182[#50182]
 
 The `@kbn/es-query` package has been moved to `src/plugins/data` and is available under the `esQuery` namespace on both the client and the server.
 
@@ -461,7 +466,7 @@ esQuery.buildEsQuery(...);
 
 [float]
 ==== Migrate share registry
-{pull}50137[#50137]
+{kib-pull}50137[#50137]
 
 The `ui/share` registry is removed in favor of the `share` plugin which exposes a `register` method in the setup contract. The interface of share menu providers does not change except for the removal of angular dependency injection. The function to render the menu also moves into a function exposed by the `share` plugin in the start phase instead of a function which has to be called with the menu item providers. The following items have also been renamed:
 
@@ -473,13 +478,13 @@ The `ui/share` registry is removed in favor of the `share` plugin which exposes 
 
 [float]
 ==== Ensure chromeless applications hide left navbar link
-{pull}50060[#50060]
+{kib-pull}50060[#50060]
 
 Chromeless applications no longer display a navigation link in the left application menu.
 
 [float]
 ==== Allow registered applications to hide Kibana chrome
-{pull}49795[#49795]
+{kib-pull}49795[#49795]
 
 When registering an application, you can now use the `chromeless` option to hide the Kibana chrome UI when the application is mounted.
 
@@ -503,7 +508,7 @@ application.register({
 
 [float]
 ==== Remove react references from core `Notifications` APIs
-{pull}49573[#49573]
+{kib-pull}49573[#49573]
 
 The core `NotificationService` and `ToastsApi` methods are now framework agnostic
 and no longer accept react components as input. Please use `kibana_react`'s`toMountPoint`
@@ -511,7 +516,7 @@ utility to convert a react node to a mountPoint.
 
 [float]
 ==== Shim dev tools
-{pull}49349[#49349]
+{kib-pull}49349[#49349]
 
 The `ui/registry/dev_tools` is removed in favor of the `DevTools` plugin,
 which exposes a `register` method in the setup contract.
@@ -520,7 +525,7 @@ Routing will be handled by the id of the dev tool - your dev tool will be mounte
 
 [float]
 ==== Kibana app migration: Shim dashboard
-{pull}48913[#48913]
+{kib-pull}48913[#48913]
 
 The route flag `requireDefaultIndex` making sure there are index patterns
 and the `defaultIndex` advanced setting is set was removed.
@@ -530,7 +535,7 @@ helper function `ensureDefaultIndexPattern` from `ui/legacy_compat` within the `
 
 [float]
 ==== Remove react references from core `OverlayService` apis
-{pull}48431[#48431]
+{kib-pull}48431[#48431]
 
 The core `OverlayService` methods are now framework agnostic and no longer accept react components as input.
 Please use `kibana_react`'s`toMountPoint` utility to convert a react component to a mountPoint.
@@ -553,14 +558,14 @@ core.overlays.openModal(toMountPoint(<MyComponent/>))
 
 [float]
 ==== Supply deprecated req and res properties on IHttpFetchError for legacy compatibility
-{pull}48430[#48430]
+{kib-pull}48430[#48430]
 
 Expose deprecated `req: Request` and `res: Response` properties on `IHttpFetchError`s
 to help plugins migrated faster by removing an additional migration burden.
 
 [float]
 ==== Timelion server API
-{pull}47813[#47813]
+{kib-pull}47813[#47813]
 
 The server side AOU of Timelion `/api/timelion/run` used to
 accept datemath strings (like `now`) for the `time.from` and `time.to` properties.
@@ -568,7 +573,7 @@ This PR removes support for datemath, from now on only ISO8601 encoded strings a
 
 [float]
 ==== Pass along request object to all HTTP interceptors
-{pull}47258[#47258]
+{kib-pull}47258[#47258]
 
 Make the `Request` instance available to all HTTP interceptors, which is now in a read-only state.
 You may now also under-specify the object returned from HTTP response interceptors
@@ -576,7 +581,7 @@ to only overwrite specific properties.
 
 [float]
 ==== Expose whitelisted config values to client-side plugin
-{pull}50641[#50641]
+{kib-pull}50641[#50641]
 
 New Platform plugins with both a server and client parts can now expose configuration properties to the client-side plugin.
 
@@ -638,7 +643,7 @@ export class Plugin implements Plugin<PluginSetup, PluginStart> {
 
 [float]
 ==== Allow registering per-app navigation items
-{pull}53136[#53136]
+{kib-pull}53136[#53136]
 
 Allow registering per-app TopNavMenuItems&mdash;have a plugin register menu items into another application.
 
@@ -698,7 +703,7 @@ npSetup.plugins.navigation.registerMenuItem(customDiscoverExtension);
 
 [float]
 ==== Management API for Kibana Platform
-{pull}52579[#52579]
+{kib-pull}52579[#52579]
 
 Management API for Kibana Platform implemented.
 Demonstration code available at `test/plugin_functional/plugins/management_test_plugin/public/plugin.tsx`
@@ -706,7 +711,7 @@ Demonstration code available at `test/plugin_functional/plugins/management_test_
 
 [float]
 ==== New platform applications can now prompt user with a message
-{pull}54221[#54221]
+{kib-pull}54221[#54221]
 
 New platform applications can now prompt a message when users are trying to
 leave the app, allowing to notify them if some changes are unsaved.
@@ -755,7 +760,7 @@ leave the app, allowing to notify them if some changes are unsaved.
 
 [float]
 ==== [NP] Add lifecycle timeout
-{pull}54129[#54129]
+{kib-pull}54129[#54129]
 
 {kib} platform deprecates async lifecycles by `v8` release.
 {kib} supports async lifecycles for BWC, but limits their time duration to 30 sec.
@@ -763,7 +768,7 @@ leave the app, allowing to notify them if some changes are unsaved.
 
 [float]
 ==== Migrate config deprecations and `ShieldUser` functionality to the New Platform
-{pull}53768[#53768]
+{kib-pull}53768[#53768]
 
 In the Security Plugin, the
 Legacy `ShieldUser` angular service has been removed and replaced with
@@ -817,7 +822,7 @@ public setup(core: CoreSetup, { security }: PluginSetupDependencies) {
 
 [float]
 ==== NP Migration: Move doc views registry and existing doc views into discover plugin
-{pull}53465[#53465]
+{kib-pull}53465[#53465]
 
 The `ui/registry/doc_views` registry is removed in favor of the same
 functionality exposed through the setup contract of the `discover` plugin in `core_plugins/kibana`.
@@ -861,7 +866,7 @@ setup.addDocView({
 
 [float]
 ==== bfetch
-{pull}52888[#52888]
+{kib-pull}52888[#52888]
 
 `ajax_stream` has been ported to the New Platform. Use `fetchStreaming()` method of `bfetch` plugin instead.
 
@@ -875,7 +880,7 @@ const { stream, promise } = npStart.plugins.bfetch.fetchStreaming({ url: 'http:/
 
 [float]
 ==== Move CSP options to New Platform
-{pull}52698[#52698]
+{kib-pull}52698[#52698]
 
 The default options used for managing Kibana's Content Security Policy have been moved into core for the new platform. Relevant items exposed from `src/core/server` include:
 
@@ -888,7 +893,7 @@ The default options used for managing Kibana's Content Security Policy have been
 
 [float]
 ==== Implements config deprecation in New Platform
-{pull}52251[#52251]
+{kib-pull}52251[#52251]
 
 
 New platform plugin's configuration now supports deprecation. Use the `deprecations` key of a plugin's config descriptor to register them.
@@ -934,13 +939,13 @@ New platform plugin's configuration now supports deprecation. Use the `deprecati
 
 [float]
 ==== [Telemetry] Migrate ui_metric plugin to NP under usageCollection
-{pull}51972[#51972]
+{kib-pull}51972[#51972]
 
 Migrates `ui_metrics` to NP under `usageCollection`.
 
 [float]
 ==== NP licensing plugin improvements
-{pull}51818[#51818]
+{kib-pull}51818[#51818]
 
 
 Licensing plugin retrieves license data from {es} and
@@ -971,7 +976,7 @@ license from **Kibana**, it will emit `an empty license` object.
 
 [float]
 ==== [Cloud] move cloud plugin to New Platform
-{pull}51789[#51789]
+{kib-pull}51789[#51789]
 
 Fully migrates `cloud` plugin over to NP. To use the NP contract exposed by
 the cloud plugin (ex `cloudId` or `isCloudEnabled`) follow this quick guide below.
@@ -1036,7 +1041,7 @@ const isCloudEnabled = get<boolean>(cloud, 'isCloudEnabled', false);
 
 [float]
 ==== [Telemetry] Migrate Usage Collector Set to the new Kibana Platform
-{pull}51618[#51618]
+{kib-pull}51618[#51618]
 
 Fully migrate (`server.usage.collectorSet`) to New Platform under (`UsageCollection`) plugin.
 To use the `UsageCollector` plugin to collect server side stats with the NP follow the quick guide below (Note that all the plugins are already migrated to use this new plugin in this very same PR):
@@ -1133,7 +1138,7 @@ export function registerMyPluginUsageCollector(usageCollection?: UsageCollection
 
 [float]
 ==== Move SearchBar to NP
-{pull}51028[#51028]
+{kib-pull}51028[#51028]
 
 The SearchBar component is now available by importing from the data plugin.
 
@@ -1175,7 +1180,7 @@ export class MyPublicPlugin {
 
 [float]
 ==== Move QueryBarInput to New Platform
-{pull}51023[#51023]
+{kib-pull}51023[#51023]
 
 
 * `QueryBarInput` was renamed to `QueryStringInput` and moved to `src/plugins/data/public`
@@ -1190,7 +1195,7 @@ export class MyPublicPlugin {
 
 [float]
 ==== Move ApplyFiltersPopover to New Platform
-{pull}51022[#51022]
+{kib-pull}51022[#51022]
 
 The `ApplyFiltersPopover` component is no longer exported.
 
@@ -1211,7 +1216,7 @@ use the Actions API from within an `embeddable`:
 
 [float]
 ==== Deprecated the `filter-bar` directive
-{pull}51020[#51020]
+{kib-pull}51020[#51020]
 
 If you need to render a filter bar from `angular`,
 use the `kbn-top-nav` directive with the following configuration:
@@ -1272,7 +1277,7 @@ import { FilterBar } from '../../../plugins/data/public';
 
 [float]
 ==== NP Kibana plugin home feature catalogue
-{pull}50838[#50838]
+{kib-pull}50838[#50838]
 
 The `ui/registries/feature_catalogue` module has been deprecated for removal in 8.0.
 
@@ -1311,7 +1316,7 @@ Note that the old module supported providing a Angular DI function to receive An
 
 [float]
 ==== [NP Kibana Migrations ] Kibana plugin home
-{pull}50444[#50444]
+{kib-pull}50444[#50444]
 
 The API to register new tutorials was moved to the new platform. You are now able to add new tutorials by creating a plugin in the new platform, adding a dependency to `home` in its `kibana.json` and using the `tutorials.registerTutorial` method in the setup lifecycle:
 
@@ -1339,7 +1344,7 @@ server.newPlatform.setup.plugins.home.tutorials.registerTutorial(() => ({ /* tut
 
 [float]
 ==== Expressions fully migrated to the New Platform
-{pull}50294[#50294]
+{kib-pull}50294[#50294]
 
 The Expressions service has been moved to the New Platform. Moving forward, any expressions-related code should be consumed via the new plugin's contracts (`src/plugins/expressions`).
 
@@ -1385,7 +1390,7 @@ npStart.plugins.expressions.execute(myExpression);
 
 [float]
 ==== Move generateFilters to NP
-{pull}50118[#50118]
+{kib-pull}50118[#50118]
 
 Filter generator is now available as a utility function in the `data` plugin.
 
@@ -1401,7 +1406,7 @@ const filters = generateFilters(filterManager, field, values, negate, indexStrin
 
 [float]
 ==== Move Query type to NP
-{pull}49636[#49636]
+{kib-pull}49636[#49636]
 
 Moved the data `Query` type, used to represent a query string in a specific querying language  to `src/plugins/data`.
 
@@ -1419,7 +1424,7 @@ import { Query } from `src/plugins/data/public`;
 
 [float]
 ==== Move Timefilter service to NP
-{pull}49491[#49491]
+{kib-pull}49491[#49491]
 
 Moved the `timefilter` service to New Platform.
 
@@ -1465,7 +1470,7 @@ class MyPlugin {
 
 [float]
 ==== Move Storage to New Platform
-{pull}49448[#49448]
+{kib-pull}49448[#49448]
 
 Move `Storage` to `kibana_utils`.
 
@@ -1477,7 +1482,7 @@ Move `Storage` to `kibana_utils`.
 
 [float]
 ==== Licensing plugin
-{pull}49345[#49345]
+{kib-pull}49345[#49345]
 
 Add x-pack plugin for new platform public licensing information. This will eventually replace the licensing information consumed via `xpack_main`. Upon setup, this plugin exposes an observable API for inspecting and making checks against the license information.
 
@@ -1505,7 +1510,7 @@ license$.subscribe(license => {
 
 [float]
 ==== Migrate ui/registry/feature_catalogue to New Platform plugin
-{pull}48818[#48818]
+{kib-pull}48818[#48818]
 
 The `ui/registries/feature_catalogue` module has been deprecated for removal in 8.0.
 
@@ -1543,7 +1548,7 @@ Note that the old module supported providing a Angular DI function to receive An
 
 [float]
 ==== Migrate necessary ui/autoload functionality to NP
-{pull}48689[#48689]
+{kib-pull}48689[#48689]
 
 The `ui/autoload/styles` and `ui/autoload/settings` modules have been removed and are no longer necessary to import in your plugin code. Remove these imports starting in 7.6.
 
@@ -1557,7 +1562,7 @@ import 'font-awesome/less/font-awesome';
 
 [float]
 ==== Provide uiSettings service in NP
-{pull}48413[#48413]
+{kib-pull}48413[#48413]
 
 New platform plugins can register custom uiSettings via the `uiSettings.register` method.
 
@@ -1617,7 +1622,7 @@ public start({ uiSettings }) {
 
 [float]
 ==== Move FilterManager to New Platform
-{pull}48391[#48391]
+{kib-pull}48391[#48391]
 
 Moved Filter Manager to New Platform.
 
@@ -1657,7 +1662,7 @@ class MyPlugin {
 
 [float]
 ==== Migrate ui/doc_title to New platform
-{pull}48121[#48121]
+{kib-pull}48121[#48121]
 
 Migrate `chrome.docTitle` to new platform. Plugins can now change the page title using this API.
 
@@ -1669,7 +1674,7 @@ coreStart.docTitle.change('My Title');
 
 [float]
 ==== Use NP registry instead of ui/registry/field_formats
-{pull}48108[#48108]
+{kib-pull}48108[#48108]
 
 The `FieldFormats` service has been moved to the `data` plugin in the New Platform.
 If your plugin has any imports from `ui/registry/field_formats`, you'll need to update your imports as follows:
@@ -1716,7 +1721,7 @@ npStart.plugins.data.fieldFormats.getType(myFieldFormatId);
 
 [float]
 ==== ui/management to New Platform
-{pull}45747[#45747]
+{kib-pull}45747[#45747]
 
 The following interfaces were previously available under `ui/management`
 and are now available via `import { setup as managementSetup }``
@@ -1730,7 +1735,7 @@ from `'${correct path to top dir}src/legacy/core_plugins/management/public/legac
 
 [float]
 ==== `ui/public` cleanup
-{pull}43511[#43511]
+{kib-pull}43511[#43511]
 
 **Removed / moved modules**
 
@@ -1746,10 +1751,10 @@ or copy the relevant code into your plugin.
 
 [float]
 **`ui/state_management`**
-{pull}51835[#51835]
-{pull}52172[#52172]
-{pull}52280[#52280]
-{pull}53582[#53582]
+{kib-pull}51835[#51835]
+{kib-pull}52172[#52172]
+{kib-pull}52280[#52280]
+{kib-pull}53582[#53582]
 
 The `hashUrl` and `unhashUrl` functions no longer rely on states being provided as an argument, therefore `getUnhashableStates`/`getUnhashableStatesProvider` have been removed.
 
@@ -1803,45 +1808,45 @@ This should become a replacement for `AppState` and `GlobalState` in NP.
 
 **`ui/public/utils` cleanup**
 
-- `base_object` and `find_by_param` utilities have been removed {pull}52500[#52500]
+- `base_object` and `find_by_param` utilities have been removed {kib-pull}52500[#52500]
 
-- `decode_geo_hash` and `zoom_to_precision` utilities have been moved to `ui/vis/map`{pull}52615[#52615]
+- `decode_geo_hash` and `zoom_to_precision` utilities have been moved to `ui/vis/map`{kib-pull}52615[#52615]
 
-- `range` utility has beed moved to `ui/vis/editors/default` {pull}52615[#52615]
+- `range` utility has beed moved to `ui/vis/editors/default` {kib-pull}52615[#52615]
 
-- `cidr_mask`, `date_range`, `geo_utils`,  `ip_range`, `ordinal_suffix` utilities have been moved to `ui/agg_types` {pull}52744[#52744]
+- `cidr_mask`, `date_range`, `geo_utils`,  `ip_range`, `ordinal_suffix` utilities have been moved to `ui/agg_types` {kib-pull}52744[#52744]
 
-- `case_conversion` {pull}53819[#53819]
+- `case_conversion` {kib-pull}53819[#53819]
 
     - `keysToSnakeCaseShallow` moved to `src/legacy/server/status/lib`
 
     - `keysToCamelCaseShallow` moved to `src/legacy/core_plugins/kibana/public/management`
 
-- `collection` {pull}53819[#53819]
+- `collection` {kib-pull}53819[#53819]
 
     - `organizeBy moved to `src/legacy/ui/public/indexed_array`
 
     - `pushAll` was removed
 
-- `diff_object moved to `ui/state_management` {pull}53819[#53819]
+- `diff_object moved to `ui/state_management` {kib-pull}53819[#53819]
 
-- `function` was removed {pull}53819[#53819]
+- `function` was removed {kib-pull}53819[#53819]
 
-- `key_map` moved to `ui/directives` {pull}53819[#53819]
+- `key_map` moved to `ui/directives` {kib-pull}53819[#53819]
 
-- `math` moved to `ui/vis`  {pull}53819[#53819]
+- `math` moved to `ui/vis`  {kib-pull}53819[#53819]
 
-- `numeric` moved to `src/legacy/core_plugins/kibana/public/management` {pull}53819[#53819]
+- `numeric` moved to `src/legacy/core_plugins/kibana/public/management` {kib-pull}53819[#53819]
 
-- `parse_interval` moved to`src/legacy/core_plugins/data/common` {pull}53819[#53819]
+- `parse_interval` moved to`src/legacy/core_plugins/data/common` {kib-pull}53819[#53819]
 
-- `sort_prefix_first` moved to `x-pack/legacy/plugins/kuery_autocomplete` {pull}53819[#53819]
+- `sort_prefix_first` moved to `x-pack/legacy/plugins/kuery_autocomplete` {kib-pull}53819[#53819]
 
-- `supports` moved to `src/legacy/core_plugins/tile_map/public` {pull}53819[#53819]
+- `supports` moved to `src/legacy/core_plugins/tile_map/public` {kib-pull}53819[#53819]
 
 [float]
 ==== Index Patterns moved to New Platform
-{pull}43438[#43438]
+{kib-pull}43438[#43438]
 
 The `indexPatterns` service is now available from the data plugin.
 

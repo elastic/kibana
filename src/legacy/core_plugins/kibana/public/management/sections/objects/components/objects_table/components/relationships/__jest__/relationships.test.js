@@ -92,7 +92,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -155,7 +155,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -218,7 +218,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -281,7 +281,7 @@ describe('Relationships', () => {
     expect(component.find('EuiLoadingKibana').length).toBe(1);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -314,7 +314,7 @@ describe('Relationships', () => {
     const component = shallowWithI18nProvider(<Relationships {...props} />);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 

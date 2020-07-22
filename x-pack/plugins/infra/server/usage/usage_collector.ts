@@ -79,7 +79,7 @@ export class UsageCollector {
 
     // only keep the newest BUCKET_NUMBER buckets
     const cutoff = this.getBucket() - this.BUCKET_SIZE * (this.BUCKET_NUMBER - 1);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (parseInt(key, 10) < cutoff) {
         delete this.counters[key];
       }

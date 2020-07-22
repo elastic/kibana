@@ -61,7 +61,7 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
       : networkModel.IpDetailsTableType.http;
 
   const updateLimitPagination = useCallback(
-    newLimit =>
+    (newLimit) =>
       updateNetworkTable({
         networkType: type,
         tableType,
@@ -71,7 +71,7 @@ const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
   );
 
   const updateActivePage = useCallback(
-    newPage =>
+    (newPage) =>
       updateNetworkTable({
         networkType: type,
         tableType,

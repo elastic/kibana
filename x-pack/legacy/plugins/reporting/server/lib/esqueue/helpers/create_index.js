@@ -81,7 +81,7 @@ export function createIndex(client, indexName, indexSettings = {}) {
     .callAsInternalUser('indices.exists', {
       index: indexName,
     })
-    .then(exists => {
+    .then((exists) => {
       if (!exists) {
         return client
           .callAsInternalUser('indices.create', {
@@ -89,7 +89,7 @@ export function createIndex(client, indexName, indexSettings = {}) {
             body: body,
           })
           .then(() => true)
-          .catch(err => {
+          .catch((err) => {
             /* FIXME creating the index will fail if there were multiple jobs staged in parallel.
              * Each staged job checks `client.indices.exists` and could each get `false` as a response.
              * Only the first job in line can successfully create it though.

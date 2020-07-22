@@ -19,7 +19,7 @@ export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
     // if no shards exist only then perform the heavier APM query. This optimizes for normal use when siem data exists
     try {
       // Remove APM index if exists, and only query if length > 0 in case it's the only index provided
-      const nonApmIndexNames = indexNames.filter(name => name !== APM_INDEX_NAME);
+      const nonApmIndexNames = indexNames.filter((name) => name !== APM_INDEX_NAME);
       const indexCheckResponse = await (nonApmIndexNames.length > 0
         ? this.framework.callWithRequest(request, 'search', {
             index: nonApmIndexNames,

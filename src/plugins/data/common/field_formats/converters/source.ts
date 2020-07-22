@@ -56,7 +56,7 @@ export class SourceFormat extends FieldFormat {
   static title = '_source';
   static fieldType = KBN_FIELD_TYPES._SOURCE;
 
-  textConvert: TextContextTypeConvert = value => JSON.stringify(value);
+  textConvert: TextContextTypeConvert = (value) => JSON.stringify(value);
 
   htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
     const { field, hit } = options;
@@ -73,7 +73,7 @@ export class SourceFormat extends FieldFormat {
     const sourcePairs: any[] = [];
     const isShortDots = this.getConfig!('shortDots:enable');
 
-    keys(formatted).forEach(key => {
+    keys(formatted).forEach((key) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
       const newField = isShortDots ? shortenDottedString(key) : key;
       const val = formatted[key];

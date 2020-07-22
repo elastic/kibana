@@ -293,7 +293,7 @@ export class SidebarHeader extends Component<Props, State> {
             onClick: bringToFront,
           },
           {
-            name: shortcutHelp.BRING_TO_FRONT, // TODO: same as above
+            name: shortcutHelp.BRING_FORWARD, // TODO: same as above
             icon: 'arrowUp',
             onClick: bringForward,
           },

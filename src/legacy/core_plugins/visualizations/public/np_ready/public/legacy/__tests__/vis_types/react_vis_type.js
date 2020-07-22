@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { ReactVisType } from '../../../vis_types/react_vis_type';
 
-describe('React Vis Type', function() {
+describe('React Vis Type', function () {
   const visConfig = {
     name: 'test',
     title: 'test',

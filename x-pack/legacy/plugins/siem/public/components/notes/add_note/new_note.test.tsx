@@ -24,23 +24,13 @@ describe('NewNote', () => {
   test('it renders a tab labeled "Note"', () => {
     const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);
 
-    expect(
-      wrapper
-        .find('button[role="tab"]')
-        .first()
-        .text()
-    ).toEqual(i18n.NOTE);
+    expect(wrapper.find('button[role="tab"]').first().text()).toEqual(i18n.NOTE);
   });
 
   test('it renders a tab labeled "Preview (Markdown)"', () => {
     const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);
 
-    expect(
-      wrapper
-        .find('button[role="tab"]')
-        .at(1)
-        .text()
-    ).toEqual(i18n.PREVIEW_MARKDOWN);
+    expect(wrapper.find('button[role="tab"]').at(1).text()).toEqual(i18n.PREVIEW_MARKDOWN);
   });
 
   test('it renders the expected placeholder when a note is NOT provided', () => {
@@ -52,28 +42,15 @@ describe('NewNote', () => {
   test('it renders a text area containing the contents of a new (raw) note', () => {
     const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="add-a-note"]')
-        .first()
-        .text()
-    ).toEqual(note);
+    expect(wrapper.find('[data-test-subj="add-a-note"]').first().text()).toEqual(note);
   });
 
   test('it renders a markdown preview when the user clicks Preview (Markdown)', () => {
     const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);
 
     // click the preview tab:
-    wrapper
-      .find('button[role="tab"]')
-      .at(1)
-      .simulate('click');
+    wrapper.find('button[role="tab"]').at(1).simulate('click');
 
-    expect(
-      wrapper
-        .find('[data-test-subj="markdown-root"]')
-        .first()
-        .text()
-    ).toEqual(note);
+    expect(wrapper.find('[data-test-subj="markdown-root"]').first().text()).toEqual(note);
   });
 });

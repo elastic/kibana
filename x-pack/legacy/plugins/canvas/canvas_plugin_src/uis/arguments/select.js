@@ -14,7 +14,7 @@ const { Select: strings } = ArgumentStrings;
 
 const SelectArgInput = ({ typeInstance, onValueChange, argValue, argId }) => {
   const choices = typeInstance.options.choices.map(({ value, name }) => ({ value, text: name }));
-  const handleChange = ev => {
+  const handleChange = (ev) => {
     // Get the value from the choices passed in since it could be a number or
     // boolean, but ev.target.value is always a string
     const { value } = choices[ev.target.selectedIndex];

@@ -57,7 +57,7 @@ export const datasourceReducer = reducerWithInitialState<DatasourceState>(initia
     current: newDatasource,
     loading: true,
   }))
-  .case(datasourceLoaded, datasource => ({
+  .case(datasourceLoaded, (datasource) => ({
     ...datasource,
     loading: false,
   }))
@@ -66,5 +66,5 @@ export const datasourceReducer = reducerWithInitialState<DatasourceState>(initia
 export const datasourceSelector = (state: GraphState) => state.datasource;
 export const hasDatasourceSelector = createSelector(
   datasourceSelector,
-  datasource => datasource.current.type !== 'none'
+  (datasource) => datasource.current.type !== 'none'
 );

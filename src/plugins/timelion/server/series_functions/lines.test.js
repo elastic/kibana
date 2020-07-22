@@ -30,7 +30,7 @@ describe('lines.js', () => {
 
   it('should simply set show, steps, stack and lineWidth', () => {
     expect(seriesList.list[0]._global).to.equal(undefined);
-    return invoke(fn, [seriesList, 1, 2, true, true, false]).then(r => {
+    return invoke(fn, [seriesList, 1, 2, true, true, false]).then((r) => {
       expect(r.output.list[0].lines.lineWidth).to.equal(1);
       expect(r.output.list[0].lines.show).to.equal(true);
       expect(r.output.list[0].stack).to.equal(true);
@@ -40,7 +40,7 @@ describe('lines.js', () => {
 
   it('should set lineWidth to 3 by default, and nothing else', () => {
     expect(seriesList.list[0]._global).to.equal(undefined);
-    return invoke(fn, [seriesList]).then(r => {
+    return invoke(fn, [seriesList]).then((r) => {
       expect(r.output.list[0].lines.lineWidth).to.equal(3);
       expect(r.output.list[0].lines.fill).to.equal(undefined);
       expect(r.output.list[0].lines.show).to.equal(undefined);

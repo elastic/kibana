@@ -12,7 +12,7 @@ import { loadIndices } from './load_indices';
 import { notificationService } from '../../services/notification';
 
 export const reloadIndicesSuccess = createAction('INDEX_MANAGEMENT_RELOAD_INDICES_SUCCESS');
-export const reloadIndices = indexNames => async (dispatch, getState) => {
+export const reloadIndices = (indexNames) => async (dispatch, getState) => {
   let indices;
   indexNames = indexNames || getIndexNamesForCurrentPage(getState());
   try {

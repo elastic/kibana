@@ -14,11 +14,11 @@ export async function getIndicesPrivileges(setup: Setup) {
           indices['apm_oss.errorIndices'],
           indices['apm_oss.metricsIndices'],
           indices['apm_oss.transactionIndices'],
-          indices['apm_oss.spanIndices']
+          indices['apm_oss.spanIndices'],
         ],
-        privileges: ['read']
-      }
-    ]
+        privileges: ['read'],
+      },
+    ],
   });
   return response.index;
 }

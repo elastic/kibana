@@ -16,9 +16,7 @@ describe('MonitorStatusBar component', () => {
   let monitorTls: PingTls;
 
   beforeEach(() => {
-    const dateInTwoMonths = moment()
-      .add(2, 'month')
-      .toString();
+    const dateInTwoMonths = moment().add(2, 'month').toString();
 
     monitorTls = {
       certificate_not_valid_after: dateInTwoMonths,
@@ -39,9 +37,7 @@ describe('MonitorStatusBar component', () => {
   });
 
   it('renders expiration date with a warning state if ssl expiry date is less than 30 days', () => {
-    const dateIn15Days = moment()
-      .add(15, 'day')
-      .toString();
+    const dateIn15Days = moment().add(15, 'day').toString();
     monitorTls = {
       certificate_not_valid_after: dateIn15Days,
     };
@@ -57,9 +53,7 @@ describe('MonitorStatusBar component', () => {
   });
 
   it('does not render the expiration date with a warning state if expiry date is greater than a month', () => {
-    const dateIn40Days = moment()
-      .add(40, 'day')
-      .toString();
+    const dateIn40Days = moment().add(40, 'day').toString();
     monitorTls = {
       certificate_not_valid_after: dateIn40Days,
     };

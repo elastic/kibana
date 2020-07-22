@@ -38,12 +38,9 @@ describe('FieldsPane', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="selected-category-title"]`)
-        .first()
-        .text()
-    ).toEqual(selectedCategory);
+    expect(wrapper.find(`[data-test-subj="selected-category-title"]`).first().text()).toEqual(
+      selectedCategory
+    );
   });
 
   test('it renders a unknown category that does not exist in filteredBrowserFields', () => {
@@ -66,12 +63,9 @@ describe('FieldsPane', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="selected-category-title"]`)
-        .first()
-        .text()
-    ).toEqual(selectedCategory);
+    expect(wrapper.find(`[data-test-subj="selected-category-title"]`).first().text()).toEqual(
+      selectedCategory
+    );
   });
 
   test('it renders the expected message when `filteredBrowserFields` is empty and `searchInput` is empty', () => {
@@ -94,12 +88,9 @@ describe('FieldsPane', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="no-fields-match"]`)
-        .first()
-        .text()
-    ).toEqual('No fields match ');
+    expect(wrapper.find(`[data-test-subj="no-fields-match"]`).first().text()).toEqual(
+      'No fields match '
+    );
   });
 
   test('it renders the expected message when `filteredBrowserFields` is empty and `searchInput` is an unknown field name', () => {
@@ -122,11 +113,8 @@ describe('FieldsPane', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="no-fields-match"]`)
-        .first()
-        .text()
-    ).toEqual(`No fields match ${searchInput}`);
+    expect(wrapper.find(`[data-test-subj="no-fields-match"]`).first().text()).toEqual(
+      `No fields match ${searchInput}`
+    );
   });
 });

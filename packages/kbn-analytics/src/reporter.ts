@@ -115,7 +115,7 @@ export class Reporter {
     eventNames: string | string[],
     count?: number
   ) => {
-    const metrics = wrapArray(eventNames).map(eventName => {
+    const metrics = wrapArray(eventNames).map((eventName) => {
       this.log(`${type} Metric -> (${appName}:${eventName}):`);
       const report = createUiStatsMetric({ type, appName, eventName, count });
       this.log(report);

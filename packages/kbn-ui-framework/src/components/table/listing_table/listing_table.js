@@ -57,7 +57,7 @@ export function KuiListingTable({
     if (areAllRowsSelected()) {
       onItemSelectionChanged([]);
     } else {
-      onItemSelectionChanged(rows.map(row => row.id));
+      onItemSelectionChanged(rows.map((row) => row.id));
     }
   }
 

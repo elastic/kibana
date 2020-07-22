@@ -38,7 +38,7 @@ describe('EventDetails', () => {
   });
 
   describe('tabs', () => {
-    ['Table', 'JSON View'].forEach(tab => {
+    ['Table', 'JSON View'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
         const wrapper = mount(
           <TestProviders>
@@ -83,11 +83,7 @@ describe('EventDetails', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="eventDetails"]')
-          .find('.euiTab-isSelected')
-          .first()
-          .text()
+        wrapper.find('[data-test-subj="eventDetails"]').find('.euiTab-isSelected').first().text()
       ).toEqual('Table');
     });
   });

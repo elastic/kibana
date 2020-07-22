@@ -18,9 +18,9 @@ export function addFieldMetaOptions({ attributes }) {
   }
 
   const layerList = JSON.parse(attributes.layerListJSON);
-  layerList.forEach(layerDescriptor => {
+  layerList.forEach((layerDescriptor) => {
     if (isVectorLayer(layerDescriptor) && _.has(layerDescriptor, 'style.properties')) {
-      Object.values(layerDescriptor.style.properties).forEach(stylePropertyDescriptor => {
+      Object.values(layerDescriptor.style.properties).forEach((stylePropertyDescriptor) => {
         if (stylePropertyDescriptor.type === STYLE_TYPE.DYNAMIC) {
           stylePropertyDescriptor.options.fieldMetaOptions = {
             isEnabled: false, // turn off field metadata to avoid changing behavior of existing saved objects

@@ -82,7 +82,7 @@ export class NoDataController extends MonitoringViewBaseController {
       true
     );
 
-    this.changePath = path => kbnUrl.changePath(path);
+    this.changePath = (path) => kbnUrl.changePath(path);
   }
 
   getDefaultModel() {

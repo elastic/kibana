@@ -370,7 +370,7 @@ const EditRulePageComponent: FC = () => {
               values={{
                 countError: tabHasError.length,
                 tabHasError: tabHasError
-                  .map(t => {
+                  .map((t) => {
                     if (t === RuleStep.aboutRule) {
                       return ruleI18n.ABOUT;
                     } else if (t === RuleStep.defineRule) {
@@ -390,7 +390,7 @@ const EditRulePageComponent: FC = () => {
 
         <EuiTabbedContent
           initialSelectedTab={tabs[0]}
-          selectedTab={tabs.find(t => t.id === selectedTab?.id)}
+          selectedTab={tabs.find((t) => t.id === selectedTab?.id)}
           onTabClick={onTabClick}
           tabs={tabs}
         />

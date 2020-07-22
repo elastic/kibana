@@ -69,7 +69,7 @@ describe('VegaVisualizations', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject($injector => {
+    ngMock.inject(($injector) => {
       vegaVisualizationDependencies = {
         serviceSettings: $injector.get('serviceSettings'),
         core: {
@@ -101,19 +101,19 @@ describe('VegaVisualizations', () => {
   );
 
   describe('VegaVisualization - basics', () => {
-    beforeEach(async function() {
+    beforeEach(async function () {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
       vis = visualizationsStart.createVis('vega', { type: 'vega' });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize (may fail in dev env)', async function() {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -136,7 +136,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vega graph (may fail in dev env)', async function() {
+    it('should show vega graph (may fail in dev env)', async function () {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);

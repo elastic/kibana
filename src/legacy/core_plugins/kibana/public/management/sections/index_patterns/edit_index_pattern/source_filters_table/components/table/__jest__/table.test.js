@@ -51,7 +51,7 @@ describe('Table', () => {
         }}
         items={items}
         deleteFilter={() => {}}
-        fieldWildcardMatcher={filter => field => field.includes(filter[0])}
+        fieldWildcardMatcher={(filter) => (field) => field.includes(filter[0])}
         saveFilter={() => {}}
         isSaving={false}
       />
@@ -85,10 +85,7 @@ describe('Table', () => {
         // Wrap in a div because: https://github.com/airbnb/enzyme/issues/1213
         <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
-      editingComponent
-        .find('EuiButtonIcon')
-        .at(1)
-        .simulate('click');
+      editingComponent.find('EuiButtonIcon').at(1).simulate('click');
       // Ensure the state change propagates
       component.update();
 
@@ -105,10 +102,7 @@ describe('Table', () => {
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
         <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
-      editingComponent
-        .find('EuiButtonIcon')
-        .at(1)
-        .simulate('click');
+      editingComponent.find('EuiButtonIcon').at(1).simulate('click');
 
       // Ensure the state change propagates
       component.update();
@@ -129,7 +123,7 @@ describe('Table', () => {
           }}
           items={items}
           deleteFilter={() => {}}
-          fieldWildcardMatcher={query => () => {
+          fieldWildcardMatcher={(query) => () => {
             return query.includes('time*');
           }}
           saveFilter={saveFilter}
@@ -142,10 +136,7 @@ describe('Table', () => {
         // Fixes: Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
         <div>{localComponent.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
-      editingComponent
-        .find('EuiButtonIcon')
-        .at(1)
-        .simulate('click');
+      editingComponent.find('EuiButtonIcon').at(1).simulate('click');
 
       // Update the value
       localComponent.setState({ editingFilterValue: 'time*' });
@@ -173,10 +164,7 @@ describe('Table', () => {
         // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
         <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
       );
-      editingComponent
-        .find('EuiButtonIcon')
-        .at(0)
-        .simulate('click');
+      editingComponent.find('EuiButtonIcon').at(0).simulate('click');
 
       // Ensure we call saveFilter properly
       expect(saveFilter).toBeCalledWith({
@@ -208,10 +196,7 @@ describe('Table', () => {
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>{component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}</div>
     );
-    deleteCellComponent
-      .find('EuiButtonIcon')
-      .at(0)
-      .simulate('click');
+    deleteCellComponent.find('EuiButtonIcon').at(0).simulate('click');
     expect(deleteFilter).toBeCalled();
   });
 
@@ -235,10 +220,7 @@ describe('Table', () => {
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
     );
-    editingComponent
-      .find('EuiButtonIcon')
-      .at(1)
-      .simulate('click');
+    editingComponent.find('EuiButtonIcon').at(1).simulate('click');
     // Ensure the state change propagates
     component.update();
 
@@ -276,10 +258,7 @@ describe('Table', () => {
       // Fixes Invariant Violation: ReactShallowRenderer render(): Shallow rendering works only with custom components, but the provided element type was `symbol`.
       <div>{component.prop('columns')[2].render({ clientId, value: 'tim*' })}</div>
     );
-    editingComponent
-      .find('EuiButtonIcon')
-      .at(1)
-      .simulate('click');
+    editingComponent.find('EuiButtonIcon').at(1).simulate('click');
     // Ensure the state change propagates
     component.update();
 

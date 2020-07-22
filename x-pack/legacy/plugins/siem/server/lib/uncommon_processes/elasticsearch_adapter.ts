@@ -41,7 +41,7 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
     const buckets = getOr([], 'aggregations.group_by_process.buckets', response);
     const hits = getHits(buckets);
 
-    const uncommonProcessesEdges = hits.map(hit =>
+    const uncommonProcessesEdges = hits.map((hit) =>
       formatUncommonProcessesData(options.fields, hit, { ...processFieldsMap, ...userFieldsMap })
     );
 
@@ -80,7 +80,7 @@ export const getHits = (buckets: readonly UncommonProcessBucket[]): readonly Unc
   }));
 
 export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
-  buckets.map(bucket => {
+  buckets.map((bucket) => {
     const source = get('host.hits.hits[0]._source', bucket);
     return {
       id: [bucket.key],

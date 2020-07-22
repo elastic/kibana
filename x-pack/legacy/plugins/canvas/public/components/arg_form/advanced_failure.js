@@ -15,7 +15,7 @@ import { ComponentStrings } from '../../../i18n';
 
 const { ArgFormAdvancedFailure: strings } = ComponentStrings;
 
-export const AdvancedFailureComponent = props => {
+export const AdvancedFailureComponent = (props) => {
   const {
     onValueChange,
     defaultValue,
@@ -26,7 +26,7 @@ export const AdvancedFailureComponent = props => {
     argId,
   } = props;
 
-  const valueChange = ev => {
+  const valueChange = (ev) => {
     ev.preventDefault();
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
@@ -36,7 +36,7 @@ export const AdvancedFailureComponent = props => {
     }
   };
 
-  const confirmReset = ev => {
+  const confirmReset = (ev) => {
     ev.preventDefault();
     resetErrorState(); // when setting a new value, attempt to reset the error state
     onValueChange(fromExpression(defaultValue, 'argument'));
@@ -61,7 +61,7 @@ export const AdvancedFailureComponent = props => {
       </EuiFormRow>
       <EuiSpacer size="s" />
       <div>
-        <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
+        <EuiButton disabled={!valid} onClick={(e) => valueChange(e)} size="s" type="submit">
           {strings.getApplyButtonLabel()}
         </EuiButton>
         {defaultValue && defaultValue.length && (
@@ -91,7 +91,7 @@ export const AdvancedFailure = compose(
   })),
   createStatefulPropHoc('argExpression', 'updateArgExpression'),
   withPropsOnChange(['argExpression'], ({ argExpression }) => ({
-    valid: (function() {
+    valid: (function () {
       try {
         fromExpression(argExpression, 'argument');
         return true;
