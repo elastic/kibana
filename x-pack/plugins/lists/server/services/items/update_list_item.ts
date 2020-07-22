@@ -12,12 +12,16 @@ import {
   ListItemSchema,
   MetaOrUndefined,
   UpdateEsListItemSchema,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 import { transformListItemToElasticQuery } from '../utils';
+import { decodeVersion } from '../utils/decode_version';
+import { encodeHitVersion } from '../utils/encode_hit_version';
 
 import { getListItem } from './get_list_item';
 
 export interface UpdateListItemOptions {
+  _version: _VersionOrUndefined;
   id: Id;
   value: string | null | undefined;
   callCluster: LegacyAPICaller;
@@ -28,6 +32,7 @@ export interface UpdateListItemOptions {
 }
 
 export const updateListItem = async ({
+  _version,
   id,
   value,
   callCluster,
@@ -57,6 +62,7 @@ export const updateListItem = async ({
       };
 
       const response = await callCluster<CreateDocumentResponse>('update', {
+        ...decodeVersion(_version),
         body: {
           doc,
         },
@@ -65,6 +71,7 @@ export const updateListItem = async ({
         refresh: 'wait_for',
       });
       return {
+        _version: encodeHitVersion(response),
         created_at: listItem.created_at,
         created_by: listItem.created_by,
         deserializer: listItem.deserializer,

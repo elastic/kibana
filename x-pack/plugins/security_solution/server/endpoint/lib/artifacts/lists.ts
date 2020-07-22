@@ -9,7 +9,7 @@ import { deflate } from 'zlib';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { validate } from '../../../../common/validate';
 
-import { Entry, EntryNested } from '../../../../../lists/common/schemas/types/entries';
+import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
 import { FoundExceptionListItemSchema } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { ENDPOINT_LIST_ID } from '../../../../common/shared_imports';

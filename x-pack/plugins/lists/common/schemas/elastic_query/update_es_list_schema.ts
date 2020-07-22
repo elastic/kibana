@@ -26,4 +26,4 @@ export const updateEsListSchema = t.exact(
   })
 );
 
-export type UpdateEsListSchema = t.TypeOf<typeof updateEsListSchema>;
+export type UpdateEsListSchema = t.OutputOf<typeof updateEsListSchema>;

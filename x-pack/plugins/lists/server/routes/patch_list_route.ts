@@ -17,7 +17,7 @@ export const patchListRoute = (router: IRouter): void => {
   router.patch(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_URL,
       validate: {
@@ -27,9 +27,9 @@ export const patchListRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, description, id, meta } = request.body;
+        const { name, description, id, meta, _version, version } = request.body;
         const lists = getListClient(context);
-        const list = await lists.updateList({ description, id, meta, name });
+        const list = await lists.updateList({ _version, description, id, meta, name, version });
         if (list == null) {
           return siemResponse.error({
             body: `list id: "${id}" found found`,
