@@ -55,7 +55,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         expect(response.status).to.be(200);
-        expect(response.body.kpis.map((kpi) => kpi.name)).to.eql([
+        expect(response.body.kpis.map((kpi: { name: string }) => kpi.name)).to.eql([
           'app',
           'http',
           'postgresql',
