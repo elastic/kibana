@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { ExceptionListItemComponent } from './builder_exception_item';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules/fetch_index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
   ExceptionListItemSchema,
   NamespaceType,
@@ -22,7 +22,6 @@ import { AndOrBadge } from '../../and_or_badge';
 import { BuilderButtonOptions } from './builder_button_options';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
-import { Loader } from '../../loader';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import exceptionableFields from '../exceptionable_fields.json';
 
@@ -51,8 +50,7 @@ interface ExceptionBuilderProps {
   listId: string;
   listNamespaceType: NamespaceType;
   ruleName: string;
-  indexPatternConfig: string[];
-  isLoading: boolean;
+  indexPatterns: IIndexPattern;
   isOrDisabled: boolean;
   isAndDisabled: boolean;
   onChange: (arg: OnChangeProps) => void;
@@ -64,8 +62,7 @@ export const ExceptionBuilder = ({
   listId,
   listNamespaceType,
   ruleName,
-  indexPatternConfig,
-  isLoading,
+  indexPatterns,
   isOrDisabled,
   isAndDisabled,
   onChange,
@@ -75,9 +72,6 @@ export const ExceptionBuilder = ({
     exceptionListItems
   );
   const [exceptionsToDelete, setExceptionsToDelete] = useState<ExceptionListItemSchema[]>([]);
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    indexPatternConfig ?? []
-  );
 
   const handleCheckAndLogic = (items: ExceptionsBuilderExceptionItem[]): void => {
     setAndLogicIncluded(items.filter(({ entries }) => entries.length > 1).length > 0);
@@ -154,7 +148,7 @@ export const ExceptionBuilder = ({
   }, [setExceptions, listType, listId, listNamespaceType, ruleName]);
 
   // Filters index pattern fields by exceptionable fields if list type is endpoint
-  const filterIndexPatterns = useCallback(() => {
+  const filterIndexPatterns = useMemo((): IIndexPattern => {
     if (listType === 'endpoint') {
       return {
         ...indexPatterns,
@@ -196,9 +190,6 @@ export const ExceptionBuilder = ({
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
-      {(isLoading || indexPatternLoading) && (
-        <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-      )}
       {exceptions.map((exceptionListItem, index) => (
         <EuiFlexItem grow={1} key={getExceptionListItemId(exceptionListItem, index)}>
           <EuiFlexGroup gutterSize="s" direction="column">
@@ -224,8 +215,8 @@ export const ExceptionBuilder = ({
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
-                indexPattern={filterIndexPatterns()}
-                isLoading={indexPatternLoading}
+                indexPattern={filterIndexPatterns}
+                isLoading={indexPatterns.fields.length === 0}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}
                 isOnlyItem={exceptions.length === 1}
