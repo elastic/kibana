@@ -111,7 +111,7 @@ pipeline {
       }
     }
     cleanup {
-      notifyBuildResult(notifyPRComment: false, analyzeFlakey: false, shouldNotify: false)
+      notifyBuildResult(prComment: false, analyzeFlakey: false, shouldNotify: false)
     }
   }
 }
