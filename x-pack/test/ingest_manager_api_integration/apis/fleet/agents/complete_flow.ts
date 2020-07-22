@@ -6,8 +6,9 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { setupIngest, getSupertestWithoutAuth } from './agents/services';
+import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
+import { setupIngest, getSupertestWithoutAuth } from './services';
+import { skipIfNoDockerRegistry } from '../../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -19,6 +20,7 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
 
   describe('fleet_agent_flow', () => {
+    skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
