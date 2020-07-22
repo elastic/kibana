@@ -33,6 +33,7 @@ export const initialPolicyListState: () => Immutable<PolicyListState> = () => ({
     total: 0,
     other: 0,
   },
+  agentConfigs: {},
 });
 
 export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
