@@ -28,7 +28,7 @@ import * as APIKeysService from '../../api_keys';
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_UPDATE_ACTIONS_INTERVAL_MS } from '../../../constants';
 import { createAgentAction, getNewActionsSince } from '../actions';
 import { appContextService } from '../../app_context';
-import { toPromiseAbortable, AbortError, createLimiter } from './rxjs_utils';
+import { toPromiseAbortable, AbortError, createSubscriberConcurrencyLimiter } from './rxjs_utils';
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -134,10 +134,7 @@ export function agentCheckinStateNewActionsFactory() {
   const agentConfigs$ = new Map<string, Observable<FullAgentConfig | null>>();
   const newActions$ = createNewActionsSharedObservable();
   // Rx operators
-  const rateLimiter = createLimiter(
-    appContextService.getConfig()?.fleet.agentConfigRollupRateLimitIntervalMs || 5000,
-    appContextService.getConfig()?.fleet.agentConfigRollupRateLimitRequestPerInterval || 50
-  );
+  const conccurencyLimiter = createSubscriberConcurrencyLimiter();
 
   async function subscribeToNewActions(
     soClient: SavedObjectsClientContract,
@@ -155,10 +152,11 @@ export function agentCheckinStateNewActionsFactory() {
     if (!agentConfig$) {
       throw new Error(`Invalid state no observable for config ${configId}`);
     }
+
     const stream$ = agentConfig$.pipe(
       timeout(appContextService.getConfig()?.fleet.pollingRequestTimeout || 0),
       filter((config) => shouldCreateAgentConfigAction(agent, config)),
-      rateLimiter(),
+      conccurencyLimiter(appContextService.getConfig()?.fleet.agentConfigRolloutConcurrency ?? 1),
       mergeMap((config) => createAgentActionFromConfig(soClient, agent, config)),
       merge(newActions$),
       mergeMap(async (data) => {
