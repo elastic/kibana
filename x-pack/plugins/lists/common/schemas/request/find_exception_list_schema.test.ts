@@ -14,8 +14,8 @@ import {
   getFindExceptionListSchemaMock,
 } from './find_exception_list_schema.mock';
 import {
-  FindExceptionListSchemaPartial,
-  FindExceptionListSchemaPartialDecoded,
+  FindExceptionListSchema,
+  FindExceptionListSchemaDecoded,
   findExceptionListSchema,
 } from './find_exception_list_schema';
 
@@ -30,13 +30,18 @@ describe('find_exception_list_schema', () => {
   });
 
   test('it should validate and empty object since everything is optional and will respond only with namespace_type filled out to be "single"', () => {
-    const payload: FindExceptionListSchemaPartial = {};
+    const payload: FindExceptionListSchema = {};
     const decoded = findExceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: FindExceptionListSchemaPartialDecoded = {
+    const expected: FindExceptionListSchemaDecoded = {
+      filter: undefined,
       namespace_type: 'single',
+      page: undefined,
+      per_page: undefined,
+      sort_field: undefined,
+      sort_order: undefined,
     };
     expect(message.schema).toEqual(expected);
   });
@@ -102,7 +107,7 @@ describe('find_exception_list_schema', () => {
   });
 
   test('it should not allow an extra key to be sent in', () => {
-    const payload: FindExceptionListSchemaPartial & {
+    const payload: FindExceptionListSchema & {
       extraKey: string;
     } = { ...getFindExceptionListSchemaMock(), extraKey: 'some new value' };
     const decoded = findExceptionListSchema.decode(payload);

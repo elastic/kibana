@@ -17,7 +17,10 @@ import {
   ResolverNodeStats,
   ResolverRelatedAlerts,
 } from '../../../../plugins/security_solution/common/endpoint/types';
-import { parentEntityId } from '../../../../plugins/security_solution/common/endpoint/models/event';
+import {
+  parentEntityId,
+  eventId,
+} from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   Event,
@@ -167,10 +170,14 @@ const compareArrays = (
   if (lengthCheck) {
     expect(expected.length).to.eql(toTest.length);
   }
+
   toTest.forEach((toTestEvent) => {
     expect(
       expected.find((arrEvent) => {
-        return JSON.stringify(arrEvent) === JSON.stringify(toTestEvent);
+        // we're only checking that the event ids are the same here. The reason we can't check the entire document
+        // is because ingest pipelines are used to add fields to the document when it is received by elasticsearch,
+        // therefore it will not be the same as the document created by the generator
+        return eventId(toTestEvent) === eventId(arrEvent);
       })
     ).to.be.ok();
   });

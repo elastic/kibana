@@ -262,7 +262,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       defaultTitle: this.savedVis.title,
       title,
       editPath: getEditPath(savedObjectId),
-      editUrl: this.deps.basePath.prepend(`app/lens${getEditPath(savedObjectId)}`),
+      editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
       indexPatterns,
     });
   }

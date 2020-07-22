@@ -10,7 +10,7 @@ import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
 import { uniquePidForProcess } from '../models/process_event';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -99,7 +99,9 @@ export const terminatedProcesses = composeSelectors(
 /**
  * Returns a map of `ResolverEvent` entity_id to their related event and alert statistics
  */
-export const relatedEventsStats = composeSelectors(
+export const relatedEventsStats: (
+  state: ResolverState
+) => (nodeID: string) => ResolverNodeStats | undefined = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventsStats
 );
@@ -142,26 +144,15 @@ export const relatedEventInfoByEntityId = composeSelectors(
 /**
  * Returns the id of the "current" tree node (fake-focused)
  */
-export const uiActiveDescendantId = composeSelectors(
+export const ariaActiveDescendant = composeSelectors(
   uiStateSelector,
-  uiSelectors.activeDescendantId
+  uiSelectors.ariaActiveDescendant
 );
 
 /**
- * Returns the id of the "selected" tree node (the node that is currently "pressed" and possibly controlling other popups / components)
+ * Returns the nodeID of the selected node
  */
-export const uiSelectedDescendantId = composeSelectors(
-  uiStateSelector,
-  uiSelectors.selectedDescendantId
-);
-
-/**
- * Returns the entity_id of the "selected" tree node's process
- */
-export const uiSelectedDescendantProcessId = composeSelectors(
-  uiStateSelector,
-  uiSelectors.selectedDescendantProcessId
-);
+export const selectedNode = composeSelectors(uiStateSelector, uiSelectors.selectedNode);
 
 /**
  * Returns the camera state from within ResolverState
@@ -247,6 +238,14 @@ export const ariaLevel: (
 ) => (nodeID: string) => number | null = composeSelectors(
   dataStateSelector,
   dataSelectors.ariaLevel
+);
+
+/**
+ * the node ID of the node representing the databaseDocumentID
+ */
+export const originID: (state: ResolverState) => string | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.originID
 );
 
 /**

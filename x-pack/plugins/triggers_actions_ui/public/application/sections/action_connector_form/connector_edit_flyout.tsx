@@ -195,6 +195,7 @@ export const ConnectorEditFlyout = ({
             actionTypeRegistry={actionTypeRegistry}
             http={http}
             docLinks={docLinks}
+            capabilities={capabilities}
             consumer={consumer}
           />
         ) : (
