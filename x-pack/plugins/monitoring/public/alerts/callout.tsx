@@ -10,7 +10,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { CommonAlertStatus } from '../../common/types';
 import { AlertSeverity } from '../../common/enums';
 import { replaceTokens } from './lib/replace_tokens';
-import { AlertMessage } from '../../server/alerts/types';
+import { AlertMessage, AlertState } from '../../server/alerts/types';
 
 const TYPES = [
   {

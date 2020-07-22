@@ -36,7 +36,6 @@ export const AlertPanel: React.FC<Props> = (props: Props) => {
   const {
     alert: { alert },
     alertState,
-    stateFilter = () => true,
   } = props;
   const [showFlyout, setShowFlyout] = React.useState(false);
   const [isEnabled, setIsEnabled] = React.useState(alert.rawAlert.enabled);
