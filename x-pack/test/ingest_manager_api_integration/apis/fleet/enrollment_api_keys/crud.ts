@@ -6,8 +6,9 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { setupIngest, getEsClientForAPIKey } from '../agents/services';
+import { skipIfNoDockerRegistry } from '../../../helpers';
 
 const ENROLLMENT_KEY_ID = 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0';
 
@@ -21,10 +22,13 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
     });
-    setupIngest({ getService } as FtrProviderContext);
+
     after(async () => {
       await esArchiver.unload('fleet/agents');
     });
+
+    skipIfNoDockerRegistry(providerContext);
+    setupIngest(providerContext);
 
     describe('GET /fleet/enrollment-api-keys', async () => {
       it('should list existing api keys', async () => {
