@@ -7,6 +7,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
+import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
 import {
   WhenExpression,
   OfExpression,
@@ -106,7 +107,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const updateThreshold = useCallback(
     (enteredThreshold) => {
       const t = isMetricPct
-        ? enteredThreshold.map((v: number) => correctedPctConvert(v, false))
+        ? enteredThreshold.map((v: number) => pctToDecimal(v))
         : enteredThreshold;
       if (t.join() !== expression.threshold.join()) {
         setAlertParams(expressionId, { ...expression, threshold: t });
@@ -116,7 +117,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const displayedThreshold = useMemo(() => {
-    if (isMetricPct) return threshold.map((v) => correctedPctConvert(v, true));
+    if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;
   }, [threshold, isMetricPct]);
 
@@ -269,12 +270,4 @@ export const aggregationType: { [key: string]: any } = {
     value: AGGREGATION_TYPES.P99,
     validNormalizedTypes: ['number'],
   },
-};
-
-const correctedPctConvert = (v: number, decimalToPct: boolean) => {
-  // Correct floating point precision
-  const replacementPattern = decimalToPct ? new RegExp(/0?\./) : '.';
-  const numberOfDigits = String(v).replace(replacementPattern, '').length;
-  const multipliedValue = decimalToPct ? v * 100 : v / 100;
-  return parseFloat(multipliedValue.toPrecision(numberOfDigits));
 };

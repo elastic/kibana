@@ -84,7 +84,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           reason,
           timestamp,
           value: mapToConditionsLookup(alertResults, (result) => result[group].currentValue),
-          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          threshold: mapToConditionsLookup(alertResults, (result) => result[group].threshold),
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
       }

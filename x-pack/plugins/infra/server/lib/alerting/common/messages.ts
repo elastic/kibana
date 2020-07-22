@@ -96,6 +96,8 @@ const thresholdToI18n = ([a, b]: number[]) => {
   });
 };
 
+const pctIfMetricIsPct = (metric: string) => (metric.endsWith('.pct') ? '%' : '');
+
 export const buildFiredAlertReason: (alertResult: {
   metric: string;
   comparator: Comparator;
@@ -108,8 +110,8 @@ export const buildFiredAlertReason: (alertResult: {
     values: {
       metric,
       comparator: comparatorToI18n(comparator, threshold, currentValue),
-      threshold: thresholdToI18n(threshold),
-      currentValue,
+      threshold: `${thresholdToI18n(threshold)}${pctIfMetricIsPct(metric)}`,
+      currentValue: `${currentValue}${pctIfMetricIsPct(metric)}`,
     },
   });
 
@@ -125,8 +127,8 @@ export const buildRecoveredAlertReason: (alertResult: {
     values: {
       metric,
       comparator: recoveredComparatorToI18n(comparator, threshold, currentValue),
-      threshold: thresholdToI18n(threshold),
-      currentValue,
+      threshold: `${thresholdToI18n(threshold)}${pctIfMetricIsPct(metric)}`,
+      currentValue: `${currentValue}${pctIfMetricIsPct(metric)}`,
     },
   });
 
