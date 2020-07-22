@@ -10,11 +10,13 @@ import {
   Description,
   DeserializerOrUndefined,
   Id,
+  Immutable,
   ListSchema,
   MetaOrUndefined,
   Name,
   SerializerOrUndefined,
   Type,
+  Version,
 } from '../../../common/schemas';
 
 import { getList } from './get_list';
@@ -27,12 +29,14 @@ export interface CreateListIfItDoesNotExistOptions {
   deserializer: DeserializerOrUndefined;
   serializer: SerializerOrUndefined;
   description: Description;
+  immutable: Immutable;
   callCluster: LegacyAPICaller;
   listIndex: string;
   user: string;
   meta: MetaOrUndefined;
   dateNow?: string;
   tieBreaker?: string;
+  version: Version;
 }
 
 export const createListIfItDoesNotExist = async ({
@@ -48,6 +52,8 @@ export const createListIfItDoesNotExist = async ({
   serializer,
   dateNow,
   tieBreaker,
+  version,
+  immutable,
 }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
   const list = await getList({ callCluster, id, listIndex });
   if (list == null) {
@@ -57,6 +63,7 @@ export const createListIfItDoesNotExist = async ({
       description,
       deserializer,
       id,
+      immutable,
       listIndex,
       meta,
       name,
@@ -64,6 +71,7 @@ export const createListIfItDoesNotExist = async ({
       tieBreaker,
       type,
       user,
+      version,
     });
   } else {
     return list;
