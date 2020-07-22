@@ -215,7 +215,7 @@ export class BaseAlert {
     const availableCcs = this.config.ui.ccs.enabled ? await fetchAvailableCcs(callCluster) : [];
     // Support CCS use cases by querying to find available remote clusters
     // and then adding those to the index pattern we are searching against
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
+    let esIndexPattern = `${INDEX_PATTERN_ELASTICSEARCH},${this.config.ui.metricbeat.index}`;
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }

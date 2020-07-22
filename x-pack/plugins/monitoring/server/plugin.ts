@@ -137,6 +137,7 @@ export class Plugin {
     if (plugins.telemetryCollectionManager) {
       registerMonitoringCollection(plugins.telemetryCollectionManager, this.cluster, {
         maxBucketSize: config.ui.max_bucket_size,
+        metricbeatIndex: config.ui.metricbeat.index,
       });
     }
 

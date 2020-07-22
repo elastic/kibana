@@ -189,7 +189,11 @@ export function ccrRoute(server) {
     async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const esIndexPattern = prefixIndexPattern(
+        config,
+        `${INDEX_PATTERN_ELASTICSEARCH},${config.get('monitoring.ui.metricbeat.index')}`,
+        ccs
+      );
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

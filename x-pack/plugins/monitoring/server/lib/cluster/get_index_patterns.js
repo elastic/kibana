@@ -15,7 +15,11 @@ import {
 
 export function getIndexPatterns(server, additionalPatterns = {}, ccs = '*') {
   const config = server.config();
-  const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+  const esIndexPattern = prefixIndexPattern(
+    config,
+    `${INDEX_PATTERN_ELASTICSEARCH},${config.get('monitoring.ui.metricbeat.index')}`,
+    ccs
+  );
   const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
   const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
   const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
