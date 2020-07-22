@@ -167,27 +167,17 @@ export const DiscoverGrid = React.memo(
         }
         const field = indexPattern.fields.getByName(columnId);
         const formatSource = () => {
-          const highlights = (row && row.highlight) || {};
           const formatted = indexPattern.formatHit(row);
-          const highlightPairs: any[] = [];
-          const sourcePairs: any[] = [];
-
-          Object.keys(formatted).forEach((key) => {
-            const pairs = highlights[key] ? highlightPairs : sourcePairs;
-            const newField = key;
-            const val = formatted[key];
-            pairs.push([newField, val]);
-          }, []);
 
           return (
             <dl className="dscFormatSource">
-              {sourcePairs.map((pair) => (
-                <span key={pair[0]}>
-                  <dt className="dscFormatSource__title">{pair[0]}</dt>
+              {Object.keys(formatted).map((key) => (
+                <span key={key}>
+                  <dt className="dscFormatSource__title">{key}</dt>
                   <dd
                     className="dscFormatSource__description"
                     /* eslint-disable-next-line react/no-danger */
-                    dangerouslySetInnerHTML={{ __html: pair[1] }}
+                    dangerouslySetInnerHTML={{ __html: formatted[key] }}
                   />
                 </span>
               ))}
@@ -196,8 +186,8 @@ export const DiscoverGrid = React.memo(
         };
         // TODO Field formatters need to be fixed
         const value =
-          field.type === '_source' ? (
-            formatSource(row, columnId)
+          field && field.type === '_source' ? (
+            formatSource()
           ) : (
             // eslint-disable-next-line react/no-danger
             <span dangerouslySetInnerHTML={{ __html: indexPattern.formatField(row, columnId) }} />
