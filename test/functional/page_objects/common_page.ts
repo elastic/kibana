@@ -397,7 +397,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async closeToastIfExists() {
       const toastShown = await find.existsByCssSelector('.euiToast');
       if (toastShown) {
-        await this.closeToast();
+        try {
+          await this.closeToast();
+        } catch (err) {
+          // ignore errors, toast clear themselves after timeout
+        }
       }
     }
 
