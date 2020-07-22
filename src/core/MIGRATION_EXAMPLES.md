@@ -1164,6 +1164,20 @@ const request = client.asCurrentUser.ping();
 request.abort();
 ```
 
+- it is now possible to override headers when performing specific API calls.
+
+Note that doing so is strongly discouraged due to potential side effects with the ES service internal
+behavior when scoping as the internal or as the current user.
+
+```ts
+const request = client.asCurrentUser.ping({}, { 
+  headers: {
+    authorization: 'foo',
+    custom: 'bar',
+  }
+});
+```
+
 Please refer to the  [Breaking changes list](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/breaking-changes.html)
 for more information about the changes between the legacy and new client.
 
