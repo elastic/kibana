@@ -93,6 +93,10 @@ import { footerHeight } from '../../../../../timelines/components/timeline/foote
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
+import { showGlobalFilters } from '../../../../../timelines/components/timeline/helpers';
+import { timelineSelectors } from '../../../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../../../../timelines/store/timeline/model';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -123,6 +127,7 @@ const getRuleDetailsTabs = (rule: Rule | null) => {
 
 export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   filters,
+  graphEventId,
   query,
   setAbsoluteRangeDatePicker,
 }) => {
@@ -361,7 +366,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       {indicesExist ? (
         <StickyContainer>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal>
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
@@ -552,13 +557,19 @@ RuleDetailsPageComponent.displayName = 'RuleDetailsPageComponent';
 
 const makeMapStateToProps = () => {
   const getGlobalInputs = inputsSelectors.globalSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   return (state: State) => {
     const globalInputs: InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
 
+    const timeline: TimelineModel =
+      getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults;
+    const { graphEventId } = timeline;
+
     return {
       query,
       filters,
+      graphEventId,
     };
   };
 };
