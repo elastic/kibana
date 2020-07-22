@@ -4,20 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AxiosInstance, Method, AxiosResponse } from 'axios';
+import {
+  AxiosInstance,
+  Method,
+  AxiosResponse,
+  AxiosProxyConfig,
+  AxiosBasicCredentials,
+} from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import HttpProxyAgent from 'http-proxy-agent';
 import { ProxySettings } from '../../types';
-
-export const throwIfNotAlive = (
-  status: number,
-  contentType: string,
-  validStatusCodes: number[] = [200, 201, 204]
-) => {
-  if (!validStatusCodes.includes(status) || !contentType.includes('application/json')) {
-    throw new Error('Instance is not alive.');
-  }
-};
 
 export const request = async <T = unknown>({
   axios,
@@ -28,6 +23,7 @@ export const request = async <T = unknown>({
   proxySettings,
   headers,
   validateStatus,
+  auth,
 }: {
   axios: AxiosInstance;
   url: string;
@@ -37,26 +33,22 @@ export const request = async <T = unknown>({
   proxySettings?: ProxySettings;
   headers?: Record<string, string> | null;
   validateStatus?: (status: number) => boolean;
+  auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
-  const res = await axios(url, {
+  return await axios(url, {
     method,
     data: data ?? {},
     params,
-    // use (httpsAgent || httpsAgent)  and embedded proxy: false
-    httpsAgent: getProxyAgent('https', proxySettings),
-    httpAgent: getProxyAgent('http', proxySettings),
-    proxy: false,
+    auth,
+    // use httpsAgent and embedded proxy: false, to be able to handle fail on invalid certs
+    httpsAgent: getProxyAgent(proxySettings),
+    proxy: getProxy(proxySettings),
     headers,
     validateStatus,
   });
-  throwIfNotAlive(res.status, res.headers['content-type']);
-  return res;
 };
 
-const getProxyAgent = (
-  agentProtocol: string,
-  proxySettings?: ProxySettings
-): HttpsProxyAgent | HttpProxyAgent | undefined => {
+const getProxyAgent = (proxySettings?: ProxySettings): HttpsProxyAgent | undefined => {
   if (!proxySettings) {
     return undefined;
   }
@@ -68,19 +60,28 @@ const getProxyAgent = (
     headers: proxySettings.proxyHeaders,
   };
 
-  if (proxyUrl.protocol !== agentProtocol) {
-    return undefined;
-  }
-
   if (/^https/.test(proxyUrl.protocol)) {
     return new HttpsProxyAgent({
       ...proxy,
       // do not fail on invalid certs
       rejectUnauthorized: false,
     });
-  } else {
-    return new HttpProxyAgent(proxy);
   }
+  return undefined;
+};
+
+const getProxy = (proxySettings?: ProxySettings): AxiosProxyConfig | false => {
+  if (!proxySettings) {
+    return false;
+  }
+  const proxyUrl = new URL(proxySettings.proxyUrl);
+  if (/^http:/.test(proxyUrl.protocol)) {
+    return {
+      host: proxyUrl.host,
+      port: Number(proxyUrl.port),
+    };
+  }
+  return false;
 };
 
 export const patch = async <T = unknown>({

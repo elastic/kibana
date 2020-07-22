@@ -24,6 +24,7 @@ export async function postPagerduty(options: PostPagerdutyOptions): Promise<Axio
   return await request({
     axios: axiosInstance,
     url: apiUrl,
+    method: 'post',
     data,
     proxySettings,
     headers,
