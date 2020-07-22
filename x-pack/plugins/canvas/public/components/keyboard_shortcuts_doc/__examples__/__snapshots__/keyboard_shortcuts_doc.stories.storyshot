@@ -41,6 +41,11 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
     data-focus-lock-disabled={false}
     onBlur={[Function]}
     onFocus={[Function]}
+    onMouseDown={[Function]}
+    onScrollCapture={[Function]}
+    onTouchMoveCapture={[Function]}
+    onTouchStart={[Function]}
+    onWheelCapture={[Function]}
   >
     <div
       className="euiFlyout euiFlyout--small"

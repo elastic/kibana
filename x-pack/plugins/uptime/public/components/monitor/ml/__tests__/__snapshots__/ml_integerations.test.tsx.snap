@@ -8,15 +8,16 @@ exports[`ML Integrations renders without errors 1`] = `
     class="euiPopover__anchor"
   >
     <button
-      class="euiButtonEmpty euiButtonEmpty--primary"
+      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty-isDisabled"
       data-test-subj="uptimeEnableAnomalyBtn"
+      disabled=""
       type="button"
     >
       <span
-        class="euiButtonEmpty__content"
+        class="euiButtonContent euiButtonEmpty__content"
       >
         <span
-          class="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
+          class="euiLoadingSpinner euiLoadingSpinner--medium euiButtonContent__spinner"
         />
         <span
           class="euiButtonEmpty__text"
