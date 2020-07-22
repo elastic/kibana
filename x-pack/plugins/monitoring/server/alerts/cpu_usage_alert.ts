@@ -137,7 +137,7 @@ export class CpuUsageAlert extends BaseAlert {
     uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = INDEX_PATTERN_ELASTICSEARCH;
+    let esIndexPattern = `${INDEX_PATTERN_ELASTICSEARCH},${this.config.ui.metricbeat.index}`;
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }

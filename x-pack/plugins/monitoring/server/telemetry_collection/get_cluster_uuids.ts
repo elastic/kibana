@@ -19,9 +19,9 @@ import { CustomContext } from './get_all_stats';
  */
 export const getClusterUuids: ClusterDetailsGetter<CustomContext> = async (
   config,
-  { maxBucketSize }
+  { maxBucketSize, metricbeatIndex }
 ) => {
-  const response = await fetchClusterUuids(config, maxBucketSize);
+  const response = await fetchClusterUuids(config, maxBucketSize, metricbeatIndex);
   return handleClusterUuidsResponse(response);
 };
 
@@ -30,10 +30,11 @@ export const getClusterUuids: ClusterDetailsGetter<CustomContext> = async (
  */
 export function fetchClusterUuids(
   { callCluster, start, end }: StatsCollectionConfig,
-  maxBucketSize: number
+  maxBucketSize: number,
+  metricbeatIndex: string
 ) {
   const params = {
-    index: INDEX_PATTERN_ELASTICSEARCH,
+    index: `${INDEX_PATTERN_ELASTICSEARCH},${metricbeatIndex}`,
     size: 0,
     ignoreUnavailable: true,
     filterPath: 'aggregations.cluster_uuids.buckets.key',

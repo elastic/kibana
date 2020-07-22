@@ -93,7 +93,11 @@ export function ccrShardRoute(server) {
       const index = req.params.index;
       const shardId = req.params.shardId;
       const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const esIndexPattern = prefixIndexPattern(
+        config,
+        `${INDEX_PATTERN_ELASTICSEARCH},${config.get('monitoring.ui.metricbeat.index')}`,
+        ccs
+      );
 
       const filters = [
         {

@@ -39,7 +39,11 @@ export function esIndicesRoute(server) {
       const { clusterUuid } = req.params;
       const { show_system_indices: showSystemIndices } = req.query;
       const { ccs } = req.payload;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const esIndexPattern = prefixIndexPattern(
+        config,
+        `${INDEX_PATTERN_ELASTICSEARCH},${config.get('monitoring.ui.metricbeat.index')}`,
+        ccs
+      );
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);

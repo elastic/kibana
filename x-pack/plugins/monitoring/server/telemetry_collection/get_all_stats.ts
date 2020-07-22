@@ -20,6 +20,7 @@ type PromiseReturnType<T extends (...args: any[]) => any> = ReturnType<T> extend
 
 export interface CustomContext {
   maxBucketSize: number;
+  metricbeatIndex: string;
 }
 
 /**
@@ -30,12 +31,12 @@ export interface CustomContext {
 export const getAllStats: StatsGetter<CustomContext> = async (
   clustersDetails,
   { callCluster, start, end },
-  { maxBucketSize }
+  { maxBucketSize, metricbeatIndex }
 ) => {
   const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
-    getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
+    getElasticsearchStats(callCluster, clusterUuids, maxBucketSize, metricbeatIndex), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
     getKibanaStats(callCluster, clusterUuids, start, end, maxBucketSize), // stack_stats.kibana
     getHighLevelStats(callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID, maxBucketSize), // stack_stats.logstash
     getBeatsStats(callCluster, clusterUuids, start, end), // stack_stats.beats
