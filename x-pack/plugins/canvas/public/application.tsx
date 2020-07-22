@@ -17,6 +17,7 @@ import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/pub
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 // @ts-expect-error untyped local
 import { App } from './components/app';
+import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
@@ -44,8 +45,8 @@ import './style/index.scss';
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
 export const renderApp = (
-  _coreStart: CoreStart,
-  _plugins: CanvasStartDeps,
+  coreStart: CoreStart,
+  plugins: CanvasStartDeps,
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
@@ -53,13 +54,15 @@ export const renderApp = (
   element.classList.add('canvasContainerWrapper');
 
   ReactDOM.render(
-    <ServicesProvider providers={services}>
-      <I18nProvider>
-        <Provider store={canvasStore}>
-          <App />
-        </Provider>
-      </I18nProvider>
-    </ServicesProvider>,
+    <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
+      <ServicesProvider providers={services}>
+        <I18nProvider>
+          <Provider store={canvasStore}>
+            <App />
+          </Provider>
+        </I18nProvider>
+      </ServicesProvider>
+    </KibanaContextProvider>,
     element
   );
   return () => {
