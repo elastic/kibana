@@ -18,18 +18,43 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { ServerStatus } from './server_status';
+import { FormattedStatus } from '../lib';
 
-const STATE = {
+const getStatus = (parts: Partial<FormattedStatus>): FormattedStatus => ({
   id: 'green',
   title: 'Green',
   uiColor: 'secondary',
   state: 'green',
   message: '',
-};
+  ...parts,
+});
 
-test('render', () => {
-  const component = shallow(<ServerStatus serverState={STATE} name="My Computer" />);
-  expect(component).toMatchSnapshot();
+describe('ServerStatus', () => {
+  it('renders correctly for green state', () => {
+    const status = getStatus();
+    const component = mount(<ServerStatus serverState={status} name="My Computer" />);
+    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Green"`);
+    expect(component.find('EuiBadge')).toMatchSnapshot();
+  });
+
+  it('renders correctly for red state', () => {
+    const status = getStatus({
+      id: 'red',
+      title: 'Red',
+      state: 'red',
+    });
+    const component = mount(<ServerStatus serverState={status} name="My Computer" />);
+    expect(component.find('EuiTitle').text()).toMatchInlineSnapshot(`"Kibana status is Red"`);
+    expect(component.find('EuiBadge')).toMatchSnapshot();
+  });
+
+  it('displays the correct `name`', () => {
+    let component = mount(<ServerStatus serverState={getStatus()} name="Localhost" />);
+    expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"Localhost"`);
+
+    component = mount(<ServerStatus serverState={getStatus()} name="Kibana" />);
+    expect(component.find('EuiText').text()).toMatchInlineSnapshot(`"Kibana"`);
+  });
 });

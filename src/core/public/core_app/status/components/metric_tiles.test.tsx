@@ -22,46 +22,48 @@ import { shallow } from 'enzyme';
 import { MetricTile } from './metric_tiles';
 import { Metric } from '../lib';
 
-const GENERAL_METRIC: Metric = {
+const untypedMetric: Metric = {
   name: 'A metric',
   value: 1.8,
   // no type specified
 };
 
-const BYTE_METRIC: Metric = {
+const byteMetric: Metric = {
   name: 'Heap Total',
   value: 1501560832,
   type: 'byte',
 };
 
-const FLOAT_METRIC: Metric = {
+const floatMetric: Metric = {
   name: 'Load',
   type: 'float',
   value: [4.0537109375, 3.36669921875, 3.1220703125],
 };
 
-const MS_METRIC: Metric = {
+const timeMetric: Metric = {
   name: 'Response Time Max',
   type: 'time',
   value: 1234,
 };
 
-test('general metric', () => {
-  const component = shallow(<MetricTile metric={GENERAL_METRIC} />);
-  expect(component).toMatchSnapshot();
-});
+describe('MetricTile', () => {
+  it('correct displays an untyped metric', () => {
+    const component = shallow(<MetricTile metric={untypedMetric} />);
+    expect(component).toMatchSnapshot();
+  });
 
-test('byte metric', () => {
-  const component = shallow(<MetricTile metric={BYTE_METRIC} />);
-  expect(component).toMatchSnapshot();
-});
+  it('correct displays a byte metric', () => {
+    const component = shallow(<MetricTile metric={byteMetric} />);
+    expect(component).toMatchSnapshot();
+  });
 
-test('float metric', () => {
-  const component = shallow(<MetricTile metric={FLOAT_METRIC} />);
-  expect(component).toMatchSnapshot();
-});
+  it('correct displays a float metric', () => {
+    const component = shallow(<MetricTile metric={floatMetric} />);
+    expect(component).toMatchSnapshot();
+  });
 
-test('millisecond metric', () => {
-  const component = shallow(<MetricTile metric={MS_METRIC} />);
-  expect(component).toMatchSnapshot();
+  it('correct displays a time metric', () => {
+    const component = shallow(<MetricTile metric={timeMetric} />);
+    expect(component).toMatchSnapshot();
+  });
 });

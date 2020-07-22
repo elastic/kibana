@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`byte metric 1`] = `
+exports[`MetricTile correct displays a byte metric 1`] = `
 <EuiCard
   data-test-subj="serverMetric-heap-total"
   description="Heap Total"
@@ -9,7 +9,7 @@ exports[`byte metric 1`] = `
 />
 `;
 
-exports[`float metric 1`] = `
+exports[`MetricTile correct displays a float metric 1`] = `
 <EuiCard
   data-test-subj="serverMetric-load"
   description="Load"
@@ -18,20 +18,20 @@ exports[`float metric 1`] = `
 />
 `;
 
-exports[`general metric 1`] = `
-<EuiCard
-  data-test-subj="serverMetric-a-metric"
-  description="A metric"
-  layout="horizontal"
-  title="1.80"
-/>
-`;
-
-exports[`millisecond metric 1`] = `
+exports[`MetricTile correct displays a time metric 1`] = `
 <EuiCard
   data-test-subj="serverMetric-response-time-max"
   description="Response Time Max"
   layout="horizontal"
   title="1234.00 ms"
+/>
+`;
+
+exports[`MetricTile correct displays an untyped metric 1`] = `
+<EuiCard
+  data-test-subj="serverMetric-a-metric"
+  description="A metric"
+  layout="horizontal"
+  title="1.80"
 />
 `;

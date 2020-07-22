@@ -21,19 +21,21 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { StatusTable } from './status_table';
 
-const STATE = {
+const state = {
   id: 'green',
   uiColor: 'secondary',
   message: 'Ready',
   title: 'green',
 };
 
-test('render', () => {
-  const component = shallow(<StatusTable statuses={[{ id: 'plugin:1', state: STATE }]} />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
+describe('StatusTable', () => {
+  it('renders when statuses is provided', () => {
+    const component = shallow(<StatusTable statuses={[{ id: 'plugin:1', state }]} />);
+    expect(component).toMatchSnapshot();
+  });
 
-test('render empty', () => {
-  const component = shallow(<StatusTable />);
-  expect(component.isEmptyRender()).toBe(true); // eslint-disable-line
+  it('renders when statuses is not provided', () => {
+    const component = shallow(<StatusTable />);
+    expect(component.isEmptyRender()).toBe(true);
+  });
 });

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`render 1`] = `
+exports[`StatusTable renders when statuses is provided 1`] = `
 <EuiBasicTable
   columns={
     Array [
