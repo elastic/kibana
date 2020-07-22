@@ -19,7 +19,7 @@
 
 import React, { ReactElement, Component } from 'react';
 
-import { EuiGlobalToastList, EuiGlobalToastListToast } from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -129,7 +129,13 @@ export class CreateIndexPatternWizard extends Component<
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(services.es, services.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
+        getIndices(
+          services.es,
+          services.indexPatternCreationType,
+          `*`,
+          MAX_SEARCH_SIZE,
+          this.state.isIncludingSystemIndices
+        ),
         [],
         indicesFailMsg
       )
@@ -140,7 +146,13 @@ export class CreateIndexPatternWizard extends Component<
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(services.es, services.indexPatternCreationType, `*:*`, 1),
+      getIndices(
+        services.es,
+        services.indexPatternCreationType,
+        `*:*`,
+        1,
+        this.state.isIncludingSystemIndices
+      ),
       ['a'],
       clustersFailMsg
     ).then((remoteIndices: string[] | MatchedIndex[]) =>
@@ -197,10 +209,8 @@ export class CreateIndexPatternWizard extends Component<
     this.setState({ step: 1 });
   };
 
-  onChangeIncludingSystemIndices = () => {
-    this.setState((prevState) => ({
-      isIncludingSystemIndices: !prevState.isIncludingSystemIndices,
-    }));
+  onChangeIncludingSystemIndices = (event: EuiSwitchEvent) => {
+    this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchData());
   };
 
   renderHeader() {

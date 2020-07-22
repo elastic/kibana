@@ -28,6 +28,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -45,7 +46,7 @@ export const Header = ({
   indexPatternName: string;
   showSystemIndices?: boolean;
   isIncludingSystemIndices: boolean;
-  onChangeIncludingSystemIndices: () => void;
+  onChangeIncludingSystemIndices: (event: EuiSwitchEvent) => void;
   isBeta?: boolean;
 }) => (
   <div>

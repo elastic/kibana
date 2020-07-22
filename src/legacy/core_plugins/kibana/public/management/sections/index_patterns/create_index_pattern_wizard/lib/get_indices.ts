@@ -26,7 +26,8 @@ export async function getIndices(
   es: DataPublicPluginStart['search']['__LEGACY']['esClient'],
   indexPatternCreationType: IndexPatternCreationConfig,
   rawPattern: string,
-  limit: number
+  limit: number,
+  showHidden: boolean = false
 ): Promise<MatchedIndex[]> {
   const pattern = rawPattern.trim();
 
@@ -55,6 +56,7 @@ export async function getIndices(
 
   const params = {
     ignoreUnavailable: true,
+    expand_wildcards: showHidden ? 'all' : 'open',
     index: pattern,
     ignore: [404],
     body: {
