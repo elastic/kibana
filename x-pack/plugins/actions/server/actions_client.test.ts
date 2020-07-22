@@ -26,7 +26,7 @@ import { ActionsAuthorization } from './authorization/actions_authorization';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 
 const defaultKibanaIndex = '.kibana';
-const savedObjectsClient = savedObjectsClientMock.create();
+const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
@@ -58,7 +58,7 @@ beforeEach(() => {
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
   actionsClient = new ActionsClient({
     actionTypeRegistry,
-    savedObjectsClient,
+    unsecuredSavedObjectsClient,
     scopedClusterClient,
     defaultKibanaIndex,
     preconfiguredActions: [],
@@ -88,7 +88,7 @@ describe('create()', () => {
         minimumLicenseRequired: 'basic',
         executor,
       });
-      savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       await actionsClient.create({
         action: {
@@ -119,7 +119,7 @@ describe('create()', () => {
         minimumLicenseRequired: 'basic',
         executor,
       });
-      savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to create a "my-action-type" action`)
@@ -157,7 +157,7 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       executor,
     });
-    savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
       action: {
         name: 'my name',
@@ -173,8 +173,8 @@ describe('create()', () => {
       actionTypeId: 'my-action-type',
       config: {},
     });
-    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         Object {
@@ -235,7 +235,7 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       executor,
     });
-    savedObjectsClient.create.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'type',
       attributes: {
@@ -273,8 +273,8 @@ describe('create()', () => {
         c: true,
       },
     });
-    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         Object {
@@ -311,7 +311,7 @@ describe('create()', () => {
     actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
     actionsClient = new ActionsClient({
       actionTypeRegistry,
-      savedObjectsClient,
+      unsecuredSavedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
       preconfiguredActions: [],
@@ -337,7 +337,7 @@ describe('create()', () => {
       minimumLicenseRequired: 'basic',
       executor,
     });
-    savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
     await expect(
       actionsClient.create({
@@ -373,7 +373,7 @@ describe('create()', () => {
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
       throw new Error('Fail');
     });
-    savedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     await expect(
       actionsClient.create({
         action: {
@@ -390,7 +390,7 @@ describe('create()', () => {
 describe('get()', () => {
   describe('authorization', () => {
     test('ensures user is authorised to get the type of action', async () => {
-      savedObjectsClient.get.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'type',
         attributes: {
@@ -409,7 +409,7 @@ describe('get()', () => {
     test('ensures user is authorised to get preconfigured type of action', async () => {
       actionsClient = new ActionsClient({
         actionTypeRegistry,
-        savedObjectsClient,
+        unsecuredSavedObjectsClient,
         scopedClusterClient,
         defaultKibanaIndex,
         actionExecutor,
@@ -438,7 +438,7 @@ describe('get()', () => {
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
-      savedObjectsClient.get.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'type',
         attributes: {
@@ -463,7 +463,7 @@ describe('get()', () => {
     test('throws when user is not authorised to create preconfigured of action', async () => {
       actionsClient = new ActionsClient({
         actionTypeRegistry,
-        savedObjectsClient,
+        unsecuredSavedObjectsClient,
         scopedClusterClient,
         defaultKibanaIndex,
         actionExecutor,
@@ -498,8 +498,8 @@ describe('get()', () => {
     });
   });
 
-  test('calls savedObjectsClient with id', async () => {
-    savedObjectsClient.get.mockResolvedValueOnce({
+  test('calls unsecuredSavedObjectsClient with id', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'type',
       attributes: {},
@@ -510,8 +510,8 @@ describe('get()', () => {
       id: '1',
       isPreconfigured: false,
     });
-    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         "1",
@@ -522,7 +522,7 @@ describe('get()', () => {
   test('return predefined action with id', async () => {
     actionsClient = new ActionsClient({
       actionTypeRegistry,
-      savedObjectsClient,
+      unsecuredSavedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
       actionExecutor,
@@ -552,7 +552,7 @@ describe('get()', () => {
       isPreconfigured: true,
       name: 'test',
     });
-    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 });
 
@@ -578,7 +578,7 @@ describe('getAll()', () => {
           },
         ],
       };
-      savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
       scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
         aggregations: {
           '1': { doc_count: 6 },
@@ -588,7 +588,7 @@ describe('getAll()', () => {
 
       actionsClient = new ActionsClient({
         actionTypeRegistry,
-        savedObjectsClient,
+        unsecuredSavedObjectsClient,
         scopedClusterClient,
         defaultKibanaIndex,
         actionExecutor,
@@ -629,7 +629,7 @@ describe('getAll()', () => {
     });
   });
 
-  test('calls savedObjectsClient with parameters', async () => {
+  test('calls unsecuredSavedObjectsClient with parameters', async () => {
     const expectedResult = {
       total: 1,
       per_page: 10,
@@ -649,7 +649,7 @@ describe('getAll()', () => {
         },
       ],
     };
-    savedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     scopedClusterClient.callAsInternalUser.mockResolvedValueOnce({
       aggregations: {
         '1': { doc_count: 6 },
@@ -659,7 +659,7 @@ describe('getAll()', () => {
 
     actionsClient = new ActionsClient({
       actionTypeRegistry,
-      savedObjectsClient,
+      unsecuredSavedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
       actionExecutor,
@@ -704,7 +704,7 @@ describe('getAll()', () => {
 describe('getBulk()', () => {
   describe('authorization', () => {
     function getBulkOperation(): ReturnType<ActionsClient['getBulk']> {
-      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {
             id: '1',
@@ -729,7 +729,7 @@ describe('getBulk()', () => {
 
       actionsClient = new ActionsClient({
         actionTypeRegistry,
-        savedObjectsClient,
+        unsecuredSavedObjectsClient,
         scopedClusterClient,
         defaultKibanaIndex,
         actionExecutor,
@@ -770,8 +770,8 @@ describe('getBulk()', () => {
     });
   });
 
-  test('calls getBulk savedObjectsClient with parameters', async () => {
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+  test('calls getBulk unsecuredSavedObjectsClient with parameters', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -796,7 +796,7 @@ describe('getBulk()', () => {
 
     actionsClient = new ActionsClient({
       actionTypeRegistry,
-      savedObjectsClient,
+      unsecuredSavedObjectsClient,
       scopedClusterClient,
       defaultKibanaIndex,
       actionExecutor,
@@ -861,13 +861,13 @@ describe('delete()', () => {
     });
   });
 
-  test('calls savedObjectsClient with id', async () => {
+  test('calls unsecuredSavedObjectsClient with id', async () => {
     const expectedResult = Symbol();
-    savedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce(expectedResult);
     const result = await actionsClient.delete({ id: '1' });
     expect(result).toEqual(expectedResult);
-    expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         "1",
@@ -885,7 +885,7 @@ describe('update()', () => {
         minimumLicenseRequired: 'basic',
         executor,
       });
-      savedObjectsClient.get.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
         type: 'action',
         attributes: {
@@ -893,7 +893,7 @@ describe('update()', () => {
         },
         references: [],
       });
-      savedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
         id: 'my-action',
         type: 'action',
         attributes: {
@@ -938,7 +938,7 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       executor,
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
       attributes: {
@@ -946,7 +946,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -972,8 +972,8 @@ describe('update()', () => {
       name: 'my name',
       config: {},
     });
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         "my-action",
@@ -985,8 +985,8 @@ describe('update()', () => {
         },
       ]
     `);
-    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         "my-action",
@@ -1006,7 +1006,7 @@ describe('update()', () => {
       },
       executor,
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -1035,7 +1035,7 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       executor,
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -1043,7 +1043,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -1081,8 +1081,8 @@ describe('update()', () => {
         c: true,
       },
     });
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         "my-action",
@@ -1110,7 +1110,7 @@ describe('update()', () => {
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
       throw new Error('Fail');
     });
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
       attributes: {
@@ -1118,7 +1118,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -1233,6 +1233,6 @@ describe('enqueueExecution()', () => {
     };
     await expect(actionsClient.enqueueExecution(opts)).resolves.toMatchInlineSnapshot(`undefined`);
 
-    expect(executionEnqueuer).toHaveBeenCalledWith(savedObjectsClient, opts);
+    expect(executionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
   });
 });

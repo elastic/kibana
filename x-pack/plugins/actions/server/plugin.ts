@@ -256,7 +256,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         );
       }
       return new ActionsClient({
-        savedObjectsClient: core.savedObjects.getScopedClient(request, {
+        unsecuredSavedObjectsClient: core.savedObjects.getScopedClient(request, {
           excludedWrappers: ['security'],
           includedHiddenTypes,
         }),
@@ -299,7 +299,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
-      getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
+      getScopedSavedObjectsClient: (request: KibanaRequest) =>
+        core.savedObjects.getScopedClient(request, {
+          includedHiddenTypes,
+        }),
     });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
@@ -364,7 +367,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
             );
           }
           return new ActionsClient({
-            savedObjectsClient: savedObjects.getScopedClient(request, {
+            unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
               excludedWrappers: ['security'],
               includedHiddenTypes,
             }),
