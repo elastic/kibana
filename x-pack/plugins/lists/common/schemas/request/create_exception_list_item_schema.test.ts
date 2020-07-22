@@ -130,7 +130,7 @@ describe('create_exception_list_item_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should validate an undefined for "entries" but return an array', () => {
+  test('it should NOT validate an undefined for "entries"', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     const outputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.entries;
@@ -139,8 +139,10 @@ describe('create_exception_list_item_schema', () => {
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
     delete (message.schema as CreateExceptionListItemSchema).item_id;
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "entries"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('it should validate an undefined for "namespace_type" but return enum "single" and generate a correct body not counting the auto generated uuid', () => {
