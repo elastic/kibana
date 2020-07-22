@@ -53,19 +53,17 @@ describe('AutocompleteFieldListsComponent', () => {
           selectedValue="some-list-id"
           isLoading={false}
           isClearable={true}
-          isDisabled={false}
+          isDisabled
           onChange={jest.fn()}
         />
       </ThemeProvider>
     );
 
-    await waitFor(() => {
-      expect(
-        wrapper
-          .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input`)
-          .prop('disabled')
-      ).toBeTruthy();
-    });
+    expect(
+      wrapper
+        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input`)
+        .prop('disabled')
+    ).toBeTruthy();
   });
 
   test('it renders loading if "isLoading" is true', async () => {
@@ -75,7 +73,7 @@ describe('AutocompleteFieldListsComponent', () => {
           placeholder="Placeholder text"
           selectedField={getField('@tags')}
           selectedValue=""
-          isLoading={false}
+          isLoading
           isClearable={false}
           isDisabled={false}
           onChange={jest.fn()}
@@ -83,19 +81,17 @@ describe('AutocompleteFieldListsComponent', () => {
       </ThemeProvider>
     );
 
-    await waitFor(() => {
+    wrapper
+      .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] button`)
+      .at(0)
+      .simulate('click');
+    expect(
       wrapper
-        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] button`)
-        .at(0)
-        .simulate('click');
-      expect(
-        wrapper
-          .find(
-            `EuiComboBoxOptionsList[data-test-subj="valuesAutocompleteComboBox listsComboxBox-optionsList"]`
-          )
-          .prop('isLoading')
-      ).toBeTruthy();
-    });
+        .find(
+          `EuiComboBoxOptionsList[data-test-subj="valuesAutocompleteComboBox listsComboxBox-optionsList"]`
+        )
+        .prop('isLoading')
+    ).toBeTruthy();
   });
 
   test('it allows user to clear values if "isClearable" is true', async () => {
@@ -222,6 +218,11 @@ describe('AutocompleteFieldListsComponent', () => {
         type: 'ip',
         updated_at: DATE_NOW,
         updated_by: 'some user',
+        _version: undefined,
+        version: 1,
+        deserializer: undefined,
+        serializer: undefined,
+        immutable: false,
       });
     });
   });

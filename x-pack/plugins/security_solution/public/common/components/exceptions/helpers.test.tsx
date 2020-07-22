@@ -42,7 +42,6 @@ import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/
 import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
 import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comments.mock';
-import { getEntriesArrayMock } from '../../../../../lists/common/schemas/types/entries.mock';
 import { ENTRIES } from '../../../../../lists/common/constants.mock';
 import {
   CreateExceptionListItemSchema,

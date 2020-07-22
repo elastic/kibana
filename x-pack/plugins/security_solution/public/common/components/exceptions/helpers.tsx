@@ -35,7 +35,7 @@ import {
   ExceptionListType,
   EntryNested,
 } from '../../../lists_plugin_deps';
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
 import { TimelineNonEcsData } from '../../../graphql/types';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
