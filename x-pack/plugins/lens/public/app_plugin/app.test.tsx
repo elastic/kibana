@@ -99,6 +99,7 @@ function createMockQueryString() {
   return {
     getQuery: jest.fn(),
     setQuery: jest.fn(),
+    getDefaultQuery: jest.fn(),
   };
 }
 
