@@ -84,7 +84,7 @@ image::images/intro-dashboard.png[]
 {kib} also offers these visualization features:
 
 * <<visualize, Visualize>> allows you to display your data in
-line charts, bar graphs, pie charts, histograms, and tables
+charts, graphs, and tables
 (just to name a few). It's also home to Lens.
 Visualize supports the ability to add interactive
 controls to your dashboard, and filter dashboard content in real time.
