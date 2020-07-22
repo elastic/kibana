@@ -25,7 +25,6 @@ import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
-import { Query } from '../../common';
 import { QueryStringManager, QueryStringContract } from './query_string';
 
 /**
@@ -47,7 +46,6 @@ interface QueryServiceStartDependencies {
 export class QueryService {
   filterManager!: FilterManager;
   timefilter!: TimefilterSetup;
-  queryString?: Query;
   queryStringManager!: QueryStringContract;
 
   state$!: ReturnType<typeof createQueryStateObservable>;
