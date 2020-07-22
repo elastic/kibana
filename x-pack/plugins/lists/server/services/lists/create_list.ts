@@ -8,16 +8,19 @@ import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 import { LegacyAPICaller } from 'kibana/server';
 
+import { encodeHitVersion } from '../utils/encode_hit_version';
 import {
   Description,
   DeserializerOrUndefined,
   IdOrUndefined,
+  Immutable,
   IndexEsListSchema,
   ListSchema,
   MetaOrUndefined,
   Name,
   SerializerOrUndefined,
   Type,
+  Version,
 } from '../../../common/schemas';
 
 export interface CreateListOptions {
@@ -33,6 +36,8 @@ export interface CreateListOptions {
   meta: MetaOrUndefined;
   dateNow?: string;
   tieBreaker?: string;
+  immutable: Immutable;
+  version: Version;
 }
 
 export const createList = async ({
@@ -48,6 +53,8 @@ export const createList = async ({
   meta,
   dateNow,
   tieBreaker,
+  immutable,
+  version,
 }: CreateListOptions): Promise<ListSchema> => {
   const createdAt = dateNow ?? new Date().toISOString();
   const body: IndexEsListSchema = {
@@ -55,6 +62,7 @@ export const createList = async ({
     created_by: user,
     description,
     deserializer,
+    immutable,
     meta,
     name,
     serializer,
@@ -62,6 +70,7 @@ export const createList = async ({
     type,
     updated_at: createdAt,
     updated_by: user,
+    version,
   };
   const response = await callCluster<CreateDocumentResponse>('index', {
     body,
@@ -70,6 +79,7 @@ export const createList = async ({
     refresh: 'wait_for',
   });
   return {
+    _version: encodeHitVersion(response),
     id: response._id,
     ...body,
   };

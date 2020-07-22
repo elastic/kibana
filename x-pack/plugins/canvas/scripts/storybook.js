@@ -10,7 +10,7 @@ const del = require('del');
 const { run } = require('@kbn/dev-utils');
 const storybook = require('@storybook/react/standalone');
 const execa = require('execa');
-const { DLL_OUTPUT } = require('./../.storybook/constants');
+const { DLL_OUTPUT } = require('./../storybook/constants');
 
 const options = {
   stdio: ['ignore', 'inherit', 'inherit'],
@@ -18,7 +18,7 @@ const options = {
 };
 
 const storybookOptions = {
-  configDir: path.resolve(__dirname, './../.storybook'),
+  configDir: path.resolve(__dirname, './../storybook'),
   mode: 'dev',
 };
 
@@ -51,7 +51,7 @@ run(
         [
           'webpack',
           '--config',
-          'x-pack/plugins/canvas/.storybook/webpack.dll.config.js',
+          'x-pack/plugins/canvas/storybook/webpack.dll.config.js',
           '--progress',
           '--hide-modules',
           '--display-entrypoints',
