@@ -36,7 +36,7 @@ import {
 } from '@elastic/eui';
 
 import { CoreStart } from '../../../../src/core/public';
-import { getEsQueryConfig, buildEsQuery, Filter } from '../../../../src/plugins/data/common';
+import { getEsQueryConfig, buildEsQuery } from '../../../../src/plugins/data/common';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
 import { PLUGIN_ID, PLUGIN_NAME, IMyStrategyResponse } from '../../common';
@@ -86,11 +86,12 @@ export const SearchExamplesApp = ({
   const doAsyncSearch = async (strategy?: string) => {
     if (!indexPattern) return;
 
+    // TODO:This should be coming from state
     const timeFilter = data.query.timefilter.timefilter.createFilter(indexPattern);
     const filters = [...(queryState?.filters || []), ...(timeFilter ? [timeFilter] : [])];
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
-    const query = buildEsQuery(
+    const esQuery = buildEsQuery(
       indexPattern,
       queryState?.queryString || [],
       filters,
@@ -104,9 +105,7 @@ export const SearchExamplesApp = ({
           aggs: {
             avg_bytes: { avg: { field: 'bytes' } },
           },
-          query: {
-            ...query,
-          },
+          query: esQuery,
         },
       },
     };
