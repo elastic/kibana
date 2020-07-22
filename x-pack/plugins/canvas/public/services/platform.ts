@@ -19,11 +19,15 @@ export interface PlatformService {
   getDocLinkVersion: () => string;
   getElasticWebsiteUrl: () => string;
   getHasWriteAccess: () => boolean;
-  getSavedObjects: () => SavedObjectsStart;
-  getSavedObjectsClient: () => SavedObjectsClientContract;
-  getUISettingsClient: () => IUiSettingsClient;
+  getUISetting: (key: string, defaultValue?: any) => any;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   setRecentlyAccessed: (link: string, label: string, id: string) => void;
+
+  // TODO: these should go away.  We want thin accessors, not entire objects.
+  // Entire objects are hard to mock, and hide our dependency on the external service.
+  getSavedObjects: () => SavedObjectsStart;
+  getSavedObjectsClient: () => SavedObjectsClientContract;
+  getUISettings: () => IUiSettingsClient;
 }
 
 export const platformServiceFactory: CanvasServiceFactory<PlatformService> = (
@@ -40,7 +44,8 @@ export const platformServiceFactory: CanvasServiceFactory<PlatformService> = (
     getHasWriteAccess: () => coreStart.application.capabilities.canvas.save as boolean,
     getSavedObjects: () => coreStart.savedObjects,
     getSavedObjectsClient: () => coreStart.savedObjects.client,
-    getUISettingsClient: () => coreStart.uiSettings,
+    getUISettings: () => coreStart.uiSettings,
+    getUISetting: () => coreStart.uiSettings.get,
     setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
     setRecentlyAccessed: coreStart.chrome.recentlyAccessed.add,
   };

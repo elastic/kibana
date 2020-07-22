@@ -24,7 +24,7 @@ const getSavedObjectsClient = function () {
 };
 
 const getAdvancedSettings = function () {
-  return platformService.getService().getUISettingsClient();
+  return platformService.getService().getUISettings();
 };
 
 export const getFields = (index = '_all') => {

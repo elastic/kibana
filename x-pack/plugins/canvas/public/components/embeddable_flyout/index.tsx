@@ -102,9 +102,6 @@ export class EmbeddableFlyoutPortal extends React.Component<Props & WithServices
         <AddEmbeddableFlyout
           {...this.props}
           availableEmbeddables={Object.keys(allowedEmbeddables)}
-          savedObjects={this.props.services.platform.getSavedObjects()}
-          uiSettings={this.props.services.platform.getUISettingsClient()}
-          getEmbeddableFactories={this.props.services.embeddables.getEmbeddableFactories}
         />,
         this.el
       );

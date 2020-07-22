@@ -137,7 +137,7 @@ export const WorkpadLoader = compose(
   })),
   withProps((props) => ({
     formatDate: (date) => {
-      const dateFormat = props.services.platform.getUISettingsClient().get('dateFormat');
+      const dateFormat = props.services.platform.getUISetting('dateFormat');
       return date && moment(date).format(dateFormat);
     },
   }))

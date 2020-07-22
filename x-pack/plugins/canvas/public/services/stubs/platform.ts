@@ -14,9 +14,10 @@ export const platformService: PlatformService = {
   getDocLinkVersion: () => 'dockLinkVersion',
   getElasticWebsiteUrl: () => 'https://elastic.co',
   getHasWriteAccess: () => true,
-  getSavedObjects: noop,
-  getSavedObjectsClient: noop,
-  getUISettingsClient: noop,
+  getUISetting: noop,
   setBreadcrumbs: noop,
   setRecentlyAccessed: noop,
+  getSavedObjects: noop,
+  getSavedObjectsClient: noop,
+  getUISettings: noop,
 };
