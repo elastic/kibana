@@ -14,6 +14,8 @@ import { TestProviders } from '../../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
+import { useKibana } from '../../../common/lib/kibana';
+import { createUseKibanaMock } from '../../../common/mock/kibana_react';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -26,12 +28,15 @@ jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 
+const useKibanaMock = useKibana as jest.Mock;
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 
 jest.mock('../../../common/components/link_to');
+
+jest.mock('../../../common/lib/kibana');
 
 describe('AllCases', () => {
   const dispatchResetIsDeleted = jest.fn();
@@ -45,6 +50,7 @@ describe('AllCases', () => {
   const setSelectedCases = jest.fn();
   const updateBulkStatus = jest.fn();
   const fetchCasesStatus = jest.fn();
+  const onRowClick = jest.fn();
   const emptyTag = getEmptyTagValue().props.children;
 
   const defaultGetCases = {
@@ -77,6 +83,9 @@ describe('AllCases', () => {
     dispatchResetIsUpdated,
     updateBulkStatus,
   };
+
+  let navigateToApp: jest.Mock;
+
   /* eslint-disable no-console */
   // Silence until enzyme fixed to use ReactTestUtils.act()
   const originalError = console.error;
@@ -89,6 +98,16 @@ describe('AllCases', () => {
   /* eslint-enable no-console */
   beforeEach(() => {
     jest.resetAllMocks();
+    navigateToApp = jest.fn();
+    const kibanaMock = createUseKibanaMock()();
+    useKibanaMock.mockImplementation(() => ({
+      ...kibanaMock,
+      services: {
+        application: {
+          navigateToApp,
+        },
+      },
+    }));
     useUpdateCasesMock.mockImplementation(() => defaultUpdateCases);
     useGetCasesMock.mockImplementation(() => defaultGetCases);
     useDeleteCasesMock.mockImplementation(() => defaultDeleteCases);
@@ -319,5 +338,97 @@ describe('AllCases', () => {
     expect(refetchCases).toBeCalled();
     expect(fetchCasesStatus).toBeCalled();
     expect(dispatchResetIsUpdated).toBeCalled();
+  });
+
+  it('should not render header when modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="all-cases-header"]').exists()).toBe(false);
+  });
+
+  it('should not render table utility bar when modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="case-table-utility-bar-actions"]').exists()).toBe(false);
+  });
+
+  it('case table should not be selectable when modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="cases-table"]').first().prop('isSelectable')).toBe(false);
+  });
+
+  it('should call onRowClick with no cases and modal=true', () => {
+    useGetCasesMock.mockImplementation(() => ({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        total: 0,
+        cases: [],
+      },
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} onRowClick={onRowClick} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
+    expect(onRowClick).toHaveBeenCalled();
+  });
+
+  it('should call navigateToApp with no cases and modal=false', () => {
+    useGetCasesMock.mockImplementation(() => ({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        total: 0,
+        cases: [],
+      },
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={false} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="cases-table-add-case"]').first().simulate('click');
+    expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/create' });
+  });
+
+  it('should call onRowClick when clicking a case with modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={true} onRowClick={onRowClick} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
+    expect(onRowClick).toHaveBeenCalledWith('1');
+  });
+
+  it('should NOT call onRowClick when clicking a case with modal=true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases userCanCrud={true} isModal={false} />
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
+    expect(onRowClick).not.toHaveBeenCalled();
   });
 });

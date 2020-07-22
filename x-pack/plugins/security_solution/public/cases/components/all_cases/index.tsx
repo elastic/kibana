@@ -329,7 +329,13 @@ export const AllCases = React.memo<AllCasesProps>(
         )}
         {!isModal && (
           <CaseHeaderPage title={i18n.PAGE_TITLE}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="m"
+              responsive={false}
+              wrap={true}
+              data-test-subj="all-cases-header"
+            >
               <EuiFlexItem grow={false}>
                 <OpenClosedStats
                   dataTestSubj="openStatsHeader"
@@ -401,7 +407,7 @@ export const AllCases = React.memo<AllCasesProps>(
                     </UtilityBarText>
                   </UtilityBarGroup>
                   {!isModal && (
-                    <UtilityBarGroup>
+                    <UtilityBarGroup data-test-subj="case-table-utility-bar-actions">
                       <UtilityBarText data-test-subj="case-table-selected-case-count">
                         {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
                       </UtilityBarText>
@@ -441,6 +447,7 @@ export const AllCases = React.memo<AllCasesProps>(
                         onClick={goToCreateCase}
                         href={formatUrl(getCreateCaseUrl())}
                         iconType="plusInCircle"
+                        data-test-subj="cases-table-add-case"
                       >
                         {i18n.ADD_NEW_CASE}
                       </LinkButton>
@@ -452,13 +459,16 @@ export const AllCases = React.memo<AllCasesProps>(
                 rowProps={(item) =>
                   isModal
                     ? {
+                        'data-test-subj': `cases-table-row-${item.id}`,
                         onClick: () => {
                           if (onRowClick != null) {
                             onRowClick(item.id);
                           }
                         },
                       }
-                    : {}
+                    : {
+                        'data-test-subj': `cases-table-row-${item.id}`,
+                      }
                 }
                 selection={userCanCrud && !isModal ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
