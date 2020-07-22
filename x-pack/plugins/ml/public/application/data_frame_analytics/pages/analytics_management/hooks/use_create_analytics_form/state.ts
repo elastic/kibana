@@ -283,8 +283,9 @@ function toCamelCase(property: string): string {
  * Extracts form state for a job clone from the analytics job configuration.
  * For cloning we keep job id and destination index empty.
  */
-export function getCloneFormStateFromJobConfig(
-  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>
+export function getFormStateFromJobConfig(
+  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>,
+  isClone?: boolean = true
 ): Partial<State['form']> {
   const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
 
@@ -299,6 +300,10 @@ export function getCloneFormStateFromJobConfig(
     maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields.includes,
   };
+
+  if (isClone === false) {
+    resultState.destinationIndex = analyticsJobConfig?.dest.index ?? '';
+  }
 
   const analysisConfig = analyticsJobConfig.analysis[jobType];
 

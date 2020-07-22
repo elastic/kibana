@@ -28,7 +28,7 @@ import {
   FormMessage,
   State,
   SourceIndexMap,
-  getCloneFormStateFromJobConfig,
+  getFormStateFromJobConfig,
 } from './state';
 
 import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
@@ -298,7 +298,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       setJobConfig(config);
       switchToAdvancedEditor();
     } else {
-      setFormState(getCloneFormStateFromJobConfig(config));
+      setFormState(getFormStateFromJobConfig(config));
       setEstimatedModelMemoryLimit(config.model_memory_limit);
     }
 

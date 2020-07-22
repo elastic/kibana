@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 // @ts-ignore
 import numeral from '@elastic/numeral';
-import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
@@ -16,7 +15,7 @@ import { collapseLiteralStrings } from '../../../../../../../../../../src/plugin
 import { Action, ACTION } from './actions';
 import {
   getInitialState,
-  getCloneFormStateFromJobConfig,
+  getFormStateFromJobConfig,
   getJobConfigFromFormState,
   State,
 } from './state';
@@ -543,10 +542,8 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
       let { jobConfig } = state;
-      const isJobConfigEmpty = isEmpty(state.jobConfig);
-      if (isJobConfigEmpty) {
-        jobConfig = getJobConfigFromFormState(state.form);
-      }
+      jobConfig = getJobConfigFromFormState(state.form);
+
       return validateAdvancedEditor({
         ...state,
         advancedEditorRawString: JSON.stringify(jobConfig, null, 2),
@@ -556,12 +553,19 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.SWITCH_TO_FORM:
       const { jobConfig: config } = state;
-      const formState = getCloneFormStateFromJobConfig(config);
-      // TODO: way to keep track of errors if something changed in the advanced editor and it changes other stuff in a step
+      const { jobId } = state.form;
+
+      const formState = getFormStateFromJobConfig(config, false);
+      if (jobId.trim() !== '') {
+        formState.jobId = jobId;
+      }
+
       return validateForm({
         ...state,
         form: formState,
         isAdvancedEditorEnabled: false,
+        advancedEditorRawString: JSON.stringify(config, null, 2),
+        jobConfig: config,
       });
 
     case ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT:
