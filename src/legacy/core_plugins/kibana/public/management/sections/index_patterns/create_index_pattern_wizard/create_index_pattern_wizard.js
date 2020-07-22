@@ -69,7 +69,7 @@ export class CreateIndexPatternWizard extends Component {
     try {
       return await asyncFn;
     } catch (errors) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         toasts: prevState.toasts.concat([
           {
             title: errorMsg,
@@ -109,19 +109,31 @@ export class CreateIndexPatternWizard extends Component {
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
+        getIndices(
+          services.es,
+          this.indexPatternCreationType,
+          `*`,
+          MAX_SEARCH_SIZE,
+          this.state.isIncludingSystemIndices
+        ),
         [],
         indicesFailMsg
       )
-    ).then(allIndices => this.setState({ allIndices, isInitiallyLoadingIndices: false }));
+    ).then((allIndices) => this.setState({ allIndices, isInitiallyLoadingIndices: false }));
 
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(services.es, this.indexPatternCreationType, `*:*`, 1),
+      getIndices(
+        services.es,
+        this.indexPatternCreationType,
+        `*:*`,
+        1,
+        this.state.isIncludingSystemIndices
+      ),
       ['a'],
       clustersFailMsg
-    ).then(remoteIndices => this.setState({ remoteClustersExist: !!remoteIndices.length }));
+    ).then((remoteIndices) => this.setState({ remoteClustersExist: !!remoteIndices.length }));
   };
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {
@@ -165,7 +177,7 @@ export class CreateIndexPatternWizard extends Component {
     services.changeUrl(`/management/kibana/index_patterns/${createdId}`);
   };
 
-  goToTimeFieldStep = indexPattern => {
+  goToTimeFieldStep = (indexPattern) => {
     this.setState({ step: 2, indexPattern });
   };
 
@@ -173,10 +185,8 @@ export class CreateIndexPatternWizard extends Component {
     this.setState({ step: 1 });
   };
 
-  onChangeIncludingSystemIndices = () => {
-    this.setState(state => ({
-      isIncludingSystemIndices: !state.isIncludingSystemIndices,
-    }));
+  onChangeIncludingSystemIndices = (event) => {
+    this.setState({ isIncludingSystemIndices: event.target.checked }, () => this.fetchData());
   };
 
   renderHeader() {
@@ -245,9 +255,9 @@ export class CreateIndexPatternWizard extends Component {
     return null;
   }
 
-  removeToast = removedToast => {
-    this.setState(prevState => ({
-      toasts: prevState.toasts.filter(toast => toast.id !== removedToast.id),
+  removeToast = (removedToast) => {
+    this.setState((prevState) => ({
+      toasts: prevState.toasts.filter((toast) => toast.id !== removedToast.id),
     }));
   };
 
