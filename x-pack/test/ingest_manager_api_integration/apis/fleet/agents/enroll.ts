@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../api_integration/ftr_provider_con
 import { getSupertestWithoutAuth, setupIngest, getEsClientForAPIKey } from './services';
 import { skipIfNoDockerRegistry } from '../../../helpers';
 
-export default function(providerContext: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
 
   const esArchiver = getService('esArchiver');
