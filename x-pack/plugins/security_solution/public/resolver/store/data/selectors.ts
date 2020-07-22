@@ -30,8 +30,9 @@ import {
   ResolverRelatedEvents,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
-import { isometricTaxiLayout } from '../../models/indexed_process_tree/isometric_taxi_layout';
+import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
 import { allEventCategories } from '../../../../common/endpoint/models/event';
+import * as vector2 from '../../models/vector2';
 
 /**
  * If there is currently a request.
@@ -69,6 +70,21 @@ const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
     return undefined;
   }
 };
+
+/**
+ * the node ID of the node representing the databaseDocumentID.
+ * NB: this could be stale if the last response is stale
+ */
+export const originID: (state: DataState) => string | undefined = createSelector(
+  resolverTreeResponse,
+  function (resolverTree?) {
+    if (resolverTree) {
+      // This holds the entityID (aka nodeID) of the node related to the last fetched `_id`
+      return resolverTree.entityID;
+    }
+    return undefined;
+  }
+);
 
 /**
  * Process events that will be displayed as terminated.
@@ -317,13 +333,45 @@ export function databaseDocumentIDToFetch(state: DataState): string | null {
   }
 }
 
-export const layout = createSelector(tree, function processNodePositionsAndEdgeLineSegments(
-  /* eslint-disable no-shadow */
-  indexedProcessTree
-  /* eslint-enable no-shadow */
-) {
-  return isometricTaxiLayout(indexedProcessTree);
-});
+export const layout = createSelector(
+  tree,
+  originID,
+  function processNodePositionsAndEdgeLineSegments(
+    /* eslint-disable no-shadow */
+    indexedProcessTree,
+    originID
+    /* eslint-enable no-shadow */
+  ) {
+    // use the isometric taxi layout as a base
+    const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedProcessTree);
+
+    if (!originID) {
+      // no data has loaded.
+      return taxiLayout;
+    }
+
+    // find the origin node
+    const originNode = indexedProcessTreeModel.processEvent(indexedProcessTree, originID);
+
+    if (!originNode) {
+      // this should only happen if the `ResolverTree` from the server has an entity ID with no matching lifecycle events.
+      throw new Error('Origin node not found in ResolverTree');
+    }
+
+    // Find the position of the origin, we'll center the map on it intrinsically
+    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originNode);
+    // adjust the position of everything so that the origin node is at `(0, 0)`
+
+    if (originPosition === undefined) {
+      // not sure how this could happen.
+      return taxiLayout;
+    }
+
+    // Take the origin position, and multipy it by -1, then move the layout by that amount.
+    // This should center the layout around the origin.
+    return isometricTaxiLayoutModel.translated(taxiLayout, vector2.scale(originPosition, -1));
+  }
+);
 
 /**
  * Given a nodeID (aka entity_id) get the indexed process event.

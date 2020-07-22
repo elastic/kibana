@@ -48,10 +48,6 @@ import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
-import { savedLens } from './saved_lens';
-import { savedMap } from './saved_map';
-import { savedSearch } from './saved_search';
-import { savedVisualization } from './saved_visualization';
 import { seriesStyle } from './seriesStyle';
 import { shape } from './shape';
 import { sort } from './sort';
@@ -110,10 +106,6 @@ export const functions = [
   revealImage,
   rounddate,
   rowCount,
-  savedLens,
-  savedMap,
-  savedSearch,
-  savedVisualization,
   seriesStyle,
   shape,
   sort,
