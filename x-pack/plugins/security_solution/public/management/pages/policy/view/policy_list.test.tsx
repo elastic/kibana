@@ -6,8 +6,11 @@
 
 import React from 'react';
 import { PolicyList } from './index';
-import { policyListApiPathHandlers } from '../store/policy_list/mock_policy_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import {
+  policyListApiPathHandlers,
+  setPolicyListApiMockImplementation,
+} from '../store/policy_list/test_mock_utils';
 
 jest.mock('../../../../common/components/link_to');
 
@@ -56,16 +59,18 @@ describe('when on the policies page', () => {
     };
 
     beforeEach(async () => {
-      const policyApiHandlers = policyListApiPathHandlers(3);
-      coreStart.http.get.mockImplementation(async (...args) => {
-        const [path] = args;
-        if (typeof path === 'string') {
-          if (policyApiHandlers[path]) {
-            return policyApiHandlers[path]();
-          }
-        }
-        throw new Error(`no http GET mock implementation for: ${path}`);
-      });
+      setPolicyListApiMockImplementation(coreStart.http, 3);
+
+      // const policyApiHandlers = policyListApiPathHandlers(3);
+      // coreStart.http.get.mockImplementation(async (...args) => {
+      //   const [path] = args;
+      //   if (typeof path === 'string') {
+      //     if (policyApiHandlers[path]) {
+      //       return policyApiHandlers[path]();
+      //     }
+      //   }
+      //   throw new Error(`no http GET mock implementation for: ${path}`);
+      // });
     });
 
     it('should display rows in the table', async () => {
