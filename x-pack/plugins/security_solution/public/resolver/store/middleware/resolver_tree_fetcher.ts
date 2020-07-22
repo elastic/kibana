@@ -9,11 +9,8 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { ResolverTree, ResolverEntityIndex } from '../../../../common/endpoint/types';
 
-import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
-import { ResolverState } from '../../types';
+import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
-import { StartServices } from '../../../types';
-import { DEFAULT_INDEX_KEY as defaultIndexKey } from '../../../../common/constants';
 import { ResolverAction } from '../actions';
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
@@ -23,7 +20,7 @@ import { ResolverAction } from '../actions';
  * This is a factory because it is stateful and keeps that state in closure.
  */
 export function ResolverTreeFetcher(
-  context: KibanaReactContextValue<StartServices>,
+  dataAccessLayer: DataAccessLayer,
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
 ): () => void {
   let lastRequestAbortController: AbortController | undefined;
@@ -48,17 +45,12 @@ export function ResolverTreeFetcher(
         payload: databaseDocumentIDToFetch,
       });
       try {
-        const indices: string[] = context.services.uiSettings.get(defaultIndexKey);
-        const matchingEntities: ResolverEntityIndex = await context.services.http.get(
-          '/api/endpoint/resolver/entity',
-          {
-            signal: lastRequestAbortController.signal,
-            query: {
-              _id: databaseDocumentIDToFetch,
-              indices,
-            },
-          }
-        );
+        const indices: string[] = dataAccessLayer.indexPatterns();
+        const matchingEntities: ResolverEntityIndex = await dataAccessLayer.entities({
+          _id: databaseDocumentIDToFetch,
+          indices,
+          signal: lastRequestAbortController.signal,
+        });
         if (matchingEntities.length < 1) {
           // If no entity_id could be found for the _id, bail out with a failure.
           api.dispatch({
@@ -68,9 +60,10 @@ export function ResolverTreeFetcher(
           return;
         }
         const entityIDToFetch = matchingEntities[0].entity_id;
-        result = await context.services.http.get(`/api/endpoint/resolver/${entityIDToFetch}`, {
-          signal: lastRequestAbortController.signal,
-        });
+        result = await dataAccessLayer.resolverTree(
+          entityIDToFetch,
+          lastRequestAbortController.signal
+        );
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError
         if (error instanceof DOMException && error.name === 'AbortError') {
