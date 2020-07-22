@@ -33,7 +33,7 @@ export const deleteListIndexRoute = (router: IRouter): void => {
   router.delete(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_INDEX,
       validate: false,
