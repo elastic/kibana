@@ -14,7 +14,6 @@ import {
   Description,
   DescriptionOrUndefined,
   EntriesArray,
-  EntriesArrayOrUndefined,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
@@ -140,7 +139,7 @@ export interface UpdateExceptionListItemOptions {
   _tags: _TagsOrUndefined;
   _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
-  entries: EntriesArrayOrUndefined;
+  entries: EntriesArray;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
   namespaceType: NamespaceType;
@@ -155,7 +154,7 @@ export interface UpdateEndpointListItemOptions {
   _tags: _TagsOrUndefined;
   _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
-  entries: EntriesArrayOrUndefined;
+  entries: EntriesArray;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
   name: NameOrUndefined;
