@@ -90,7 +90,7 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
     const { build_hash: buildHash, build_number: buildNumber } = version;
 
     return (
-      <EuiPage className="stsPage">
+      <EuiPage className="stsPage" data-test-subj="statusPageRoot">
         <EuiPageBody restrictWidth>
           <ServerStatus name={name} serverState={serverState} />
 
