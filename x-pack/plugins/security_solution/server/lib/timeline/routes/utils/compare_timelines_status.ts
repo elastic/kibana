@@ -71,6 +71,12 @@ export class CompareTimelinesStatus {
   }
 
   public get isCreatable() {
+    // From Line 86-87 is the condition for creating a template via import without given a templateTimelineId or templateTimelineVersion,
+    // but keep the existing savedObjectId and version there.
+    // Therefore even the timeline exists, we still allow it to create a new timeline template by assigning a templateTimelineId and templateTimelineVersion.
+    // https://github.com/elastic/kibana/pull/67496#discussion_r454337222
+    // Line 88-89 means that we want to make sure the existing timeline retrieved by savedObjectId is atemplate.
+    // If it is not a template, we show an error this timeline is already exist instead.
     return (
       this.isTitleValid &&
       !this.isSavedObjectVersionConflict &&
