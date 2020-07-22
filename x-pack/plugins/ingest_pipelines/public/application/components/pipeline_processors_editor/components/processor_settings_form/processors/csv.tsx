@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  FieldConfig,
   FIELD_TYPES,
   fieldValidators,
   UseField,
@@ -20,9 +19,13 @@ import {
   ValidationFunc,
 } from '../../../../../../shared_imports';
 
+import { FieldsConfig } from './shared';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { FieldNameField } from './common_fields/field_name_field';
+
 import { isArrayOfStrings } from './shared';
 
-const { emptyField, minLengthField } = fieldValidators;
+const { minLengthField } = fieldValidators;
 
 /**
  * Allow empty strings ('') to pass this validation.
@@ -40,24 +43,7 @@ const isStringLengthOne: ValidationFunc = ({ value }) => {
     : undefined;
 };
 
-export const fieldsConfig: Record<string, FieldConfig> = {
-  field: {
-    type: FIELD_TYPES.TEXT,
-    serializer: String,
-    deserializer: String,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.fieldFieldLabel', {
-      defaultMessage: 'Field',
-    }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.fieldRequiredError', {
-            defaultMessage: 'A field value is required.',
-          })
-        ),
-      },
-    ],
-  },
+const fieldsConfig: FieldsConfig = {
   target_fields: {
     type: FIELD_TYPES.COMBO_BOX,
     deserializer: (v) => {
@@ -132,23 +118,12 @@ export const fieldsConfig: Record<string, FieldConfig> = {
       defaultMessage: 'Empty value',
     }),
   },
-  ignore_missing: {
-    type: FIELD_TYPES.TOGGLE,
-    defaultValue: false,
-    deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
-    label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.cicleForm.ignoreMissingFieldLabel',
-      {
-        defaultMessage: 'Ignore missing',
-      }
-    ),
-  },
 };
 
 export const CSV: FunctionComponent = () => {
   return (
     <>
-      <UseField config={fieldsConfig.field} component={Field} path="fields.field" />
+      <FieldNameField />
 
       <UseField
         config={fieldsConfig.target_fields}
@@ -164,11 +139,7 @@ export const CSV: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.empty_value} component={Field} path="fields.empty_value" />
 
-      <UseField
-        config={fieldsConfig.ignore_missing}
-        component={ToggleField}
-        path="fields.ignore_missing"
-      />
+      <IgnoreMissingField />
     </>
   );
 };

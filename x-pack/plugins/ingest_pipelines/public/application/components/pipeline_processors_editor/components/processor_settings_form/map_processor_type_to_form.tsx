@@ -13,7 +13,12 @@ import { Circle } from './processors/circle';
 import { Convert } from './processors/convert';
 import { CSV } from './processors/csv';
 import { DateProcessor } from './processors/date';
-import { SetProcessor } from './processors/set';
+import { DateIndexName } from './processors/date_index_name';
+import { Dissect } from './processors/dissect';
+import { DotExpander } from './processors/dot_expander';
+import { Drop } from './processors/drop';
+
+// import { SetProcessor } from './processors/set';
 // import { Gsub } from './processors/gsub';
 
 interface FieldsFormDescriptor {
@@ -69,28 +74,28 @@ const mapProcessorTypeToFormDescriptor: Record<string, FieldsFormDescriptor> = {
     }),
   },
   date_index_name: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: DateIndexName,
     docLinkPath: '/date-index-name-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.dateIndexName', {
       defaultMessage: 'Date Index Name',
     }),
   },
   dissect: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Dissect,
     docLinkPath: '/dissect-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.dissect', {
       defaultMessage: 'Dissect',
     }),
   },
   dot_expander: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: DotExpander,
     docLinkPath: '/dot-expand-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.dotExpander', {
       defaultMessage: 'Dot Expander',
     }),
   },
   drop: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Drop,
     docLinkPath: '/drop-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.drop', {
       defaultMessage: 'Drop',
@@ -253,7 +258,7 @@ const mapProcessorTypeToFormDescriptor: Record<string, FieldsFormDescriptor> = {
 
   // --- The below processor descriptors have components implemented ---
   set: {
-    FieldsComponent: SetProcessor,
+    FieldsComponent: undefined,
     docLinkPath: '/set-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.set', {
       defaultMessage: 'Set',

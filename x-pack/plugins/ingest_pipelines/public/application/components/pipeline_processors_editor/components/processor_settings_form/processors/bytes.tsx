@@ -7,64 +7,29 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  FieldConfig,
-  FIELD_TYPES,
-  fieldValidators,
-  UseField,
-  Field,
-  ToggleField,
-} from '../../../../../../shared_imports';
+import { FIELD_TYPES, UseField, Field } from '../../../../../../shared_imports';
 
-const { emptyField } = fieldValidators;
+import { FieldsConfig } from './shared';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { FieldNameField } from './common_fields/field_name_field';
 
-export const fieldsConfig: Record<string, FieldConfig> = {
-  field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.bytesForm.fieldFieldLabel', {
-      defaultMessage: 'Field',
-    }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.bytesForm.fieldRequiredError', {
-            defaultMessage: 'A field value is required.',
-          })
-        ),
-      },
-    ],
-  },
+const fieldsConfig: FieldsConfig = {
   target_field: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.bytesForm.targetFieldLabel', {
       defaultMessage: 'Target field',
     }),
   },
-  ignore_missing: {
-    type: FIELD_TYPES.TOGGLE,
-    defaultValue: false,
-    deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
-    label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.bytesForm.ignoreMissingFieldLabel',
-      {
-        defaultMessage: 'Ignore missing',
-      }
-    ),
-  },
 };
 
 export const Bytes: FunctionComponent = () => {
   return (
     <>
-      <UseField config={fieldsConfig.field} component={Field} path="fields.field" />
+      <FieldNameField />
 
       <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
 
-      <UseField
-        config={fieldsConfig.ignore_missing}
-        component={ToggleField}
-        path="fields.ignore_missing"
-      />
+      <IgnoreMissingField />
     </>
   );
 };

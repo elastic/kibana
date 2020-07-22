@@ -7,32 +7,14 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  FieldConfig,
-  FIELD_TYPES,
-  fieldValidators,
-  UseField,
-  Field,
-} from '../../../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
+
+import { FieldsConfig } from './shared';
+import { FieldNameField } from './common_fields/field_name_field';
 
 const { emptyField } = fieldValidators;
 
-export const fieldsConfig: Record<string, FieldConfig> = {
-  field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.appendForm.fieldFieldLabel', {
-      defaultMessage: 'Field',
-    }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.appendForm.fieldRequiredError', {
-            defaultMessage: 'A field value is required.',
-          })
-        ),
-      },
-    ],
-  },
+const fieldsConfig: FieldsConfig = {
   value: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel', {
@@ -53,7 +35,7 @@ export const fieldsConfig: Record<string, FieldConfig> = {
 export const Append: FunctionComponent = () => {
   return (
     <>
-      <UseField config={fieldsConfig.field} component={Field} path="fields.field" />
+      <FieldNameField />
 
       <UseField config={fieldsConfig.value} component={Field} path="fields.value" />
     </>

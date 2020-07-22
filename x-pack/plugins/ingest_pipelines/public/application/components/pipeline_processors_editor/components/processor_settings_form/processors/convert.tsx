@@ -8,33 +8,20 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  FieldConfig,
   FIELD_TYPES,
   fieldValidators,
   UseField,
   Field,
-  ToggleField,
   SelectField,
 } from '../../../../../../shared_imports';
 
+import { FieldsConfig } from './shared';
+import { FieldNameField } from './common_fields/field_name_field';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+
 const { emptyField } = fieldValidators;
 
-export const fieldsConfig: Record<string, FieldConfig> = {
-  field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.fieldFieldLabel', {
-      defaultMessage: 'Field',
-    }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.fieldRequiredError', {
-            defaultMessage: 'A field value is required.',
-          })
-        ),
-      },
-    ],
-  },
+const fieldsConfig: FieldsConfig = {
   type: {
     type: FIELD_TYPES.TEXT,
     defaultValue: '',
@@ -63,23 +50,12 @@ export const fieldsConfig: Record<string, FieldConfig> = {
       }
     ),
   },
-  ignore_missing: {
-    type: FIELD_TYPES.TOGGLE,
-    defaultValue: false,
-    deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
-    label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.cicleForm.ignoreMissingFieldLabel',
-      {
-        defaultMessage: 'Ignore missing',
-      }
-    ),
-  },
 };
 
 export const Convert: FunctionComponent = () => {
   return (
     <>
-      <UseField config={fieldsConfig.field} component={Field} path="fields.field" />
+      <FieldNameField />
 
       <UseField
         componentProps={{
@@ -137,11 +113,7 @@ export const Convert: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
 
-      <UseField
-        config={fieldsConfig.ignore_missing}
-        component={ToggleField}
-        path="fields.ignore_missing"
-      />
+      <IgnoreMissingField />
     </>
   );
 };

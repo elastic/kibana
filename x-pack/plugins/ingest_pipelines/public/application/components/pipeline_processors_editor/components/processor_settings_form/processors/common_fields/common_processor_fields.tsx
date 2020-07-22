@@ -17,6 +17,7 @@ import {
 
 const ignoreFailureConfig: FieldConfig = {
   defaultValue: false,
+  serializer: (v) => (v === false ? undefined : v),
   label: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureFieldLabel',
     {

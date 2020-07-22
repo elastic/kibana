@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  FieldConfig,
   FIELD_TYPES,
   fieldValidators,
   UseField,
@@ -18,28 +17,12 @@ import {
   ComboBoxField,
 } from '../../../../../../shared_imports';
 
-import { isArrayOfStrings } from './shared';
+import { FieldsConfig, isArrayOfStrings } from './shared';
+import { FieldNameField } from './common_fields/field_name_field';
 
-const { emptyField, minLengthField } = fieldValidators;
+const { minLengthField } = fieldValidators;
 
-export const fieldsConfig: Record<string, FieldConfig> = {
-  field: {
-    type: FIELD_TYPES.TEXT,
-    serializer: String,
-    deserializer: String,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.fieldFieldLabel', {
-      defaultMessage: 'Field',
-    }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.fieldRequiredError', {
-            defaultMessage: 'A field value is required.',
-          })
-        ),
-      },
-    ],
-  },
+const fieldsConfig: FieldsConfig = {
   target_field: {
     type: FIELD_TYPES.TEXT,
     serializer: (v) => (v ? undefined : v),
@@ -114,7 +97,7 @@ export const fieldsConfig: Record<string, FieldConfig> = {
 export const DateProcessor: FunctionComponent = () => {
   return (
     <>
-      <UseField config={fieldsConfig.field} component={Field} path="fields.field" />
+      <FieldNameField />
 
       <UseField config={fieldsConfig.formats} component={ComboBoxField} path="fields.formats" />
 

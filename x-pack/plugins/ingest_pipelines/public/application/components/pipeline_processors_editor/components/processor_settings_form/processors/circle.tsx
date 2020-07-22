@@ -8,34 +8,21 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  FieldConfig,
   FIELD_TYPES,
   fieldValidators,
   UseField,
   Field,
-  ToggleField,
   RadioGroupField,
   NumericField,
 } from '../../../../../../shared_imports';
 
+import { FieldsConfig } from './shared';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { FieldNameField } from './common_fields/field_name_field';
+
 const { emptyField } = fieldValidators;
 
-export const fieldsConfig: Record<string, FieldConfig> = {
-  field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.fieldFieldLabel', {
-      defaultMessage: 'Field',
-    }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.fieldRequiredError', {
-            defaultMessage: 'A field value is required.',
-          })
-        ),
-      },
-    ],
-  },
+const fieldsConfig: FieldsConfig = {
   target_field: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.targetFieldLabel', {
@@ -106,7 +93,7 @@ export const fieldsConfig: Record<string, FieldConfig> = {
 export const Circle: FunctionComponent = () => {
   return (
     <>
-      <UseField config={fieldsConfig.field} component={Field} path="fields.field" />
+      <FieldNameField />
 
       <UseField
         componentProps={{
@@ -142,11 +129,7 @@ export const Circle: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
 
-      <UseField
-        config={fieldsConfig.ignore_missing}
-        component={ToggleField}
-        path="fields.ignore_missing"
-      />
+      <IgnoreMissingField />
     </>
   );
 };

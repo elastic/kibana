@@ -8,5 +8,9 @@ import * as rt from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
 import { flow } from 'fp-ts/lib/function';
 
+import { FieldConfig } from '../../../../../../shared_imports';
+
 export const arrayOfStrings = rt.array(rt.string);
 export const isArrayOfStrings = flow(arrayOfStrings.decode, isRight);
+
+export type FieldsConfig = Record<string, FieldConfig>;
