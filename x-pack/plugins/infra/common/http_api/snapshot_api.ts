@@ -107,6 +107,7 @@ export const SnapshotRequestRT = rt.intersection([
     region: rt.string,
     filterQuery: rt.union([rt.string, rt.null]),
     includeTimeseries: rt.boolean,
+    overrideCompositeSize: rt.number,
   }),
 ]);
 

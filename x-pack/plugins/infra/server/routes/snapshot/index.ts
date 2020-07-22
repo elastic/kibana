@@ -40,6 +40,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           accountId,
           region,
           includeTimeseries,
+          overrideCompositeSize,
         } = pipe(
           SnapshotRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
@@ -59,6 +60,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           metrics,
           timerange,
           includeTimeseries,
+          overrideCompositeSize,
         };
 
         const searchES = <Hit = {}, Aggregation = undefined>(
