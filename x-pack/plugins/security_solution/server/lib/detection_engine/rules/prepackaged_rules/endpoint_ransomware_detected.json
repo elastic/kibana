@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "EElastic Endpoint Security detected Ransomware. Click the Elastic Endpoint Security icon in the event.module column or the link in the rule.reference column for additional information.",
+  "description": "Elastic Endpoint Security detected Ransomware. Click the Elastic Endpoint Security icon in the event.module column or the link in the rule.reference column for additional information.",
   "from": "now-15m",
   "index": [
     "endgame-*"
