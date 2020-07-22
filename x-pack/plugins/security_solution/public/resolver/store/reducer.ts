@@ -18,7 +18,13 @@ const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
   },
   action
 ) => {
-  if (action.type === 'userFocusedOnResolverNode') {
+  if (action.type === 'serverReturnedResolverData') {
+    const next: ResolverUIState = {
+      ...state,
+      selectedNode: action.payload.result.entityID,
+    };
+    return next;
+  } else if (action.type === 'userFocusedOnResolverNode') {
     const next: ResolverUIState = {
       ...state,
       ariaActiveDescendant: action.payload,

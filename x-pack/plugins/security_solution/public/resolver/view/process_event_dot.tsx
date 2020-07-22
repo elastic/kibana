@@ -216,7 +216,6 @@ const UnstyledProcessEventDot = React.memo(
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const isAriaCurrent = nodeID === ariaActiveDescendant;
     const isAriaSelected = nodeID === selectedNode;
 
     const dispatch = useResolverDispatch();
@@ -235,8 +234,7 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID]);
 
-    const { pushToQueryParams } = useResolverQueryParams();
-
+    const { pushToQueryParams, queryParams } = useResolverQueryParams();
     const handleClick = useCallback(() => {
       if (animationTarget.current !== null) {
         // This works but the types are missing in the typescript DOM lib
@@ -304,7 +302,6 @@ const UnstyledProcessEventDot = React.memo(
         aria-flowto={ariaFlowtoNodeID === null ? undefined : nodeHTMLID(ariaFlowtoNodeID)}
         aria-labelledby={labelHTMLID}
         aria-haspopup="true"
-        aria-current={isAriaCurrent ? 'true' : undefined}
         aria-selected={isAriaSelected ? 'true' : undefined}
         style={nodeViewportStyle}
         id={nodeHTMLID(nodeID)}
@@ -453,13 +450,13 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
     stroke-dashoffset: 500;
     fill-opacity: 0;
   }
-  &:hover:not([aria-current]) .backing {
+  &:hover:not([aria-selected]) .backing {
     transition-property: fill-opacity;
     transition-duration: 0.25s;
     fill-opacity: 1; // actual color opacity handled in the fill hex
   }
 
-  &[aria-current] .backing {
+  &[aria-selected] .backing {
     transition-property: stroke-dashoffset;
     transition-duration: 1s;
     stroke-dashoffset: 0;
