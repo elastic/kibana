@@ -142,7 +142,9 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams();
-  const { rule, refresh: refreshRule, loading: isLoading } = useRuleAsync(ruleId);
+  const { rule: maybeRule, refresh: refreshRule, loading: ruleLoading } = useRuleAsync(ruleId);
+  const [rule, setRule] = useState<Rule | null>(null);
+  const isLoading = ruleLoading && rule == null;
   // This is used to re-trigger api rule status when user de/activate rule
   const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
@@ -168,10 +170,17 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
   const ruleDetailTabs = getRuleDetailsTabs(rule);
 
-  const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
+  // persist rule until refresh is complete
+  useEffect(() => {
+    if (maybeRule != null) {
+      setRule(maybeRule);
+    }
+  }, [maybeRule]);
+
+  const title = rule?.name ?? <EuiLoadingSpinner size="m" />;
   const subTitle = useMemo(
     () =>
-      isLoading === true || rule === null ? (
+      rule == null ? (
         <EuiLoadingSpinner size="m" />
       ) : (
         [
@@ -207,7 +216,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           ),
         ]
       ),
-    [isLoading, rule]
+    [rule]
   );
 
   // Set showBuildingBlockAlerts if rule is a Building Block Rule otherwise we won't show alerts
