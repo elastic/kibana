@@ -13,7 +13,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import {
-  AgentConfig,
+  GetAgentConfigsResponseItem,
   GetAgentStatusResponse,
   GetOnePackageConfigResponse,
   GetPackageConfigsResponse,
@@ -48,7 +48,7 @@ export interface PolicyListState {
   /** A summary of stats for the agents associated with a given Fleet Agent Configuration */
   agentStatusSummary?: GetAgentStatusResponse['results'];
   /** A list of agent configs stored by agent config id */
-  agentConfigs: Record<string, AgentConfig>;
+  agentConfigs: Record<string, GetAgentConfigsResponseItem>;
 }
 
 /**

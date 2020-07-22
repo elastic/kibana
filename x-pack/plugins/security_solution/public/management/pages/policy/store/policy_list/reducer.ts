@@ -9,6 +9,7 @@ import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
 import { Immutable } from '../../../../../../common/endpoint/types';
 import { PolicyListState } from '../../types';
+import { GetAgentConfigsResponseItem } from '../../../../../../../ingest_manager/common/types/rest_spec';
 
 /**
  * Return the initial state.
@@ -108,7 +109,13 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
   if (action.type === 'serverReturnedAgentConfigListData') {
     return {
       ...state,
-      agentConfigs: action.payload.items,
+      agentConfigs: {
+        ...state.agentConfigs,
+        ...action.payload.items.reduce<PolicyListState['agentConfigs']>((list, agentConfig) => {
+          list[agentConfig.id] = agentConfig as GetAgentConfigsResponseItem;
+          return list;
+        }, {}),
+      },
     };
   }
 
