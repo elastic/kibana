@@ -31,7 +31,13 @@ jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
     services: mockCoreServices.createStart(),
   }),
+  useNotifications: () => {
+    return {
+      toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError: jest.fn() },
+    };
+  },
 }));
+
 export const MockI18nService = i18nServiceMock.create();
 export const I18nServiceConstructor = jest.fn().mockImplementation(() => MockI18nService);
 jest.doMock('@kbn/i18n', () => ({
@@ -43,37 +49,20 @@ describe('DeleteAction', () => {
     jest.clearAllMocks();
   });
 
-  test('When canDeleteDataFrameAnalytics permission is false, button should be disabled.', () => {
+  test('When isDisabled prop is true, inner button should be disabled.', () => {
     const { getByTestId } = render(
-      <DeleteButton item={mockAnalyticsListItem} onClick={() => {}} />
+      <DeleteButton isDisabled={true} item={mockAnalyticsListItem} onClick={() => {}} />
     );
+
     expect(getByTestId('mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
   });
 
-  test('When canDeleteDataFrameAnalytics permission is true, button should not be disabled.', () => {
-    const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
-    mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
+  test('When isDisabled prop is true, inner button should not be disabled.', () => {
     const { getByTestId } = render(
-      <DeleteButton item={mockAnalyticsListItem} onClick={() => {}} />
+      <DeleteButton isDisabled={false} item={mockAnalyticsListItem} onClick={() => {}} />
     );
 
     expect(getByTestId('mlAnalyticsJobDeleteButton')).not.toHaveAttribute('disabled');
-
-    mock.mockRestore();
-  });
-
-  test('When job is running, delete button should be disabled.', () => {
-    const { getByTestId } = render(
-      <DeleteButton
-        item={{
-          ...mockAnalyticsListItem,
-          stats: { state: 'started' },
-        }}
-        onClick={() => {}}
-      />
-    );
-
-    expect(getByTestId('mlAnalyticsJobDeleteButton')).toHaveAttribute('disabled');
   });
 
   describe('When delete model is open', () => {
@@ -87,7 +76,11 @@ describe('DeleteAction', () => {
         return (
           <>
             {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
-            <DeleteButton item={mockAnalyticsListItem} onClick={deleteAction.openModal} />
+            <DeleteButton
+              isDisabled={false}
+              item={mockAnalyticsListItem}
+              onClick={() => deleteAction.openModal(mockAnalyticsListItem)}
+            />
           </>
         );
       };

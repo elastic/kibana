@@ -34,7 +34,9 @@ import {
   buildUnorderedListArrayDescription,
   buildUrlsDescription,
   buildNoteDescription,
+  buildRiskScoreDescription,
   buildRuleTypeDescription,
+  buildThresholdDescription,
 } from './helpers';
 import { useSiemJobs } from '../../../../common/components/ml_popover/hooks/use_siem_jobs';
 import { buildMlJobDescription } from './ml_job_description';
@@ -179,6 +181,9 @@ export const getDescriptionItem = (
       (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
     );
     return buildThreatDescription({ label, threat });
+  } else if (field === 'threshold') {
+    const threshold = get(field, data);
+    return buildThresholdDescription(label, threshold);
   } else if (field === 'references') {
     const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);
@@ -188,18 +193,12 @@ export const getDescriptionItem = (
   } else if (Array.isArray(get(field, data))) {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
-    // TODO: Add custom UI for Risk/Severity Mappings (and fix missing label)
   } else if (field === 'riskScore') {
-    const val: AboutStepRiskScore = get(field, data);
-    return [
-      {
-        title: label,
-        description: val.value,
-      },
-    ];
+    const values: AboutStepRiskScore = get(field, data);
+    return buildRiskScoreDescription(values);
   } else if (field === 'severity') {
-    const val: AboutStepSeverity = get(field, data);
-    return buildSeverityDescription(label, val.value);
+    const values: AboutStepSeverity = get(field, data);
+    return buildSeverityDescription(values);
   } else if (field === 'timeline') {
     const timeline = get(field, data) as FieldValueTimeline;
     return [

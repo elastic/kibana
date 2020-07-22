@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiBasicTable, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -183,8 +183,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-          <EuiCallOut size="s" title={i18n.TEMPLATE_CALL_OUT_MESSAGE} />
-          <EuiSpacer size="m" />
           {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"

@@ -15,7 +15,9 @@ import {
   CategoryJobNoticesSection,
   LogAnalysisJobProblemIndicator,
 } from '../../../components/logging/log_analysis_job_status';
+import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
+import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
@@ -42,6 +44,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 
   const { sourceId } = useLogSourceContext();
+
+  const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
   const {
     hasOutdatedJobConfigurations: hasOutdatedLogEntryRateJobConfigurations,
@@ -80,11 +84,14 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     [queryTimeRange.value.endTime, queryTimeRange.value.startTime]
   );
 
+  const [selectedDatasets, setSelectedDatasets] = useState<string[]>([]);
+
   const { getLogEntryRate, isLoading, logEntryRate } = useLogEntryRateResults({
     sourceId,
     startTime: queryTimeRange.value.startTime,
     endTime: queryTimeRange.value.endTime,
     bucketDuration,
+    filteredDatasets: selectedDatasets,
   });
 
   const {
@@ -97,12 +104,15 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     changePaginationOptions,
     sortOptions,
     paginationOptions,
+    datasets,
+    isLoadingDatasets,
   } = useLogEntryAnomaliesResults({
     sourceId,
     startTime: queryTimeRange.value.startTime,
     endTime: queryTimeRange.value.endTime,
     defaultSortOptions: SORT_DEFAULTS,
     defaultPaginationOptions: PAGINATION_DEFAULTS,
+    filteredDatasets: selectedDatasets,
   });
 
   const handleQueryTimeRangeChange = useCallback(
@@ -175,7 +185,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
 
   useEffect(() => {
     getLogEntryRate();
-  }, [getLogEntryRate, queryTimeRange.lastChangedTime]);
+  }, [getLogEntryRate, selectedDatasets, queryTimeRange.lastChangedTime]);
 
   useInterval(
     () => {
@@ -191,7 +201,15 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
     <ResultsContentPage>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <DatasetsSelector
+                availableDatasets={datasets}
+                isLoading={isLoadingDatasets}
+                selectedDatasets={selectedDatasets}
+                onChangeDatasetSelection={setSelectedDatasets}
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiSuperDatePicker
                 start={selectedTimeRange.startTime}
@@ -208,6 +226,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           <LogAnalysisJobProblemIndicator
             hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             hasStoppedJobs={hasStoppedLogEntryRateJobs}
             isFirstUse={false /* the first use message is already shown by the section below */}
             moduleName={logEntryRateModuleDescriptor.moduleName}
@@ -217,6 +236,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           <CategoryJobNoticesSection
             hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
             isFirstUse={isFirstUse}
             moduleName={logEntryCategoriesModuleDescriptor.moduleName}

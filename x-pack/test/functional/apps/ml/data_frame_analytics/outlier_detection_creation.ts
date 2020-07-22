@@ -37,6 +37,18 @@ export default function ({ getService }: FtrProviderContext) {
         modelMemory: '5mb',
         createIndexPattern: true,
         expected: {
+          histogramCharts: [
+            { chartAvailable: true, id: '1stFlrSF', legend: '334 - 4692' },
+            { chartAvailable: true, id: 'BsmtFinSF1', legend: '0 - 5644' },
+            { chartAvailable: true, id: 'BsmtQual', legend: '0 - 5' },
+            { chartAvailable: true, id: 'CentralAir', legend: '2 categories' },
+            { chartAvailable: true, id: 'Condition2', legend: '2 categories' },
+            { chartAvailable: true, id: 'Electrical', legend: '2 categories' },
+            { chartAvailable: true, id: 'ExterQual', legend: '1 - 4' },
+            { chartAvailable: true, id: 'Exterior1st', legend: '2 categories' },
+            { chartAvailable: true, id: 'Exterior2nd', legend: '3 categories' },
+            { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
+          ],
           row: {
             type: 'outlier_detection',
             status: 'stopped',
@@ -84,6 +96,16 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
         });
 
+        it('enables the source data preview histogram charts', async () => {
+          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts();
+        });
+
+        it('displays the source data preview histogram charts', async () => {
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(
+            testData.expected.histogramCharts
+          );
+        });
+
         it('displays the include fields selection', async () => {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
         });
@@ -111,7 +133,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setJobDescription(testData.jobDescription);
         });
 
-        it('inputs the destination index', async () => {
+        it('should default the set destination index to job id switch to true', async () => {
+          await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdSwitchExists();
+          await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdCheckState(true);
+        });
+
+        it('should input the destination index', async () => {
+          await ml.dataFrameAnalyticsCreation.setDestIndexSameAsIdCheckState(false);
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
         });

@@ -25,6 +25,7 @@ import {
   enrichExceptionItemsWithOS,
   entryHasListType,
   entryHasNonEcsType,
+  prepareExceptionItemsForBulkClose,
 } from './helpers';
 import { FormattedEntry, DescriptionListItem, EmptyEntry } from './types';
 import {
@@ -37,18 +38,20 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from '../autocomplete/operators';
-import { OperatorTypeEnum, OperatorEnum } from '../../../lists_plugin_deps';
+import { OperatorTypeEnum, OperatorEnum, EntryNested } from '../../../lists_plugin_deps';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import {
-  getEntryExistsMock,
-  getEntryListMock,
-  getEntryMatchMock,
-  getEntryMatchAnyMock,
-  getEntriesArrayMock,
-} from '../../../../../lists/common/schemas/types/entries.mock';
+import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/entry_match_any.mock';
+import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
+import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comments.mock';
+import { getEntriesArrayMock } from '../../../../../lists/common/schemas/types/entries.mock';
 import { ENTRIES } from '../../../../../lists/common/constants.mock';
-import { ExceptionListItemSchema, EntriesArray } from '../../../../../lists/common/schemas';
+import {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  EntriesArray,
+} from '../../../../../lists/common/schemas';
 import { IIndexPattern } from 'src/plugins/data/common';
 
 describe('Exception helpers', () => {
@@ -250,8 +253,8 @@ describe('Exception helpers', () => {
         {
           fieldName: 'host.name.host.name',
           isNested: true,
-          operator: 'is',
-          value: 'some host name',
+          operator: 'is one of',
+          value: ['some host name'],
         },
       ];
       expect(result).toEqual(expected);
@@ -397,11 +400,11 @@ describe('Exception helpers', () => {
           title: 'OS',
         },
         {
-          description: 'April 23rd 2020 @ 00:19:13',
+          description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
         {
-          description: 'user_name',
+          description: 'some user',
           title: 'Created by',
         },
       ];
@@ -416,11 +419,11 @@ describe('Exception helpers', () => {
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {
-          description: 'April 23rd 2020 @ 00:19:13',
+          description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
         {
-          description: 'user_name',
+          description: 'some user',
           title: 'Created by',
         },
         {
@@ -439,11 +442,11 @@ describe('Exception helpers', () => {
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {
-          description: 'April 23rd 2020 @ 00:19:13',
+          description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
         {
-          description: 'user_name',
+          description: 'some user',
           title: 'Created by',
         },
       ];
@@ -481,7 +484,7 @@ describe('Exception helpers', () => {
   });
 
   describe('#filterExceptionItems', () => {
-    test('it removes empty entry items', () => {
+    test('it removes entry items with "value" of "undefined"', () => {
       const { entries, ...rest } = getExceptionListItemSchemaMock();
       const mockEmptyException: EmptyEntry = {
         field: 'host.name',
@@ -499,6 +502,85 @@ describe('Exception helpers', () => {
       expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
     });
 
+    test('it removes "match" entry items with "value" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EmptyEntry = {
+        field: 'host.name',
+        type: OperatorTypeEnum.MATCH,
+        operator: OperatorEnum.INCLUDED,
+        value: '',
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
+    test('it removes "match" entry items with "field" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EmptyEntry = {
+        field: '',
+        type: OperatorTypeEnum.MATCH,
+        operator: OperatorEnum.INCLUDED,
+        value: 'some value',
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
+    test('it removes "match_any" entry items with "field" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EmptyEntry = {
+        field: '',
+        type: OperatorTypeEnum.MATCH_ANY,
+        operator: OperatorEnum.INCLUDED,
+        value: ['some value'],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
+    test('it removes "nested" entry items with "field" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EntryNested = {
+        field: '',
+        type: OperatorTypeEnum.NESTED,
+        entries: [{ ...getEntryMatchMock() }],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
     test('it removes `temporaryId` from items', () => {
       const { meta, ...rest } = getNewExceptionItem({
         listType: 'detection',
@@ -508,7 +590,7 @@ describe('Exception helpers', () => {
       });
       const exceptions = filterExceptionItems([{ ...rest, meta }]);
 
-      expect(exceptions).toEqual([{ ...rest, meta: undefined }]);
+      expect(exceptions).toEqual([{ ...rest, entries: [], meta: undefined }]);
     });
   });
 
@@ -519,12 +601,12 @@ describe('Exception helpers', () => {
       const expected = {
         _tags: ['endpoint', 'process', 'malware', 'os:linux'],
         comments: [],
-        description: 'This is a sample endpoint type exception',
+        description: 'some description',
         entries: ENTRIES,
         id: '1',
         item_id: 'endpoint_list_item',
         meta: {},
-        name: 'Sample Endpoint Exception List',
+        name: 'some name',
         namespace_type: 'single',
         tags: ['user added string for a tag', 'malware'],
         type: 'simple',
@@ -681,6 +763,67 @@ describe('Exception helpers', () => {
       ];
       const result = entryHasNonEcsType(payload, mockEcsIndexPattern);
       expect(result).toEqual(true);
+    });
+  });
+
+  describe('#prepareExceptionItemsForBulkClose', () => {
+    test('it should return no exceptionw when passed in an empty array', () => {
+      const payload: ExceptionListItemSchema[] = [];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual([]);
+    });
+
+    test("should not make any updates when the exception entries don't contain 'event.'", () => {
+      const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual(payload);
+    });
+
+    test("should update entry fields when they start with 'event.'", () => {
+      const payload = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'event.kind',
+            },
+            getEntryMatchMock(),
+          ],
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'event.module',
+            },
+          ],
+        },
+      ];
+      const expected = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'signal.original_event.kind',
+            },
+            getEntryMatchMock(),
+          ],
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'signal.original_event.module',
+            },
+          ],
+        },
+      ];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual(expected);
     });
   });
 });

@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable complexity */
+
 import dateMath from '@elastic/datemath';
-import { getOr, isEmpty } from 'lodash/fp';
+import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
 
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
@@ -30,6 +32,8 @@ import {
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
+import { KueryFilterQueryKind } from '../../../common/store';
+import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -93,16 +97,51 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
 
   const from = moment(ecsData.timestamp ?? new Date())
     .subtract(ellapsedTimeRule)
-    .valueOf();
-  const to = moment(ecsData.timestamp ?? new Date()).valueOf();
+    .toISOString();
+  const to = moment(ecsData.timestamp ?? new Date()).toISOString();
 
   return { to, from };
+};
+
+export const getThresholdAggregationDataProvider = (
+  ecsData: Ecs,
+  nonEcsData: TimelineNonEcsData[]
+): DataProvider[] => {
+  const aggregationField = ecsData.signal?.rule?.threshold.field;
+  const aggregationValue =
+    get(aggregationField, ecsData) ?? find(['field', aggregationField], nonEcsData)?.value;
+  const dataProviderValue = Array.isArray(aggregationValue)
+    ? aggregationValue[0]
+    : aggregationValue;
+
+  if (!dataProviderValue) {
+    return [];
+  }
+
+  const aggregationFieldId = aggregationField.replace('.', '-');
+
+  return [
+    {
+      and: [],
+      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-${aggregationFieldId}-${dataProviderValue}`,
+      name: ecsData.signal?.rule?.threshold.field,
+      enabled: true,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: aggregationField,
+        value: dataProviderValue,
+        operator: ':',
+      },
+    },
+  ];
 };
 
 export const sendAlertToTimelineAction = async ({
   apolloClient,
   createTimeline,
   ecsData,
+  nonEcsData,
   updateTimelineIsLoading,
 }: SendAlertToTimelineActionProps) => {
   let openAlertInBasicTimeline = true;
@@ -146,7 +185,7 @@ export const sendAlertToTimelineAction = async ({
           timeline.timelineType
         );
 
-        createTimeline({
+        return createTimeline({
           from,
           timeline: {
             ...timeline,
@@ -186,8 +225,62 @@ export const sendAlertToTimelineAction = async ({
     }
   }
 
-  if (openAlertInBasicTimeline) {
-    createTimeline({
+  if (
+    ecsData.signal?.rule?.type?.length &&
+    ecsData.signal?.rule?.type[0] === 'threshold' &&
+    openAlertInBasicTimeline
+  ) {
+    return createTimeline({
+      from,
+      timeline: {
+        ...timelineDefaults,
+        dataProviders: [
+          {
+            and: [],
+            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-${ecsData._id}`,
+            name: ecsData._id,
+            enabled: true,
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: '_id',
+              value: ecsData._id,
+              operator: ':',
+            },
+          },
+          ...getThresholdAggregationDataProvider(ecsData, nonEcsData),
+        ],
+        id: 'timeline-1',
+        dateRange: {
+          start: from,
+          end: to,
+        },
+        eventType: 'all',
+        kqlQuery: {
+          filterQuery: {
+            kuery: {
+              kind: ecsData.signal?.rule?.language?.length
+                ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
+                : 'kuery',
+              expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
+            },
+            serializedQuery: ecsData.signal?.rule?.query?.length
+              ? ecsData.signal?.rule?.query[0]
+              : '',
+          },
+          filterQueryDraft: {
+            kind: ecsData.signal?.rule?.language?.length
+              ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
+              : 'kuery',
+            expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
+          },
+        },
+      },
+      to,
+      ruleNote: noteContent,
+    });
+  } else {
+    return createTimeline({
       from,
       timeline: {
         ...timelineDefaults,

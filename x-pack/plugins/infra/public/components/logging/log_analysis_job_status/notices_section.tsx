@@ -12,6 +12,7 @@ import { CategoryQualityWarnings } from './quality_warning_notices';
 export const CategoryJobNoticesSection: React.FC<{
   hasOutdatedJobConfigurations: boolean;
   hasOutdatedJobDefinitions: boolean;
+  hasSetupCapabilities: boolean;
   hasStoppedJobs: boolean;
   isFirstUse: boolean;
   moduleName: string;
@@ -21,6 +22,7 @@ export const CategoryJobNoticesSection: React.FC<{
 }> = ({
   hasOutdatedJobConfigurations,
   hasOutdatedJobDefinitions,
+  hasSetupCapabilities,
   hasStoppedJobs,
   isFirstUse,
   moduleName,
@@ -32,6 +34,7 @@ export const CategoryJobNoticesSection: React.FC<{
     <LogAnalysisJobProblemIndicator
       hasOutdatedJobConfigurations={hasOutdatedJobConfigurations}
       hasOutdatedJobDefinitions={hasOutdatedJobDefinitions}
+      hasSetupCapabilities={hasSetupCapabilities}
       hasStoppedJobs={hasStoppedJobs}
       isFirstUse={isFirstUse}
       moduleName={moduleName}

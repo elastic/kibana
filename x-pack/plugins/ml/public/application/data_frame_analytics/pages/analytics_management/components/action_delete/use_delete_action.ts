@@ -13,6 +13,7 @@ import { IIndexPattern } from 'src/plugins/data/common';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 import {
   deleteAnalytics,
@@ -37,6 +38,8 @@ export const useDeleteAction = () => {
 
   const indexName = item?.config.dest.index ?? '';
 
+  const toastNotificationService = useToastNotificationService();
+
   const checkIndexPatternExists = async () => {
     try {
       const response = await savedObjectsClient.find<IIndexPattern>({
@@ -51,6 +54,8 @@ export const useDeleteAction = () => {
       );
       if (ip !== undefined) {
         setIndexPatternExists(true);
+      } else {
+        setIndexPatternExists(false);
       }
     } catch (e) {
       const { toasts } = notifications;
@@ -98,7 +103,7 @@ export const useDeleteAction = () => {
 
     // Check if an user has permission to delete the index & index pattern
     checkUserIndexPermission();
-  }, []);
+  }, [isModalVisible]);
 
   const closeModal = () => setModalVisible(false);
   const deleteAndCloseModal = () => {
@@ -109,10 +114,11 @@ export const useDeleteAction = () => {
         deleteAnalyticsAndDestIndex(
           item,
           deleteTargetIndex,
-          indexPatternExists && deleteIndexPattern
+          indexPatternExists && deleteIndexPattern,
+          toastNotificationService
         );
       } else {
-        deleteAnalytics(item);
+        deleteAnalytics(item, toastNotificationService);
       }
     }
   };

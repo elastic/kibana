@@ -39,11 +39,13 @@ interface ISetupModeState {
   enabled: boolean;
   data: any;
   callback?: (() => void) | null;
+  hideBottomBar: boolean;
 }
 const setupModeState: ISetupModeState = {
   enabled: false,
   data: null,
   callback: null,
+  hideBottomBar: false,
 };
 
 export const getSetupModeState = () => setupModeState;
@@ -126,6 +128,15 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
       setNewlyDiscoveredClusterUuid(liveClusterUuid);
     }
   }
+};
+
+export const hideBottomBar = () => {
+  setupModeState.hideBottomBar = true;
+  notifySetupModeDataChange();
+};
+export const showBottomBar = () => {
+  setupModeState.hideBottomBar = false;
+  notifySetupModeDataChange();
 };
 
 export const disableElasticsearchInternalCollection = async () => {

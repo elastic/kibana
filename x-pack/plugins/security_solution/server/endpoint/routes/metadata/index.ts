@@ -7,8 +7,8 @@
 import { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-
 import Boom from 'boom';
+
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import {
@@ -35,6 +35,7 @@ interface MetadataRequestContext {
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
   ['online', HostStatus.ONLINE],
   ['offline', HostStatus.OFFLINE],
+  ['unenrolling', HostStatus.UNENROLLING],
 ]);
 
 /**

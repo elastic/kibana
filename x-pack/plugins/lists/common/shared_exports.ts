@@ -12,6 +12,7 @@ export {
   CreateComments,
   ExceptionListSchema,
   ExceptionListItemSchema,
+  CreateExceptionListSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
   Entry,
@@ -39,4 +40,7 @@ export {
   entriesList,
   namespaceType,
   ExceptionListType,
+  Type,
 } from './schemas';
+
+export { ENDPOINT_LIST_ID } from './constants';

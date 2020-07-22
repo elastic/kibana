@@ -4,27 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import Boom from 'boom';
+import semver from 'semver';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
   Installation,
-  KibanaAssetType,
   CallESAsCurrentUser,
   DefaultPackages,
+  AssetType,
+  KibanaAssetReference,
+  EsAssetReference,
   ElasticsearchAssetType,
-  IngestAssetType,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
-import { getObject } from './get_objects';
 import { getInstallation, getInstallationObject, isRequiredPackage } from './index';
 import { installTemplates } from '../elasticsearch/template/install';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
+import { installPipelines, deletePipelines } from '../elasticsearch/ingest_pipeline/';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
-import { deleteAssetsByType, deleteKibanaSavedObjectsAssets } from './remove';
+import { installKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 
 export async function installLatestPackage(options: {
@@ -92,127 +93,115 @@ export async function installPackage(options: {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO: change epm API to /packageName/version so we don't need to do this
   const [pkgName, pkgVersion] = pkgkey.split('-');
-  const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
-  // see if some version of this package is already installed
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-
-  if (pkgVersion < latestPackage.version)
+  if (semver.lt(pkgVersion, latestPackage.version))
     throw Boom.badRequest('Cannot install or update to an out-of-date package');
+
+  const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
+  const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
+
+  // get the currently installed package
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
 
   const reinstall = pkgVersion === installedPkg?.attributes.version;
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;
+  const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
 
-  // delete the previous version's installation's SO kibana assets before installing new ones
-  // in case some assets were removed in the new version
-  if (installedPkg) {
-    try {
-      await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedPkg.attributes.installed);
-    } catch (err) {
-      // log these errors, some assets may not exist if deleted during a failed update
-    }
-  }
-
-  const [installedKibanaAssets, installedPipelines] = await Promise.all([
-    installKibanaAssets({
+  // add the package installation to the saved object
+  if (!installedPkg) {
+    await createInstallation({
       savedObjectsClient,
       pkgName,
       pkgVersion,
-      paths,
-    }),
-    installPipelines(registryPackageInfo, paths, callCluster),
-    // index patterns and ilm policies are not currently associated with a particular package
-    // so we do not save them in the package saved object state.
-    installIndexPatterns(savedObjectsClient, pkgName, pkgVersion),
-    // currenly only the base package has an ILM policy
-    // at some point ILM policies can be installed/modified
-    // per dataset and we should then save them
-    installILMPolicy(paths, callCluster),
-  ]);
+      internal,
+      removable,
+      installed_kibana: [],
+      installed_es: [],
+      toSaveESIndexPatterns,
+    });
+  }
 
-  // install or update the templates
+  const installIndexPatternPromise = installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
+  const installKibanaAssetsPromise = installKibanaAssets({
+    savedObjectsClient,
+    pkgName,
+    paths,
+    isUpdate,
+  });
+
+  // the rest of the installation must happen in sequential order
+
+  // currently only the base package has an ILM policy
+  // at some point ILM policies can be installed/modified
+  // per dataset and we should then save them
+  await installILMPolicy(paths, callCluster);
+
+  // installs versionized pipelines without removing currently installed ones
+  const installedPipelines = await installPipelines(
+    registryPackageInfo,
+    paths,
+    callCluster,
+    savedObjectsClient
+  );
+  // install or update the templates referencing the newly installed pipelines
   const installedTemplates = await installTemplates(
     registryPackageInfo,
+    isUpdate,
     callCluster,
-    pkgName,
-    pkgVersion,
-    paths
+    paths,
+    savedObjectsClient
   );
-  const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
+
+  // update current backing indices of each data stream
+  await updateCurrentWriteIndices(callCluster, installedTemplates);
+
+  // if this is an update, delete the previous version's pipelines
+  if (installedPkg && !reinstall) {
+    await deletePipelines(
+      callCluster,
+      savedObjectsClient,
+      pkgName,
+      installedPkg.attributes.version
+    );
+  }
 
   // get template refs to save
   const installedTemplateRefs = installedTemplates.map((template) => ({
     id: template.templateName,
-    type: IngestAssetType.IndexTemplate,
+    type: ElasticsearchAssetType.indexTemplate,
   }));
 
-  if (installedPkg) {
-    // update current index for every index template created
-    await updateCurrentWriteIndices(callCluster, installedTemplates);
-    if (!reinstall) {
-      try {
-        // delete the previous version's installation's pipelines
-        // this must happen after the template is updated
-        await deleteAssetsByType({
-          savedObjectsClient,
-          callCluster,
-          installedObjects: installedPkg.attributes.installed,
-          assetType: ElasticsearchAssetType.ingestPipeline,
-        });
-      } catch (err) {
-        throw new Error(err.message);
-      }
-    }
-  }
-  const toSaveAssetRefs: AssetReference[] = [
-    ...installedKibanaAssets,
-    ...installedPipelines,
-    ...installedTemplateRefs,
-  ];
-  // Save references to installed assets in the package's saved object state
-  return saveInstallationReferences({
-    savedObjectsClient,
-    pkgName,
-    pkgVersion,
-    internal,
-    removable,
-    toSaveAssetRefs,
-    toSaveESIndexPatterns,
+  const [installedKibanaAssets] = await Promise.all([
+    installKibanaAssetsPromise,
+    installIndexPatternPromise,
+  ]);
+
+  await saveInstalledKibanaRefs(savedObjectsClient, pkgName, installedKibanaAssets);
+  // update to newly installed version when all assets are successfully installed
+  if (isUpdate) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
+  return [...installedKibanaAssets, ...installedPipelines, ...installedTemplateRefs];
+}
+const updateVersion = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  pkgVersion: string
+) => {
+  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+    version: pkgVersion,
   });
-}
-
-// TODO: make it an exhaustive list
-// e.g. switch statement with cases for each enum key returning `never` for default case
-export async function installKibanaAssets(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  pkgVersion: string;
-  paths: string[];
-}) {
-  const { savedObjectsClient, paths } = options;
-
-  // Only install Kibana assets during package installation.
-  const kibanaAssetTypes = Object.values(KibanaAssetType);
-  const installationPromises = kibanaAssetTypes.map(async (assetType) =>
-    installKibanaSavedObjects({ savedObjectsClient, assetType, paths })
-  );
-
-  // installKibanaSavedObjects returns AssetReference[], so .map creates AssetReference[][]
-  // call .flat to flatten into one dimensional array
-  return Promise.all(installationPromises).then((results) => results.flat());
-}
-
-export async function saveInstallationReferences(options: {
+};
+export async function createInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
   internal: boolean;
   removable: boolean;
-  toSaveAssetRefs: AssetReference[];
+  installed_kibana: KibanaAssetReference[];
+  installed_es: EsAssetReference[];
   toSaveESIndexPatterns: Record<string, string>;
 }) {
   const {
@@ -221,14 +210,15 @@ export async function saveInstallationReferences(options: {
     pkgVersion,
     internal,
     removable,
-    toSaveAssetRefs,
+    installed_kibana: installedKibana,
+    installed_es: installedEs,
     toSaveESIndexPatterns,
   } = options;
-
   await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
-      installed: toSaveAssetRefs,
+      installed_kibana: installedKibana,
+      installed_es: installedEs,
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
@@ -237,37 +227,46 @@ export async function saveInstallationReferences(options: {
     },
     { id: pkgName, overwrite: true }
   );
-
-  return toSaveAssetRefs;
+  return [...installedKibana, ...installedEs];
 }
 
-async function installKibanaSavedObjects({
-  savedObjectsClient,
-  assetType,
-  paths,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  assetType: KibanaAssetType;
-  paths: string[];
-}) {
-  const isSameType = (path: string) => assetType === Registry.pathParts(path).type;
-  const pathsOfType = paths.filter((path) => isSameType(path));
-  const toBeSavedObjects = await Promise.all(pathsOfType.map(getObject));
+export const saveInstalledKibanaRefs = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  installedAssets: KibanaAssetReference[]
+) => {
+  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+    installed_kibana: installedAssets,
+  });
+  return installedAssets;
+};
 
-  if (toBeSavedObjects.length === 0) {
-    return [];
-  } else {
-    const createResults = await savedObjectsClient.bulkCreate(toBeSavedObjects, {
-      overwrite: true,
-    });
-    const createdObjects = createResults.saved_objects;
-    const installed = createdObjects.map(toAssetReference);
-    return installed;
-  }
-}
+export const saveInstalledEsRefs = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  installedAssets: EsAssetReference[]
+) => {
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installedAssetsToSave = installedPkg?.attributes.installed_es.concat(installedAssets);
+  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+    installed_es: installedAssetsToSave,
+  });
+  return installedAssets;
+};
 
-function toAssetReference({ id, type }: SavedObject) {
-  const reference: AssetReference = { id, type: type as KibanaAssetType };
+export const removeAssetsFromInstalledEsByType = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  assetType: AssetType
+) => {
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installedAssets = installedPkg?.attributes.installed_es;
+  if (!installedAssets?.length) return;
+  const installedAssetsToSave = installedAssets?.filter(({ id, type }) => {
+    return type !== assetType;
+  });
 
-  return reference;
-}
+  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+    installed_es: installedAssetsToSave,
+  });
+};

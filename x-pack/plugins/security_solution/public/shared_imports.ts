@@ -18,6 +18,7 @@ export {
   FormHook,
   FormSchema,
   UseField,
+  UseMultiFields,
   useForm,
   ValidationFunc,
   VALIDATION_TYPES,
@@ -27,12 +28,16 @@ export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/for
 export { ERROR_CODE } from '../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
 
 export {
+  exportList,
   useIsMounted,
+  useCursor,
   useApi,
   useExceptionList,
   usePersistExceptionItem,
   usePersistExceptionList,
   useFindLists,
+  useDeleteList,
+  useImportList,
   useCreateListIndex,
   useReadListIndex,
   useReadListPrivileges,
@@ -44,4 +49,5 @@ export {
   ExceptionList,
   Pagination,
   UseExceptionListSuccess,
+  addEndpointExceptionList,
 } from '../../lists/public';

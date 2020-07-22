@@ -7,6 +7,7 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import LRU from 'lru-cache';
 
 import {
   CoreSetup,
@@ -34,13 +35,21 @@ import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
-import { ManifestTask, ExceptionsCache } from './endpoint/lib/artifacts';
+import { ManifestTask } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_ICON, SERVER_APP_ID, SecurityPageName } from '../common/constants';
+import {
+  APP_ID,
+  APP_ICON,
+  SERVER_APP_ID,
+  SecurityPageName,
+  SIGNALS_ID,
+  NOTIFICATIONS_ID,
+} from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
+import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { ArtifactClient, ManifestManager } from './endpoint/services';
@@ -48,6 +57,7 @@ import { EndpointAppContextService } from './endpoint/endpoint_app_context_servi
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
+import { AppRequestContext } from './types';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -80,7 +90,7 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,
-  `${APP_ID}:${SecurityPageName.management}`,
+  `${APP_ID}:${SecurityPageName.administration}`,
 ];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -93,14 +103,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
 
   private manifestTask: ManifestTask | undefined;
-  private exceptionsCache: ExceptionsCache;
+  private exceptionsCache: LRU<string, Buffer>;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.appClientFactory = new AppClientFactory();
-    this.exceptionsCache = new ExceptionsCache(5); // TODO
+    // Cache up to three artifacts with a max retention of 5 mins each
+    this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
 
     this.logger.debug('plugin initialized');
   }
@@ -114,6 +125,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
     initUsageCollectors({
+      core,
       kibanaIndex: globalConfig.kibana.index,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
@@ -126,9 +138,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
-      getAppClient: () => this.appClientFactory.create(request),
-    }));
+    core.http.registerRouteHandlerContext(
+      APP_ID,
+      (context, request, response): AppRequestContext => ({
+        getAppClient: () => this.appClientFactory.create(request),
+      })
+    );
 
     this.appClientFactory.setup({
       getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
@@ -143,8 +158,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.security,
       plugins.ml
     );
-
     registerEndpointRoutes(router, endpointContext);
+    registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
     registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
@@ -159,16 +174,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
+      alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
       privileges: {
         all: {
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: ['securitySolution', 'lists-all'],
           savedObject: {
             all: [
               'alert',
-              'action',
-              'action_task_params',
               'cases',
               'cases-comments',
               'cases-configure',
@@ -177,23 +191,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
             read: ['config'],
           },
-          ui: [
-            'show',
-            'crud',
-            'alerting:show',
-            'actions:show',
-            'alerting:save',
-            'actions:save',
-            'alerting:delete',
-            'actions:delete',
-          ],
+          alerting: {
+            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+          },
+          ui: ['show', 'crud', 'alerting:show'],
         },
         read: {
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: ['securitySolution', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+          api: ['securitySolution', 'lists-read'],
           savedObject: {
-            all: ['alert', 'action', 'action_task_params'],
+            all: ['alert'],
             read: [
               'config',
               'cases',
@@ -203,15 +211,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               ...savedObjectTypes,
             ],
           },
-          ui: [
-            'show',
-            'alerting:show',
-            'actions:show',
-            'alerting:save',
-            'actions:save',
-            'alerting:delete',
-            'actions:delete',
-          ],
+          alerting: {
+            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+          },
+          ui: ['show', 'alerting:show'],
         },
       },
     });
@@ -248,7 +251,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    const libs = compose(core, plugins, this.context.env.mode.prod);
+    const libs = compose(core, plugins, this.context.env.mode.prod, endpointContext);
     initServer(libs);
 
     return {};

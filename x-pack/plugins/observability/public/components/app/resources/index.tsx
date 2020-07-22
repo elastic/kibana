@@ -13,21 +13,21 @@ const resources = [
     label: i18n.translate('xpack.observability.resources.documentation', {
       defaultMessage: 'Documentation',
     }),
-    href: 'https://www.elastic.co/guide/en/observability/current/observability-ui.html',
+    href: 'https://ela.st/observability-documentation',
   },
   {
     iconType: 'editorComment',
     label: i18n.translate('xpack.observability.resources.forum', {
       defaultMessage: 'Discuss forum',
     }),
-    href: 'https://discuss.elastic.co/c/observability/',
+    href: 'https://ela.st/observability-discuss',
   },
   {
     iconType: 'training',
     label: i18n.translate('xpack.observability.resources.training', {
       defaultMessage: 'Observability fundamentals',
     }),
-    href: 'https://www.elastic.co/training/observability-fundamentals',
+    href: 'https://ela.st/observability-training',
   },
 ];
 

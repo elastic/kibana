@@ -13,6 +13,8 @@ export { useExceptionList } from './exceptions/hooks/use_exception_list';
 export { useFindLists } from './lists/hooks/use_find_lists';
 export { useImportList } from './lists/hooks/use_import_list';
 export { useDeleteList } from './lists/hooks/use_delete_list';
+export { exportList } from './lists/api';
+export { useCursor } from './common/hooks/use_cursor';
 export { useExportList } from './lists/hooks/use_export_list';
 export { useReadListIndex } from './lists/hooks/use_read_list_index';
 export { useCreateListIndex } from './lists/hooks/use_create_list_index';
@@ -22,6 +24,7 @@ export {
   updateExceptionListItem,
   fetchExceptionListById,
   addExceptionList,
+  addEndpointExceptionList,
 } from './exceptions/api';
 export {
   ExceptionList,
