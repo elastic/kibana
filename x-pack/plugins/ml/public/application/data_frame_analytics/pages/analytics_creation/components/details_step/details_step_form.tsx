@@ -169,23 +169,6 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       </EuiFormRow>
       <EuiFormRow
         fullWidth
-        helpText={
-          destIndexSameAsId === true && destinationIndexNameExists && indexNameExistsMessage
-        }
-      >
-        <EuiSwitch
-          disabled={isJobCreated}
-          name="mlDataFrameAnalyticsDestIndexSameAsId"
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.DestIndexSameAsIdLabel', {
-            defaultMessage: 'Destination index same as job ID',
-          })}
-          checked={destIndexSameAsId === true}
-          onChange={() => setDestIndexSameAsId(!destIndexSameAsId)}
-          data-test-subj="mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
         label={i18n.translate('xpack.ml.dataframe.analytics.create.jobDescription.label', {
           defaultMessage: 'Job description',
         })}
@@ -205,6 +188,23 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
             setFormState({ description: value });
           }}
           data-test-subj="mlDFAnalyticsJobCreationJobDescription"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        fullWidth
+        helpText={
+          destIndexSameAsId === true && destinationIndexNameExists && indexNameExistsMessage
+        }
+      >
+        <EuiSwitch
+          disabled={isJobCreated}
+          name="mlDataFrameAnalyticsDestIndexSameAsId"
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.DestIndexSameAsIdLabel', {
+            defaultMessage: 'Destination index same as job ID',
+          })}
+          checked={destIndexSameAsId === true}
+          onChange={() => setDestIndexSameAsId(!destIndexSameAsId)}
+          data-test-subj="mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch"
         />
       </EuiFormRow>
       {destIndexSameAsId === false && (
