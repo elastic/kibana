@@ -20,13 +20,15 @@ import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 
 type AlertInstancesProps = {
   alert: Alert;
+  readOnly: boolean;
   alertState: AlertTaskState;
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
 export const alertInstancesTableColumns = (
-  onMuteAction: (instance: AlertInstanceListItem) => Promise<void>
+  onMuteAction: (instance: AlertInstanceListItem) => Promise<void>,
+  readOnly: boolean
 ) => [
   {
     field: 'instance',
@@ -90,6 +92,7 @@ export const alertInstancesTableColumns = (
             showLabel={false}
             compressed={true}
             checked={alertInstance.isMuted}
+            disabled={readOnly}
             data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
             onChange={() => onMuteAction(alertInstance)}
           />
@@ -109,6 +112,7 @@ function durationAsString(duration: Duration): string {
 
 export function AlertInstances({
   alert,
+  readOnly,
   alertState: { alertInstances = {} },
   muteAlertInstance,
   unmuteAlertInstance,
@@ -162,7 +166,7 @@ export function AlertInstances({
         cellProps={() => ({
           'data-test-subj': 'cell',
         })}
-        columns={alertInstancesTableColumns(onMuteAction)}
+        columns={alertInstancesTableColumns(onMuteAction, readOnly)}
         data-test-subj="alertInstancesList"
       />
     </Fragment>

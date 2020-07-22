@@ -16,6 +16,12 @@ kibanaLibrary.load()
 
 withGithubCredentials {
   branches.each { branch ->
+    if (branch == '6.8') {
+      // skip 6.8, it is tracked but we don't need snapshots for it and haven't backported
+      // the baseline capture scripts to it.
+      return;
+    }
+
     stage(branch) {
       def commits = getCommits(branch, MAXIMUM_COMMITS_TO_CHECK, MAXIMUM_COMMITS_TO_BUILD)
 
