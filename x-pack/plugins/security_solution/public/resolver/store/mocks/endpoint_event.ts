@@ -17,7 +17,7 @@ export function mockEndpointEvent({
 }: {
   entityID: string;
   name: string;
-  parentEntityId: string | undefined;
+  parentEntityId?: string;
   timestamp: number;
 }): EndpointEvent {
   return {

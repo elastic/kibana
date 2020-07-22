@@ -10,7 +10,6 @@ import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
 import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
-import { storeFactory } from '../store';
 import { Matrix3, ResolverStore, SideEffectSimulator } from '../types';
 import { ResolverEvent } from '../../../common/endpoint/types';
 import { SideEffectContext } from './side_effect_context';
@@ -19,6 +18,8 @@ import { sideEffectSimulator } from './side_effect_simulator';
 import { mockProcessEvent } from '../models/process_event_test_helpers';
 import { mock as mockResolverTree } from '../models/resolver_tree';
 import { ResolverAction } from '../store/actions';
+import { createStore } from 'redux';
+import { resolverReducer } from '../store/reducer';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
@@ -29,7 +30,7 @@ describe('useCamera on an unpainted element', () => {
   let simulator: SideEffectSimulator;
 
   beforeEach(async () => {
-    store = storeFactory();
+    store = createStore(resolverReducer);
 
     const Test = function Test() {
       const camera = useCamera();

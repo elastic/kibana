@@ -20,7 +20,7 @@ import { DEFAULT_INDEX_KEY as defaultIndexKey } from '../../../common/constants'
 export function dataAccessLayerFactory(
   context: KibanaReactContextValue<StartServices>
 ): DataAccessLayer {
-  return {
+  const dataAccessLayer: DataAccessLayer = {
     async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
       return context.services.http.get(`/api/endpoint/resolver/${entityID}/events`, {
         query: { events: 100 },
@@ -53,5 +53,7 @@ export function dataAccessLayerFactory(
         },
       });
     },
+
   };
+  return dataAccessLayer;
 }
