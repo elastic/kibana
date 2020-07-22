@@ -36,7 +36,6 @@ import {
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   SavedQuery,
-  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 
 interface State {
@@ -82,17 +81,13 @@ export function App({
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
 }) {
-  const language =
-    storage.get('kibana.userQueryLanguage') ||
-    core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
-
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       isLoading: !!docId,
       isSaveModalVisible: false,
       indexPatternsForTopNav: [],
-      query: { query: '', language },
+      query: data.query.queryString.getDefaultQuery(),
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
@@ -466,12 +461,7 @@ export function App({
                   ...s,
                   savedQuery: undefined,
                   filters: data.query.filterManager.getGlobalFilters(),
-                  query: {
-                    query: '',
-                    language:
-                      storage.get('kibana.userQueryLanguage') ||
-                      core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
-                  },
+                  query: data.query.queryString.getDefaultQuery(),
                 }));
               }}
               query={state.query}

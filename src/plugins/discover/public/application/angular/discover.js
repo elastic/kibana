@@ -70,9 +70,7 @@ import {
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
-  getDefaultQuery,
   search,
-  UI_SETTINGS,
 } from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
@@ -593,12 +591,7 @@ function discoverController(
   };
 
   function getStateDefaults() {
-    const query =
-      $scope.searchSource.getField('query') ||
-      getDefaultQuery(
-        localStorage.get('kibana.userQueryLanguage') ||
-          config.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
-      );
+    const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
     return {
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),

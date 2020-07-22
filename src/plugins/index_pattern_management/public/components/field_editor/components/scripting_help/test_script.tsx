@@ -35,12 +35,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  esQuery,
-  IndexPattern,
-  Query,
-  UI_SETTINGS,
-} from '../../../../../../../plugins/data/public';
+import { esQuery, IndexPattern, Query } from '../../../../../../../plugins/data/public';
 import { context as contextType } from '../../../../../../kibana_react/public';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
@@ -248,10 +243,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
-            query={{
-              language: this.context.services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
-              query: '',
-            }}
+            query={this.context.services.data.query.queryString.getDefaultQuery()}
             onQuerySubmit={this.previewScript}
             indexPatterns={[this.props.indexPattern]}
             customSubmitButton={

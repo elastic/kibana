@@ -13,7 +13,6 @@ import {
   getIndexPatternService,
   getToasts,
   getData,
-  getUiSettings,
   getCoreChrome,
 } from '../../../kibana_services';
 import { copyPersistentState } from '../../../reducers/util';
@@ -281,7 +280,6 @@ export class MapsAppView extends React.Component {
       query: getInitialQuery({
         mapStateJSON,
         appState: this._appStateManager.getAppState(),
-        userQueryLanguage: getUiSettings().get('search:queryLanguage'),
       }),
       time: getInitialTimeFilters({
         mapStateJSON,

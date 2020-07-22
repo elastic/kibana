@@ -40,12 +40,10 @@ export const syncQueryStateWithUrl = (
 ) => {
   const {
     timefilter: { timefilter },
-    queryString,
     filterManager,
   } = query;
   const defaultState: QueryState = {
     time: timefilter.getTime(),
-    queryString: queryString.getQuery(),
     refreshInterval: timefilter.getRefreshInterval(),
     filters: filterManager.getGlobalFilters(),
   };
@@ -68,7 +66,6 @@ export const syncQueryStateWithUrl = (
   const stopSyncingWithStateContainer = connectToQueryState(query, globalQueryStateContainer, {
     refreshInterval: true,
     time: true,
-    queryString: true,
     filters: FilterStateStore.GLOBAL_STATE,
   });
 
