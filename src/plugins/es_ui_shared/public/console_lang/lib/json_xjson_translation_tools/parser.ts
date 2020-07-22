@@ -23,22 +23,26 @@ interface ParseResult {
   stringValues: StringValues;
 }
 
-interface ParseOptions {
-  assumeValidJson?: boolean;
-}
-
 const JSON_COLON = ':';
 const JSON_STRING_DELIMITER = '"';
 const JSON_STRING_ESCAPE = '\\';
 
-export const extractJSONStringValues = (
-  input: string,
-  { assumeValidJson = true }: ParseOptions = {}
-): ParseResult => {
-  if (!assumeValidJson) {
-    JSON.parse(input);
-  }
-
+/**
+ * Accepts JSON (as a string) and extracts the positions of all JSON string
+ * values.
+ *
+ * For example:
+ *
+ * '{ "my_string_value": "is this", "my_number_value": 42 }'
+ *
+ * Would extract one result:
+ *
+ * [ { startIndex: 21, endIndex: 29 } ]
+ *
+ * This result maps to `"is this"` from the example JSON.
+ *
+ */
+export const extractJSONStringValues = (input: string): ParseResult => {
   let position = 0;
   let currentStringStartPos: number;
   let isInsideString = false;
@@ -60,7 +64,7 @@ export const extractJSONStringValues = (
     }
   }
 
-  function eat() {
+  function advance() {
     ++position;
   }
 
@@ -71,10 +75,11 @@ export const extractJSONStringValues = (
         currentStringStartPos = position;
         isInsideString = true;
       }
+      // else continue scanning for JSON_STRING_DELIMITER
     } else {
       if (char === JSON_STRING_ESCAPE) {
         // skip ahead - we are still inside of a string
-        eat();
+        advance();
       } else if (char === JSON_STRING_DELIMITER) {
         if (peekNextNonWhitespace() !== JSON_COLON) {
           stringValues.push({
@@ -85,7 +90,7 @@ export const extractJSONStringValues = (
         isInsideString = false;
       }
     }
-    eat();
+    advance();
   }
 
   return { stringValues };

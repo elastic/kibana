@@ -34,7 +34,7 @@ export function expandLiteralStrings(data: string) {
     return data;
   }
 
-  // Include pre-expanded JSON
+  // Include JSON before our first string value
   let result = data.substring(0, stringValues[0].startIndex);
 
   for (let x = 0; x < stringValues.length; x++) {
@@ -55,12 +55,12 @@ export function expandLiteralStrings(data: string) {
     }
 
     if (stringValues[x + 1]) {
-      // Include interspersed JSON, i.e., between instances of triple quote string candidates
+      // Add any JSON between string values
       result += data.substring(endIndex + 1, stringValues[x + 1].startIndex);
     }
   }
 
-  // Include post-expanded JSON
+  // Add any remaining JSON after all string values
   result += data.substring(stringValues[stringValues.length - 1].endIndex + 1);
 
   return result;
