@@ -276,12 +276,7 @@ const EditRulePageComponent: FC = () => {
             : myActionsRuleForm.data) as ActionsStepRule,
           rule
         ),
-        ...(ruleId
-          ? {
-              id: ruleId,
-              exceptions_list: rule?.exceptions_list,
-            }
-          : {}),
+        ...(ruleId ? { id: ruleId } : {}),
       });
     } else {
       setTabHasError(invalidForms);
