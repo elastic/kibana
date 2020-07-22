@@ -26,7 +26,12 @@ const mockReq = (searchResult = {}, securityEnabled = true, userHasPermissions =
       },
       config() {
         return {
-          get: sinon.stub().withArgs('server.uuid').returns('kibana-1234'),
+          get: sinon
+            .stub()
+            .withArgs('server.uuid')
+            .returns('kibana-1234')
+            .withArgs('monitoring.ui.metricbeat.index')
+            .returns('metricbeat-*'),
         };
       },
       usage: {
@@ -141,6 +146,51 @@ describe('getCollectionStatus', () => {
           buckets: [
             {
               key: '.monitoring-es-7-mb-2019',
+              es_uuids: { buckets: [{ key: 'es_1' }] },
+            },
+            {
+              key: '.monitoring-kibana-7-mb-2019',
+              kibana_uuids: { buckets: [{ key: 'kibana_1' }] },
+            },
+            {
+              key: '.monitoring-beats-7-2019',
+              beats_uuids: { buckets: [{ key: 'beats_1' }] },
+            },
+            {
+              key: '.monitoring-logstash-7-2019',
+              logstash_uuids: { buckets: [{ key: 'logstash_1' }] },
+            },
+          ],
+        },
+      },
+    });
+
+    const result = await getCollectionStatus(req, getIndexPatterns(req.server));
+
+    expect(result.kibana.totalUniqueInstanceCount).to.be(1);
+    expect(result.kibana.totalUniqueFullyMigratedCount).to.be(1);
+    expect(result.kibana.byUuid.kibana_1.isFullyMigrated).to.be(true);
+
+    expect(result.beats.totalUniqueInstanceCount).to.be(1);
+    expect(result.beats.totalUniqueFullyMigratedCount).to.be(0);
+    expect(result.beats.byUuid.beats_1.isInternalCollector).to.be(true);
+
+    expect(result.logstash.totalUniqueInstanceCount).to.be(1);
+    expect(result.logstash.totalUniqueFullyMigratedCount).to.be(0);
+    expect(result.logstash.byUuid.logstash_1.isInternalCollector).to.be(true);
+
+    expect(result.elasticsearch.totalUniqueInstanceCount).to.be(1);
+    expect(result.elasticsearch.totalUniqueFullyMigratedCount).to.be(1);
+    expect(result.elasticsearch.byUuid.es_1.isFullyMigrated).to.be(true);
+  });
+
+  it('should handle some stack products as fully migrated under metricbeat-* indices', async () => {
+    const req = mockReq({
+      aggregations: {
+        indices: {
+          buckets: [
+            {
+              key: 'metricbeat-8.0.0',
               es_uuids: { buckets: [{ key: 'es_1' }] },
             },
             {

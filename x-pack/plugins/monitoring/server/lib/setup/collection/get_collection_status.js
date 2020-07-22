@@ -356,6 +356,8 @@ export const getCollectionStatus = async (
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
   const size = config.get('monitoring.ui.max_bucket_size');
+  const mbIndex = config.get('monitoring.ui.metricbeat.index');
+  const mbIndexRegExp = new RegExp(mbIndex);
   const hasPermissions = await hasNecessaryPermissions(req);
 
   if (!hasPermissions) {
@@ -372,8 +374,8 @@ export const getCollectionStatus = async (
     { name: KIBANA_SYSTEM_ID },
     { name: BEATS_SYSTEM_ID },
     { name: LOGSTASH_SYSTEM_ID },
-    { name: APM_SYSTEM_ID, token: '-beats-' },
-    { name: ELASTICSEARCH_SYSTEM_ID, token: '-es-' },
+    { name: APM_SYSTEM_ID, tokens: [/-beats-/] },
+    { name: ELASTICSEARCH_SYSTEM_ID, tokens: [/-es-/, mbIndexRegExp] },
   ];
 
   const [recentDocuments, detectedProducts] = await Promise.all([
@@ -389,9 +391,21 @@ export const getCollectionStatus = async (
   const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);
 
   const status = PRODUCTS.reduce((products, product) => {
-    const token = product.token || product.name;
-    const indexBuckets = indicesBuckets.filter((bucket) => bucket.key.includes(token));
+    const tokens = product.tokens || [new RegExp(product.name)];
+    const indexBuckets = indicesBuckets.filter((bucket) =>
+      tokens.find((token) => token.test(bucket.key))
+    );
     const uuidBucketName = getUuidBucketName(product.name);
+
+    const noData = !indexBuckets || indexBuckets.length === 0;
+    const fullyOnOneMethod =
+      !noData &&
+      (indexBuckets.length === 1 ||
+        indexBuckets.every(
+          (indexBucket) =>
+            indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
+            mbIndexRegExp.test(indexBucket.key)
+        ));
 
     const productStatus = {
       totalUniqueInstanceCount: 0,
@@ -407,13 +421,17 @@ export const getCollectionStatus = async (
     const partiallyMigratedUuidsMap = {};
 
     // If there is no data, then they are a net new user
-    if (!indexBuckets || indexBuckets.length === 0) {
+    if (noData) {
       productStatus.totalUniqueInstanceCount = 0;
     }
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
-    else if (indexBuckets.length === 1) {
-      const singleIndexBucket = indexBuckets[0];
-      const isFullyMigrated = singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+    else if (fullyOnOneMethod) {
+      const singleIndexBucket = indexBuckets.find(
+        (indexBucket) => get(indexBucket, `${uuidBucketName}.buckets`, []).length > 0
+      );
+      const isFullyMigrated =
+        singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
+        mbIndexRegExp.test(singleIndexBucket.key);
 
       const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
       const uuidBuckets = get(singleIndexBucket, `${uuidBucketName}.buckets`, []);
