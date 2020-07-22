@@ -251,11 +251,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     // the container to pick them up and use them to configure filter bar and
     // config dropdown correctly.
     const input = this.getInput();
-    const title = input.hidePanelTitles
-      ? ''
-      : input.title === undefined
-      ? this.savedVis.title
-      : input.title;
+    const title = input.hidePanelTitles ? '' : input.title || this.savedVis.title;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
       ...this.getOutput(),

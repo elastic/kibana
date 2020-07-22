@@ -99,7 +99,7 @@ export function App({
     storage.get('kibana.userQueryLanguage') ||
     core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
 
-  const editFromDashMode =
+  const editFromContainerMode =
     !!embeddableEditorIncomingState?.originatingApp &&
     (!!savedObjectId || !!embeddableEditorIncomingState?.valueInput);
 
@@ -419,7 +419,7 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...(editFromDashMode || state.byValueMode
+                ...(editFromContainerMode || state.byValueMode
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -431,7 +431,7 @@ export function App({
                           if (isSaveable && lastKnownDoc) {
                             runSave({
                               newTitle: lastKnownDoc.title,
-                              newCopyOnSave: !editFromDashMode || state.byValueMode,
+                              newCopyOnSave: !editFromContainerMode || state.byValueMode,
                               isTitleDuplicateConfirmed: false,
                               returnToOrigin: true,
                             });
@@ -444,14 +444,14 @@ export function App({
                   : []),
                 {
                   label:
-                    editFromDashMode || state.byValueMode
+                    editFromContainerMode || state.byValueMode
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !editFromDashMode && !state.byValueMode,
+                  emphasize: !editFromContainerMode && !state.byValueMode,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
@@ -460,7 +460,7 @@ export function App({
                   testId: 'lnsApp_saveButton',
                   disableButton: !isSaveable,
                 },
-                ...(editFromDashMode || state.byValueMode
+                ...(editFromContainerMode || state.byValueMode
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.cancel', {
