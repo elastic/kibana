@@ -27,8 +27,8 @@ import { scanCopy } from '../scan_copy';
 
 const IS_WINDOWS = process.platform === 'win32';
 const FIXTURES = resolve(__dirname, '../__fixtures__');
+const TMP = resolve(__dirname, '../__tmp__');
 const WORLD_EXECUTABLE = resolve(FIXTURES, 'bin/world_executable');
-const TMP = resolve(FIXTURES, '__tmp__');
 
 const getCommonMode = (path: string) => statSync(path).mode.toString(8).slice(-3);
 
