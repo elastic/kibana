@@ -120,8 +120,8 @@ describe('Exception viewer helpers', () => {
         {
           fieldName: 'host.name.host.name',
           isNested: true,
-          operator: 'is',
-          value: 'some host name',
+          operator: 'is one of',
+          value: ['some host name'],
         },
       ];
       expect(result).toEqual(expected);
