@@ -55,9 +55,14 @@ export interface NewPackageConfig {
   inputs: NewPackageConfigInput[];
 }
 
+export interface UpdatePackageConfig extends NewPackageConfig {
+  version?: string;
+}
+
 export interface PackageConfig extends Omit<NewPackageConfig, 'inputs'> {
   id: string;
   inputs: PackageConfigInput[];
+  version?: string;
   revision: number;
   updated_at: string;
   updated_by: string;
@@ -65,4 +70,4 @@ export interface PackageConfig extends Omit<NewPackageConfig, 'inputs'> {
   created_by: string;
 }
 
-export type PackageConfigSOAttributes = Omit<PackageConfig, 'id'>;
+export type PackageConfigSOAttributes = Omit<PackageConfig, 'id' | 'version'>;

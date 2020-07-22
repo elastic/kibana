@@ -43,14 +43,16 @@ export function getTemplate({
   mappings,
   pipelineName,
   packageName,
+  composedOfTemplates,
 }: {
   type: string;
   templateName: string;
   mappings: IndexTemplateMappings;
   pipelineName?: string | undefined;
   packageName: string;
+  composedOfTemplates: string[];
 }): IndexTemplate {
-  const template = getBaseTemplate(type, templateName, mappings, packageName);
+  const template = getBaseTemplate(type, templateName, mappings, packageName, composedOfTemplates);
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
@@ -244,8 +246,18 @@ function getBaseTemplate(
   type: string,
   templateName: string,
   mappings: IndexTemplateMappings,
-  packageName: string
+  packageName: string,
+  composedOfTemplates: string[]
 ): IndexTemplate {
+  // Meta information to identify Ingest Manager's managed templates and indices
+  const _meta = {
+    package: {
+      name: packageName,
+    },
+    managed_by: 'ingest-manager',
+    managed: true,
+  };
+
   return {
     // This takes precedence over all index templates installed by ES by default (logs-*-* and metrics-*-*)
     // if this number is lower than the ES value (which is 100) this template will never be applied when a data stream
@@ -259,7 +271,7 @@ function getBaseTemplate(
         index: {
           // ILM Policy must be added here, for now point to the default global ILM policy name
           lifecycle: {
-            name: `${type}-default`,
+            name: type,
           },
           // What should be our default for the compression?
           codec: 'best_compression',
@@ -301,19 +313,14 @@ function getBaseTemplate(
         date_detection: false,
         // All the properties we know from the fields.yml file
         properties: mappings.properties,
+        _meta,
       },
       // To be filled with the aliases that we need
       aliases: {},
     },
-    data_stream: {
-      timestamp_field: '@timestamp',
-    },
-    _meta: {
-      package: {
-        name: packageName,
-      },
-      managed_by: 'ingest-manager',
-    },
+    data_stream: {},
+    composed_of: composedOfTemplates,
+    _meta,
   };
 }
 
@@ -321,9 +328,10 @@ export const updateCurrentWriteIndices = async (
   callCluster: CallESAsCurrentUser,
   templates: TemplateRef[]
 ): Promise<void> => {
-  if (!templates) return;
+  if (!templates.length) return;
 
   const allIndices = await queryIndicesFromTemplates(callCluster, templates);
+  if (!allIndices.length) return;
   return updateAllIndices(allIndices, callCluster);
 };
 
@@ -353,12 +361,12 @@ const getIndices = async (
     method: 'GET',
     path: `/_data_stream/${templateName}-*`,
   });
-  if (res.length) {
-    return res.map((datastream: any) => ({
-      indexName: datastream.indices[datastream.indices.length - 1].index_name,
-      indexTemplate,
-    }));
-  }
+  const dataStreams = res.data_streams;
+  if (!dataStreams.length) return;
+  return dataStreams.map((dataStream: any) => ({
+    indexName: dataStream.indices[dataStream.indices.length - 1].index_name,
+    indexTemplate,
+  }));
 };
 
 const updateAllIndices = async (

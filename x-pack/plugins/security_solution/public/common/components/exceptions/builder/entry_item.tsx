@@ -67,13 +67,13 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
         {
           field: entry.field != null ? entry.field.name : undefined,
           type: OperatorTypeEnum.MATCH,
-          operator: isOperator.operator,
+          operator: entry.operator.operator,
           value: newField,
         },
         entryIndex
       );
     },
-    [onChange, entryIndex, entry.field]
+    [onChange, entryIndex, entry.field, entry.operator.operator]
   );
 
   const handleFieldMatchAnyValueChange = useCallback(
@@ -82,13 +82,13 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
         {
           field: entry.field != null ? entry.field.name : undefined,
           type: OperatorTypeEnum.MATCH_ANY,
-          operator: isOperator.operator,
+          operator: entry.operator.operator,
           value: newField,
         },
         entryIndex
       );
     },
-    [onChange, entryIndex, entry.field]
+    [onChange, entryIndex, entry.field, entry.operator.operator]
   );
 
   const handleFieldListValueChange = useCallback(
@@ -97,13 +97,13 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
         {
           field: entry.field != null ? entry.field.name : undefined,
           type: OperatorTypeEnum.LIST,
-          operator: isOperator.operator,
+          operator: entry.operator.operator,
           list: { id: newField.id, type: newField.type },
         },
         entryIndex
       );
     },
-    [onChange, entryIndex, entry.field]
+    [onChange, entryIndex, entry.field, entry.operator.operator]
   );
 
   const renderFieldInput = (isFirst: boolean): JSX.Element => {
@@ -114,9 +114,10 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
         selectedField={entry.field}
         isLoading={isLoading}
         isClearable={false}
-        isDisabled={indexPattern == null}
+        isDisabled={isLoading}
         onChange={handleFieldChange}
-        data-test-subj="filterFieldSuggestionList"
+        data-test-subj="exceptionBuilderEntryField"
+        isRequired
       />
     );
 
@@ -137,11 +138,11 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
         placeholder={i18n.EXCEPTION_OPERATOR_PLACEHOLDER}
         selectedField={entry.field}
         operator={entry.operator}
-        isDisabled={false}
+        isDisabled={isLoading}
         isLoading={false}
         isClearable={false}
         onChange={handleOperatorChange}
-        data-test-subj="filterFieldSuggestionList"
+        data-test-subj="exceptionBuilderEntryOperator"
       />
     );
 
@@ -165,12 +166,13 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             selectedField={entry.field}
             selectedValue={value}
-            isDisabled={false}
+            isDisabled={isLoading}
             isLoading={isLoading}
             isClearable={false}
             indexPattern={indexPattern}
             onChange={handleFieldMatchValueChange}
-            data-test-subj="filterFieldSuggestionList"
+            isRequired
+            data-test-subj="exceptionBuilderEntryFieldMatch"
           />
         );
       case OperatorTypeEnum.MATCH_ANY:
@@ -180,12 +182,13 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             selectedField={entry.field}
             selectedValue={values}
-            isDisabled={false}
+            isDisabled={isLoading}
             isLoading={isLoading}
             isClearable={false}
             indexPattern={indexPattern}
             onChange={handleFieldMatchAnyValueChange}
-            data-test-subj="filterFieldSuggestionList"
+            isRequired
+            data-test-subj="exceptionBuilderEntryFieldMatchAny"
           />
         );
       case OperatorTypeEnum.LIST:
@@ -195,17 +198,19 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
             selectedField={entry.field}
             placeholder={i18n.EXCEPTION_FIELD_LISTS_PLACEHOLDER}
             selectedValue={id}
-            isLoading={false}
-            isDisabled={false}
+            isLoading={isLoading}
+            isDisabled={isLoading}
             isClearable={false}
             onChange={handleFieldListValueChange}
+            isRequired
+            data-test-subj="exceptionBuilderEntryFieldList"
           />
         );
       case OperatorTypeEnum.EXISTS:
         return (
           <AutocompleteFieldExistsComponent
             placeholder={getEmptyValue()}
-            data-test-subj="filterFieldSuggestionList"
+            data-test-subj="exceptionBuilderEntryFieldExists"
           />
         );
       default:

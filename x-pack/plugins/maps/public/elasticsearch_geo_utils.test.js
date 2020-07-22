@@ -20,6 +20,7 @@ import {
   roundCoordinates,
   extractFeaturesFromFilters,
   makeESBbox,
+  scaleBounds,
 } from './elasticsearch_geo_utils';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 
@@ -421,7 +422,7 @@ describe('createExtentFilter', () => {
       });
     });
 
-    it('should not clamp longitudes to -180 to 180', () => {
+    it('should clamp longitudes to -180 to 180 when lonitude wraps globe', () => {
       const mapExtent = {
         maxLat: 39,
         maxLon: 209,
@@ -436,11 +437,11 @@ describe('createExtentFilter', () => {
             shape: {
               coordinates: [
                 [
-                  [-191, 39],
-                  [-191, 35],
-                  [209, 35],
-                  [209, 39],
-                  [-191, 39],
+                  [-180, 39],
+                  [-180, 35],
+                  [180, 35],
+                  [180, 39],
+                  [-180, 39],
                 ],
               ],
               type: 'Polygon',
@@ -685,5 +686,22 @@ describe('makeESBbox', () => {
       maxLat: 100,
     });
     expect(bbox).toEqual({ bottom_right: [-170, -89], top_left: [-175, 89] });
+  });
+});
+
+describe('scaleBounds', () => {
+  it('Should scale bounds', () => {
+    const bounds = {
+      maxLat: 10,
+      maxLon: 100,
+      minLat: 5,
+      minLon: 95,
+    };
+    expect(scaleBounds(bounds, 0.5)).toEqual({
+      maxLat: 12.5,
+      maxLon: 102.5,
+      minLat: 2.5,
+      minLon: 92.5,
+    });
   });
 });

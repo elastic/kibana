@@ -5,6 +5,9 @@
  */
 
 import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useWindowSize } from 'react-use';
+
 import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
@@ -15,9 +18,19 @@ import {
   MatrixHisrogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
+import { useFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import {
+  getEventsViewerBodyHeight,
+  getInvestigateInResolverAction,
+  MIN_EVENTS_VIEWER_BODY_HEIGHT,
+} from '../../../timelines/components/timeline/body/helpers';
+import { FILTERS_GLOBAL_HEIGHT } from '../../../../common/constants';
+import { globalHeaderHeightPx } from '../../../app/home';
+import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../common/components/events_viewer/events_viewer';
+import { footerHeight } from '../../../timelines/components/timeline/footer';
 
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
@@ -57,13 +70,18 @@ export const EventsQueryTabBody = ({
   startDate,
 }: HostsComponentsQueryProps) => {
   const { initializeTimeline } = useManageTimeline();
-
+  const dispatch = useDispatch();
+  const { height: windowHeight } = useWindowSize();
+  const { globalFullScreen } = useFullScreen();
   useEffect(() => {
     initializeTimeline({
       id: TimelineId.hostsPageEvents,
       defaultModel: eventsDefaultModel,
+      timelineRowActions: () => [
+        getInvestigateInResolverAction({ dispatch, timelineId: TimelineId.hostsPageEvents }),
+      ],
     });
-  }, [initializeTimeline]);
+  }, [dispatch, initializeTimeline]);
 
   useEffect(() => {
     return () => {
@@ -75,19 +93,32 @@ export const EventsQueryTabBody = ({
 
   return (
     <>
-      <MatrixHistogramContainer
-        endDate={endDate}
-        filterQuery={filterQuery}
-        setQuery={setQuery}
-        sourceId="default"
-        startDate={startDate}
-        type={hostsModel.HostsType.page}
-        id={EVENTS_HISTOGRAM_ID}
-        {...histogramConfigs}
-      />
+      {!globalFullScreen && (
+        <MatrixHistogramContainer
+          endDate={endDate}
+          filterQuery={filterQuery}
+          setQuery={setQuery}
+          sourceId="default"
+          startDate={startDate}
+          type={hostsModel.HostsType.page}
+          id={EVENTS_HISTOGRAM_ID}
+          {...histogramConfigs}
+        />
+      )}
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
         end={endDate}
+        height={
+          globalFullScreen
+            ? getEventsViewerBodyHeight({
+                footerHeight,
+                headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
+                kibanaChromeHeight: globalHeaderHeightPx,
+                otherContentHeight: FILTERS_GLOBAL_HEIGHT,
+                windowHeight,
+              })
+            : MIN_EVENTS_VIEWER_BODY_HEIGHT
+        }
         id={TimelineId.hostsPageEvents}
         start={startDate}
         pageFilters={pageFilters}

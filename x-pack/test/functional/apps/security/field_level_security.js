@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'discover', 'header']);
 
-  describe('field_level_security', () => {
+  // Skipped as it was failing on ES Promotion: https://github.com/elastic/kibana/issues/70880
+  describe.skip('field_level_security', () => {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
       await esArchiver.load('security/flstest/kibana'); //(savedobject)

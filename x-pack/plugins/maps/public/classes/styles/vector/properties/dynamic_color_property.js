@@ -6,12 +6,7 @@
 
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
-import {
-  getOrdinalMbColorRampStops,
-  getColorPalette,
-  getHexColorRangeStrings,
-  GRADIENT_INTERVALS,
-} from '../../color_utils';
+import { getOrdinalMbColorRampStops, getColorPalette } from '../../color_palettes';
 import React from 'react';
 import { COLOR_MAP_TYPE, MB_LOOKUP_FUNCTION } from '../../../../../common/constants';
 import {
@@ -138,8 +133,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       const colorStops = getOrdinalMbColorRampStops(
         this._options.color,
         rangeFieldMeta.min,
-        rangeFieldMeta.max,
-        GRADIENT_INTERVALS
+        rangeFieldMeta.max
       );
       if (!colorStops) {
         return null;
@@ -253,7 +247,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return [];
     }
 
-    const colors = getHexColorRangeStrings(this._options.color, GRADIENT_INTERVALS);
+    const colors = getColorPalette(this._options.color);
 
     if (rangeFieldMeta.delta === 0) {
       //map to last color.
@@ -266,7 +260,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
 
     return colors.map((color, index) => {
-      const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / GRADIENT_INTERVALS);
+      const rawStopValue = rangeFieldMeta.min + rangeFieldMeta.delta * (index / colors.length);
       return {
         color,
         stop: dynamicRound(rawStopValue),

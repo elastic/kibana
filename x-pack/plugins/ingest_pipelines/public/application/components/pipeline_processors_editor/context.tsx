@@ -6,7 +6,6 @@
 
 import React, {
   createContext,
-  Dispatch,
   FunctionComponent,
   useCallback,
   useContext,
@@ -18,45 +17,33 @@ import React, {
 
 import { Processor } from '../../../../common/types';
 
-import { EditorMode, FormValidityState, OnFormUpdateArg, OnUpdateHandlerArg } from './types';
-
 import {
-  ProcessorsDispatch,
-  useProcessorsState,
-  State as ProcessorsState,
-  isOnFailureSelector,
-} from './processors_reducer';
+  EditorMode,
+  FormValidityState,
+  OnFormUpdateArg,
+  OnUpdateHandlerArg,
+  ContextValue,
+  ContextValueState,
+  Links,
+  ProcessorInternal,
+} from './types';
+
+import { useProcessorsState, isOnFailureSelector } from './processors_reducer';
 
 import { deserialize } from './deserialize';
 
 import { serialize } from './serialize';
 
-import { OnSubmitHandler, ProcessorSettingsForm } from './components/processor_settings_form';
-
 import { OnActionHandler } from './components/processors_tree';
 
-import { ProcessorRemoveModal } from './components';
+import {
+  ProcessorRemoveModal,
+  PipelineProcessorsItemTooltip,
+  ProcessorSettingsForm,
+  OnSubmitHandler,
+} from './components';
 
 import { getValue } from './utils';
-
-interface Links {
-  esDocsBasePath: string;
-}
-
-interface ContextValue {
-  links: Links;
-  onTreeAction: OnActionHandler;
-  state: {
-    processors: {
-      state: ProcessorsState;
-      dispatch: ProcessorsDispatch;
-    };
-    editor: {
-      mode: EditorMode;
-      setMode: Dispatch<EditorMode>;
-    };
-  };
-}
 
 const PipelineProcessorsContext = createContext<ContextValue>({} as any);
 
@@ -81,7 +68,10 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   children,
 }) => {
   const initRef = useRef(false);
-  const [mode, setMode] = useState<EditorMode>({ id: 'idle' });
+
+  const [mode, setMode] = useState<EditorMode>(() => ({
+    id: 'idle',
+  }));
   const deserializedResult = useMemo(
     () =>
       deserialize({
@@ -199,18 +189,36 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     [processorsDispatch, setMode]
   );
 
+  // Memoize the state object to ensure we do not trigger unnecessary re-renders and so
+  // this object can be used safely further down the tree component tree.
+  const state = useMemo<ContextValueState>(() => {
+    return {
+      editor: {
+        mode,
+        setMode,
+      },
+      processors: { state: processorsState, dispatch: processorsDispatch },
+    };
+  }, [mode, setMode, processorsState, processorsDispatch]);
+
   return (
     <PipelineProcessorsContext.Provider
       value={{
         links,
         onTreeAction,
-        state: {
-          editor: { mode, setMode },
-          processors: { state: processorsState, dispatch: processorsDispatch },
-        },
+        state,
       }}
     >
       {children}
+
+      {mode.id === 'movingProcessor' && (
+        <PipelineProcessorsItemTooltip
+          processor={getValue<ProcessorInternal>(mode.arg.selector, {
+            processors,
+            onFailure: onFailureProcessors,
+          })}
+        />
+      )}
 
       {mode.id === 'editingProcessor' || mode.id === 'creatingProcessor' ? (
         <ProcessorSettingsForm
@@ -225,7 +233,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       {mode.id === 'removingProcessor' && (
         <ProcessorRemoveModal
           selector={mode.arg.selector}
-          processor={getValue(mode.arg.selector, {
+          processor={getValue<ProcessorInternal>(mode.arg.selector, {
             processors,
             onFailure: onFailureProcessors,
           })}

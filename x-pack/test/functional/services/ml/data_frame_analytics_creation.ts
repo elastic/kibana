@@ -124,18 +124,84 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertJobDescriptionValue(jobDescription);
     },
 
-    // async assertExcludedFieldsSelection(expectedSelection: string[]) {
-    //   const actualSelection = await comboBox.getComboBoxSelectedOptions(
-    //     'mlAnalyticsCreateJobWizardExcludesSelect'
-    //   );
+    async assertSourceDataPreviewExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreationDataGrid loaded', { timeout: 5000 });
+    },
+
+    async assertIndexPreviewHistogramChartButtonExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreationDataGridHistogramButton');
+    },
+
+    async enableSourceDataPreviewHistogramCharts() {
+      await this.assertSourceDataPreviewHistogramChartButtonCheckState(false);
+      await testSubjects.click('mlAnalyticsCreationDataGridHistogramButton');
+      await this.assertSourceDataPreviewHistogramChartButtonCheckState(true);
+    },
+
+    async assertSourceDataPreviewHistogramChartButtonCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute(
+          'mlAnalyticsCreationDataGridHistogramButton',
+          'aria-checked'
+        )) === 'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertSourceDataPreviewHistogramCharts(
+      expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
+    ) {
+      // For each chart, get the content of each header cell and assert
+      // the legend text and column id and if the chart should be present or not.
+      await retry.tryForTime(5000, async () => {
+        for (const [index, expected] of expectedHistogramCharts.entries()) {
+          await testSubjects.existOrFail(`mlDataGridChart-${index}`);
+
+          if (expected.chartAvailable) {
+            await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
+          } else {
+            await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
+          }
+
+          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
+          expect(actualLegend).to.eql(
+            expected.legend,
+            `Legend text for column '${index}' should be '${expected.legend}' (got '${actualLegend}')`
+          );
+
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
+          expect(actualId).to.eql(
+            expected.id,
+            `Id text for column '${index}' should be '${expected.id}' (got '${actualId}')`
+          );
+        }
+      });
+    },
+
+    async assertIncludeFieldsSelectionExists() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesTable', { timeout: 8000 });
+
+      await retry.tryForTime(8000, async () => {
+        await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect');
+      });
+    },
+
+    // async assertIncludedFieldsSelection(expectedSelection: string[]) {
+    //   const includesTable = await testSubjects.find('mlAnalyticsCreateJobWizardIncludesSelect');
+    //   const actualSelection = await includesTable.findByClassName('euiTableRow-isSelected');
+
     //   expect(actualSelection).to.eql(
     //     expectedSelection,
-    //     `Excluded fields should be '${expectedSelection}' (got '${actualSelection}')`
+    //     `Included fields should be '${expectedSelection}' (got '${actualSelection}')`
     //   );
     // },
 
     async assertDestIndexInputExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+      await retry.tryForTime(4000, async () => {
+        await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+      });
     },
 
     async assertDestIndexValue(expectedValue: string) {
@@ -252,19 +318,35 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertTrainingPercentValue(trainingPercent);
     },
 
+    async assertConfigurationStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardConfigurationStep active');
+    },
+
+    async assertAdditionalOptionsStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep active');
+    },
+
+    async assertDetailsStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep active');
+    },
+
+    async assertCreateStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep active');
+    },
+
     async continueToAdditionalOptionsStep() {
-      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardAdvancedStep');
+      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await this.assertAdditionalOptionsStepActive();
     },
 
     async continueToDetailsStep() {
-      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDetailsStep');
+      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await this.assertDetailsStepActive();
     },
 
     async continueToCreateStep() {
-      await testSubjects.click('mlAnalyticsCreateJobWizardContinueButton');
-      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep');
+      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+      await this.assertCreateStepActive();
     },
 
     async assertModelMemoryInputExists() {
@@ -279,6 +361,26 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       expect(actualModelMemory).to.eql(
         expectedValue,
         `Model memory limit should be '${expectedValue}' (got '${actualModelMemory}')`
+      );
+    },
+
+    async assertModelMemoryInputPopulated() {
+      const actualModelMemory = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardModelMemoryInput',
+        'value'
+      );
+
+      expect(actualModelMemory).not.to.be('');
+    },
+
+    async assertPredictionFieldNameValue(expectedValue: string) {
+      const actualPredictedFieldName = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardPredictionFieldNameInput',
+        'value'
+      );
+      expect(actualPredictedFieldName).to.eql(
+        expectedValue,
+        `Prediction field name should be '${expectedValue}' (got '${actualPredictedFieldName}')`
       );
     },
 
@@ -315,6 +417,35 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         expectedCheckState,
         `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertDestIndexSameAsIdCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getDestIndexSameAsIdSwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Destination index same as job id check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertDestIndexSameAsIdSwitchExists() {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch`, {
+        allowHidden: true,
+      });
+    },
+
+    async setDestIndexSameAsIdCheckState(checkState: boolean) {
+      if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch');
+      }
+      await this.assertDestIndexSameAsIdCheckState(checkState);
     },
 
     async setCreateIndexPatternSwitchState(checkState: boolean) {
@@ -372,11 +503,19 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await this.assertDependentVariableSelection([job.analysis[jobType].dependent_variable]);
         await this.assertTrainingPercentValue(String(job.analysis[jobType].training_percent));
       }
-      // await this.assertExcludedFieldsSelection(job.analyzed_fields.excludes);
+      await this.assertSourceDataPreviewExists();
+      await this.assertIncludeFieldsSelectionExists();
+      // await this.assertIncludedFieldsSelection(job.analyzed_fields.includes);
     },
 
-    async assertInitialCloneJobAdditionalOptionsStep(job: DataFrameAnalyticsConfig) {
-      await this.assertModelMemoryValue(job.model_memory_limit);
+    async assertInitialCloneJobAdditionalOptionsStep(
+      analysis: DataFrameAnalyticsConfig['analysis']
+    ) {
+      const jobType = Object.keys(analysis)[0];
+      if (isClassificationAnalysis(analysis) || isRegressionAnalysis(analysis)) {
+        // @ts-ignore
+        await this.assertPredictionFieldNameValue(analysis[jobType].prediction_field_name);
+      }
     },
 
     async assertInitialCloneJobDetailsStep(job: DataFrameAnalyticsConfig) {

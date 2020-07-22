@@ -17,7 +17,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
   router.delete(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
       validate: {
@@ -52,7 +52,11 @@ export const deleteListItemRoute = (router: IRouter): void => {
               statusCode: 404,
             });
           } else {
-            const deleted = await lists.deleteListItemByValue({ listId, type: list.type, value });
+            const deleted = await lists.deleteListItemByValue({
+              listId,
+              type: list.type,
+              value,
+            });
             if (deleted == null || deleted.length === 0) {
               return siemResponse.error({
                 body: `list_id: "${listId}" with ${value} was not found`,

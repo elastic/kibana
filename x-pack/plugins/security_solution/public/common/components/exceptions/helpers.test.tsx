@@ -18,6 +18,14 @@ import {
   getFormattedComments,
   filterExceptionItems,
   getNewExceptionItem,
+  formatOperatingSystems,
+  getEntryValue,
+  formatExceptionItemForUpdate,
+  enrichExceptionItemsWithComments,
+  enrichExceptionItemsWithOS,
+  entryHasListType,
+  entryHasNonEcsType,
+  prepareExceptionItemsForBulkClose,
 } from './helpers';
 import { FormattedEntry, DescriptionListItem, EmptyEntry } from './types';
 import {
@@ -30,16 +38,21 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from '../autocomplete/operators';
-import { OperatorTypeEnum, OperatorEnum } from '../../../lists_plugin_deps';
+import { OperatorTypeEnum, OperatorEnum, EntryNested } from '../../../lists_plugin_deps';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import {
-  getEntryExistsMock,
-  getEntryListMock,
-  getEntryMatchMock,
-  getEntryMatchAnyMock,
-  getEntriesArrayMock,
-} from '../../../../../lists/common/schemas/types/entries.mock';
+import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/entry_match_any.mock';
+import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
+import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comments.mock';
+import { getEntriesArrayMock } from '../../../../../lists/common/schemas/types/entries.mock';
+import { ENTRIES } from '../../../../../lists/common/constants.mock';
+import {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  EntriesArray,
+} from '../../../../../lists/common/schemas';
+import { IIndexPattern } from 'src/plugins/data/common';
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -240,10 +253,40 @@ describe('Exception helpers', () => {
         {
           fieldName: 'host.name.host.name',
           isNested: true,
-          operator: 'is',
-          value: 'some host name',
+          operator: 'is one of',
+          value: ['some host name'],
         },
       ];
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('#getEntryValue', () => {
+    it('returns "match" entry value', () => {
+      const payload = getEntryMatchMock();
+      const result = getEntryValue(payload);
+      const expected = 'some host name';
+      expect(result).toEqual(expected);
+    });
+
+    it('returns "match any" entry values', () => {
+      const payload = getEntryMatchAnyMock();
+      const result = getEntryValue(payload);
+      const expected = ['some host name'];
+      expect(result).toEqual(expected);
+    });
+
+    it('returns "exists" entry value', () => {
+      const payload = getEntryExistsMock();
+      const result = getEntryValue(payload);
+      const expected = undefined;
+      expect(result).toEqual(expected);
+    });
+
+    it('returns "list" entry value', () => {
+      const payload = getEntryListMock();
+      const result = getEntryValue(payload);
+      const expected = 'some-list-id';
       expect(result).toEqual(expected);
     });
   });
@@ -280,25 +323,55 @@ describe('Exception helpers', () => {
     test('it returns null if no operating system tag specified', () => {
       const result = getOperatingSystems(['some tag', 'some other tag']);
 
-      expect(result).toEqual('');
+      expect(result).toEqual([]);
     });
 
     test('it returns null if operating system tag malformed', () => {
       const result = getOperatingSystems(['some tag', 'jibberos:mac,windows', 'some other tag']);
 
+      expect(result).toEqual([]);
+    });
+
+    test('it returns operating systems if space included in os tag', () => {
+      const result = getOperatingSystems(['some tag', 'os: macos', 'some other tag']);
+      expect(result).toEqual(['macos']);
+    });
+
+    test('it returns operating systems if multiple os tags specified', () => {
+      const result = getOperatingSystems(['some tag', 'os: macos', 'some other tag', 'os:windows']);
+      expect(result).toEqual(['macos', 'windows']);
+    });
+  });
+
+  describe('#formatOperatingSystems', () => {
+    test('it returns null if no operating system tag specified', () => {
+      const result = formatOperatingSystems(getOperatingSystems(['some tag', 'some other tag']));
+
+      expect(result).toEqual('');
+    });
+
+    test('it returns null if operating system tag malformed', () => {
+      const result = formatOperatingSystems(
+        getOperatingSystems(['some tag', 'jibberos:mac,windows', 'some other tag'])
+      );
+
       expect(result).toEqual('');
     });
 
     test('it returns formatted operating systems if space included in os tag', () => {
-      const result = getOperatingSystems(['some tag', 'os: mac', 'some other tag']);
+      const result = formatOperatingSystems(
+        getOperatingSystems(['some tag', 'os: macos', 'some other tag'])
+      );
 
-      expect(result).toEqual('Mac');
+      expect(result).toEqual('macOS');
     });
 
     test('it returns formatted operating systems if multiple os tags specified', () => {
-      const result = getOperatingSystems(['some tag', 'os: mac', 'some other tag', 'os:windows']);
+      const result = formatOperatingSystems(
+        getOperatingSystems(['some tag', 'os: macos', 'some other tag', 'os:windows'])
+      );
 
-      expect(result).toEqual('Mac, Windows');
+      expect(result).toEqual('macOS, Windows');
     });
   });
 
@@ -327,11 +400,11 @@ describe('Exception helpers', () => {
           title: 'OS',
         },
         {
-          description: 'April 23rd 2020 @ 00:19:13',
+          description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
         {
-          description: 'user_name',
+          description: 'some user',
           title: 'Created by',
         },
       ];
@@ -346,11 +419,11 @@ describe('Exception helpers', () => {
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {
-          description: 'April 23rd 2020 @ 00:19:13',
+          description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
         {
-          description: 'user_name',
+          description: 'some user',
           title: 'Created by',
         },
         {
@@ -369,11 +442,11 @@ describe('Exception helpers', () => {
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
         {
-          description: 'April 23rd 2020 @ 00:19:13',
+          description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
         },
         {
-          description: 'user_name',
+          description: 'some user',
           title: 'Created by',
         },
       ];
@@ -411,7 +484,7 @@ describe('Exception helpers', () => {
   });
 
   describe('#filterExceptionItems', () => {
-    test('it removes empty entry items', () => {
+    test('it removes entry items with "value" of "undefined"', () => {
       const { entries, ...rest } = getExceptionListItemSchemaMock();
       const mockEmptyException: EmptyEntry = {
         field: 'host.name',
@@ -429,6 +502,85 @@ describe('Exception helpers', () => {
       expect(exceptions).toEqual([getExceptionListItemSchemaMock()]);
     });
 
+    test('it removes "match" entry items with "value" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EmptyEntry = {
+        field: 'host.name',
+        type: OperatorTypeEnum.MATCH,
+        operator: OperatorEnum.INCLUDED,
+        value: '',
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
+    test('it removes "match" entry items with "field" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EmptyEntry = {
+        field: '',
+        type: OperatorTypeEnum.MATCH,
+        operator: OperatorEnum.INCLUDED,
+        value: 'some value',
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
+    test('it removes "match_any" entry items with "field" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EmptyEntry = {
+        field: '',
+        type: OperatorTypeEnum.MATCH_ANY,
+        operator: OperatorEnum.INCLUDED,
+        value: ['some value'],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
+    test('it removes "nested" entry items with "field" of empty string', () => {
+      const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
+      const mockEmptyException: EntryNested = {
+        field: '',
+        type: OperatorTypeEnum.NESTED,
+        entries: [{ ...getEntryMatchMock() }],
+      };
+      const output: Array<
+        ExceptionListItemSchema | CreateExceptionListItemSchema
+      > = filterExceptionItems([
+        {
+          ...rest,
+          entries: [...entries, mockEmptyException],
+        },
+      ]);
+
+      expect(output).toEqual([{ ...getExceptionListItemSchemaMock() }]);
+    });
+
     test('it removes `temporaryId` from items', () => {
       const { meta, ...rest } = getNewExceptionItem({
         listType: 'detection',
@@ -438,7 +590,240 @@ describe('Exception helpers', () => {
       });
       const exceptions = filterExceptionItems([{ ...rest, meta }]);
 
-      expect(exceptions).toEqual([{ ...rest, meta: undefined }]);
+      expect(exceptions).toEqual([{ ...rest, entries: [], meta: undefined }]);
+    });
+  });
+
+  describe('#formatExceptionItemForUpdate', () => {
+    test('it should return correct update fields', () => {
+      const payload = getExceptionListItemSchemaMock();
+      const result = formatExceptionItemForUpdate(payload);
+      const expected = {
+        _tags: ['endpoint', 'process', 'malware', 'os:linux'],
+        comments: [],
+        description: 'some description',
+        entries: ENTRIES,
+        id: '1',
+        item_id: 'endpoint_list_item',
+        meta: {},
+        name: 'some name',
+        namespace_type: 'single',
+        tags: ['user added string for a tag', 'malware'],
+        type: 'simple',
+      };
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('#enrichExceptionItemsWithComments', () => {
+    test('it should add comments to an exception item', () => {
+      const payload = [getExceptionListItemSchemaMock()];
+      const comments = getCommentsArrayMock();
+      const result = enrichExceptionItemsWithComments(payload, comments);
+      const expected = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          comments: getCommentsArrayMock(),
+        },
+      ];
+      expect(result).toEqual(expected);
+    });
+
+    test('it should add comments to multiple exception items', () => {
+      const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
+      const comments = getCommentsArrayMock();
+      const result = enrichExceptionItemsWithComments(payload, comments);
+      const expected = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          comments: getCommentsArrayMock(),
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          comments: getCommentsArrayMock(),
+        },
+      ];
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('#enrichExceptionItemsWithOS', () => {
+    test('it should add an os tag to an exception item', () => {
+      const payload = [getExceptionListItemSchemaMock()];
+      const osTypes = ['windows'];
+      const result = enrichExceptionItemsWithOS(payload, osTypes);
+      const expected = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          _tags: [...getExceptionListItemSchemaMock()._tags, 'os:windows'],
+        },
+      ];
+      expect(result).toEqual(expected);
+    });
+
+    test('it should add multiple os tags to all exception items', () => {
+      const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
+      const osTypes = ['windows', 'macos'];
+      const result = enrichExceptionItemsWithOS(payload, osTypes);
+      const expected = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          _tags: [...getExceptionListItemSchemaMock()._tags, 'os:windows', 'os:macos'],
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          _tags: [...getExceptionListItemSchemaMock()._tags, 'os:windows', 'os:macos'],
+        },
+      ];
+      expect(result).toEqual(expected);
+    });
+
+    test('it should add os tag to all exception items without duplication', () => {
+      const payload = [
+        { ...getExceptionListItemSchemaMock(), _tags: ['os:linux', 'os:windows'] },
+        { ...getExceptionListItemSchemaMock(), _tags: ['os:linux'] },
+      ];
+      const osTypes = ['windows'];
+      const result = enrichExceptionItemsWithOS(payload, osTypes);
+      const expected = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          _tags: ['os:linux', 'os:windows'],
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          _tags: ['os:linux', 'os:windows'],
+        },
+      ];
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('#entryHasListType', () => {
+    test('it should return false with an empty array', () => {
+      const payload: ExceptionListItemSchema[] = [];
+      const result = entryHasListType(payload);
+      expect(result).toEqual(false);
+    });
+
+    test("it should return false with exception items that don't contain a list type", () => {
+      const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
+      const result = entryHasListType(payload);
+      expect(result).toEqual(false);
+    });
+
+    test('it should return true with exception items that do contain a list type', () => {
+      const payload = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ type: OperatorTypeEnum.LIST }] as EntriesArray,
+        },
+        getExceptionListItemSchemaMock(),
+      ];
+      const result = entryHasListType(payload);
+      expect(result).toEqual(true);
+    });
+  });
+
+  describe('#entryHasNonEcsType', () => {
+    const mockEcsIndexPattern = {
+      title: 'testIndex',
+      fields: [
+        {
+          name: 'some.parentField',
+        },
+        {
+          name: 'some.not.nested.field',
+        },
+        {
+          name: 'nested.field',
+        },
+      ],
+    } as IIndexPattern;
+
+    test('it should return false with an empty array', () => {
+      const payload: ExceptionListItemSchema[] = [];
+      const result = entryHasNonEcsType(payload, mockEcsIndexPattern);
+      expect(result).toEqual(false);
+    });
+
+    test("it should return false with exception items that don't contain a non ecs type", () => {
+      const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
+      const result = entryHasNonEcsType(payload, mockEcsIndexPattern);
+      expect(result).toEqual(false);
+    });
+
+    test('it should return true with exception items that do contain a non ecs type', () => {
+      const payload = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'some.nonEcsField' }] as EntriesArray,
+        },
+        getExceptionListItemSchemaMock(),
+      ];
+      const result = entryHasNonEcsType(payload, mockEcsIndexPattern);
+      expect(result).toEqual(true);
+    });
+  });
+
+  describe('#prepareExceptionItemsForBulkClose', () => {
+    test('it should return no exceptionw when passed in an empty array', () => {
+      const payload: ExceptionListItemSchema[] = [];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual([]);
+    });
+
+    test("should not make any updates when the exception entries don't contain 'event.'", () => {
+      const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual(payload);
+    });
+
+    test("should update entry fields when they start with 'event.'", () => {
+      const payload = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'event.kind',
+            },
+            getEntryMatchMock(),
+          ],
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'event.module',
+            },
+          ],
+        },
+      ];
+      const expected = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'signal.original_event.kind',
+            },
+            getEntryMatchMock(),
+          ],
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'signal.original_event.module',
+            },
+          ],
+        },
+      ];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual(expected);
     });
   });
 });

@@ -17,7 +17,7 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.load('maps/data');
       await esArchiver.load('maps/kibana');
       await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
+        defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
       await browser.setWindowSize(1600, 1000);
     });
@@ -34,6 +34,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./vector_styling'));
       loadTestFile(require.resolve('./saved_object_management'));
       loadTestFile(require.resolve('./sample_data'));
+      loadTestFile(require.resolve('./auto_fit_to_bounds'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
       loadTestFile(require.resolve('./feature_controls/maps_spaces'));
       loadTestFile(require.resolve('./full_screen_mode'));

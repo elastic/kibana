@@ -10,7 +10,13 @@ import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import { CrumbInfo, formatDate, StyledBreadcrumbs, BoldCode } from './panel_content_utilities';
+import {
+  CrumbInfo,
+  formatDate,
+  StyledBreadcrumbs,
+  BoldCode,
+  StyledTime,
+} from './panel_content_utilities';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
@@ -163,7 +169,9 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
       process,
       ...relevantData
     } = relatedEventToShowDetailsFor as ResolverEvent & {
+      // Type this with various unknown keys so that ts will let us delete those keys
       ecs: unknown;
+      process: unknown;
     };
     let displayDate = '';
     const sectionData: Array<{
@@ -308,7 +316,7 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
 
   return (
     <>
-      <StyledBreadcrumbs truncate={false} breadcrumbs={crumbs} />
+      <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiText size="s">
         <BoldCode>
@@ -321,11 +329,13 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
             defaultMessage="{category} {eventType}"
           />
         </BoldCode>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
-          values={{ date: formattedDate }}
-          defaultMessage="@ {date}"
-        />
+        <StyledTime dateTime={formattedDate}>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.resolver.panel.relatedEventDetail.atTime"
+            values={{ date: formattedDate }}
+            defaultMessage="@ {date}"
+          />
+        </StyledTime>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiText>
@@ -340,14 +350,15 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
         return (
           <Fragment key={index}>
             {index === 0 ? null : <EuiSpacer size="m" />}
-            <EuiTitle size="xs">
-              <EuiTextColor color="secondary">
+            <EuiTitle size="xxxs">
+              <EuiTextColor color="subdued">
                 <StyledFlexTitle>
                   {sectionTitle}
                   <TitleHr />
                 </StyledFlexTitle>
               </EuiTextColor>
             </EuiTitle>
+            <EuiSpacer size="m" />
             <StyledDescriptionList
               type="column"
               align="left"
@@ -362,4 +373,3 @@ export const RelatedEventDetail = memo(function RelatedEventDetail({
     </>
   );
 });
-RelatedEventDetail.displayName = 'RelatedEventDetail';

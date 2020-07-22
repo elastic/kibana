@@ -23,10 +23,10 @@ import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
 
 import { createVegaRequestHandler } from './vega_request_handler';
-// @ts-ignore
+// @ts-expect-error
 import { createVegaVisualization } from './vega_visualization';
-// @ts-ignore
-import defaultSpec from '!!raw-loader!./default.spec.hjson';
+import { getDefaultSpec } from './default_spec';
+import { createInspectorAdapters } from './vega_inspector';
 
 export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependencies) => {
   const requestHandler = createVegaRequestHandler(dependencies);
@@ -40,7 +40,7 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
       description: 'Vega and Vega-Lite are product names and should not be translated',
     }),
     icon: 'visVega',
-    visConfig: { defaults: { spec: defaultSpec } },
+    visConfig: { defaults: { spec: getDefaultSpec() } },
     editorConfig: {
       optionsTemplate: VegaVisEditor,
       enableAutoApply: true,
@@ -55,5 +55,6 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
       showFilterBar: true,
     },
     stage: 'experimental',
+    inspectorAdapters: createInspectorAdapters,
   };
 };

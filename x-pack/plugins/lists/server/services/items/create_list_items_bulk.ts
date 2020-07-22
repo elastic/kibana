@@ -10,12 +10,16 @@ import { LegacyAPICaller } from 'kibana/server';
 import { transformListItemToElasticQuery } from '../utils';
 import {
   CreateEsBulkTypeSchema,
+  DeserializerOrUndefined,
   IndexEsListItemSchema,
   MetaOrUndefined,
+  SerializerOrUndefined,
   Type,
 } from '../../../common/schemas';
 
 export interface CreateListItemsBulkOptions {
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   listId: string;
   type: Type;
   value: string[];
@@ -30,6 +34,8 @@ export interface CreateListItemsBulkOptions {
 export const createListItemsBulk = async ({
   listId,
   type,
+  deserializer,
+  serializer,
   value,
   callCluster,
   listItemIndex,
@@ -47,24 +53,40 @@ export const createListItemsBulk = async ({
       const createdAt = dateNow ?? new Date().toISOString();
       const tieBreakerId =
         tieBreaker != null && tieBreaker[index] != null ? tieBreaker[index] : uuid.v4();
-      const elasticBody: IndexEsListItemSchema = {
-        created_at: createdAt,
-        created_by: user,
-        list_id: listId,
-        meta,
-        tie_breaker_id: tieBreakerId,
-        updated_at: createdAt,
-        updated_by: user,
-        ...transformListItemToElasticQuery({ type, value: singleValue }),
-      };
-      const createBody: CreateEsBulkTypeSchema = { create: { _index: listItemIndex } };
-      return [...accum, createBody, elasticBody];
+      const elasticQuery = transformListItemToElasticQuery({
+        serializer,
+        type,
+        value: singleValue,
+      });
+      if (elasticQuery != null) {
+        const elasticBody: IndexEsListItemSchema = {
+          created_at: createdAt,
+          created_by: user,
+          deserializer,
+          list_id: listId,
+          meta,
+          serializer,
+          tie_breaker_id: tieBreakerId,
+          updated_at: createdAt,
+          updated_by: user,
+          ...elasticQuery,
+        };
+        const createBody: CreateEsBulkTypeSchema = { create: { _index: listItemIndex } };
+        return [...accum, createBody, elasticBody];
+      } else {
+        // TODO: Report errors with return values from the bulk insert into another index or saved object
+        return accum;
+      }
     },
     []
   );
-
-  await callCluster('bulk', {
-    body,
-    index: listItemIndex,
-  });
+  try {
+    await callCluster('bulk', {
+      body,
+      index: listItemIndex,
+      refresh: 'wait_for',
+    });
+  } catch (error) {
+    // TODO: Log out the error with return values from the bulk insert into another index or saved object
+  }
 };
