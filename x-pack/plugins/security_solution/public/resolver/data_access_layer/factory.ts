@@ -53,7 +53,6 @@ export function dataAccessLayerFactory(
         },
       });
     },
-
   };
   return dataAccessLayer;
 }
