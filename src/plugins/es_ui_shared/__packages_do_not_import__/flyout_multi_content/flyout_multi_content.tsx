@@ -50,11 +50,7 @@ const DEFAULT_FLYOUT_PROPS = {
   maxWidth: 500,
 };
 
-export const FlyoutMultiContentProvider = ({
-  children,
-}: {
-  children: JSX.Element | JSX.Element[];
-}) => {
+export const GlobalFlyoutProvider: React.FC = ({ children }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [activeContent, setActiveContent] = useState<Content<any> | undefined>(undefined);
 
@@ -118,11 +114,11 @@ export const FlyoutMultiContentProvider = ({
   );
 };
 
-export const useFlyoutMultiContent = () => {
+export const useGlobalFlyout = () => {
   const ctx = useContext(FlyoutMultiContentContext);
 
   if (ctx === undefined) {
-    throw new Error('useFlyoutMultiContent must be used within a <FlyoutMultiContentProvider />');
+    throw new Error('useGlobalFlyout must be used within a <GlobalFlyoutProvider />');
   }
 
   const isMounted = useRef(false);

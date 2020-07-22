@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { ComponentTemplateListItem } from '../../../../../common';
-import { SectionError, SectionLoading, FlyoutMultiContent } from '../shared_imports';
+import { SectionError, SectionLoading, GlobalFlyout } from '../shared_imports';
 import {
   ComponentTemplateDetailsFlyoutContent,
   flyoutProps,
@@ -24,7 +24,7 @@ import { useApi } from '../component_templates_context';
 
 import './component_templates_selector.scss';
 
-const { useFlyoutMultiContent } = FlyoutMultiContent;
+const { useGlobalFlyout } = GlobalFlyout;
 
 interface Props {
   onChange: (components: string[]) => void;
@@ -59,7 +59,7 @@ export const ComponentTemplatesSelector = ({
   emptyPrompt: { text, showCreateButton } = {},
 }: Props) => {
   const { data: components, isLoading, error } = useApi().useLoadComponentTemplates();
-  const { addContent, removeContent } = useFlyoutMultiContent();
+  const { addContent, removeContent } = useGlobalFlyout();
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [componentsSelected, setComponentsSelected] = useState<ComponentTemplateListItem[]>([]);
   const isInitialized = useRef(false);

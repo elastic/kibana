@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useCallback, useMemo, useRef } from 'react';
 
-import { useForm, FlyoutMultiContent } from '../../../../shared_imports';
+import { useForm, GlobalFlyout } from '../../../../shared_imports';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Field } from '../../../../types';
 import { fieldSerializer, fieldDeserializer } from '../../../../lib';
@@ -13,12 +13,12 @@ import { ModalConfirmationDeleteFields } from '../modal_confirmation_delete_fiel
 import { EditField, flyoutProps, Props as EditFieldProps } from './edit_field';
 import { useUpdateField } from './use_update_field';
 
-const { useFlyoutMultiContent } = FlyoutMultiContent;
+const { useGlobalFlyout } = GlobalFlyout;
 
 export const EditFieldContainer = React.memo(() => {
   const { fields, documentFields } = useMappingsState();
   const dispatch = useDispatch();
-  const { addContent, removeContent } = useFlyoutMultiContent();
+  const { addContent, removeContent } = useGlobalFlyout();
   const { updateField, modal } = useUpdateField();
   const isMounted = useRef(false);
 

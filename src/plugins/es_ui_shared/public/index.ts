@@ -24,7 +24,7 @@
 import * as Forms from './forms';
 import * as Monaco from './monaco';
 import * as ace from './ace';
-import * as FlyoutMultiContent from './flyout_multi_content';
+import * as GlobalFlyout from './flyout_multi_content';
 
 export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
 
@@ -66,7 +66,7 @@ export {
   useAuthorizationContext,
 } from './authorization';
 
-export { Monaco, Forms, ace, FlyoutMultiContent };
+export { Monaco, Forms, ace, GlobalFlyout };
 
 export { extractQueryParams } from './url';
 

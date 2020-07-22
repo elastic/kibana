@@ -11,11 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ScopedHistory } from 'kibana/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
-import {
-  SectionLoading,
-  ComponentTemplateDeserialized,
-  FlyoutMultiContent,
-} from '../shared_imports';
+import { SectionLoading, ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
 import { attemptToDecodeURI } from '../lib';
 import { useComponentTemplatesContext } from '../component_templates_context';
@@ -34,13 +30,13 @@ interface Props {
   history: RouteComponentProps['history'];
 }
 
-const { useFlyoutMultiContent } = FlyoutMultiContent;
+const { useGlobalFlyout } = GlobalFlyout;
 
 export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
   history,
 }) => {
-  const { addContent, removeContent } = useFlyoutMultiContent();
+  const { addContent, removeContent } = useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
 
   const { data, isLoading, error, sendRequest } = api.useLoadComponentTemplates();

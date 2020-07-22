@@ -18,6 +18,6 @@
  */
 
 export {
-  FlyoutMultiContentProvider,
-  useFlyoutMultiContent,
+  GlobalFlyoutProvider,
+  useGlobalFlyout,
 } from '../../__packages_do_not_import__/flyout_multi_content';

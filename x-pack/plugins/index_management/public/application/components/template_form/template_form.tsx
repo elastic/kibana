@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButton } from '@elastic/eui';
 
 import { TemplateDeserialized } from '../../../../common';
-import { serializers, Forms, FlyoutMultiContent } from '../../../shared_imports';
+import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
 import { SectionError } from '../section_error';
 import {
   SimulateTemplateFlyoutContent,
@@ -27,7 +27,7 @@ import { documentationService } from '../../services/documentation';
 
 const { stripEmptyFields } = serializers;
 const { FormWizard, FormWizardStep } = Forms;
-const { useFlyoutMultiContent } = FlyoutMultiContent;
+const { useGlobalFlyout } = GlobalFlyout;
 
 interface Props {
   title: string | JSX.Element;
@@ -97,7 +97,7 @@ export const TemplateForm = ({
   onSave,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
-  const { addContent, closeFlyout } = useFlyoutMultiContent();
+  const { addContent, closeFlyout } = useGlobalFlyout();
 
   const indexTemplate = defaultValue ?? {
     name: '',

@@ -15,7 +15,7 @@ import {
   applicationServiceMock,
 } from '../../../../../../../../../../src/core/public/mocks';
 
-import { FlyoutMultiContent } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 import { MappingsEditorProvider } from '../../../../mappings_editor';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
 
@@ -23,7 +23,7 @@ import { init as initHttpRequests } from './http_requests';
 import { API_BASE_PATH } from './constants';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-const { FlyoutMultiContentProvider } = FlyoutMultiContent;
+const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const appDependencies = {
   httpClient: (mockHttpClient as unknown) as HttpSetup,
@@ -47,9 +47,9 @@ export const setupEnvironment = () => {
 export const WithAppDependencies = (Comp: any) => (props: any) => (
   <MappingsEditorProvider>
     <ComponentTemplatesProvider value={appDependencies}>
-      <FlyoutMultiContentProvider>
+      <GlobalFlyoutProvider>
         <Comp {...props} />
-      </FlyoutMultiContentProvider>
+      </GlobalFlyoutProvider>
     </ComponentTemplatesProvider>
   </MappingsEditorProvider>
 );

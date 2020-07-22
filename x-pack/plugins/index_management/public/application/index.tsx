@@ -11,14 +11,14 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { CoreStart } from '../../../../../src/core/public';
 
 import { API_BASE_PATH } from '../../common';
-import { FlyoutMultiContent } from '../shared_imports';
+import { GlobalFlyout } from '../shared_imports';
 
 import { AppContextProvider, AppDependencies } from './app_context';
 import { App } from './app';
 import { indexManagementStore } from './store';
 import { ComponentTemplatesProvider, MappingsEditorProvider } from './components';
 
-const { FlyoutMultiContentProvider } = FlyoutMultiContent;
+const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export const renderApp = (
   elem: HTMLElement | null,
@@ -48,9 +48,9 @@ export const renderApp = (
         <AppContextProvider value={dependencies}>
           <MappingsEditorProvider>
             <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-              <FlyoutMultiContentProvider>
+              <GlobalFlyoutProvider>
                 <App history={history} />
-              </FlyoutMultiContentProvider>
+              </GlobalFlyoutProvider>
             </ComponentTemplatesProvider>
           </MappingsEditorProvider>
         </AppContextProvider>

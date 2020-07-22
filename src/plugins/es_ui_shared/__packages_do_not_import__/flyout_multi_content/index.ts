@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { FlyoutMultiContentProvider, useFlyoutMultiContent } from './flyout_multi_content';
+export { GlobalFlyoutProvider, useGlobalFlyout } from './flyout_multi_content';
