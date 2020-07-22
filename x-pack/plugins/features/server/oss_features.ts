@@ -148,7 +148,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           app: ['kibana'],
           catalogue: ['dashboard'],
           savedObject: {
-            all: ['dashboard', 'url', 'query'],
+            all: ['dashboard', 'query'],
             read: [
               'index-pattern',
               'search',
