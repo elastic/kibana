@@ -38,6 +38,9 @@ describe('registerLimitedConcurrencyRoutes', () => {
   });
 });
 
+// assertions for calls to .decrease are commented out because it's called on the
+// "req.events.aborted$ observable (which) will never emit from a mocked request in a jest unit test environment"
+// https://github.com/elastic/kibana/pull/72338#issuecomment-661908791
 describe('preAuthHandler', () => {
   test(`ignores routes when !isMatch`, async () => {
     const mockMaxCounter = {
@@ -56,7 +59,6 @@ describe('preAuthHandler', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPreAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
 
-    // @ts-ignore error re: mockPreAuthToolkit return type
     await preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit);
 
     expect(mockMaxCounter.increase).not.toHaveBeenCalled();
@@ -82,7 +84,6 @@ describe('preAuthHandler', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPreAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
 
-    // @ts-ignore error re: mockPreAuthToolkit return type
     await preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit);
 
     expect(mockMaxCounter.increase).not.toHaveBeenCalled();
@@ -109,7 +110,6 @@ describe('preAuthHandler', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPreAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
 
-    // @ts-ignore error re: mockPreAuthToolkit return type
     await preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit);
 
     // will call lessThanMax because isMatch succeeds
@@ -134,7 +134,6 @@ describe('preAuthHandler', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPreAuthToolkit = httpServiceMock.createOnPreAuthToolkit();
 
-    // @ts-ignore error re: mockPreAuthToolkit return type
     await preAuthHandler(mockRequest, mockResponse, mockPreAuthToolkit);
 
     expect(mockMaxCounter.increase).toHaveBeenCalled();
@@ -172,7 +171,6 @@ describe('preAuthHandler', () => {
       const response = httpServerMock.createResponseFactory();
       const toolkit = httpServiceMock.createOnPreAuthToolkit();
 
-      // @ts-ignore error re: mockPreAuthToolkit return type
       preAuthHandler(request, response, toolkit);
       expect(toolkit.next).toHaveBeenCalledTimes(1);
       expect(response.customError).not.toHaveBeenCalled();
@@ -186,7 +184,6 @@ describe('preAuthHandler', () => {
       const response = httpServerMock.createResponseFactory();
       const toolkit = httpServiceMock.createOnPreAuthToolkit();
 
-      // @ts-ignore error re: mockPreAuthToolkit return type
       preAuthHandler(request, response, toolkit);
       expect(toolkit.next).not.toHaveBeenCalled();
       expect(response.customError).toHaveBeenCalledTimes(1);
