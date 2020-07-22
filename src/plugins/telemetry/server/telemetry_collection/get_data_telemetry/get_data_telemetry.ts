@@ -139,6 +139,7 @@ export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTe
     ({ name }) =>
       !(
         name.startsWith('.') &&
+        !name.startsWith('.ds-') && // data_stream-related indices can be included
         !startingDotPatternsUntilTheFirstAsterisk.find((pattern) => name.startsWith(pattern))
       )
   );
@@ -225,7 +226,7 @@ export async function getDataTelemetry(callCluster: LegacyAPICaller) {
   try {
     const index = [
       ...DATA_DATASETS_INDEX_PATTERNS_UNIQUE.map(({ pattern }) => pattern),
-      '*-*-*-*', // Include new indexing strategy indices {type}-{dataset}-{namespace}-{rollover_counter}
+      '*-*-*', // Include data-streams aliases `{type}-{dataset}-{namespace}`
     ];
     const [indexMappings, indexStats]: [IndexMappings, IndexStats] = await Promise.all([
       // GET */_mapping?filter_path=*.mappings._meta.beat,*.mappings.properties.ecs.properties.version.type,*.mappings.properties.dataset.properties.type.value,*.mappings.properties.dataset.properties.name.value

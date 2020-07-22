@@ -75,7 +75,7 @@ describe('get_data_telemetry', () => {
           { name: 'logs-endpoint.1234', docCount: 0 }, // Matching pattern with a dot in the name
           // New Indexing strategy: everything can be inferred from the constant_keyword values
           {
-            name: 'logs-nginx.access-default-000001',
+            name: '.ds-logs-nginx.access-default-000001',
             datasetName: 'nginx.access',
             datasetType: 'logs',
             shipper: 'filebeat',
@@ -84,7 +84,7 @@ describe('get_data_telemetry', () => {
             sizeInBytes: 1000,
           },
           {
-            name: 'logs-nginx.access-default-000002',
+            name: '.ds-logs-nginx.access-default-000002',
             datasetName: 'nginx.access',
             datasetType: 'logs',
             shipper: 'filebeat',
@@ -93,7 +93,7 @@ describe('get_data_telemetry', () => {
             sizeInBytes: 60,
           },
           {
-            name: 'traces-something-default-000002',
+            name: '.ds-traces-something-default-000002',
             datasetName: 'something',
             datasetType: 'traces',
             packageName: 'some-package',
@@ -102,7 +102,7 @@ describe('get_data_telemetry', () => {
             sizeInBytes: 60,
           },
           {
-            name: 'metrics-something.else-default-000002',
+            name: '.ds-metrics-something.else-default-000002',
             datasetName: 'something.else',
             datasetType: 'metrics',
             managedBy: 'ingest-manager',
