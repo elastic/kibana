@@ -11,6 +11,7 @@ import { CommonAlertStatus } from '../../common/types';
 import { AlertSeverity } from '../../common/enums';
 import { AlertState } from '../../server/alerts/types';
 import { AlertsBadge } from './badge';
+import { isInSetupMode } from '../lib/setup_mode';
 
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
@@ -20,6 +21,7 @@ interface Props {
 }
 export const AlertsStatus: React.FC<Props> = (props: Props) => {
   const { alerts, showBadge = false, showOnlyCount = false, stateFilter = () => true } = props;
+  const inSetupMode = isInSetupMode();
 
   if (!alerts) {
     return null;
@@ -46,7 +48,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
     return cnt;
   }, 0);
 
-  if (count === 0) {
+  if (count === 0 && (!inSetupMode || showOnlyCount)) {
     return (
       <EuiToolTip
         content={i18n.translate('xpack.monitoring.alerts.status.clearToolip', {
@@ -68,7 +70,7 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
     );
   }
 
-  if (showBadge) {
+  if (showBadge || inSetupMode) {
     return <AlertsBadge alerts={alerts} stateFilter={stateFilter} />;
   }
 
