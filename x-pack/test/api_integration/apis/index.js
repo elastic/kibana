@@ -30,5 +30,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./ingest_manager'));
     loadTestFile(require.resolve('./endpoint'));
     loadTestFile(require.resolve('./ml'));
+    loadTestFile(require.resolve('./upgrade_assistant'));
   });
 }
