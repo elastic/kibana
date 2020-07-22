@@ -50,7 +50,7 @@ export const esdsl = (): EsdslExpressionFunctionDefinition => ({
   type: 'es_raw_response',
   inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('data.search.esdsl.help', {
-    defaultMessage: 'Run elasticsearch request',
+    defaultMessage: 'Run Elasticsearch request',
   }),
   args: {
     dsl: {
