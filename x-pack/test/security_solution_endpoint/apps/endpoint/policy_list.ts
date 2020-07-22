@@ -61,6 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         expect(allHeaderCells).to.eql([
           'Policy Name',
+          'Agent Configuration',
           'Created By',
           'Created Date',
           'Last Updated By',
@@ -71,17 +72,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should show policy on the list', async () => {
+        await testSubjects.find('policyListAgentConfigName');
         const [, policyRow] = await pageObjects.endpointPageUtils.tableData('policyTable');
         // Validate row data with the exception of the Date columns - since those are initially
         // shown as relative.
-        expect([policyRow[0], policyRow[1], policyRow[3], policyRow[5], policyRow[6]]).to.eql([
+        expect([
+          policyRow[0],
+          policyRow[1],
+          policyRow[2],
+          policyRow[4],
+          policyRow[6],
+          policyRow[7],
+        ]).to.eql([
           'Protect East Coastrev. 1',
+          policyInfo.agentConfig.name,
           'elastic',
           'elastic',
           `${policyInfo.packageConfig.package?.title} v${policyInfo.packageConfig.package?.version}`,
           '',
         ]);
-        [policyRow[2], policyRow[4]].forEach((relativeDate) => {
+        [policyRow[3], policyRow[5]].forEach((relativeDate) => {
           expect(relativeDate).to.match(RELATIVE_DATE_FORMAT);
         });
       });
