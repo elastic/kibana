@@ -17,7 +17,6 @@ describe('timeline flyout button', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
-    throw new Error('oh no something is broken');
   });
 
   afterEach(() => {
