@@ -63,26 +63,19 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
             <EuiFlexGroup alignItems="center" responsive={false}>
               <FlexItem grow={false}>
                 <LinkAnchor onClick={goToOverview} href={getAppOverviewUrl(search)}>
-                  <EuiIcon aria-label={i18n.SIEM} type="logoSecurity" size="l" />
+                  <EuiIcon aria-label={i18n.SECURITY_SOLUTION} type="logoSecurity" size="l" />
                 </LinkAnchor>
               </FlexItem>
 
               <FlexItem component="nav">
-                {indicesExist ? (
-                  <SiemNavigation
-                    display="condensed"
-                    navTabs={
-                      hideDetectionEngine
-                        ? pickBy((_, key) => key !== SecurityPageName.detections, navTabs)
-                        : navTabs
-                    }
-                  />
-                ) : (
-                  <SiemNavigation
-                    display="condensed"
-                    navTabs={pickBy((_, key) => key === SecurityPageName.overview, navTabs)}
-                  />
-                )}
+                <SiemNavigation
+                  display="condensed"
+                  navTabs={
+                    hideDetectionEngine
+                      ? pickBy((_, key) => key !== SecurityPageName.detections, navTabs)
+                      : navTabs
+                  }
+                />
               </FlexItem>
             </EuiFlexGroup>
           </FlexItem>
