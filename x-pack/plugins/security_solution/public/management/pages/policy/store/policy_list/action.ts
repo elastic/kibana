@@ -7,6 +7,7 @@
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../../common/types';
 import {
+  GetAgentConfigsResponse,
   GetAgentStatusResponse,
   GetPackagesResponse,
 } from '../../../../../../../ingest_manager/common';
@@ -61,6 +62,11 @@ interface ServerReturnedEndpointPackageInfo {
   payload: GetPackagesResponse['response'][0];
 }
 
+interface ServerReturnedAgentConfigListData {
+  type: 'serverReturnedAgentConfigListData';
+  payload: GetAgentConfigsResponse;
+}
+
 export type PolicyListAction =
   | ServerReturnedPolicyListData
   | ServerFailedToReturnPolicyListData
@@ -70,4 +76,5 @@ export type PolicyListAction =
   | UserOpenedPolicyListDeleteModal
   | ServerReturnedPolicyAgentsSummaryForDeleteFailure
   | ServerReturnedPolicyAgentsSummaryForDelete
-  | ServerReturnedEndpointPackageInfo;
+  | ServerReturnedEndpointPackageInfo
+  | ServerReturnedAgentConfigListData;

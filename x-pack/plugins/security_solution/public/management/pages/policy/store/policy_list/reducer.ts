@@ -105,6 +105,13 @@ export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
     };
   }
 
+  if (action.type === 'serverReturnedAgentConfigListData') {
+    return {
+      ...state,
+      agentConfigs: action.payload.items,
+    };
+  }
+
   if (action.type === 'userChangedUrl') {
     const newState: Immutable<PolicyListState> = {
       ...state,

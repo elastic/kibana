@@ -287,7 +287,7 @@ export const PolicyList = React.memo(() => {
       {
         field: '',
         name: i18n.translate('xpack.securitySolution.endpoint.policyList.agentConfig', {
-          defaultMessage: 'Agent Config',
+          defaultMessage: 'Agent Configuration',
         }),
         render: (item: PolicyData) => {
           return agentConfigs[item.config_id] ?? '-';

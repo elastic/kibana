@@ -10,6 +10,7 @@ import {
   sendDeletePackageConfig,
   sendGetFleetAgentStatusForConfig,
   sendGetEndpointSecurityPackage,
+  sendGetAgentConfigList,
 } from './services/ingest';
 import { endpointPackageInfo, isOnPolicyListPage, urlSearchParams } from './selectors';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
@@ -18,6 +19,7 @@ import {
   DeletePackageConfigsResponse,
   DeletePackageConfigsRequest,
   GetAgentStatusResponse,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
 } from '../../../../../../../ingest_manager/common';
 
 export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListState> = (
@@ -79,6 +81,34 @@ export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListS
           total: response ? response.total : initialPolicyListState().total,
         },
       });
+
+      // Retrieve a list of Agent Configurations that the list of Policies reference and for
+      // which we don't yet have a record for.
+      const agentConfigs = state.agentConfigs;
+      const policyIdsToMatch = response.items
+        .filter((policy) => !agentConfigs[policy.config_id])
+        .map((policy) => policy.id);
+
+      if (policyIdsToMatch.length > 0) {
+        // Retrieve list of agent configs and ignore failures, since this is secondary data and
+        // should not impact user's ability to view the list of Policies
+        sendGetAgentConfigList(http, {
+          query: {
+            page: 1,
+            perPage: 1000,
+            sortField: 'updated_at',
+            sortOrder: 'desc',
+            kuery: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.package_configs: (${policyIdsToMatch.join(
+              ' or '
+            )})`,
+          },
+        }).then((agentConfigListResponse) => {
+          dispatch({
+            type: 'serverReturnedAgentConfigListData',
+            payload: agentConfigListResponse,
+          });
+        });
+      }
     } else if (action.type === 'userClickedPolicyListDeleteButton') {
       const { policyId } = action.payload;
       const packageConfigIds: DeletePackageConfigsRequest['body']['packageConfigIds'] = [policyId];
