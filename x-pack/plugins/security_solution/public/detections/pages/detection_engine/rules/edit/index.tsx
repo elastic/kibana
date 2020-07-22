@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
-import { useRule, usePatchRule, PatchRule } from '../../../../containers/detection_engine/rules';
+import { useRule, usePatchRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
 import {
@@ -36,7 +36,6 @@ import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import { StepRuleActions } from '../../../../components/rules/step_rule_actions';
-import { formatRule } from '../create/helpers';
 import {
   getStepsData,
   redirectToDetections,
@@ -51,6 +50,7 @@ import {
   ScheduleStepRule,
   ActionsStepRule,
 } from '../types';
+import { formatRule } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 
@@ -276,7 +276,7 @@ const EditRulePageComponent: FC = () => {
             : myActionsRuleForm.data) as ActionsStepRule
         ),
         ...(ruleId ? { id: ruleId } : {}),
-      } as PatchRule);
+      });
     } else {
       setTabHasError(invalidForms);
     }

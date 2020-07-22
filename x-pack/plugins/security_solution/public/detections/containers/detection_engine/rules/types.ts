@@ -88,8 +88,12 @@ export interface PatchRuleProps {
   signal: AbortSignal;
 }
 
-export type PatchRule = Pick<PatchRulesSchema, Exclude<keyof PatchRulesSchema, ['severity']>> & {
+export type PatchRule = Pick<
+  PatchRulesSchema,
+  Exclude<keyof PatchRulesSchema, ['severity', 'throttle']>
+> & {
   severity?: string;
+  throttle?: string | null;
 };
 
 const MetaRule = t.intersection([
