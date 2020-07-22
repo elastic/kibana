@@ -8,6 +8,7 @@ import { SCALING_TYPES, SOURCE_TYPES } from '../../../../common/constants';
 import { BlendedVectorLayer } from './blended_vector_layer';
 // @ts-expect-error
 import { ESSearchSource } from '../../sources/es_search_source';
+import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 
 jest.mock('../../../kibana_services', () => {
   return {
@@ -66,7 +67,7 @@ describe('getSource', () => {
       });
 
       const source = blendedVectorLayer.getSource();
-      expect(source.cloneDescriptor().applyGlobalQuery).toBe(true);
+      expect((source.cloneDescriptor() as ESGeoGridSourceDescriptor).applyGlobalQuery).toBe(true);
     });
 
     test('cluster source applyGlobalQuery should be false when document source applyGlobalQuery is false', async () => {
@@ -85,7 +86,7 @@ describe('getSource', () => {
       });
 
       const source = blendedVectorLayer.getSource();
-      expect(source.cloneDescriptor().applyGlobalQuery).toBe(false);
+      expect((source.cloneDescriptor() as ESGeoGridSourceDescriptor).applyGlobalQuery).toBe(false);
     });
   });
 
