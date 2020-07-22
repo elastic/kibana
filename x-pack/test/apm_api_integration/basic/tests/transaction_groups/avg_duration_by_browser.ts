@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
       it('returns the average duration by browser filtering by transaction name', async () => {
         const response = await supertest.get(
-          `/api/apm/services/client/transaction_groups/avg_duration_by_browser?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionName=${transactionName}&_debug=true`
+          `/api/apm/services/client/transaction_groups/avg_duration_by_browser?start=${start}&end=${end}&uiFilters=${uiFilters}&transactionName=${transactionName}`
         );
 
         expect(response.status).to.be(200);
