@@ -51,6 +51,16 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       />
     </eui-form-row>
     <eui-form-row
+      label="Custom Label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldLabel"
+        onChange={[Function]}
+        placeholder="Displayed instead of "
+        value=""
+      />
+    </eui-form-row>
+    <eui-form-row
       helpText={null}
       label="Language"
     >
@@ -281,6 +291,16 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       onClose={[Function]}
       script="doc.test.value"
     />
+    <eui-form-row
+      label="Custom Label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldLabel"
+        onChange={[Function]}
+        placeholder="Displayed instead of test"
+        value=""
+      />
+    </eui-form-row>
     <eui-form-row
       helpText={null}
       label="Language"
@@ -572,6 +592,16 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       />
     </eui-form-row>
     <eui-form-row
+      label="Custom Label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldLabel"
+        onChange={[Function]}
+        placeholder="Displayed instead of foobar"
+        value=""
+      />
+    </eui-form-row>
+    <eui-form-row
       helpText={null}
       label="Language"
     >
@@ -810,6 +840,16 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       onClose={[Function]}
       script="doc.test.value"
     />
+    <eui-form-row
+      label="Custom Label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldLabel"
+        onChange={[Function]}
+        placeholder="Displayed instead of test"
+        value=""
+      />
+    </eui-form-row>
     <eui-form-row
       helpText={
         <span>
@@ -1179,6 +1219,16 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         onChange={[Function]}
         placeholder="New scripted field"
         value="foobar"
+      />
+    </eui-form-row>
+    <eui-form-row
+      label="Custom Label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldLabel"
+        onChange={[Function]}
+        placeholder="Displayed instead of foobar"
+        value=""
       />
     </eui-form-row>
     <eui-form-row

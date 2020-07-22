@@ -409,19 +409,20 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     );
   }
 
-  renderlabel() {
+  renderLabel() {
     const { field } = this.state;
 
     return (
       <EuiFormRow
-        label={i18n.translate('indexPatternManagement.CustomLabelLabel', {
+        label={i18n.translate('indexPatternManagement.customLabelLabel', {
           defaultMessage: 'Custom Label',
         })}
       >
         <EuiFieldText
           value={field.label || ''}
           placeholder={i18n.translate('indexPatternManagement.customLabelPlaceholder', {
-            defaultMessage: 'New custom label',
+            defaultMessage: 'Displayed instead of {name}',
+            values: { name: field.name },
           })}
           data-test-subj="editorFieldLabel"
           onChange={(e) => {
@@ -850,7 +851,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         this.context.services.notifications.toasts.addSuccess(message);
         redirectAway();
       })
-      .catch((error) => {
+      .catch(() => {
         if (oldField) {
           indexPattern.fields.update(oldField);
         } else {
@@ -862,17 +863,13 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   isSavingDisabled() {
     const { field, hasFormatError, hasScriptError } = this.state;
 
-    if (
+    return !!(
       hasFormatError ||
       hasScriptError ||
       !field.name ||
       !field.name.trim() ||
       (field.scripted && (!field.script || !field.script.trim()))
-    ) {
-      return true;
-    }
-
-    return false;
+    );
   }
 
   render() {
@@ -900,7 +897,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
-          {this.renderlabel()}
+          {this.renderLabel()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}
