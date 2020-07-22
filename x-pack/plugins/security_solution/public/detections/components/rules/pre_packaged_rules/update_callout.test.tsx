@@ -27,6 +27,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={0}
+        numberOfUpdatedTimelines={0}
         updateRules={jest.fn()}
       />
     );

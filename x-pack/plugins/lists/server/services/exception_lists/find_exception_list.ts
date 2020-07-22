@@ -48,7 +48,7 @@ export const findExceptionList = async ({
     sortOrder,
     type: savedObjectType,
   });
-  return transformSavedObjectsToFoundExceptionList({ namespaceType, savedObjectsFindResponse });
+  return transformSavedObjectsToFoundExceptionList({ savedObjectsFindResponse });
 };
 
 export const getExceptionListFilter = ({

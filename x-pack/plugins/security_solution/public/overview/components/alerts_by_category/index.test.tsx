@@ -11,8 +11,10 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import '../../../common/mock/match_media';
 import { useQuery } from '../../../common/containers/matrix_histogram';
-import { wait } from '../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { AlertsByCategory } from '.';
@@ -26,8 +28,8 @@ jest.mock('../../../common/containers/matrix_histogram', () => {
 });
 
 const theme = () => ({ eui: { ...euiDarkVars, euiSizeL: '24px' }, darkMode: true });
-const from = new Date('2020-03-31T06:00:00.000Z').valueOf();
-const to = new Date('2019-03-31T06:00:00.000Z').valueOf();
+const from = '2020-03-31T06:00:00.000Z';
+const to = '2019-03-31T06:00:00.000Z';
 
 describe('Alerts by category', () => {
   let wrapper: ReactWrapper;
@@ -56,34 +58,45 @@ describe('Alerts by category', () => {
         </ThemeProvider>
       );
 
-      await wait();
-      wrapper.update();
-    });
-
-    test('it renders the expected title', () => {
-      expect(wrapper.find('[data-test-subj="header-section-title"]').text()).toEqual(
-        'External alert trend'
-      );
-    });
-
-    test('it renders the subtitle (to prevent layout thrashing)', () => {
-      expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').exists()).toBe(true);
-    });
-
-    test('it renders the expected filter fields', () => {
-      const expectedOptions = ['event.category', 'event.module'];
-
-      expectedOptions.forEach((option) => {
-        expect(wrapper.find(`option[value="${option}"]`).text()).toEqual(option);
+      await waitFor(() => {
+        wrapper.update();
       });
     });
 
-    test('it renders the `View alerts` button', () => {
-      expect(wrapper.find('[data-test-subj="view-alerts"]').exists()).toBe(true);
+    test('it renders the expected title', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="header-section-title"]').text()).toEqual(
+          'External alert trend'
+        );
+      });
     });
 
-    test('it does NOT render the bar chart when data is not available', () => {
-      expect(wrapper.find(`.echChart`).exists()).toBe(false);
+    test('it renders the subtitle (to prevent layout thrashing)', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').exists()).toBe(true);
+      });
+    });
+
+    test('it renders the expected filter fields', async () => {
+      await waitFor(() => {
+        const expectedOptions = ['event.category', 'event.module'];
+
+        expectedOptions.forEach((option) => {
+          expect(wrapper.find(`option[value="${option}"]`).text()).toEqual(option);
+        });
+      });
+    });
+
+    test('it renders the `View alerts` button', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="view-alerts"]').exists()).toBe(true);
+      });
+    });
+
+    test('it does NOT render the bar chart when data is not available', async () => {
+      await waitFor(() => {
+        expect(wrapper.find(`.echChart`).exists()).toBe(false);
+      });
     });
   });
 
@@ -118,18 +131,21 @@ describe('Alerts by category', () => {
         </ThemeProvider>
       );
 
-      await wait();
       wrapper.update();
     });
 
-    test('it renders the expected subtitle', () => {
-      expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').text()).toEqual(
-        'Showing: 6 external alerts'
-      );
+    test('it renders the expected subtitle', async () => {
+      await waitFor(() => {
+        expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').text()).toEqual(
+          'Showing: 6 external alerts'
+        );
+      });
     });
 
-    test('it renders the bar chart when data is available', () => {
-      expect(wrapper.find(`.echChart`).exists()).toBe(true);
+    test('it renders the bar chart when data is available', async () => {
+      await waitFor(() => {
+        expect(wrapper.find(`.echChart`).exists()).toBe(true);
+      });
     });
   });
 });

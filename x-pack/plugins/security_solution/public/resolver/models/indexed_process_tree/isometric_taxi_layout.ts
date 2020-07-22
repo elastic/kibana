@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as vector2 from '../../models/vector2';
 import {
   IndexedProcessTree,
   Vector2,
@@ -17,13 +16,17 @@ import {
 } from '../../types';
 import * as event from '../../../../common/endpoint/models/event';
 import { ResolverEvent } from '../../../../common/endpoint/types';
-import * as model from './index';
+import * as vector2 from '../vector2';
+import * as indexedProcessTreeModel from './index';
 import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
+import { uniquePidForProcess } from '../process_event';
 
 /**
  * Graph the process tree
  */
-export function isometricTaxiLayout(indexedProcessTree: IndexedProcessTree): IsometricTaxiLayout {
+export function isometricTaxiLayoutFactory(
+  indexedProcessTree: IndexedProcessTree
+): IsometricTaxiLayout {
   /**
    * Walk the tree in reverse level order, calculating the 'width' of subtrees.
    */
@@ -73,7 +76,32 @@ export function isometricTaxiLayout(indexedProcessTree: IndexedProcessTree): Iso
   return {
     processNodePositions: transformedPositions,
     edgeLineSegments: transformedEdgeLineSegments,
+    ariaLevels: ariaLevels(indexedProcessTree),
   };
+}
+
+/**
+ * Calculate a level (starting at 1) for each node.
+ */
+function ariaLevels(indexedProcessTree: IndexedProcessTree): Map<ResolverEvent, number> {
+  const map: Map<ResolverEvent, number> = new Map();
+  for (const node of indexedProcessTreeModel.levelOrder(indexedProcessTree)) {
+    const parentNode = indexedProcessTreeModel.parent(indexedProcessTree, node);
+    if (parentNode === undefined) {
+      // nodes at the root have a level of 1
+      map.set(node, 1);
+    } else {
+      const parentLevel: number | undefined = map.get(parentNode);
+
+      // because we're iterating in level order, we should have processed the parent of any node that has one.
+      if (parentLevel === undefined) {
+        throw new Error('failed to calculate aria levels');
+      }
+
+      map.set(node, parentLevel + 1);
+    }
+  }
+  return map;
 }
 
 /**
@@ -117,14 +145,19 @@ export function isometricTaxiLayout(indexedProcessTree: IndexedProcessTree): Iso
 function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
   const widths = new Map<ResolverEvent, number>();
 
-  if (model.size(indexedProcessTree) === 0) {
+  if (indexedProcessTreeModel.size(indexedProcessTree) === 0) {
     return widths;
   }
 
-  const processesInReverseLevelOrder = [...model.levelOrder(indexedProcessTree)].reverse();
+  const processesInReverseLevelOrder: ResolverEvent[] = [
+    ...indexedProcessTreeModel.levelOrder(indexedProcessTree),
+  ].reverse();
 
   for (const process of processesInReverseLevelOrder) {
-    const children = model.children(indexedProcessTree, process);
+    const children = indexedProcessTreeModel.children(
+      indexedProcessTree,
+      uniquePidForProcess(process)
+    );
 
     const sumOfWidthOfChildren = function sumOfWidthOfChildren() {
       return children.reduce(function sum(currentValue, child) {
@@ -201,7 +234,10 @@ function processEdgeLineSegments(
       metadata: edgeLineMetadata,
     };
 
-    const siblings = model.children(indexedProcessTree, parent);
+    const siblings = indexedProcessTreeModel.children(
+      indexedProcessTree,
+      uniquePidForProcess(parent)
+    );
     const isFirstChild = process === siblings[0];
 
     if (metadata.isOnlyChild) {
@@ -356,8 +392,8 @@ function* levelOrderWithWidths(
   tree: IndexedProcessTree,
   widths: ProcessWidths
 ): Iterable<ProcessWithWidthMetadata> {
-  for (const process of model.levelOrder(tree)) {
-    const parent = model.parent(tree, process);
+  for (const process of indexedProcessTreeModel.levelOrder(tree)) {
+    const parent = indexedProcessTreeModel.parent(tree, process);
     const width = widths.get(process);
 
     if (width === undefined) {
@@ -395,7 +431,7 @@ function* levelOrderWithWidths(
         parentWidth,
       };
 
-      const siblings = model.children(tree, parent);
+      const siblings = indexedProcessTreeModel.children(tree, uniquePidForProcess(parent));
       if (siblings.length === 1) {
         metadata.isOnlyChild = true;
         metadata.lastChildWidth = width;
@@ -451,3 +487,32 @@ const distanceBetweenNodesInUnits = 2;
  * The distance in pixels (at scale 1) between nodes. Change this to space out nodes more
  */
 const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
+
+export function nodePosition(model: IsometricTaxiLayout, node: ResolverEvent): Vector2 | undefined {
+  return model.processNodePositions.get(node);
+}
+
+/**
+ * Return a clone of `model` with all positions incremented by `translation`.
+ * Use this to move the layout around.
+ * e.g.
+ * ```
+ * translated(layout, [100, -200]) // return a copy of `layout`, thats been moved 100 to the right and 200 up
+ * ```
+ */
+export function translated(model: IsometricTaxiLayout, translation: Vector2): IsometricTaxiLayout {
+  return {
+    processNodePositions: new Map(
+      [...model.processNodePositions.entries()].map(([node, position]) => [
+        node,
+        vector2.add(position, translation),
+      ])
+    ),
+    edgeLineSegments: model.edgeLineSegments.map(({ points, metadata }) => ({
+      points: points.map((point) => vector2.add(point, translation)),
+      metadata,
+    })),
+    // these are unchanged
+    ariaLevels: model.ariaLevels,
+  };
+}

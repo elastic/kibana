@@ -12,7 +12,7 @@ import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
   detections: DetectionsUsage;
-  endpoints: EndpointUsage;
+  endpoints: EndpointUsage | {};
 }
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
@@ -66,8 +66,8 @@ export const registerCollector: RegisterCollector = ({
         },
         policies: {
           malware: {
-            success: { type: 'long' },
-            warning: { type: 'long' },
+            active: { type: 'long' },
+            inactive: { type: 'long' },
             failure: { type: 'long' },
           },
         },

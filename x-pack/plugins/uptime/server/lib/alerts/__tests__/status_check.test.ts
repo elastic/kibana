@@ -17,7 +17,7 @@ import { GetMonitorStatusResult } from '../../requests';
 import { AlertType } from '../../../../../alerts/server';
 import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
-import { UptimeCoreSetup } from '../../adapters';
+import { UptimeCorePlugins, UptimeCoreSetup } from '../../adapters';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 
@@ -33,9 +33,10 @@ const bootstrapDependencies = (customRequests?: any) => {
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
   const server: UptimeCoreSetup = { router };
+  const plugins: UptimeCorePlugins = {} as any;
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };
-  return { server, libs };
+  return { server, libs, plugins };
 };
 
 /**
@@ -82,8 +83,8 @@ describe('status check alert', () => {
       expect.assertions(4);
       const mockGetter = jest.fn();
       mockGetter.mockReturnValue([]);
-      const { server, libs } = bootstrapDependencies({ getMonitorStatus: mockGetter });
-      const alert = statusCheckAlertFactory(server, libs);
+      const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       // @ts-ignore the executor can return `void`, but ours never does
       const state: Record<string, any> = await alert.executor(mockOptions());
 
@@ -128,8 +129,8 @@ describe('status check alert', () => {
           status: 'down',
         },
       ]);
-      const { server, libs } = bootstrapDependencies({ getMonitorStatus: mockGetter });
-      const alert = statusCheckAlertFactory(server, libs);
+      const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions();
       const alertServices: AlertServicesMock = options.services;
       // @ts-ignore the executor can return `void`, but ours never does
@@ -213,11 +214,11 @@ describe('status check alert', () => {
           status: 'down',
         },
       ]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorStatus: mockGetter,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         numTimes: 4,
         timerange: { from: 'now-14h', to: 'now' },
@@ -286,11 +287,11 @@ describe('status check alert', () => {
           status: 'down',
         },
       ]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorStatus: mockGetter,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         numTimes: 3,
         timerangeUnit: 'm',
@@ -371,11 +372,11 @@ describe('status check alert', () => {
       toISOStringSpy.mockImplementation(() => 'search test');
       const mockGetter = jest.fn();
       mockGetter.mockReturnValue([]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getIndexPattern: jest.fn(),
         getMonitorStatus: mockGetter,
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         numTimes: 20,
         timerangeCount: 30,
@@ -467,12 +468,12 @@ describe('status check alert', () => {
           availabilityRatio: 0.909245845760545,
         },
       ]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
         getMonitorStatus: mockGetter,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         availability: {
           range: 35,
@@ -559,11 +560,11 @@ describe('status check alert', () => {
       mockGetter.mockReturnValue([]);
       const mockAvailability = jest.fn();
       mockAvailability.mockReturnValue([]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         availability: {
           range: 23,
@@ -600,11 +601,11 @@ describe('status check alert', () => {
       mockGetter.mockReturnValue([]);
       const mockAvailability = jest.fn();
       mockAvailability.mockReturnValue([]);
-      const { server, libs } = bootstrapDependencies({
+      const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
         getIndexPattern: jest.fn(),
       });
-      const alert = statusCheckAlertFactory(server, libs);
+      const alert = statusCheckAlertFactory(server, libs, plugins);
       const options = mockOptions({
         availability: {
           range: 23,
@@ -748,8 +749,8 @@ describe('status check alert', () => {
     let alert: AlertType;
 
     beforeEach(() => {
-      const { server, libs } = bootstrapDependencies();
-      alert = statusCheckAlertFactory(server, libs);
+      const { server, libs, plugins } = bootstrapDependencies();
+      alert = statusCheckAlertFactory(server, libs, plugins);
     });
 
     it('creates an alert with expected params', () => {

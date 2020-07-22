@@ -18,7 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getSupertestWithoutAuth(providerContext);
   const esClient = getService('es');
 
-  describe.skip('fleet_agent_flow', () => {
+  describe('fleet_agent_flow', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

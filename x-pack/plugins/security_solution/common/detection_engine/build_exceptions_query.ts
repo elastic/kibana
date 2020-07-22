@@ -19,7 +19,8 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../shared_imports';
-import { Language, Query } from './schemas/common/schemas';
+import { Language } from './schemas/common/schemas';
+import { hasLargeValueList } from './utils';
 
 type Operators = 'and' | 'or' | 'not';
 type LuceneOperators = 'AND' | 'OR' | 'NOT';
@@ -46,18 +47,16 @@ export const getLanguageBooleanOperator = ({
 export const operatorBuilder = ({
   operator,
   language,
-  exclude,
 }: {
   operator: Operator;
   language: Language;
-  exclude: boolean;
 }): string => {
   const not = getLanguageBooleanOperator({
     language,
     value: 'not',
   });
 
-  if ((exclude && operator === 'included') || (!exclude && operator === 'excluded')) {
+  if (operator === 'excluded') {
     return `${not} `;
   } else {
     return '';
@@ -67,14 +66,12 @@ export const operatorBuilder = ({
 export const buildExists = ({
   item,
   language,
-  exclude,
 }: {
   item: EntryExists;
   language: Language;
-  exclude: boolean;
 }): string => {
   const { operator, field } = item;
-  const exceptionOperator = operatorBuilder({ operator, language, exclude });
+  const exceptionOperator = operatorBuilder({ operator, language });
 
   switch (language) {
     case 'kuery':
@@ -89,26 +86,22 @@ export const buildExists = ({
 export const buildMatch = ({
   item,
   language,
-  exclude,
 }: {
   item: EntryMatch;
   language: Language;
-  exclude: boolean;
 }): string => {
   const { value, operator, field } = item;
-  const exceptionOperator = operatorBuilder({ operator, language, exclude });
+  const exceptionOperator = operatorBuilder({ operator, language });
 
-  return `${exceptionOperator}${field}:${value}`;
+  return `${exceptionOperator}${field}:"${value}"`;
 };
 
 export const buildMatchAny = ({
   item,
   language,
-  exclude,
 }: {
   item: EntryMatchAny;
   language: Language;
-  exclude: boolean;
 }): string => {
   const { value, operator, field } = item;
 
@@ -117,8 +110,8 @@ export const buildMatchAny = ({
       return '';
     default:
       const or = getLanguageBooleanOperator({ language, value: 'or' });
-      const exceptionOperator = operatorBuilder({ operator, language, exclude });
-      const matchAnyValues = value.map((v) => v);
+      const exceptionOperator = operatorBuilder({ operator, language });
+      const matchAnyValues = value.map((v) => `"${v}"`);
 
       return `${exceptionOperator}${field}:(${matchAnyValues.join(` ${or} `)})`;
   }
@@ -133,7 +126,7 @@ export const buildNested = ({
 }): string => {
   const { field, entries } = item;
   const and = getLanguageBooleanOperator({ language, value: 'and' });
-  const values = entries.map((entry) => `${entry.field}:${entry.value}`);
+  const values = entries.map((entry) => evaluateValues({ item: entry, language }));
 
   return `${field}:{ ${values.join(` ${and} `)} }`;
 };
@@ -141,18 +134,16 @@ export const buildNested = ({
 export const evaluateValues = ({
   item,
   language,
-  exclude,
 }: {
   item: Entry | EntryNested;
   language: Language;
-  exclude: boolean;
 }): string => {
   if (entriesExists.is(item)) {
-    return buildExists({ item, language, exclude });
+    return buildExists({ item, language });
   } else if (entriesMatch.is(item)) {
-    return buildMatch({ item, language, exclude });
+    return buildMatch({ item, language });
   } else if (entriesMatchAny.is(item)) {
-    return buildMatchAny({ item, language, exclude });
+    return buildMatchAny({ item, language });
   } else if (entriesNested.is(item)) {
     return buildNested({ item, language });
   } else {
@@ -162,78 +153,79 @@ export const evaluateValues = ({
 
 export const formatQuery = ({
   exceptions,
-  query,
-  language,
-}: {
-  exceptions: string[];
-  query: string;
-  language: Language;
-}): string => {
-  if (exceptions.length > 0) {
-    const or = getLanguageBooleanOperator({ language, value: 'or' });
-    const and = getLanguageBooleanOperator({ language, value: 'and' });
-    const formattedExceptions = exceptions.map((exception) => {
-      if (query === '') {
-        return `(${exception})`;
-      } else {
-        return `(${query} ${and} ${exception})`;
-      }
-    });
-
-    return formattedExceptions.join(` ${or} `);
-  } else {
-    return query;
-  }
-};
-
-export const buildExceptionItemEntries = ({
-  lists,
   language,
   exclude,
 }: {
-  lists: EntriesArray;
+  exceptions: string[];
   language: Language;
   exclude: boolean;
 }): string => {
-  const and = getLanguageBooleanOperator({ language, value: 'and' });
-  const exceptionItem = lists
-    .filter(({ type }) => type !== 'list')
-    .reduce<string[]>((accum, listItem) => {
-      const exceptionSegment = evaluateValues({ item: listItem, language, exclude });
-      return [...accum, exceptionSegment];
-    }, []);
+  if (exceptions == null || (exceptions != null && exceptions.length === 0)) {
+    return '';
+  }
 
-  return exceptionItem.join(` ${and} `);
+  const or = getLanguageBooleanOperator({ language, value: 'or' });
+  const not = getLanguageBooleanOperator({ language, value: 'not' });
+  const formattedExceptionItems = exceptions.map((exceptionItem, index) => {
+    if (index === 0) {
+      return `(${exceptionItem})`;
+    }
+
+    return `${or} (${exceptionItem})`;
+  });
+
+  const exceptionItemsQuery = formattedExceptionItems.join(' ');
+  return exclude ? `${not} (${exceptionItemsQuery})` : exceptionItemsQuery;
+};
+
+export const buildExceptionItemEntries = ({
+  entries,
+  language,
+}: {
+  entries: EntriesArray;
+  language: Language;
+}): string => {
+  const and = getLanguageBooleanOperator({ language, value: 'and' });
+  const exceptionItemEntries = entries.reduce<string[]>((accum, listItem) => {
+    const exceptionSegment = evaluateValues({ item: listItem, language });
+    return [...accum, exceptionSegment];
+  }, []);
+
+  return exceptionItemEntries.join(` ${and} `);
 };
 
 export const buildQueryExceptions = ({
-  query,
   language,
   lists,
   exclude = true,
 }: {
-  query: Query;
   language: Language;
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> | undefined;
   exclude?: boolean;
 }): DataQuery[] => {
-  if (lists != null) {
-    const exceptions = lists.reduce<string[]>((acc, exceptionItem) => {
-      return [
-        ...acc,
-        ...(exceptionItem.entries !== undefined
-          ? [buildExceptionItemEntries({ lists: exceptionItem.entries, language, exclude })]
-          : []),
-      ];
-    }, []);
-    const formattedQuery = formatQuery({ exceptions, language, query });
+  if (lists == null || (lists != null && lists.length === 0)) {
+    return [];
+  }
+
+  const exceptionItems = lists.reduce<string[]>((acc, exceptionItem) => {
+    const { entries } = exceptionItem;
+
+    if (entries != null && entries.length > 0 && !hasLargeValueList(entries)) {
+      return [...acc, buildExceptionItemEntries({ entries, language })];
+    } else {
+      return acc;
+    }
+  }, []);
+
+  if (exceptionItems.length === 0) {
+    return [];
+  } else {
+    const formattedQuery = formatQuery({ exceptions: exceptionItems, language, exclude });
     return [
       {
         query: formattedQuery,
         language,
       },
     ];
-  } else {
-    return [{ query, language }];
   }
 };

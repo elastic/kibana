@@ -5,7 +5,7 @@
   ],
   "description": "Identifies unusual destination port activity that can indicate command-and-control, persistence mechanism, or data exfiltration activity. Rarely used destination port activity is generally unusual in Linux fleets, and can indicate unauthorized access or threat actor activity.",
   "false_positives": [
-    "A newly installed program or one that rarely uses the network could trigger this signal."
+    "A newly installed program or one that rarely uses the network could trigger this alert."
   ],
   "from": "now-45m",
   "interval": "15m",

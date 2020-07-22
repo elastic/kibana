@@ -40,6 +40,9 @@ export const getFileUploadComponent = () => {
 let uiSettings;
 export const setUiSettings = (coreUiSettings) => (uiSettings = coreUiSettings);
 export const getUiSettings = () => uiSettings;
+export const getIsDarkMode = () => {
+  return getUiSettings().get('theme:darkMode', false);
+};
 
 let indexPatternSelectComponent;
 export const setIndexPatternSelect = (indexPatternSelect) =>
@@ -77,7 +80,7 @@ export async function fetchSearchSourceAndRecordWithInspector({
       inspectorRequest.json(body);
     });
     resp = await searchSource.fetch({ abortSignal });
-    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+    inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
   } catch (error) {
     inspectorRequest.error({ error });
     throw error;
@@ -149,7 +152,6 @@ export const getEnabled = () => getMapAppConfig().enabled;
 export const getShowMapVisualizationTypes = () => getMapAppConfig().showMapVisualizationTypes;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
-export const getEnableVectorTiles = () => getMapAppConfig().enableVectorTiles;
 
 // map.* kibana.yml settings from maps_legacy plugin that are shared between OSS map visualizations and maps app
 let kibanaCommonConfig;

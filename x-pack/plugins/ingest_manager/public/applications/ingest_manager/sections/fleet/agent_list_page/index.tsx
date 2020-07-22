@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -74,8 +74,12 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
     const { getHref } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
 
+    const isUnenrolling = agent.status === 'unenrolling';
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     return (
       <ContextMenuActions
+        isOpen={isMenuOpen}
+        onChange={(isOpen) => setIsMenuOpen(isOpen)}
         items={[
           <EuiContextMenuItem
             icon="inspect"
@@ -100,7 +104,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
             />
           </EuiContextMenuItem>,
 
-          <AgentUnenrollProvider>
+          <AgentUnenrollProvider forceUnenroll={isUnenrolling}>
             {(unenrollAgentsPrompt) => (
               <EuiContextMenuItem
                 disabled={!hasWriteCapabilites}
@@ -108,13 +112,21 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
                 onClick={() => {
                   unenrollAgentsPrompt([agent.id], 1, () => {
                     refresh();
+                    setIsMenuOpen(false);
                   });
                 }}
               >
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.unenrollOneButton"
-                  defaultMessage="Unenroll"
-                />
+                {isUnenrolling ? (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+                    defaultMessage="Force unenroll"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.unenrollOneButton"
+                    defaultMessage="Unenroll"
+                  />
+                )}
               </EuiContextMenuItem>
             )}
           </AgentUnenrollProvider>,
@@ -144,12 +156,19 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [search, setSearch] = useState(defaultKuery);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
 
-  // Configs state (for filtering)
+  // Configs state for filtering
   const [isConfigsFilterOpen, setIsConfigsFilterOpen] = useState<boolean>(false);
   const [selectedConfigs, setSelectedConfigs] = useState<string[]>([]);
+
   // Status for filtering
   const [isStatusFilterOpen, setIsStatutsFilterOpen] = useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+
+  const clearFilters = useCallback(() => {
+    setSearch('');
+    setSelectedConfigs([]);
+    setSelectedStatus([]);
+  }, [setSearch, setSelectedConfigs, setSelectedStatus]);
 
   // Add a config id to current search
   const addConfigFilter = (configId: string) => {
@@ -355,7 +374,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
             <FormattedMessage
               id="xpack.ingestManager.agentList.addButton"
-              defaultMessage="Enroll new agent"
+              defaultMessage="Add agent"
             />
           </EuiButton>
         ) : null
@@ -500,7 +519,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       <EuiBasicTable<Agent>
         className="fleet__agentList__table"
         data-test-subj="fleetAgentListTable"
-        loading={isLoading && agentsRequest.isInitialRequest}
+        loading={isLoading}
         hasActions={true}
         noItemsMessage={
           isLoading && agentsRequest.isInitialRequest ? (
@@ -508,15 +527,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               id="xpack.ingestManager.agentList.loadingAgentsMessage"
               defaultMessage="Loading agents…"
             />
-          ) : !search.trim() && selectedConfigs.length === 0 && totalAgents === 0 ? (
-            emptyPrompt
-          ) : (
+          ) : search.trim() || selectedConfigs.length || selectedStatus.length ? (
             <FormattedMessage
               id="xpack.ingestManager.agentList.noFilteredAgentsPrompt"
               defaultMessage="No agents found. {clearFiltersLink}"
               values={{
                 clearFiltersLink: (
-                  <EuiLink onClick={() => setSearch('')}>
+                  <EuiLink onClick={() => clearFilters()}>
                     <FormattedMessage
                       id="xpack.ingestManager.agentList.clearFiltersLinkText"
                       defaultMessage="Clear filters"
@@ -525,7 +542,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 ),
               }}
             />
-          )
+          ) : !isLoading && totalAgents === 0 ? (
+            emptyPrompt
+          ) : undefined
         }
         items={totalAgents ? agents : []}
         itemId="id"

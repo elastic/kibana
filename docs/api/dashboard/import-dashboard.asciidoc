@@ -42,7 +42,7 @@ Use the complete response body from the <<dashboard-api-export, Export dashboard
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST "localhost:5601/api/kibana/dashboards/import?exclude=index-pattern"
+$ curl -X POST api/kibana/dashboards/import?exclude=index-pattern
 {
   "objects": [
     {

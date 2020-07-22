@@ -172,4 +172,50 @@ export const schema: FormSchema = {
       }
     ),
   },
+  threshold: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel',
+      {
+        defaultMessage: 'Threshold',
+      }
+    ),
+    field: {
+      type: FIELD_TYPES.COMBO_BOX,
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldLabel',
+        {
+          defaultMessage: 'Field',
+        }
+      ),
+      helpText: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldHelpText',
+        {
+          defaultMessage: 'Select a field to group results by',
+        }
+      ),
+    },
+    value: {
+      type: FIELD_TYPES.NUMBER,
+      label: i18n.translate(
+        'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdValueLabel',
+        {
+          defaultMessage: 'Threshold',
+        }
+      ),
+      validations: [
+        {
+          validator: fieldValidators.numberGreaterThanField({
+            than: 1,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
+              {
+                defaultMessage: 'Value must be greater than or equal one.',
+              }
+            ),
+            allowEquality: true,
+          }),
+        },
+      ],
+    },
+  },
 };

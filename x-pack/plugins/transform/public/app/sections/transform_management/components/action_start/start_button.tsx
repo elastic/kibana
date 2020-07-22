@@ -6,7 +6,7 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common';
 
@@ -25,7 +25,7 @@ export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
   const isBulkAction = items.length > 1;
 
-  const buttonStartText = i18n.translate('xpack.transform.transformList.startActionName', {
+  const buttonText = i18n.translate('xpack.transform.transformList.startActionName', {
     defaultMessage: 'Start',
   });
 
@@ -84,23 +84,30 @@ export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick
     }
   }
 
-  const disabled = forceDisable === true || actionIsDisabled;
+  const buttonDisabled = forceDisable === true || actionIsDisabled;
 
-  const startButton = (
-    <EuiLink
+  const button = (
+    <EuiButtonEmpty
+      aria-label={buttonText}
+      color="text"
       data-test-subj="transformActionStart"
-      color={disabled ? 'subdued' : 'text'}
-      onClick={disabled ? undefined : () => onClick(items)}
+      flush="left"
+      iconType="play"
+      isDisabled={buttonDisabled}
+      onClick={() => onClick(items)}
+      size="s"
     >
-      <EuiIcon type="play" /> {buttonStartText}
-    </EuiLink>
+      {buttonText}
+    </EuiButtonEmpty>
   );
-  if (disabled && content !== undefined) {
+
+  if (buttonDisabled && content !== undefined) {
     return (
       <EuiToolTip position="top" content={content}>
-        {startButton}
+        {button}
       </EuiToolTip>
     );
   }
-  return startButton;
+
+  return button;
 };
