@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { allEventsExistInCalendar } from './helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
@@ -55,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.have.length(testCalendars.length);
         expect(body[0].events).to.have.length(testEvents.length);
-        expect(allEventsExistInCalendar(testEvents, body[0])).to.eql(true);
+        ml.api.assertAllEventsExistInCalendar(testEvents, body[0]);
       });
 
       it('should fetch all calendars for user with view permission', async () => {
@@ -67,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.have.length(testCalendars.length);
         expect(body[0].events).to.have.length(testEvents.length);
-        expect(allEventsExistInCalendar(testEvents, body[0])).to.eql(true);
+        ml.api.assertAllEventsExistInCalendar(testEvents, body[0]);
       });
 
       it('should not fetch calendars for unauthorized user', async () => {
@@ -107,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.job_ids).to.eql(testCalendar.job_ids);
         expect(body.description).to.eql(testCalendar.description);
         expect(body.events).to.have.length(testEvents.length);
-        expect(allEventsExistInCalendar(testEvents, body)).to.eql(true);
+        ml.api.assertAllEventsExistInCalendar(testEvents, body);
       });
 
       it('should fetch calendar & associated events by id for user with view permission', async () => {
@@ -120,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.job_ids).to.eql(testCalendar.job_ids);
         expect(body.description).to.eql(testCalendar.description);
         expect(body.events).to.have.length(testEvents.length);
-        expect(allEventsExistInCalendar(testEvents, body)).to.eql(true);
+        ml.api.assertAllEventsExistInCalendar(testEvents, body);
       });
 
       it('should not fetch calendars for unauthorized user', async () => {

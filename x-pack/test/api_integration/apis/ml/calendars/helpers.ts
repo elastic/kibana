@@ -6,7 +6,7 @@
 
 import { Calendar, CalendarEvent } from '../../../../../plugins/ml/server/models/calendar';
 
-export const allEventsExistInCalendar = (
+export const assertAllEventsExistInCalendar = (
   eventsToCheck: CalendarEvent[],
   calendar: Calendar
 ): boolean => {
