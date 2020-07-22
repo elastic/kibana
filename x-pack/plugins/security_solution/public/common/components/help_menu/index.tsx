@@ -39,7 +39,7 @@ export const HelpMenu = React.memo(() => {
         },
         {
           linkType: 'discuss',
-          href: 'https://discuss.elastic.co/c/siem',
+          href: 'https://discuss.elastic.co/c/security',
           target: '_blank',
           rel: 'noopener',
         },
