@@ -9,11 +9,13 @@
 import * as t from 'io-ts';
 
 import {
+  _versionOrUndefined,
   created_at,
   created_by,
   description,
   deserializerOrUndefined,
   id,
+  immutable,
   metaOrUndefined,
   name,
   serializerOrUndefined,
@@ -21,15 +23,18 @@ import {
   type,
   updated_at,
   updated_by,
+  version,
 } from '../common/schemas';
 
 export const listSchema = t.exact(
   t.type({
+    _version: _versionOrUndefined,
     created_at,
     created_by,
     description,
     deserializer: deserializerOrUndefined,
     id,
+    immutable,
     meta: metaOrUndefined,
     name,
     serializer: serializerOrUndefined,
@@ -37,6 +42,7 @@ export const listSchema = t.exact(
     type,
     updated_at,
     updated_by,
+    version,
   })
 );
 

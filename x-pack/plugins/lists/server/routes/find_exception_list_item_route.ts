@@ -21,7 +21,7 @@ export const findExceptionListItemRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: `${EXCEPTION_LIST_ITEM_URL}/_find`,
       validate: {
