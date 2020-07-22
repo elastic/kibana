@@ -43,11 +43,11 @@ export const toPromiseAbortable = <T>(
     }
   });
 
-export function createSubscriberConcurrencyLimiter() {
+export function createSubscriberConcurrencyLimiter(maxConcurrency: number) {
   let observers: Array<[Rx.Subscriber<any>, any]> = [];
   let activeObservers: Array<Rx.Subscriber<any>> = [];
 
-  function processNext(maxConcurrency: number) {
+  function processNext() {
     if (activeObservers.length >= maxConcurrency) {
       return;
     }
@@ -62,14 +62,13 @@ export function createSubscriberConcurrencyLimiter() {
     observer.next(value);
   }
 
-  return function limit<T>(maxConcurrency: number): Rx.MonoTypeOperatorFunction<T> {
+  return function limit<T>(): Rx.MonoTypeOperatorFunction<T> {
     return (observable) =>
       new Rx.Observable<T>((observer) => {
         const subscription = observable.subscribe({
           next(value) {
             observers = [...observers, [observer, value]];
-
-            processNext(maxConcurrency);
+            processNext();
           },
           error(err) {
             observer.error(err);
@@ -83,7 +82,7 @@ export function createSubscriberConcurrencyLimiter() {
           activeObservers = activeObservers.filter((o) => o !== observer);
           observers = observers.filter((o) => o[0] !== observer);
           subscription.unsubscribe();
-          processNext(maxConcurrency);
+          processNext();
         };
       });
   };

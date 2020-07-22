@@ -134,7 +134,9 @@ export function agentCheckinStateNewActionsFactory() {
   const agentConfigs$ = new Map<string, Observable<FullAgentConfig | null>>();
   const newActions$ = createNewActionsSharedObservable();
   // Rx operators
-  const conccurencyLimiter = createSubscriberConcurrencyLimiter();
+  const concurrencyLimiter = createSubscriberConcurrencyLimiter(
+    appContextService.getConfig()?.fleet.agentConfigRolloutConcurrency ?? 10
+  );
 
   async function subscribeToNewActions(
     soClient: SavedObjectsClientContract,
@@ -156,7 +158,7 @@ export function agentCheckinStateNewActionsFactory() {
     const stream$ = agentConfig$.pipe(
       timeout(appContextService.getConfig()?.fleet.pollingRequestTimeout || 0),
       filter((config) => shouldCreateAgentConfigAction(agent, config)),
-      conccurencyLimiter(appContextService.getConfig()?.fleet.agentConfigRolloutConcurrency ?? 1),
+      concurrencyLimiter(),
       mergeMap((config) => createAgentActionFromConfig(soClient, agent, config)),
       merge(newActions$),
       mergeMap(async (data) => {
