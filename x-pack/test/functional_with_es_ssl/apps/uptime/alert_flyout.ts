@@ -9,7 +9,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   // FLAKY: https://github.com/elastic/kibana/issues/65948
-  describe.skip('uptime alerts', () => {
+  // describe.skip('uptime alerts', () => {
+  describe('uptime alerts', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
@@ -105,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           alertTypeId,
           consumer,
           id,
-          params: { numTimes, timerange, locations, filters },
+          params: { numTimes, timerangeUnit, timerangeCount, filters },
           schedule: { interval },
           tags,
         } = alert;
@@ -119,22 +120,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(interval).to.eql('11m');
           expect(tags).to.eql(['uptime', 'another']);
           expect(numTimes).to.be(3);
-          expect(timerange.from).to.be('now-1h');
-          expect(timerange.to).to.be('now');
-          expect(locations).to.eql(['mpls']);
-          expect(filters).to.eql(
-            '{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"monitor.id":"0001-up"}}],' +
-              '"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match":{"observer.geo.name":"mpls"}}],' +
-              '"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match":{"url.port":5678}}],' +
-              '"minimum_should_match":1}},{"bool":{"should":[{"match":{"monitor.type":"http"}}],"minimum_should_match":1}}]}}]}}]}}'
-          );
+          expect(timerangeUnit).to.be('h');
+          expect(timerangeCount).to.be(1);
+          expect(Array.isArray(filters['url.port'])).to.be(true);
+          expect(filters['url.port']).to.have.length(1);
+          expect(filters['url.port'][0]).to.be('5678');
+          expect(Array.isArray(filters['observer.geo.name'])).to.be(true);
+          expect(filters['observer.geo.name']).to.have.length(1);
+          expect(filters['observer.geo.name'][0]).to.be('mpls');
+          expect(Array.isArray(filters['monitor.type'])).to.be(true);
+          expect(filters['monitor.type']).to.have.length(1);
+          expect(filters['monitor.type'][0]).to.be('http');
         } finally {
           await supertest.delete(`/api/alerts/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
         }
       });
     });
 
-    describe('tls alert', function () {
+    describe.skip('tls alert', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
