@@ -97,9 +97,9 @@ function createMockFilterManager() {
 
 function createMockQueryString() {
   return {
-    getQuery: jest.fn(),
+    getQuery: jest.fn(() => ({ query: '', language: 'kuery' })),
     setQuery: jest.fn(),
-    getDefaultQuery: jest.fn(),
+    getDefaultQuery: jest.fn(() => ({ query: '', language: 'kuery' })),
   };
 }
 
