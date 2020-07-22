@@ -17,5 +17,23 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/es-archiver').runCli();
+import { createGunzip } from 'zlib';
+import { PassThrough } from 'stream';
+import {
+  createFilterStream,
+  createSplitStream,
+  createReplaceStream,
+  createMapStream,
+} from '../streams';
+
+import { RECORD_SEPARATOR } from './constants';
+
+export function createParseArchiveStreams({ gzip = false } = {}) {
+  return [
+    gzip ? createGunzip() : new PassThrough(),
+    createReplaceStream('\r\n', '\n'),
+    createSplitStream(RECORD_SEPARATOR),
+    createFilterStream<string>((l) => !!l.match(/[^\s]/)),
+    createMapStream<string>((json) => JSON.parse(json.trim())),
+  ];
+}
