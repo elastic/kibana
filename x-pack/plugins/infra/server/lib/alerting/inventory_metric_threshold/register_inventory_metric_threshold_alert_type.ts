@@ -40,7 +40,7 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
   },
   defaultActionGroupId: FIRED_ACTIONS.id,
   actionGroups: [FIRED_ACTIONS],
-  producer: 'metrics',
+  producer: 'infrastructure',
   executor: createInventoryMetricThresholdExecutor(libs),
   actionVariables: {
     context: [

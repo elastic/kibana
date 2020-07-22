@@ -25,6 +25,9 @@ import {
   Operator,
 } from '../../../lists/common/schemas';
 import { getExceptionListItemSchemaMock } from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getEntryMatchMock } from '../../../lists/common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../lists/common/schemas/types/entry_match_any.mock';
+import { getEntryExistsMock } from '../../../lists/common/schemas/types/entry_exists.mock';
 
 describe('build_exceptions_query', () => {
   let exclude: boolean;
@@ -295,11 +298,76 @@ describe('build_exceptions_query', () => {
         const item: EntryNested = {
           field: 'parent',
           type: 'nested',
-          entries: [makeMatchEntry({ field: 'nestedField', operator: 'included' })],
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'nestedField',
+              operator: 'included',
+              value: 'value-1',
+            },
+          ],
         };
         const result = buildNested({ item, language: 'kuery' });
 
         expect(result).toEqual('parent:{ nestedField:"value-1" }');
+      });
+
+      test('it returns formatted query when entry item is "exists"', () => {
+        const item: EntryNested = {
+          field: 'parent',
+          type: 'nested',
+          entries: [{ ...getEntryExistsMock(), field: 'nestedField', operator: 'included' }],
+        };
+        const result = buildNested({ item, language: 'kuery' });
+
+        expect(result).toEqual('parent:{ nestedField:* }');
+      });
+
+      test('it returns formatted query when entry item is "exists" and operator is "excluded"', () => {
+        const item: EntryNested = {
+          field: 'parent',
+          type: 'nested',
+          entries: [{ ...getEntryExistsMock(), field: 'nestedField', operator: 'excluded' }],
+        };
+        const result = buildNested({ item, language: 'kuery' });
+
+        expect(result).toEqual('parent:{ not nestedField:* }');
+      });
+
+      test('it returns formatted query when entry item is "match_any"', () => {
+        const item: EntryNested = {
+          field: 'parent',
+          type: 'nested',
+          entries: [
+            {
+              ...getEntryMatchAnyMock(),
+              field: 'nestedField',
+              operator: 'included',
+              value: ['value1', 'value2'],
+            },
+          ],
+        };
+        const result = buildNested({ item, language: 'kuery' });
+
+        expect(result).toEqual('parent:{ nestedField:("value1" or "value2") }');
+      });
+
+      test('it returns formatted query when entry item is "match_any" and operator is "excluded"', () => {
+        const item: EntryNested = {
+          field: 'parent',
+          type: 'nested',
+          entries: [
+            {
+              ...getEntryMatchAnyMock(),
+              field: 'nestedField',
+              operator: 'excluded',
+              value: ['value1', 'value2'],
+            },
+          ],
+        };
+        const result = buildNested({ item, language: 'kuery' });
+
+        expect(result).toEqual('parent:{ not nestedField:("value1" or "value2") }');
       });
 
       test('it returns formatted query when multiple items in nested entry', () => {
@@ -307,8 +375,18 @@ describe('build_exceptions_query', () => {
           field: 'parent',
           type: 'nested',
           entries: [
-            makeMatchEntry({ field: 'nestedField', operator: 'included' }),
-            makeMatchEntry({ field: 'nestedFieldB', operator: 'included', value: 'value-2' }),
+            {
+              ...getEntryMatchMock(),
+              field: 'nestedField',
+              operator: 'included',
+              value: 'value-1',
+            },
+            {
+              ...getEntryMatchMock(),
+              field: 'nestedFieldB',
+              operator: 'included',
+              value: 'value-2',
+            },
           ],
         };
         const result = buildNested({ item, language: 'kuery' });
@@ -514,7 +592,7 @@ describe('build_exceptions_query', () => {
         entries,
       });
       const expectedQuery =
-        'b:("value-1" OR "value-2") AND parent:{ nestedField:"value-3" } AND NOT _exists_e';
+        'b:("value-1" OR "value-2") AND parent:{ NOT nestedField:"value-3" } AND NOT _exists_e';
       expect(query).toEqual(expectedQuery);
     });
 
@@ -576,7 +654,7 @@ describe('build_exceptions_query', () => {
           language: 'kuery',
           entries,
         });
-        const expectedQuery = 'b:* and parent:{ c:"value-1" and d:"value-2" } and e:*';
+        const expectedQuery = 'b:* and parent:{ not c:"value-1" and d:"value-2" } and e:*';
 
         expect(query).toEqual(expectedQuery);
       });
@@ -642,7 +720,8 @@ describe('build_exceptions_query', () => {
           language: 'kuery',
           entries,
         });
-        const expectedQuery = 'b:"value" and parent:{ c:"valueC" and d:"valueD" } and e:"valueE"';
+        const expectedQuery =
+          'b:"value" and parent:{ not c:"valueC" and not d:"valueD" } and e:"valueE"';
 
         expect(query).toEqual(expectedQuery);
       });
@@ -684,7 +763,7 @@ describe('build_exceptions_query', () => {
           language: 'kuery',
           entries,
         });
-        const expectedQuery = 'not b:("value-1" or "value-2") and parent:{ c:"valueC" }';
+        const expectedQuery = 'not b:("value-1" or "value-2") and parent:{ not c:"valueC" }';
 
         expect(query).toEqual(expectedQuery);
       });
@@ -800,7 +879,7 @@ describe('build_exceptions_query', () => {
           exclude,
         });
         const expectedQuery =
-          '(some.parentField:{ nested.field:"some value" } and some.not.nested.field:"some value") or (b:("value-1" or "value-2") and parent:{ c:"valueC" and d:"valueD" } and e:("value-1" or "value-2"))';
+          '(some.parentField:{ nested.field:"some value" } and some.not.nested.field:"some value") or (b:("value-1" or "value-2") and parent:{ not c:"valueC" and not d:"valueD" } and e:("value-1" or "value-2"))';
 
         expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
       });

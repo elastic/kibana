@@ -15,6 +15,7 @@ import {
   Filter,
   Id,
   IdOrUndefined,
+  Immutable,
   ListId,
   ListIdOrUndefined,
   MetaOrUndefined,
@@ -26,6 +27,8 @@ import {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Type,
+  Version,
+  VersionOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
@@ -52,11 +55,13 @@ export interface DeleteListItemOptions {
 export interface CreateListOptions {
   id: IdOrUndefined;
   deserializer: DeserializerOrUndefined;
+  immutable: Immutable;
   serializer: SerializerOrUndefined;
   name: Name;
   description: Description;
   type: Type;
   meta: MetaOrUndefined;
+  version: Version;
 }
 
 export interface CreateListIfItDoesNotExistOptions {
@@ -67,6 +72,8 @@ export interface CreateListIfItDoesNotExistOptions {
   description: Description;
   type: Type;
   meta: MetaOrUndefined;
+  version: Version;
+  immutable: Immutable;
 }
 
 export interface DeleteListItemByValueOptions {
@@ -94,6 +101,7 @@ export interface ImportListItemsToStreamOptions {
   type: Type;
   stream: Readable;
   meta: MetaOrUndefined;
+  version: Version;
 }
 
 export interface CreateListItemOptions {
@@ -119,6 +127,7 @@ export interface UpdateListOptions {
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
+  version: VersionOrUndefined;
 }
 
 export interface GetListItemOptions {

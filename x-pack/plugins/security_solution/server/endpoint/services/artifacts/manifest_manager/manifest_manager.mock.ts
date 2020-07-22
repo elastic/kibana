@@ -6,18 +6,16 @@
 
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
-import {
-  createPackageConfigWithManifestMock,
-  createPackageConfigWithInitialManifestMock,
-} from '../../../../../../ingest_manager/common/mocks';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { ExceptionsCache } from '../../../lib/artifacts';
+import LRU from 'lru-cache';
 import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
 import { ManifestManager } from './manifest_manager';
 import {
+  createPackageConfigWithManifestMock,
+  createPackageConfigWithInitialManifestMock,
   getMockManifest,
   getMockArtifactsWithDiff,
   getEmptyMockArtifacts,
@@ -30,11 +28,11 @@ export enum ManifestManagerMockType {
 
 export const getManifestManagerMock = (opts?: {
   mockType?: ManifestManagerMockType;
-  cache?: ExceptionsCache;
+  cache?: LRU<string, Buffer>;
   packageConfigService?: jest.Mocked<PackageConfigServiceInterface>;
   savedObjectsClient?: ReturnType<typeof savedObjectsClientMock.create>;
 }): ManifestManager => {
-  let cache = new ExceptionsCache(5);
+  let cache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 });
   if (opts?.cache !== undefined) {
     cache = opts.cache;
   }
