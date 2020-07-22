@@ -29,7 +29,7 @@ import {
 
 const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EsIndexActionConnector
->> = ({ action, editActionConfig, errors, http, docLinks }) => {
+>> = ({ action, editActionConfig, errors, http, readOnly, docLinks }) => {
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null
@@ -115,6 +115,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 ]
               : []
           }
+          isDisabled={readOnly}
           onChange={async (selected: EuiComboBoxOptionOption[]) => {
             editActionConfig('index', selected.length > 0 ? selected[0].value : '');
             const indices = selected.map((s) => s.value as string);
@@ -145,6 +146,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
       <EuiSwitch
         data-test-subj="indexRefreshCheckbox"
         checked={refresh || false}
+        disabled={readOnly}
         onChange={(e) => {
           editActionConfig('refresh', e.target.checked);
         }}
@@ -172,6 +174,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
       <EuiSwitch
         data-test-subj="hasTimeFieldCheckbox"
         checked={hasTimeFieldCheckbox || false}
+        disabled={readOnly}
         onChange={() => {
           setTimeFieldCheckboxState(!hasTimeFieldCheckbox);
           // if changing from checked to not checked (hasTimeField === true),

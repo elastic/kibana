@@ -5,7 +5,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { boolean, withKnobs } from '@storybook/addon-knobs';
+import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorPicker } from '../color_picker';
@@ -54,7 +54,6 @@ class Interactive extends React.Component<
 }
 
 storiesOf('components/Color/ColorPicker', module)
-  .addDecorator(withKnobs)
   .addParameters({
     info: {
       inline: true,
