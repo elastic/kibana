@@ -5,7 +5,7 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -72,26 +72,35 @@ export const CertificatesPage: React.FC = () => {
   }, [dispatch, page, search, sort.direction, sort.field, lastRefresh]);
 
   const { data: certificates } = useSelector(certificatesSelector);
+  const history = useHistory();
 
   return (
     <>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem grow={false} style={{ marginRight: 'auto', alignSelf: 'center' }}>
-          <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
-            <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-              {labels.RETURN_TO_OVERVIEW}
-            </EuiButtonEmpty>
-          </Link>
+          <EuiButtonEmpty
+            color="primary"
+            data-test-subj="uptimeCertificatesToOverviewLink"
+            href={history.createHref({ pathname: OVERVIEW_ROUTE })}
+            iconType="arrowLeft"
+            size="s"
+          >
+            {labels.RETURN_TO_OVERVIEW}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ToggleAlertFlyoutButton alertOptions={[CLIENT_ALERT_TYPES.TLS]} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-          <Link to={SETTINGS_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
-            <EuiButtonEmpty size="s" color="primary" iconType="gear">
-              <EuiHideFor sizes={['xs']}> {labels.SETTINGS_ON_CERT}</EuiHideFor>
-            </EuiButtonEmpty>
-          </Link>
+          <EuiButtonEmpty
+            color="primary"
+            data-test-subj="uptimeCertificatesToOverviewLink"
+            iconType="gear"
+            href={history.createHref({ pathname: SETTINGS_ROUTE })}
+            size="s"
+          >
+            <EuiHideFor sizes={['xs']}> {labels.SETTINGS_ON_CERT}</EuiHideFor>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiHideFor sizes={['xs']}>
