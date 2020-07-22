@@ -6,8 +6,7 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
-
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { getSupertestWithoutAuth } from './services';
 
 export default function (providerContext: FtrProviderContext) {
