@@ -58,6 +58,7 @@ import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
 
 const EVENT_LOG_PROVIDER = 'alerting';
@@ -90,6 +91,7 @@ export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
   taskManager: TaskManagerStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  features: FeaturesPluginStart;
 }
 
 export class AlertingPlugin {
@@ -216,12 +218,26 @@ export class AlertingPlugin {
       getSpaceId(request: KibanaRequest) {
         return spaces?.getSpaceId(request);
       },
+      async getSpace(request: KibanaRequest) {
+        return spaces?.getActiveSpace(request);
+      },
       actions: plugins.actions,
+      features: plugins.features,
     });
+
+    const getAlertsClientWithRequest = (request: KibanaRequest) => {
+      if (isESOUsingEphemeralEncryptionKey === true) {
+        throw new Error(
+          `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+        );
+      }
+      return alertsClientFactory!.create(request, core.savedObjects);
+    };
 
     taskRunnerFactory.initialize({
       logger,
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
+      getAlertsClientWithRequest,
       spaceIdToNamespace: this.spaceIdToNamespace,
       actionsPlugin: plugins.actions,
       encryptedSavedObjectsClient,
@@ -233,18 +249,7 @@ export class AlertingPlugin {
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
-      // Ability to get an alerts client from legacy code
-      getAlertsClientWithRequest: (request: KibanaRequest) => {
-        if (isESOUsingEphemeralEncryptionKey === true) {
-          throw new Error(
-            `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
-          );
-        }
-        return alertsClientFactory!.create(
-          request,
-          this.getScopedClientWithAlertSavedObjectType(core.savedObjects, request)
-        );
-      },
+      getAlertsClientWithRequest,
     };
   }
 
@@ -252,14 +257,11 @@ export class AlertingPlugin {
     core: CoreSetup
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
-    return async (context, request) => {
+    return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getAlertsClient: () => {
-          return alertsClientFactory!.create(
-            request,
-            this.getScopedClientWithAlertSavedObjectType(savedObjects, request)
-          );
+          return alertsClientFactory!.create(request, savedObjects);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
       };

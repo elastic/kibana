@@ -53,6 +53,7 @@ const initialState: State = {
 interface ExceptionsViewerProps {
   ruleId: string;
   ruleName: string;
+  ruleIndices: string[];
   exceptionListsMeta: ExceptionIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
@@ -61,6 +62,7 @@ interface ExceptionsViewerProps {
 const ExceptionsViewerComponent = ({
   ruleId,
   ruleName,
+  ruleIndices,
   exceptionListsMeta,
   availableListTypes,
   commentsAccordionId,
@@ -104,7 +106,7 @@ const ExceptionsViewerComponent = ({
       lists: newLists,
       exceptions: newExceptions,
       pagination: newPagination,
-    }: UseExceptionListSuccess) => {
+    }: UseExceptionListSuccess): void => {
       dispatch({
         type: 'setExceptions',
         lists: newLists,
@@ -253,10 +255,11 @@ const ExceptionsViewerComponent = ({
   return (
     <>
       {currentModal === 'editModal' &&
-        exceptionToEdit !== null &&
-        exceptionListTypeToEdit !== null && (
+        exceptionToEdit != null &&
+        exceptionListTypeToEdit != null && (
           <EditExceptionModal
             ruleName={ruleName}
+            ruleIndices={ruleIndices}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
@@ -267,6 +270,7 @@ const ExceptionsViewerComponent = ({
       {currentModal === 'addModal' && exceptionListTypeToEdit != null && (
         <AddExceptionModal
           ruleName={ruleName}
+          ruleIndices={ruleIndices}
           ruleId={ruleId}
           exceptionListType={exceptionListTypeToEdit}
           onCancel={handleOnCancelExceptionModal}

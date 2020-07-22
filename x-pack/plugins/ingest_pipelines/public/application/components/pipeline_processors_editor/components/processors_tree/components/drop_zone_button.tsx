@@ -37,7 +37,6 @@ export const DropZoneButton: FunctionComponent<Props> = (props) => {
   });
   const buttonClasses = classNames({
     'pipelineProcessorsEditor__tree__dropZoneButton--visible': isVisible,
-    'pipelineProcessorsEditor__tree__dropZoneButton--unavailable': isUnavailable,
   });
 
   const content = (
