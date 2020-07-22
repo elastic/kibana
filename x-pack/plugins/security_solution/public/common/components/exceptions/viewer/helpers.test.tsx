@@ -8,12 +8,10 @@ import moment from 'moment-timezone';
 import { getFormattedEntries, formatEntry, getDescriptionListContent } from './helpers';
 import { FormattedEntry, DescriptionListItem } from '../types';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import {
-  getEntryExistsMock,
-  getEntryMatchMock,
-  getEntryMatchAnyMock,
-  getEntriesArrayMock,
-} from '../../../../../../lists/common/schemas/types/entries.mock';
+import { getEntriesArrayMock } from '../../../../../../lists/common/schemas/types/entries.mock';
+import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
+import { getEntryExistsMock } from '../../../../../../lists/common/schemas/types/entry_exists.mock';
 
 describe('Exception viewer helpers', () => {
   beforeEach(() => {

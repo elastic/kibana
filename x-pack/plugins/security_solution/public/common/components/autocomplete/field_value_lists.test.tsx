@@ -219,10 +219,10 @@ describe('AutocompleteFieldListsComponent', () => {
         updated_at: DATE_NOW,
         updated_by: 'some user',
         _version: undefined,
-        version: 1,
+        version: VERSION,
         deserializer: undefined,
         serializer: undefined,
-        immutable: false,
+        immutable: IMMUTABLE,
       });
     });
   });

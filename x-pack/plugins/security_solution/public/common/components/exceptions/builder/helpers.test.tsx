@@ -7,12 +7,10 @@ import {
   fields,
   getField,
 } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
-import {
-  getEntryNestedMock,
-  getEntryMatchMock,
-  getEntryMatchAnyMock,
-  getEntryExistsMock,
-} from '../../../../../../lists/common/schemas/types/entries.mock';
+import { getEntryNestedMock } from '../../../../../../lists/common/schemas/types/entry_nested.mock';
+import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
+import { getEntryExistsMock } from '../../../../../../lists/common/schemas/types/entry_exists.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import {
   isOperator,
