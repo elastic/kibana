@@ -428,21 +428,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        let messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
-
-        await PageObjects.common.navigateToActualUrl('infraOps', 'inventory', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-
-        messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
