@@ -234,7 +234,8 @@ const UnstyledProcessEventDot = React.memo(
       });
     }, [dispatch, nodeID]);
 
-    const { pushToQueryParams, queryParams } = useResolverQueryParams();
+    const { pushToQueryParams } = useResolverQueryParams();
+
     const handleClick = useCallback(() => {
       if (animationTarget.current !== null) {
         // This works but the types are missing in the typescript DOM lib
