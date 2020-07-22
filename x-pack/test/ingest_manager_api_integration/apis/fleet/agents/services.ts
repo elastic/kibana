@@ -8,7 +8,7 @@ import supertestAsPromised from 'supertest-as-promised';
 import { Client } from '@elastic/elasticsearch';
 import { format as formatUrl } from 'url';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 
 export function getSupertestWithoutAuth({ getService }: FtrProviderContext) {
   const config = getService('config');
