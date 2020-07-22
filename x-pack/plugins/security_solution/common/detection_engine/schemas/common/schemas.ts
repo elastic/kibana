@@ -19,7 +19,7 @@ export type Author = t.TypeOf<typeof author>;
 export const authorOrUndefined = t.union([author, t.undefined]);
 export type AuthorOrUndefined = t.TypeOf<typeof authorOrUndefined>;
 
-export const building_block_type = t.string;
+export const building_block_type = t.union([t.string, t.null]);
 export type BuildingBlockType = t.TypeOf<typeof building_block_type>;
 
 export const buildingBlockTypeOrUndefined = t.union([building_block_type, t.undefined]);

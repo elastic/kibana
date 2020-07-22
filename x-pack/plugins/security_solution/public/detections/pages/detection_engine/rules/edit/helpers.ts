@@ -5,6 +5,7 @@
  */
 
 import deepmerge from 'deepmerge';
+import { Severity } from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { PatchRule } from '../../../../containers/detection_engine/rules';
 import {
   formatDefineStepData,
@@ -12,7 +13,23 @@ import {
   formatScheduleStepData,
   formatActionsStepData,
 } from '../utils';
-import { AboutStepRule, DefineStepRule, ScheduleStepRule, ActionsStepRule } from '../types';
+import {
+  AboutStepRule,
+  AboutStepRuleJson,
+  DefineStepRule,
+  ScheduleStepRule,
+  ActionsStepRule,
+} from '../types';
+
+export const formatForPatch = (data: AboutStepRuleJson): PatchRule => {
+  return {
+    ...data,
+    building_block_type: data.building_block_type ?? null,
+    exceptions_list: data.exceptions_list ?? [],
+    note: data.note ?? '',
+    severity: data.severity as Severity, // TODO: type
+  };
+};
 
 export const formatRule = (
   defineStepData: DefineStepRule,
@@ -22,7 +39,7 @@ export const formatRule = (
 ): PatchRule =>
   deepmerge.all([
     formatDefineStepData(defineStepData),
-    formatAboutStepData(aboutStepData),
+    formatForPatch(formatAboutStepData(aboutStepData)),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
   ]);
