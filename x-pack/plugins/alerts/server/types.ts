@@ -20,9 +20,9 @@ import {
 
 // This will have to remain `any` until we can extend Alert Executors with generics
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type State = Record<string, unknown>;
+export type State = Record<string, any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Context = Record<string, unknown>;
+export type Context = Record<string, any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertParams = Record<string, unknown>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
