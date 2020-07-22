@@ -9,12 +9,12 @@ import { AlertType, AlertExecutorOptions } from '../../types';
 import { Params, ParamsSchema } from './alert_type_params';
 import { BaseActionContext, addMessages } from './action_context';
 import { TimeSeriesQuery } from './lib/time_series_query';
+import { Service } from '../../types';
+import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../common';
 
 export const ID = '.index-threshold';
 
-import { Service } from '../../types';
 import { CoreQueryParamsSchemaProperties } from './lib/core_query_types';
-
 const ActionGroupId = 'threshold met';
 const ComparatorFns = getComparatorFns();
 export const ComparatorFnNames = new Set(ComparatorFns.keys());
@@ -115,7 +115,7 @@ export function getAlertType(service: Service): AlertType {
       ],
     },
     executor,
-    producer: 'alerting',
+    producer: BUILT_IN_ALERTS_FEATURE_ID,
   };
 
   async function executor(options: AlertExecutorOptions) {

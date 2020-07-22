@@ -27,6 +27,7 @@ import {
   health,
 } from './alert_api';
 import uuid from 'uuid';
+import { ALERTS_FEATURE_ID } from '../../../../alerts/common';
 
 const http = httpServiceMock.createStartContract();
 
@@ -43,9 +44,10 @@ describe('loadAlertTypes', () => {
           state: [{ name: 'var2', description: 'val2' }],
           params: [{ name: 'var3', description: 'val3' }],
         },
-        producer: 'alerting',
+        producer: ALERTS_FEATURE_ID,
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        authorizedConsumers: {},
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);

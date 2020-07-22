@@ -19,7 +19,9 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
       );
       expect(response.status).to.eql(200);
-      const fixtureAlertType = response.body.find((alertType: any) => alertType.id === 'test.noop');
+      const { authorizedConsumers, ...fixtureAlertType } = response.body.find(
+        (alertType: any) => alertType.id === 'test.noop'
+      );
       expect(fixtureAlertType).to.eql({
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
@@ -30,8 +32,9 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           params: [],
           context: [],
         },
-        producer: 'alerting',
+        producer: 'alertsFixture',
       });
+      expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });
 
     it('should return actionVariables with both context and state', async () => {

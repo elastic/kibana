@@ -26,6 +26,7 @@ import { KpiHostsQuery } from '../containers/kpi_hosts';
 import { useFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useWithSource } from '../../common/containers/source';
+import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey } from '../../graphql/types';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
@@ -44,11 +45,15 @@ import { HostsComponentProps } from './types';
 import { filterHostData } from './navigation';
 import { hostsModel } from '../store';
 import { HostsTableType } from '../store/model';
+import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
+import { timelineSelectors } from '../../timelines/store/timeline';
+import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../timelines/store/timeline/model';
 
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
-  ({ filters, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
+  ({ filters, graphEventId, query, setAbsoluteRangeDatePicker, hostsPagePath }) => {
     const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useFullScreen();
     const capabilities = useMlCapabilities();
@@ -93,7 +98,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
         {indicesExist ? (
           <StickyContainer>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal>
+            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
@@ -167,10 +172,22 @@ HostsComponent.displayName = 'HostsComponent';
 const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const mapStateToProps = (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const mapStateToProps = (state: State) => {
+    const hostsPageEventsTimeline: TimelineModel =
+      getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults;
+    const { graphEventId: hostsPageEventsGraphEventId } = hostsPageEventsTimeline;
+
+    const hostsPageExternalAlertsTimeline: TimelineModel =
+      getTimeline(state, TimelineId.hostsPageExternalAlerts) ?? timelineDefaults;
+    const { graphEventId: hostsPageExternalAlertsGraphEventId } = hostsPageExternalAlertsTimeline;
+
+    return {
+      query: getGlobalQuerySelector(state),
+      filters: getGlobalFiltersQuerySelector(state),
+      graphEventId: hostsPageEventsGraphEventId ?? hostsPageExternalAlertsGraphEventId,
+    };
+  };
 
   return mapStateToProps;
 };
