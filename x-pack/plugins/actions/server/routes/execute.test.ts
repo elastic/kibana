@@ -53,13 +53,6 @@ describe('executeActionRoute', () => {
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/action/{id}/_execute"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-read",
-        ],
-      }
-    `);
 
     expect(await handler(context, req, res)).toEqual({ body: executeResult });
 
