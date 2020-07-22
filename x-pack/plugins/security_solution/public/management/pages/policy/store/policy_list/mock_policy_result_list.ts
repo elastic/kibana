@@ -6,6 +6,17 @@
 
 import { GetPolicyListResponse } from '../../types';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import {
+  INGEST_API_AGENT_CONFIGS,
+  INGEST_API_EPM_PACKAGES,
+  INGEST_API_PACKAGE_CONFIGS,
+} from './services/ingest';
+import {
+  GetAgentConfigsResponse,
+  GetPackagesResponse,
+} from '../../../../../../../ingest_manager/common';
+
+const generator = new EndpointDocGenerator('seed');
 
 export const mockPolicyResultList: (options?: {
   total?: number;
@@ -26,7 +37,6 @@ export const mockPolicyResultList: (options?: {
 
   const policies = [];
   for (let index = 0; index < actualCountToReturn; index++) {
-    const generator = new EndpointDocGenerator('seed');
     policies.push(generator.generatePolicyPackageConfig());
   }
   const mock: GetPolicyListResponse = {
@@ -37,4 +47,44 @@ export const mockPolicyResultList: (options?: {
     success: true,
   };
   return mock;
+};
+
+/**
+ * Returns an object comprised of the API path as the key along with a function that
+ * returns that API's result value
+ */
+export const policyListApiPathHandlers = (totalPolicies: number = 1) => {
+  let lastResponseForPolicyResultList: undefined | GetPolicyListResponse;
+
+  return {
+    [INGEST_API_PACKAGE_CONFIGS]: () => {
+      return (lastResponseForPolicyResultList = mockPolicyResultList({ total: totalPolicies }));
+    },
+    /**
+     * Returns the list of agent configuration with IDs that were also included in the call to
+     * Policy Package Configs API
+     */
+    [INGEST_API_AGENT_CONFIGS]: (): GetAgentConfigsResponse => {
+      const items = lastResponseForPolicyResultList
+        ? lastResponseForPolicyResultList.items.map((policy) => {
+            const agentConfig = generator.generateAgentConfig();
+            agentConfig.id = policy.config_id;
+            return agentConfig;
+          })
+        : [generator.generateAgentConfig()];
+      return {
+        items,
+        page: 1,
+        perPage: 10,
+        success: true,
+        total: items.length,
+      };
+    },
+    [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
+      return {
+        response: [generator.generateEpmPackage()],
+        success: true,
+      };
+    },
+  };
 };
