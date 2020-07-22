@@ -176,9 +176,9 @@ export const formatAboutStepData = (
             (list) => list.type !== 'endpoint'
           ),
         ]
-      : {
-          ...(exceptionsList != null ? exceptionsList : []),
-        }) as AboutStepRuleJson['exceptions_list'],
+      : exceptionsList != null
+      ? exceptionsList
+      : []) as AboutStepRuleJson['exceptions_list'],
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore.value,
