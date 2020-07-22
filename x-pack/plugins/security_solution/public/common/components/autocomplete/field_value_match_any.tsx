@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 import { uniq } from 'lodash';
 
@@ -22,6 +22,7 @@ interface AutocompleteFieldMatchAnyProps {
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
+  isRequired?: boolean;
   onChange: (arg: string[]) => void;
 }
 
@@ -33,8 +34,10 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   isLoading,
   isDisabled = false,
   isClearable = false,
+  isRequired = false,
   onChange,
 }): JSX.Element => {
+  const [touched, setIsTouched] = useState(false);
   const [isLoadingSuggestions, suggestions, updateSuggestions] = useFieldValueAutocomplete({
     selectedField,
     operatorType: OperatorTypeEnum.MATCH_ANY,
@@ -76,7 +79,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
 
   const isValid = useMemo((): boolean => {
     const areAnyInvalid = selectedComboOptions.filter(
-      ({ label }) => !validateParams(label, selectedField ? selectedField.type : '')
+      ({ label }) => !validateParams(label, selectedField)
     );
     return areAnyInvalid.length === 0;
   }, [selectedComboOptions, selectedField]);
@@ -92,7 +95,8 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       onChange={handleValuesChange}
       onSearchChange={onSearchChange}
       onCreateOption={onCreateOption}
-      isInvalid={!isValid}
+      isInvalid={isRequired ? touched && (selectedValue.length === 0 || !isValid) : !isValid}
+      onFocus={() => setIsTouched(true)}
       delimiter=", "
       data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"
       fullWidth

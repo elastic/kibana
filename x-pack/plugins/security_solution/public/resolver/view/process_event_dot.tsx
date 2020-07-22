@@ -12,11 +12,12 @@ import { htmlIdGenerator, EuiButton, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } 
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../models/vector2';
-import { Vector2, Matrix3, AdjacentProcessMap } from '../types';
+import { Vector2, Matrix3 } from '../types';
 import { SymbolIds, useResolverTheme, calculateResolverFontSize } from './assets';
-import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { ResolverEvent } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../common/endpoint/models/event';
+import * as processEventModel from '../models/process_event';
 import * as selectors from '../store/selectors';
 import { useResolverQueryParams } from './use_resolver_query_params';
 
@@ -70,10 +71,8 @@ const UnstyledProcessEventDot = React.memo(
     position,
     event,
     projectionMatrix,
-    adjacentNodeMap,
     isProcessTerminated,
-    isProcessOrigin,
-    relatedEventsStatsForProcess,
+    timeAtRender,
   }: {
     /**
      * A `className` string provided by `styled`
@@ -92,24 +91,19 @@ const UnstyledProcessEventDot = React.memo(
      */
     projectionMatrix: Matrix3;
     /**
-     * map of what nodes are "adjacent" to this one in "up, down, previous, next" directions
-     */
-    adjacentNodeMap: AdjacentProcessMap;
-    /**
      * Whether or not to show the process as terminated.
      */
     isProcessTerminated: boolean;
+
     /**
-     * Whether or not to show the process as the originating event.
+     * The time (unix epoch) at render.
      */
-    isProcessOrigin: boolean;
-    /**
-     * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
-     * to provide the user some visibility regarding the contents thereof.
-     * Statistics for the number of related events and alerts for this process node
-     */
-    relatedEventsStatsForProcess?: ResolverNodeStats;
+    timeAtRender: number;
   }) => {
+    const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
+    // This should be unique to each instance of Resolver
+    const htmlIDPrefix = `resolver:${resolverComponentInstanceID}`;
+
     /**
      * Convert the position, which is in 'world' coordinates, to screen coordinates.
      */
@@ -118,12 +112,23 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const selfId = adjacentNodeMap.self;
-    const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
-    const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
+    const selectedNode = useSelector(selectors.selectedNode);
+    const nodeID = processEventModel.uniquePidForProcess(event);
+    const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
 
-    // Entity ID of self
-    const selfEntityId = eventModel.entityId(event);
+    // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
+    // this is used to link nodes via aria attributes
+    const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), [
+      htmlIDPrefix,
+    ]);
+
+    const ariaLevel: number | null = useSelector(selectors.ariaLevel)(nodeID);
+
+    // the node ID to 'flowto'
+    const ariaFlowtoNodeID: string | null = useSelector(selectors.ariaFlowtoNodeID)(timeAtRender)(
+      nodeID
+    );
 
     const isShowingEventActions = xScale > 0.8;
     const isShowingDescriptionText = xScale >= 0.55;
@@ -202,53 +207,48 @@ const UnstyledProcessEventDot = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+    } = cubeAssetsForNode(
+      isProcessTerminated,
+      /**
+       * There is no definition for 'trigger process' yet. return false.
+       */ false
+    );
 
-    const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
+    const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
-      resolverNodeIdGenerator,
-      selfId,
-    ]);
-    const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
-    const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
-    const isActiveDescendant = nodeId === activeDescendantId;
-    const isSelectedDescendant = nodeId === selectedDescendantId;
+    const isAriaCurrent = nodeID === ariaActiveDescendant;
+    const isAriaSelected = nodeID === selectedNode;
 
     const dispatch = useResolverDispatch();
 
     const handleFocus = useCallback(() => {
       dispatch({
         type: 'userFocusedOnResolverNode',
-        payload: {
-          nodeId,
-        },
+        payload: nodeID,
       });
-    }, [dispatch, nodeId]);
+    }, [dispatch, nodeID]);
 
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
         type: 'userRequestedRelatedEventData',
-        payload: selfId,
+        payload: nodeID,
       });
-    }, [dispatch, selfId]);
+    }, [dispatch, nodeID]);
 
     const { pushToQueryParams } = useResolverQueryParams();
 
     const handleClick = useCallback(() => {
       if (animationTarget.current !== null) {
+        // This works but the types are missing in the typescript DOM lib
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (animationTarget.current as any).beginElement();
       }
       dispatch({
         type: 'userSelectedResolverNode',
-        payload: {
-          nodeId,
-          selectedProcessId: selfId,
-        },
+        payload: nodeID,
       });
-      pushToQueryParams({ crumbId: selfEntityId, crumbEvent: 'all' });
-    }, [animationTarget, dispatch, nodeId, selfEntityId, pushToQueryParams, selfId]);
+      pushToQueryParams({ crumbId: nodeID, crumbEvent: '' });
+    }, [animationTarget, dispatch, pushToQueryParams, nodeID]);
 
     /**
      * Enumerates the stats for related events to display with the node as options,
@@ -259,15 +259,13 @@ const UnstyledProcessEventDot = React.memo(
     const relatedEventOptions = useMemo(() => {
       const relatedStatsList = [];
 
-      if (!relatedEventsStatsForProcess) {
+      if (!relatedEventStats) {
         // Return an empty set of options if there are no stats to report
         return [];
       }
       // If we have entries to show, map them into options to display in the selectable list
 
-      for (const [category, total] of Object.entries(
-        relatedEventsStatsForProcess.events.byCategory
-      )) {
+      for (const [category, total] of Object.entries(relatedEventStats.events.byCategory)) {
         relatedStatsList.push({
           prefix: <EuiI18nNumber value={total || 0} />,
           optionTitle: category,
@@ -280,14 +278,14 @@ const UnstyledProcessEventDot = React.memo(
               },
             });
 
-            pushToQueryParams({ crumbId: selfEntityId, crumbEvent: category });
+            pushToQueryParams({ crumbId: nodeID, crumbEvent: category });
           },
         });
       }
       return relatedStatsList;
-    }, [relatedEventsStatsForProcess, dispatch, event, pushToQueryParams, selfEntityId]);
+    }, [relatedEventStats, dispatch, event, pushToQueryParams, nodeID]);
 
-    const relatedEventStatusOrOptions = !relatedEventsStatsForProcess
+    const relatedEventStatusOrOptions = !relatedEventStats
       ? subMenuAssets.initialMenuStatus
       : relatedEventOptions;
 
@@ -302,15 +300,14 @@ const UnstyledProcessEventDot = React.memo(
         data-test-subj={'resolverNode'}
         className={`${className} kbn-resetFocusState`}
         role="treeitem"
-        aria-level={adjacentNodeMap.level}
-        aria-flowto={adjacentNodeMap.nextSibling === null ? undefined : adjacentNodeMap.nextSibling}
-        aria-labelledby={labelId}
-        aria-describedby={descriptionId}
-        aria-haspopup={'true'}
-        aria-current={isActiveDescendant ? 'true' : undefined}
-        aria-selected={isSelectedDescendant ? 'true' : undefined}
+        aria-level={ariaLevel === null ? undefined : ariaLevel}
+        aria-flowto={ariaFlowtoNodeID === null ? undefined : nodeHTMLID(ariaFlowtoNodeID)}
+        aria-labelledby={labelHTMLID}
+        aria-haspopup="true"
+        aria-current={isAriaCurrent ? 'true' : undefined}
+        aria-selected={isAriaSelected ? 'true' : undefined}
         style={nodeViewportStyle}
-        id={nodeId}
+        id={nodeHTMLID(nodeID)}
         tabIndex={-1}
       >
         <svg
@@ -373,8 +370,7 @@ const UnstyledProcessEventDot = React.memo(
           </StyledDescriptionText>
           <div
             className={xScale >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
-            data-test-subject="nodeLabel"
-            id={labelId}
+            id={labelHTMLID}
             onClick={handleClick}
             onFocus={handleFocus}
             tabIndex={-1}
@@ -386,9 +382,7 @@ const UnstyledProcessEventDot = React.memo(
           >
             <EuiButton
               color={labelButtonFill}
-              data-test-subject="nodeLabel"
               fill={isLabelFilled}
-              id={labelId}
               size="s"
               style={{
                 maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
@@ -411,7 +405,7 @@ const UnstyledProcessEventDot = React.memo(
               alignSelf: 'flex-start',
               background: colorMap.resolverBackground,
               display: `${isShowingEventActions ? 'flex' : 'none'}`,
-              margin: 0,
+              margin: '2px 0 0 0',
               padding: 0,
             }}
           >
@@ -423,6 +417,7 @@ const UnstyledProcessEventDot = React.memo(
                   buttonFill={colorMap.resolverBackground}
                   menuAction={handleRelatedEventRequest}
                   menuTitle={subMenuAssets.relatedEvents.title}
+                  projectionMatrix={projectionMatrix}
                   optionsWithActions={relatedEventStatusOrOptions}
                 />
               )}
