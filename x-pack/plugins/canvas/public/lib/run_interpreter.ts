@@ -17,10 +17,11 @@ interface Options {
  */
 export async function interpretAst(
   ast: ExpressionAstExpression,
-  variables: Record<string, any>
+  variables: Record<string, any>,
+  input: any
 ): Promise<ExpressionValue> {
   const context = { variables };
-  return await expressionsService.getService().execute(ast, null, context).getData();
+  return await expressionsService.getService().execute(ast, input, context).getData();
 }
 
 /**
