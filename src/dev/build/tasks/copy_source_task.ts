@@ -37,7 +37,6 @@ export const CopySource: Task = {
         '!src/legacy/core_plugins/console/public/tests/**',
         '!src/cli/cluster/**',
         '!src/cli/repl/**',
-        '!src/es_archiver/**',
         '!src/functional_test_runner/**',
         '!src/dev/**',
         'typings/**',
