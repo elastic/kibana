@@ -33,7 +33,7 @@ function errorAttempts(task: TaskInstance): Err<OperationError<TaskInstance, Err
   });
 }
 
-describe('Bulk Operation Buffer', () => {
+describe.skip('Bulk Operation Buffer', () => {
   describe('createBuffer()', () => {
     test('batches up multiple Operation calls', async () => {
       const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
