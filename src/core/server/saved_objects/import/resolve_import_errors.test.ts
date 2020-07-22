@@ -66,7 +66,7 @@ describe('#importSavedObjectsFromStream', () => {
       importIdMap: new Map(),
     });
     getMockFn(regenerateIds).mockReturnValue(new Map());
-    getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects: [] });
+    getMockFn(validateReferences).mockResolvedValue({ errors: [] });
     getMockFn(checkConflicts).mockResolvedValue({
       errors: [],
       filteredObjects: [],
@@ -232,12 +232,16 @@ describe('#importSavedObjectsFromStream', () => {
       const createNewCopies = (Symbol() as unknown) as boolean;
       const retries = [createRetry()];
       const options = setupOptions(retries, createNewCopies);
-      const filteredObjects = [createObject()];
-      getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
+      const collectedObjects = [createObject()];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(), // doesn't matter
+      });
 
       await resolveSavedObjectsImportErrors(options);
       const checkConflictsParams = {
-        objects: filteredObjects,
+        objects: collectedObjects,
         savedObjectsClient,
         namespace,
         retries,
@@ -265,15 +269,15 @@ describe('#importSavedObjectsFromStream', () => {
     test('splits objects to ovewrite from those not to overwrite', async () => {
       const retries = [createRetry()];
       const options = setupOptions(retries);
-      const filteredObjects = [createObject()];
-      getMockFn(checkConflicts).mockResolvedValue({
+      const collectedObjects = [createObject()];
+      getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
-        filteredObjects,
-        importIdMap: new Map(),
+        collectedObjects,
+        importIdMap: new Map(), // doesn't matter
       });
 
       await resolveSavedObjectsImportErrors(options);
-      expect(splitOverwrites).toHaveBeenCalledWith(filteredObjects, retries);
+      expect(splitOverwrites).toHaveBeenCalledWith(collectedObjects, retries);
     });
 
     describe('with createNewCopies disabled', () => {
@@ -300,7 +304,6 @@ describe('#importSavedObjectsFromStream', () => {
         });
         getMockFn(validateReferences).mockResolvedValue({
           errors: [errors[1]],
-          filteredObjects: [], // doesn't matter
         });
         getMockFn(checkConflicts).mockResolvedValue({
           errors: [errors[2]],
@@ -368,7 +371,6 @@ describe('#importSavedObjectsFromStream', () => {
         });
         getMockFn(validateReferences).mockResolvedValue({
           errors: [errors[1]],
-          filteredObjects: [], // doesn't matter
         });
         getMockFn(regenerateIds).mockReturnValue(
           new Map([
@@ -491,7 +493,7 @@ describe('#importSavedObjectsFromStream', () => {
         collectedObjects: [],
         importIdMap: new Map(), // doesn't matter
       });
-      getMockFn(validateReferences).mockResolvedValue({ errors: [errors[1]], filteredObjects: [] });
+      getMockFn(validateReferences).mockResolvedValue({ errors: [errors[1]] });
       getMockFn(createSavedObjects).mockResolvedValueOnce({
         errors: [errors[2]],
         createdObjects: [],

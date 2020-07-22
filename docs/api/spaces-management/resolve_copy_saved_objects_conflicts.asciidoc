@@ -91,6 +91,9 @@ Execute the <<spaces-api-copy-saved-objects,copy saved objects to space API>>, w
   `errors`:::
     (Optional, array) The errors that occurred during the copy operation. When errors are reported, the `success` flag is set to `false`.
 +
+NOTE: One object may result in multiple errors which require separate steps to resolve (for instance, a `missing_references` error and a
+`conflict` error).
++
 
 .Properties of `errors`
 [%collapsible%open]

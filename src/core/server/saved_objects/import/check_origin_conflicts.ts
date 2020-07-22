@@ -160,11 +160,9 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     }, new Map<string, Array<SavedObject<{ title?: string }>>>());
 
   const errors: SavedObjectsImportError[] = [];
-  const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
   checkOriginConflictResults.forEach((result) => {
     if (!isLeft(result)) {
-      filteredObjects.push(result.value);
       return;
     }
     const key = getAmbiguousConflictSourceKey(result.value);
@@ -177,7 +175,6 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
       // This is a simple "inexact match" result -- a single import object has a single destination conflict.
       if (params.ignoreRegularConflicts) {
         importIdMap.set(`${type}:${id}`, { id: destinations[0].id });
-        filteredObjects.push(object);
       } else {
         const { title } = attributes;
         errors.push({
@@ -201,7 +198,6 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
       // In the case of ambiguous source conflicts, don't treat them as errors; instead, regenerate the object ID and reset its origin
       // (e.g., the same outcome as if `createNewCopies` was enabled for the entire import operation).
       importIdMap.set(`${type}:${id}`, { id: uuidv4(), omitOriginId: true });
-      filteredObjects.push(object);
       return;
     }
     const { title } = attributes;
@@ -217,11 +213,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     });
   });
 
-  return {
-    errors,
-    filteredObjects,
-    importIdMap,
-  };
+  return { errors, importIdMap };
 }
 
 /**

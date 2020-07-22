@@ -37,7 +37,14 @@ const renderIcon = (props: Props) => {
     return <EuiLoadingSpinner data-test-subj={getDataTestSubj('loading')} />;
   }
 
-  if (summarizedCopyResult.successful) {
+  const {
+    successful,
+    hasUnresolvableErrors,
+    hasMissingReferences,
+    hasConflicts,
+  } = summarizedCopyResult;
+
+  if (successful) {
     return (
       <EuiIconTip
         type={'check'}
@@ -55,7 +62,8 @@ const renderIcon = (props: Props) => {
       />
     );
   }
-  if (summarizedCopyResult.hasUnresolvableErrors) {
+
+  if (hasUnresolvableErrors) {
     return (
       <EuiIconTip
         type={'cross'}
@@ -73,7 +81,27 @@ const renderIcon = (props: Props) => {
       />
     );
   }
-  if (summarizedCopyResult.hasConflicts) {
+
+  const missingReferences = hasMissingReferences ? (
+    <span className="spcCopyToSpace__missingReferencesIcon">
+      <EuiIconTip
+        type={'link'}
+        color={'warning'}
+        iconProps={{
+          'data-test-subj': getDataTestSubj('missingReferences'),
+        }}
+        content={
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.copyStatusSummary.missingReferencesMessage"
+            defaultMessage="One or more missing references detected in the {space} space. Expand this section for details."
+            values={{ space: space.name }}
+          />
+        }
+      />
+    </span>
+  ) : null;
+
+  if (hasConflicts) {
     return (
       <Fragment>
         <ResolveAllConflicts
@@ -96,10 +124,12 @@ const renderIcon = (props: Props) => {
             />
           }
         />
+        {missingReferences}
       </Fragment>
     );
   }
-  return null;
+
+  return missingReferences;
 };
 
 export const CopyStatusSummaryIndicator = (props: Props) => {

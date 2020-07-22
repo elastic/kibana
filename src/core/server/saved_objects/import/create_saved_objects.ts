@@ -46,18 +46,25 @@ export const createSavedObjects = async <T>({
   namespace,
   overwrite,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
+  // filter out any objects that resulted in errors
+  const errorSet = accumulatedErrors.reduce(
+    (acc, { type, id }) => acc.add(`${type}:${id}`),
+    new Set<string>()
+  );
+  const filteredObjects = objects.filter(({ type, id }) => !errorSet.has(`${type}:${id}`));
+
   // exit early if there are no objects to create
-  if (objects.length === 0) {
+  if (filteredObjects.length === 0) {
     return { createdObjects: [], errors: [] };
   }
 
   // generate a map of the raw object IDs
-  const objectIdMap = objects.reduce(
+  const objectIdMap = filteredObjects.reduce(
     (map, object) => map.set(`${object.type}:${object.id}`, object),
     new Map<string, SavedObject<T>>()
   );
 
-  const objectsToCreate = objects.map((object) => {
+  const objectsToCreate = filteredObjects.map((object) => {
     // use the import ID map to ensure that each reference is being created with the correct ID
     const references = object.references?.map((reference) => {
       const { type, id } = reference;

@@ -46,7 +46,7 @@ export async function collectSavedObjects({
   const errors: SavedObjectsImportError[] = [];
   const entries: Array<{ type: string; id: string }> = [];
   const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
-  const collectedObjects: Array<SavedObject<{ title: string }>> = await createPromiseFromStreams([
+  const collectedObjects: Array<SavedObject<{ title?: string }>> = await createPromiseFromStreams([
     readStream,
     createLimitStream(objectLimit),
     createFilterStream<SavedObject<{ title: string }>>((obj) => {

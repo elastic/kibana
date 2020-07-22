@@ -25,13 +25,11 @@ export const CopyStatusIndicator = (props: Props) => {
   const objectResult = summarizedCopyResult.objects.find(
     (o) => o.type === props.object!.type && o.id === props.object!.id
   ) as SummarizedSavedObjectResult;
+  const { conflict, hasMissingReferences, hasUnresolvableErrors } = objectResult;
+  const hasConflicts = conflict && !props.overwritePending;
 
-  const successful =
-    !objectResult.hasUnresolvableErrors &&
-    (!objectResult.conflict || props.overwritePending === true);
+  const successful = !hasMissingReferences && !hasUnresolvableErrors && !hasConflicts;
   const successColor = props.overwritePending ? 'warning' : 'success';
-  const hasConflicts = objectResult.conflict !== undefined;
-  const hasUnresolvableErrors = objectResult.hasUnresolvableErrors;
 
   if (successful) {
     const message = props.overwritePending ? (
@@ -86,5 +84,24 @@ export const CopyStatusIndicator = (props: Props) => {
       />
     );
   }
-  return null;
+  return hasMissingReferences ? (
+    <EuiIconTip
+      type={'link'}
+      color={'warning'}
+      data-test-subj={`cts-object-result-missing-references-${objectResult.id}`}
+      content={
+        conflict ? (
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesOverwriteMessage"
+            defaultMessage="This object has missing references; it will be overwritten, but one or more of its references are broken. Disable 'Overwrite' to cancel this operation."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesMessage"
+            defaultMessage="Saved object has missing references; it will be copied, but one or more of its references are broken."
+          />
+        )
+      }
+    />
+  ) : null;
 };

@@ -75,6 +75,9 @@ You can request to overwrite any objects that already exist in the target space 
   `errors`:::
     (Optional, array) The errors that occurred during the copy operation. When errors are reported, the `success` flag is set to `false`.
 +
+NOTE: One object may result in multiple errors which require separate steps to resolve (for instance, a `missing_references` error and a
+`conflict` error).
++
 .Properties of `errors`
 [%collapsible%open]
 ======

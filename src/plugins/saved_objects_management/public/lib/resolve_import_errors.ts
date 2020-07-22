@@ -59,6 +59,23 @@ const isAmbiguousConflict = (
 const isAnyConflict = (failure: FailedImport): failure is FailedImportConflict =>
   isConflict(failure) || isAmbiguousConflict(failure);
 
+/**
+ * The server-side code was updated to include missing_references errors and conflict/ambiguous_conflict errors for the same object in the
+ * same response. This client-side code was not built to handle multiple errors for a single import object, though. We simply filter out any
+ * conflicts if a missing_references error for the same object is present. This means that the missing_references error will get resolved
+ * or skipped first, and any conflicts still present will be returned again and resolved with another API call.
+ */
+const filterFailedImports = (failures: FailedImport[]) => {
+  const missingReferences = failures
+    .filter(({ error: { type } }) => type === 'missing_references')
+    .reduce((acc, { obj: { type, id } }) => acc.add(`${type}:${id}`), new Set<string>());
+  return failures.filter(
+    (failure) =>
+      !isAnyConflict(failure) ||
+      (isAnyConflict(failure) && !missingReferences.has(`${failure.obj.type}:${failure.obj.id}`))
+  );
+};
+
 async function callResolveImportErrorsApi(
   http: HttpStart,
   file: File,
@@ -183,31 +200,36 @@ export async function resolveImportErrors({
 
   // Loop until all issues are resolved
   while (failedImports.some((failure) => RESOLVABLE_ERRORS.includes(failure.error.type))) {
+    // Filter out multiple errors for the same object
+    const filteredFailures = filterFailedImports(failedImports);
+
     // Resolve regular conflicts
     if (isOverwriteAllChecked) {
-      failedImports.filter(isConflict).forEach(({ obj: { type, id }, error: { destinationId } }) =>
-        retryDecisionCache.set(`${type}:${id}`, {
-          retry: true,
-          options: {
-            overwrite: true,
-            ...(destinationId && { destinationId }),
-          },
-        })
-      );
+      filteredFailures
+        .filter(isConflict)
+        .forEach(({ obj: { type, id }, error: { destinationId } }) =>
+          retryDecisionCache.set(`${type}:${id}`, {
+            retry: true,
+            options: {
+              overwrite: true,
+              ...(destinationId && { destinationId }),
+            },
+          })
+        );
     }
 
     // prompt the user for each conflict
     const result = await getConflictResolutions(
       isOverwriteAllChecked
-        ? failedImports.filter(isAmbiguousConflict).filter(doesntHaveRetryDecision)
-        : failedImports.filter(isAnyConflict).filter(doesntHaveRetryDecision)
+        ? filteredFailures.filter(isAmbiguousConflict).filter(doesntHaveRetryDecision)
+        : filteredFailures.filter(isAnyConflict).filter(doesntHaveRetryDecision)
     );
     for (const key of Object.keys(result)) {
       retryDecisionCache.set(key, result[key]);
     }
 
     // Build retries array
-    const failRetries = failedImports
+    const failRetries = filteredFailures
       .map(callMapImportFailure)
       .filter((obj) => !!obj) as RetryObject[];
     const successRetries = successfulImports.map<RetryObject>(
@@ -230,7 +252,7 @@ export async function resolveImportErrors({
     // Scenario where there were no success results, all errors were skipped, and nothing to retry
     if (retries.length === 0) {
       // Cancelled overwrites aren't failures anymore
-      failedImports = failedImports.filter(isNotSkipped);
+      failedImports = filteredFailures.filter(isNotSkipped);
       break;
     }
 

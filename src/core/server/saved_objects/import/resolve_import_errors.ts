@@ -109,7 +109,7 @@ export async function resolveSavedObjectsImportErrors({
 
   // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
   const checkConflictsParams = {
-    objects: validateReferencesResult.filteredObjects,
+    objects: objectsToResolve,
     savedObjectsClient,
     namespace,
     retries,
@@ -165,10 +165,7 @@ export async function resolveSavedObjectsImportErrors({
       }),
     ];
   };
-  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
-    checkConflictsResult.filteredObjects,
-    retries
-  );
+  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(objectsToResolve, retries);
   await bulkCreateObjects(objectsToOverwrite, true);
   await bulkCreateObjects(objectsToNotOverwrite);
 

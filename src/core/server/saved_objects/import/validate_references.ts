@@ -104,10 +104,10 @@ export async function validateReferences(
   );
 
   // Filter out objects with missing references, add to error object
-  const filteredObjects = savedObjects.filter(({ type, id, references, attributes }) => {
+  savedObjects.forEach(({ type, id, references, attributes }) => {
     if (objectsToSkip.has(`${type}:${id}`)) {
       // skip objects with retries that have specified `ignoreMissingReferences`
-      return true;
+      return;
     }
 
     const missingReferences = [];
@@ -118,7 +118,7 @@ export async function validateReferences(
       }
     }
     if (missingReferences.length === 0) {
-      return true;
+      return;
     }
     const { title } = attributes;
     errorMap[`${type}:${id}`] = {
@@ -128,11 +128,9 @@ export async function validateReferences(
       meta: { title },
       error: { type: 'missing_references', references: missingReferences },
     };
-    return false;
   });
 
   return {
     errors: Object.values(errorMap),
-    filteredObjects,
   };
 }

@@ -54,6 +54,9 @@ The request body must include the multipart/form-data type.
 
 `errors`::
   (array) Indicates the import was unsuccessful and specifies the objects that failed to import.
++
+NOTE: One object may result in multiple errors which require separate steps to resolve (for instance, a `missing_references` error and a
+`conflict` error).
 
 `successResults`::
   (array) Indicates the objects that were imported successfully, with any metadata if applicable.

@@ -65,13 +65,12 @@ export async function importSavedObjectsFromStream({
   );
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
 
-  let objectsToCreate = validateReferencesResult.filteredObjects;
   if (createNewCopies) {
     importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
-      objects: validateReferencesResult.filteredObjects,
+      objects: collectSavedObjectsResult.collectedObjects,
       savedObjectsClient,
       namespace,
       ignoreRegularConflicts: overwrite,
@@ -92,12 +91,11 @@ export async function importSavedObjectsFromStream({
     const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
-    objectsToCreate = checkOriginConflictsResult.filteredObjects;
   }
 
   // Create objects in bulk
   const createSavedObjectsParams = {
-    objects: objectsToCreate,
+    objects: collectSavedObjectsResult.collectedObjects,
     accumulatedErrors: errorAccumulator,
     savedObjectsClient,
     importIdMap,

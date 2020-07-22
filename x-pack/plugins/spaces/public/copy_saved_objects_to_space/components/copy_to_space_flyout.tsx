@@ -105,20 +105,39 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
       setCopyResult(processedResult);
 
       // retry all successful imports
-      const getSuccessRetries = (response: ProcessedImportResponse): ImportRetry[] => {
+      const getAutomaticRetries = (response: ProcessedImportResponse): ImportRetry[] => {
         const { failedImports, successfulImports } = response;
         if (!failedImports.length) {
           // if no imports failed for this space, return an empty array
           return [];
         }
+
+        // get missing references failures that do not also have a conflict
+        const nonMissingReferencesFailures = failedImports
+          .filter(({ error }) => error.type !== 'missing_references')
+          .reduce((acc, { obj: { type, id } }) => acc.add(`${type}:${id}`), new Set<string>());
+        const missingReferencesToRetry = failedImports.filter(
+          ({ obj: { type, id }, error }) =>
+            error.type === 'missing_references' &&
+            !nonMissingReferencesFailures.has(`${type}:${id}`)
+        );
+
         // otherwise, some imports failed for this space, so retry any successful imports (if any)
-        return successfulImports.map(({ type, id, destinationId, createNewCopy }) => {
-          const { overwrite } = copyOptions;
-          return { type, id, overwrite, destinationId, createNewCopy };
-        });
+        const { overwrite } = copyOptions;
+        return [
+          ...successfulImports.map(({ type, id, destinationId, createNewCopy }) => {
+            return { type, id, overwrite, destinationId, createNewCopy };
+          }),
+          ...missingReferencesToRetry.map(({ obj: { type, id } }) => ({
+            type,
+            id,
+            overwrite,
+            ignoreMissingReferences: true,
+          })),
+        ];
       };
-      const successRetries = mapValues(processedResult, getSuccessRetries);
-      setRetries(successRetries);
+      const automaticRetries = mapValues(processedResult, getAutomaticRetries);
+      setRetries(automaticRetries);
     } catch (e) {
       setCopyInProgress(false);
       toastNotifications.addError(e, {
@@ -131,9 +150,9 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
 
   async function finishCopy() {
     // if any retries are present, attempt to resolve errors again
-    const needsConflictResolution = Object.values(retries).some((spaceRetry) => spaceRetry.length);
+    const needsErrorResolution = Object.values(retries).some((spaceRetry) => spaceRetry.length);
 
-    if (needsConflictResolution) {
+    if (needsErrorResolution) {
       setConflictResolutionInProgress(true);
       try {
         await spacesManager.resolveCopySavedObjectsErrors(

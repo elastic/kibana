@@ -157,6 +157,15 @@ describe('#createSavedObjects', () => {
     };
   };
 
+  test('filters out objects that have errors present', async () => {
+    const error = { type: obj1.type, id: obj1.id } as SavedObjectsImportError;
+    const options = setupParams({ objects: [obj1], accumulatedErrors: [error] });
+
+    const createSavedObjectsResult = await createSavedObjects(options);
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(createSavedObjectsResult).toEqual({ createdObjects: [], errors: [] });
+  });
+
   test('exits early if there are no objects to create', async () => {
     const options = setupParams({ objects: [] });
 

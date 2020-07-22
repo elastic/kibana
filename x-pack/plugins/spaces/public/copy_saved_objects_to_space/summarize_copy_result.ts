@@ -20,12 +20,14 @@ export interface SummarizedSavedObjectResult {
   name: string;
   icon: string;
   conflict?: FailedImportConflict;
+  hasMissingReferences: boolean;
   hasUnresolvableErrors: boolean;
 }
 
 interface SuccessfulResponse {
   successful: true;
   hasConflicts: false;
+  hasMissingReferences: false;
   hasUnresolvableErrors: false;
   objects: SummarizedSavedObjectResult[];
   processing: false;
@@ -33,6 +35,7 @@ interface SuccessfulResponse {
 interface UnsuccessfulResponse {
   successful: false;
   hasConflicts: boolean;
+  hasMissingReferences: boolean;
   hasUnresolvableErrors: boolean;
   objects: SummarizedSavedObjectResult[];
   processing: false;
@@ -48,8 +51,11 @@ interface FailedImportConflict {
   error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError;
 }
 
-const isConflict = (failure: FailedImport): failure is FailedImportConflict =>
+const isAnyConflict = (failure: FailedImport): failure is FailedImportConflict =>
   failure.error.type === 'conflict' || failure.error.type === 'ambiguous_conflict';
+const isMissingReferences = (failure: FailedImport) => failure.error.type === 'missing_references';
+const isUnresolvableError = (failure: FailedImport) =>
+  !isAnyConflict(failure) && !isMissingReferences(failure);
 const typeComparator = (a: { type: string }, b: { type: string }) =>
   a.type > b.type ? 1 : a.type < b.type ? -1 : 0;
 
@@ -62,15 +68,19 @@ export function summarizeCopyResult(
   savedObject: SavedObjectsManagementRecord,
   copyResult: ProcessedImportResponse | undefined
 ): SummarizedCopyToSpaceResult {
-  const conflicts = copyResult?.failedImports.filter(isConflict) ?? [];
+  const conflicts = copyResult?.failedImports.filter(isAnyConflict) ?? [];
+  const missingReferences = copyResult?.failedImports.filter(isMissingReferences) ?? [];
   const unresolvableErrors =
-    copyResult?.failedImports.filter((failed) => !isConflict(failed)) ?? [];
+    copyResult?.failedImports.filter((failed) => isUnresolvableError(failed)) ?? [];
   const getErrorFields = ({ type, id }: { type: string; id: string }) => {
     const conflict = conflicts.find(({ obj }) => obj.type === type && obj.id === id);
+    const hasMissingReferences = missingReferences.some(
+      ({ obj }) => obj.type === type && obj.id === id
+    );
     const hasUnresolvableErrors = unresolvableErrors.some(
       ({ obj }) => obj.type === type && obj.id === id
     );
-    return { conflict, hasUnresolvableErrors };
+    return { conflict, hasMissingReferences, hasUnresolvableErrors };
   };
 
   const objectMap = new Map<string, SummarizedSavedObjectResult>();
@@ -116,19 +126,20 @@ export function summarizeCopyResult(
       successful,
       hasConflicts: false,
       objects: Array.from(objectMap.values()),
+      hasMissingReferences: false,
       hasUnresolvableErrors: false,
       processing: false,
     };
   }
 
   const hasConflicts = conflicts.length > 0;
-  const hasUnresolvableErrors = Boolean(
-    copyResult?.failedImports.some((failed) => !isConflict(failed))
-  );
+  const hasMissingReferences = missingReferences.length > 0;
+  const hasUnresolvableErrors = unresolvableErrors.length > 0;
   return {
     successful,
     hasConflicts,
     objects: Array.from(objectMap.values()),
+    hasMissingReferences,
     hasUnresolvableErrors,
     processing: false,
   };

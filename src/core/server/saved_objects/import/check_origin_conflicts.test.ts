@@ -203,7 +203,6 @@ describe('#checkOriginConflicts', () => {
         const checkOriginConflictsResult = await checkOriginConflicts(params);
 
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map(),
           errors: [],
         };
@@ -232,7 +231,6 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map(),
           errors: [],
         };
@@ -258,7 +256,6 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map(),
           errors: [],
         };
@@ -287,7 +284,6 @@ describe('#checkOriginConflicts', () => {
           const params = setup(false);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            filteredObjects: [],
             importIdMap: new Map(),
             errors: [createConflictError(obj1, objA.id), createConflictError(obj2, objB.id)],
           };
@@ -298,7 +294,6 @@ describe('#checkOriginConflicts', () => {
           const params = setup(true);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            filteredObjects: objects,
             importIdMap: new Map([
               [`${obj1.type}:${obj1.id}`, { id: objA.id }],
               [`${obj2.type}:${obj2.id}`, { id: objB.id }],
@@ -340,7 +335,6 @@ describe('#checkOriginConflicts', () => {
           const params = setup(false);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            filteredObjects: [],
             importIdMap: new Map(),
             errors: [createConflictError(obj2, objA.id), createConflictError(obj4, objB.id)],
           };
@@ -351,7 +345,6 @@ describe('#checkOriginConflicts', () => {
           const params = setup(true);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            filteredObjects: objects,
             importIdMap: new Map([
               [`${obj2.type}:${obj2.id}`, { id: objA.id }],
               [`${obj4.type}:${obj4.id}`, { id: objB.id }],
@@ -382,7 +375,6 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map([
             [`${obj1.type}:${obj1.id}`, { id: 'uuidv4', omitOriginId: true }],
             [`${obj2.type}:${obj2.id}`, { id: 'uuidv4', omitOriginId: true }],
@@ -411,7 +403,6 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: [],
           importIdMap: new Map(),
           errors: [
             createAmbiguousConflictError(obj1, [objA, objB]),
@@ -442,7 +433,6 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: objects,
           importIdMap: new Map([
             [`${obj1.type}:${obj1.id}`, { id: 'uuidv4', omitOriginId: true }],
             [`${obj2.type}:${obj2.id}`, { id: 'uuidv4', omitOriginId: true }],
@@ -493,7 +483,6 @@ describe('#checkOriginConflicts', () => {
         const params = setup(false);
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: [obj1, obj2, obj4, obj7, obj8],
           importIdMap: new Map([
             [`${obj7.type}:${obj7.id}`, { id: 'uuidv4', omitOriginId: true }],
             [`${obj8.type}:${obj8.id}`, { id: 'uuidv4', omitOriginId: true }],
@@ -511,7 +500,6 @@ describe('#checkOriginConflicts', () => {
         const params = setup(true);
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          filteredObjects: [obj1, obj2, obj4, obj5, obj7, obj8],
           importIdMap: new Map([
             [`${obj5.type}:${obj5.id}`, { id: objA.id }],
             [`${obj7.type}:${obj7.id}`, { id: 'uuidv4', omitOriginId: true }],

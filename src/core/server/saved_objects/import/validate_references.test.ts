@@ -257,7 +257,6 @@ describe('validateReferences()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "errors": Array [],
-        "filteredObjects": Array [],
       }
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
@@ -403,14 +402,6 @@ describe('validateReferences()', () => {
             "type": "visualization",
           },
         ],
-        "filteredObjects": Array [
-          Object {
-            "attributes": Object {},
-            "id": "1",
-            "references": Array [],
-            "type": "visualization",
-          },
-        ],
       }
     `);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
@@ -489,7 +480,6 @@ describe('validateReferences()', () => {
     ];
     const result = await validateReferences(savedObjects, savedObjectsClient, undefined, retries);
     expect(result.errors).toHaveLength(0);
-    expect(result.filteredObjects).toHaveLength(1);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
@@ -522,20 +512,6 @@ describe('validateReferences()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "errors": Array [],
-        "filteredObjects": Array [
-          Object {
-            "attributes": Object {},
-            "id": "2",
-            "references": Array [
-              Object {
-                "id": "1",
-                "name": "ref_0",
-                "type": "index-pattern",
-              },
-            ],
-            "type": "visualization",
-          },
-        ],
       }
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
@@ -566,26 +542,6 @@ describe('validateReferences()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "errors": Array [],
-        "filteredObjects": Array [
-          Object {
-            "attributes": Object {},
-            "id": "1",
-            "references": Array [],
-            "type": "index-pattern",
-          },
-          Object {
-            "attributes": Object {},
-            "id": "2",
-            "references": Array [
-              Object {
-                "id": "1",
-                "name": "ref_0",
-                "type": "index-pattern",
-              },
-            ],
-            "type": "visualization",
-          },
-        ],
       }
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
@@ -615,25 +571,6 @@ describe('validateReferences()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "errors": Array [],
-        "filteredObjects": Array [
-          Object {
-            "attributes": Object {},
-            "id": "1",
-            "references": Array [
-              Object {
-                "id": "2",
-                "name": "ref_0",
-                "type": "visualization",
-              },
-              Object {
-                "id": "3",
-                "name": "ref_1",
-                "type": "other-type",
-              },
-            ],
-            "type": "dashboard",
-          },
-        ],
       }
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);

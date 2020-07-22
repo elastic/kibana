@@ -72,26 +72,36 @@ const createFailureMissingReferences = ({ type, id, meta }: ObjectProperties): F
     error: { type: 'missing_references', references: [] },
   };
 };
+const createFailureUnresolvable = ({ type, id, meta }: ObjectProperties): FailedImport => {
+  return {
+    obj: { type, id, meta },
+    // currently, unresolvable errors are 'unsupported_type' and 'unknown'; either would work for this test case
+    error: { type: 'unknown', message: 'some error message', statusCode: 400 },
+  };
+};
 
 const createCopyResult = (
-  opts: { withConflicts?: boolean; withUnresolvableError?: boolean } = {}
+  opts: {
+    withConflicts?: boolean;
+    withMissingReferencesError?: boolean;
+    withUnresolvableError?: boolean;
+  } = {}
 ) => {
   const successfulImports: ProcessedImportResponse['successfulImports'] = [
     createSuccessResult(OBJECTS.MY_DASHBOARD),
   ];
   const failedImports: ProcessedImportResponse['failedImports'] = [];
   if (opts.withConflicts) {
-    failedImports.push(
-      createFailureConflict(OBJECTS.VISUALIZATION_FOO),
-      createFailureConflict(OBJECTS.INDEX_PATTERN_FOO)
-    );
+    failedImports.push(createFailureConflict(OBJECTS.VISUALIZATION_FOO));
   } else {
-    successfulImports.push(
-      createSuccessResult(OBJECTS.VISUALIZATION_FOO),
-      createSuccessResult(OBJECTS.INDEX_PATTERN_FOO)
-    );
+    successfulImports.push(createSuccessResult(OBJECTS.VISUALIZATION_FOO));
   }
   if (opts.withUnresolvableError) {
+    failedImports.push(createFailureUnresolvable(OBJECTS.INDEX_PATTERN_FOO));
+  } else {
+    successfulImports.push(createSuccessResult(OBJECTS.INDEX_PATTERN_FOO));
+  }
+  if (opts.withMissingReferencesError) {
     failedImports.push(createFailureMissingReferences(OBJECTS.VISUALIZATION_BAR));
     // INDEX_PATTERN_BAR is not present in the source space, therefore VISUALIZATION_BAR resulted in a missing_references error
   } else {
@@ -119,6 +129,7 @@ describe('summarizeCopyResult', () => {
         "objects": Array [
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "dashboardApp",
             "id": "foo",
@@ -138,36 +149,17 @@ describe('summarizeCopyResult', () => {
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": true,
+        "hasMissingReferences": false,
         "hasUnresolvableErrors": false,
         "objects": Array [
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "dashboardApp",
             "id": "foo",
             "name": "my-dashboard-title",
             "type": "dashboard",
-          },
-          Object {
-            "conflict": Object {
-              "error": Object {
-                "type": "conflict",
-              },
-              "obj": Object {
-                "id": "foo",
-                "meta": Object {
-                  "icon": "indexPatternApp",
-                  "namespaceType": "single",
-                  "title": "index-pattern-foo-title",
-                },
-                "type": "index-pattern",
-              },
-            },
-            "hasUnresolvableErrors": false,
-            "icon": "indexPatternApp",
-            "id": "foo",
-            "name": "index-pattern-foo-title",
-            "type": "index-pattern",
           },
           Object {
             "conflict": Object {
@@ -184,6 +176,7 @@ describe('summarizeCopyResult', () => {
                 "type": "visualization",
               },
             },
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "visualizeApp",
             "id": "bar",
@@ -192,6 +185,16 @@ describe('summarizeCopyResult', () => {
           },
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "indexPatternApp",
+            "id": "foo",
+            "name": "index-pattern-foo-title",
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "indexPatternApp",
             "id": "bar",
@@ -200,10 +203,64 @@ describe('summarizeCopyResult', () => {
           },
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "visualizeApp",
             "id": "baz",
             "name": "visualization-bar-title",
+            "type": "visualization",
+          },
+        ],
+        "processing": false,
+        "successful": false,
+      }
+    `);
+  });
+
+  it('processes failedImports to extract missing references errors', () => {
+    const copyResult = createCopyResult({ withMissingReferencesError: true });
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
+
+    expect(summarizedResult).toMatchInlineSnapshot(`
+      Object {
+        "hasConflicts": false,
+        "hasMissingReferences": true,
+        "hasUnresolvableErrors": false,
+        "objects": Array [
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "dashboardApp",
+            "id": "foo",
+            "name": "my-dashboard-title",
+            "type": "dashboard",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": true,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "baz",
+            "name": "visualization-bar-title",
+            "type": "visualization",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "indexPatternApp",
+            "id": "foo",
+            "name": "index-pattern-foo-title",
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "bar",
+            "name": "visualization-foo-title",
             "type": "visualization",
           },
         ],
@@ -220,10 +277,12 @@ describe('summarizeCopyResult', () => {
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": false,
+        "hasMissingReferences": false,
         "hasUnresolvableErrors": true,
         "objects": Array [
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "dashboardApp",
             "id": "foo",
@@ -232,15 +291,8 @@ describe('summarizeCopyResult', () => {
           },
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": true,
-            "icon": "visualizeApp",
-            "id": "baz",
-            "name": "visualization-bar-title",
-            "type": "visualization",
-          },
-          Object {
-            "conflict": undefined,
-            "hasUnresolvableErrors": false,
             "icon": "indexPatternApp",
             "id": "foo",
             "name": "index-pattern-foo-title",
@@ -248,10 +300,29 @@ describe('summarizeCopyResult', () => {
           },
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "indexPatternApp",
+            "id": "bar",
+            "name": "index-pattern-bar-title",
+            "type": "index-pattern",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "visualizeApp",
             "id": "bar",
             "name": "visualization-foo-title",
+            "type": "visualization",
+          },
+          Object {
+            "conflict": undefined,
+            "hasMissingReferences": false,
+            "hasUnresolvableErrors": false,
+            "icon": "visualizeApp",
+            "id": "baz",
+            "name": "visualization-bar-title",
             "type": "visualization",
           },
         ],
@@ -268,10 +339,12 @@ describe('summarizeCopyResult', () => {
     expect(summarizedResult).toMatchInlineSnapshot(`
       Object {
         "hasConflicts": false,
+        "hasMissingReferences": false,
         "hasUnresolvableErrors": false,
         "objects": Array [
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "dashboardApp",
             "id": "foo",
@@ -280,6 +353,7 @@ describe('summarizeCopyResult', () => {
           },
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "indexPatternApp",
             "id": "foo",
@@ -288,6 +362,7 @@ describe('summarizeCopyResult', () => {
           },
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "indexPatternApp",
             "id": "bar",
@@ -296,6 +371,7 @@ describe('summarizeCopyResult', () => {
           },
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "visualizeApp",
             "id": "bar",
@@ -304,6 +380,7 @@ describe('summarizeCopyResult', () => {
           },
           Object {
             "conflict": undefined,
+            "hasMissingReferences": false,
             "hasUnresolvableErrors": false,
             "icon": "visualizeApp",
             "id": "baz",
