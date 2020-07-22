@@ -14,9 +14,9 @@ export interface NavLinkService {
 
 export const navLinkServiceFactory: CanvasServiceFactory<NavLinkService> = (
   coreSetup,
-  coreStart,
-  setupPlugins,
-  startPlugins,
+  _coreStart,
+  _setupPlugins,
+  _startPlugins,
   appUpdater
 ) => {
   return {

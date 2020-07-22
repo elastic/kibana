@@ -13,8 +13,7 @@ import { downloadWorkpad } from '../../../lib/download_workpad';
 import { ShareMenu as Component, Props as ComponentProps } from './share_menu';
 import { getPdfUrl, createPdf } from './utils';
 import { State, CanvasWorkpad } from '../../../../types';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public/';
-import { WithKibanaProps } from '../../../index';
+import { withServices, WithServicesProps } from '../../../services';
 
 import { ComponentStrings } from '../../../../i18n';
 
@@ -43,12 +42,16 @@ interface Props {
 
 export const ShareMenu = compose<ComponentProps, {}>(
   connect(mapStateToProps),
-  withKibana,
+  withServices,
   withProps(
-    ({ workpad, pageCount, kibana }: Props & WithKibanaProps): ComponentProps => ({
+    ({ workpad, pageCount, services }: Props & WithServicesProps): ComponentProps => ({
       getExportUrl: (type) => {
         if (type === 'pdf') {
-          const pdfUrl = getPdfUrl(workpad, { pageCount }, kibana.services.http.basePath);
+          const pdfUrl = getPdfUrl(
+            workpad,
+            { pageCount },
+            services.platform.getBasePathInterface()
+          );
           return getAbsoluteUrl(pdfUrl);
         }
 
@@ -57,10 +60,10 @@ export const ShareMenu = compose<ComponentProps, {}>(
       onCopy: (type) => {
         switch (type) {
           case 'pdf':
-            kibana.services.canvas.notify.info(strings.getCopyPDFMessage());
+            services.notify.info(strings.getCopyPDFMessage());
             break;
           case 'reportingConfig':
-            kibana.services.canvas.notify.info(strings.getCopyReportingConfigMessage());
+            services.notify.info(strings.getCopyReportingConfigMessage());
             break;
           default:
             throw new Error(strings.getUnknownExportErrorMessage(type));
@@ -69,9 +72,9 @@ export const ShareMenu = compose<ComponentProps, {}>(
       onExport: (type) => {
         switch (type) {
           case 'pdf':
-            return createPdf(workpad, { pageCount }, kibana.services.http.basePath)
+            return createPdf(workpad, { pageCount }, services.platform.getBasePathInterface())
               .then(({ data }: { data: { job: { id: string } } }) => {
-                kibana.services.canvas.notify.info(strings.getExportPDFMessage(), {
+                services.notify.info(strings.getExportPDFMessage(), {
                   title: strings.getExportPDFTitle(workpad.name),
                 });
 
@@ -79,7 +82,7 @@ export const ShareMenu = compose<ComponentProps, {}>(
                 jobCompletionNotifications.add(data.job.id);
               })
               .catch((err: Error) => {
-                kibana.services.canvas.notify.error(err, {
+                services.notify.error(err, {
                   title: strings.getExportPDFErrorTitle(workpad.name),
                 });
               });

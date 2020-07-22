@@ -7,7 +7,6 @@
 import { connect } from 'react-redux';
 import { compose, withHandlers } from 'recompose';
 import { Dispatch } from 'redux';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public/';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';
 // @ts-expect-error untyped local
@@ -97,6 +96,5 @@ const mergeProps = (
 
 export const ViewMenu = compose<ComponentProps, {}>(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withKibana,
   withHandlers(zoomHandlerCreators)
 )(Component);

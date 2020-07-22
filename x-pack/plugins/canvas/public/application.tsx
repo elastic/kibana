@@ -17,7 +17,6 @@ import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/pub
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 // @ts-expect-error untyped local
 import { App } from './components/app';
-import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
@@ -31,7 +30,7 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, services } from './services';
+import { startServices, services, ServicesProvider } from './services';
 // @ts-expect-error untyped local
 import { createHistory, destroyHistory } from './lib/history_provider';
 // @ts-expect-error untyped local
@@ -45,27 +44,22 @@ import './style/index.scss';
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
 export const renderApp = (
-  coreStart: CoreStart,
-  plugins: CanvasStartDeps,
+  _coreStart: CoreStart,
+  _plugins: CanvasStartDeps,
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
-  const canvasServices = Object.entries(services).reduce((reduction, [key, provider]) => {
-    reduction[key] = provider.getService();
-
-    return reduction;
-  }, {} as Record<string, any>);
 
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...plugins, ...coreStart, canvas: canvasServices }}>
+    <ServicesProvider providers={services}>
       <I18nProvider>
         <Provider store={canvasStore}>
           <App />
         </Provider>
       </I18nProvider>
-    </KibanaContextProvider>,
+    </ServicesProvider>,
     element
   );
   return () => {

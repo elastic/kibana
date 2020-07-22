@@ -8,7 +8,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { Dispatch } from 'redux';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public/';
 import { State, ElementSpec } from '../../../../types';
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../../lib/elements_registry';
@@ -44,6 +43,5 @@ const mergeProps = (stateProps: StateProps, dispatchProps: DispatchProps) => ({
 
 export const ElementMenu = compose<ComponentProps, {}>(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withKibana,
   withProps(() => ({ elements: elementsRegistry.toJS() }))
 )(Component);

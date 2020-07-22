@@ -5,17 +5,21 @@
  */
 
 import {
+  SavedObjectsStart,
   SavedObjectsClientContract,
   IUiSettingsClient,
   ChromeBreadcrumb,
+  IBasePath,
 } from '../../../../../src/core/public';
 import { CanvasServiceFactory } from '.';
 
 export interface PlatformService {
   getBasePath: () => string;
+  getBasePathInterface: () => IBasePath;
   getDocLinkVersion: () => string;
   getElasticWebsiteUrl: () => string;
   getHasWriteAccess: () => boolean;
+  getSavedObjects: () => SavedObjectsStart;
   getSavedObjectsClient: () => SavedObjectsClientContract;
   getUISettingsClient: () => IUiSettingsClient;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
@@ -28,11 +32,13 @@ export const platformServiceFactory: CanvasServiceFactory<PlatformService> = (
 ) => {
   return {
     getBasePath: coreStart.http.basePath.get,
+    getBasePathInterface: () => coreStart.http.basePath,
     getElasticWebsiteUrl: () => coreStart.docLinks.ELASTIC_WEBSITE_URL,
     getDocLinkVersion: () => coreStart.docLinks.DOC_LINK_VERSION,
     // TODO: is there a better type for this?  The capabilities type allows for a Record,
     // though we don't do this.  So this cast may be the best option.
     getHasWriteAccess: () => coreStart.application.capabilities.canvas.save as boolean,
+    getSavedObjects: () => coreStart.savedObjects,
     getSavedObjectsClient: () => coreStart.savedObjects.client,
     getUISettingsClient: () => coreStart.uiSettings,
     setBreadcrumbs: coreStart.chrome.setBreadcrumbs,

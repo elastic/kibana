@@ -10,9 +10,11 @@ const noop = (..._args: any[]): any => {};
 
 export const platformService: PlatformService = {
   getBasePath: () => '/base/path',
+  getBasePathInterface: noop,
   getDocLinkVersion: () => 'dockLinkVersion',
   getElasticWebsiteUrl: () => 'https://elastic.co',
   getHasWriteAccess: () => true,
+  getSavedObjects: noop,
   getSavedObjectsClient: noop,
   getUISettingsClient: noop,
   setBreadcrumbs: noop,
