@@ -7,10 +7,11 @@
 import expect from '@kbn/expect';
 import uuid from 'uuid';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { getSupertestWithoutAuth, setupIngest, getEsClientForAPIKey } from './services';
+import { skipIfNoDockerRegistry } from '../../../helpers';
 
-export default function (providerContext: FtrProviderContext) {
+export default function(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
 
   const esArchiver = getService('esArchiver');
@@ -21,8 +22,8 @@ export default function (providerContext: FtrProviderContext) {
   let apiKey: { id: string; api_key: string };
   let kibanaVersion: string;
 
-  // Failing: See https://github.com/elastic/kibana/issues/60865
-  describe.skip('fleet_agents_enroll', () => {
+  describe('fleet_agents_enroll', () => {
+    skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
