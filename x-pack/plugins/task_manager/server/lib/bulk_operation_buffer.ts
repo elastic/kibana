@@ -93,11 +93,8 @@ export function createBuffer<Input extends Entity, ErrorOutput, Output extends E
               // the race is started in response to the first operation into the buffer
               // so we flush once the remaining operations come in (which is `bufferMaxOperations - 1`)
               storeUpdateBuffer.pipe(bufferCount(bufferMaxOperations - 1)),
-              bufferMaxDuration
-                ? // if theres a max duration, flush buffer based on that
-                  from(resolveIn(bufferMaxDuration))
-                : // ensure we flush by the end of the "current" event loop tick
-                  from(resolveImmediate()),
+              // flush buffer once max duration has passed
+              from(resolveIn(bufferMaxDuration)),
             ]).pipe(first(), mapTo(FLUSH))
           : from([DONT_FLUSH]);
       }),
@@ -116,10 +113,6 @@ export function createBuffer<Input extends Entity, ErrorOutput, Output extends E
       storeUpdateBuffer.next({ entity, onSuccess: resolve, onFailure: reject });
     });
   };
-}
-
-function resolveImmediate() {
-  return new Promise(setImmediate);
 }
 
 function resolveIn(ms: number) {
