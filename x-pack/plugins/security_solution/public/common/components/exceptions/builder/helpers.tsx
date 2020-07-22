@@ -325,9 +325,7 @@ export const getEntryOnFieldChange = (
   newField: IFieldType
 ): { updatedEntry: BuilderEntry; index: number } => {
   const { parent, entryIndex, nested } = item;
-  const newParentFieldValue =
-    newField.subType != null && newField.subType.nested != null ? newField.subType.nested.path : '';
-  const newChildFieldValue = newField.name.split('.').slice(-1)[0];
+  const newChildFieldValue = newField != null ? newField.name.split('.').slice(-1)[0] : '';
 
   if (nested === 'parent') {
     // For nested entries, when user first selects to add a nested
@@ -335,6 +333,11 @@ export const getEntryOnFieldChange = (
     // a user selects "exists", as soon as they make a selection
     // we can now identify the 'parent' and 'child' this is where
     // we first convert the entry into type "nested"
+    const newParentFieldValue =
+      newField.subType != null && newField.subType.nested != null
+        ? newField.subType.nested.path
+        : '';
+
     return {
       updatedEntry: {
         field: newParentFieldValue,
