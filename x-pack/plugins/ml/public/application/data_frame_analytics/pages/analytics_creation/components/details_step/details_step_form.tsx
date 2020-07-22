@@ -90,7 +90,11 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     if (destinationIndexNameValid === true) {
       debouncedIndexCheck();
-    } else if (destinationIndex.trim() === '' && destinationIndexNameExists === true) {
+    } else if (
+      typeof destinationIndex === 'string' &&
+      destinationIndex.trim() === '' &&
+      destinationIndexNameExists === true
+    ) {
       setFormState({ destinationIndexNameExists: false });
     }
 

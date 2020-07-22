@@ -283,6 +283,10 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.SWITCH_TO_ADVANCED_EDITOR });
   };
 
+  const switchToForm = () => {
+    dispatch({ type: ACTION.SWITCH_TO_FORM });
+  };
+
   const setEstimatedModelMemoryLimit = (value: State['estimatedModelMemoryLimit']) => {
     dispatch({ type: ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT, value });
   };
@@ -311,6 +315,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     setJobConfig,
     startAnalyticsJob,
     switchToAdvancedEditor,
+    switchToForm,
     setEstimatedModelMemoryLimit,
     setJobClone,
   };

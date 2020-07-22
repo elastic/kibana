@@ -14,7 +14,12 @@ import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 
 import { Action, ACTION } from './actions';
-import { getInitialState, getJobConfigFromFormState, State } from './state';
+import {
+  getInitialState,
+  getCloneFormStateFromJobConfig,
+  getJobConfigFromFormState,
+  State,
+} from './state';
 import {
   isJobIdValid,
   validateModelMemoryLimitUnits,
@@ -547,6 +552,16 @@ export function reducer(state: State, action: Action): State {
         advancedEditorRawString: JSON.stringify(jobConfig, null, 2),
         isAdvancedEditorEnabled: true,
         jobConfig,
+      });
+
+    case ACTION.SWITCH_TO_FORM:
+      const { jobConfig: config } = state;
+      const formState = getCloneFormStateFromJobConfig(config);
+      // TODO: way to keep track of errors if something changed in the advanced editor and it changes other stuff in a step
+      return validateForm({
+        ...state,
+        form: formState,
+        isAdvancedEditorEnabled: false,
       });
 
     case ACTION.SET_ESTIMATED_MODEL_MEMORY_LIMIT:

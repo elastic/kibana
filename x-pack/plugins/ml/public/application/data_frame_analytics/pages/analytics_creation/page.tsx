@@ -6,7 +6,6 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -16,6 +15,7 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiStepStatus,
+  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -48,9 +48,15 @@ export const Page: FC<Props> = ({ jobId }) => {
   const { currentIndexPattern } = mlContext;
 
   const createAnalyticsForm = useCreateAnalyticsForm();
-  const { isAdvancedEditorEnabled } = createAnalyticsForm.state;
-  const { jobType } = createAnalyticsForm.state.form;
-  const { initiateWizard, setJobClone, switchToAdvancedEditor } = createAnalyticsForm.actions;
+  const { state } = createAnalyticsForm;
+  const { jobConfig, isAdvancedEditorEnabled } = state;
+  const { jobType } = state.form;
+  const {
+    initiateWizard,
+    setJobClone,
+    switchToAdvancedEditor,
+    switchToForm,
+  } = createAnalyticsForm.actions;
 
   useEffect(() => {
     initiateWizard();
@@ -170,34 +176,36 @@ export const Page: FC<Props> = ({ jobId }) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {isAdvancedEditorEnabled === false && (
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  helpText={i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.enableJsonEditorHelpText',
+
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+              // helpText={i18n.translate(
+              //   'xpack.ml.dataframe.analytics.create.enableJsonEditorHelpText',
+              //   {
+              //     defaultMessage: 'You cannot switch back to this form from the json editor.',
+              //   }
+              // )}
+              >
+                <EuiSwitch
+                  disabled={jobType === undefined}
+                  label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
                     {
-                      defaultMessage: 'You cannot switch back to this form from the json editor.',
+                      defaultMessage: 'Switch to json editor',
                     }
                   )}
-                >
-                  <EuiButtonEmpty
-                    isDisabled={jobType === undefined}
-                    iconType="link"
-                    onClick={switchToAdvancedEditor}
-                    data-test-subj="mlAnalyticsCreateJobWizardAdvancedEditorSwitch"
-                  >
-                    <EuiText size="s" grow={false}>
-                      {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
-                        {
-                          defaultMessage: 'Switch to json editor',
-                        }
-                      )}
-                    </EuiText>
-                  </EuiButtonEmpty>
-                </EuiFormRow>
-              </EuiFlexItem>
-            )}
+                  checked={isAdvancedEditorEnabled}
+                  onChange={(e) => {
+                    if (e.target.checked === true) {
+                      switchToAdvancedEditor();
+                    } else {
+                      switchToForm();
+                    }
+                  }}
+                  data-test-subj="mlAnalyticsCreateJobWizardAdvancedEditorSwitch"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
           {isAdvancedEditorEnabled === true && (
