@@ -14,7 +14,6 @@ import {
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_data_sets';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { NoLogAnalysisResultsIndexError } from './errors';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 
 export async function fetchMlJob(mlAnomalyDetectors: MlAnomalyDetectors, jobId: string) {
@@ -67,16 +66,8 @@ export async function getLogEntryDatasets(
       )
     );
 
-    if (logEntryDatasetsResponse._shards.total === 0) {
-      throw new NoLogAnalysisResultsIndexError(
-        `Failed to find ml indices for jobs: ${jobIds.join(', ')}.`
-      );
-    }
-
-    const {
-      after_key: afterKey,
-      buckets: latestBatchBuckets,
-    } = logEntryDatasetsResponse.aggregations.dataset_buckets;
+    const { after_key: afterKey, buckets: latestBatchBuckets = [] } =
+      logEntryDatasetsResponse.aggregations?.dataset_buckets ?? {};
 
     logEntryDatasetBuckets = [...logEntryDatasetBuckets, ...latestBatchBuckets];
     afterLatestBatchKey = afterKey;

@@ -12,10 +12,7 @@ import {
 } from '../../../../common/http_api/log_analysis';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
-import {
-  getLogEntryCategoryDatasets,
-  NoLogAnalysisResultsIndexError,
-} from '../../../lib/log_analysis';
+import { getLogEntryCategoryDatasets } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
 export const initGetLogEntryCategoryDatasetsRoute = ({ framework }: InfraBackendLibs) => {
@@ -56,10 +53,6 @@ export const initGetLogEntryCategoryDatasetsRoute = ({ framework }: InfraBackend
       } catch (error) {
         if (Boom.isBoom(error)) {
           throw error;
-        }
-
-        if (error instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message: error.message } });
         }
 
         return response.customError({
