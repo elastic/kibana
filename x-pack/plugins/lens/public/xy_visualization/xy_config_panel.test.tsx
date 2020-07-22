@@ -109,7 +109,6 @@ describe('XY Config panels', () => {
 
     it('should disable the select if there is no unstacked area or line series', () => {
       const state = testState();
-
       const component = shallow(
         <XyToolbar
           frame={frame}
@@ -130,7 +129,6 @@ describe('XY Config panels', () => {
 
     it('should show the values of the X and Y axes titles on the corresponding input text', () => {
       const state = testState();
-
       const component = shallow(
         <XyToolbar
           frame={frame}
@@ -153,7 +151,6 @@ describe('XY Config panels', () => {
 
     it('should disable the input texts if the switch is off', () => {
       const state = testState();
-
       const component = shallow(
         <XyToolbar
           frame={frame}
@@ -172,7 +169,6 @@ describe('XY Config panels', () => {
 
     it('has the tick labels buttons enabled', () => {
       const state = testState();
-
       const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
 
       const options = component
@@ -188,16 +184,15 @@ describe('XY Config panels', () => {
       expect(selections!).toEqual({ x: true, y: true });
     });
 
-    it('has the gridlines buttons disabled', () => {
+    it('has the gridlines buttons enabled', () => {
       const state = testState();
-
       const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
 
       const selections = component
         .find('[data-test-subj="lnsGridlinesSettings"]')
         .prop('idToSelectedMap');
 
-      expect(selections!).toEqual({ x: false, y: false });
+      expect(selections!).toEqual({ x: true, y: true });
     });
   });
 });

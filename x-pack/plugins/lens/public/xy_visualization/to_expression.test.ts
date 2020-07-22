@@ -201,7 +201,7 @@ describe('#toExpression', () => {
     });
   });
 
-  it('should default the gridlines visibility settings to false', () => {
+  it('should default the gridlines visibility settings to true', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
@@ -221,8 +221,8 @@ describe('#toExpression', () => {
     expect(
       (expression.chain[0].arguments.gridlinesVisibilitySettings[0] as Ast).chain[0].arguments
     ).toEqual({
-      x: [false],
-      y: [false],
+      x: [true],
+      y: [true],
     });
   });
 });

@@ -420,8 +420,8 @@ function buildSuggestion({
       y: true,
     },
     gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
-      x: false,
-      y: false,
+      x: true,
+      y: true,
     },
     preferredSeriesType: seriesType,
     layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],

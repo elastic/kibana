@@ -136,8 +136,8 @@ export const buildExpression = (
                   type: 'function',
                   function: 'lens_xy_gridlinesConfig',
                   arguments: {
-                    x: [state?.gridlinesVisibilitySettings?.x || false],
-                    y: [state?.gridlinesVisibilitySettings?.y || false],
+                    x: [state?.gridlinesVisibilitySettings?.x ?? true],
+                    y: [state?.gridlinesVisibilitySettings?.y ?? true],
                   },
                 },
               ],

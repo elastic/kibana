@@ -5,7 +5,7 @@
  */
 
 import './xy_config_panel.scss';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import {
@@ -106,29 +106,64 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     },
   ];
 
+  const { frame, state, setState } = props;
+
   const [open, setOpen] = useState(false);
-  const hasNonBarSeries = props.state?.layers.some(
+  const hasNonBarSeries = state?.layers.some(
     (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
   );
-  const [xtitle, setXtitle] = useState<string>(props.state?.xTitle || '');
-  const [ytitle, setYtitle] = useState<string>(props.state?.yTitle || '');
+
+  const [xaxistitle, setXaxistitle] = useState(state?.xTitle);
+  const [yaxistitle, setYaxistitle] = useState(state?.yTitle);
+
+  const xyTitles = useCallback(() => {
+    const defaults = {
+      xTitle: state?.xTitle,
+      yTitle: state?.yTitle,
+    };
+    const layer = state?.layers[0];
+    if (!layer || !layer.accessors.length) {
+      return defaults;
+    }
+    const datasource = frame.datasourceLayers[layer.layerId];
+    if (!datasource) {
+      return defaults;
+    }
+    const x = layer.xAccessor ? datasource.getOperationForColumnId(layer.xAccessor) : null;
+    const y = layer.accessors[0] ? datasource.getOperationForColumnId(layer.accessors[0]) : null;
+
+    return {
+      xTitle: defaults.xTitle || x?.label,
+      yTitle: defaults.yTitle || y?.label,
+    };
+  }, [open]);
+
+  useEffect(() => {
+    const {
+      xTitle,
+      yTitle,
+    }: { xTitle: string | undefined; yTitle: string | undefined } = xyTitles();
+    setXaxistitle(xTitle);
+    setYaxistitle(yTitle);
+  }, [xyTitles]);
+
   const [tickLabelsVisibilitySettings, setTickLabelsVisibilitySettings] = useState({
-    x: props.state?.tickLabelsVisibilitySettings?.x ?? true,
-    y: props.state?.tickLabelsVisibilitySettings?.y ?? true,
+    x: state?.tickLabelsVisibilitySettings?.x ?? true,
+    y: state?.tickLabelsVisibilitySettings?.y ?? true,
   });
   const [gridlinesVisibilitySettings, setGridlinesVisibilitySettings] = useState({
-    x: props.state?.gridlinesVisibilitySettings?.x || false,
-    y: props.state?.gridlinesVisibilitySettings?.y || false,
+    x: state?.gridlinesVisibilitySettings?.x ?? true,
+    y: state?.gridlinesVisibilitySettings?.y ?? true,
   });
 
   const onXTitleChange = (value: string): void => {
-    setXtitle(value);
-    props.setState({ ...props.state, xTitle: value });
+    setXaxistitle(value);
+    setState({ ...state, xTitle: value });
   };
 
   const onYTitleChange = (value: string): void => {
-    setYtitle(value);
-    props.setState({ ...props.state, yTitle: value });
+    setYaxistitle(value);
+    setState({ ...state, yTitle: value });
   };
 
   type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -142,8 +177,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       },
     };
     setTickLabelsVisibilitySettings(newTickLabelsVisibilitySettings);
-    props.setState({
-      ...props.state,
+    setState({
+      ...state,
       tickLabelsVisibilitySettings: newTickLabelsVisibilitySettings,
     });
   };
@@ -157,8 +192,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       },
     };
     setGridlinesVisibilitySettings(newGridlinesVisibilitySettings);
-    props.setState({
-      ...props.state,
+    setState({
+      ...state,
       gridlinesVisibilitySettings: newGridlinesVisibilitySettings,
     });
   };
@@ -218,8 +253,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                     inputDisplay: title,
                   };
                 })}
-                valueOfSelected={props.state?.fittingFunction || 'None'}
-                onChange={(value) => props.setState({ ...props.state, fittingFunction: value })}
+                valueOfSelected={state?.fittingFunction || 'None'}
+                onChange={(value) => setState({ ...state, fittingFunction: value })}
                 itemLayoutAlign="top"
                 hasDividers
               />
@@ -272,18 +307,19 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             display="columnCompressed"
             label={
               <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>X-axis</EuiFlexItem>
+                <EuiFlexItem grow={false}>X-axis</EuiFlexItem>
                 <EuiFlexItem>
                   <EuiSwitch
+                    compressed
                     data-test-subj="lnsshowXAxisTitleSwitch"
                     showLabel={false}
                     label={i18n.translate('xpack.lens.xyChart.showXAxisTitleLabel', {
                       defaultMessage: 'show X-axis Title',
                     })}
                     onChange={({ target }) =>
-                      props.setState({ ...props.state, showXAxisTitle: target.checked })
+                      setState({ ...state, showXAxisTitle: target.checked })
                     }
-                    checked={props.state?.showXAxisTitle ?? true}
+                    checked={state?.showXAxisTitle ?? true}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -295,10 +331,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               placeholder={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
                 defaultMessage: 'Overwrite X-axis title',
               })}
-              value={xtitle}
-              disabled={
-                props.state && 'showXAxisTitle' in props.state ? !props.state.showXAxisTitle : false
-              }
+              value={xaxistitle}
+              disabled={state && 'showXAxisTitle' in state ? !state.showXAxisTitle : false}
               onChange={({ target }) => onXTitleChange(target.value)}
               aria-label={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
                 defaultMessage: 'Overwrite X-axis title',
@@ -309,18 +343,19 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             display="columnCompressed"
             label={
               <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem>Y-axis</EuiFlexItem>
+                <EuiFlexItem grow={false}>Y-axis</EuiFlexItem>
                 <EuiFlexItem>
                   <EuiSwitch
+                    compressed
                     data-test-subj="lnsShowYAxisTitleSwitch"
                     showLabel={false}
                     label={i18n.translate('xpack.lens.xyChart.ShowYAxisTitleLabel', {
                       defaultMessage: 'Show Y-axis Title',
                     })}
                     onChange={({ target }) =>
-                      props.setState({ ...props.state, showYAxisTitle: target.checked })
+                      setState({ ...state, showYAxisTitle: target.checked })
                     }
-                    checked={props.state?.showYAxisTitle ?? true}
+                    checked={state?.showYAxisTitle ?? true}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -332,10 +367,8 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
                 defaultMessage: 'Overwrite Y-axis title',
               })}
-              value={ytitle}
-              disabled={
-                props.state && 'showYAxisTitle' in props.state ? !props.state.showYAxisTitle : false
-              }
+              value={yaxistitle}
+              disabled={state && 'showYAxisTitle' in state ? !state.showYAxisTitle : false}
               onChange={({ target }) => onYTitleChange(target.value)}
               aria-label={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
                 defaultMessage: 'Overwrite Y-axis title',
