@@ -5,30 +5,108 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { times } from 'lodash';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
-import { AlertType, AlertExecutorOptions } from '../../../../../../../plugins/alerts/server';
+import { AlertType } from '../../../../../../../plugins/alerts/server';
 
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerts }: Pick<FixtureSetupDeps, 'alerts'>
 ) {
-  const clusterClient = core.elasticsearch.legacy.client;
-  const alwaysFiringAlertType: AlertType = {
+  // Alert types
+  const noopAlertType: AlertType = {
+    id: 'test.noop',
+    name: 'Test: Noop',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    async executor() {},
+  };
+  const onlyContextVariablesAlertType: AlertType = {
+    id: 'test.onlyContextVariables',
+    name: 'Test: Only Context Variables',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    actionVariables: {
+      context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
+    },
+    async executor() {},
+  };
+  const onlyStateVariablesAlertType: AlertType = {
+    id: 'test.onlyStateVariables',
+    name: 'Test: Only State Variables',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    actionVariables: {
+      state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
+    },
+    async executor() {},
+  };
+  const throwAlertType: AlertType = {
+    id: 'test.throw',
+    name: 'Test: Throw',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alerting',
+    defaultActionGroupId: 'default',
+    async executor() {
+      throw new Error('this alert is intended to fail');
+    },
+  };
+
+  alerts.registerType(getAlwaysFiringAlertType());
+  alerts.registerType(getCumulativeFiringAlertType());
+  alerts.registerType(getNeverFiringAlertType());
+  alerts.registerType(getFailingAlertType());
+  alerts.registerType(getValidationAlertType());
+  alerts.registerType(getAuthorizationAlertType(core));
+  alerts.registerType(noopAlertType);
+  alerts.registerType(onlyContextVariablesAlertType);
+  alerts.registerType(onlyStateVariablesAlertType);
+  alerts.registerType(getPatternFiringAlertType());
+  alerts.registerType(throwAlertType);
+}
+
+function getAlwaysFiringAlertType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+    groupsToScheduleActionsInSeries: schema.arrayOf(schema.nullable(schema.string())),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State {
+    groupInSeriesIndex?: number;
+  }
+  interface InstanceState {
+    instanceStateValue: boolean;
+  }
+  interface InstanceContext {
+    instanceContextValue: boolean;
+  }
+  const result: AlertType<ParamsType, State, InstanceState, InstanceContext> = {
     id: 'test.always-firing',
     name: 'Test: Always Firing',
     actionGroups: [
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
+    validate: {
+      params: paramsSchema,
+    },
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     actionVariables: {
       state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
       context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
     },
-    async executor(alertExecutorOptions: AlertExecutorOptions) {
+    async executor(alertExecutorOptions) {
       const {
         services,
         params,
@@ -41,7 +119,7 @@ export function defineAlertTypes(
         createdBy,
         updatedBy,
       } = alertExecutorOptions;
-      let group = 'default';
+      let group: string | null = 'default';
       const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
 
       if (params.groupsToScheduleActionsInSeries) {
@@ -74,8 +152,17 @@ export function defineAlertTypes(
       };
     },
   };
-  // Alert types
-  const cumulativeFiringAlertType: AlertType = {
+  return result;
+}
+
+function getCumulativeFiringAlertType() {
+  interface State {
+    runCount?: number;
+  }
+  interface InstanceState {
+    instanceStateValue: boolean;
+  }
+  const result: AlertType<{}, State, InstanceState, {}> = {
     id: 'test.cumulative-firing',
     name: 'Test: Cumulative Firing',
     actionGroups: [
@@ -84,7 +171,7 @@ export function defineAlertTypes(
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    async executor(alertExecutorOptions: AlertExecutorOptions) {
+    async executor(alertExecutorOptions) {
       const { services, state } = alertExecutorOptions;
       const group = 'default';
 
@@ -102,7 +189,19 @@ export function defineAlertTypes(
       };
     },
   };
-  const neverFiringAlertType: AlertType = {
+  return result;
+}
+
+function getNeverFiringAlertType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State {
+    globalStateValue: boolean;
+  }
+  const result: AlertType<ParamsType, State, {}, {}> = {
     id: 'test.never-firing',
     name: 'Test: Never firing',
     actionGroups: [
@@ -111,9 +210,12 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
+    validate: {
+      params: paramsSchema,
+    },
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    async executor({ services, params, state }: AlertExecutorOptions) {
+    async executor({ services, params, state }) {
       await services.callCluster('index', {
         index: params.index,
         refresh: 'wait_for',
@@ -129,9 +231,21 @@ export function defineAlertTypes(
       };
     },
   };
-  const failingAlertType: AlertType = {
+  return result;
+}
+
+function getFailingAlertType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: AlertType<ParamsType, {}, {}, {}> = {
     id: 'test.failing',
     name: 'Test: Failing',
+    validate: {
+      params: paramsSchema,
+    },
     actionGroups: [
       {
         id: 'default',
@@ -140,7 +254,7 @@ export function defineAlertTypes(
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    async executor({ services, params, state }: AlertExecutorOptions) {
+    async executor({ services, params, state }) {
       await services.callCluster('index', {
         index: params.index,
         refresh: 'wait_for',
@@ -154,7 +268,20 @@ export function defineAlertTypes(
       throw new Error('Failed to execute alert type');
     },
   };
-  const authorizationAlertType: AlertType = {
+  return result;
+}
+
+function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
+  const clusterClient = core.elasticsearch.legacy.client;
+  const paramsSchema = schema.object({
+    callClusterAuthorizationIndex: schema.string(),
+    savedObjectsClientType: schema.string(),
+    savedObjectsClientId: schema.string(),
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: AlertType<ParamsType, {}, {}, {}> = {
     id: 'test.authorization',
     name: 'Test: Authorization',
     actionGroups: [
@@ -166,15 +293,9 @@ export function defineAlertTypes(
     defaultActionGroupId: 'default',
     producer: 'alertsFixture',
     validate: {
-      params: schema.object({
-        callClusterAuthorizationIndex: schema.string(),
-        savedObjectsClientType: schema.string(),
-        savedObjectsClientId: schema.string(),
-        index: schema.string(),
-        reference: schema.string(),
-      }),
+      params: paramsSchema,
     },
-    async executor({ services, params, state }: AlertExecutorOptions) {
+    async executor({ services, params, state }) {
       // Call cluster
       let callClusterSuccess = false;
       let callClusterError;
@@ -238,7 +359,15 @@ export function defineAlertTypes(
       });
     },
   };
-  const validationAlertType: AlertType = {
+  return result;
+}
+
+function getValidationAlertType() {
+  const paramsSchema = schema.object({
+    param1: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: AlertType<ParamsType, {}, {}, {}> = {
     id: 'test.validation',
     name: 'Test: Validation',
     actionGroups: [
@@ -250,64 +379,28 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     validate: {
-      params: schema.object({
-        param1: schema.string(),
-      }),
+      params: paramsSchema,
     },
-    async executor({ services, params, state }: AlertExecutorOptions) {},
+    async executor() {},
   };
-  const noopAlertType: AlertType = {
-    id: 'test.noop',
-    name: 'Test: Noop',
-    actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alertsFixture',
-    defaultActionGroupId: 'default',
-    async executor({ services, params, state }: AlertExecutorOptions) {},
-  };
-  const onlyContextVariablesAlertType: AlertType = {
-    id: 'test.onlyContextVariables',
-    name: 'Test: Only Context Variables',
-    actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alertsFixture',
-    defaultActionGroupId: 'default',
-    actionVariables: {
-      context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
-    },
-    async executor(opts: AlertExecutorOptions) {},
-  };
-  const onlyStateVariablesAlertType: AlertType = {
-    id: 'test.onlyStateVariables',
-    name: 'Test: Only State Variables',
-    actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alertsFixture',
-    defaultActionGroupId: 'default',
-    actionVariables: {
-      state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
-    },
-    async executor(opts: AlertExecutorOptions) {},
-  };
-  const throwAlertType: AlertType = {
-    id: 'test.throw',
-    name: 'Test: Throw',
-    actionGroups: [
-      {
-        id: 'default',
-        name: 'Default',
-      },
-    ],
-    producer: 'alerting',
-    defaultActionGroupId: 'default',
-    async executor({ services, params, state }: AlertExecutorOptions) {
-      throw new Error('this alert is intended to fail');
-    },
-  };
-  const patternFiringAlertType: AlertType = {
+  return result;
+}
+
+function getPatternFiringAlertType() {
+  const paramsSchema = schema.object({
+    pattern: schema.arrayOf(schema.boolean()),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State {
+    patternIndex?: number;
+  }
+  const result: AlertType<ParamsType, State, {}, {}> = {
     id: 'test.patternFiring',
     name: 'Test: Firing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alerting',
     defaultActionGroupId: 'default',
-    async executor(alertExecutorOptions: AlertExecutorOptions) {
+    async executor(alertExecutorOptions) {
       const { services, state, params } = alertExecutorOptions;
       const pattern = params.pattern;
       if (!Array.isArray(pattern)) throw new Error('pattern is not an array');
@@ -329,16 +422,5 @@ export function defineAlertTypes(
       };
     },
   };
-
-  alerts.registerType(alwaysFiringAlertType);
-  alerts.registerType(cumulativeFiringAlertType);
-  alerts.registerType(neverFiringAlertType);
-  alerts.registerType(failingAlertType);
-  alerts.registerType(validationAlertType);
-  alerts.registerType(authorizationAlertType);
-  alerts.registerType(noopAlertType);
-  alerts.registerType(onlyContextVariablesAlertType);
-  alerts.registerType(onlyStateVariablesAlertType);
-  alerts.registerType(patternFiringAlertType);
-  alerts.registerType(throwAlertType);
+  return result;
 }
