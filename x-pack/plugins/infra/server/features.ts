@@ -5,6 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LOG_DOCUMENT_COUNT_ALERT_TYPE_ID } from '../common/alerting/logs/types';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/inventory_metric_threshold/types';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './lib/alerting/metric_threshold/types';
 
 export const METRICS_FEATURE = {
   id: 'infrastructure',
@@ -16,44 +19,33 @@ export const METRICS_FEATURE = {
   navLinkId: 'metrics',
   app: ['infra', 'metrics', 'kibana'],
   catalogue: ['infraops'],
+  alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
       catalogue: ['infraops'],
-      api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+      api: ['infra'],
       savedObject: {
-        all: ['infrastructure-ui-source', 'alert', 'action', 'action_task_params'],
+        all: ['infrastructure-ui-source'],
         read: ['index-pattern'],
       },
-      ui: [
-        'show',
-        'configureSource',
-        'save',
-        'alerting:show',
-        'actions:show',
-        'alerting:save',
-        'actions:save',
-        'alerting:delete',
-        'actions:delete',
-      ],
+      alerting: {
+        all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+      },
+      ui: ['show', 'configureSource', 'save', 'alerting:show'],
     },
     read: {
       app: ['infra', 'metrics', 'kibana'],
       catalogue: ['infraops'],
-      api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
+      api: ['infra'],
       savedObject: {
-        all: ['alert', 'action', 'action_task_params'],
+        all: [],
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
-      ui: [
-        'show',
-        'alerting:show',
-        'actions:show',
-        'alerting:save',
-        'actions:save',
-        'alerting:delete',
-        'actions:delete',
-      ],
+      alerting: {
+        all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
+      },
+      ui: ['show', 'alerting:show'],
     },
   },
 };
@@ -68,6 +60,7 @@ export const LOGS_FEATURE = {
   navLinkId: 'logs',
   app: ['infra', 'logs', 'kibana'],
   catalogue: ['infralogging'],
+  alerting: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
   privileges: {
     all: {
       app: ['infra', 'logs', 'kibana'],
@@ -77,12 +70,18 @@ export const LOGS_FEATURE = {
         all: ['infrastructure-ui-source'],
         read: [],
       },
+      alerting: {
+        all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+      },
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
       app: ['infra', 'logs', 'kibana'],
       catalogue: ['infralogging'],
       api: ['infra'],
+      alerting: {
+        all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+      },
       savedObject: {
         all: [],
         read: ['infrastructure-ui-source'],

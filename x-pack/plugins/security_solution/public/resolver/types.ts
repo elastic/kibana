@@ -34,17 +34,13 @@ export interface ResolverState {
  */
 export interface ResolverUIState {
   /**
-   * The ID attribute of the resolver's aria-activedescendent.
+   * The nodeID for the process that is selected (in the aria-activedescendent sense of being selected.)
    */
-  readonly activeDescendantId: string | null;
+  readonly ariaActiveDescendant: string | null;
   /**
-   * The ID attribute of the resolver's currently selected descendant.
+   * nodeID of the selected node
    */
-  readonly selectedDescendantId: string | null;
-  /**
-   * The entity_id of the process for the resolver's currently selected descendant.
-   */
-  readonly processEntityIdOfSelectedDescendant: string | null;
+  readonly selectedNode: string | null;
 }
 
 /**

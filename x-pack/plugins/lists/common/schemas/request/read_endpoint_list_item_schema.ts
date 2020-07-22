@@ -18,14 +18,9 @@ export const readEndpointListItemSchema = t.exact(
   })
 );
 
-export type ReadEndpointListItemSchemaPartial = t.TypeOf<typeof readEndpointListItemSchema>;
-
-// This type is used after a decode since some things are defaults after a decode.
-export type ReadEndpointListItemSchemaPartialDecoded = ReadEndpointListItemSchemaPartial;
+export type ReadEndpointListItemSchema = t.OutputOf<typeof readEndpointListItemSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
 export type ReadEndpointListItemSchemaDecoded = RequiredKeepUndefined<
-  ReadEndpointListItemSchemaPartialDecoded
+  t.TypeOf<typeof readEndpointListItemSchema>
 >;
-
-export type ReadEndpointListItemSchema = RequiredKeepUndefined<ReadEndpointListItemSchemaPartial>;
