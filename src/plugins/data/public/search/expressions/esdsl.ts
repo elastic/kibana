@@ -81,12 +81,9 @@ export const esdsl = (): EsdslExpressionFunctionDefinition => ({
 
       if (!dslBody.query) {
         dslBody.query = query;
-      } else if (!dslBody.query.bool) {
-        dslBody.query.bool = query.bool;
-      } else if (!dslBody.query.bool.filter) {
-        dslBody.query.bool.filter = query.bool.filter;
       } else {
-        dslBody.query.bool.filter = dslBody.query.bool.filter.concat(query.bool.filter);
+        query.bool.must.push(dslBody.query);
+        dslBody.query = query;
       }
     }
 

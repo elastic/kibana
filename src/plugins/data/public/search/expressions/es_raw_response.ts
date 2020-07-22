@@ -27,6 +27,7 @@ export interface EsRawResponse<T = unknown> {
   body: SearchResponse<T>;
 }
 
+// flattens elasticsearch object into table rows
 function flatten(obj: any, keyPrefix = '') {
   let topLevelKeys: Record<string, any> = {};
   const nestedRows: any[] = [];
@@ -64,16 +65,24 @@ const convertResult = (body: SearchResponse<unknown>) => {
   return body.hits.hits.length ? parseRawDocs(body.hits) : flatten(body.aggregations);
 };
 
-export const esRawResponse: ExpressionTypeDefinition<typeof name, EsRawResponse, EsRawResponse> = {
+export type EsRawResponseExpressionTypeDefinition = ExpressionTypeDefinition<
+  typeof name,
+  EsRawResponse,
+  EsRawResponse
+>;
+
+export const esRawResponse: EsRawResponseExpressionTypeDefinition = {
   name,
   to: {
     datatable: (context: EsRawResponse) => {
       const rows = convertResult(context.body);
-      const columns = Object.keys(rows[0]).map((key) => ({
-        id: key,
-        name: key,
-        type: typeof rows[0][key],
-      }));
+      const columns = rows.length
+        ? Object.keys(rows[0]).map((key) => ({
+            id: key,
+            name: key,
+            type: typeof rows[0][key],
+          }))
+        : [];
 
       return {
         type: 'datatable',

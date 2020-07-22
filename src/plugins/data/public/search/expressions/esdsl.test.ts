@@ -62,6 +62,27 @@ describe('esdsl', () => {
       expect(result).toMatchSnapshot();
     });
 
+    test('adds filters to query with filters', async () => {
+      const result = await esdsl().fn(
+        {
+          type: 'kibana_context',
+          filters: [
+            {
+              meta: { index: '1', alias: 'test', negate: false, disabled: false },
+              query: { match_phrase: { gender: 'male' } },
+            },
+          ],
+        },
+        {
+          dsl:
+            '{"index": "kibana_sample_data_logs", "size": 4, "body": { "_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}}',
+        },
+        { inspectorAdapters: {} } as any
+      );
+
+      expect(result).toMatchSnapshot();
+    });
+
     test('adds query', async () => {
       const result = await esdsl().fn(
         {
@@ -69,6 +90,22 @@ describe('esdsl', () => {
           query: { language: 'lucene', query: '*' },
         },
         { dsl: '{}' },
+        { inspectorAdapters: {} } as any
+      );
+
+      expect(result).toMatchSnapshot();
+    });
+
+    test('adds query to a query with filters', async () => {
+      const result = await esdsl().fn(
+        {
+          type: 'kibana_context',
+          query: { language: 'lucene', query: '*' },
+        },
+        {
+          dsl:
+            '{"index": "kibana_sample_data_logs", "size": 4, "body": { "_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}}',
+        },
         { inspectorAdapters: {} } as any
       );
 

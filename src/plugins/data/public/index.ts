@@ -363,6 +363,9 @@ export {
   SearchInterceptor,
   SearchInterceptorDeps,
   RequestTimeoutError,
+  // expression functions and types
+  EsdslExpressionFunctionDefinition,
+  EsRawResponseExpressionTypeDefinition,
 } from './search';
 
 // Search namespace
