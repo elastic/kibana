@@ -14,10 +14,10 @@ const metaSchema = t.partial({
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
 
-const stateSchema = t.record(t.string, t.any);
+const stateSchema = t.record(t.string, t.unknown);
 export type AlertInstanceState = t.TypeOf<typeof stateSchema>;
 
-const contextSchema = t.record(t.string, t.any);
+const contextSchema = t.record(t.string, t.unknown);
 export type AlertInstanceContext = t.TypeOf<typeof contextSchema>;
 
 export const rawAlertInstance = t.partial({

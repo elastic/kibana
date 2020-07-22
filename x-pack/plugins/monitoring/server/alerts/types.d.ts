@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
+import { AlertInstanceState as BaseAlertInstanceState } from '../../../alerts/server';
 
 export interface AlertEnableAction {
   id: string;
   config: { [key: string]: any };
 }
 
-export interface AlertInstanceState {
+export interface AlertInstanceState extends BaseAlertInstanceState {
   alertStates: AlertState[];
 }
 

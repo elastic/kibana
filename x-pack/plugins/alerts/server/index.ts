@@ -20,6 +20,8 @@ export {
   AlertTypeState,
   AlertTypeParams,
   PartialAlert,
+  AlertInstanceState,
+  AlertInstanceContext,
 } from './types';
 export { PluginSetupContract, PluginStartContract } from './plugin';
 export { FindResult } from './alerts_client';
