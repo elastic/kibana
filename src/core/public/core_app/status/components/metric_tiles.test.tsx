@@ -20,28 +20,29 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricTile } from './metric_tiles';
+import { Metric } from '../lib';
 
-const GENERAL_METRIC = {
+const GENERAL_METRIC: Metric = {
   name: 'A metric',
   value: 1.8,
   // no type specified
 };
 
-const BYTE_METRIC = {
+const BYTE_METRIC: Metric = {
   name: 'Heap Total',
   value: 1501560832,
   type: 'byte',
 };
 
-const FLOAT_METRIC = {
+const FLOAT_METRIC: Metric = {
   name: 'Load',
   type: 'float',
   value: [4.0537109375, 3.36669921875, 3.1220703125],
 };
 
-const MS_METRIC = {
+const MS_METRIC: Metric = {
   name: 'Response Time Max',
-  type: 'ms',
+  type: 'time',
   value: 1234,
 };
 

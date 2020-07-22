@@ -33,17 +33,17 @@ describe('format byte', () => {
   });
 });
 
-describe('format ms', () => {
+describe('format time', () => {
   test('zero', () => {
-    expect(formatNumber(0, 'ms')).toMatchInlineSnapshot(`"0.00 ms"`);
+    expect(formatNumber(0, 'time')).toMatchInlineSnapshot(`"0.00 ms"`);
   });
 
   test('sub ms', () => {
-    expect(formatNumber(0.128, 'ms')).toMatchInlineSnapshot(`"0.13 ms"`);
+    expect(formatNumber(0.128, 'time')).toMatchInlineSnapshot(`"0.13 ms"`);
   });
 
   test('many ms', () => {
-    expect(formatNumber(3030.284, 'ms')).toMatchInlineSnapshot(`"3030.28 ms"`);
+    expect(formatNumber(3030.284, 'time')).toMatchInlineSnapshot(`"3030.28 ms"`);
   });
 });
 
@@ -58,5 +58,33 @@ describe('format integer', () => {
 
   test('many integer', () => {
     expect(formatNumber(3030.284, 'integer')).toMatchInlineSnapshot(`"3030"`);
+  });
+});
+
+describe('format float', () => {
+  test('zero', () => {
+    expect(formatNumber(0, 'float')).toMatchInlineSnapshot(`"0.00"`);
+  });
+
+  test('sub integer', () => {
+    expect(formatNumber(0.728, 'float')).toMatchInlineSnapshot(`"0.73"`);
+  });
+
+  test('many integer', () => {
+    expect(formatNumber(3030.284, 'float')).toMatchInlineSnapshot(`"3030.28"`);
+  });
+});
+
+describe('format default', () => {
+  test('zero', () => {
+    expect(formatNumber(0)).toMatchInlineSnapshot(`"0.00"`);
+  });
+
+  test('sub integer', () => {
+    expect(formatNumber(0.464)).toMatchInlineSnapshot(`"0.46"`);
+  });
+
+  test('many integer', () => {
+    expect(formatNumber(6237.291)).toMatchInlineSnapshot(`"6237.29"`);
   });
 });

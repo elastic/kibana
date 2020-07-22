@@ -55,5 +55,5 @@ const formatMetric = ({ value, type }: Metric) => {
 };
 
 const formatMetricId = ({ name }: Metric) => {
-  return name.toLowerCase().replace(' ', '');
+  return name.toLowerCase().replace(/[ ]+/g, '-');
 };

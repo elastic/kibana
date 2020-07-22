@@ -19,19 +19,25 @@
 
 import numeral from '@elastic/numeral';
 
-export function formatNumber(num: number, which?: string) {
-  let format = '0.00';
+export type DataType = 'byte' | 'float' | 'integer' | 'time';
+
+export function formatNumber(num: number, type?: DataType) {
+  let format: string;
   let postfix = '';
-  switch (which) {
+  switch (type) {
     case 'byte':
-      format += ' b';
+      format = '0.00 b';
       break;
-    case 'ms':
+    case 'time':
+      format = '0.00';
       postfix = ' ms';
       break;
     case 'integer':
       format = '0';
       break;
+    case 'float':
+    default:
+      format = '0.00';
   }
 
   return numeral(num).format(format) + postfix;

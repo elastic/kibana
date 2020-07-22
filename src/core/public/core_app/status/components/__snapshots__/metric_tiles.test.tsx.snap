@@ -2,7 +2,7 @@
 
 exports[`byte metric 1`] = `
 <EuiCard
-  data-test-subj="serverMetric-heaptotal"
+  data-test-subj="serverMetric-heap-total"
   description="Heap Total"
   layout="horizontal"
   title="1.40 GB"
@@ -20,7 +20,7 @@ exports[`float metric 1`] = `
 
 exports[`general metric 1`] = `
 <EuiCard
-  data-test-subj="serverMetric-ametric"
+  data-test-subj="serverMetric-a-metric"
   description="A metric"
   layout="horizontal"
   title="1.80"
@@ -29,7 +29,7 @@ exports[`general metric 1`] = `
 
 exports[`millisecond metric 1`] = `
 <EuiCard
-  data-test-subj="serverMetric-responsetime max"
+  data-test-subj="serverMetric-response-time-max"
   description="Response Time Max"
   layout="horizontal"
   title="1234.00 ms"

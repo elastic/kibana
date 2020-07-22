@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import type { ServerStatus, StatusResponse } from '../../../../types/status';
 import type { HttpSetup } from '../../../http';
 import type { NotificationsSetup } from '../../../notifications';
+import type { DataType } from '../lib';
 
 export interface Metric {
   name: string;
   value: number | number[];
-  type?: string;
+  type?: DataType;
 }
 
 export interface FormattedStatus {
@@ -43,8 +43,8 @@ export interface FormattedStatus {
 /**
  * Returns an object of any keys that should be included for metrics.
  */
-function formatMetrics(data: StatusResponse): Metric[] {
-  if (!data.metrics) {
+function formatMetrics({ metrics }: StatusResponse): Metric[] {
+  if (!metrics) {
     return [];
   }
 
@@ -53,48 +53,43 @@ function formatMetrics(data: StatusResponse): Metric[] {
       name: i18n.translate('core.statusPage.metricsTiles.columns.heapTotalHeader', {
         defaultMessage: 'Heap total',
       }),
-      value: get(data.metrics, 'process.memory.heap.size_limit'),
+      value: metrics.process.memory.heap.size_limit,
       type: 'byte',
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.heapUsedHeader', {
         defaultMessage: 'Heap used',
       }),
-      value: get(data.metrics, 'process.memory.heap.used_in_bytes'),
+      value: metrics.process.memory.heap.used_in_bytes,
       type: 'byte',
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.loadHeader', {
         defaultMessage: 'Load',
       }),
-      value: [
-        get(data.metrics, 'os.load.1m'),
-        get(data.metrics, 'os.load.5m'),
-        get(data.metrics, 'os.load.15m'),
-      ],
-      type: 'float',
+      value: [metrics.os.load['1m'], metrics.os.load['5m'], metrics.os.load['15m']],
+      type: 'time',
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeAvgHeader', {
         defaultMessage: 'Response time avg',
       }),
-      value: get(data.metrics, 'response_times.avg_in_millis'),
-      type: 'ms',
+      value: metrics.response_times.avg_in_millis,
+      type: 'time',
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
         defaultMessage: 'Response time max',
       }),
-      value: get(data.metrics, 'response_times.max_in_millis'),
-      type: 'ms',
+      value: metrics.response_times.max_in_millis,
+      type: 'time',
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.requestsPerSecHeader', {
         defaultMessage: 'Requests per second',
       }),
-      value:
-        (get(data.metrics, 'requests.total') * 1000) /
-        get(data.metrics, 'collection_interval_in_millis'),
+      value: (metrics.requests.total * 1000) / metrics.collection_interval_in_millis,
+      type: 'float',
     },
   ];
 }
@@ -127,9 +122,7 @@ export async function loadStatus({
   let response: StatusResponse;
 
   try {
-    response = await http.get('/api/status', {
-      credentials: 'same-origin',
-    });
+    response = await http.get('/api/status');
   } catch (e) {
     if ((e.response?.status ?? 0) >= 400) {
       notifications.toasts.addDanger(

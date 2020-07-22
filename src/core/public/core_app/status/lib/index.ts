@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { formatNumber } from './format_number';
+export { formatNumber, DataType } from './format_number';
 export { loadStatus, Metric, FormattedStatus, ProcessedServerResponse } from './load_status';
