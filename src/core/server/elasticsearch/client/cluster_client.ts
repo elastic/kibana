@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Client, ApiError, RequestEvent } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { AuditorFactory } from '../../audit_trail';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, isRealRequest, Headers, KibanaRequest } from '../../http';
@@ -60,7 +60,6 @@ export interface ICustomClusterClient extends IClusterClient {
    */
   close: () => Promise<void>;
 }
-let counter = 0;
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
   public readonly asInternalUser: Client;
@@ -79,14 +78,15 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   asScoped(request: ScopeableRequest) {
-    const id = `scoped-client-${counter++}`;
+    const auditor = this.getScopedAuditor(request);
     const scopedClient = this.rootScopedClient.child({
       headers: this.getScopedHeaders(request),
-      name: id,
+      context: { auditor, type: 'currentUser' },
     });
-    const internalClient = this.asInternalUser.child({ name: id });
+    const internalClient = this.asInternalUser.child({
+      context: { auditor, type: 'internalUser' },
+    });
 
-    this.integrateAuditor(internalClient, scopedClient, request, id);
     return new ScopedClusterClient(internalClient, scopedClient);
   }
 
@@ -123,36 +123,6 @@ export class ClusterClient implements ICustomClusterClient {
       const kibanaRequest =
         request instanceof KibanaRequest ? request : KibanaRequest.from(request);
       return this.auditorFactory.asScoped(kibanaRequest);
-    }
-  }
-
-  /** All requests made by clients are written in the auditor for further analysis. */
-  private integrateAuditor(
-    internalClient: ElasticsearchClient,
-    scopedClient: ElasticsearchClient,
-    request: ScopeableRequest,
-    id: string
-  ) {
-    const auditor = this.getScopedAuditor(request);
-    if (auditor) {
-      internalClient.on('request', (err: ApiError, event: RequestEvent) => {
-        // Child clients share the event bus. The guard filters out events not related to the client.
-        if (event.meta.name === id) {
-          auditor.add({
-            message: `${event.meta.request.params.method} ${event.meta.request.params.path}`,
-            type: 'elasticsearch.call.internalUser',
-          });
-        }
-      });
-
-      scopedClient.on('request', (err: ApiError, event: RequestEvent) => {
-        if (event.meta.name === id) {
-          auditor.add({
-            message: `${event.meta.request.params.method} ${event.meta.request.params.path}`,
-            type: 'elasticsearch.call.currentUser',
-          });
-        }
-      });
     }
   }
 }
