@@ -63,7 +63,7 @@ export function DiscoverGridPopover({
           <EuiButtonEmpty
             iconType="minusInCircle"
             aria-label={i18n.translate('discover.grid.ariaFilterOut', {
-              defaultMessage: 'Filter without {value}',
+              defaultMessage: 'Filter out {value}',
               values: { value: text },
             })}
             color="danger"
