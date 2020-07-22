@@ -7,6 +7,7 @@
 import './xy_config_panel.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
@@ -16,6 +17,7 @@ import {
   EuiFormRow,
   EuiPopover,
   EuiText,
+  EuiSelect,
   htmlIdGenerator,
   EuiForm,
   EuiColorPicker,
@@ -49,6 +51,30 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
     layers: newLayers,
   };
 }
+
+const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
+  {
+    id: `xy_legend_auto`,
+    value: 'auto',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
+      defaultMessage: 'auto',
+    }),
+  },
+  {
+    id: `xy_legend_show`,
+    value: 'show',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.show', {
+      defaultMessage: 'show',
+    }),
+  },
+  {
+    id: `xy_legend_hide`,
+    value: 'hide',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
+      defaultMessage: 'hide',
+    }),
+  },
+];
 
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
@@ -198,6 +224,12 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     });
   };
 
+  const legendMode =
+    state?.legend.isVisible && !state?.legend.showSingleSeries
+      ? 'auto'
+      : !state?.legend.isVisible
+      ? 'hide'
+      : 'show';
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
@@ -260,6 +292,67 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               />
             </EuiFormRow>
           </EuiToolTip>
+          <EuiHorizontalRule margin="s" />
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+              defaultMessage: 'Legend display',
+            })}
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+                defaultMessage: 'Legend display',
+              })}
+              name="legendDisplay"
+              buttonSize="compressed"
+              options={legendOptions}
+              idSelected={legendOptions.find(({ value }) => value === legendMode)!.id}
+              onChange={(optionId) => {
+                const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+                if (newMode === 'auto') {
+                  setState({
+                    ...state,
+                    legend: { ...state.legend, isVisible: true, showSingleSeries: false },
+                  });
+                } else if (newMode === 'show') {
+                  setState({
+                    ...state,
+                    legend: { ...state.legend, isVisible: true, showSingleSeries: true },
+                  });
+                } else if (newMode === 'hide') {
+                  setState({
+                    ...state,
+                    legend: { ...state.legend, isVisible: false, showSingleSeries: false },
+                  });
+                }
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
+              defaultMessage: 'Legend position',
+            })}
+          >
+            <EuiSelect
+              disabled={legendMode === 'hide'}
+              compressed
+              options={[
+                { value: Position.Top, text: 'Top' },
+                { value: Position.Left, text: 'Left' },
+                { value: Position.Right, text: 'Right' },
+                { value: Position.Bottom, text: 'Bottom' },
+              ]}
+              value={state?.legend.position}
+              onChange={(e) => {
+                setState({
+                  ...state,
+                  legend: { ...state.legend, position: e.target.value as Position },
+                });
+              }}
+            />
+          </EuiFormRow>
           <EuiHorizontalRule margin="s" />
           <EuiFormRow
             display="columnCompressed"
@@ -331,7 +424,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               placeholder={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
                 defaultMessage: 'Overwrite X-axis title',
               })}
-              value={xaxistitle}
+              value={xaxistitle || ''}
               disabled={state && 'showXAxisTitle' in state ? !state.showXAxisTitle : false}
               onChange={({ target }) => onXTitleChange(target.value)}
               aria-label={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
@@ -367,7 +460,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
                 defaultMessage: 'Overwrite Y-axis title',
               })}
-              value={yaxistitle}
+              value={yaxistitle || ''}
               disabled={state && 'showYAxisTitle' in state ? !state.showYAxisTitle : false}
               onChange={({ target }) => onYTitleChange(target.value)}
               aria-label={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {

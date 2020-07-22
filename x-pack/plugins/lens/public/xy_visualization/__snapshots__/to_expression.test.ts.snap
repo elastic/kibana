@@ -83,6 +83,7 @@ Object {
                   "position": Array [
                     "bottom",
                   ],
+                  "showSingleSeries": Array [],
                 },
                 "function": "lens_xy_legendConfig",
                 "type": "function",
