@@ -295,7 +295,7 @@ it('rewrites cypress reports with minimal changes', async () => {
     ===================================================================
     --- cypress.xml	[object Object]
     +++ cypress.xml
-    @@ -1,25 +1,12 @@
+    @@ -1,25 +1,16 @@
     -‹?xml version="1.0" encoding="UTF-8"?›
     +‹?xml version="1.0" encoding="utf-8"?›
      ‹testsuites name="Mocha Tests" time="16.198" tests="2" failures="1"›
@@ -308,15 +308,17 @@ it('rewrites cypress reports with minimal changes', async () => {
     +    ‹testcase name="timeline flyout button toggles open the timeline" time="8.099" classname="toggles open the timeline"/›
          ‹testcase name="timeline flyout button &quot;after each&quot; hook for &quot;toggles open the timeline&quot;" time="8.099" classname="&quot;after each&quot; hook for &quot;toggles open the timeline&quot;"›
     -      ‹failure message="Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
-    +      ‹failure message="Failed Tests Reporter:&#xA;  - Some extra content&#xA;&#xA;&#xA;Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:&#xA;&#xA;\`&lt;button class=&quot;euiButtonEmpty euiButtonEmpty--text&quot; type=&quot;button&quot; data-test-subj=&quot;timeline-new&quot;›...&lt;/button›\`&#xA;&#xA;You can fix this problem by:&#xA;  - Passing \`{force: true}\` which disables all error checking&#xA;  - Passing \`{waitForAnimations: false}\` which disables waiting on animations&#xA;  - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity&#xA;&#xA;https://on.cypress.io/element-is-animating&#xA;&#xA;Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`timeline flyout button\`" type="CypressError"›‹![CDATA[CypressError: Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
+    +      ‹failure message="Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:&#xA;&#xA;\`&lt;button class=&quot;euiButtonEmpty euiButtonEmpty--text&quot; type=&quot;button&quot; data-test-subj=&quot;timeline-new&quot;›...&lt;/button›\`&#xA;&#xA;You can fix this problem by:&#xA;  - Passing \`{force: true}\` which disables all error checking&#xA;  - Passing \`{waitForAnimations: false}\` which disables waiting on animations&#xA;  - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity&#xA;&#xA;https://on.cypress.io/element-is-animating&#xA;&#xA;Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`timeline flyout button\`" type="CypressError"›‹![CDATA[Failed Tests Reporter:
+    +  - Some extra content
 
     -\`&lt;button class=&quot;euiButtonEmpty euiButtonEmpty--text&quot; type=&quot;button&quot; data-test-subj=&quot;timeline-new&quot;&gt;...&lt;/button&gt;\`
-    -
+
     -You can fix this problem by:
     -  - Passing \`{force: true}\` which disables all error checking
     -  - Passing \`{waitForAnimations: false}\` which disables waiting on animations
     -  - Passing \`{animationDistanceThreshold: 20}\` which decreases the sensitivity
-    -
+    +CypressError: Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
+
     -https://on.cypress.io/element-is-animating
     -
     -Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`timeline flyout button\`" type="CypressError"›‹![CDATA[CypressError: Timed out retrying: \`cy.click()\` could not be issued because this element is currently animating:
@@ -325,7 +327,7 @@ it('rewrites cypress reports with minimal changes', async () => {
 
      You can fix this problem by:
        - Passing \`{force: true}\` which disables all error checking
-    @@ -46,5 +33,5 @@
+    @@ -46,5 +37,5 @@
          at Promise._settlePromise (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:7057:18)
          at Promise._settlePromise0 (http://elastic:changeme@localhost:61141/__cypress/runner/cypress_runner.js:7102:10)]]›‹/failure›
          ‹/testcase›
