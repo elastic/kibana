@@ -7094,7 +7094,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingDescription": "没有节点属性，将无法控制分片分配。",
     "xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingLabel": "elasticsearch.yml 中未配置任何节点属性",
     "xpack.indexLifecycleMgmt.editPolicy.nodeDetailErrorMessage": "加载节点属性详细信息时出错",
-    "xpack.indexLifecycleMgmt.editPolicy.nodeInfoErrorMessage": "加载节点属性信息时出错",
     "xpack.indexLifecycleMgmt.editPolicy.numberRequiredError": "数字必填。",
     "xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeLabel": "冷阶段计时",
     "xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeUnitsAriaLabel": "冷阶段计时单位",

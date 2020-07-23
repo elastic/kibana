@@ -7089,7 +7089,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingDescription": "ノード属性なしではシャードの割り当てをコントロールできません。",
     "xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingLabel": "elasticsearch.yml でノード属性が構成されていません",
     "xpack.indexLifecycleMgmt.editPolicy.nodeDetailErrorMessage": "ノード属性の詳細の読み込み中にエラーが発生しました",
-    "xpack.indexLifecycleMgmt.editPolicy.nodeInfoErrorMessage": "ノード属性の情報の読み込み中にエラーが発生しました",
     "xpack.indexLifecycleMgmt.editPolicy.numberRequiredError": "数字が必要です。",
     "xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeLabel": "コールドフェーズのタイミング",
     "xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeUnitsAriaLabel": "コールドフェーズのタイミングの単位",
