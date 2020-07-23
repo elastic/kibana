@@ -1,0 +1,41 @@
+// .kbnFieldButton-isOpen {
+//   @include euiFocusRing;
+// }
+
+.kbnFieldButton {
+  border-radius: $euiBorderRadius - 1px;
+  padding: $euiSizeS;
+  display: flex;
+  align-items: flex-start;
+  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
+
+  .kbnFieldButton__name {
+    margin-left: $euiSizeS;
+    flex-grow: 1;
+    word-break: break-word;
+  }
+
+  .kbnFieldButton__fieldIcon,
+  .kbnFieldButton__infoIcon {
+    flex-shrink: 0;
+  }
+
+  .kbnFieldButton__fieldIcon {
+    margin-top: $euiSizeXS / 2;
+    margin-right: $euiSizeXS / 2;
+  }
+
+  //   .kbnFieldButton__infoIcon {
+  //     visibility: hidden;
+  //   }
+
+  //   &:hover,
+  //   &:focus {
+  //     cursor: grab;
+
+  //     .kbnFieldButton__infoIcon {
+  //       visibility: visible;
+  //     }
+  //   }
+}
