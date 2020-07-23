@@ -1,5 +1,5 @@
 {
-  "indices.put_template": {
+  "indices.simulate_template": {
     "data_autocomplete_rules": {
       "index_patterns": [],
       "mappings": { "__scope_link": "put_mapping" },
@@ -7,15 +7,10 @@
       "version": 0,
       "template": {},
       "composed_of": [],
-      "priority": 0,
-      "aliases": {
-        "__template": {
-          "NAME": {}
-        }
-      }
+      "priority": 0
     },
     "patterns": [
-      "_template/{template}"
+      "_index_template/_simulate/{template}"
     ]
   }
 }
