@@ -57,7 +57,7 @@ export const getBreadcrumbs = (
 ): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
-      text: i18nDetections.PAGE_TITLE,
+      text: i18nDetections.BREADCRUMB_TITLE,
       href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
         path: !isEmpty(search[0]) ? search[0] : '',
       }),
