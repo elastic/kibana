@@ -215,20 +215,18 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         sourcePRLabels: [] as string[],
       } as BackportOptions;
 
-      const res = await runTimersUntilResolved(() =>
-        cherrypickAndCreateTargetPullRequest({
-          options,
-          commits: [
-            {
-              sourceBranch: '7.x',
-              sha: 'mySha',
-              formattedMessage: 'myCommitMessage',
-              targetBranchesFromLabels: [],
-            },
-          ],
-          targetBranch: '6.x',
-        })
-      );
+      const res = await cherrypickAndCreateTargetPullRequest({
+        options,
+        commits: [
+          {
+            sourceBranch: '7.x',
+            sha: 'mySha',
+            formattedMessage: 'myCommitMessage',
+            targetBranchesFromLabels: [],
+          },
+        ],
+        targetBranch: '6.x',
+      });
 
       expect(res).toEqual({
         html_url: 'myHtmlUrl',
@@ -238,28 +236,31 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       expect(promptSpy.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "The following files from /myHomeDir/.backport/repositories/elastic/kibana have conflicts:
+            "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
+
+        Conflicting files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
-        You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
 
-        Press ENTER when the conflicts are resolved",
+        Press ENTER when the conflicts are resolved and files are staged",
           ],
           Array [
-            "The following files from /myHomeDir/.backport/repositories/elastic/kibana have conflicts:
+            "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
+
+        Conflicting files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
-        You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
 
-        Press ENTER when the conflicts are resolved",
+        Press ENTER when the conflicts are resolved and files are staged",
           ],
           Array [
-            "The following files are unstaged:
+            "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
+
+
+        Unstaged files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
-
-
-        Press ENTER to stage them",
+        Press ENTER when the conflicts are resolved and files are staged",
           ],
         ]
       `);
@@ -271,16 +272,14 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         Backporting to 6.x:",
           ],
           Array [
-            "",
+            "
+        ----------------------------------------
+        ",
           ],
           Array [
-            "",
-          ],
-          Array [
-            "",
-          ],
-          Array [
-            "",
+            "
+        ----------------------------------------
+        ",
           ],
           Array [
             "View pull request: myHtmlUrl",
@@ -317,7 +316,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 });
 
 function setupExecSpy() {
-  let conflictCheckCounts = 0;
+  let conflictingFilesCheck = 0;
+  let unstagedFilesCheck = 0;
   return jest
     .spyOn(childProcess, 'exec')
 
@@ -337,10 +337,10 @@ function setupExecSpy() {
         throw new ExecError({ cmd });
       }
 
-      // getFilesWithConflicts
+      // getConflictingFiles
       if (cmd === 'git --no-pager diff --check') {
-        conflictCheckCounts++;
-        if (conflictCheckCounts >= 4) {
+        conflictingFilesCheck++;
+        if (conflictingFilesCheck >= 4) {
           return { stderr: '', stdout: '' };
         }
 
@@ -351,8 +351,12 @@ function setupExecSpy() {
         });
       }
 
-      // getUnmergedFiles
-      if (cmd === 'git --no-pager diff --name-only --diff-filter=U') {
+      // getUnstagedFiles
+      if (cmd === 'git --no-pager diff --name-only') {
+        unstagedFilesCheck++;
+        if (unstagedFilesCheck >= 5) {
+          return { stderr: '', stdout: '' };
+        }
         return { stdout: `conflicting-file.txt\n`, stderr: '' };
       }
 
@@ -378,27 +382,4 @@ function setupExecSpy() {
 
       throw new Error(`Missing mock for "${cmd}"`);
     });
-}
-
-/*
- * Run timers (setInterval/setTimeout) every tick continuously until the promise has been resolved
- */
-async function runTimersUntilResolved(fn: () => Promise<any>) {
-  jest.useFakeTimers();
-
-  let isResolved = false;
-  const p = fn();
-  p.finally(() => (isResolved = true));
-
-  // wont-fix: https://github.com/typescript-eslint/typescript-eslint/issues/1984
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  while (isResolved === false) {
-    // tick
-    await new Promise((resolve) => setImmediate(resolve));
-
-    // run timers
-    jest.runAllTimers();
-  }
-
-  return p;
 }

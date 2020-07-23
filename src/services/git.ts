@@ -138,10 +138,10 @@ export async function cherrypick(
     }
 
     const isCherryPickError = e.cmd === cmd;
-    const hasConflicts = !isEmpty(await getFilesWithConflicts(options));
-    const hasUnmergedFiles = !isEmpty(await getUnmergedFiles(options));
+    const hasConflicts = !isEmpty(await getConflictingFiles(options));
+    const hasUnstagedFiles = !isEmpty(await getUnstagedFiles(options));
 
-    if (isCherryPickError && (hasConflicts || hasUnmergedFiles)) {
+    if (isCherryPickError && (hasConflicts || hasUnstagedFiles)) {
       return { needsResolving: true };
     }
 
@@ -170,7 +170,7 @@ export async function finalizeCherrypick(options: BackportOptions) {
   }
 }
 
-export async function getFilesWithConflicts(options: BackportOptions) {
+export async function getConflictingFiles(options: BackportOptions) {
   const repoPath = getRepoPath(options);
   try {
     await exec(`git --no-pager diff --check`, { cwd: repoPath });
@@ -200,15 +200,17 @@ export async function getFilesWithConflicts(options: BackportOptions) {
 }
 
 // retrieve the list of files that could not be cleanly merged
-export async function getUnmergedFiles(options: BackportOptions) {
+export async function getUnstagedFiles(options: BackportOptions) {
   const repoPath = getRepoPath(options);
-  const res = await exec(`git --no-pager diff --name-only --diff-filter=U`, {
+  const res = await exec(`git --no-pager diff --name-only`, {
     cwd: repoPath,
   });
-  return res.stdout
+  const files = res.stdout
     .split('\n')
     .filter((file) => !!file)
     .map((file) => pathResolve(repoPath, file));
+
+  return uniq(files);
 }
 
 export async function setCommitAuthor(
@@ -227,10 +229,6 @@ export async function setCommitAuthor(
     spinner.fail();
     throw e;
   }
-}
-
-export async function addUnstagedFiles(options: BackportOptions) {
-  return exec(`git add --update`, { cwd: getRepoPath(options) });
 }
 
 // How the commit flows:
@@ -282,7 +280,7 @@ export async function deleteBackportBranch({
   const spinner = ora().start();
 
   await exec(
-    `git checkout ${options.sourceBranch} && git branch -D ${backportBranch}`,
+    `git reset --hard && git checkout ${options.sourceBranch} && git branch -D ${backportBranch}`,
     { cwd: getRepoPath(options) }
   );
 

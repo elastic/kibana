@@ -57,7 +57,7 @@ Array [
     },
   ],
   Array [
-    "git checkout mySourceBranch && git branch -D backport/6.x/commit-2e63475c",
+    "git reset --hard && git checkout mySourceBranch && git branch -D backport/6.x/commit-2e63475c",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },

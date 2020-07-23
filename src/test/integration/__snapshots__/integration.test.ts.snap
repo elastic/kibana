@@ -549,8 +549,9 @@ fatal: No such remote: 'elastic'
     "",
   ],
   Array [
-    "[VERBOSE] exec success 'git checkout master && git branch -D backport/6.0/pr-85':",
-    "Deleted branch backport/6.0/pr-85 (was <COMMIT HASH>).
+    "[VERBOSE] exec success 'git reset --hard && git checkout master && git branch -D backport/6.0/pr-85':",
+    "HEAD is now at <COMMIT HASH> Add witch (#85)
+Deleted branch backport/6.0/pr-85 (was <COMMIT HASH>).
 ",
   ],
   Array [

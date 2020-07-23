@@ -33,7 +33,7 @@
     "prepublishOnly": "tsc --project ./tsconfig.prod.json",
     "test": "jest",
     "test-private": "jest --config ./jest.config.private.js",
-    "test-all": "yarn test && yarn test-private",
+    "test-all": "yarn lint && yarn test && yarn test-private",
     "start": "ts-node --transpile-only ./src/entrypoint.cli.ts"
   },
   "lint-staged": {
@@ -63,11 +63,13 @@
     "node": ">=10.0.0"
   },
   "dependencies": {
+    "@types/lodash.difference": "^4.5.6",
     "axios": "^0.19.2",
     "dedent": "^0.7.0",
     "del": "^5.1.0",
     "find-up": "^4.1.0",
-    "inquirer": "^7.3.1",
+    "inquirer": "^7.3.3",
+    "lodash.difference": "^4.5.0",
     "lodash.flatmap": "^4.5.0",
     "lodash.isempty": "^4.4.0",
     "lodash.isstring": "^4.0.1",
@@ -75,14 +77,14 @@
     "make-dir": "^3.1.0",
     "ora": "^4.0.4",
     "safe-json-stringify": "^1.2.0",
-    "strip-json-comments": "^3.1.0",
+    "strip-json-comments": "^3.1.1",
     "winston": "^3.3.3",
     "yargs": "^15.4.0"
   },
   "devDependencies": {
     "@types/core-js": "^2.5.2",
     "@types/dedent": "^0.7.0",
-    "@types/inquirer": "^6.5.0",
+    "@types/inquirer": "^7.3.0",
     "@types/jest": "^26.0.4",
     "@types/lodash": "^4.14.157",
     "@types/lodash.flatmap": "^4.5.6",

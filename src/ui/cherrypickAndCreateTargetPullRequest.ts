@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import dedent = require('dedent');
-import isEmpty = require('lodash.isempty');
+import difference from 'lodash.difference';
+import isEmpty from 'lodash.isempty';
 import ora = require('ora');
 import { BackportOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
@@ -12,10 +12,9 @@ import {
   deleteBackportBranch,
   pushBackportBranch,
   setCommitAuthor,
-  getUnmergedFiles,
-  addUnstagedFiles,
+  getUnstagedFiles,
   finalizeCherrypick,
-  getFilesWithConflicts,
+  getConflictingFiles,
 } from '../services/git';
 import { getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
@@ -39,6 +38,7 @@ export async function cherrypickAndCreateTargetPullRequest({
   consoleLog(`\n${chalk.bold(`Backporting to ${targetBranch}:`)}`);
 
   await createBackportBranch({ options, targetBranch, backportBranch });
+
   await sequentially(commits, (commit) =>
     waitForCherrypick(options, commit, targetBranch)
   );
@@ -154,7 +154,7 @@ async function waitForCherrypick(
       'Attempting to resolve conflicts automatically'
     ).start();
 
-    const filesWithConflicts = await getFilesWithConflicts(options);
+    const filesWithConflicts = await getConflictingFiles(options);
     const repoPath = getRepoPath(options);
     const didAutoFix = await options.autoFixConflicts({
       files: filesWithConflicts,
@@ -184,18 +184,12 @@ async function waitForCherrypick(
     await exec(`${options.editor} ${repoPath}`, {});
   }
 
-  // list files with conflict markers and require user to resolve them
-  await listConflictingFiles(options);
+  // list files with conflict markers + unstaged files and require user to resolve them
+  await listConflictingAndUnstagedFiles(options);
 
-  // list unmerged files and require user to confirm adding+comitting them
-  await listUnstagedFiles(options);
-
-  // Conflicts resolved and unstaged files will now be staged and committed
+  // Conflicts should be resolved and files staged at this point
   const stagingSpinner = ora(`Finalizing cherrypick`).start();
   try {
-    // add unstaged files
-    await addUnstagedFiles(options);
-
     // Run `git commit`
     await finalizeCherrypick(options);
     stagingSpinner.succeed();
@@ -205,61 +199,58 @@ async function waitForCherrypick(
   }
 }
 
-async function listConflictingFiles(options: BackportOptions) {
-  const checkForConflicts = async (): Promise<void> => {
-    const filesWithConflicts = await getFilesWithConflicts(options);
+async function listConflictingAndUnstagedFiles(options: BackportOptions) {
+  const checkForProblems = async (retries = 0): Promise<void> => {
+    const [conflictingFiles, _unstagedFiles] = await Promise.all([
+      getConflictingFiles(options),
+      getUnstagedFiles(options),
+    ]);
 
-    if (isEmpty(filesWithConflicts)) {
+    const unstagedFiles = difference(_unstagedFiles, conflictingFiles);
+    const hasConflictingFiles = !isEmpty(conflictingFiles);
+    const hasUnstagedFiles = !isEmpty(unstagedFiles);
+
+    if (!hasConflictingFiles && !hasUnstagedFiles) {
       return;
     }
 
-    consoleLog(''); // linebreak
-    const res = await confirmPrompt(
-      dedent(`
-        ${chalk.reset(
-          `The following files from ${getRepoPath(options)} have conflicts:`
-        )}
-        ${chalk.reset(
-          filesWithConflicts.map((file) => ` - ${file}`).join('\n')
-        )}
+    // add divider between prompts
+    if (retries > 0) {
+      consoleLog('\n----------------------------------------\n');
+    }
 
-        ${chalk.reset.italic(
-          'You do not need to `git add` or `git commit` the files - simply fix the conflicts.'
-        )}
+    // show conflict section if there are conflicting files
+    const conflictSection = hasConflictingFiles
+      ? `Conflicting files:\n${chalk.reset(
+          conflictingFiles.map((file) => ` - ${file}`).join('\n')
+        )}`
+      : '';
 
-        Press ENTER when the conflicts are resolved
-      `)
-    );
+    const unstagedSection = hasUnstagedFiles
+      ? `Unstaged files:\n${chalk.reset(
+          unstagedFiles.map((file) => ` - ${file}`).join('\n')
+        )}`
+      : '';
+
+    const res = await confirmPrompt(`${chalk.reset(
+      `Please fix the issues in: ${getRepoPath(options)}`
+    )}
+
+${conflictSection}
+${unstagedSection}
+
+Press ENTER when the conflicts are resolved and files are staged`);
+
     if (!res) {
       throw new HandledError('Aborted');
     }
 
-    await checkForConflicts();
+    const MAX_RETRIES = 100;
+    if (retries++ > MAX_RETRIES) {
+      throw new Error(`Maximum number of retries (${MAX_RETRIES}) exceeded`);
+    }
+    await checkForProblems(retries);
   };
 
-  await checkForConflicts();
-}
-
-async function listUnstagedFiles(options: BackportOptions) {
-  const unmergedFiles = await getUnmergedFiles(options);
-
-  if (isEmpty(unmergedFiles)) {
-    return;
-  }
-
-  consoleLog(''); // linebreak
-  const res = await confirmPrompt(
-    dedent(`
-      ${chalk.reset(`The following files are unstaged:`)}
-      ${chalk.reset(unmergedFiles.map((file) => ` - ${file}`).join('\n'))}
-
-
-
-      Press ENTER to stage them
-    `)
-  );
-  if (!res) {
-    throw new HandledError('Aborted');
-  }
-  consoleLog(''); // linebreak
+  await checkForProblems();
 }

@@ -45,8 +45,6 @@ export async function promptForCommits({
   });
 
   const res = await prompt<CommitChoice[]>({
-    // loop was recently added and not yet part of the types
-    //@ts-expect-error
     loop: false,
     pageSize: 15,
     choices: choices,
@@ -68,8 +66,6 @@ export async function promptForTargetBranches({
   isMultipleChoice: boolean;
 }): Promise<string[]> {
   const res = await prompt<string | string[]>({
-    // loop was recently added and not yet part of the types
-    //@ts-expect-error
     loop: false,
     pageSize: 15,
     choices: targetBranchChoices,

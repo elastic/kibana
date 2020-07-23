@@ -2,11 +2,11 @@ import { BackportOptions } from '../options/options';
 import * as childProcess from '../services/child-process-promisified';
 import {
   addRemote,
-  getUnmergedFiles,
+  getUnstagedFiles,
   finalizeCherrypick,
   deleteRemote,
   cherrypick,
-  getFilesWithConflicts,
+  getConflictingFiles,
   createBackportBranch,
 } from '../services/git';
 import { ExecError } from '../test/ExecError';
@@ -15,7 +15,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('getUnmergedFiles', () => {
+describe('getUnstagedFiles', () => {
   it('should split lines and remove empty', async () => {
     jest.spyOn(childProcess, 'exec').mockResolvedValueOnce({
       stdout: 'conflicting-file.txt\nconflicting-file2.txt\n',
@@ -27,7 +27,7 @@ describe('getUnmergedFiles', () => {
       repoName: 'kibana',
     } as BackportOptions;
 
-    await expect(await getUnmergedFiles(options)).toEqual([
+    await expect(await getUnstagedFiles(options)).toEqual([
       '/myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
       '/myHomeDir/.backport/repositories/elastic/kibana/conflicting-file2.txt',
     ]);
@@ -44,11 +44,11 @@ describe('getUnmergedFiles', () => {
       repoName: 'kibana',
     } as BackportOptions;
 
-    await expect(await getUnmergedFiles(options)).toEqual([]);
+    await expect(await getUnstagedFiles(options)).toEqual([]);
   });
 });
 
-describe('getFilesWithConflicts', () => {
+describe('getConflictingFiles', () => {
   it('should split by linebreak and remove empty and duplicate items', async () => {
     const err = {
       killed: false,
@@ -66,7 +66,7 @@ describe('getFilesWithConflicts', () => {
       repoName: 'kibana',
     } as BackportOptions;
 
-    expect(await getFilesWithConflicts(options)).toEqual([
+    expect(await getConflictingFiles(options)).toEqual([
       '/myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt',
     ]);
   });
@@ -226,7 +226,7 @@ describe('cherrypick', () => {
         })
       )
 
-      // mock getFilesWithConflicts
+      // mock getConflictingFiles
       .mockRejectedValueOnce(
         new ExecError({
           code: 2,
@@ -237,7 +237,7 @@ describe('cherrypick', () => {
         })
       )
 
-      // mock getUnmergedFiles
+      // mock getUnstagedFiles
       .mockResolvedValueOnce({ stdout: '', stderr: '' });
 
     expect(await cherrypick(options, commit)).toEqual({
@@ -313,10 +313,10 @@ Or refer to the git documentation for more information: https://git-scm.com/docs
       // mock cherry pick command
       .mockRejectedValueOnce(new Error('non-cherrypick error'))
 
-      // getFilesWithConflicts
+      // getConflictingFiles
       .mockResolvedValueOnce({ stdout: '', stderr: '' })
 
-      // getUnmergedFiles
+      // getUnstagedFiles
       .mockResolvedValueOnce({ stdout: '', stderr: '' });
 
     await expect(
