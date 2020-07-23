@@ -7,7 +7,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   skipIfNoRegistry,
   isRegistryEnabled,
-} from '../../../security_solution_endpoint_api_int/registryry';
+} from '../../../security_solution_endpoint_api_int/registry';
 
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
