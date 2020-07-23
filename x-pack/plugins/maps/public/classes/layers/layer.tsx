@@ -24,6 +24,7 @@ import {
 import { copyPersistentState } from '../../reducers/util';
 import {
   AggDescriptor,
+  JoinDescriptor,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
@@ -165,8 +166,8 @@ export class AbstractLayer implements ILayer {
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
 
     if (clonedDescriptor.joins) {
-      clonedDescriptor.joins.forEach((joinDescriptor) => {
-        const originalJoinId = joinDescriptor.right.id;
+      clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+        const originalJoinId = joinDescriptor.right.id!;
 
         // right.id is uuid used to track requests in inspector
         joinDescriptor.right.id = uuid();
@@ -182,7 +183,7 @@ export class AbstractLayer implements ILayer {
             const newJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
               aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
-              rightSourceId: joinDescriptor.right.id,
+              rightSourceId: joinDescriptor.right.id!,
             });
 
             Object.keys(clonedDescriptor.style.properties).forEach((key) => {
