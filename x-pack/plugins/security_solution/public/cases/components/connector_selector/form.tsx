@@ -64,3 +64,4 @@ export const ConnectorSelector = ({
     </EuiFormRow>
   );
 };
+// node scripts/jest.js security_solution/public/timelines/components/manage_timeline/index --coverage --collectCoverageOnlyFrom=security_solution/public/timelines/components/manage_timeline/**/*.tsx
