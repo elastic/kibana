@@ -10,9 +10,8 @@ set_chmod() {
 }
 
 set_chown() {
-  chown <%= user %>:<%= group %> <%= dataDir %>
-  chown root:<%= group %> ${KBN_PATH_CONF}
-  chown root:<%= group %> ${KBN_PATH_CONF}/kibana.yml
+  chown -R <%= user %>:<%= group %> <%= dataDir %>
+  chown -R root:<%= group %> ${KBN_PATH_CONF}
 }
 
 set_access() {
