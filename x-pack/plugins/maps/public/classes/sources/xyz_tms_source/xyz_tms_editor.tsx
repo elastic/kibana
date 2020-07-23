@@ -9,10 +9,15 @@ import React, { Component, ChangeEvent } from 'react';
 import _ from 'lodash';
 import { EuiFormRow, EuiFieldText, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
+
+export type XYZTMSSourceConfig = {
+  urlTemplate: string;
+  attributionText: string;
+  attributionUrl: string;
+};
 
 interface Props {
-  onSourceConfigChange: (sourceConfig: XYZTMSSourceDescriptor) => void;
+  onSourceConfigChange: (sourceConfig: XYZTMSSourceConfig | null) => void;
 }
 
 interface State {
