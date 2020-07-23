@@ -8,7 +8,11 @@ import { CoreSetup } from 'src/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { times } from 'lodash';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
-import { AlertType } from '../../../../../../../plugins/alerts/server';
+import {
+  AlertType,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../../../../plugins/alerts/server';
 
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
@@ -84,10 +88,10 @@ function getAlwaysFiringAlertType() {
   interface State {
     groupInSeriesIndex?: number;
   }
-  interface InstanceState {
+  interface InstanceState extends AlertInstanceState {
     instanceStateValue: boolean;
   }
-  interface InstanceContext {
+  interface InstanceContext extends AlertInstanceContext {
     instanceContextValue: boolean;
   }
   const result: AlertType<ParamsType, State, InstanceState, InstanceContext> = {
@@ -159,7 +163,7 @@ function getCumulativeFiringAlertType() {
   interface State {
     runCount?: number;
   }
-  interface InstanceState {
+  interface InstanceState extends AlertInstanceState {
     instanceStateValue: boolean;
   }
   const result: AlertType<{}, State, InstanceState, {}> = {
