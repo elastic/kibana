@@ -310,7 +310,7 @@ export type DurationTypes =
  * duration value and description string
  */
 export interface DurationDetails {
-  duration: number;
+  duration: number | '<1';
   durationType: DurationTypes;
 }
 /**
