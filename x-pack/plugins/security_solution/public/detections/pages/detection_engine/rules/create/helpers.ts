@@ -166,19 +166,25 @@ export const formatAboutStepData = (
     timestampOverride,
     ...rest
   } = aboutStepData;
+
+  const detectionExceptionLists =
+    exceptionsList != null ? exceptionsList.filter((list) => list.type !== 'endpoint') : [];
+
   const resp = {
     author: author.filter((item) => !isEmpty(item)),
     ...(isBuildingBlock ? { building_block_type: 'default' } : {}),
-    exceptions_list: (isAssociatedToEndpointList
-      ? [
-          { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
-          ...(exceptionsList != null ? exceptionsList : []).filter(
-            (list) => list.type !== 'endpoint'
-          ),
-        ]
+    ...(isAssociatedToEndpointList
+      ? {
+          exceptions_list: [
+            { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
+            ...detectionExceptionLists,
+          ] as AboutStepRuleJson['exceptions_list'],
+        }
       : exceptionsList != null
-      ? exceptionsList.filter((list) => list.type !== 'endpoint')
-      : []) as AboutStepRuleJson['exceptions_list'],
+      ? {
+          exceptions_list: [...detectionExceptionLists],
+        }
+      : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore.value,

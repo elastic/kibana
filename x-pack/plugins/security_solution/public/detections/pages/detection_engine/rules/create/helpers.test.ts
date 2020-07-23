@@ -351,7 +351,6 @@ describe('helpers', () => {
       const expected = {
         author: ['Elastic'],
         description: '24/7',
-        exceptions_list: [],
         false_positives: ['test'],
         license: 'Elastic License',
         name: 'Query with rule-id',
@@ -441,7 +440,6 @@ describe('helpers', () => {
       const expected = {
         author: ['Elastic'],
         description: '24/7',
-        exceptions_list: [],
         false_positives: ['test'],
         license: 'Elastic License',
         name: 'Query with rule-id',
@@ -483,7 +481,6 @@ describe('helpers', () => {
       const expected = {
         author: ['Elastic'],
         description: '24/7',
-        exceptions_list: [],
         false_positives: ['test'],
         license: 'Elastic License',
         name: 'Query with rule-id',
@@ -556,7 +553,6 @@ describe('helpers', () => {
         author: ['Elastic'],
         license: 'Elastic License',
         description: '24/7',
-        exceptions_list: [],
         false_positives: ['test'],
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
