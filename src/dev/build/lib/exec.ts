@@ -17,21 +17,33 @@
  * under the License.
  */
 
-export { BinderBase } from './binder';
-export { BinderFor } from './binder_for';
-export { deepCloneWithBuffers } from './deep_clone_with_buffers';
-export { unset } from './unset';
-export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
-export { IS_KIBANA_RELEASE } from './artifact_type';
+import execa from 'execa';
+import chalk from 'chalk';
+import { ToolingLog, LogLevel } from '@kbn/dev-utils';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createIntersperseStream,
-  createListStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createSplitStream,
-  createMapStream,
-  createReplaceStream,
-} from './streams';
+import { watchStdioForLine } from './watch_stdio_for_line';
+
+interface Options {
+  level?: Exclude<LogLevel, 'silent' | 'error'>;
+  cwd?: string;
+  env?: Record<string, string>;
+  exitAfter?: RegExp;
+}
+
+export async function exec(
+  log: ToolingLog,
+  cmd: string,
+  args: string[],
+  { level = 'debug', cwd, env, exitAfter }: Options = {}
+) {
+  log[level](chalk.dim('$'), cmd, ...args);
+
+  const proc = execa(cmd, args, {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    cwd,
+    env,
+    preferLocal: true,
+  });
+
+  await watchStdioForLine(proc, (line) => log[level](line), exitAfter);
+}

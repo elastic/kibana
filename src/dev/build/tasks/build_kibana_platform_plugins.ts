@@ -17,30 +17,36 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
+import { CiStatsReporter } from '@kbn/dev-utils';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  logOptimizerState,
+  reportOptimizerStats,
+} from '@kbn/optimizer';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
+import { Task } from '../lib';
 
-export const InstallChromium = {
-  description: 'Installing Chromium',
-
+export const BuildKibanaPlatformPlugins: Task = {
+  description: 'Building distributable versions of Kibana platform plugins',
   async run(config, log, build) {
-    if (build.isOss()) {
-      return;
-    } else {
-      for (const platform of config.getNodePlatforms()) {
-        log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
+    const optimizerConfig = OptimizerConfig.create({
+      repoRoot: build.resolvePath(),
+      cache: false,
+      oss: build.isOss(),
+      examples: false,
+      watch: false,
+      dist: true,
+      includeCoreBundle: true,
+    });
 
-        const { binaryPath$ } = installBrowser(
-          // TODO: https://github.com/elastic/kibana/issues/72496
-          log,
-          build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
-          platform.getName(),
-          platform.getArchitecture()
-        );
-        await binaryPath$.pipe(first()).toPromise();
-      }
-    }
+    const reporter = CiStatsReporter.fromEnv(log);
+
+    await runOptimizer(optimizerConfig)
+      .pipe(
+        reportOptimizerStats(reporter, optimizerConfig),
+        logOptimizerState(log, optimizerConfig)
+      )
+      .toPromise();
   },
 };

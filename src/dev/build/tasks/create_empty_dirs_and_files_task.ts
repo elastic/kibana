@@ -17,30 +17,16 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
+import { mkdirp, write, Task } from '../lib';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
-
-export const InstallChromium = {
-  description: 'Installing Chromium',
+export const CreateEmptyDirsAndFiles: Task = {
+  description: 'Creating some empty directories and files to prevent file-permission issues',
 
   async run(config, log, build) {
-    if (build.isOss()) {
-      return;
-    } else {
-      for (const platform of config.getNodePlatforms()) {
-        log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
-
-        const { binaryPath$ } = installBrowser(
-          // TODO: https://github.com/elastic/kibana/issues/72496
-          log,
-          build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
-          platform.getName(),
-          platform.getArchitecture()
-        );
-        await binaryPath$.pipe(first()).toPromise();
-      }
-    }
+    await Promise.all([
+      mkdirp(build.resolvePath('plugins')),
+      mkdirp(build.resolvePath('data/optimize')),
+      write(build.resolvePath('data/optimize/.babel_register_cache.json'), '{}'),
+    ]);
   },
 };
