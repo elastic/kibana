@@ -20,7 +20,6 @@
 import { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 import { EventEmitter } from 'events';
-import { merge } from 'rxjs';
 
 import { migrateLegacyQuery } from '../../../../../kibana_legacy/public';
 import {
@@ -47,6 +46,8 @@ export const useEditorUpdates = (
       const {
         timefilter: { timefilter },
         filterManager,
+        queryString,
+        state$,
       } = services.data.query;
       const { embeddableHandler, savedVis, savedSearch, vis } = savedVisInstance;
       const initialState = appState.getState();
@@ -60,7 +61,7 @@ export const useEditorUpdates = (
             uiState: vis.uiState,
             timeRange: timefilter.getTime(),
             filters: filterManager.getFilters(),
-            query: appState.getState().query,
+            query: queryString.getQuery(),
             linked: !!vis.data.savedSearchId,
             savedSearch,
           });
@@ -68,17 +69,12 @@ export const useEditorUpdates = (
           embeddableHandler.updateInput({
             timeRange: timefilter.getTime(),
             filters: filterManager.getFilters(),
-            query: appState.getState().query,
+            query: queryString.getQuery(),
           });
         }
       };
 
-      const subscriptions = merge(
-        timefilter.getTimeUpdate$(),
-        timefilter.getAutoRefreshFetch$(),
-        timefilter.getFetch$(),
-        filterManager.getFetches$()
-      ).subscribe({
+      const subscriptions = state$.subscribe({
         next: reloadVisualization,
         error: services.fatalErrors.add,
       });
@@ -115,10 +111,6 @@ export const useEditorUpdates = (
           // this filters out the case when manipulating the browser history back/forward
           // and initializing different visualizations
           return;
-        }
-        const newQuery = migrateLegacyQuery(state.query);
-        if (!isEqual(state.query, newQuery)) {
-          appState.transitions.set('query', newQuery);
         }
 
         if (!isEqual(state.uiState, vis.uiState.getChanges())) {
