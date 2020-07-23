@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { DEFAULT_REGISTRY_URL } from '../../../../plugins/ingest_manager/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
-  skipIfNoRegistry,
   isRegistryEnabled,
+  getRegistryUrl,
 } from '../../../security_solution_endpoint_api_int/registry';
 
 export default function (providerContext: FtrProviderContext) {
@@ -17,13 +18,15 @@ export default function (providerContext: FtrProviderContext) {
     const ingestManager = getService('ingestManager');
     const log = getService('log');
 
-    skipIfNoRegistry(log);
+    if (!isRegistryEnabled()) {
+      log.warning('These tests are being run with an external package registry');
+    }
+
+    const registryUrl = getRegistryUrl() ?? DEFAULT_REGISTRY_URL;
+    log.info(`Package registry URL for tests: ${registryUrl}`);
+
     before(async () => {
-      if (isRegistryEnabled()) {
-        await ingestManager.setup();
-      } else {
-        log.warning('skipping ingest setup because the registry location was not defined');
-      }
+      await ingestManager.setup();
     });
     loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_list'));

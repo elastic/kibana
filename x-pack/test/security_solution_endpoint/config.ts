@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import {
-  getRegistryUrlOrEmptyStr,
+  getRegistryUrlAsArray,
   createEndpointDockerConfig,
 } from '../security_solution_endpoint_api_int/registry';
 
@@ -36,7 +36,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         '--xpack.ingestManager.enabled=true',
-        getRegistryUrlOrEmptyStr(),
+        // if you return an empty string here the kibana server will not start properly but an empty array works
+        ...getRegistryUrlAsArray(),
       ],
     },
   };

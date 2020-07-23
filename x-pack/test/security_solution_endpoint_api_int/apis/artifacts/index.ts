@@ -8,11 +8,8 @@ import expect from '@kbn/expect';
 import { createHash } from 'crypto';
 import { inflateSync } from 'zlib';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  getSupertestWithoutAuth,
-  setupIngest,
-} from '../../../ingest_manager_api_integration/apis/fleet/agents/services';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { getSupertestWithoutAuth } from '../../../ingest_manager_api_integration/apis/fleet/agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -22,7 +19,6 @@ export default function (providerContext: FtrProviderContext) {
   let agentAccessAPIKey: string;
 
   describe('artifact download', () => {
-    setupIngest(providerContext);
     before(async () => {
       await esArchiver.load('endpoint/artifacts/api_feature', { useCreate: true });
 

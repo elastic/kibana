@@ -4,26 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../ftr_provider_context';
-import { skipIfNoRegistry, isRegistryEnabled } from '../registry';
+import { isRegistryEnabled, getRegistryUrl } from '../registry';
+import { DEFAULT_REGISTRY_URL } from '../../../plugins/ingest_manager/common';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
+
   describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
-    const log = getService('log');
 
     this.tags('ciGroup7');
+    const log = getService('log');
 
-    skipIfNoRegistry(log);
+    if (!isRegistryEnabled()) {
+      log.warning('These tests are being run with an external package registry');
+    }
+
+    const registryUrl = getRegistryUrl() ?? DEFAULT_REGISTRY_URL;
+    log.info(`Package registry URL for tests: ${registryUrl}`);
+
     before(async () => {
-      if (isRegistryEnabled()) {
-        await ingestManager.setup();
-      } else {
-        log.warning('skipping ingest setup because the registry location was not defined');
-      }
+      await ingestManager.setup();
     });
     loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./policy'));
+    loadTestFile(require.resolve('./artifacts'));
   });
 }

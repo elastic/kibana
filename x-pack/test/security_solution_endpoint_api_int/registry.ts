@@ -6,8 +6,6 @@
 import path from 'path';
 
 import { defineDockerServersConfig } from '@kbn/test';
-import { ToolingLog } from '@kbn/dev-utils';
-import { warnAndSkipTest } from '../ingest_manager_api_integration/helpers';
 import { dockerImage as ingestDockerImage } from '../ingest_manager_api_integration/config';
 
 /**
@@ -33,7 +31,7 @@ const dockerRegistryPort: string | undefined = process.env.INGEST_MANAGEMENT_PAC
 const packageRegistryOverride: string | undefined = process.env.PACKAGE_REGISTRY_OVERRIDE;
 
 const defaultRegistryConfigPath = path.join(
-  path.dirname(__filename),
+  __dirname,
   './apis/fixtures/package_registry_config.yml'
 );
 
@@ -69,25 +67,11 @@ export function getRegistryUrl(): string | undefined {
   return registryUrl;
 }
 
-export function getRegistryUrlOrEmptyStr(): string {
+export function getRegistryUrlAsArray(): string[] {
   const registryUrl: string | undefined = getRegistryUrl();
-  return registryUrl !== undefined ? registryUrl : '';
+  return registryUrl !== undefined ? [registryUrl] : [];
 }
 
 export function isRegistryEnabled() {
   return getRegistryUrl() !== undefined;
-}
-
-/**
- * This function checks if a package registry was configured to be used with these tests. If
- * no registry exists it skips all the tests in the describe block and logs warnings.
- *
- * @param providerContext test context to retrieve services
- */
-export function skipIfNoRegistry(log: ToolingLog) {
-  before(function beforeSetupWithDockerRegistry() {
-    if (!isRegistryEnabled()) {
-      warnAndSkipTest(this, log);
-    }
-  });
 }
