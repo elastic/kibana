@@ -48,20 +48,20 @@ export const useAllCasesModal = ({
   const onOpenModal = useCallback(() => setShowModal(true), []);
 
   const onRowClick = useCallback(
-    (id?: string) => {
+    async (id?: string) => {
       onCloseModal();
 
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      await navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: id != null ? getCaseDetailsUrl({ id }) : getCreateCaseUrl(),
-      }).then(() =>
-        dispatch(
-          setInsertTimeline({
-            graphEventId,
-            timelineId,
-            timelineSavedObjectId,
-            timelineTitle: title && title.length > 0 ? title : UNTITLED_TIMELINE,
-          })
-        )
+      });
+
+      dispatch(
+        setInsertTimeline({
+          graphEventId,
+          timelineId,
+          timelineSavedObjectId,
+          timelineTitle: title && title.length > 0 ? title : UNTITLED_TIMELINE,
+        })
       );
     },
     // dispatch causes unnecessary rerenders
