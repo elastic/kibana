@@ -130,6 +130,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
       >
         <EuiFilePicker
           accept={validFileTypes.join()}
+          data-test-subj="value-list-file-picker"
           id="value-list-file-picker"
           initialPromptText={i18n.FILE_PICKER_PROMPT}
           ref={filePickerRef}
