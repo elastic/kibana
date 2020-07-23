@@ -17,7 +17,6 @@ export const LIST_PRIVILEGES_URL = `${LIST_URL}/privileges`;
  */
 export const EXCEPTION_LIST_URL = '/api/exception_lists';
 export const EXCEPTION_LIST_ITEM_URL = '/api/exception_lists/items';
-export const EXCEPTION_LIST_ITEM_COMMENTS_URL = '/api/exception_lists/items/comments';
 
 /**
  * Exception list spaces
