@@ -155,7 +155,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const handleRuleChange = useCallback(
-    (ruleChanged: boolean) => {
+    (ruleChanged: boolean): void => {
       if (ruleChanged && onRuleChange) {
         onRuleChange();
       }
