@@ -31,6 +31,7 @@ export interface UseFetchOrCreateRuleExceptionListProps {
   ruleId: Rule['id'];
   exceptionListType: ExceptionListSchema['type'];
   onError: (arg: Error) => void;
+  onSuccess?: (ruleWasChanged: boolean) => void;
 }
 
 /**
@@ -47,6 +48,7 @@ export const useFetchOrCreateRuleExceptionList = ({
   ruleId,
   exceptionListType,
   onError,
+  onSuccess,
 }: UseFetchOrCreateRuleExceptionListProps): ReturnUseFetchOrCreateRuleExceptionList => {
   const [isLoading, setIsLoading] = useState(false);
   const [exceptionList, setExceptionList] = useState<ExceptionListSchema | null>(null);
@@ -168,6 +170,9 @@ export const useFetchOrCreateRuleExceptionList = ({
         if (isSubscribed) {
           setExceptionList(exceptionListToUse);
           setIsLoading(false);
+          if (onSuccess) {
+            onSuccess(matchingList == null);
+          }
         }
       } catch (error) {
         if (isSubscribed) {
@@ -183,7 +188,7 @@ export const useFetchOrCreateRuleExceptionList = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [http, ruleId, exceptionListType, onError]);
+  }, [http, ruleId, exceptionListType, onError, onSuccess]);
 
   return [isLoading, exceptionList];
 };
