@@ -322,6 +322,26 @@ export const AllCases = React.memo<AllCasesProps>(
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
     const TableWrap = useMemo(() => (isModal ? 'span' : Panel), [isModal]);
+
+    const tableRowProps = useCallback((item) => {
+      const rowProps = {
+        'data-test-subj': `cases-table-row-${item.id}`,
+      };
+
+      if (isModal) {
+        return {
+          ...rowProps,
+          onClick: () => {
+            if (onRowClick != null) {
+              onRowClick(item.id);
+            }
+          },
+        };
+      }
+
+      return rowProps;
+    }, []);
+
     return (
       <>
         {!isEmpty(actionsErrors) && (
@@ -456,20 +476,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 }
                 onChange={tableOnChangeCallback}
                 pagination={memoizedPagination}
-                rowProps={(item) =>
-                  isModal
-                    ? {
-                        'data-test-subj': `cases-table-row-${item.id}`,
-                        onClick: () => {
-                          if (onRowClick != null) {
-                            onRowClick(item.id);
-                          }
-                        },
-                      }
-                    : {
-                        'data-test-subj': `cases-table-row-${item.id}`,
-                      }
-                }
+                rowProps={tableRowProps}
                 selection={userCanCrud && !isModal ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
               />
