@@ -1622,6 +1622,8 @@ If others are consuming your plugin's new platform contracts via the `ui/new_pla
 
 #### What about karma tests?
 
+// TODO: REMOVE
+
 While our plan is to only provide first-class mocks for Jest tests, there are many legacy karma tests that cannot be quickly or easily converted to Jest -- particularly those which are still relying on mocking Angular services via `ngMock`.
 
 For these tests, we are maintaining a separate set of mocks. Files with a `.karma_mock.{js|ts|tsx}` extension will be loaded _globally_ before karma tests are run.

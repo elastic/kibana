@@ -42,21 +42,7 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      cors: schema.conditional(
-        schema.contextRef('dev'),
-        true,
-        schema.object(
-          {
-            origin: schema.arrayOf(schema.string()),
-          },
-          {
-            defaultValue: {
-              origin: ['*://localhost:9876'], // karma test server
-            },
-          }
-        ),
-        schema.boolean({ defaultValue: false })
-      ),
+      cors: schema.boolean({ defaultValue: false }),
       customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
         defaultValue: {},
       }),

@@ -26,8 +26,6 @@ root)
 |Functional
 |`test/*integration/**/config.js` `test/*functional/**/config.js` `test/accessibility/config.js`
 |`yarn test:ftr:server --config test/[directory]/config.js``yarn test:ftr:runner --config test/[directory]/config.js --grep=regexp`
-
-|Karma |`src/**/public/__tests__/*.js` |`yarn test:karma:debug`
 |===
 
 For X-Pack tests located in `x-pack/` see

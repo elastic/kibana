@@ -53,7 +53,7 @@ interface BootstrapModule {
  * The LegacyPlatformService is responsible for initializing
  * the legacy platform by injecting parts of the new platform
  * services into the legacy platform modules, like ui/modules,
- * and then bootstrapping the ui/chrome or ui/test_harness to
+ * and then bootstrapping the ui/chrome or ~~ui/test_harness~~ to
  * setup either the app or browser tests.
  */
 export class LegacyPlatformService {
