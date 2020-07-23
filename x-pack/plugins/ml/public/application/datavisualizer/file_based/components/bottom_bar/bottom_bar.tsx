@@ -39,7 +39,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
                 disableImport ? (
                   <FormattedMessage
                     id="xpack.ml.fileDatavisualizer.bottomBar.missingImportPrivilegesMessage"
-                    defaultMessage="You don't have the privileges required to import data"
+                    defaultMessage="You require the ingest_admin role to enable data importing"
                   />
                 ) : null
               }
