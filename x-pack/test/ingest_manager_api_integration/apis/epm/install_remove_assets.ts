@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const dockerServers = getService('dockerServers');
   const log = getService('log');
-  const pkgName = 'es_assets';
+  const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const pkgKey = `${pkgName}-${pkgVersion}`;
   const logsTemplateName = `logs-${pkgName}.test_logs`;

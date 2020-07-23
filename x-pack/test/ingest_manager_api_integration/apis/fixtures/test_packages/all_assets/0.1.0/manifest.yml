@@ -1,7 +1,7 @@
 format_version: 1.0.0
-name: es_assets 
-title: ES Assets Installed Test
-description: This is a test package for testing that all the elastisearch assets were installed when installing a package for the first time and removing the assets during package uninstall
+name: all_assets 
+title: All Assets Installed/Uninstalled Test
+description: This is a test package for testing that all assets were installed when installing a package for the first time and removing the assets during package uninstall
 version: 0.1.0
 categories: []
 release: beta
