@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { GlobalSearchResultProvider, GlobalSearchResult } from '../../../global_search/public';
 
 interface Props {
@@ -87,6 +88,9 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         inputRef: (ref: HTMLInputElement) => {
           setSearchRef(ref);
         },
+        'aria-label': i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+          defaultMessage: 'Search for anything...',
+        }),
       }}
       listProps={{
         rowHeight: 68,

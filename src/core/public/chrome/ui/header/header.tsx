@@ -69,6 +69,7 @@ export interface HeaderProps {
   helpSupportUrl$: Observable<string>;
   legacyMode: boolean;
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
+  navControlsCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
