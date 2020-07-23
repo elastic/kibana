@@ -186,7 +186,6 @@ def getNextCommentMessage(previousCommentInfo = [:]) {
   }
 
   messages << getTestFailuresMessage()
-  messages << ciStats.getMetricsReport()
 
   if (info.builds && info.builds.size() > 0) {
     messages << getHistoryText(info.builds)
