@@ -1790,6 +1790,10 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean | 'optional';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
+    timeout?: {
+        server?: boolean | number;
+        socket?: boolean | number;
+    };
     xsrfRequired?: Method extends 'get' ? never : boolean;
 }
 
@@ -1799,6 +1803,7 @@ export interface RouteConfigOptionsBody {
     maxBytes?: number;
     output?: typeof validBodyOutput[number];
     parse?: boolean | 'gunzip';
+    timeout?: false | number;
 }
 
 // @public
