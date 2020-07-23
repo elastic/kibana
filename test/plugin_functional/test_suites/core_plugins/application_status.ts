@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         defaultPath: '/arbitrary/path',
       });
 
-      retry.waitFor('link url updated with "defaultPath"', async () => {
+      await retry.waitFor('link url updated with "defaultPath"', async () => {
         const updatedLink = await appsMenu.getLink('App Status');
         return updatedLink?.href === getKibanaUrl('/app/app_status/arbitrary/path');
       });
