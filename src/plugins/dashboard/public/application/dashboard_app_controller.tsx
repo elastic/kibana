@@ -542,7 +542,7 @@ export class DashboardAppController {
     };
 
     $scope.handleRefresh = function (_payload, isUpdate) {
-      if (!isUpdate) {
+      if (isUpdate === false) {
         // The user can still request a reload in the query bar, even if the
         // query is the same, and in that case, we have to explicitly ask for
         // a reload, since no state changes will cause it.

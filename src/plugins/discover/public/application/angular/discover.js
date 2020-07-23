@@ -255,7 +255,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const changes = ['interval', 'sort', 'query'].filter(
+        const changes = ['interval', 'sort'].filter(
           (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
 
@@ -804,6 +804,12 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
           });
         }
       });
+  };
+
+  $scope.handleRefresh = function (_payload, isUpdate) {
+    if (isUpdate === false) {
+      $fetchObservable.next();
+    }
   };
 
   $scope.updateSavedQueryId = (newSavedQueryId) => {
