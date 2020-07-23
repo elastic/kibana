@@ -42,11 +42,14 @@ export const platformServiceFactory: CanvasServiceFactory<PlatformService> = (
     // TODO: is there a better type for this?  The capabilities type allows for a Record,
     // though we don't do this.  So this cast may be the best option.
     getHasWriteAccess: () => coreStart.application.capabilities.canvas.save as boolean,
+    getUISetting: coreStart.uiSettings.get.bind(coreStart.uiSettings),
+    setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+    setRecentlyAccessed: coreStart.chrome.recentlyAccessed.add,
+
+    // TODO: these should go away.  We want thin accessors, not entire objects.
+    // Entire objects are hard to mock, and hide our dependency on the external service.
     getSavedObjects: () => coreStart.savedObjects,
     getSavedObjectsClient: () => coreStart.savedObjects.client,
     getUISettings: () => coreStart.uiSettings,
-    getUISetting: () => coreStart.uiSettings.get,
-    setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
-    setRecentlyAccessed: coreStart.chrome.recentlyAccessed.add,
   };
 };

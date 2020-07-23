@@ -14,7 +14,6 @@ import { AddEmbeddableFlyout, Props } from './flyout';
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
-import { withServices, WithServicesProps } from '../../services';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
@@ -73,10 +72,10 @@ const mergeProps = (
   };
 };
 
-export class EmbeddableFlyoutPortal extends React.Component<Props & WithServicesProps> {
+export class EmbeddableFlyoutPortal extends React.Component<Props> {
   el?: HTMLElement;
 
-  constructor(props: Props & WithServicesProps) {
+  constructor(props: Props) {
     super(props);
 
     this.el = document.createElement('div');
@@ -109,7 +108,6 @@ export class EmbeddableFlyoutPortal extends React.Component<Props & WithServices
   }
 }
 
-export const AddEmbeddablePanel = compose<Props & WithServicesProps, { onClose: () => void }>(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withServices
+export const AddEmbeddablePanel = compose<Props, { onClose: () => void }>(
+  connect(mapStateToProps, mapDispatchToProps, mergeProps)
 )(EmbeddableFlyoutPortal);

@@ -21,9 +21,6 @@ export interface Props {
   onClose: () => void;
   onSelect: (id: string, embeddableType: string) => void;
   availableEmbeddables: string[];
-  savedObjects: CoreStart['savedObjects'];
-  uiSettings: CoreStart['uiSettings'];
-  getEmbeddableFactories: CanvasStartDeps['embeddable']['getEmbeddableFactories'];
 }
 
 export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
