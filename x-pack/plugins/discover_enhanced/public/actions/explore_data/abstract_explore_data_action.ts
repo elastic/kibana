@@ -42,7 +42,12 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
 
   public async isCompatible({ embeddable }: Context): Promise<boolean> {
     if (!embeddable) return false;
-    if (!this.params.start().plugins.discover.urlGenerator) return false;
+
+    const { core, plugins } = this.params.start();
+    const { capabilities } = core.application;
+
+    if (capabilities.discover) if (!capabilities.discover.show) return false;
+    if (!plugins.discover.urlGenerator) return false;
     if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
     return true;

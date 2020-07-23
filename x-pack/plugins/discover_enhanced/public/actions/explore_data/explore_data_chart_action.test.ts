@@ -181,6 +181,19 @@ describe('"Explore underlying data" panel action', () => {
 
       expect(isCompatible).toBe(false);
     });
+
+    test('returns false if Discover app is disabled', async () => {
+      const { action, context, core } = setup();
+
+      core.application.capabilities = { ...core.application.capabilities };
+      (core.application.capabilities as any).discover = {
+        show: false,
+      };
+
+      const isCompatible = await action.isCompatible(context);
+
+      expect(isCompatible).toBe(false);
+    });
   });
 
   describe('getHref()', () => {
