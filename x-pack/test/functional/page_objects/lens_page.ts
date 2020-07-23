@@ -195,5 +195,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async createLayer() {
       await testSubjects.click('lnsLayerAddButton');
     },
+
+    async linkedToOriginatingApp() {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('lnsApp_saveAndReturnButton');
+    },
+
+    async notLinkedToOriginatingApp() {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('lnsApp_saveAndReturnButton');
+    },
   });
 }
