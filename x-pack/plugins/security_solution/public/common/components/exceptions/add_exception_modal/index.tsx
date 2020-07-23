@@ -318,6 +318,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   indexPatterns={indexPatterns}
                   isOrDisabled={false}
                   isAndDisabled={false}
+                  isNestedDisabled={false}
                   data-test-subj="alert-exception-builder"
                   id-aria="alert-exception-builder"
                   onChange={handleBuilderOnChange}
