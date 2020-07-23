@@ -20,5 +20,5 @@ import { QueryStart } from '../../../query';
 
 export const clearStateFromSavedQuery = (queryService: QueryStart) => {
   queryService.filterManager.removeAll();
-  queryService.queryString.setQuery();
+  queryService.queryString.clearQuery();
 };
