@@ -26,6 +26,7 @@ import {
   useGetAgentConfigs,
   sendGetOneAgentConfig,
   useCapabilities,
+  useFleetStatus,
 } from '../../../hooks';
 import { CreateAgentConfigFlyout } from '../list_page/components';
 
@@ -36,12 +37,12 @@ const AgentConfigWrapper = styled(EuiFormRow)`
 `;
 
 const AgentConfigNameColumn = styled(EuiFlexItem)`
-  max-width: ${(2 / 9) * 100}%;
+  max-width: ${(props) => `${(props.grow / 9) * 100}%`};
   overflow: hidden;
 `;
 
 const AgentConfigDescriptionColumn = styled(EuiFlexItem)`
-  max-width: ${(5 / 9) * 100}%;
+  max-width: ${(props) => `${(props.grow / 9) * 100}%`};
   overflow: hidden;
 `;
 
@@ -52,6 +53,8 @@ export const StepSelectConfig: React.FunctionComponent<{
   updateAgentConfig: (config: AgentConfig | undefined) => void;
   setIsLoadingSecondStep: (isLoading: boolean) => void;
 }> = ({ pkgkey, updatePackageInfo, agentConfig, updateAgentConfig, setIsLoadingSecondStep }) => {
+  const { isReady: isFleetReady } = useFleetStatus();
+
   // Selected config state
   const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(
     agentConfig ? agentConfig.id : undefined
@@ -231,7 +234,7 @@ export const StepSelectConfig: React.FunctionComponent<{
               </EuiFlexGroup>
             }
             helpText={
-              selectedConfigId ? (
+              isFleetReady && selectedConfigId ? (
                 <FormattedMessage
                   id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsCountText"
                   defaultMessage="{count, plural, one {# agent} other {# agents}} are enrolled with the selected agent configuration."
@@ -259,22 +262,24 @@ export const StepSelectConfig: React.FunctionComponent<{
                     <AgentConfigNameColumn grow={2}>
                       <span className="eui-textTruncate">{option.label}</span>
                     </AgentConfigNameColumn>
-                    <AgentConfigDescriptionColumn grow={5}>
+                    <AgentConfigDescriptionColumn grow={isFleetReady ? 5 : 7}>
                       <EuiTextColor className="eui-textTruncate" color="subdued">
                         {agentConfigsById[option.key!].description}
                       </EuiTextColor>
                     </AgentConfigDescriptionColumn>
-                    <EuiFlexItem grow={2} className="eui-textRight">
-                      <EuiTextColor color="subdued">
-                        <FormattedMessage
-                          id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsCountText"
-                          defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
-                          values={{
-                            count: agentConfigsById[option.key!].agents || 0,
-                          }}
-                        />
-                      </EuiTextColor>
-                    </EuiFlexItem>
+                    {isFleetReady ? (
+                      <EuiFlexItem grow={2} className="eui-textRight">
+                        <EuiTextColor color="subdued">
+                          <FormattedMessage
+                            id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsCountText"
+                            defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
+                            values={{
+                              count: agentConfigsById[option.key!].agents || 0,
+                            }}
+                          />
+                        </EuiTextColor>
+                      </EuiFlexItem>
+                    ) : null}
                   </EuiFlexGroup>
                 );
               }}
