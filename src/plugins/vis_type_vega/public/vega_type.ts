@@ -23,9 +23,10 @@ import { VegaVisualizationDependencies } from './plugin';
 import { VegaVisEditor } from './components';
 
 import { createVegaRequestHandler } from './vega_request_handler';
-// @ts-ignore
+// @ts-expect-error
 import { createVegaVisualization } from './vega_visualization';
 import { getDefaultSpec } from './default_spec';
+import { createInspectorAdapters } from './vega_inspector';
 
 export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependencies) => {
   const requestHandler = createVegaRequestHandler(dependencies);
@@ -54,5 +55,6 @@ export const createVegaTypeDefinition = (dependencies: VegaVisualizationDependen
       showFilterBar: true,
     },
     stage: 'experimental',
+    inspectorAdapters: createInspectorAdapters,
   };
 };
