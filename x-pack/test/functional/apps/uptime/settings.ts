@@ -16,8 +16,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const es = getService('es');
 
-  // Flaky https://github.com/elastic/kibana/issues/60866
-  describe('uptime settings page', () => {
+  // Flaky https://github.com/elastic/kibana/issues/72994
+  describe.skip('uptime settings page', () => {
     beforeEach('navigate to clean app root', async () => {
       // make 10 checks
       await makeChecks(es, 'myMonitor', 1, 1, 1);
