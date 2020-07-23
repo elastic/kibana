@@ -15,7 +15,6 @@ import { simulateIndexTemplate } from '../../../services';
 const { stripEmptyFields } = serializers;
 
 interface Props {
-  templateName: string;
   template: { [key: string]: any };
   minHeightCodeBlock?: string;
 }
