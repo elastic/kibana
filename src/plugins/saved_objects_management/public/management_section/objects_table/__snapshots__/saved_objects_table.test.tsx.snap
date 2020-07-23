@@ -371,6 +371,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "onSelectionChange": [Function],
         }
       }
+      showSharedSpacesColumn={true}
       totalItemCount={4}
     />
   </RedirectAppLinks>

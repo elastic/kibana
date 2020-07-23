@@ -30,6 +30,7 @@ const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
   actionRegistry: actionServiceMock.createStart(),
   columnRegistry: columnServiceMock.createStart(),
+  showSharedSpacesColumn: true,
   selectedSavedObjects: [
     {
       id: '1',

@@ -28,7 +28,7 @@ export const registerGetAllowedTypesRoute = (router: IRouter) => {
     async (context, req, res) => {
       const allowedTypes = context.core.savedObjects.typeRegistry
         .getImportableAndExportableTypes()
-        .map((type) => type.name);
+        .map(({ name, namespaceType }) => ({ name, namespaceType }));
 
       return res.ok({
         body: {

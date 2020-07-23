@@ -85,6 +85,7 @@ interface ExportAllOption {
 
 export interface SavedObjectsTableProps {
   allowedTypes: string[];
+  showSharedSpacesColumn: boolean;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -781,6 +782,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             itemId={'id'}
             actionRegistry={this.props.actionRegistry}
             columnRegistry={this.props.columnRegistry}
+            showSharedSpacesColumn={this.props.showSharedSpacesColumn}
             selectionConfig={selectionConfig}
             selectedSavedObjects={selectedSavedObjects}
             onQueryChange={this.onQueryChange}
