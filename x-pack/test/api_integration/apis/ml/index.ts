@@ -50,14 +50,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    // loadTestFile(require.resolve('./modules'));
-    // loadTestFile(require.resolve('./anomaly_detectors'));
-    // loadTestFile(require.resolve('./data_visualizer'));
-    // loadTestFile(require.resolve('./fields_service'));
-    // loadTestFile(require.resolve('./job_validation'));
-    // loadTestFile(require.resolve('./jobs'));
-    // loadTestFile(require.resolve('./results'));
-    // loadTestFile(require.resolve('./data_frame_analytics'));
+    loadTestFile(require.resolve('./modules'));
+    loadTestFile(require.resolve('./anomaly_detectors'));
+    loadTestFile(require.resolve('./data_visualizer'));
+    loadTestFile(require.resolve('./fields_service'));
+    loadTestFile(require.resolve('./job_validation'));
+    loadTestFile(require.resolve('./jobs'));
+    loadTestFile(require.resolve('./results'));
+    loadTestFile(require.resolve('./data_frame_analytics'));
     loadTestFile(require.resolve('./annotations'));
   });
 }
