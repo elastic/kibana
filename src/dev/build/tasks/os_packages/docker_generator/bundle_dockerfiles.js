@@ -18,7 +18,7 @@
  */
 
 import { resolve } from 'path';
-import { compress, copyAll, mkdirp, write } from '../../../lib';
+import { compressTar, copyAll, mkdirp, write } from '../../../lib';
 import { dockerfileTemplate } from './templates';
 
 export async function bundleDockerFiles(config, log, build, scope) {
@@ -50,8 +50,7 @@ export async function bundleDockerFiles(config, log, build, scope) {
   // Compress dockerfiles dir created inside
   // docker build dir as output it as a target
   // on targets folder
-  await compress(
-    'tar',
+  await compressTar(
     {
       archiverOptions: {
         gzip: true,

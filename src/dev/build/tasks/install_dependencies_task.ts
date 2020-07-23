@@ -17,30 +17,27 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
+import { Project } from '@kbn/pm';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
+import { Task } from '../lib';
 
-export const InstallChromium = {
-  description: 'Installing Chromium',
+export const InstallDependencies: Task = {
+  description: 'Installing node_modules, including production builds of packages',
 
   async run(config, log, build) {
-    if (build.isOss()) {
-      return;
-    } else {
-      for (const platform of config.getNodePlatforms()) {
-        log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
+    const project = await Project.fromPath(build.resolvePath());
 
-        const { binaryPath$ } = installBrowser(
-          // TODO: https://github.com/elastic/kibana/issues/72496
-          log,
-          build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
-          platform.getName(),
-          platform.getArchitecture()
-        );
-        await binaryPath$.pipe(first()).toPromise();
-      }
-    }
+    await project.installDependencies({
+      extraArgs: [
+        '--production',
+        '--ignore-optional',
+        '--frozen-lockfile',
+        '--prefer-offline',
+
+        // We're using --no-bin-links to support systems that don't have symlinks.
+        // This is commonly seen in shared folders on virtual machines
+        '--no-bin-links',
+      ],
+    });
   },
 };
