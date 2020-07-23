@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`attribtion validation should provide no validation errors when attribution text and attribution url are provided 1`] = `
+exports[`attribution validation should provide no validation errors when attribution text and attribution url are provided 1`] = `
 <EuiPanel>
   <EuiFormRow
     describedByIds={Array []}
@@ -27,13 +27,13 @@ exports[`attribtion validation should provide no validation errors when attribut
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    isInvalid={true}
+    isInvalid={false}
     label="Attribution text"
     labelType="label"
   >
     <EuiFieldText
       onChange={[Function]}
-      value=""
+      value="myAttribtionLabel"
     />
   </EuiFormRow>
   <EuiFormRow
@@ -59,7 +59,7 @@ exports[`attribtion validation should provide no validation errors when attribut
 </EuiPanel>
 `;
 
-exports[`attribtion validation should provide validation error when attribution text is provided without attribution url 1`] = `
+exports[`attribution validation should provide validation error when attribution text is provided without attribution url 1`] = `
 <EuiPanel>
   <EuiFormRow
     describedByIds={Array []}
@@ -118,7 +118,7 @@ exports[`attribtion validation should provide validation error when attribution 
 </EuiPanel>
 `;
 
-exports[`attribtion validation should provide validation error when attribution url is provided without attribution text 1`] = `
+exports[`attribution validation should provide validation error when attribution url is provided without attribution text 1`] = `
 <EuiPanel>
   <EuiFormRow
     describedByIds={Array []}

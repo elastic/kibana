@@ -15,7 +15,7 @@ test('should render', () => {
   expect(component).toMatchSnapshot();
 });
 
-describe('attribtion validation', () => {
+describe('attribution validation', () => {
   test('should provide validation error when attribution text is provided without attribution url', () => {
     const component = shallow(<XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />);
     component.setState({ attributionText: 'myAttribtionLabel' });
@@ -30,6 +30,7 @@ describe('attribtion validation', () => {
 
   test('should provide no validation errors when attribution text and attribution url are provided', () => {
     const component = shallow(<XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />);
+    component.setState({ attributionText: 'myAttribtionLabel' });
     component.setState({ attributionUrl: 'http://mySource' });
     expect(component).toMatchSnapshot();
   });
