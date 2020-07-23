@@ -112,6 +112,7 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
+    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
     const selectedNode = useSelector(selectors.selectedNode);
     const nodeID = processEventModel.uniquePidForProcess(event);
     const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
@@ -215,6 +216,7 @@ const UnstyledProcessEventDot = React.memo(
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
+    const isAriaCurrent = nodeID === ariaActiveDescendant;
     const isAriaSelected = nodeID === selectedNode;
 
     const dispatch = useResolverDispatch();
@@ -302,6 +304,7 @@ const UnstyledProcessEventDot = React.memo(
         aria-flowto={ariaFlowtoNodeID === null ? undefined : nodeHTMLID(ariaFlowtoNodeID)}
         aria-labelledby={labelHTMLID}
         aria-haspopup="true"
+        aria-current={isAriaCurrent ? 'true' : undefined}
         aria-selected={isAriaSelected ? 'true' : undefined}
         style={nodeViewportStyle}
         id={nodeHTMLID(nodeID)}
@@ -450,13 +453,13 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
     stroke-dashoffset: 500;
     fill-opacity: 0;
   }
-  &:hover:not([aria-selected]) .backing {
+  &:hover:not([aria-current]) .backing {
     transition-property: fill-opacity;
     transition-duration: 0.25s;
     fill-opacity: 1; // actual color opacity handled in the fill hex
   }
 
-  &[aria-selected] .backing {
+  &[aria-current] .backing {
     transition-property: stroke-dashoffset;
     transition-duration: 1s;
     stroke-dashoffset: 0;
