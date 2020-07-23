@@ -100,18 +100,18 @@ describe('AllCases', () => {
     jest.resetAllMocks();
     navigateToApp = jest.fn();
     const kibanaMock = createUseKibanaMock()();
-    useKibanaMock.mockImplementation(() => ({
+    useKibanaMock.mockReturnValue({
       ...kibanaMock,
       services: {
         application: {
           navigateToApp,
         },
       },
-    }));
-    useUpdateCasesMock.mockImplementation(() => defaultUpdateCases);
-    useGetCasesMock.mockImplementation(() => defaultGetCases);
-    useDeleteCasesMock.mockImplementation(() => defaultDeleteCases);
-    useGetCasesStatusMock.mockImplementation(() => defaultCasesStatus);
+    });
+    useUpdateCasesMock.mockReturnValue(defaultUpdateCases);
+    useGetCasesMock.mockReturnValue(defaultGetCases);
+    useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
+    useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     moment.tz.setDefault('UTC');
   });
   it('should render AllCases', () => {
@@ -144,7 +144,7 @@ describe('AllCases', () => {
     );
   });
   it('should render empty fields', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       data: {
         ...defaultGetCases.data,
@@ -160,7 +160,7 @@ describe('AllCases', () => {
           },
         ],
       },
-    }));
+    });
     const wrapper = mount(
       <TestProviders>
         <AllCases userCanCrud={true} />
@@ -221,10 +221,10 @@ describe('AllCases', () => {
     });
   });
   it('opens case when row action icon clicked', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       filterOptions: { ...defaultGetCases.filterOptions, status: 'closed' },
-    }));
+    });
 
     const wrapper = mount(
       <TestProviders>
@@ -242,10 +242,11 @@ describe('AllCases', () => {
     });
   });
   it('Bulk delete', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       selectedCases: useGetCasesMockState.data.cases,
-    }));
+    });
+
     useDeleteCasesMock
       .mockReturnValueOnce({
         ...defaultDeleteCases,
@@ -276,10 +277,10 @@ describe('AllCases', () => {
     );
   });
   it('Bulk close status update', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       selectedCases: useGetCasesMockState.data.cases,
-    }));
+    });
 
     const wrapper = mount(
       <TestProviders>
@@ -291,14 +292,14 @@ describe('AllCases', () => {
     expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, 'closed');
   });
   it('Bulk open status update', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       selectedCases: useGetCasesMockState.data.cases,
       filterOptions: {
         ...defaultGetCases.filterOptions,
         status: 'closed',
       },
-    }));
+    });
 
     const wrapper = mount(
       <TestProviders>
@@ -310,10 +311,10 @@ describe('AllCases', () => {
     expect(updateBulkStatus).toBeCalledWith(useGetCasesMockState.data.cases, 'open');
   });
   it('isDeleted is true, refetch', () => {
-    useDeleteCasesMock.mockImplementation(() => ({
+    useDeleteCasesMock.mockReturnValue({
       ...defaultDeleteCases,
       isDeleted: true,
-    }));
+    });
 
     mount(
       <TestProviders>
@@ -325,10 +326,10 @@ describe('AllCases', () => {
     expect(dispatchResetIsDeleted).toBeCalled();
   });
   it('isUpdated is true, refetch', () => {
-    useUpdateCasesMock.mockImplementation(() => ({
+    useUpdateCasesMock.mockReturnValue({
       ...defaultUpdateCases,
       isUpdated: true,
-    }));
+    });
 
     mount(
       <TestProviders>
@@ -371,14 +372,14 @@ describe('AllCases', () => {
   });
 
   it('should call onRowClick with no cases and modal=true', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       data: {
         ...defaultGetCases.data,
         total: 0,
         cases: [],
       },
-    }));
+    });
 
     const wrapper = mount(
       <TestProviders>
@@ -391,14 +392,14 @@ describe('AllCases', () => {
   });
 
   it('should call navigateToApp with no cases and modal=false', () => {
-    useGetCasesMock.mockImplementation(() => ({
+    useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
       data: {
         ...defaultGetCases.data,
         total: 0,
         cases: [],
       },
-    }));
+    });
 
     const wrapper = mount(
       <TestProviders>
