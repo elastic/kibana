@@ -222,19 +222,47 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             {
               id: 'logs',
               label: (
-                <FormattedMessage
-                  id="xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel"
-                  defaultMessage="Collect agent logs"
-                />
+                <>
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel"
+                    defaultMessage="Collect agent logs"
+                  />{' '}
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.ingestManager.agentConfigForm.monitoringLogsTooltipText',
+                      {
+                        defaultMessage:
+                          'Collect logs from Elastic Agents that use this configuration.',
+                      }
+                    )}
+                    position="right"
+                    type="iInCircle"
+                    color="subdued"
+                  />
+                </>
               ),
             },
             {
               id: 'metrics',
               label: (
-                <FormattedMessage
-                  id="xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel"
-                  defaultMessage="Collect agent metrics"
-                />
+                <>
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel"
+                    defaultMessage="Collect agent metrics"
+                  />{' '}
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.ingestManager.agentConfigForm.monitoringMetricsTooltipText',
+                      {
+                        defaultMessage:
+                          'Collect metrics from Elastic Agents that use this configuration.',
+                      }
+                    )}
+                    position="right"
+                    type="iInCircle"
+                    color="subdued"
+                  />
+                </>
               ),
             },
           ]}
