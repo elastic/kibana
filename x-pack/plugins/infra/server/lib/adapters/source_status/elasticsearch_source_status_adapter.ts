@@ -40,7 +40,7 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
     });
   }
 
-  public async hasIndices(requestContext: RequestHandlerContext, indexNames: string) {
+  public async getIndexStatus(requestContext: RequestHandlerContext, indexNames: string) {
     return await this.framework
       .callWithRequest(requestContext, 'search', {
         ignore_unavailable: true,
@@ -48,12 +48,23 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
         index: indexNames,
         size: 0,
         terminate_after: 1,
+        track_total_hits: 1,
       })
       .then(
-        (response) => response._shards.total > 0,
+        (response) => {
+          if (response._shards.total < 0) {
+            return 'missing' as const;
+          }
+
+          if (response.hits.total.value > 0) {
+            return 'available' as const;
+          }
+
+          return 'empty' as const;
+        },
         (err) => {
           if (err.status === 404) {
-            return false;
+            return 'missing' as const;
           }
           throw err;
         }

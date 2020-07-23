@@ -43,7 +43,7 @@ export function getLogsHasDataFetcher(
   return async () => {
     const [core] = await getStartServices();
     const sourceStatus = await callFetchLogSourceStatusAPI(DEFAULT_SOURCE_ID, core.http.fetch);
-    return sourceStatus.data.logIndicesExist;
+    return sourceStatus.data.logIndexStatus === 'available';
   };
 }
 
