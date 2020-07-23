@@ -152,7 +152,7 @@ function getNoItemsMessage({
   if (status === FETCH_STATUS.FAILURE) {
     return i18n.translate(
       'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
-      { defaultMessage: 'Unabled to fetch anomaly detection jobs.' }
+      { defaultMessage: 'Unable to fetch anomaly detection jobs.' }
     );
   }
 
