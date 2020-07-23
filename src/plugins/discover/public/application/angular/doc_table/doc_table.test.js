@@ -17,15 +17,18 @@
  * under the License.
  */
 import angular from 'angular';
-import expect from '@kbn/expect';
 import _ from 'lodash';
-import ngMock from 'ng_mock';
-import 'ui/private';
-import { pluginInstance } from './legacy';
+import 'angular-mocks';
+import 'angular-sanitize';
+import 'angular-route';
+import { createBrowserHistory } from 'history';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import hits from 'fixtures/real_hits';
-import { setScopedHistory } from '../../../../../../plugins/discover/public/kibana_services';
-import { createBrowserHistory } from 'history';
+import { coreMock } from '../../../../../../core/public/mocks';
+import { dataPluginMock } from '../../../../../data/public/mocks';
+import { navigationPluginMock } from '../../../../../navigation/public/mocks';
+import { setScopedHistory, setServices } from '../../../kibana_services';
+import { getInnerAngularModule } from '../../../get_inner_angular';
 
 let $parentScope;
 
@@ -36,7 +39,7 @@ let $timeout;
 let indexPattern;
 
 const init = function ($elem, props) {
-  ngMock.inject(function ($rootScope, $compile, _$timeout_) {
+  angular.mock.inject(function ($rootScope, $compile, _$timeout_) {
     $timeout = _$timeout_;
     $parentScope = $rootScope;
     _.assign($parentScope, props);
@@ -44,7 +47,7 @@ const init = function ($elem, props) {
     $compile($elem)($parentScope);
 
     // I think the prereq requires this?
-    $timeout(function () {
+    $timeout(() => {
       $elem.scope().$digest();
     }, 0);
 
@@ -52,19 +55,40 @@ const init = function ($elem, props) {
   });
 };
 
-const destroy = function () {
+const destroy = () => {
   $scope.$destroy();
   $parentScope.$destroy();
 };
 
-describe('docTable', function () {
+describe('docTable', () => {
+  const core = coreMock.createStart();
   let $elem;
 
-  before(() => setScopedHistory(createBrowserHistory()));
-  beforeEach(() => pluginInstance.initializeInnerAngular());
-  beforeEach(() => pluginInstance.initializeServices());
-  beforeEach(ngMock.module('app/discover'));
-  beforeEach(function () {
+  beforeAll(() => setScopedHistory(createBrowserHistory()));
+  beforeEach(() => {
+    angular.element.prototype.slice = jest.fn(() => {
+      return null;
+    });
+    angular.element.prototype.filter = jest.fn(() => {
+      return {
+        remove: jest.fn(),
+      };
+    });
+    setServices({
+      uiSettings: core.uiSettings,
+    });
+    getInnerAngularModule(
+      'app/discover',
+      core,
+      {
+        data: dataPluginMock.createStartContract(),
+        navigation: navigationPluginMock.createStartContract(),
+      },
+      coreMock.createPluginInitializerContext()
+    );
+    angular.mock.module('app/discover');
+  });
+  beforeEach(() => {
     $elem = angular.element(`
       <doc-table
         index-pattern="indexPattern"
@@ -74,7 +98,7 @@ describe('docTable', function () {
         sorting="sorting"
       ></doc-table>
     `);
-    ngMock.inject(function (Private) {
+    angular.mock.inject(function (Private) {
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     });
     init($elem, {
@@ -87,34 +111,36 @@ describe('docTable', function () {
     $scope.$digest();
   });
 
-  afterEach(function () {
+  afterEach(() => {
+    delete angular.element.prototype.slice;
+    delete angular.element.prototype.filter;
     destroy();
   });
 
-  it('should compile', function () {
-    expect($elem.text()).to.not.be.empty();
+  test('should compile', () => {
+    expect($elem.text()).toBeTruthy();
   });
 
-  it('should have an addRows function that increases the row count', function () {
-    expect($scope.addRows).to.be.a(Function);
+  test('should have an addRows function that increases the row count', () => {
+    expect($scope.addRows).toBeInstanceOf(Function);
     $scope.$digest();
-    expect($scope.limit).to.be(50);
+    expect($scope.limit).toBe(50);
     $scope.addRows();
-    expect($scope.limit).to.be(100);
+    expect($scope.limit).toBe(100);
   });
 
-  it('should reset the row limit when results are received', function () {
+  test('should reset the row limit when results are received', () => {
     $scope.limit = 100;
-    expect($scope.limit).to.be(100);
+    expect($scope.limit).toBe(100);
     $scope.hits = [...hits];
     $scope.$digest();
-    expect($scope.limit).to.be(50);
+    expect($scope.limit).toBe(50);
   });
 
-  it('should have a header and a table element', function () {
+  test('should have a header and a table element', () => {
     $scope.$digest();
 
-    expect($elem.find('thead').length).to.be(1);
-    expect($elem.find('table').length).to.be(1);
+    expect($elem.find('thead').length).toBe(1);
+    expect($elem.find('table').length).toBe(1);
   });
 });

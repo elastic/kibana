@@ -17,22 +17,25 @@
  * under the License.
  */
 
-import numeral from '@elastic/numeral';
+import React from 'react';
+import { shallow } from 'enzyme';
+import { StatusTable } from './status_table';
 
-export default function formatNumber(num, which) {
-  let format = '0.00';
-  let postfix = '';
-  switch (which) {
-    case 'byte':
-      format += ' b';
-      break;
-    case 'ms':
-      postfix = ' ms';
-      break;
-    case 'integer':
-      format = '0';
-      break;
-  }
+const state = {
+  id: 'green',
+  uiColor: 'secondary',
+  message: 'Ready',
+  title: 'green',
+};
 
-  return numeral(num).format(format) + postfix;
-}
+describe('StatusTable', () => {
+  it('renders when statuses is provided', () => {
+    const component = shallow(<StatusTable statuses={[{ id: 'plugin:1', state }]} />);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders when statuses is not provided', () => {
+    const component = shallow(<StatusTable />);
+    expect(component.isEmptyRender()).toBe(true);
+  });
+});

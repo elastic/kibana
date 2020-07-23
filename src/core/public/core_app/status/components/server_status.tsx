@@ -17,22 +17,34 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { State as StatePropType } from '../lib/prop_types';
+import React, { FunctionComponent } from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { FormattedStatus } from '../lib';
 
-const ServerState = ({ name, serverState }) => (
+interface ServerStateProps {
+  name: string;
+  serverState: FormattedStatus['state'];
+}
+
+export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, serverState }) => (
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" style={{ flexGrow: 0 }}>
     <EuiFlexItem grow={false}>
       <EuiTitle>
-        <h2>
+        <h2 data-test-subj="serverStatusTitle">
           <FormattedMessage
-            id="statusPage.serverStatus.statusTitle"
+            id="core.statusPage.serverStatus.statusTitle"
             defaultMessage="Kibana status is {kibanaStatus}"
             values={{
-              kibanaStatus: <EuiBadge color={serverState.uiColor}>{serverState.title}</EuiBadge>,
+              kibanaStatus: (
+                <EuiBadge
+                  data-test-subj="serverStatusTitleBadge"
+                  color={serverState.uiColor}
+                  aria-label={serverState.title}
+                >
+                  {serverState.title}
+                </EuiBadge>
+              ),
             }}
           />
         </h2>
@@ -45,10 +57,3 @@ const ServerState = ({ name, serverState }) => (
     </EuiFlexItem>
   </EuiFlexGroup>
 );
-
-ServerState.propTypes = {
-  name: PropTypes.string.isRequired,
-  serverState: StatePropType.isRequired,
-};
-
-export default ServerState;
