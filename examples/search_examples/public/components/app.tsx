@@ -86,16 +86,17 @@ export const SearchExamplesApp = ({
   const doAsyncSearch = async (strategy?: string) => {
     if (!indexPattern) return;
 
-    // TODO:This should be coming from state
-    const timeFilter = data.query.timefilter.timefilter.createFilter(indexPattern);
-    const filters = [...(queryState?.filters || []), ...(timeFilter ? [timeFilter] : [])];
+    const timeFilter = data.query.timefilter.timefilter.createFilter(
+      indexPattern,
+      queryState?.time
+    );
+    const queryFilters = [...(queryState?.filters || []), ...(timeFilter ? [timeFilter] : [])];
 
-    const esQueryConfigs = getEsQueryConfig(uiSettings);
     const esQuery = buildEsQuery(
       indexPattern,
       queryState?.queryString || [],
-      filters,
-      esQueryConfigs
+      queryFilters,
+      getEsQueryConfig(uiSettings)
     );
 
     const request = {
@@ -109,19 +110,25 @@ export const SearchExamplesApp = ({
         },
       },
     };
-    const search$ = data.search.search(request, {
-      strategy,
-    });
-    search$.subscribe((response) => {
-      if (!response.isPartial && !response.isRunning) {
-        setResult(response);
-        notifications.toasts.addSuccess(
-          `Searched ${response.rawResponse.hits.total} documents. Result is ${
-            response.rawResponse.aggregations?.avg_bytes.value
-          }. Is this Cool? ${(response as IMyStrategyResponse).cool}`
-        );
-      }
-    });
+    const searchSubscription$ = data.search
+      .search(request, {
+        strategy,
+      })
+      .subscribe((response) => {
+        if (!response.isPartial && !response.isRunning) {
+          setResult(response);
+          notifications.toasts.addSuccess(
+            `Searched ${response.rawResponse.hits.total} documents. Result is ${
+              response.rawResponse.aggregations?.avg_bytes.value
+            }. Is this Cool? ${(response as IMyStrategyResponse).cool}`
+          );
+          searchSubscription$.unsubscribe();
+        } else if (response.isPartial && !response.isRunning) {
+          // TODO: Make response error status clearer
+          notifications.toasts.addWarning('An error has occurred');
+          searchSubscription$.unsubscribe();
+        }
+      });
   };
 
   const onClickHandler = () => {
