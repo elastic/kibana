@@ -80,28 +80,25 @@ Array [
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <a
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            data-test-subj="settings-page-link"
             href="/settings"
+            rel="noreferrer"
           >
-            <button
-              class="euiButtonEmpty euiButtonEmpty--primary"
-              data-test-subj="settings-page-link"
-              type="button"
+            <span
+              class="euiButtonEmpty__content"
             >
+              <div
+                aria-hidden="true"
+                class="euiButtonEmpty__icon"
+                data-euiicon-type="gear"
+              />
               <span
-                class="euiButtonEmpty__content"
+                class="euiButtonEmpty__text"
               >
-                <div
-                  aria-hidden="true"
-                  class="euiButtonEmpty__icon"
-                  data-euiicon-type="gear"
-                />
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Settings
-                </span>
+                Settings
               </span>
-            </button>
+            </span>
           </a>
         </div>
         <div
