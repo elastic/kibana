@@ -4203,6 +4203,7 @@
               "FAILED",
               "STOPPING",
               "STOPPED",
+              "DEGRADED",
               "DATA_DUMP",
               "ACKNOWLEDGED",
               "UNKNOWN"

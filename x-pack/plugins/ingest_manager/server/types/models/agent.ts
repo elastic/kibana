@@ -29,6 +29,7 @@ const AgentEventBase = {
     schema.literal('FAILED'),
     schema.literal('STOPPING'),
     schema.literal('STOPPED'),
+    schema.literal('DEGRADED'),
     // Action results
     schema.literal('DATA_DUMP'),
     // Actions
