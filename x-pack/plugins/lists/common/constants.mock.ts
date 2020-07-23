@@ -63,3 +63,4 @@ export const CURSOR = 'c29tZXN0cmluZ2ZvcnlvdQ==';
 export const _VERSION = 'WzI5NywxXQ==';
 export const VERSION = 1;
 export const IMMUTABLE = false;
+export const IMPORT_TIMEOUT = 300000;
