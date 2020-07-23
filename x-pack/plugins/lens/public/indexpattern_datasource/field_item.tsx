@@ -40,12 +40,7 @@ import {
   esQuery,
   IIndexPattern,
 } from '../../../../../src/plugins/data/public';
-import {
-  FieldButton,
-  FieldButtonProps,
-  FieldTest,
-  FieldTestProps,
-} from '../../../../../src/plugins/kibana_react/public';
+import { FieldButton, FieldButtonProps } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
@@ -236,7 +231,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
                 defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
               })}
-              // fieldInfoIcon={lensInfoIcon}
+              fieldInfoIcon={lensInfoIcon}
               fieldIcon={lensFieldIcon}
               fieldName={wrappableHighlightableFieldName}
             />

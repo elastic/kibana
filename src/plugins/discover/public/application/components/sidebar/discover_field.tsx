@@ -20,7 +20,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
-import { FieldIcon } from '../../../../../kibana_react/public';
+import { FieldIcon, FieldButton, FieldButtonProps } from '../../../../../kibana_react/public';
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { shortenDottedString } from '../../helpers';

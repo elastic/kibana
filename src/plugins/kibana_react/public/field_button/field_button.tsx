@@ -58,9 +58,11 @@ export function FieldButton({
       // size={size as EuiTokenProps['size']}
       {...rest}
     >
-      <div className="kbnFieldButton__fieldIcon">{fieldIcon}</div>
-      <div className="kbnFieldButton__name">{fieldName}</div>
-      <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>
+      <div className="kbnFieldButton__info">
+        <div className="kbnFieldButton__fieldIcon">{fieldIcon}</div>
+        <div className="kbnFieldButton__name">{fieldName}</div>
+        <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>
+      </div>
     </div>
     // </>
   );

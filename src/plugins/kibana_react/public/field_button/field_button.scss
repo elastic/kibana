@@ -3,6 +3,13 @@
 // }
 
 .kbnFieldButton {
+  @include euiFontSizeS;
+  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+  border-radius: $euiBorderRadius;
+  margin-bottom: $euiSizeXS;
+}
+
+.kbnFieldButton__info {
   border-radius: $euiBorderRadius - 1px;
   padding: $euiSizeS;
   display: flex;

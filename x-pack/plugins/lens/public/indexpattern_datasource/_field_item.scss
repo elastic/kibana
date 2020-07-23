@@ -1,9 +1,9 @@
-.lnsFieldItem {
-  @include euiFontSizeS;
-  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
-  border-radius: $euiBorderRadius;
-  margin-bottom: $euiSizeXS;
-}
+// .lnsFieldItem {
+//   @include euiFontSizeS;
+//   background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+//   border-radius: $euiBorderRadius;
+//   margin-bottom: $euiSizeXS;
+// }
 
 .lnsFieldItem__popoverAnchor:hover,
 .lnsFieldItem__popoverAnchor:focus,
@@ -56,9 +56,9 @@
   }
 }
 
-.lnsFieldItem__info-isOpen {
-  @include euiFocusRing;
-}
+// .lnsFieldItem__info-isOpen {
+//   @include euiFocusRing;
+// }
 
 .lnsFieldItem__topValue {
   margin-bottom: $euiSizeS;
