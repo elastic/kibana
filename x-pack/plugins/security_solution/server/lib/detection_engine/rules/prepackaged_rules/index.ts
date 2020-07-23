@@ -205,6 +205,13 @@ import rule193 from './privilege_escalation_root_login_without_mfa.json';
 import rule194 from './privilege_escalation_updateassumerolepolicy.json';
 import rule195 from './elastic_endpoint.json';
 import rule196 from './external_alerts.json';
+import rule197 from './ml_cloudtrail_error_message_spike.json';
+import rule198 from './ml_cloudtrail_rare_error_code.json';
+import rule199 from './ml_cloudtrail_rare_method_by_city.json';
+import rule200 from './ml_cloudtrail_rare_method_by_country.json';
+import rule201 from './ml_cloudtrail_rare_method_by_user.json';
+import rule202 from './credential_access_aws_iam_assume_role_brute_force.json';
+import rule203 from './credential_access_okta_brute_force_or_password_spraying.json';
 
 export const rawRules = [
   rule1,
@@ -403,4 +410,11 @@ export const rawRules = [
   rule194,
   rule195,
   rule196,
+  rule197,
+  rule198,
+  rule199,
+  rule200,
+  rule201,
+  rule202,
+  rule203,
 ];

@@ -167,8 +167,8 @@ describe('UrlFormat', () => {
     });
   });
 
-  describe('whitelist', () => {
-    test('should assume a relative url if the value is not in the whitelist without a base path', () => {
+  describe('allow-list', () => {
+    test('should assume a relative url if the value is not in the allow-list without a base path', () => {
       const parsedUrl = {
         origin: 'http://kibana',
         basePath: '',
@@ -193,7 +193,7 @@ describe('UrlFormat', () => {
       );
     });
 
-    test('should assume a relative url if the value is not in the whitelist with a basepath', () => {
+    test('should assume a relative url if the value is not in the allow-list with a basepath', () => {
       const parsedUrl = {
         origin: 'http://kibana',
         basePath: '/xyz',

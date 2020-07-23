@@ -47,9 +47,41 @@ export const toStringArrayScalar = new GraphQLScalarType({
     return null;
   },
 });
-
+export const toStringArrayNoNullableScalar = new GraphQLScalarType({
+  name: 'StringArray',
+  description: 'Represents value in detail item from the timeline who wants to more than one type',
+  serialize(value): string[] | undefined {
+    if (value == null) {
+      return undefined;
+    } else if (Array.isArray(value)) {
+      return convertArrayToString(value) as string[];
+    } else if (isBoolean(value) || isNumber(value) || isObject(value)) {
+      return [convertToString(value)];
+    }
+    return [value];
+  },
+  parseValue(value) {
+    return value;
+  },
+  parseLiteral(ast) {
+    switch (ast.kind) {
+      case Kind.INT:
+        return parseInt(ast.value, 10);
+      case Kind.FLOAT:
+        return parseFloat(ast.value);
+      case Kind.STRING:
+        return ast.value;
+      case Kind.LIST:
+        return ast.values;
+      case Kind.OBJECT:
+        return ast.fields;
+    }
+    return undefined;
+  },
+});
 export const createScalarToStringArrayValueResolvers = () => ({
   ToStringArray: toStringArrayScalar,
+  ToStringArrayNoNullable: toStringArrayNoNullableScalar,
 });
 
 const convertToString = (value: object | number | boolean | string): string => {

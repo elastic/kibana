@@ -33,6 +33,7 @@ const enabledActionTypes = [
   'test.index-record',
   'test.noop',
   'test.rate-limit',
+  'test.throw',
 ];
 
 // eslint-disable-next-line import/no-default-export

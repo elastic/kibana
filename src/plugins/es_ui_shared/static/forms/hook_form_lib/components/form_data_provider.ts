@@ -29,6 +29,7 @@ interface Props {
 
 export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) => {
   const form = useFormContext();
+  const { subscribe } = form;
   const previousRawData = useRef<FormData>(form.__getFormData$().value);
   const [formData, setFormData] = useState<FormData>(previousRawData.current);
 
@@ -54,9 +55,9 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
   );
 
   useEffect(() => {
-    const subscription = form.subscribe(onFormData);
+    const subscription = subscribe(onFormData);
     return subscription.unsubscribe;
-  }, [form.subscribe, onFormData]);
+  }, [subscribe, onFormData]);
 
   return children(formData);
 });

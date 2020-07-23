@@ -7,7 +7,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ReportingConfigType } from '../server/config';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { LayoutInstance } from '../server/export_types/common/layouts';
+export { LayoutInstance } from '../server/lib/layouts';
 
 export type JobId = string;
 export type JobStatus =

@@ -15,7 +15,10 @@ describe('MLJobLink', () => {
       () => (
         <MLJobLink jobId="myservicename-mytransactiontype-high_mean_response_time" />
       ),
-      { search: '?rangeFrom=now/w&rangeTo=now-4h' } as Location
+      {
+        search:
+          '?rangeFrom=now/w&rangeTo=now-4h&refreshPaused=true&refreshInterval=0',
+      } as Location
     );
 
     expect(href).toMatchInlineSnapshot(
@@ -31,7 +34,10 @@ describe('MLJobLink', () => {
           transactionType="request"
         />
       ),
-      { search: '?rangeFrom=now/w&rangeTo=now-4h' } as Location
+      {
+        search:
+          '?rangeFrom=now/w&rangeTo=now-4h&refreshPaused=true&refreshInterval=0',
+      } as Location
     );
 
     expect(href).toMatchInlineSnapshot(

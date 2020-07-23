@@ -21,6 +21,7 @@ import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
+import { appContextService } from '../..';
 
 export { ArchiveEntry } from './extract';
 
@@ -47,6 +48,10 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
       url.searchParams.set('experimental', params.experimental.toString());
     }
   }
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be 8.0.0-SNAPSHOT
+  if (kibanaVersion) {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -56,6 +61,10 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
   const url = new URL(
     `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
   );
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be 8.0.0-SNAPSHOT
+  if (kibanaVersion) {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {

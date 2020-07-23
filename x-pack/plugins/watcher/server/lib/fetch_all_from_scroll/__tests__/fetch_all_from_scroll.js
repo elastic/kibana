@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { fetchAllFromScroll } from '../fetch_all_from_scroll';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 
 describe('fetch_all_from_scroll', () => {
   let mockResponse;

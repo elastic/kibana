@@ -23,12 +23,22 @@ import { IIndexPattern } from '../..';
 
 describe('SearchSource#normalizeSortRequest', function () {
   const scriptedField = {
-    name: 'script string',
+    name: 'script number',
     type: 'number',
     scripted: true,
     sortable: true,
     script: 'foo',
     lang: 'painless',
+  };
+  const stringScriptedField = {
+    ...scriptedField,
+    name: 'script string',
+    type: 'string',
+  };
+  const booleanScriptedField = {
+    ...scriptedField,
+    name: 'script boolean',
+    type: 'boolean',
   };
   const murmurScriptedField = {
     ...scriptedField,
@@ -37,7 +47,7 @@ describe('SearchSource#normalizeSortRequest', function () {
     type: 'murmur3',
   };
   const indexPattern = {
-    fields: [scriptedField, murmurScriptedField],
+    fields: [scriptedField, stringScriptedField, booleanScriptedField, murmurScriptedField],
   } as IIndexPattern;
 
   it('should return an array', function () {
@@ -101,6 +111,54 @@ describe('SearchSource#normalizeSortRequest', function () {
           },
           type: scriptedField.type,
           order: SortDirection.desc,
+        },
+      },
+    ]);
+  });
+
+  it('should use script based sorting with string type', function () {
+    const result = normalizeSortRequest(
+      [
+        {
+          [stringScriptedField.name]: SortDirection.asc,
+        },
+      ],
+      indexPattern
+    );
+
+    expect(result).toEqual([
+      {
+        _script: {
+          script: {
+            source: stringScriptedField.script,
+            lang: stringScriptedField.lang,
+          },
+          type: 'string',
+          order: SortDirection.asc,
+        },
+      },
+    ]);
+  });
+
+  it('should use script based sorting with boolean type as string type', function () {
+    const result = normalizeSortRequest(
+      [
+        {
+          [booleanScriptedField.name]: SortDirection.asc,
+        },
+      ],
+      indexPattern
+    );
+
+    expect(result).toEqual([
+      {
+        _script: {
+          script: {
+            source: booleanScriptedField.script,
+            lang: booleanScriptedField.lang,
+          },
+          type: 'string',
+          order: SortDirection.asc,
         },
       },
     ]);

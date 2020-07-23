@@ -21,7 +21,6 @@ import {
   showSaveModal,
 } from '../../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { updateBreadcrumbs } from '../breadcrumbs';
 import { goToSpecifiedPath } from '../../maps_router';
 
 export function MapsTopNavMenu({
@@ -35,7 +34,6 @@ export function MapsTopNavMenu({
   refreshConfig,
   setRefreshConfig,
   setRefreshStoreConfig,
-  initialLayerListConfig,
   indexPatterns,
   updateFiltersAndDispatch,
   isSaveDisabled,
@@ -44,7 +42,7 @@ export function MapsTopNavMenu({
   openMapSettings,
   inspectorAdapters,
   syncAppAndGlobalState,
-  currentPath,
+  setBreadcrumbs,
   isOpenSettingsDisabled,
 }) {
   const { TopNavMenu } = getNavigation().ui;
@@ -64,14 +62,13 @@ export function MapsTopNavMenu({
   // Nav settings
   const config = getTopNavConfig(
     savedMap,
-    initialLayerListConfig,
     isOpenSettingsDisabled,
     isSaveDisabled,
     closeFlyout,
     enableFullScreen,
     openMapSettings,
     inspectorAdapters,
-    currentPath
+    setBreadcrumbs
   );
 
   const submitQuery = function ({ dateRange, query }) {
@@ -121,14 +118,13 @@ export function MapsTopNavMenu({
 
 function getTopNavConfig(
   savedMap,
-  initialLayerListConfig,
   isOpenSettingsDisabled,
   isSaveDisabled,
   closeFlyout,
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
-  currentPath
+  setBreadcrumbs
 ) {
   return [
     {
@@ -210,19 +206,15 @@ function getTopNavConfig(
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
                 };
-                return doSave(
-                  savedMap,
-                  saveOptions,
-                  initialLayerListConfig,
-                  closeFlyout,
-                  currentPath
-                ).then((response) => {
-                  // If the save wasn't successful, put the original values back.
-                  if (!response.id || response.error) {
-                    savedMap.title = currentTitle;
+                return doSave(savedMap, saveOptions, closeFlyout, setBreadcrumbs).then(
+                  (response) => {
+                    // If the save wasn't successful, put the original values back.
+                    if (!response.id || response.error) {
+                      savedMap.title = currentTitle;
+                    }
+                    return response;
                   }
-                  return response;
-                });
+                );
               };
 
               const saveModal = (
@@ -243,7 +235,7 @@ function getTopNavConfig(
   ];
 }
 
-async function doSave(savedMap, saveOptions, initialLayerListConfig, closeFlyout, currentPath) {
+async function doSave(savedMap, saveOptions, closeFlyout, setBreadcrumbs) {
   closeFlyout();
   savedMap.syncWithStore();
   let id;
@@ -265,7 +257,7 @@ async function doSave(savedMap, saveOptions, initialLayerListConfig, closeFlyout
 
   if (id) {
     goToSpecifiedPath(`/map/${id}${window.location.hash}`);
-    updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
+    setBreadcrumbs();
 
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.mapController.saveSuccessMessage', {

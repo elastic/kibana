@@ -6,12 +6,10 @@
 
 import Boom from 'boom';
 import { ILegacyScopedClusterClient } from 'kibana/server';
+import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
+import { PartitionFieldsType } from '../../../common/types/anomalies';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { CriteriaField } from './results_service';
-
-const PARTITION_FIELDS = ['partition_field', 'over_field', 'by_field'] as const;
-
-type PartitionFieldsType = typeof PARTITION_FIELDS[number];
 
 type SearchTerm =
   | {
@@ -77,7 +75,6 @@ function getFieldObject(fieldType: PartitionFieldsType, aggs: any) {
 }
 
 export const getPartitionFieldsValuesFactory = ({
-  callAsCurrentUser,
   callAsInternalUser,
 }: ILegacyScopedClusterClient) =>
   /**
@@ -104,7 +101,7 @@ export const getPartitionFieldsValuesFactory = ({
 
     const isModelPlotEnabled = job?.model_plot_config?.enabled;
 
-    const resp = await callAsCurrentUser('search', {
+    const resp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {

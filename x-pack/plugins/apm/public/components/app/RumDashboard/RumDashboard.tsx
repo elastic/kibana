@@ -16,8 +16,9 @@ import { ClientMetrics } from './ClientMetrics';
 import { PageViewsTrend } from './PageViewsTrend';
 import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
+import { VisitorBreakdown } from './VisitorBreakdown';
 
-export function RumDashboard() {
+export const RumDashboard = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -42,7 +43,15 @@ export function RumDashboard() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
+        <EuiSpacer size="s" />
+        <EuiPanel>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={3}>
+              <VisitorBreakdown />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+};

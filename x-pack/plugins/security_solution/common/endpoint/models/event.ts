@@ -32,9 +32,9 @@ export function eventName(event: ResolverEvent): string {
   }
 }
 
-export function eventId(event: ResolverEvent): string {
+export function eventId(event: ResolverEvent): number | undefined | string {
   if (isLegacyEvent(event)) {
-    return event.endgame.serial_event_id ? String(event.endgame.serial_event_id) : '';
+    return event.endgame.serial_event_id;
   }
   return event.event.id;
 }

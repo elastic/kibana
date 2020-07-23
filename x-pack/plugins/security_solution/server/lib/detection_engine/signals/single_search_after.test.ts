@@ -31,6 +31,7 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: undefined,
+      timestampOverride: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId);
   });
@@ -46,6 +47,7 @@ describe('singleSearchAfter', () => {
       logger: mockLogger,
       pageSize: 1,
       filter: undefined,
+      timestampOverride: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId);
   });
@@ -64,6 +66,7 @@ describe('singleSearchAfter', () => {
         logger: mockLogger,
         pageSize: 1,
         filter: undefined,
+        timestampOverride: undefined,
       })
     ).rejects.toThrow('Fake Error');
   });

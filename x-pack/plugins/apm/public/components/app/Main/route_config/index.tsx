@@ -28,6 +28,7 @@ import {
   EditAgentConfigurationRouteHandler,
   CreateAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
+import { RumHome } from '../../RumDashboard/RumHome';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics',
@@ -253,17 +254,8 @@ export const routes: BreadcrumbRoute[] = [
   },
   {
     exact: true,
-    path: '/rum-overview',
-    component: () => <Home tab="rum-overview" />,
-    breadcrumb: i18n.translate('xpack.apm.home.rumOverview.title', {
-      defaultMessage: 'Real User Monitoring',
-    }),
-    name: RouteName.RUM_OVERVIEW,
-  },
-  {
-    exact: true,
-    path: '/services/:serviceName/rum-overview',
-    component: () => <ServiceDetails tab="rum-overview" />,
+    path: '/rum-preview',
+    component: () => <RumHome />,
     breadcrumb: i18n.translate('xpack.apm.home.rumOverview.title', {
       defaultMessage: 'Real User Monitoring',
     }),

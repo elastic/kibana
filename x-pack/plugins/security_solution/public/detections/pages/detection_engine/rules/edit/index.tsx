@@ -160,12 +160,13 @@ const EditRulePageComponent: FC = () => {
           <>
             <EuiSpacer />
             <StepPanel loading={loading || initLoading} title={ruleI18n.ABOUT}>
-              {myAboutRuleForm.data != null && (
+              {myAboutRuleForm.data != null && myDefineRuleForm.data != null && (
                 <StepAboutRule
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
                   defaultValues={myAboutRuleForm.data}
+                  defineRuleData={myDefineRuleForm.data}
                   setForm={setStepsForm}
                 />
               )}
@@ -272,7 +273,8 @@ const EditRulePageComponent: FC = () => {
             : myScheduleRuleForm.data) as ScheduleStepRule,
           (activeFormId === RuleStep.ruleActions
             ? activeForm.data
-            : myActionsRuleForm.data) as ActionsStepRule
+            : myActionsRuleForm.data) as ActionsStepRule,
+          rule
         ),
         ...(ruleId ? { id: ruleId } : {}),
       });

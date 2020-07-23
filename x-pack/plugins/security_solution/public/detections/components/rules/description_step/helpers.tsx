@@ -13,12 +13,17 @@ import {
   EuiSpacer,
   EuiLink,
   EuiText,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import * as i18nSeverity from '../severity_mapping/translations';
+import * as i18nRiskScore from '../risk_score_mapping/translations';
+import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { RuleType } from '../../../../../common/detection_engine/types';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
@@ -29,6 +34,7 @@ import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './t
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 import { assertUnreachable } from '../../../../common/lib/helpers';
+import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -132,10 +138,10 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                     {tactic != null ? tactic.text : ''}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {singleThreat.technique.map((technique) => {
+                    {singleThreat.technique.map((technique, listIndex) => {
                       const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
                       return (
-                        <EuiFlexItem>
+                        <EuiFlexItem key={myTechnique?.id ?? listIndex}>
                           <TechniqueLinkItem
                             data-test-subj="threatTechniqueLink"
                             href={technique.reference}
@@ -218,11 +224,75 @@ export const buildStringArrayDescription = (
   return [];
 };
 
-export const buildSeverityDescription = (label: string, value: string): ListItems[] => [
+const OverrideColumn = styled(EuiFlexItem)`
+  width: 125px;
+  max-width: 125px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems[] => [
   {
-    title: label,
-    description: <SeverityBadge value={value} />,
+    title: i18nSeverity.DEFAULT_SEVERITY,
+    description: <SeverityBadge value={severity.value} />,
   },
+  ...severity.mapping.map((severityItem, index) => {
+    return {
+      title: index === 0 ? i18nSeverity.SEVERITY_MAPPING : '',
+      description: (
+        <EuiFlexGroup alignItems="center">
+          <OverrideColumn>
+            <EuiToolTip
+              content={severityItem.field}
+              data-test-subj={`severityOverrideField${index}`}
+            >
+              <>{severityItem.field}</>
+            </EuiToolTip>
+          </OverrideColumn>
+          <EuiToolTip content={severityItem.value} data-test-subj={`severityOverrideValue${index}`}>
+            <>{severityItem.value}</>
+          </EuiToolTip>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={'sortRight'} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SeverityBadge
+              data-test-subj={`severityOverrideSeverity${index}`}
+              value={severityItem.severity}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    };
+  }),
+];
+
+export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListItems[] => [
+  {
+    title: i18nRiskScore.RISK_SCORE,
+    description: riskScore.value,
+  },
+  ...riskScore.mapping.map((riskScoreItem, index) => {
+    return {
+      title: index === 0 ? i18nRiskScore.RISK_SCORE_MAPPING : '',
+      description: (
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiToolTip
+              content={riskScoreItem.field}
+              data-test-subj={`riskScoreOverrideField${index}`}
+            >
+              <>{riskScoreItem.field}</>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={'sortRight'} />
+          </EuiFlexItem>
+          <EuiFlexItem>{'signal.rule.risk_score'}</EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    };
+  }),
 ];
 
 const MyRefUrlLink = styled(EuiLink)`
@@ -292,7 +362,28 @@ export const buildRuleTypeDescription = (label: string, ruleType: RuleType): Lis
         },
       ];
     }
+    case 'threshold': {
+      return [
+        {
+          title: label,
+          description: i18n.THRESHOLD_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }
 };
+
+export const buildThresholdDescription = (label: string, threshold: Threshold): ListItems[] => [
+  {
+    title: label,
+    description: (
+      <>
+        {isEmpty(threshold.field[0])
+          ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field[0]} >= ${threshold.value}`}
+      </>
+    ),
+  },
+];

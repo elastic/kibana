@@ -129,7 +129,7 @@ function LayerPanels(
               className="lnsConfigPanel__addLayerBtn"
               fullWidth
               size="s"
-              data-test-subj="lnsXY_layer_add"
+              data-test-subj="lnsLayerAddButton"
               aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
                 defaultMessage: 'Add layer',
               })}

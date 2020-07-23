@@ -19,3 +19,5 @@ export * from '../../embeddable/merge_input_with_saved_map';
 // @ts-expect-error
 export * from '../../routing/maps_router';
 export * from '../../classes/layers/solution_layers/security';
+export { registerLayerWizard } from '../../classes/layers/layer_wizard_registry';
+export { registerSource } from '../../classes/sources/source_registry';

@@ -4,56 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { Logger } from '../../../../../../src/core/server';
-import { AlertCommonPerClusterState } from '../../alerts/types';
+import { AlertInstanceState } from '../../alerts/types';
 import { AlertsClient } from '../../../../alerts/server';
+import { AlertsFactory } from '../../alerts';
+import { CommonAlertStatus, CommonAlertState, CommonAlertFilter } from '../../../common/types';
+import { ALERTS } from '../../../common/constants';
+import { MonitoringLicenseService } from '../../types';
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
-  alertTypes: string[],
+  licenseService: MonitoringLicenseService,
+  alertTypes: string[] | undefined,
+  clusterUuid: string,
   start: number,
   end: number,
-  log: Logger
-): Promise<any[]> {
-  const statuses = await Promise.all(
-    alertTypes.map(
-      (type) =>
-        new Promise(async (resolve, reject) => {
-          // We need to get the id from the alertTypeId
-          const alerts = await alertsClient.find({
-            options: {
-              filter: `alert.attributes.alertTypeId:${type}`,
-            },
-          });
-          if (alerts.total === 0) {
-            return resolve(false);
+  filters: CommonAlertFilter[]
+): Promise<{ [type: string]: CommonAlertStatus }> {
+  const byType: { [type: string]: CommonAlertStatus } = {};
+  await Promise.all(
+    (alertTypes || ALERTS).map(async (type) => {
+      const alert = await AlertsFactory.getByType(type, alertsClient);
+      if (!alert || !alert.isEnabled(licenseService)) {
+        return;
+      }
+      const serialized = alert.serialize();
+      if (!serialized) {
+        return;
+      }
+
+      const result: CommonAlertStatus = {
+        exists: false,
+        enabled: false,
+        states: [],
+        alert: serialized,
+      };
+
+      byType[type] = result;
+
+      const id = alert.getId();
+      if (!id) {
+        return result;
+      }
+
+      result.exists = true;
+      result.enabled = true;
+
+      // Now that we have the id, we can get the state
+      const states = await alert.getStates(alertsClient, id, filters);
+      if (!states) {
+        return result;
+      }
+
+      result.states = Object.values(states).reduce((accum: CommonAlertState[], instance: any) => {
+        const alertInstanceState = instance.state as AlertInstanceState;
+        for (const state of alertInstanceState.alertStates) {
+          const meta = instance.meta;
+          if (clusterUuid && state.cluster.clusterUuid !== clusterUuid) {
+            return accum;
           }
 
-          if (alerts.total !== 1) {
-            log.warn(`Found more than one alert for type ${type} which is unexpected.`);
-          }
-
-          const id = alerts.data[0].id;
-
-          // Now that we have the id, we can get the state
-          const states = await alertsClient.getAlertState({ id });
-          if (!states || !states.alertTypeState) {
-            log.warn(`No alert states found for type ${type} which is unexpected.`);
-            return resolve(false);
-          }
-
-          const state = Object.values(states.alertTypeState)[0] as AlertCommonPerClusterState;
+          let firing = false;
           const isInBetween = moment(state.ui.resolvedMS).isBetween(start, end);
           if (state.ui.isFiring || isInBetween) {
-            return resolve({
-              type,
-              ...state.ui,
-            });
+            firing = true;
           }
-          return resolve(false);
-        })
-    )
+          accum.push({ firing, state, meta });
+        }
+        return accum;
+      }, []);
+    })
   );
 
-  return statuses.filter(Boolean);
+  return byType;
 }

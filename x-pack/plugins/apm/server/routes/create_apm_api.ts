@@ -63,7 +63,6 @@ import {
 } from './ui_filters';
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
-import { indicesPrivilegesRoute } from './security';
 import {
   createCustomLinkRoute,
   updateCustomLinkRoute,
@@ -77,6 +76,7 @@ import {
   rumPageLoadDistributionRoute,
   rumPageLoadDistBreakdownRoute,
   rumServicesRoute,
+  rumVisitorsBreakdownRoute,
 } from './rum_client';
 import {
   observabilityOverviewHasDataRoute,
@@ -157,9 +157,6 @@ const createApmApi = () => {
     .add(serviceMapRoute)
     .add(serviceMapServiceNodeRoute)
 
-    // security
-    .add(indicesPrivilegesRoute)
-
     // Custom links
     .add(createCustomLinkRoute)
     .add(updateCustomLinkRoute)
@@ -174,6 +171,7 @@ const createApmApi = () => {
     .add(rumPageLoadDistBreakdownRoute)
     .add(rumClientMetricsRoute)
     .add(rumServicesRoute)
+    .add(rumVisitorsBreakdownRoute)
 
     // Observability dashboard
     .add(observabilityOverviewHasDataRoute)

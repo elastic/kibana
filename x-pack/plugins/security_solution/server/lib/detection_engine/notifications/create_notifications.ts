@@ -5,7 +5,7 @@
  */
 
 import { Alert } from '../../../../../alerts/common';
-import { APP_ID, NOTIFICATIONS_ID } from '../../../../common/constants';
+import { SERVER_APP_ID, NOTIFICATIONS_ID } from '../../../../common/constants';
 import { CreateNotificationParams } from './types';
 import { addTags } from './add_tags';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
@@ -23,7 +23,7 @@ export const createNotifications = async ({
       name,
       tags: addTags([], ruleAlertId),
       alertTypeId: NOTIFICATIONS_ID,
-      consumer: APP_ID,
+      consumer: SERVER_APP_ID,
       params: {
         ruleAlertId,
       },

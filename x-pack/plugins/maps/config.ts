@@ -11,7 +11,6 @@ export interface MapsConfigType {
   showMapVisualizationTypes: boolean;
   showMapsInspectorAdapter: boolean;
   preserveDrawingBuffer: boolean;
-  enableVectorTiles: boolean;
 }
 
 export const configSchema = schema.object({
@@ -21,8 +20,6 @@ export const configSchema = schema.object({
   showMapsInspectorAdapter: schema.boolean({ defaultValue: false }),
   // flag used in functional testing
   preserveDrawingBuffer: schema.boolean({ defaultValue: false }),
-  // flag used to enable/disable vector-tiles
-  enableVectorTiles: schema.boolean({ defaultValue: false }),
 });
 
 export type MapsXPackConfig = TypeOf<typeof configSchema>;

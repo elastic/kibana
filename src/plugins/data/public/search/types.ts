@@ -18,17 +18,22 @@
  */
 
 import { Observable } from 'rxjs';
+import { PackageInfo } from 'kibana/server';
 import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
-
+import { SearchUsageCollector } from './collectors';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
 } from '../../common/search';
+import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
+import { ExpressionsSetup } from '../../../expressions/public';
+import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { GetInternalStartServicesFn } from '../types';
 
 export interface ISearchOptions {
   signal?: AbortSignal;
@@ -69,5 +74,19 @@ export interface ISearchStart {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
+  usageCollector?: SearchUsageCollector;
   __LEGACY: ISearchStartLegacy;
+}
+
+export { SEARCH_EVENT_TYPE } from './collectors';
+
+export interface SearchServiceSetupDependencies {
+  expressions: ExpressionsSetup;
+  usageCollection?: UsageCollectionSetup;
+  getInternalStartServices: GetInternalStartServicesFn;
+  packageInfo: PackageInfo;
+}
+
+export interface SearchServiceStartDependencies {
+  indexPatterns: IndexPatternsContract;
 }

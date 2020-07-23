@@ -94,22 +94,23 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
     id: 'configurationForm',
   });
   const dispatch = useDispatch();
+  const { subscribe, submit, reset, getFormData } = form;
 
   useEffect(() => {
-    const subscription = form.subscribe(({ data, isValid, validate }) => {
+    const subscription = subscribe(({ data, isValid, validate }) => {
       dispatch({
         type: 'configuration.update',
         value: {
           data,
           isValid,
           validate,
-          submitForm: form.submit,
+          submitForm: submit,
         },
       });
     });
 
     return subscription.unsubscribe;
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, subscribe, submit]);
 
   useEffect(() => {
     if (isMounted.current === undefined) {
@@ -125,18 +126,18 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
 
     // If the value has changed (it probably means that we have loaded a new JSON)
     // we need to reset the form to update the fields values.
-    form.reset({ resetValues: true });
-  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+    reset({ resetValues: true });
+  }, [value, reset]);
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
 
       // Save a snapshot of the form state so we can get back to it when navigating back to the tab
-      const configurationData = form.getFormData();
+      const configurationData = getFormData();
       dispatch({ type: 'configuration.save', value: configurationData });
     };
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [getFormData, dispatch]);
 
   return (
     <Form

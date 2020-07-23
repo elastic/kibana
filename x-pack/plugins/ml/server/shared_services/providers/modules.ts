@@ -13,6 +13,7 @@ import { TypeOf } from '@kbn/config-schema';
 import { DataRecognizer } from '../../models/data_recognizer';
 import { SharedServicesChecks } from '../shared_services';
 import { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
+import { HasMlCapabilities } from '../../lib/capabilities';
 
 export type ModuleSetupPayload = TypeOf<typeof moduleIdParamSchema> &
   TypeOf<typeof setupModuleBodySchema>;
@@ -40,8 +41,14 @@ export function getModulesProvider({
       request: KibanaRequest,
       savedObjectsClient: SavedObjectsClientContract
     ) {
-      const hasMlCapabilities = getHasMlCapabilities(request);
+      let hasMlCapabilities: HasMlCapabilities;
+      if (request.params === 'DummyKibanaRequest') {
+        hasMlCapabilities = () => Promise.resolve();
+      } else {
+        hasMlCapabilities = getHasMlCapabilities(request);
+      }
       const dr = dataRecognizerFactory(mlClusterClient, savedObjectsClient, request);
+
       return {
         async recognize(...args) {
           isFullLicense();

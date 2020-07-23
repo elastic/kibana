@@ -226,4 +226,48 @@ export function systemRoutes(
       }
     })
   );
+
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {post} /api/ml/index_exists ES Field caps wrapper checks if index exists
+   * @apiName MlIndexExists
+   */
+  router.post(
+    {
+      path: '/api/ml/index_exists',
+      validate: {
+        body: schema.object({ index: schema.string() }),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const { index } = request.body;
+
+        const options = {
+          index: [index],
+          fields: ['*'],
+          ignoreUnavailable: true,
+          allowNoIndices: true,
+          ignore: 404,
+        };
+
+        const fieldsResult = await context.ml!.mlClient.callAsCurrentUser('fieldCaps', options);
+        const result = { exists: false };
+
+        if (Array.isArray(fieldsResult.indices) && fieldsResult.indices.length !== 0) {
+          result.exists = true;
+        }
+
+        return response.ok({
+          body: result,
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+    })
+  );
 }

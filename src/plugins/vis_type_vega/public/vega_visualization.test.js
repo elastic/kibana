@@ -52,6 +52,7 @@ jest.mock('./lib/vega', () => ({
   vegaLite: jest.requireActual('vega-lite'),
 }));
 
+// FLAKY: https://github.com/elastic/kibana/issues/71713
 describe('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
@@ -76,17 +77,17 @@ describe('VegaVisualizations', () => {
     mockHeight = jest.spyOn($.prototype, 'height').mockImplementation(() => mockedHeightValue);
   };
 
-  setKibanaMapFactory((...args) => new KibanaMap(...args));
-  setInjectedVars({
-    emsTileLayerId: {},
-    enableExternalUrls: true,
-    esShardTimeout: 10000,
-  });
-  setData(dataPluginStart);
-  setSavedObjects(coreStart.savedObjects);
-  setNotifications(coreStart.notifications);
-
   beforeEach(() => {
+    setKibanaMapFactory((...args) => new KibanaMap(...args));
+    setInjectedVars({
+      emsTileLayerId: {},
+      enableExternalUrls: true,
+      esShardTimeout: 10000,
+    });
+    setData(dataPluginStart);
+    setSavedObjects(coreStart.savedObjects);
+    setNotifications(coreStart.notifications);
+
     vegaVisualizationDependencies = {
       core: coreMock.createSetup(),
       plugins: {
@@ -180,50 +181,6 @@ describe('VegaVisualizations', () => {
 
         await vegaVis.render(vegaParser);
         expect(domNode.innerHTML).toMatchSnapshot();
-      } finally {
-        vegaVis.destroy();
-      }
-    });
-
-    test('should add a small subpixel value to the height of the canvas to avoid getting it set to 0', async () => {
-      let vegaVis;
-      try {
-        vegaVis = new VegaVisualization(domNode, vis);
-        const vegaParser = new VegaParser(
-          `{
-            "$schema": "https://vega.github.io/schema/vega/v5.json",
-            "marks": [
-              {
-                "type": "text",
-                "encode": {
-                  "update": {
-                    "text": {
-                      "value": "Test"
-                    },
-                    "align": {"value": "center"},
-                    "baseline": {"value": "middle"},
-                    "xc": {"signal": "width/2"},
-                    "yc": {"signal": "height/2"}
-                    fontSize: {value: "14"}
-                  }
-                }
-              }
-            ]
-          }`,
-          new SearchAPI({
-            search: dataPluginStart.search,
-            uiSettings: coreStart.uiSettings,
-            injectedMetadata: coreStart.injectedMetadata,
-          })
-        );
-        await vegaParser.parseAsync();
-
-        mockedWidthValue = 256;
-        mockedHeightValue = 256;
-
-        await vegaVis.render(vegaParser);
-        const vegaView = vegaVis._vegaView._view;
-        expect(vegaView.height()).toBe(250.00000001);
       } finally {
         vegaVis.destroy();
       }

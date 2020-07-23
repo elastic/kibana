@@ -249,7 +249,14 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
           enabled: false,
           type: 'object',
         },
-        installed: {
+        installed_es: {
+          type: 'nested',
+          properties: {
+            id: { type: 'keyword' },
+            type: { type: 'keyword' },
+          },
+        },
+        installed_kibana: {
           type: 'nested',
           properties: {
             id: { type: 'keyword' },

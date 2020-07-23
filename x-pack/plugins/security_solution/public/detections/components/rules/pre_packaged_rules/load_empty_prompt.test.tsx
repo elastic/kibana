@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import '../../../../common/mock/match_media';
 import { PrePackagedRulesPrompt } from './load_empty_prompt';
 
 jest.mock('react-router-dom', () => {

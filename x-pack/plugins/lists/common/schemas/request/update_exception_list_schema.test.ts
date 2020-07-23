@@ -109,20 +109,6 @@ describe('update_exception_list_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  // TODO: Is it expected behavior for it not to auto-generate a uui or throw
-  // error if list_id is not passed in?
-  test.skip('it should accept an undefined for "list_id" and auto generate a uuid', () => {
-    const inputPayload = getUpdateExceptionListSchemaMock();
-    delete inputPayload.list_id;
-    const decoded = updateExceptionListSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as UpdateExceptionListSchema).list_id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-    );
-  });
-
   test('it should accept an undefined for "list_id" and generate a correct body not counting the uuid', () => {
     const inputPayload = getUpdateExceptionListSchemaMock();
     delete inputPayload.list_id;

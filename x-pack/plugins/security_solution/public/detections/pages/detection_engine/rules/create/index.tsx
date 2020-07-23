@@ -109,10 +109,10 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.ruleActions]: null,
   });
   const stepsData = useRef<Record<RuleStep, RuleStepData>>({
-    [RuleStep.defineRule]: { isValid: false, data: {} },
-    [RuleStep.aboutRule]: { isValid: false, data: {} },
-    [RuleStep.scheduleRule]: { isValid: false, data: {} },
-    [RuleStep.ruleActions]: { isValid: false, data: {} },
+    [RuleStep.defineRule]: { isValid: false, data: undefined },
+    [RuleStep.aboutRule]: { isValid: false, data: undefined },
+    [RuleStep.scheduleRule]: { isValid: false, data: undefined },
+    [RuleStep.ruleActions]: { isValid: false, data: undefined },
   });
   const [isStepRuleInReadOnlyView, setIsStepRuleInEditView] = useState<Record<RuleStep, boolean>>({
     [RuleStep.defineRule]: false,
@@ -123,7 +123,7 @@ const CreateRulePageComponent: React.FC = () => {
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
   const actionMessageParams = useMemo(
     () =>
-      getActionMessageParams((stepsData.current['define-rule'].data as DefineStepRule).ruleType),
+      getActionMessageParams((stepsData.current['define-rule'].data as DefineStepRule)?.ruleType),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [stepsData.current['define-rule'].data]
   );
@@ -335,9 +335,7 @@ const CreateRulePageComponent: React.FC = () => {
             <EuiHorizontalRule margin="m" />
             <StepDefineRule
               addPadding={true}
-              defaultValues={
-                (stepsData.current[RuleStep.defineRule].data as DefineStepRule) ?? null
-              }
+              defaultValues={stepsData.current[RuleStep.defineRule].data as DefineStepRule}
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.defineRule]}
               isLoading={isLoading || loading}
               setForm={setStepsForm}
@@ -370,10 +368,8 @@ const CreateRulePageComponent: React.FC = () => {
             <EuiHorizontalRule margin="m" />
             <StepAboutRule
               addPadding={true}
-              defaultValues={(stepsData.current[RuleStep.aboutRule].data as AboutStepRule) ?? null}
-              defineRuleData={
-                (stepsData.current[RuleStep.defineRule].data as DefineStepRule) ?? null
-              }
+              defaultValues={stepsData.current[RuleStep.aboutRule].data as AboutStepRule}
+              defineRuleData={stepsData.current[RuleStep.defineRule].data as DefineStepRule}
               descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.aboutRule]}
               isLoading={isLoading || loading}
@@ -406,9 +402,7 @@ const CreateRulePageComponent: React.FC = () => {
             <EuiHorizontalRule margin="m" />
             <StepScheduleRule
               addPadding={true}
-              defaultValues={
-                (stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule) ?? null
-              }
+              defaultValues={stepsData.current[RuleStep.scheduleRule].data as ScheduleStepRule}
               descriptionColumns="singleSplit"
               isReadOnlyView={isStepRuleInReadOnlyView[RuleStep.scheduleRule]}
               isLoading={isLoading || loading}
