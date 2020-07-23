@@ -74,7 +74,7 @@ export class QueryStringManager {
    */
   public setQuery = (query: Query) => {
     const curQuery = this.query$.getValue();
-    if (query?.language !== curQuery.language || query?.query !== curQuery.language) {
+    if (query?.language !== curQuery.language || query?.query !== curQuery.query) {
       this.query$.next(query);
     }
   };

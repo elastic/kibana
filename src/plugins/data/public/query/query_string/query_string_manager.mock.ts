@@ -26,6 +26,7 @@ const createSetupContractMock = () => {
     getUpdates$: jest.fn(),
     getDefaultQuery: jest.fn(),
     formatQuery: jest.fn(),
+    clearQuery: jest.fn(),
   };
   return queryStringManagerMock;
 };
