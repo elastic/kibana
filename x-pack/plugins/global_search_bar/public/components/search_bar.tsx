@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiSelectable,
   EuiPopover,
@@ -14,9 +14,9 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiIcon,
-  keys,
 } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { GlobalSearchResultProvider, GlobalSearchResult } from '../../../global_search/public';
 
 interface Props {
@@ -29,6 +29,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   const [options, setOptions] = useState([] as GlobalSearchResult[]);
   const [isLoading, setLoadingState] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
+  const isWindows = navigator.platform.toLowerCase().indexOf('win') >= 0;
 
   const onSearch = useCallback(
     (term: string) => {
@@ -56,8 +57,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
   useEffect(() => {
     const openSearch = (event: KeyboardEvent) => {
-      if (event.key === 'k' && event.metaKey) {
-        // TODO if windows, use ctrl
+      if (event.key === 'k' && (isWindows ? event.ctrlKey : event.metaKey)) {
         if (searchRef) searchRef.focus();
       }
     };
@@ -66,7 +66,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     return () => {
       window.removeEventListener('keydown', openSearch);
     };
-  }, [searchRef]);
+  }, [searchRef, isWindows]);
 
   return (
     <EuiSelectable
@@ -112,11 +112,14 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
         if (typeof url === 'string') {
           if (url.startsWith('https://')) {
+            // if absolute path
             window.location.assign(url);
           } else {
+            // else is relative path
             navigateToUrl(url);
           }
         } else {
+          // else is url obj
           // TODO
         }
       }}
@@ -133,12 +136,20 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
             <div style={{ width: '600px' }}>{list}</div>
             <EuiPopoverFooter>
               <EuiText className="kibanaChromeSearch__popoverFooter" size="xs">
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                  <EuiFlexItem />
-                  <EuiFlexItem grow={false}>Quickly search using</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {/* TODO this is for mac only */}
-                    <EuiBadge>Command + K</EuiBadge>
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="flexEnd"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false} component="p">
+                    <FormattedMessage
+                      id="searchBar.shortcut"
+                      defaultMessage="Quickly search using {shortcut}"
+                      values={{
+                        shortcut: <EuiBadge>{isWindows ? 'Command + K' : 'Ctrl + K'}</EuiBadge>,
+                      }}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiText>
