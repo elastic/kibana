@@ -77,7 +77,7 @@ export class QueryStringManager {
    * @property {string|moment} time.to
    */
   public setQuery = (query?: Query) => {
-    if (query?.language !== this._query?.language || query?.query !== this._query?.language) {
+    if (query?.language !== this._query?.language || query?.query !== this._query?.query) {
       if (!query) {
         query = this.getDefaultQuery();
       }
