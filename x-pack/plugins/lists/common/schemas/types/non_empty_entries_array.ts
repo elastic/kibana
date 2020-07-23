@@ -27,7 +27,7 @@ export const nonEmptyEntriesArray = new t.Type<EntriesArray, EntriesArray, unkno
         input.some((entry) => entriesList.is(entry)) &&
         input.some((entry) => !entriesList.is(entry))
       ) {
-        // fail when an entry contains a value list entry and a non-value list entry
+        // fail when an exception item contains both a value list entry and a non-value list entry
         return t.failure(input, context, 'Cannot have entry of type list and other');
       }
       return entriesArray.validate(input, context);
