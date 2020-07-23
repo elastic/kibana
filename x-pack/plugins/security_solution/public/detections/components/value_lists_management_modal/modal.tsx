@@ -46,6 +46,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const { start: findLists, ...lists } = useFindLists();
   const { start: deleteList, result: deleteResult } = useDeleteList();
   const [exportListId, setExportListId] = useState<string>();
+  const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
   const { addError, addSuccess } = useAppToasts();
 
   const fetchLists = useCallback(() => {
@@ -54,16 +55,18 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
 
   const handleDelete = useCallback(
     ({ id }: { id: string }) => {
+      setDeletingListIds([...deletingListIds, id]);
       deleteList({ http, id });
     },
-    [deleteList, http]
+    [deleteList, deletingListIds, http]
   );
 
   useEffect(() => {
-    if (deleteResult != null) {
+    if (deleteResult != null && deletingListIds.length > 0) {
+      setDeletingListIds([...deletingListIds.filter((id) => id !== deleteResult.id)]);
       fetchLists();
     }
-  }, [deleteResult, fetchLists]);
+  }, [deleteResult, deletingListIds, fetchLists]);
 
   const handleExport = useCallback(
     async ({ ids }: { ids: string[] }) =>
@@ -116,6 +119,12 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     return null;
   }
 
+  const tableItems = (lists.result?.data ?? []).map((item) => ({
+    ...item,
+    isExporting: item.id === exportListId,
+    isDeleting: deletingListIds.includes(item.id),
+  }));
+
   const pagination = {
     pageIndex,
     pageSize,
@@ -133,7 +142,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
           <ValueListsForm onSuccess={handleUploadSuccess} onError={handleUploadError} />
           <EuiSpacer />
           <ValueListsTable
-            lists={lists.result?.data ?? []}
+            items={tableItems}
             loading={lists.loading}
             onDelete={handleDelete}
             onExport={handleExportClick}

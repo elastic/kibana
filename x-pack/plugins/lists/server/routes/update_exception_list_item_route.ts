@@ -21,7 +21,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
   router.put(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_ITEM_URL,
       validate: {
@@ -41,6 +41,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           meta,
           type,
           _tags,
+          _version,
           comments,
           entries,
           item_id: itemId,
@@ -50,6 +51,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
         const exceptionLists = getExceptionListClient(context);
         const exceptionListItem = await exceptionLists.updateExceptionListItem({
           _tags,
+          _version,
           comments,
           description,
           entries,

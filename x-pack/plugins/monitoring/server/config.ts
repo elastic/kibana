@@ -21,7 +21,6 @@ export const monitoringElasticsearchConfigSchema = elasticsearchConfigSchema.ext
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  elasticsearch: monitoringElasticsearchConfigSchema,
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     ccs: schema.object({
@@ -86,7 +85,6 @@ export type MonitoringConfig = ReturnType<typeof createConfig>;
 export function createConfig(config: TypeOf<typeof configSchema>) {
   return {
     ...config,
-    elasticsearch: new ElasticsearchConfig(config.elasticsearch as ElasticsearchConfigType),
     ui: {
       ...config.ui,
       elasticsearch: new MonitoringElasticsearchConfig(config.ui.elasticsearch),
