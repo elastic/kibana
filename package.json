@@ -84,6 +84,7 @@
     "**/@types/hoist-non-react-statics": "^3.3.1",
     "**/@types/chai": "^4.2.11",
     "**/cypress/@types/lodash": "^4.14.155",
+    "**/cypress/lodash": "^4.15.19",
     "**/typescript": "3.9.5",
     "**/graphql-toolkit/lodash": "^4.17.15",
     "**/hoist-non-react-statics": "^3.3.2",
