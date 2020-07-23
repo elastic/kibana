@@ -184,31 +184,47 @@ function getGeoShapeAggCount(
       return isGeoShapeAggLayer(indexPatterns, layerDescriptor);
     });
     return geoShapeAggLayers.length;
-  });
+});
 
-  return _.sum(countsPerMap);
+return _.sum(countsPerMap);
 }
 
 export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
-  return mapSavedObjects.map((savedMapObject) => {
-    const layerList =
-      savedMapObject.attributes && savedMapObject.attributes.layerListJSON
-        ? JSON.parse(savedMapObject.attributes.layerListJSON)
-        : [];
-    return layerList as LayerDescriptor[];
-  });
+return mapSavedObjects.map((savedMapObject) => {
+  const layerList =
+    savedMapObject.attributes && savedMapObject.attributes.layerListJSON
+      ? JSON.parse(savedMapObject.attributes.layerListJSON)
+      : [];
+  return layerList as LayerDescriptor[];
+});
 }
 
-export function buildMapsTelemetry({
-  mapSavedObjects,
-  indexPatternSavedObjects,
-  settings,
-}: {
-  mapSavedObjects: MapSavedObject[];
-  indexPatternSavedObjects: IIndexPattern[];
-  settings: SavedObjectAttribute;
-}): SavedObjectAttributes {
-  const layerLists: LayerDescriptor[][] = getLayerLists(mapSavedObjects);
+
+export function buildMapIndexPatternTelemetry(
+  indexPatternSavedObjects: IIndexPattern[],
+  layerLists: LayerDescriptor[][],
+): any {
+  const {
+    indexPatternsWithGeoFieldCount,
+    indexPatternsWithGeoPointFieldCount,
+    indexPatternsWithGeoShapeFieldCount,
+  } = getIndexPatternsWithGeoFieldCount(indexPatternSavedObjects);
+
+  // Tracks whether user uses Gold+ only functionality
+  const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists, indexPatternSavedObjects);
+
+  return {
+    indexPatternsWithGeoFieldCount,
+    indexPatternsWithGeoPointFieldCount,
+    indexPatternsWithGeoShapeFieldCount,
+    geoShapeAggLayersCount,
+  };
+}
+
+export function buildMapSavedObjectTelemetry(
+  mapSavedObjects: MapSavedObject[],
+  layerLists: LayerDescriptor[][],
+): SavedObjectAttributes {
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map((layerList: LayerDescriptor[]) => {
@@ -227,21 +243,7 @@ export function buildMapsTelemetry({
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
 
-  const {
-    indexPatternsWithGeoFieldCount,
-    indexPatternsWithGeoPointFieldCount,
-    indexPatternsWithGeoShapeFieldCount,
-  } = getIndexPatternsWithGeoFieldCount(indexPatternSavedObjects);
-
-  // Tracks whether user users Gold+ only functionality
-  const geoShapeAggLayersCount = getGeoShapeAggCount(layerLists, indexPatternSavedObjects);
-
   return {
-    settings,
-    indexPatternsWithGeoFieldCount,
-    indexPatternsWithGeoPointFieldCount,
-    indexPatternsWithGeoShapeFieldCount,
-    geoShapeAggLayersCount,
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture
@@ -270,26 +272,58 @@ export function buildMapsTelemetry({
     },
   };
 }
-async function getMapSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
-  const mapsSavedObjects = await savedObjectsClient.find({ type: MAP_SAVED_OBJECT_TYPE });
-  return _.get(mapsSavedObjects, 'saved_objects', []);
-}
 
-async function getIndexPatternSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
-  const indexPatternSavedObjects = await savedObjectsClient.find({ type: 'index-pattern' });
-  return _.get(indexPatternSavedObjects, 'saved_objects', []);
+async function getSavedObjects(savedObjectsClient: SavedObjectsClientContract, type: string) {
+  return await savedObjectsClient.find({ type, perPage: 3 });
 }
 
 export async function getMapsTelemetry(config: MapsConfigType) {
   const savedObjectsClient = getInternalRepository();
-  // @ts-ignore
-  const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
-  const indexPatternSavedObjects: IIndexPattern[] = (await getIndexPatternSavedObjects(
-    // @ts-ignore
-    savedObjectsClient
-  )) as IIndexPattern[];
   const settings: SavedObjectAttribute = {
     showMapVisualizationTypes: config.showMapVisualizationTypes,
   };
-  return buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
+  let page = 1;
+  let per_page = 1;
+  let total = 3;
+  let saved_objects = [];
+  let savedObjectTelemetry = {};
+  let cumulativeLayerLists = [];
+  while (page * per_page < total) {
+    ({ page, per_page, saved_objects, total } = await savedObjectsClient.find({ type: MAP_SAVED_OBJECT_TYPE }));
+
+    const layerLists: LayerDescriptor[][] = getLayerLists(saved_objects);
+    cumulativeLayerLists.concat(layerLists);
+    _.mergeWith(savedObjectTelemetry, buildMapSavedObjectTelemetry(saved_objects, layerLists), (objValue, srcValue) => {
+      if (isNaN(srcValue)) {
+        return objValue;
+      } else if (isNaN(objValue)) {
+        return srcValue;
+      } else {
+        return objValue + srcValue;
+      }
+    });
+  }
+
+  page = 1;
+  per_page = 1;
+  total = 3;
+  let indexPatternTelemetry = {};
+  while (page * per_page < total) {
+    ({ page, per_page, saved_objects, total } = await savedObjectsClient.find({ type: 'index-pattern' }));
+    _.mergeWith(indexPatternTelemetry, buildMapIndexPatternTelemetry(saved_objects, cumulativeLayerLists), (objValue, srcValue) => {
+      if (isNaN(srcValue)) {
+        return objValue;
+      } else if (isNaN(objValue)) {
+        return srcValue;
+      } else {
+        return objValue + srcValue;
+      }
+    });
+  }
+
+  return {
+    settings,
+    ...savedObjectTelemetry,
+    ...indexPatternTelemetry,
+  }
 }
