@@ -131,6 +131,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(endpointConfig).not.to.be(undefined);
       });
 
+      it('should have empty value for package configuration name', async () => {
+        await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
+        expect(await pageObjects.ingestManagerCreatePackageConfig.getPackageConfigName()).to.be('');
+      });
+
       it('should redirect user back to Policy List after a successful save', async () => {
         const newPolicyName = `endpoint policy ${Date.now()}`;
         await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
