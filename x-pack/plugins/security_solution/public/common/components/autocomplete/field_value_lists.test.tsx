@@ -15,7 +15,7 @@ import { getField } from '../../../../../../../src/plugins/data/common/index_pat
 import { ListSchema } from '../../../lists_plugin_deps';
 import { getFoundListSchemaMock } from '../../../../../lists/common/schemas/response/found_list_schema.mock';
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
-import { DATE_NOW } from '../../../../../lists/common/constants.mock';
+import { DATE_NOW, VERSION, IMMUTABLE } from '../../../../../lists/common/constants.mock';
 
 import { AutocompleteFieldListsComponent } from './field_value_lists';
 
@@ -52,20 +52,18 @@ describe('AutocompleteFieldListsComponent', () => {
           selectedField={getField('ip')}
           selectedValue="some-list-id"
           isLoading={false}
-          isClearable={false}
-          isDisabled={true}
+          isClearable={true}
+          isDisabled
           onChange={jest.fn()}
         />
       </ThemeProvider>
     );
 
-    await waitFor(() => {
-      expect(
-        wrapper
-          .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input`)
-          .prop('disabled')
-      ).toBeTruthy();
-    });
+    expect(
+      wrapper
+        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input`)
+        .prop('disabled')
+    ).toBeTruthy();
   });
 
   test('it renders loading if "isLoading" is true', async () => {
@@ -73,9 +71,9 @@ describe('AutocompleteFieldListsComponent', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldListsComponent
           placeholder="Placeholder text"
-          selectedField={getField('ip')}
-          selectedValue="some-list-id"
-          isLoading={true}
+          selectedField={getField('@tags')}
+          selectedValue=""
+          isLoading
           isClearable={false}
           isDisabled={false}
           onChange={jest.fn()}
@@ -83,19 +81,17 @@ describe('AutocompleteFieldListsComponent', () => {
       </ThemeProvider>
     );
 
-    await waitFor(() => {
+    wrapper
+      .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] button`)
+      .at(0)
+      .simulate('click');
+    expect(
       wrapper
-        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] button`)
-        .at(0)
-        .simulate('click');
-      expect(
-        wrapper
-          .find(
-            `EuiComboBoxOptionsList[data-test-subj="valuesAutocompleteComboBox listsComboxBox-optionsList"]`
-          )
-          .prop('isLoading')
-      ).toBeTruthy();
-    });
+        .find(
+          `EuiComboBoxOptionsList[data-test-subj="valuesAutocompleteComboBox listsComboxBox-optionsList"]`
+        )
+        .prop('isLoading')
+    ).toBeTruthy();
   });
 
   test('it allows user to clear values if "isClearable" is true', async () => {
@@ -104,9 +100,9 @@ describe('AutocompleteFieldListsComponent', () => {
         <AutocompleteFieldListsComponent
           placeholder="Placeholder text"
           selectedField={getField('ip')}
-          selectedValue="some-list-id"
+          selectedValue=""
           isLoading={false}
-          isClearable={true}
+          isClearable={false}
           isDisabled={false}
           onChange={jest.fn()}
         />
@@ -114,9 +110,9 @@ describe('AutocompleteFieldListsComponent', () => {
     );
     expect(
       wrapper
-        .find(`[data-test-subj="comboBoxInput"]`)
-        .hasClass('euiComboBox__inputWrap-isClearable')
-    ).toBeTruthy();
+        .find('EuiComboBox[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]')
+        .prop('options')
+    ).toEqual([{ label: 'some name' }]);
   });
 
   test('it correctly displays lists that match the selected "keyword" field esType', () => {
@@ -210,17 +206,24 @@ describe('AutocompleteFieldListsComponent', () => {
       onChange: (a: EuiComboBoxOptionOption[]) => void;
     }).onChange([{ label: 'some name' }]);
 
-    expect(mockOnChange).toHaveBeenCalledWith({
-      created_at: DATE_NOW,
-      created_by: 'some user',
-      description: 'some description',
-      id: 'some-list-id',
-      meta: {},
-      name: 'some name',
-      tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
-      type: 'ip',
-      updated_at: DATE_NOW,
-      updated_by: 'some user',
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith({
+        created_at: DATE_NOW,
+        created_by: 'some user',
+        description: 'some description',
+        id: 'some-list-id',
+        meta: {},
+        name: 'some name',
+        tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
+        type: 'ip',
+        updated_at: DATE_NOW,
+        updated_by: 'some user',
+        _version: undefined,
+        version: VERSION,
+        deserializer: undefined,
+        serializer: undefined,
+        immutable: IMMUTABLE,
+      });
     });
   });
 });

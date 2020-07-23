@@ -30,12 +30,17 @@ export const getOperators = (field: IFieldType | undefined): OperatorOption[] =>
   }
 };
 
-export const validateParams = (
+export const paramIsValid = (
   params: string | undefined,
-  field: IFieldType | undefined
+  field: IFieldType | undefined,
+  isRequired: boolean,
+  touched: boolean
 ): boolean => {
-  // Box would show error state if empty otherwise
-  if (params == null || params === '') {
+  if (isRequired && touched && (params == null || params === '')) {
+    return false;
+  }
+
+  if ((isRequired && !touched) || (!isRequired && (params == null || params === ''))) {
     return true;
   }
 
@@ -44,7 +49,7 @@ export const validateParams = (
   return types.reduce<boolean>((acc, type) => {
     switch (type) {
       case 'date':
-        const moment = dateMath.parse(params);
+        const moment = dateMath.parse(params ?? '');
         return Boolean(moment && moment.isValid());
       default:
         return acc;
