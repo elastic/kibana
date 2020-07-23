@@ -9,7 +9,7 @@ import { AbstractLayer } from './layer';
 import { ISource } from '../sources/source';
 import { IStyle } from '../styles/style';
 import { AGG_TYPE, FIELD_ORIGIN, LAYER_STYLE_TYPE, VECTOR_STYLES } from '../../../common/constants';
-import { VectorStyleDescriptor } from '../../../common/descriptor_types';
+import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 
 jest.mock('uuid/v4', () => {
@@ -95,19 +95,19 @@ describe('cloneDescriptor', () => {
       );
     });
 
-    test('Should update data driven styling properties using join fields when metrics is not provided', async () => {
+    test('Should update data driven styling properties using join fields when metrics are not provided', async () => {
       const layerDescriptor = AbstractLayer.createDescriptor({
         style: styleDescriptor,
         joins: [
           {
             leftField: 'iso2',
-            right: {
+            right: ({
               id: '557d0f15',
               indexPatternId: 'myIndexPattern',
               indexPatternTitle: 'logs-*',
               term: 'myTermField',
               type: 'joinSource',
-            },
+            } as unknown) as ESTermSourceDescriptor,
           },
         ],
       });
