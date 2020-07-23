@@ -44,6 +44,7 @@ interface ExceptionListItemProps {
   addNested: boolean;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
+  onlyShowListOperators?: boolean;
 }
 
 export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
@@ -58,6 +59,7 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
     andLogicIncluded,
     onDeleteExceptionItem,
     onChangeExceptionItem,
+    onlyShowListOperators = false,
   }) => {
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
@@ -169,6 +171,7 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
                           exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                         }
                         onChange={handleEntryChange}
+                        onlyShowListOperators={onlyShowListOperators}
                       />
                     </EuiFlexItem>
                     {getDeleteButton(

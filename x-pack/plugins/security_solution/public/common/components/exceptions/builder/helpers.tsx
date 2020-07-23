@@ -553,3 +553,6 @@ export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
   type: OperatorTypeEnum.NESTED,
   entries: [],
 });
+
+export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
+  items.some((item) => item.entries.some((entry) => entry.type === OperatorTypeEnum.LIST));

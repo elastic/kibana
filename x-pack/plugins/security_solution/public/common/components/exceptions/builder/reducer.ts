@@ -69,8 +69,8 @@ export const exceptionsBuilderReducer = () => (state: State, action: Action): St
         andLogicIncluded: isAndLogicIncluded,
         exceptions: action.exceptions,
         addNested: isAddNested,
-        disableAnd: isAndDisabled || containsValueList,
-        disableOr: isOrDisabled || containsValueList,
+        disableAnd: isAndDisabled,
+        disableOr: isOrDisabled,
         disableNested: containsValueList,
       };
     }

@@ -27,6 +27,7 @@ import {
   getEntryOnMatchAnyChange,
   getEntryOnListChange,
 } from './helpers';
+import { EXCEPTION_OPERATORS_ONLY_LISTS } from '../../autocomplete/operators';
 
 interface EntryItemProps {
   entry: FormattedBuilderEntry;
@@ -35,6 +36,7 @@ interface EntryItemProps {
   listType: ExceptionListType;
   addNested: boolean;
   onChange: (arg: BuilderEntry, i: number) => void;
+  onlyShowListOperators?: boolean;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -44,6 +46,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   addNested,
   showLabel,
   onChange,
+  onlyShowListOperators = false,
 }): JSX.Element => {
   const handleFieldChange = useCallback(
     ([newField]: IFieldType[]): void => {
@@ -124,12 +127,14 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    const operatorOptions = getOperatorOptions(
-      entry,
-      listType,
-      entry.field != null && entry.field.type === 'boolean',
-      isFirst
-    );
+    const operatorOptions = onlyShowListOperators
+      ? EXCEPTION_OPERATORS_ONLY_LISTS
+      : getOperatorOptions(
+          entry,
+          listType,
+          entry.field != null && entry.field.type === 'boolean',
+          isFirst
+        );
     const comboBox = (
       <OperatorComponent
         placeholder={i18n.EXCEPTION_OPERATOR_PLACEHOLDER}
