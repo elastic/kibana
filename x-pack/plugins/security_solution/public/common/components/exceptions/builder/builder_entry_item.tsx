@@ -9,136 +9,135 @@ import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../../autocomplete/field';
 import { OperatorComponent } from '../../autocomplete/operator';
-import { isOperator } from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
 import { AutocompleteFieldMatchComponent } from '../../autocomplete/field_value_match';
 import { AutocompleteFieldMatchAnyComponent } from '../../autocomplete/field_value_match_any';
 import { AutocompleteFieldExistsComponent } from '../../autocomplete/field_value_exists';
 import { FormattedBuilderEntry, BuilderEntry } from '../types';
 import { AutocompleteFieldListsComponent } from '../../autocomplete/field_value_lists';
-import { ListSchema, OperatorTypeEnum } from '../../../../lists_plugin_deps';
-import { getValueFromOperator } from '../helpers';
+import { ListSchema, OperatorTypeEnum, ExceptionListType } from '../../../../lists_plugin_deps';
 import { getEmptyValue } from '../../empty_value';
-import * as i18n from '../translations';
+import * as i18n from './translations';
+import {
+  getFilteredIndexPatterns,
+  getOperatorOptions,
+  getEntryOnFieldChange,
+  getEntryOnOperatorChange,
+  getEntryOnMatchChange,
+  getEntryOnMatchAnyChange,
+  getEntryOnListChange,
+} from './helpers';
 
 interface EntryItemProps {
   entry: FormattedBuilderEntry;
-  entryIndex: number;
   indexPattern: IIndexPattern;
-  isLoading: boolean;
   showLabel: boolean;
+  listType: ExceptionListType;
+  addNested: boolean;
   onChange: (arg: BuilderEntry, i: number) => void;
 }
 
-export const EntryItemComponent: React.FC<EntryItemProps> = ({
+export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   entry,
-  entryIndex,
   indexPattern,
-  isLoading,
+  listType,
+  addNested,
   showLabel,
   onChange,
 }): JSX.Element => {
   const handleFieldChange = useCallback(
     ([newField]: IFieldType[]): void => {
-      onChange(
-        {
-          field: newField.name,
-          type: OperatorTypeEnum.MATCH,
-          operator: isOperator.operator,
-          value: undefined,
-        },
-        entryIndex
-      );
+      const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
+
+      onChange(updatedEntry, index);
     },
-    [onChange, entryIndex]
+    [onChange, entry]
   );
 
   const handleOperatorChange = useCallback(
     ([newOperator]: OperatorOption[]): void => {
-      const newEntry = getValueFromOperator(entry.field, newOperator);
-      onChange(newEntry, entryIndex);
+      const { updatedEntry, index } = getEntryOnOperatorChange(entry, newOperator);
+
+      onChange(updatedEntry, index);
     },
-    [onChange, entryIndex, entry.field]
+    [onChange, entry]
   );
 
   const handleFieldMatchValueChange = useCallback(
     (newField: string): void => {
-      onChange(
-        {
-          field: entry.field != null ? entry.field.name : undefined,
-          type: OperatorTypeEnum.MATCH,
-          operator: entry.operator.operator,
-          value: newField,
-        },
-        entryIndex
-      );
+      const { updatedEntry, index } = getEntryOnMatchChange(entry, newField);
+
+      onChange(updatedEntry, index);
     },
-    [onChange, entryIndex, entry.field, entry.operator.operator]
+    [onChange, entry]
   );
 
   const handleFieldMatchAnyValueChange = useCallback(
     (newField: string[]): void => {
-      onChange(
-        {
-          field: entry.field != null ? entry.field.name : undefined,
-          type: OperatorTypeEnum.MATCH_ANY,
-          operator: entry.operator.operator,
-          value: newField,
-        },
-        entryIndex
-      );
+      const { updatedEntry, index } = getEntryOnMatchAnyChange(entry, newField);
+
+      onChange(updatedEntry, index);
     },
-    [onChange, entryIndex, entry.field, entry.operator.operator]
+    [onChange, entry]
   );
 
   const handleFieldListValueChange = useCallback(
     (newField: ListSchema): void => {
-      onChange(
-        {
-          field: entry.field != null ? entry.field.name : undefined,
-          type: OperatorTypeEnum.LIST,
-          operator: entry.operator.operator,
-          list: { id: newField.id, type: newField.type },
-        },
-        entryIndex
-      );
+      const { updatedEntry, index } = getEntryOnListChange(entry, newField);
+
+      onChange(updatedEntry, index);
     },
-    [onChange, entryIndex, entry.field, entry.operator.operator]
+    [onChange, entry]
   );
 
-  const renderFieldInput = (isFirst: boolean): JSX.Element => {
-    const comboBox = (
-      <FieldComponent
-        placeholder={i18n.EXCEPTION_FIELD_PLACEHOLDER}
-        indexPattern={indexPattern}
-        selectedField={entry.field}
-        isLoading={isLoading}
-        isClearable={false}
-        isDisabled={isLoading}
-        onChange={handleFieldChange}
-        data-test-subj="exceptionBuilderEntryField"
-        isRequired
-      />
-    );
-
-    if (isFirst) {
-      return (
-        <EuiFormRow label={i18n.FIELD} data-test-subj="exceptionBuilderEntryFieldFormRow">
-          {comboBox}
-        </EuiFormRow>
+  const renderFieldInput = useCallback(
+    (isFirst: boolean): JSX.Element => {
+      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry);
+      const comboBox = (
+        <FieldComponent
+          placeholder={
+            entry.nested != null
+              ? i18n.EXCEPTION_FIELD_NESTED_PLACEHOLDER
+              : i18n.EXCEPTION_FIELD_PLACEHOLDER
+          }
+          indexPattern={filteredIndexPatterns}
+          selectedField={entry.field}
+          isClearable={false}
+          isLoading={false}
+          isDisabled={indexPattern == null}
+          onChange={handleFieldChange}
+          data-test-subj="exceptionBuilderEntryField"
+        />
       );
-    } else {
-      return comboBox;
-    }
-  };
+
+      if (isFirst) {
+        return (
+          <EuiFormRow label={i18n.FIELD} data-test-subj="exceptionBuilderEntryFieldFormRow">
+            {comboBox}
+          </EuiFormRow>
+        );
+      } else {
+        return comboBox;
+      }
+    },
+    [handleFieldChange, indexPattern, entry]
+  );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
+    const operatorOptions = getOperatorOptions(
+      entry,
+      listType,
+      entry.field != null && entry.field.type === 'boolean'
+    );
     const comboBox = (
       <OperatorComponent
         placeholder={i18n.EXCEPTION_OPERATOR_PLACEHOLDER}
         selectedField={entry.field}
         operator={entry.operator}
-        isDisabled={isLoading}
+        isDisabled={
+          indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
+        }
+        operatorOptions={operatorOptions}
         isLoading={false}
         isClearable={false}
         onChange={handleOperatorChange}
@@ -166,8 +165,10 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             selectedField={entry.field}
             selectedValue={value}
-            isDisabled={isLoading}
-            isLoading={isLoading}
+            isDisabled={
+              indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
+            }
+            isLoading={false}
             isClearable={false}
             indexPattern={indexPattern}
             onChange={handleFieldMatchValueChange}
@@ -182,8 +183,10 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             selectedField={entry.field}
             selectedValue={values}
-            isDisabled={isLoading}
-            isLoading={isLoading}
+            isDisabled={
+              indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
+            }
+            isLoading={false}
             isClearable={false}
             indexPattern={indexPattern}
             onChange={handleFieldMatchAnyValueChange}
@@ -198,8 +201,10 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
             selectedField={entry.field}
             placeholder={i18n.EXCEPTION_FIELD_LISTS_PLACEHOLDER}
             selectedValue={id}
-            isLoading={isLoading}
-            isDisabled={isLoading}
+            isLoading={false}
+            isDisabled={
+              indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
+            }
             isClearable={false}
             onChange={handleFieldListValueChange}
             isRequired
@@ -240,9 +245,14 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
     >
       <EuiFlexItem grow={false}>{renderFieldInput(showLabel)}</EuiFlexItem>
       <EuiFlexItem grow={false}>{renderOperatorInput(showLabel)}</EuiFlexItem>
-      <EuiFlexItem grow={6}>{renderFieldValueInput(showLabel, entry.operator.type)}</EuiFlexItem>
+      <EuiFlexItem grow={6}>
+        {renderFieldValueInput(
+          showLabel,
+          entry.nested === 'parent' ? OperatorTypeEnum.EXISTS : entry.operator.type
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-EntryItemComponent.displayName = 'EntryItem';
+BuilderEntryItem.displayName = 'BuilderEntryItem';
