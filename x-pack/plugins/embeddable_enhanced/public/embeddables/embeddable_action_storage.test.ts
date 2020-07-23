@@ -546,24 +546,27 @@ describe('EmbeddableActionStorage', () => {
   describe('migrate', () => {
     test('DASHBOARD_TO_DASHBOARD_DRILLDOWN triggers migration', async () => {
       const embeddable = new TestEmbeddable();
+      const OTHER_TRIGGER = 'OTHER_TRIGGER';
       embeddable.updateInput({
         enhancements: {
           dynamicActions: {
             events: [
               {
-                id: '1',
-                triggers: ['random'],
+                eventId: '1',
+                triggers: [OTHER_TRIGGER],
                 action: {
-                  id: '1',
                   factoryId: DASHBOARD_TO_DASHBOARD_DRILLDOWN,
+                  name: '',
+                  config: {},
                 },
               },
               {
-                id: '1',
-                triggers: ['random'],
+                eventId: '2',
+                triggers: [OTHER_TRIGGER],
                 action: {
-                  id: '1',
                   factoryId: 'SOME_OTHER',
+                  name: '',
+                  config: {},
                 },
               },
             ],
@@ -574,7 +577,7 @@ describe('EmbeddableActionStorage', () => {
 
       const [event1, event2] = await storage.list();
       expect(event1.triggers).toEqual([APPLY_FILTER_TRIGGER]);
-      expect(event2.triggers).toEqual(['random']);
+      expect(event2.triggers).toEqual([OTHER_TRIGGER]);
     });
   });
 });
