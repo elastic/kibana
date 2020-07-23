@@ -47,24 +47,22 @@ export interface Services {
 }
 
 export interface AlertServices<
-  AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
-  AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > extends Services {
-  alertInstanceFactory: (
-    id: string
-  ) => AlertInstance<AlertInstanceStateType, AlertInstanceContextType>;
+  alertInstanceFactory: (id: string) => AlertInstance<InstanceState, InstanceContext>;
 }
 
 export interface AlertExecutorOptions<
   Params extends AlertTypeParams = AlertTypeParams,
   State extends AlertTypeState = AlertTypeState,
-  AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
-  AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > {
   alertId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
-  services: AlertServices<AlertInstanceStateType, AlertInstanceContextType>;
+  services: AlertServices<InstanceState, InstanceContext>;
   params: Params;
   state: State;
   spaceId: string;
@@ -83,8 +81,8 @@ export interface ActionVariable {
 export interface AlertType<
   Params extends AlertTypeParams = AlertTypeParams,
   State extends AlertTypeState = AlertTypeState,
-  AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
-  AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > {
   id: string;
   name: string;
@@ -97,12 +95,7 @@ export interface AlertType<
     services,
     params,
     state,
-  }: AlertExecutorOptions<
-    Params,
-    State,
-    AlertInstanceStateType,
-    AlertInstanceContextType
-  >) => Promise<State | void>;
+  }: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>) => Promise<State | void>;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];

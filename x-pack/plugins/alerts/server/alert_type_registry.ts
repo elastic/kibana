@@ -68,9 +68,9 @@ export class AlertTypeRegistry {
   public register<
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
-    AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
-    AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
-  >(alertType: AlertType<Params, State, AlertInstanceStateType, AlertInstanceContextType>) {
+    InstanceState extends AlertInstanceState = AlertInstanceState,
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
     if (this.has(alertType.id)) {
       throw new Error(
         i18n.translate('xpack.alerts.alertTypeRegistry.register.duplicateAlertTypeError', {
@@ -96,9 +96,9 @@ export class AlertTypeRegistry {
   public get<
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
-    AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
-    AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
-  >(id: string): AlertType<Params, State, AlertInstanceStateType, AlertInstanceContextType> {
+    InstanceState extends AlertInstanceState = AlertInstanceState,
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  >(id: string): AlertType<Params, State, InstanceState, InstanceContext> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerts.alertTypeRegistry.get.missingAlertTypeError', {
@@ -109,12 +109,7 @@ export class AlertTypeRegistry {
         })
       );
     }
-    return this.alertTypes.get(id)! as AlertType<
-      Params,
-      State,
-      AlertInstanceStateType,
-      AlertInstanceContextType
-    >;
+    return this.alertTypes.get(id)! as AlertType<Params, State, InstanceState, InstanceContext>;
   }
 
   public list(): Set<RegistryAlertType> {
