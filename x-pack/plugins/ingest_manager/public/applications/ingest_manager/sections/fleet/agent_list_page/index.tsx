@@ -536,9 +536,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 ),
               }}
             />
-          ) : !isLoading && totalAgents === 0 ? (
+          ) : (
             emptyPrompt
-          ) : undefined
+          )
         }
         items={totalAgents ? agents : []}
         itemId="id"
