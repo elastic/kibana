@@ -89,6 +89,7 @@ export const searchAfterAndBulkCreate = async ({
     bulkCreateTimes: [],
     lastLookBackDate: null,
     createdSignalsCount: 0,
+    errorMessage: undefined,
   };
 
   // sortId tells us where to start our next consecutive search_after query

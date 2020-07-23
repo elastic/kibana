@@ -100,6 +100,7 @@ export const signalRulesAlertType = ({
         searchAfterTimes: [],
         lastLookBackDate: null,
         createdSignalsCount: 0,
+        errorMessage: undefined,
       };
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(services.savedObjectsClient);
       const ruleStatusService = await ruleStatusServiceFactory({
@@ -135,18 +136,44 @@ export const signalRulesAlertType = ({
       logger.debug(buildRuleMessage(`interval: ${interval}`));
       await ruleStatusService.goingToRun();
 
-      const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
+      let gap;
+      try {
+        gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
+      } catch (exc) {
+        const errorMessage = buildRuleMessage(`${exc.message} Check logs for further details.`);
+        logger.error(errorMessage);
+        await ruleStatusService.error(errorMessage, {
+          bulkCreateTimeDurations: result.bulkCreateTimes,
+          searchAfterTimeDurations: result.searchAfterTimes,
+          lastLookBackDate: result.lastLookBackDate?.toISOString(),
+        });
+        // throw the error because we can't query later on.
+        throw Error(exc.message);
+      }
       if (gap != null && gap.asMilliseconds() > 0) {
         const fromUnit = from[from.length - 1];
-        const { ratio } = getGapMaxCatchupRatio({
-          logger,
-          buildRuleMessage,
-          previousStartedAt,
-          ruleParamsFrom: from,
-          interval,
-          unit: fromUnit,
-        });
-        if (ratio && ratio >= MAX_RULE_GAP_RATIO) {
+        let vals;
+        try {
+          vals = getGapMaxCatchupRatio({
+            logger,
+            buildRuleMessage,
+            previousStartedAt,
+            ruleParamsFrom: from,
+            interval,
+            unit: fromUnit,
+          });
+        } catch (exc) {
+          const errorMessage = buildRuleMessage(`${exc.message} Check logs for further details.`);
+          logger.error(errorMessage);
+          await ruleStatusService.error(errorMessage, {
+            bulkCreateTimeDurations: result.bulkCreateTimes,
+            searchAfterTimeDurations: result.searchAfterTimes,
+            lastLookBackDate: result.lastLookBackDate?.toISOString(),
+          });
+          // throw the error because we can't query later on.
+          throw Error(exc.message);
+        }
+        if (vals != null && vals.ratio && vals.ratio >= MAX_RULE_GAP_RATIO) {
           const gapString = gap.humanize();
           const gapMessage = buildRuleMessage(
             `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
