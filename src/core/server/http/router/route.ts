@@ -108,6 +108,14 @@ export interface RouteConfigOptionsBody {
    * Default value: true, unless no validation.body is provided in the route definition. In that case the default is false to alleviate memory pressure.
    */
   parse?: boolean | 'gunzip';
+
+  /**
+   * Payload reception timeout in milliseconds. Sets the maximum time allowed for the client to transmit the request payload (body) before giving up and responding with a Request Timeout (408) error response.
+   * Set to false to disable.
+   *
+   * Default value: 10000 (10 seconds).
+   */
+  timeout?: false | number;
 }
 
 /**
@@ -144,6 +152,24 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Additional body options {@link RouteConfigOptionsBody}.
    */
   body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
+
+  /**
+   * Timeouts for processing durations.
+   * Default value: { server: false }
+   */
+  timeout?: {
+    /**
+     * Response timeout in milliseconds. Sets the maximum time allowed for the server to respond to an incoming request before giving up and responding with a Service Unavailable (503) error response.
+     * Default value: false.
+     */
+    server?: boolean | number;
+
+    /**
+     * By default, node sockets automatically timeout after 2 minutes. Use this option to override this behavior. Set to false to disable socket timeouts.
+     * Default value: none (use node default of 2 minutes).
+     */
+    socket?: boolean | number;
+  };
 }
 
 /**

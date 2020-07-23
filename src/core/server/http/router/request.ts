@@ -196,19 +196,21 @@ export class KibanaRequest<
 
   private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
-    const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
+    const { parse, maxBytes, allow, output, timeout } = request.route.settings.payload || {};
 
     const options = ({
       authRequired: this.getAuthRequired(request),
       // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
+      timeout: request.route.settings.timeout,
       body: isSafeMethod(method)
         ? undefined
         : {
             parse,
             maxBytes,
             accepts: allow,
+            timeout,
             output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
           },
     } as unknown) as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting

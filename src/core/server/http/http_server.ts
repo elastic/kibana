@@ -161,8 +161,9 @@ export class HttpServer {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
         const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-        const { authRequired, tags, body = {} } = route.options;
-        const { accepts: allow, maxBytes, output, parse } = body;
+        const { authRequired, tags, body = {}, timeout = {} } = route.options;
+        const { accepts: allow, maxBytes, output, parse, timeout: payloadTimeout } = body;
+        const { server, socket } = timeout;
 
         const kibanaRouteState: KibanaRouteState = {
           xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
@@ -181,8 +182,13 @@ export class HttpServer {
             // validation applied in ./http_tools#getServerOptions
             // (All NP routes are already required to specify their own validation in order to access the payload)
             validate,
-            payload: [allow, maxBytes, output, parse].some((v) => typeof v !== 'undefined')
-              ? { allow, maxBytes, output, parse }
+            payload: [allow, maxBytes, output, parse, payloadTimeout].some(
+              (v) => typeof v !== 'undefined'
+            )
+              ? { allow, maxBytes, output, parse, timeout: payloadTimeout }
+              : undefined,
+            timeout: [server, socket].some((v) => typeof v !== 'undefined')
+              ? { server, socket }
               : undefined,
           },
         });

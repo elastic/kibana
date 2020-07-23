@@ -25,8 +25,13 @@ export const importListItemRoute = (router: IRouter, config: ConfigType): void =
           accepts: ['multipart/form-data'],
           maxBytes: config.maxImportPayloadBytes,
           parse: false,
+          timeout: config.importTimeout, // payload has 5 minutes to upload before it times out
         },
         tags: ['access:lists-all'],
+        timeout: {
+          server: false, // The server should never not timeout while processing
+          socket: config.importTimeout + 1, // The socket timeout _must_ be greater than the payload timeout, so we add 1 additional millisecond to it
+        },
       },
       path: `${LIST_ITEM_URL}/_import`,
       validate: {
