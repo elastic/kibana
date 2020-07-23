@@ -513,7 +513,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser(
+        const results = await context.ml!.mlClient.callAsInternalUser(
           'ml.updateDataFrameAnalytics',
           {
             body: request.body,
