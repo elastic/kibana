@@ -21,7 +21,7 @@ export const readEndpointListItemRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {

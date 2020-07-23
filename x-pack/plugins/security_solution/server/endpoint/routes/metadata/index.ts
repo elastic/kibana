@@ -35,6 +35,7 @@ interface MetadataRequestContext {
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
   ['online', HostStatus.ONLINE],
   ['offline', HostStatus.OFFLINE],
+  ['unenrolling', HostStatus.UNENROLLING],
 ]);
 
 /**
