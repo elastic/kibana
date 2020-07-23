@@ -37,6 +37,8 @@ import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
 
@@ -56,8 +58,10 @@ export function LogstashPanel(props) {
   const goToPipelines = () => getSafeForExternalLink('#/logstash/pipelines');
 
   const setupModeData = get(setupMode.data, 'logstash');
-  const setupModeTooltip =
-    setupMode && setupMode.enabled ? (
+  const setupModeMetricbeatMigrationTooltip =
+    setupMode &&
+    setupMode.enabled &&
+    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration) ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
         productName={LOGSTASH_SYSTEM_ID}
@@ -162,7 +166,7 @@ export function LogstashPanel(props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
-                  {setupModeTooltip}
+                  {setupModeMetricbeatMigrationTooltip}
                   {nodesAlertStatus}
                 </EuiFlexGroup>
               </EuiFlexItem>

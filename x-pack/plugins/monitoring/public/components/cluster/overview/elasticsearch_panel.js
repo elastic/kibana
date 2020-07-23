@@ -44,6 +44,8 @@ import {
 } from '../../../../common/constants';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { SetupModeFeature } from '../../../../common/enums';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 
 const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
@@ -172,8 +174,10 @@ export function ElasticsearchPanel(props) {
   const { primaries, replicas } = calculateShards(get(props, 'cluster_stats.indices.shards', {}));
 
   const setupModeData = get(setupMode.data, 'elasticsearch');
-  const setupModeTooltip =
-    setupMode && setupMode.enabled ? (
+  const setupModeMetricbeatMigrationTooltip =
+    setupMode &&
+    setupMode.enabled &&
+    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration) ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
         productName={ELASTICSEARCH_SYSTEM_ID}
@@ -367,7 +371,7 @@ export function ElasticsearchPanel(props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
-                  {setupModeTooltip}
+                  {setupModeMetricbeatMigrationTooltip}
                   {nodesAlertStatus}
                 </EuiFlexGroup>
               </EuiFlexItem>

@@ -11,7 +11,12 @@ import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from '../components';
 import { Legacy } from '../legacy_shims';
 import { PromiseWithCancel } from '../../common/cancel_promise';
-import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
+import { SetupModeFeature } from '../../common/enums';
+import {
+  updateSetupModeData,
+  getSetupModeState,
+  isSetupModeFeatureEnabled,
+} from '../lib/setup_mode';
 
 /**
  * Given a timezone, this function will calculate the offset in milliseconds
@@ -154,7 +159,7 @@ export class MonitoringViewBaseController {
       if (alerts.shouldFetch) {
         promises.push(fetchAlerts());
       }
-      if (setupMode.enabled) {
+      if (setupMode.enabled && isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
         promises.push(updateSetupModeData());
       }
       this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));

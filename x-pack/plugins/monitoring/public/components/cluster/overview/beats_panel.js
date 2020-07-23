@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 export function BeatsPanel(props) {
   const { setupMode } = props;
@@ -35,8 +37,10 @@ export function BeatsPanel(props) {
   }
 
   const setupModeData = get(setupMode.data, 'beats');
-  const setupModeTooltip =
-    setupMode && setupMode.enabled ? (
+  const setupModeMetricbeatMigrationTooltip =
+    setupMode &&
+    setupMode.enabled &&
+    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration) ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
         productName={BEATS_SYSTEM_ID}
@@ -142,7 +146,7 @@ export function BeatsPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeTooltip}
+              {setupModeMetricbeatMigrationTooltip}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">{beatTypes}</EuiDescriptionList>
