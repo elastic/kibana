@@ -16,7 +16,6 @@ import {
   EuiSteps,
   EuiStepStatus,
   EuiSwitch,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -49,7 +48,7 @@ export const Page: FC<Props> = ({ jobId }) => {
 
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { state } = createAnalyticsForm;
-  const { jobConfig, isAdvancedEditorEnabled } = state;
+  const { isAdvancedEditorEnabled } = state;
   const { jobType } = state.form;
   const {
     initiateWizard,

@@ -285,7 +285,7 @@ function toCamelCase(property: string): string {
  */
 export function getFormStateFromJobConfig(
   analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>,
-  isClone?: boolean = true
+  isClone: boolean = true
 ): Partial<State['form']> {
   const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
 

@@ -554,14 +554,15 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SWITCH_TO_FORM:
       const { jobConfig: config } = state;
       const { jobId } = state.form;
-
+      // @ts-ignore
       const formState = getFormStateFromJobConfig(config, false);
-      if (jobId.trim() !== '') {
+      if (typeof jobId === 'string' && jobId.trim() !== '') {
         formState.jobId = jobId;
       }
 
       return validateForm({
         ...state,
+        // @ts-ignore
         form: formState,
         isAdvancedEditorEnabled: false,
         advancedEditorRawString: JSON.stringify(config, null, 2),
