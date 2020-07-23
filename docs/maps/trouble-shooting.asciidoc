@@ -24,7 +24,7 @@ image::maps/images/inspector.png[]
 ==== Index not listed when adding layer
 
 * Verify your geospatial data is correctly mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].
-  ** Run `GET myIndexPatternTitle/_field_caps?fields=myGeoFieldName` in <<console-kibana, console>>, replacing `myIndexPatternTitle` and `myGeoFieldName` with your index pattern title and geospatial field name.
+  ** Run `GET myIndexPatternTitle/_field_caps?fields=myGeoFieldName` in <<console-kibana, Console>>, replacing `myIndexPatternTitle` and `myGeoFieldName` with your index pattern title and geospatial field name.
   ** Ensure response specifies `type` as `geo_point` or `geo_shape`.
 * Verify your geospatial data is correctly mapped in your <<managing-fields, Kibana index pattern>>.
   ** Open your index pattern in <<management, management>>.
