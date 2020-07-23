@@ -26,7 +26,7 @@ export interface QueryState {
   time?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: Filter[];
-  queryString?: Query;
+  query?: Query;
 }
 
 type QueryStateChangePartial = {

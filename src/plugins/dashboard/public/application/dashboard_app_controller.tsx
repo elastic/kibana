@@ -187,24 +187,24 @@ export class DashboardAppController {
     const stopSyncingAppFilters = connectToQueryState(
       queryService,
       {
-        set: ({ filters, queryString }) => {
+        set: ({ filters, query }) => {
           dashboardStateManager.setFilters(filters || []);
-          dashboardStateManager.setQuery(queryString || queryStringMananger.getDefaultQuery());
+          dashboardStateManager.setQuery(query || queryStringMananger.getDefaultQuery());
         },
         get: () => ({
           filters: dashboardStateManager.appState.filters,
-          queryString: dashboardStateManager.getQuery(),
+          query: dashboardStateManager.getQuery(),
         }),
         state$: dashboardStateManager.appState$.pipe(
           map((state) => ({
             filters: state.filters,
-            queryString: queryStringMananger.formatQuery(state.query),
+            query: queryStringMananger.formatQuery(state.query),
           }))
         ),
       },
       {
         filters: esFilters.FilterStateStore.APP_STATE,
-        queryString: true,
+        query: true,
       }
     );
 

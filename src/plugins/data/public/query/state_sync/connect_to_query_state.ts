@@ -43,15 +43,15 @@ export const connectToQueryState = <S extends QueryState>(
     time?: boolean;
     refreshInterval?: boolean;
     filters?: FilterStateStore | boolean;
-    queryString?: boolean;
+    query?: boolean;
   }
 ) => {
   const syncKeys: Array<keyof QueryStateChange> = [];
   if (syncConfig.time) {
     syncKeys.push('time');
   }
-  if (syncConfig.queryString) {
-    syncKeys.push('queryString');
+  if (syncConfig.query) {
+    syncKeys.push('query');
   }
   if (syncConfig.refreshInterval) {
     syncKeys.push('refreshInterval');
@@ -142,8 +142,8 @@ export const connectToQueryState = <S extends QueryState>(
           if (syncConfig.time && changes.time) {
             newState.time = timefilter.getTime();
           }
-          if (syncConfig.queryString && changes.queryString) {
-            newState.queryString = queryString.getQuery();
+          if (syncConfig.query && changes.query) {
+            newState.query = queryString.getQuery();
           }
           if (syncConfig.refreshInterval && changes.refreshInterval) {
             newState.refreshInterval = timefilter.getRefreshInterval();
@@ -185,8 +185,8 @@ export const connectToQueryState = <S extends QueryState>(
         }
       }
 
-      if (syncConfig.queryString) {
-        const curQuery = state.queryString || queryString.getQuery();
+      if (syncConfig.query) {
+        const curQuery = state.query || queryString.getQuery();
         if (!_.isEqual(curQuery, queryString.getQuery())) {
           queryString.setQuery(_.cloneDeep(curQuery));
         }

@@ -40,14 +40,14 @@ export function createQueryStateObservable({
       time: timefilter.getTime(),
       refreshInterval: timefilter.getRefreshInterval(),
       filters: filterManager.getFilters(),
-      queryString: queryString.getQuery(),
+      query: queryString.getQuery(),
     });
 
     let currentChange: QueryStateChange = {};
     const subs: Subscription[] = [
       queryString.getQueryUpdate$().subscribe(() => {
-        currentChange.queryString = true;
-        state.set({ ...state.get(), queryString: queryString.getQuery() });
+        currentChange.query = true;
+        state.set({ ...state.get(), query: queryString.getQuery() });
       }),
       timefilter.getTimeUpdate$().subscribe(() => {
         currentChange.time = true;
