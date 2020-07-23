@@ -391,22 +391,28 @@ export const defaultEndpointExceptionItems = (
       ...getNewExceptionItem({ listType, listId, namespaceType, ruleName }),
       entries: [
         {
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: signatureSigner ?? '',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: signatureTrusted ?? '',
+            },
+          ],
+        },
+        {
           field: 'file.path',
           operator: 'included',
           type: 'match',
           value: filePath ?? '',
-        },
-        {
-          field: 'file.Ext.code_signature.subject_name',
-          operator: 'included',
-          type: 'match',
-          value: signatureSigner ?? '',
-        },
-        {
-          field: 'file.Ext.code_signature.trusted',
-          operator: 'included',
-          type: 'match',
-          value: signatureTrusted ?? '',
         },
         {
           field: 'file.hash.sha1',

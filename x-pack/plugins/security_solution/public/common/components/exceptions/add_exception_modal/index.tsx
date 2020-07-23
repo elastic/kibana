@@ -285,9 +285,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             <p>{i18n.ADD_EXCEPTION_FETCH_ERROR}</p>
           </EuiCallOut>
         )}
-        {fetchOrCreateListError === false && isLoadingExceptionList === true && (
-          <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
-        )}
+        {fetchOrCreateListError === false &&
+          (isLoadingExceptionList ||
+            isIndexPatternLoading ||
+            isSignalIndexLoading ||
+            isSignalIndexPatternLoading) && (
+            <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
+          )}
         {fetchOrCreateListError === false &&
           !isSignalIndexLoading &&
           !isSignalIndexPatternLoading &&
