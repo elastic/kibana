@@ -198,7 +198,7 @@ describe('Layer Data Panel', () => {
   }
 
   function getIndexPatternPickerOptions(instance: ShallowWrapper) {
-    return getIndexPatternPickerList(instance).dive().find(EuiSelectableList).prop('options');
+    return getIndexPatternPickerList(instance).prop('options');
   }
 
   it('should list all index patterns', () => {
