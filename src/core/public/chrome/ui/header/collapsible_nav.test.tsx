@@ -60,7 +60,7 @@ function mockProps() {
     basePath: httpServiceMock.createSetupContract({ basePath: '/test' }).basePath,
     id: 'collapsibe-nav',
     isLocked: false,
-    isOpen: false,
+    isNavOpen: false,
     homeHref: '/',
     legacyMode: false,
     navLinks$: new BehaviorSubject([]),
@@ -125,7 +125,7 @@ describe('CollapsibleNav', () => {
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
-        isOpen={true}
+        isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
         customNavLink$={new BehaviorSubject(customNavLink)}
@@ -140,7 +140,7 @@ describe('CollapsibleNav', () => {
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
-        isOpen={true}
+        isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
       />
@@ -149,9 +149,9 @@ describe('CollapsibleNav', () => {
     clickGroup(component, 'kibana');
     clickGroup(component, 'recentlyViewed');
     expectShownNavLinksCount(component, 1);
-    component.setProps({ isOpen: false });
+    component.setProps({ isNavOpen: false });
     expectNavIsClosed(component);
-    component.setProps({ isOpen: true });
+    component.setProps({ isNavOpen: true });
     expectShownNavLinksCount(component, 1);
   });
 
@@ -162,14 +162,14 @@ describe('CollapsibleNav', () => {
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
-        isOpen={true}
+        isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
       />
     );
     component.setProps({
       closeNav: () => {
-        component.setProps({ isOpen: false });
+        component.setProps({ isNavOpen: false });
         onClose();
       },
     });
@@ -177,11 +177,11 @@ describe('CollapsibleNav', () => {
     component.find('[data-test-subj="collapsibleNavGroup-recentlyViewed"] a').simulate('click');
     expect(onClose.callCount).toEqual(1);
     expectNavIsClosed(component);
-    component.setProps({ isOpen: true });
+    component.setProps({ isNavOpen: true });
     component.find('[data-test-subj="collapsibleNavGroup-kibana"] a').simulate('click');
     expect(onClose.callCount).toEqual(2);
     expectNavIsClosed(component);
-    component.setProps({ isOpen: true });
+    component.setProps({ isNavOpen: true });
     component.find('[data-test-subj="collapsibleNavGroup-noCategory"] a').simulate('click');
     expect(onClose.callCount).toEqual(3);
     expectNavIsClosed(component);
