@@ -28,7 +28,8 @@ export interface FieldButtonProps extends Omit<EuiTokenProps, 'iconType'> {
   fieldIcon?: node;
   fieldName?: node;
   fieldInfoIcon?: node;
-  fieldButton?: node;
+  fieldAction?: node;
+  isDraggable?: boolean;
 }
 
 export function FieldButton({
@@ -40,13 +41,19 @@ export function FieldButton({
   fieldIcon,
   fieldName,
   fieldInfoIcon,
-  fieldButton,
+  fieldAction,
   className,
+  isDraggable = false,
   ...rest
 }: FieldButtonProps) {
   // const token = typeToEuiIconMap[type] || defaultIcon;
 
-  const classes = classNames('kbnFieldButton', { 'kbnFieldButton-isOpen': isOpen }, className);
+  const classes = classNames(
+    'kbnFieldButton',
+    { 'kbnFieldButton-isOpen': isOpen },
+    { 'kbnFieldButton--isDraggable': isDraggable },
+    className
+  );
 
   return (
     // <>
@@ -61,6 +68,7 @@ export function FieldButton({
       <div className="kbnFieldButton__info">
         <div className="kbnFieldButton__fieldIcon">{fieldIcon}</div>
         <div className="kbnFieldButton__name">{fieldName}</div>
+        <div className="kbnFieldButton__fieldAction">{fieldAction}</div>
         <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>
       </div>
     </div>

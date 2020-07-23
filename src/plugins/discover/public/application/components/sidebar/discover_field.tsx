@@ -130,15 +130,67 @@ export function DiscoverField({
     return str ? str.replace(/\./g, '.\u200B') : '';
   }
 
+  const dscFieldIcon = (
+    <FieldIcon type={field.type} label={getFieldTypeName(field.type)} scripted={field.scripted} />
+  );
+
+  const fieldName = (
+    <span
+      data-test-subj={`field-${field.name}`}
+      title={field.name}
+      className="dscSidebarField__name"
+    >
+      {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+    </span>
+  );
+
+  let actionButton;
+  if (field.name !== '_source' && !selected) {
+    actionButton = (
+      <EuiButton
+        fill
+        size="s"
+        className="dscSidebarItem__action"
+        onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          toggleDisplay(field);
+        }}
+        data-test-subj={`fieldToggle-${field.name}`}
+        arial-label={addLabelAria}
+      >
+        {addLabel}
+      </EuiButton>
+    );
+  } else if (field.name !== '_source' && selected) {
+    actionButton = (
+      <EuiButton
+        color="danger"
+        className="dscSidebarItem__action"
+        onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          toggleDisplay(field);
+        }}
+        data-test-subj={`fieldToggle-${field.name}`}
+        arial-label={removeLabelAria}
+      >
+        {removeLabel}
+      </EuiButton>
+    );
+  }
+
   return (
     <>
       <EuiPopover
         display="block"
         button={
-          <div
-            className={`dscSidebarField dscSidebarItem ${
-              showDetails ? 'dscSidebarItem--active' : ''
-            }`}
+          <FieldButton
+            // className={`dscSidebarField dscSidebarItem ${
+            //   showDetails ? 'dscSidebarItem--active' : ''
+            // }`}
+            className="dscSidebarItem"
+            isOpen={showDetails}
             tabIndex={0}
             // onClick={() => onShowDetails(!showDetails, field)}
             // onKeyPress={() => onShowDetails(!showDetails, field)}
@@ -151,57 +203,10 @@ export function DiscoverField({
               }
             }}
             data-test-subj={`field-${field.name}-showDetails`}
-          >
-            <span className="dscSidebarField__fieldIcon">
-              <FieldIcon
-                type={field.type}
-                label={getFieldTypeName(field.type)}
-                scripted={field.scripted}
-              />
-            </span>
-            <span
-              data-test-subj={`field-${field.name}`}
-              title={field.name}
-              className="dscSidebarField__name"
-            >
-              {useShortDots
-                ? wrapOnDot(shortenDottedString(field.name))
-                : wrapOnDot(field.displayName)}
-            </span>
-            <span>
-              {field.name !== '_source' && !selected && (
-                <EuiButton
-                  fill
-                  size="s"
-                  className="dscSidebarItem__action"
-                  onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    toggleDisplay(field);
-                  }}
-                  data-test-subj={`fieldToggle-${field.name}`}
-                  arial-label={addLabelAria}
-                >
-                  {addLabel}
-                </EuiButton>
-              )}
-              {field.name !== '_source' && selected && (
-                <EuiButton
-                  color="danger"
-                  className="dscSidebarItem__action"
-                  onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    toggleDisplay(field);
-                  }}
-                  data-test-subj={`fieldToggle-${field.name}`}
-                  arial-label={removeLabelAria}
-                >
-                  {removeLabel}
-                </EuiButton>
-              )}
-            </span>
-          </div>
+            fieldIcon={dscFieldIcon}
+            fieldAction={actionButton}
+            fieldName={fieldName}
+          />
         }
         isOpen={infoIsOpen}
         closePopover={() => setOpen(false)}

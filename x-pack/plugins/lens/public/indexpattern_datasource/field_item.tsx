@@ -216,6 +216,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             <FieldButton
               // className={`lnsFieldItem__info ${infoIsOpen ? 'lnsFieldItem__info-isOpen' : ''}`}
               className="lnsFieldItem__info"
+              isDraggable
               isOpen={infoIsOpen}
               data-test-subj={`lnsFieldListPanelField-${field.name}`}
               onClick={() => {

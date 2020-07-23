@@ -4,9 +4,20 @@
 
 .kbnFieldButton {
   @include euiFontSizeS;
-  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
   border-radius: $euiBorderRadius;
   margin-bottom: $euiSizeXS;
+  cursor: pointer;
+}
+
+.kbnFieldButton--isDraggable {
+  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+
+  .kbnFieldButton__info {
+    &:hover,
+    &:focus {
+      cursor: grab;
+    }
+  }
 }
 
 .kbnFieldButton__info {
@@ -21,6 +32,7 @@
     margin-left: $euiSizeS;
     flex-grow: 1;
     word-break: break-word;
+    padding-right: 1px;
   }
 
   .kbnFieldButton__fieldIcon,
