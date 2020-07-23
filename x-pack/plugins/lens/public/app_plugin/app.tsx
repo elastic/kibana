@@ -48,6 +48,7 @@ interface State {
   byValueMode: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
+  originatingApp?: string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -99,10 +100,6 @@ export function App({
     storage.get('kibana.userQueryLanguage') ||
     core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
 
-  const editFromContainerMode =
-    !!embeddableEditorIncomingState?.originatingApp &&
-    (!!savedObjectId || !!embeddableEditorIncomingState?.valueInput);
-
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
@@ -113,16 +110,21 @@ export function App({
         !!embeddableEditorIncomingState?.originatingApp &&
         (!!embeddableEditorIncomingState?.valueInput ||
           !embeddableEditorIncomingState?.embeddableId),
+      originatingApp: embeddableEditorIncomingState?.originatingApp,
       indexPatternsForTopNav: [],
       query: { query: '', language },
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
+      originatingApp,
       filters: [],
       indicateNoData: false,
     };
   });
+
+  const editFromContainerMode =
+    !!state.originatingApp && (!!savedObjectId || !!embeddableEditorIncomingState?.valueInput);
 
   const showNoDataPopover = useCallback(() => {
     setState((prevState) => ({ ...prevState, indicateNoData: true }));
@@ -374,6 +376,10 @@ export function App({
             ...s,
             byValueMode: false,
             isSaveModalVisible: false,
+            originatingApp:
+              saveProps.newCopyOnSave && !saveProps.returnToOrigin
+                ? undefined
+                : currentOriginatingApp,
             persistedDoc: newDoc,
             lastKnownDoc: newDoc,
           }));
@@ -587,8 +593,8 @@ export function App({
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
-            originatingApp={embeddableEditorIncomingState?.originatingApp}
-            onSave={(props) => runSave(props, true)}
+            originatingApp={state.originatingApp}
+            onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
               id: state.byValueMode ? undefined : lastKnownDoc.savedObjectId,

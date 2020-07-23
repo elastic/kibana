@@ -19,7 +19,7 @@
 
 export { withProcRunner, ProcRunner } from './proc_runner';
 export * from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
+export * from './serializers';
 export {
   CA_CERT_PATH,
   ES_KEY_PATH,
