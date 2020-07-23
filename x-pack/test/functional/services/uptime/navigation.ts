@@ -41,7 +41,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     goToSettings: async () => {
       await goToUptimeRoot();
       await testSubjects.click('settings-page-link', 5000);
-      await testSubjects.existOrFail('uptimeSettingsPage', { timeout: 2000 });
+      await testSubjects.existOrFail('uptimeSettingsPage', { timeout: 10000 });
     },
 
     checkIfOnMonitorPage: async (monitorId: string) => {
