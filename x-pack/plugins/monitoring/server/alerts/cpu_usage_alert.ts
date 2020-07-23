@@ -39,7 +39,7 @@ const FIRING = i18n.translate('xpack.monitoring.alerts.cpuUsage.firing', {
   defaultMessage: 'firing',
 });
 
-const DEFAULT_THRESHOLD = 90;
+const DEFAULT_THRESHOLD = 85;
 const DEFAULT_DURATION = '5m';
 
 interface CpuUsageParams {
@@ -291,13 +291,6 @@ export class CpuUsageAlert extends BaseAlert {
       return;
     }
 
-    const nodes = instanceState.alertStates
-      .map((_state) => {
-        const state = _state as AlertCpuUsageState;
-        return `${state.nodeName}:${state.cpuUsage.toFixed(2)}`;
-      })
-      .join(',');
-
     const ccs = instanceState.alertStates.reduce((accum: string, state): string => {
       if (state.ccs) {
         return state.ccs;
@@ -305,35 +298,16 @@ export class CpuUsageAlert extends BaseAlert {
       return accum;
     }, '');
 
-    const count = instanceState.alertStates.length;
-    if (!instanceState.alertStates[0].ui.isFiring) {
-      instance.scheduleActions('default', {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.cpuUsage.resolved.internalShortMessage',
-          {
-            defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
-            values: {
-              count,
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        internalFullMessage: i18n.translate(
-          'xpack.monitoring.alerts.cpuUsage.resolved.internalFullMessage',
-          {
-            defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
-            values: {
-              count,
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        state: RESOLVED,
-        nodes,
-        count,
-        clusterName: cluster.clusterName,
-      });
-    } else {
+    const firingCount = instanceState.alertStates.filter((alertState) => alertState.ui.isFiring)
+      .length;
+    const firingNodes = instanceState.alertStates
+      .filter((_state) => (_state as AlertCpuUsageState).ui.isFiring)
+      .map((_state) => {
+        const state = _state as AlertCpuUsageState;
+        return `${state.nodeName}:${state.cpuUsage.toFixed(2)}`;
+      })
+      .join(',');
+    if (firingCount > 0) {
       const shortActionText = i18n.translate('xpack.monitoring.alerts.cpuUsage.shortAction', {
         defaultMessage: 'Verify CPU levels across affected nodes.',
       });
@@ -354,7 +328,7 @@ export class CpuUsageAlert extends BaseAlert {
           {
             defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
             values: {
-              count,
+              count: firingCount,
               clusterName: cluster.clusterName,
               shortActionText,
             },
@@ -365,19 +339,58 @@ export class CpuUsageAlert extends BaseAlert {
           {
             defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
             values: {
-              count,
+              count: firingCount,
               clusterName: cluster.clusterName,
               action,
             },
           }
         ),
         state: FIRING,
-        nodes,
-        count,
+        nodes: firingNodes,
+        count: firingCount,
         clusterName: cluster.clusterName,
         action,
         actionPlain: shortActionText,
       });
+    } else {
+      const resolvedCount = instanceState.alertStates.filter(
+        (alertState) => !alertState.ui.isFiring
+      ).length;
+      const resolvedNodes = instanceState.alertStates
+        .filter((_state) => !(_state as AlertCpuUsageState).ui.isFiring)
+        .map((_state) => {
+          const state = _state as AlertCpuUsageState;
+          return `${state.nodeName}:${state.cpuUsage.toFixed(2)}`;
+        })
+        .join(',');
+      if (resolvedCount > 0) {
+        instance.scheduleActions('default', {
+          internalShortMessage: i18n.translate(
+            'xpack.monitoring.alerts.cpuUsage.resolved.internalShortMessage',
+            {
+              defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
+              values: {
+                count: resolvedCount,
+                clusterName: cluster.clusterName,
+              },
+            }
+          ),
+          internalFullMessage: i18n.translate(
+            'xpack.monitoring.alerts.cpuUsage.resolved.internalFullMessage',
+            {
+              defaultMessage: `CPU usage alert is resolved for {count} node(s) in cluster: {clusterName}.`,
+              values: {
+                count: resolvedCount,
+                clusterName: cluster.clusterName,
+              },
+            }
+          ),
+          state: RESOLVED,
+          nodes: resolvedNodes,
+          count: resolvedCount,
+          clusterName: cluster.clusterName,
+        });
+      }
     }
   }
 
@@ -393,7 +406,16 @@ export class CpuUsageAlert extends BaseAlert {
         continue;
       }
 
-      const instance = services.alertInstanceFactory(`${this.type}:${cluster.clusterUuid}`);
+      const firingNodeUuids = nodes.reduce((list: string[], node) => {
+        const stat = node.meta as AlertCpuUsageNodeStats;
+        if (node.shouldFire) {
+          list.push(stat.nodeId);
+        }
+        return list;
+      }, [] as string[]);
+      firingNodeUuids.sort(); // It doesn't matter how we sort, but keep the order consistent
+      const instanceId = `${this.type}:${cluster.clusterUuid}:${firingNodeUuids.join(',')}`;
+      const instance = services.alertInstanceFactory(instanceId);
       const state = (instance.getState() as unknown) as AlertInstanceState;
       const alertInstanceState: AlertInstanceState = { alertStates: state?.alertStates || [] };
       let shouldExecuteActions = false;

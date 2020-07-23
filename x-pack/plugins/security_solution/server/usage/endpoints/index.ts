@@ -3,14 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { cloneDeep } from 'lodash';
 import { ISavedObjectsRepository } from 'src/core/server';
+import { SavedObject } from './../../../../../../src/core/types/saved_objects';
+import { Agent, NewAgentEvent } from './../../../../ingest_manager/common/types/models/agent';
 import { AgentMetadata } from '../../../../ingest_manager/common/types/models/agent';
-import {
-  getFleetSavedObjectsMetadata,
-  getFleetEventsSavedObjects,
-  FLEET_ENDPOINT_PACKAGE_CONSTANT,
-} from './fleet_saved_objects';
+import { getFleetSavedObjectsMetadata, getLatestFleetEndpointEvent } from './fleet_saved_objects';
 
 export interface AgentOSMetadataTelemetry {
   full_name: string;
@@ -18,21 +16,24 @@ export interface AgentOSMetadataTelemetry {
   version: string;
   count: number;
 }
+export interface PolicyTelemetry {
+  active: number;
+  inactive: number;
+  failure: number;
+}
 
 export interface PoliciesTelemetry {
-  malware: {
-    success: number;
-    warning: number;
-    failure: number;
-  };
+  malware: PolicyTelemetry;
 }
 
 export interface EndpointUsage {
   total_installed: number;
   active_within_last_24_hours: number;
   os: AgentOSMetadataTelemetry[];
-  policies?: PoliciesTelemetry; // TODO: make required when able to enable policy information
+  policies: PoliciesTelemetry;
 }
+
+type EndpointOSNames = 'Linux' | 'Windows' | 'macOs';
 
 export interface AgentLocalMetadata extends AgentMetadata {
   elastic: {
@@ -51,7 +52,8 @@ export interface AgentLocalMetadata extends AgentMetadata {
   };
 }
 
-export type OSTracker = Record<string, AgentOSMetadataTelemetry>;
+type OSTracker = Record<string, AgentOSMetadataTelemetry>;
+
 /**
  * @description returns an empty telemetry object to be incrmented and updated within the `getEndpointTelemetryFromFleet` fn
  */
@@ -59,13 +61,24 @@ export const getDefaultEndpointTelemetry = (): EndpointUsage => ({
   total_installed: 0,
   active_within_last_24_hours: 0,
   os: [],
+  policies: {
+    malware: {
+      active: 0,
+      inactive: 0,
+      failure: 0,
+    },
+  },
 });
 
-export const trackEndpointOSTelemetry = (
+/**
+ * @description this function updates the os telemetry. We use the fullName field as the key as it contains the name and version details.
+ * If it has already been tracked, the count will be updated, otherwise a tracker will be initialized for that fullName.
+ */
+export const updateEndpointOSTelemetry = (
   os: AgentLocalMetadata['os'],
   osTracker: OSTracker
 ): OSTracker => {
-  const updatedOSTracker = { ...osTracker };
+  const updatedOSTracker = cloneDeep(osTracker);
   const { version: osVersion, platform: osPlatform, full: osFullName } = os;
   if (osFullName && osVersion) {
     if (updatedOSTracker[osFullName]) updatedOSTracker[osFullName].count += 1;
@@ -83,77 +96,167 @@ export const trackEndpointOSTelemetry = (
 };
 
 /**
+ * @description we take the latest endpoint specific agent event, get the status of the endpoint, and if it is running
+ * and the agent itself has been active within the last 24 hours, we can safely assume the endpoint has been active within
+ * the same time span.
+ */
+export const updateEndpointDailyActiveCount = (
+  latestEndpointEvent: SavedObject<NewAgentEvent>,
+  lastAgentCheckin: Agent['last_checkin'],
+  currentCount: number
+) => {
+  const aDayAgo = new Date();
+  aDayAgo.setDate(aDayAgo.getDate() - 1);
+
+  const agentWasActiveOverLastDay = !!lastAgentCheckin && new Date(lastAgentCheckin) > aDayAgo;
+  return agentWasActiveOverLastDay && latestEndpointEvent.attributes.subtype === 'RUNNING'
+    ? currentCount + 1
+    : currentCount;
+};
+
+/**
+ * @description We take the latest endpoint specific agent event, and as long as it provides the payload with policy details, we will parse that policy
+ * to populate the success of it's application. The policy is provided in the agent health checks.
+ */
+export const updateEndpointPolicyTelemetry = (
+  latestEndpointEvent: SavedObject<NewAgentEvent>,
+  policiesTracker: PoliciesTelemetry
+): PoliciesTelemetry => {
+  const policyHostTypeToPolicyType = {
+    Linux: 'linux',
+    macOs: 'mac',
+    Windows: 'windows',
+  };
+  const enabledMalwarePolicyTypes = ['prevent', 'detect'];
+
+  // The policy details are sent as a string on the 'payload' attribute of the agent event
+  const { payload } = latestEndpointEvent.attributes;
+
+  if (!payload) {
+    // This payload may not always be provided depending on the state of the endpoint. Guard again situations where it is not sent
+    return policiesTracker;
+  }
+
+  let endpointPolicyPayload;
+  try {
+    endpointPolicyPayload = JSON.parse(latestEndpointEvent.attributes.payload);
+  } catch (error) {
+    return policiesTracker;
+  }
+
+  // Get the platform: windows, mac, or linux
+  const hostType =
+    policyHostTypeToPolicyType[
+      endpointPolicyPayload['endpoint-security']?.host?.os?.name as EndpointOSNames
+    ];
+  // Get whether the malware setting for the platform on the most recently provided config is active (prevent or detect is on) or off
+  const userDesiredMalwareState =
+    endpointPolicyPayload['endpoint-security'].Endpoint?.configuration?.inputs[0]?.policy[hostType]
+      ?.malware?.mode;
+
+  // Get the status of the application of the malware protection
+  const malwareStatus =
+    endpointPolicyPayload['endpoint-security'].Endpoint?.policy?.applied?.response?.configurations
+      ?.malware?.status;
+
+  if (!userDesiredMalwareState || !malwareStatus) {
+    // If we get policy information without the mode or status, then nothing to track or update
+    return policiesTracker;
+  }
+
+  const updatedPoliciesTracker = {
+    malware: { ...policiesTracker.malware },
+  };
+
+  const isAnActiveMalwareState = enabledMalwarePolicyTypes.includes(userDesiredMalwareState);
+
+  // we only check for 'not failure' as the 'warning' state for malware is still technically actively enabled (with warnings)
+  const successfullyEnabled = !!malwareStatus && malwareStatus !== 'failure';
+  const failedToEnable = !!malwareStatus && malwareStatus === 'failure';
+
+  if (isAnActiveMalwareState && successfullyEnabled) {
+    updatedPoliciesTracker.malware.active += 1;
+  } else if (!isAnActiveMalwareState && successfullyEnabled) {
+    updatedPoliciesTracker.malware.inactive += 1;
+  } else if (isAnActiveMalwareState && failedToEnable) {
+    updatedPoliciesTracker.malware.failure += 1;
+  }
+
+  return updatedPoliciesTracker;
+};
+
+/**
  * @description This aggregates the telemetry details from the two fleet savedObject sources, `fleet-agents` and `fleet-agent-events` to populate
  * the telemetry details for endpoint. Since we cannot access our own indices due to `kibana_system` not having access, this is the best alternative.
  * Once the data is requested, we iterate over all agents with endpoints registered, and then request the events for each active agent (within last 24 hours)
  * to confirm whether or not the endpoint is still active
  */
 export const getEndpointTelemetryFromFleet = async (
-  savedObjectsClient: ISavedObjectsRepository
-): Promise<EndpointUsage> => {
-  // Retrieve every agent that references the endpoint as an installed package. It will not be listed if it was never installed
-  const { saved_objects: endpointAgents } = await getFleetSavedObjectsMetadata(savedObjectsClient);
+  soClient: ISavedObjectsRepository
+): Promise<EndpointUsage | {}> => {
+  // Retrieve every agent (max 10000) that references the endpoint as an installed package. It will not be listed if it was never installed
+  let endpointAgents;
+  try {
+    const response = await getFleetSavedObjectsMetadata(soClient);
+    endpointAgents = response.saved_objects;
+  } catch (error) {
+    // Better to provide an empty object rather than default telemetry as this better informs us of an error
+    return {};
+  }
+
+  const endpointAgentsCount = endpointAgents.length;
   const endpointTelemetry = getDefaultEndpointTelemetry();
 
   // If there are no installed endpoints return the default telemetry object
-  if (!endpointAgents || endpointAgents.length < 1) return endpointTelemetry;
+  if (!endpointAgents || endpointAgentsCount < 1) return endpointTelemetry;
 
   // Use unique hosts to prevent any potential duplicates
   const uniqueHostIds: Set<string> = new Set();
-  // Need unique agents to get events data for those that have run in last 24 hours
-  const uniqueAgentIds: Set<string> = new Set();
-
-  const aDayAgo = new Date();
-  aDayAgo.setDate(aDayAgo.getDate() - 1);
   let osTracker: OSTracker = {};
+  let dailyActiveCount = 0;
+  let policyTracker: PoliciesTelemetry = { malware: { active: 0, inactive: 0, failure: 0 } };
 
-  const endpointMetadataTelemetry = endpointAgents.reduce(
-    (metadataTelemetry, { attributes: metadataAttributes }) => {
-      const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
-      // The extended AgentMetadata is just an empty blob, so cast to account for our specific use case
-      const { host, os, elastic } = localMetadata as AgentLocalMetadata;
+  for (let i = 0; i < endpointAgentsCount; i += 1) {
+    const { attributes: metadataAttributes } = endpointAgents[i];
+    const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
+    const { host, os, elastic } = localMetadata as AgentLocalMetadata; // AgentMetadata is just an empty blob, casting for our  use case
 
-      if (lastCheckin && new Date(lastCheckin) > aDayAgo) {
-        // Get agents that have checked in within the last 24 hours to later see if their endpoints are running
-        uniqueAgentIds.add(elastic.agent.id);
+    if (!uniqueHostIds.has(host.id)) {
+      uniqueHostIds.add(host.id);
+      const agentId = elastic?.agent?.id;
+      osTracker = updateEndpointOSTelemetry(os, osTracker);
+
+      if (agentId) {
+        let agentEvents;
+        try {
+          const response = await getLatestFleetEndpointEvent(soClient, agentId);
+          agentEvents = response.saved_objects;
+        } catch (error) {
+          // If the request fails we do not obtain `active within last 24 hours for this agent` or policy specifics
+        }
+
+        // AgentEvents will have a max length of 1
+        if (agentEvents && agentEvents.length > 0) {
+          const latestEndpointEvent = agentEvents[0];
+          dailyActiveCount = updateEndpointDailyActiveCount(
+            latestEndpointEvent,
+            lastCheckin,
+            dailyActiveCount
+          );
+          policyTracker = updateEndpointPolicyTelemetry(latestEndpointEvent, policyTracker);
+        }
       }
-      if (host && uniqueHostIds.has(host.id)) {
-        return metadataTelemetry;
-      } else {
-        uniqueHostIds.add(host.id);
-        osTracker = trackEndpointOSTelemetry(os, osTracker);
-        return metadataTelemetry;
-      }
-    },
-    endpointTelemetry
-  );
-
-  // All unique agents with an endpoint installed. You can technically install a new agent on a host, so relying on most recently installed.
-  endpointTelemetry.total_installed = uniqueHostIds.size;
-
-  // Get the objects to populate our OS Telemetry
-  endpointMetadataTelemetry.os = Object.values(osTracker);
-
-  // Check for agents running in the last 24 hours whose endpoints are still active
-  for (const agentId of uniqueAgentIds) {
-    const { saved_objects: agentEvents } = await getFleetEventsSavedObjects(
-      savedObjectsClient,
-      agentId
-    );
-    const lastEndpointStatus = agentEvents.find((agentEvent) =>
-      agentEvent.attributes.message.includes(FLEET_ENDPOINT_PACKAGE_CONSTANT)
-    );
-
-    /*
-      We can assume that if the last status of the endpoint is RUNNING and the agent has checked in within the last 24 hours
-      then the endpoint has still been running within the last 24 hours. If / when we get the policy response, then we can use that
-      instead
-    */
-    const endpointIsActive = lastEndpointStatus?.attributes.subtype === 'RUNNING';
-    if (endpointIsActive) {
-      endpointMetadataTelemetry.active_within_last_24_hours += 1;
     }
   }
 
-  return endpointMetadataTelemetry;
+  // All unique hosts with an endpoint installed, thus all unique endpoint installs
+  endpointTelemetry.total_installed = uniqueHostIds.size;
+  // Set the daily active count for the endpoints
+  endpointTelemetry.active_within_last_24_hours = dailyActiveCount;
+  // Get the objects to populate our OS Telemetry
+  endpointTelemetry.os = Object.values(osTracker);
+  // Provide the updated policy information
+  endpointTelemetry.policies = policyTracker;
+
+  return endpointTelemetry;
 };

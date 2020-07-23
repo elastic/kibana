@@ -39,7 +39,6 @@ import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { ErrorToastOptions } from 'src/core/public/notifications';
-import { EventEmitter } from 'events';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -532,6 +531,8 @@ export interface ISearchOptions {
 // @public (undocumented)
 export interface ISearchSetup {
     registerSearchStrategy: (name: string, strategy: ISearchStrategy) => void;
+    // Warning: (ae-forgotten-export) The symbol "SearchUsage" needs to be exported by the entry point index.d.ts
+    usage: SearchUsage;
 }
 
 // Warning: (ae-missing-release-tag) "ISearchStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

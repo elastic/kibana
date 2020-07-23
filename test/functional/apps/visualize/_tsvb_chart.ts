@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
+  const retry = getService('retry');
   const security = getService('security');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
@@ -128,9 +129,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
         const toTime = 'Oct 28, 2018 @ 23:59:59.999';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
-        await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+        // Sometimes popovers take some time to appear in Firefox (#71979)
+        await retry.try(async () => {
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
+          await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+        });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
         expect(newValue).to.eql('10');
       });

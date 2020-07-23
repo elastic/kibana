@@ -318,11 +318,7 @@ function getSeriesType(
     return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultType;
   }
 
-  if (changeType === 'initial') {
-    return defaultType;
-  }
-
-  return closestSeriesType !== defaultType ? closestSeriesType : defaultType;
+  return closestSeriesType;
 }
 
 function getSuggestionTitle(
@@ -394,17 +390,25 @@ function buildSuggestion({
         : undefined,
   };
 
+  // Maintain consistent order for any layers that were saved
   const keptLayers = currentState
-    ? currentState.layers.filter(
-        (layer) => layer.layerId !== layerId && keptLayerIds.includes(layer.layerId)
-      )
+    ? currentState.layers
+        // Remove layers that aren't being suggested
+        .filter((layer) => keptLayerIds.includes(layer.layerId))
+        // Update in place
+        .map((layer) => (layer.layerId === layerId ? newLayer : layer))
+        // Replace the seriesType on all previous layers
+        .map((layer) => ({
+          ...layer,
+          seriesType,
+        }))
     : [];
 
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     fittingFunction: currentState?.fittingFunction || 'None',
     preferredSeriesType: seriesType,
-    layers: [...keptLayers, newLayer],
+    layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
   };
 
   return {

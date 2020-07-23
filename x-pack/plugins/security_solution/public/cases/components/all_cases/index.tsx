@@ -5,7 +5,6 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import {
   EuiBasicTable,
   EuiContextMenuPanel,
@@ -50,6 +49,8 @@ import { ConfigureCaseButton } from '../configure_cases/button';
 import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
 import { LinkButton } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
+import { useKibana } from '../../../common/lib/kibana';
+import { APP_ID } from '../../../../common/constants';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -81,13 +82,13 @@ const getSortField = (field: string): SortFieldCase => {
 };
 
 interface AllCasesProps {
-  onRowClick?: (id: string) => void;
+  onRowClick?: (id?: string) => void;
   isModal?: boolean;
   userCanCrud: boolean;
 }
 export const AllCases = React.memo<AllCasesProps>(
-  ({ onRowClick = () => {}, isModal = false, userCanCrud }) => {
-    const history = useHistory();
+  ({ onRowClick, isModal = false, userCanCrud }) => {
+    const { navigateToApp } = useKibana().services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
     const { actionLicense } = useGetActionLicense();
     const {
@@ -234,9 +235,15 @@ export const AllCases = React.memo<AllCasesProps>(
     const goToCreateCase = useCallback(
       (ev) => {
         ev.preventDefault();
-        history.push(getCreateCaseUrl(urlSearch));
+        if (isModal && onRowClick != null) {
+          onRowClick();
+        } else {
+          navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+            path: getCreateCaseUrl(urlSearch),
+          });
+        }
       },
-      [history, urlSearch]
+      [navigateToApp, isModal, onRowClick, urlSearch]
     );
 
     const actions = useMemo(
@@ -445,7 +452,11 @@ export const AllCases = React.memo<AllCasesProps>(
                 rowProps={(item) =>
                   isModal
                     ? {
-                        onClick: () => onRowClick(item.id),
+                        onClick: () => {
+                          if (onRowClick != null) {
+                            onRowClick(item.id);
+                          }
+                        },
                       }
                     : {}
                 }

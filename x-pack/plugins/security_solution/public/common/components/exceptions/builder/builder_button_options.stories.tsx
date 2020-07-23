@@ -16,42 +16,48 @@ addDecorator((storyFn) => (
 ));
 
 storiesOf('Components|Exceptions|BuilderButtonOptions', module)
-  .add('init button', () => {
-    return (
-      <BuilderButtonOptions
-        isAndDisabled={false}
-        isOrDisabled={false}
-        showNestedButton={false}
-        displayInitButton
-        onOrClicked={action('onClick')}
-        onAndClicked={action('onClick')}
-        onNestedClicked={action('onClick')}
-      />
-    );
-  })
   .add('and/or buttons', () => {
     return (
       <BuilderButtonOptions
         isAndDisabled={false}
         isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested={false}
         showNestedButton={false}
-        displayInitButton={false}
         onOrClicked={action('onClick')}
         onAndClicked={action('onClick')}
         onNestedClicked={action('onClick')}
+        onAddClickWhenNested={action('onClick')}
       />
     );
   })
-  .add('nested button', () => {
+  .add('nested button - isNested false', () => {
     return (
       <BuilderButtonOptions
         isAndDisabled={false}
         isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested={false}
         showNestedButton
-        displayInitButton={false}
         onOrClicked={action('onClick')}
         onAndClicked={action('onClick')}
         onNestedClicked={action('onClick')}
+        onAddClickWhenNested={action('onClick')}
+      />
+    );
+  })
+  .add('nested button - isNested true', () => {
+    return (
+      <BuilderButtonOptions
+        isAndDisabled={false}
+        isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested
+        showNestedButton
+        onOrClicked={action('onClick')}
+        onAndClicked={action('onClick')}
+        onNestedClicked={action('onClick')}
+        onAddClickWhenNested={action('onClick')}
       />
     );
   })
@@ -60,11 +66,13 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
       <BuilderButtonOptions
         isAndDisabled
         isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested={false}
         showNestedButton={false}
-        displayInitButton={false}
         onOrClicked={action('onClick')}
         onAndClicked={action('onClick')}
         onNestedClicked={action('onClick')}
+        onAddClickWhenNested={action('onClick')}
       />
     );
   })
@@ -73,11 +81,28 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
       <BuilderButtonOptions
         isAndDisabled={false}
         isOrDisabled
+        isNestedDisabled={false}
+        isNested={false}
         showNestedButton={false}
-        displayInitButton={false}
         onOrClicked={action('onClick')}
         onAndClicked={action('onClick')}
         onNestedClicked={action('onClick')}
+        onAddClickWhenNested={action('onClick')}
+      />
+    );
+  })
+  .add('nested disabled', () => {
+    return (
+      <BuilderButtonOptions
+        isAndDisabled={false}
+        isOrDisabled={false}
+        isNestedDisabled
+        isNested={false}
+        showNestedButton
+        onOrClicked={action('onClick')}
+        onAndClicked={action('onClick')}
+        onNestedClicked={action('onClick')}
+        onAddClickWhenNested={action('onClick')}
       />
     );
   });

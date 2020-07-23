@@ -5,12 +5,13 @@
  */
 
 import { isUndefined } from 'lodash';
-import { get, keyBy, pick, set, isEmpty } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { get, keyBy, pick, isEmpty } from 'lodash/fp';
 import { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY, NO_ALERT_INDEX } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 
 import { IndexField, SourceQuery } from '../../../graphql/types';
@@ -59,7 +60,7 @@ export const getIndexFields = memoizeOne(
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
-            pick(['name', 'searchable', 'type', 'aggregatable'], field)
+            pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
           ),
           title,
         }
@@ -80,7 +81,7 @@ export const getBrowserFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
-export const getdocValueFields = memoizeOne(
+export const getDocValueFields = memoizeOne(
   (_title: string, fields: IndexField[]): DocValueFields[] =>
     fields && fields.length > 0
       ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
@@ -125,8 +126,9 @@ export const useWithSource = (
 ) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
-    if (indexToAdd != null && !isEmpty(indexToAdd)) {
-      return onlyCheckIndexToAdd ? indexToAdd : [...configIndex, ...indexToAdd];
+    const filterIndexAdd = (indexToAdd ?? []).filter((item) => item !== NO_ALERT_INDEX);
+    if (!isEmpty(filterIndexAdd)) {
+      return onlyCheckIndexToAdd ? filterIndexAdd : [...configIndex, ...filterIndexAdd];
     }
     return configIndex;
   }, [configIndex, indexToAdd, onlyCheckIndexToAdd]);
@@ -137,7 +139,7 @@ export const useWithSource = (
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
     indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
-    loading: false,
+    loading: true,
   });
 
   const apolloClient = useApolloClient();
@@ -154,7 +156,7 @@ export const useWithSource = (
       try {
         const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
           query: sourceQuery,
-          fetchPolicy: 'cache-first',
+          fetchPolicy: 'network-only',
           variables: {
             sourceId,
             defaultIndex,
@@ -176,7 +178,7 @@ export const useWithSource = (
               defaultIndex.join(),
               get('data.source.status.indexFields', result)
             ),
-            docValueFields: getdocValueFields(
+            docValueFields: getDocValueFields(
               defaultIndex.join(),
               get('data.source.status.indexFields', result)
             ),

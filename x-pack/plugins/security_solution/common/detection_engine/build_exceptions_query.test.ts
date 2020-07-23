@@ -5,14 +5,13 @@
  */
 
 import {
-  buildQueryExceptions,
-  buildExceptionItemEntries,
+  buildExceptionListQueries,
+  buildExceptionItem,
   operatorBuilder,
   buildExists,
   buildMatch,
   buildMatchAny,
-  evaluateValues,
-  formatQuery,
+  buildEntry,
   getLanguageBooleanOperator,
   buildNested,
 } from './build_exceptions_query';
@@ -25,9 +24,11 @@ import {
   Operator,
 } from '../../../lists/common/schemas';
 import { getExceptionListItemSchemaMock } from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getEntryMatchMock } from '../../../lists/common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../lists/common/schemas/types/entry_match_any.mock';
+import { getEntryExistsMock } from '../../../lists/common/schemas/types/entry_exists.mock';
 
 describe('build_exceptions_query', () => {
-  let exclude: boolean;
   const makeMatchEntry = ({
     field,
     value = 'value-1',
@@ -94,10 +95,6 @@ describe('build_exceptions_query', () => {
     operator: 'excluded',
   });
 
-  beforeEach(() => {
-    exclude = true;
-  });
-
   describe('getLanguageBooleanOperator', () => {
     test('it returns value as uppercase if language is "lucene"', () => {
       const result = getLanguageBooleanOperator({ language: 'lucene', value: 'not' });
@@ -113,226 +110,97 @@ describe('build_exceptions_query', () => {
   });
 
   describe('operatorBuilder', () => {
-    describe("when 'exclude' is true", () => {
-      describe('and langauge is kuery', () => {
-        test('it returns "not " when operator is "included"', () => {
-          const operator = operatorBuilder({ operator: 'included', language: 'kuery', exclude });
-          expect(operator).toEqual('not ');
-        });
-        test('it returns empty string when operator is "excluded"', () => {
-          const operator = operatorBuilder({ operator: 'excluded', language: 'kuery', exclude });
-          expect(operator).toEqual('');
-        });
+    describe('and language is kuery', () => {
+      test('it returns empty string when operator is "included"', () => {
+        const operator = operatorBuilder({ operator: 'included', language: 'kuery' });
+        expect(operator).toEqual('');
       });
-
-      describe('and language is lucene', () => {
-        test('it returns "NOT " when operator is "included"', () => {
-          const operator = operatorBuilder({ operator: 'included', language: 'lucene', exclude });
-          expect(operator).toEqual('NOT ');
-        });
-        test('it returns empty string when operator is "excluded"', () => {
-          const operator = operatorBuilder({ operator: 'excluded', language: 'lucene', exclude });
-          expect(operator).toEqual('');
-        });
+      test('it returns "not " when operator is "excluded"', () => {
+        const operator = operatorBuilder({ operator: 'excluded', language: 'kuery' });
+        expect(operator).toEqual('not ');
       });
     });
-    describe("when 'exclude' is false", () => {
-      beforeEach(() => {
-        exclude = false;
-      });
 
-      describe('and language is kuery', () => {
-        test('it returns empty string when operator is "included"', () => {
-          const operator = operatorBuilder({ operator: 'included', language: 'kuery', exclude });
-          expect(operator).toEqual('');
-        });
-        test('it returns "not " when operator is "excluded"', () => {
-          const operator = operatorBuilder({ operator: 'excluded', language: 'kuery', exclude });
-          expect(operator).toEqual('not ');
-        });
+    describe('and language is lucene', () => {
+      test('it returns empty string when operator is "included"', () => {
+        const operator = operatorBuilder({ operator: 'included', language: 'lucene' });
+        expect(operator).toEqual('');
       });
-
-      describe('and language is lucene', () => {
-        test('it returns empty string when operator is "included"', () => {
-          const operator = operatorBuilder({ operator: 'included', language: 'lucene', exclude });
-          expect(operator).toEqual('');
-        });
-        test('it returns "NOT " when operator is "excluded"', () => {
-          const operator = operatorBuilder({ operator: 'excluded', language: 'lucene', exclude });
-          expect(operator).toEqual('NOT ');
-        });
+      test('it returns "NOT " when operator is "excluded"', () => {
+        const operator = operatorBuilder({ operator: 'excluded', language: 'lucene' });
+        expect(operator).toEqual('NOT ');
       });
     });
   });
 
   describe('buildExists', () => {
-    describe("when 'exclude' is true", () => {
-      describe('kuery', () => {
-        test('it returns formatted wildcard string when operator is "excluded"', () => {
-          const query = buildExists({
-            item: existsEntryWithExcluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(query).toEqual('host.name:*');
+    describe('kuery', () => {
+      test('it returns formatted wildcard string when operator is "excluded"', () => {
+        const query = buildExists({
+          entry: existsEntryWithExcluded,
+          language: 'kuery',
         });
-        test('it returns formatted wildcard string when operator is "included"', () => {
-          const query = buildExists({
-            item: existsEntryWithIncluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(query).toEqual('not host.name:*');
-        });
+        expect(query).toEqual('not host.name:*');
       });
-
-      describe('lucene', () => {
-        test('it returns formatted wildcard string when operator is "excluded"', () => {
-          const query = buildExists({
-            item: existsEntryWithExcluded,
-            language: 'lucene',
-            exclude,
-          });
-          expect(query).toEqual('_exists_host.name');
+      test('it returns formatted wildcard string when operator is "included"', () => {
+        const query = buildExists({
+          entry: existsEntryWithIncluded,
+          language: 'kuery',
         });
-        test('it returns formatted wildcard string when operator is "included"', () => {
-          const query = buildExists({
-            item: existsEntryWithIncluded,
-            language: 'lucene',
-            exclude,
-          });
-          expect(query).toEqual('NOT _exists_host.name');
-        });
+        expect(query).toEqual('host.name:*');
       });
     });
 
-    describe("when 'exclude' is false", () => {
-      beforeEach(() => {
-        exclude = false;
+    describe('lucene', () => {
+      test('it returns formatted wildcard string when operator is "excluded"', () => {
+        const query = buildExists({
+          entry: existsEntryWithExcluded,
+          language: 'lucene',
+        });
+        expect(query).toEqual('NOT _exists_host.name');
       });
-
-      describe('kuery', () => {
-        test('it returns formatted wildcard string when operator is "excluded"', () => {
-          const query = buildExists({
-            item: existsEntryWithExcluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(query).toEqual('not host.name:*');
+      test('it returns formatted wildcard string when operator is "included"', () => {
+        const query = buildExists({
+          entry: existsEntryWithIncluded,
+          language: 'lucene',
         });
-        test('it returns formatted wildcard string when operator is "included"', () => {
-          const query = buildExists({
-            item: existsEntryWithIncluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(query).toEqual('host.name:*');
-        });
-      });
-
-      describe('lucene', () => {
-        test('it returns formatted wildcard string when operator is "excluded"', () => {
-          const query = buildExists({
-            item: existsEntryWithExcluded,
-            language: 'lucene',
-            exclude,
-          });
-          expect(query).toEqual('NOT _exists_host.name');
-        });
-        test('it returns formatted wildcard string when operator is "included"', () => {
-          const query = buildExists({
-            item: existsEntryWithIncluded,
-            language: 'lucene',
-            exclude,
-          });
-          expect(query).toEqual('_exists_host.name');
-        });
+        expect(query).toEqual('_exists_host.name');
       });
     });
   });
 
   describe('buildMatch', () => {
-    describe("when 'exclude' is true", () => {
-      describe('kuery', () => {
-        test('it returns formatted string when operator is "included"', () => {
-          const query = buildMatch({
-            item: matchEntryWithIncluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(query).toEqual('not host.name:suricata');
+    describe('kuery', () => {
+      test('it returns formatted string when operator is "included"', () => {
+        const query = buildMatch({
+          entry: matchEntryWithIncluded,
+          language: 'kuery',
         });
-        test('it returns formatted string when operator is "excluded"', () => {
-          const query = buildMatch({
-            item: matchEntryWithExcluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(query).toEqual('host.name:suricata');
-        });
+        expect(query).toEqual('host.name:"suricata"');
       });
-
-      describe('lucene', () => {
-        test('it returns formatted string when operator is "included"', () => {
-          const query = buildMatch({
-            item: matchEntryWithIncluded,
-            language: 'lucene',
-            exclude,
-          });
-          expect(query).toEqual('NOT host.name:suricata');
+      test('it returns formatted string when operator is "excluded"', () => {
+        const query = buildMatch({
+          entry: matchEntryWithExcluded,
+          language: 'kuery',
         });
-        test('it returns formatted string when operator is "excluded"', () => {
-          const query = buildMatch({
-            item: matchEntryWithExcluded,
-            language: 'lucene',
-            exclude,
-          });
-          expect(query).toEqual('host.name:suricata');
-        });
+        expect(query).toEqual('not host.name:"suricata"');
       });
     });
 
-    describe("when 'exclude' is false", () => {
-      beforeEach(() => {
-        exclude = false;
+    describe('lucene', () => {
+      test('it returns formatted string when operator is "included"', () => {
+        const query = buildMatch({
+          entry: matchEntryWithIncluded,
+          language: 'lucene',
+        });
+        expect(query).toEqual('host.name:"suricata"');
       });
-
-      describe('kuery', () => {
-        test('it returns formatted string when operator is "included"', () => {
-          const query = buildMatch({
-            item: matchEntryWithIncluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(query).toEqual('host.name:suricata');
+      test('it returns formatted string when operator is "excluded"', () => {
+        const query = buildMatch({
+          entry: matchEntryWithExcluded,
+          language: 'lucene',
         });
-        test('it returns formatted string when operator is "excluded"', () => {
-          const query = buildMatch({
-            item: matchEntryWithExcluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(query).toEqual('not host.name:suricata');
-        });
-      });
-
-      describe('lucene', () => {
-        test('it returns formatted string when operator is "included"', () => {
-          const query = buildMatch({
-            item: matchEntryWithIncluded,
-            language: 'lucene',
-            exclude,
-          });
-          expect(query).toEqual('host.name:suricata');
-        });
-        test('it returns formatted string when operator is "excluded"', () => {
-          const query = buildMatch({
-            item: matchEntryWithExcluded,
-            language: 'lucene',
-            exclude,
-          });
-          expect(query).toEqual('NOT host.name:suricata');
-        });
+        expect(query).toEqual('NOT host.name:"suricata"');
       });
     });
   });
@@ -352,441 +220,297 @@ describe('build_exceptions_query', () => {
       operator: 'excluded',
     });
 
-    describe("when 'exclude' is true", () => {
-      describe('kuery', () => {
-        test('it returns empty string if given an empty array for "values"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithIncludedAndNoValues,
-            language: 'kuery',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('');
+    describe('kuery', () => {
+      test('it returns empty string if given an empty array for "values"', () => {
+        const exceptionSegment = buildMatchAny({
+          entry: entryWithIncludedAndNoValues,
+          language: 'kuery',
         });
-        test('it returns formatted string when "values" includes only one item', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithIncludedAndOneValue,
-            language: 'kuery',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('not host.name:(suricata)');
-        });
-        test('it returns formatted string when operator is "included"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: matchAnyEntryWithIncludedAndTwoValues,
-            language: 'kuery',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('not host.name:(suricata or auditd)');
-        });
-
-        test('it returns formatted string when operator is "excluded"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithExcludedAndTwoValues,
-            language: 'kuery',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('host.name:(suricata or auditd)');
-        });
+        expect(exceptionSegment).toEqual('');
       });
 
-      describe('lucene', () => {
-        test('it returns formatted string when operator is "included"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: matchAnyEntryWithIncludedAndTwoValues,
-            language: 'lucene',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('NOT host.name:(suricata OR auditd)');
+      test('it returns formatted string when "values" includes only one item', () => {
+        const exceptionSegment = buildMatchAny({
+          entry: entryWithIncludedAndOneValue,
+          language: 'kuery',
         });
-        test('it returns formatted string when operator is "excluded"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithExcludedAndTwoValues,
-            language: 'lucene',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('host.name:(suricata OR auditd)');
+
+        expect(exceptionSegment).toEqual('host.name:("suricata")');
+      });
+
+      test('it returns formatted string when operator is "included"', () => {
+        const exceptionSegment = buildMatchAny({
+          entry: matchAnyEntryWithIncludedAndTwoValues,
+          language: 'kuery',
         });
-        test('it returns formatted string when "values" includes only one item', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithIncludedAndOneValue,
-            language: 'lucene',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('NOT host.name:(suricata)');
+
+        expect(exceptionSegment).toEqual('host.name:("suricata" or "auditd")');
+      });
+
+      test('it returns formatted string when operator is "excluded"', () => {
+        const exceptionSegment = buildMatchAny({
+          entry: entryWithExcludedAndTwoValues,
+          language: 'kuery',
         });
+
+        expect(exceptionSegment).toEqual('not host.name:("suricata" or "auditd")');
       });
     });
 
-    describe("when 'exclude' is false", () => {
-      beforeEach(() => {
-        exclude = false;
+    describe('lucene', () => {
+      test('it returns formatted string when operator is "included"', () => {
+        const exceptionSegment = buildMatchAny({
+          entry: matchAnyEntryWithIncludedAndTwoValues,
+          language: 'lucene',
+        });
+
+        expect(exceptionSegment).toEqual('host.name:("suricata" OR "auditd")');
       });
-
-      describe('kuery', () => {
-        test('it returns empty string if given an empty array for "values"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithIncludedAndNoValues,
-            language: 'kuery',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('');
-        });
-        test('it returns formatted string when "values" includes only one item', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithIncludedAndOneValue,
-            language: 'kuery',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('host.name:(suricata)');
-        });
-        test('it returns formatted string when operator is "included"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: matchAnyEntryWithIncludedAndTwoValues,
-            language: 'kuery',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('host.name:(suricata or auditd)');
+      test('it returns formatted string when operator is "excluded"', () => {
+        const exceptionSegment = buildMatchAny({
+          entry: entryWithExcludedAndTwoValues,
+          language: 'lucene',
         });
 
-        test('it returns formatted string when operator is "excluded"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithExcludedAndTwoValues,
-            language: 'kuery',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('not host.name:(suricata or auditd)');
-        });
+        expect(exceptionSegment).toEqual('NOT host.name:("suricata" OR "auditd")');
       });
+      test('it returns formatted string when "values" includes only one item', () => {
+        const exceptionSegment = buildMatchAny({
+          entry: entryWithIncludedAndOneValue,
+          language: 'lucene',
+        });
 
-      describe('lucene', () => {
-        test('it returns formatted string when operator is "included"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: matchAnyEntryWithIncludedAndTwoValues,
-            language: 'lucene',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('host.name:(suricata OR auditd)');
-        });
-        test('it returns formatted string when operator is "excluded"', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithExcludedAndTwoValues,
-            language: 'lucene',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('NOT host.name:(suricata OR auditd)');
-        });
-        test('it returns formatted string when "values" includes only one item', () => {
-          const exceptionSegment = buildMatchAny({
-            item: entryWithIncludedAndOneValue,
-            language: 'lucene',
-            exclude,
-          });
-          expect(exceptionSegment).toEqual('host.name:(suricata)');
-        });
+        expect(exceptionSegment).toEqual('host.name:("suricata")');
       });
     });
   });
 
   describe('buildNested', () => {
+    // NOTE: Only KQL supports nested
     describe('kuery', () => {
       test('it returns formatted query when one item in nested entry', () => {
-        const item: EntryNested = {
-          field: 'parent',
-          type: 'nested',
-          entries: [makeMatchEntry({ field: 'nestedField', operator: 'excluded' })],
-        };
-        const result = buildNested({ item, language: 'kuery' });
-
-        expect(result).toEqual('parent:{ nestedField:value-1 }');
-      });
-
-      test('it returns formatted query when multiple items in nested entry', () => {
-        const item: EntryNested = {
+        const entry: EntryNested = {
           field: 'parent',
           type: 'nested',
           entries: [
-            makeMatchEntry({ field: 'nestedField', operator: 'excluded' }),
-            makeMatchEntry({ field: 'nestedFieldB', operator: 'excluded', value: 'value-2' }),
+            {
+              ...getEntryMatchMock(),
+              field: 'nestedField',
+              operator: 'included',
+              value: 'value-1',
+            },
           ],
         };
-        const result = buildNested({ item, language: 'kuery' });
+        const result = buildNested({ entry, language: 'kuery' });
 
-        expect(result).toEqual('parent:{ nestedField:value-1 and nestedFieldB:value-2 }');
+        expect(result).toEqual('parent:{ nestedField:"value-1" }');
       });
-    });
 
-    // TODO: Does lucene support nested query syntax?
-    describe.skip('lucene', () => {
-      test('it returns formatted query when one item in nested entry', () => {
-        const item: EntryNested = {
+      test('it returns formatted query when entry item is "exists"', () => {
+        const entry: EntryNested = {
           field: 'parent',
           type: 'nested',
-          entries: [makeMatchEntry({ field: 'nestedField', operator: 'excluded' })],
+          entries: [{ ...getEntryExistsMock(), field: 'nestedField', operator: 'included' }],
         };
-        const result = buildNested({ item, language: 'lucene' });
+        const result = buildNested({ entry, language: 'kuery' });
 
-        expect(result).toEqual('parent:{ nestedField:value-1 }');
+        expect(result).toEqual('parent:{ nestedField:* }');
       });
 
-      test('it returns formatted query when multiple items in nested entry', () => {
-        const item: EntryNested = {
+      test('it returns formatted query when entry item is "exists" and operator is "excluded"', () => {
+        const entry: EntryNested = {
+          field: 'parent',
+          type: 'nested',
+          entries: [{ ...getEntryExistsMock(), field: 'nestedField', operator: 'excluded' }],
+        };
+        const result = buildNested({ entry, language: 'kuery' });
+
+        expect(result).toEqual('parent:{ not nestedField:* }');
+      });
+
+      test('it returns formatted query when entry item is "match_any"', () => {
+        const entry: EntryNested = {
           field: 'parent',
           type: 'nested',
           entries: [
-            makeMatchEntry({ field: 'nestedField', operator: 'excluded' }),
-            makeMatchEntry({ field: 'nestedFieldB', operator: 'excluded', value: 'value-2' }),
+            {
+              ...getEntryMatchAnyMock(),
+              field: 'nestedField',
+              operator: 'included',
+              value: ['value1', 'value2'],
+            },
           ],
         };
-        const result = buildNested({ item, language: 'lucene' });
+        const result = buildNested({ entry, language: 'kuery' });
 
-        expect(result).toEqual('parent:{ nestedField:value-1 AND nestedFieldB:value-2 }');
+        expect(result).toEqual('parent:{ nestedField:("value1" or "value2") }');
+      });
+
+      test('it returns formatted query when entry item is "match_any" and operator is "excluded"', () => {
+        const entry: EntryNested = {
+          field: 'parent',
+          type: 'nested',
+          entries: [
+            {
+              ...getEntryMatchAnyMock(),
+              field: 'nestedField',
+              operator: 'excluded',
+              value: ['value1', 'value2'],
+            },
+          ],
+        };
+        const result = buildNested({ entry, language: 'kuery' });
+
+        expect(result).toEqual('parent:{ not nestedField:("value1" or "value2") }');
+      });
+
+      test('it returns formatted query when multiple items in nested entry', () => {
+        const entry: EntryNested = {
+          field: 'parent',
+          type: 'nested',
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              field: 'nestedField',
+              operator: 'included',
+              value: 'value-1',
+            },
+            {
+              ...getEntryMatchMock(),
+              field: 'nestedFieldB',
+              operator: 'included',
+              value: 'value-2',
+            },
+          ],
+        };
+        const result = buildNested({ entry, language: 'kuery' });
+
+        expect(result).toEqual('parent:{ nestedField:"value-1" and nestedFieldB:"value-2" }');
       });
     });
   });
 
-  describe('evaluateValues', () => {
-    describe("when 'exclude' is true", () => {
-      describe('kuery', () => {
-        test('it returns formatted wildcard string when "type" is "exists"', () => {
-          const result = evaluateValues({
-            item: existsEntryWithIncluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(result).toEqual('not host.name:*');
-        });
-        test('it returns formatted string when "type" is "match"', () => {
-          const result = evaluateValues({
-            item: matchEntryWithIncluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(result).toEqual('not host.name:suricata');
-        });
-        test('it returns formatted string when "type" is "match_any"', () => {
-          const result = evaluateValues({
-            item: matchAnyEntryWithIncludedAndTwoValues,
-            language: 'kuery',
-            exclude,
-          });
-          expect(result).toEqual('not host.name:(suricata or auditd)');
-        });
-      });
-
-      describe('lucene', () => {
-        describe('kuery', () => {
-          test('it returns formatted wildcard string when "type" is "exists"', () => {
-            const result = evaluateValues({
-              item: existsEntryWithIncluded,
-              language: 'lucene',
-              exclude,
-            });
-            expect(result).toEqual('NOT _exists_host.name');
-          });
-          test('it returns formatted string when "type" is "match"', () => {
-            const result = evaluateValues({
-              item: matchEntryWithIncluded,
-              language: 'lucene',
-              exclude,
-            });
-            expect(result).toEqual('NOT host.name:suricata');
-          });
-          test('it returns formatted string when "type" is "match_any"', () => {
-            const result = evaluateValues({
-              item: matchAnyEntryWithIncludedAndTwoValues,
-              language: 'lucene',
-              exclude,
-            });
-            expect(result).toEqual('NOT host.name:(suricata OR auditd)');
-          });
-        });
-      });
-    });
-
-    describe("when 'exclude' is false", () => {
-      beforeEach(() => {
-        exclude = false;
-      });
-
-      describe('kuery', () => {
-        test('it returns formatted wildcard string when "type" is "exists"', () => {
-          const result = evaluateValues({
-            item: existsEntryWithIncluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(result).toEqual('host.name:*');
-        });
-        test('it returns formatted string when "type" is "match"', () => {
-          const result = evaluateValues({
-            item: matchEntryWithIncluded,
-            language: 'kuery',
-            exclude,
-          });
-          expect(result).toEqual('host.name:suricata');
-        });
-        test('it returns formatted string when "type" is "match_any"', () => {
-          const result = evaluateValues({
-            item: matchAnyEntryWithIncludedAndTwoValues,
-            language: 'kuery',
-            exclude,
-          });
-          expect(result).toEqual('host.name:(suricata or auditd)');
-        });
-      });
-
-      describe('lucene', () => {
-        describe('kuery', () => {
-          test('it returns formatted wildcard string when "type" is "exists"', () => {
-            const result = evaluateValues({
-              item: existsEntryWithIncluded,
-              language: 'lucene',
-              exclude,
-            });
-            expect(result).toEqual('_exists_host.name');
-          });
-          test('it returns formatted string when "type" is "match"', () => {
-            const result = evaluateValues({
-              item: matchEntryWithIncluded,
-              language: 'lucene',
-              exclude,
-            });
-            expect(result).toEqual('host.name:suricata');
-          });
-          test('it returns formatted string when "type" is "match_any"', () => {
-            const result = evaluateValues({
-              item: matchAnyEntryWithIncludedAndTwoValues,
-              language: 'lucene',
-              exclude,
-            });
-            expect(result).toEqual('host.name:(suricata OR auditd)');
-          });
-        });
-      });
-    });
-  });
-
-  describe('formatQuery', () => {
-    describe('when query is empty string', () => {
-      test('it returns query if "exceptions" is empty array', () => {
-        const formattedQuery = formatQuery({ exceptions: [], query: '', language: 'kuery' });
-        expect(formattedQuery).toEqual('');
-      });
-      test('it returns expected query string when single exception in array', () => {
-        const formattedQuery = formatQuery({
-          exceptions: ['b:(value-1 or value-2) and not c:*'],
-          query: '',
+  describe('buildEntry', () => {
+    describe('kuery', () => {
+      test('it returns formatted wildcard string when "type" is "exists"', () => {
+        const result = buildEntry({
+          entry: existsEntryWithIncluded,
           language: 'kuery',
         });
-        expect(formattedQuery).toEqual('(b:(value-1 or value-2) and not c:*)');
+        expect(result).toEqual('host.name:*');
+      });
+
+      test('it returns formatted string when "type" is "match"', () => {
+        const result = buildEntry({
+          entry: matchEntryWithIncluded,
+          language: 'kuery',
+        });
+        expect(result).toEqual('host.name:"suricata"');
+      });
+
+      test('it returns formatted string when "type" is "match_any"', () => {
+        const result = buildEntry({
+          entry: matchAnyEntryWithIncludedAndTwoValues,
+          language: 'kuery',
+        });
+        expect(result).toEqual('host.name:("suricata" or "auditd")');
       });
     });
 
-    test('it returns query if "exceptions" is empty array', () => {
-      const formattedQuery = formatQuery({ exceptions: [], query: 'a:*', language: 'kuery' });
-      expect(formattedQuery).toEqual('a:*');
-    });
-
-    test('it returns expected query string when single exception in array', () => {
-      const formattedQuery = formatQuery({
-        exceptions: ['b:(value-1 or value-2) and not c:*'],
-        query: 'a:*',
-        language: 'kuery',
+    describe('lucene', () => {
+      test('it returns formatted wildcard string when "type" is "exists"', () => {
+        const result = buildEntry({
+          entry: existsEntryWithIncluded,
+          language: 'lucene',
+        });
+        expect(result).toEqual('_exists_host.name');
       });
-      expect(formattedQuery).toEqual('(a:* and b:(value-1 or value-2) and not c:*)');
-    });
 
-    test('it returns expected query string when multiple exceptions in array', () => {
-      const formattedQuery = formatQuery({
-        exceptions: ['b:(value-1 or value-2) and not c:*', 'not d:*'],
-        query: 'a:*',
-        language: 'kuery',
+      test('it returns formatted string when "type" is "match"', () => {
+        const result = buildEntry({
+          entry: matchEntryWithIncluded,
+          language: 'lucene',
+        });
+        expect(result).toEqual('host.name:"suricata"');
       });
-      expect(formattedQuery).toEqual(
-        '(a:* and b:(value-1 or value-2) and not c:*) or (a:* and not d:*)'
-      );
+
+      test('it returns formatted string when "type" is "match_any"', () => {
+        const result = buildEntry({
+          entry: matchAnyEntryWithIncludedAndTwoValues,
+          language: 'lucene',
+        });
+        expect(result).toEqual('host.name:("suricata" OR "auditd")');
+      });
     });
   });
 
-  describe('buildExceptionItemEntries', () => {
+  describe('buildExceptionItem', () => {
     test('it returns empty string if empty lists array passed in', () => {
-      const query = buildExceptionItemEntries({
+      const query = buildExceptionItem({
         language: 'kuery',
-        lists: [],
-        exclude,
+        entries: [],
       });
 
       expect(query).toEqual('');
     });
 
-    test('it returns expected query when more than one item in list', () => {
-      // Equal to query && !(b && !c) -> (query AND NOT b) OR (query AND c)
-      // https://www.dcode.fr/boolean-expressions-calculator
+    test('it returns expected query when more than one item in exception item', () => {
       const payload: EntriesArray = [
         makeMatchAnyEntry({ field: 'b' }),
         makeMatchEntry({ field: 'c', operator: 'excluded', value: 'value-3' }),
       ];
-      const query = buildExceptionItemEntries({
+      const query = buildExceptionItem({
         language: 'kuery',
-        lists: payload,
-        exclude,
+        entries: payload,
       });
-      const expectedQuery = 'not b:(value-1 or value-2) and c:value-3';
+      const expectedQuery = 'b:("value-1" or "value-2") and not c:"value-3"';
 
       expect(query).toEqual(expectedQuery);
     });
 
-    test('it returns expected query when list item includes nested value', () => {
-      // Equal to query && !(b || !c) -> (query AND NOT b AND c)
-      // https://www.dcode.fr/boolean-expressions-calculator
-      const lists: EntriesArray = [
+    test('it returns expected query when exception item includes nested value', () => {
+      const entries: EntriesArray = [
         makeMatchAnyEntry({ field: 'b' }),
         {
           field: 'parent',
           type: 'nested',
           entries: [
-            makeMatchEntry({ field: 'nestedField', operator: 'excluded', value: 'value-3' }),
+            makeMatchEntry({ field: 'nestedField', operator: 'included', value: 'value-3' }),
           ],
         },
       ];
-      const query = buildExceptionItemEntries({
+      const query = buildExceptionItem({
         language: 'kuery',
-        lists,
-        exclude,
+        entries,
       });
-      const expectedQuery = 'not b:(value-1 or value-2) and parent:{ nestedField:value-3 }';
+      const expectedQuery = 'b:("value-1" or "value-2") and parent:{ nestedField:"value-3" }';
 
       expect(query).toEqual(expectedQuery);
     });
 
-    test('it returns expected query when list includes multiple items and nested "and" values', () => {
-      // Equal to query && !((b || !c) && d) -> (query AND NOT b AND c) OR (query AND NOT d)
-      // https://www.dcode.fr/boolean-expressions-calculator
-      const lists: EntriesArray = [
+    test('it returns expected query when exception item includes multiple items and nested "and" values', () => {
+      const entries: EntriesArray = [
         makeMatchAnyEntry({ field: 'b' }),
         {
           field: 'parent',
           type: 'nested',
           entries: [
-            makeMatchEntry({ field: 'nestedField', operator: 'excluded', value: 'value-3' }),
+            makeMatchEntry({ field: 'nestedField', operator: 'included', value: 'value-3' }),
           ],
         },
         makeExistsEntry({ field: 'd' }),
       ];
-      const query = buildExceptionItemEntries({
+      const query = buildExceptionItem({
         language: 'kuery',
-        lists,
-        exclude,
+        entries,
       });
       const expectedQuery =
-        'not b:(value-1 or value-2) and parent:{ nestedField:value-3 } and not d:*';
+        'b:("value-1" or "value-2") and parent:{ nestedField:"value-3" } and d:*';
       expect(query).toEqual(expectedQuery);
     });
 
     test('it returns expected query when language is "lucene"', () => {
-      // Equal to query && !((b || !c) && !d) -> (query AND NOT b AND c) OR (query AND d)
-      // https://www.dcode.fr/boolean-expressions-calculator
-      const lists: EntriesArray = [
+      const entries: EntriesArray = [
         makeMatchAnyEntry({ field: 'b' }),
         {
           field: 'parent',
@@ -797,172 +521,58 @@ describe('build_exceptions_query', () => {
         },
         makeExistsEntry({ field: 'e', operator: 'excluded' }),
       ];
-      const query = buildExceptionItemEntries({
+      const query = buildExceptionItem({
         language: 'lucene',
-        lists,
-        exclude,
+        entries,
       });
       const expectedQuery =
-        'NOT b:(value-1 OR value-2) AND parent:{ nestedField:value-3 } AND _exists_e';
+        'b:("value-1" OR "value-2") AND parent:{ NOT nestedField:"value-3" } AND NOT _exists_e';
       expect(query).toEqual(expectedQuery);
-    });
-
-    describe('when "exclude" is false', () => {
-      beforeEach(() => {
-        exclude = false;
-      });
-
-      test('it returns empty string if empty lists array passed in', () => {
-        const query = buildExceptionItemEntries({
-          language: 'kuery',
-          lists: [],
-          exclude,
-        });
-
-        expect(query).toEqual('');
-      });
-      test('it returns expected query when more than one item in list', () => {
-        // Equal to query && !(b && !c) -> (query AND NOT b) OR (query AND c)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const payload: EntriesArray = [
-          makeMatchAnyEntry({ field: 'b' }),
-          makeMatchEntry({ field: 'c', operator: 'excluded', value: 'value-3' }),
-        ];
-        const query = buildExceptionItemEntries({
-          language: 'kuery',
-          lists: payload,
-          exclude,
-        });
-        const expectedQuery = 'b:(value-1 or value-2) and not c:value-3';
-
-        expect(query).toEqual(expectedQuery);
-      });
-
-      test('it returns expected query when list item includes nested value', () => {
-        // Equal to query && !(b || !c) -> (query AND NOT b AND c)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
-          makeMatchAnyEntry({ field: 'b' }),
-          {
-            field: 'parent',
-            type: 'nested',
-            entries: [
-              makeMatchEntry({ field: 'nestedField', operator: 'excluded', value: 'value-3' }),
-            ],
-          },
-        ];
-        const query = buildExceptionItemEntries({
-          language: 'kuery',
-          lists,
-          exclude,
-        });
-        const expectedQuery = 'b:(value-1 or value-2) and parent:{ nestedField:value-3 }';
-
-        expect(query).toEqual(expectedQuery);
-      });
-
-      test('it returns expected query when list includes multiple items and nested "and" values', () => {
-        // Equal to query && !((b || !c) && d) -> (query AND NOT b AND c) OR (query AND NOT d)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
-          makeMatchAnyEntry({ field: 'b' }),
-          {
-            field: 'parent',
-            type: 'nested',
-            entries: [
-              makeMatchEntry({ field: 'nestedField', operator: 'excluded', value: 'value-3' }),
-            ],
-          },
-          makeExistsEntry({ field: 'd' }),
-        ];
-        const query = buildExceptionItemEntries({
-          language: 'kuery',
-          lists,
-          exclude,
-        });
-        const expectedQuery = 'b:(value-1 or value-2) and parent:{ nestedField:value-3 } and d:*';
-        expect(query).toEqual(expectedQuery);
-      });
-
-      test('it returns expected query when language is "lucene"', () => {
-        // Equal to query && !((b || !c) && !d) -> (query AND NOT b AND c) OR (query AND d)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
-          makeMatchAnyEntry({ field: 'b' }),
-          {
-            field: 'parent',
-            type: 'nested',
-            entries: [
-              makeMatchEntry({ field: 'nestedField', operator: 'excluded', value: 'value-3' }),
-            ],
-          },
-          makeExistsEntry({ field: 'e', operator: 'excluded' }),
-        ];
-        const query = buildExceptionItemEntries({
-          language: 'lucene',
-          lists,
-          exclude,
-        });
-        const expectedQuery =
-          'b:(value-1 OR value-2) AND parent:{ nestedField:value-3 } AND NOT _exists_e';
-        expect(query).toEqual(expectedQuery);
-      });
     });
 
     describe('exists', () => {
       test('it returns expected query when list includes single list item with operator of "included"', () => {
-        // Equal to query && !(b) -> (query AND NOT b)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [makeExistsEntry({ field: 'b' })];
-        const query = buildExceptionItemEntries({
+        const entries: EntriesArray = [makeExistsEntry({ field: 'b' })];
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
-        });
-        const expectedQuery = 'not b:*';
-
-        expect(query).toEqual(expectedQuery);
-      });
-
-      test('it returns expected query when list includes single list item with operator of "excluded"', () => {
-        // Equal to query && !(!b) -> (query AND b)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [makeExistsEntry({ field: 'b', operator: 'excluded' })];
-        const query = buildExceptionItemEntries({
-          language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
         const expectedQuery = 'b:*';
 
         expect(query).toEqual(expectedQuery);
       });
 
-      test('it returns expected query when list includes list item with "and" values', () => {
-        // Equal to query && !(!b || !c) -> (query AND b AND c)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
+      test('it returns expected query when list includes single list item with operator of "excluded"', () => {
+        const entries: EntriesArray = [makeExistsEntry({ field: 'b', operator: 'excluded' })];
+        const query = buildExceptionItem({
+          language: 'kuery',
+          entries,
+        });
+        const expectedQuery = 'not b:*';
+
+        expect(query).toEqual(expectedQuery);
+      });
+
+      test('it returns expected query when exception item includes entry item with "and" values', () => {
+        const entries: EntriesArray = [
           makeExistsEntry({ field: 'b', operator: 'excluded' }),
           {
             field: 'parent',
             type: 'nested',
-            entries: [makeMatchEntry({ field: 'c', operator: 'excluded', value: 'value-1' })],
+            entries: [makeMatchEntry({ field: 'c', operator: 'included', value: 'value-1' })],
           },
         ];
-        const query = buildExceptionItemEntries({
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'b:* and parent:{ c:value-1 }';
+        const expectedQuery = 'not b:* and parent:{ c:"value-1" }';
 
         expect(query).toEqual(expectedQuery);
       });
 
       test('it returns expected query when list includes multiple items', () => {
-        // Equal to query && !((b || !c || d) && e) -> (query AND NOT b AND c AND NOT d) OR (query AND NOT e)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
+        const entries: EntriesArray = [
           makeExistsEntry({ field: 'b' }),
           {
             field: 'parent',
@@ -974,12 +584,11 @@ describe('build_exceptions_query', () => {
           },
           makeExistsEntry({ field: 'e' }),
         ];
-        const query = buildExceptionItemEntries({
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'not b:* and parent:{ c:value-1 and d:value-2 } and not e:*';
+        const expectedQuery = 'b:* and parent:{ not c:"value-1" and d:"value-2" } and e:*';
 
         expect(query).toEqual(expectedQuery);
       });
@@ -987,60 +596,49 @@ describe('build_exceptions_query', () => {
 
     describe('match', () => {
       test('it returns expected query when list includes single list item with operator of "included"', () => {
-        // Equal to query && !(b) -> (query AND NOT b)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [makeMatchEntry({ field: 'b', value: 'value' })];
-        const query = buildExceptionItemEntries({
+        const entries: EntriesArray = [makeMatchEntry({ field: 'b', value: 'value' })];
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'not b:value';
+        const expectedQuery = 'b:"value"';
 
         expect(query).toEqual(expectedQuery);
       });
 
       test('it returns expected query when list includes single list item with operator of "excluded"', () => {
-        // Equal to query && !(!b) -> (query AND b)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
+        const entries: EntriesArray = [
           makeMatchEntry({ field: 'b', operator: 'excluded', value: 'value' }),
         ];
-        const query = buildExceptionItemEntries({
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'b:value';
+        const expectedQuery = 'not b:"value"';
 
         expect(query).toEqual(expectedQuery);
       });
 
       test('it returns expected query when list includes list item with "and" values', () => {
-        // Equal to query && !(!b || !c) -> (query AND b AND c)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
+        const entries: EntriesArray = [
           makeMatchEntry({ field: 'b', operator: 'excluded', value: 'value' }),
           {
             field: 'parent',
             type: 'nested',
-            entries: [makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' })],
+            entries: [makeMatchEntry({ field: 'c', operator: 'included', value: 'valueC' })],
           },
         ];
-        const query = buildExceptionItemEntries({
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'b:value and parent:{ c:valueC }';
+        const expectedQuery = 'not b:"value" and parent:{ c:"valueC" }';
 
         expect(query).toEqual(expectedQuery);
       });
 
       test('it returns expected query when list includes multiple items', () => {
-        // Equal to query && !((b || !c || d) && e) -> (query AND NOT b AND c AND NOT d) OR (query AND NOT e)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
+        const entries: EntriesArray = [
           makeMatchEntry({ field: 'b', value: 'value' }),
           {
             field: 'parent',
@@ -1052,12 +650,12 @@ describe('build_exceptions_query', () => {
           },
           makeMatchEntry({ field: 'e', value: 'valueE' }),
         ];
-        const query = buildExceptionItemEntries({
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'not b:value and parent:{ c:valueC and d:valueD } and not e:valueE';
+        const expectedQuery =
+          'b:"value" and parent:{ not c:"valueC" and not d:"valueD" } and e:"valueE"';
 
         expect(query).toEqual(expectedQuery);
       });
@@ -1065,37 +663,29 @@ describe('build_exceptions_query', () => {
 
     describe('match_any', () => {
       test('it returns expected query when list includes single list item with operator of "included"', () => {
-        // Equal to query && !(b) -> (query AND NOT b)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [makeMatchAnyEntry({ field: 'b' })];
-        const query = buildExceptionItemEntries({
+        const entries: EntriesArray = [makeMatchAnyEntry({ field: 'b' })];
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'not b:(value-1 or value-2)';
+        const expectedQuery = 'b:("value-1" or "value-2")';
 
         expect(query).toEqual(expectedQuery);
       });
 
       test('it returns expected query when list includes single list item with operator of "excluded"', () => {
-        // Equal to query && !(!b) -> (query AND b)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [makeMatchAnyEntry({ field: 'b', operator: 'excluded' })];
-        const query = buildExceptionItemEntries({
+        const entries: EntriesArray = [makeMatchAnyEntry({ field: 'b', operator: 'excluded' })];
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'b:(value-1 or value-2)';
+        const expectedQuery = 'not b:("value-1" or "value-2")';
 
         expect(query).toEqual(expectedQuery);
       });
 
       test('it returns expected query when list includes list item with nested values', () => {
-        // Equal to query && !(!b || c) -> (query AND b AND NOT c)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
+        const entries: EntriesArray = [
           makeMatchAnyEntry({ field: 'b', operator: 'excluded' }),
           {
             field: 'parent',
@@ -1103,46 +693,45 @@ describe('build_exceptions_query', () => {
             entries: [makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' })],
           },
         ];
-        const query = buildExceptionItemEntries({
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'b:(value-1 or value-2) and parent:{ c:valueC }';
+        const expectedQuery = 'not b:("value-1" or "value-2") and parent:{ not c:"valueC" }';
 
         expect(query).toEqual(expectedQuery);
       });
 
       test('it returns expected query when list includes multiple items', () => {
-        // Equal to query && !((b || !c || d) && e) -> ((query AND NOT b AND c AND NOT d) OR (query AND NOT e)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const lists: EntriesArray = [
+        const entries: EntriesArray = [
           makeMatchAnyEntry({ field: 'b' }),
           makeMatchAnyEntry({ field: 'c' }),
         ];
-        const query = buildExceptionItemEntries({
+        const query = buildExceptionItem({
           language: 'kuery',
-          lists,
-          exclude,
+          entries,
         });
-        const expectedQuery = 'not b:(value-1 or value-2) and not c:(value-1 or value-2)';
+        const expectedQuery = 'b:("value-1" or "value-2") and c:("value-1" or "value-2")';
 
         expect(query).toEqual(expectedQuery);
       });
     });
   });
 
-  describe('buildQueryExceptions', () => {
-    test('it returns original query if lists is empty array', () => {
-      const query = buildQueryExceptions({ query: 'host.name: *', language: 'kuery', lists: [] });
-      const expectedQuery = 'host.name: *';
+  describe('buildExceptionListQueries', () => {
+    test('it returns empty array if lists is empty array', () => {
+      const query = buildExceptionListQueries({ language: 'kuery', lists: [] });
 
-      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
+      expect(query).toEqual([]);
+    });
+
+    test('it returns empty array if lists is undefined', () => {
+      const query = buildExceptionListQueries({ language: 'kuery', lists: undefined });
+
+      expect(query).toEqual([]);
     });
 
     test('it returns expected query when lists exist and language is "kuery"', () => {
-      // Equal to query && !((b || !c || d) && e) -> ((query AND NOT b AND c AND NOT d) OR (query AND NOT e)
-      // https://www.dcode.fr/boolean-expressions-calculator
       const payload = getExceptionListItemSchemaMock();
       const payload2 = getExceptionListItemSchemaMock();
       payload2.entries = [
@@ -1151,26 +740,56 @@ describe('build_exceptions_query', () => {
           field: 'parent',
           type: 'nested',
           entries: [
-            makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' }),
-            makeMatchEntry({ field: 'd', operator: 'excluded', value: 'valueD' }),
+            makeMatchEntry({ field: 'c', operator: 'included', value: 'valueC' }),
+            makeMatchEntry({ field: 'd', operator: 'included', value: 'valueD' }),
           ],
         },
-        makeMatchAnyEntry({ field: 'e' }),
+        makeMatchAnyEntry({ field: 'e', operator: 'excluded' }),
       ];
-      const query = buildQueryExceptions({
-        query: 'a:*',
+      const queries = buildExceptionListQueries({
         language: 'kuery',
         lists: [payload, payload2],
       });
-      const expectedQuery =
-        '(a:* and some.parentField:{ nested.field:some value } and not some.not.nested.field:some value) or (a:* and not b:(value-1 or value-2) and parent:{ c:valueC and d:valueD } and not e:(value-1 or value-2))';
+      const expectedQueries = [
+        {
+          query:
+            'some.parentField:{ nested.field:"some value" } and some.not.nested.field:"some value"',
+          language: 'kuery',
+        },
+        {
+          query:
+            'b:("value-1" or "value-2") and parent:{ c:"valueC" and d:"valueD" } and not e:("value-1" or "value-2")',
+          language: 'kuery',
+        },
+      ];
 
-      expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
+      expect(queries).toEqual(expectedQueries);
     });
 
     test('it returns expected query when lists exist and language is "lucene"', () => {
-      // Equal to query && !((b || !c || d) && e) -> ((query AND NOT b AND c AND NOT d) OR (query AND NOT e)
-      // https://www.dcode.fr/boolean-expressions-calculator
+      const payload = getExceptionListItemSchemaMock();
+      payload.entries = [makeMatchAnyEntry({ field: 'a' }), makeMatchAnyEntry({ field: 'b' })];
+      const payload2 = getExceptionListItemSchemaMock();
+      payload2.entries = [makeMatchAnyEntry({ field: 'c' }), makeMatchAnyEntry({ field: 'd' })];
+      const queries = buildExceptionListQueries({
+        language: 'lucene',
+        lists: [payload, payload2],
+      });
+      const expectedQueries = [
+        {
+          query: 'a:("value-1" OR "value-2") AND b:("value-1" OR "value-2")',
+          language: 'lucene',
+        },
+        {
+          query: 'c:("value-1" OR "value-2") AND d:("value-1" OR "value-2")',
+          language: 'lucene',
+        },
+      ];
+
+      expect(queries).toEqual(expectedQueries);
+    });
+
+    test('it builds correct queries for nested excluded fields', () => {
       const payload = getExceptionListItemSchemaMock();
       const payload2 = getExceptionListItemSchemaMock();
       payload2.entries = [
@@ -1179,97 +798,31 @@ describe('build_exceptions_query', () => {
           field: 'parent',
           type: 'nested',
           entries: [
+            // TODO: these operators are not being respected. buildNested needs to be updated
             makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' }),
             makeMatchEntry({ field: 'd', operator: 'excluded', value: 'valueD' }),
           ],
         },
         makeMatchAnyEntry({ field: 'e' }),
       ];
-      const query = buildQueryExceptions({
-        query: 'a:*',
-        language: 'lucene',
+      const queries = buildExceptionListQueries({
+        language: 'kuery',
         lists: [payload, payload2],
       });
-      const expectedQuery =
-        '(a:* AND some.parentField:{ nested.field:some value } AND NOT some.not.nested.field:some value) OR (a:* AND NOT b:(value-1 OR value-2) AND parent:{ c:valueC AND d:valueD } AND NOT e:(value-1 OR value-2))';
-
-      expect(query).toEqual([{ query: expectedQuery, language: 'lucene' }]);
-    });
-
-    describe('when "exclude" is false', () => {
-      beforeEach(() => {
-        exclude = false;
-      });
-
-      test('it returns original query if lists is empty array', () => {
-        const query = buildQueryExceptions({
-          query: 'host.name: *',
+      const expectedQueries = [
+        {
+          query:
+            'some.parentField:{ nested.field:"some value" } and some.not.nested.field:"some value"',
           language: 'kuery',
-          lists: [],
-          exclude,
-        });
-        const expectedQuery = 'host.name: *';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-      });
-
-      test('it returns expected query when lists exist and language is "kuery"', () => {
-        // Equal to query && !((b || !c || d) && e) -> ((query AND NOT b AND c AND NOT d) OR (query AND NOT e)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const payload = getExceptionListItemSchemaMock();
-        const payload2 = getExceptionListItemSchemaMock();
-        payload2.entries = [
-          makeMatchAnyEntry({ field: 'b' }),
-          {
-            field: 'parent',
-            type: 'nested',
-            entries: [
-              makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' }),
-              makeMatchEntry({ field: 'd', operator: 'excluded', value: 'valueD' }),
-            ],
-          },
-          makeMatchAnyEntry({ field: 'e' }),
-        ];
-        const query = buildQueryExceptions({
-          query: 'a:*',
+        },
+        {
+          query:
+            'b:("value-1" or "value-2") and parent:{ not c:"valueC" and not d:"valueD" } and e:("value-1" or "value-2")',
           language: 'kuery',
-          lists: [payload, payload2],
-          exclude,
-        });
-        const expectedQuery =
-          '(a:* and some.parentField:{ nested.field:some value } and some.not.nested.field:some value) or (a:* and b:(value-1 or value-2) and parent:{ c:valueC and d:valueD } and e:(value-1 or value-2))';
+        },
+      ];
 
-        expect(query).toEqual([{ query: expectedQuery, language: 'kuery' }]);
-      });
-
-      test('it returns expected query when lists exist and language is "lucene"', () => {
-        // Equal to query && !((b || !c || d) && e) -> ((query AND NOT b AND c AND NOT d) OR (query AND NOT e)
-        // https://www.dcode.fr/boolean-expressions-calculator
-        const payload = getExceptionListItemSchemaMock();
-        const payload2 = getExceptionListItemSchemaMock();
-        payload2.entries = [
-          makeMatchAnyEntry({ field: 'b' }),
-          {
-            field: 'parent',
-            type: 'nested',
-            entries: [
-              makeMatchEntry({ field: 'c', operator: 'excluded', value: 'valueC' }),
-              makeMatchEntry({ field: 'd', operator: 'excluded', value: 'valueD' }),
-            ],
-          },
-          makeMatchAnyEntry({ field: 'e' }),
-        ];
-        const query = buildQueryExceptions({
-          query: 'a:*',
-          language: 'lucene',
-          lists: [payload, payload2],
-          exclude,
-        });
-        const expectedQuery =
-          '(a:* AND some.parentField:{ nested.field:some value } AND some.not.nested.field:some value) OR (a:* AND b:(value-1 OR value-2) AND parent:{ c:valueC AND d:valueD } AND e:(value-1 OR value-2))';
-
-        expect(query).toEqual([{ query: expectedQuery, language: 'lucene' }]);
-      });
+      expect(queries).toEqual(expectedQueries);
     });
   });
 });

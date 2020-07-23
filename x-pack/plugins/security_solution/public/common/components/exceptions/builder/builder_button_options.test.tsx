@@ -15,11 +15,13 @@ describe('BuilderButtonOptions', () => {
       <BuilderButtonOptions
         isAndDisabled={false}
         isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested={false}
         showNestedButton={false}
-        displayInitButton={false}
         onOrClicked={jest.fn()}
         onAndClicked={jest.fn()}
         onNestedClicked={jest.fn()}
+        onAddClickWhenNested={jest.fn()}
       />
     );
 
@@ -31,44 +33,6 @@ describe('BuilderButtonOptions', () => {
     expect(wrapper.find('[data-test-subj="exceptionsNestedButton"] button')).toHaveLength(0);
   });
 
-  test('it renders "add exception" button if "displayInitButton" is true', () => {
-    const wrapper = mount(
-      <BuilderButtonOptions
-        isAndDisabled={false}
-        isOrDisabled={false}
-        showNestedButton={false}
-        displayInitButton
-        onOrClicked={jest.fn()}
-        onAndClicked={jest.fn()}
-        onNestedClicked={jest.fn()}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="exceptionsAddNewExceptionButton"] button')).toHaveLength(
-      1
-    );
-  });
-
-  test('it invokes "onAddExceptionClicked" when "add exception" button is clicked', () => {
-    const onOrClicked = jest.fn();
-
-    const wrapper = mount(
-      <BuilderButtonOptions
-        isAndDisabled={false}
-        isOrDisabled={false}
-        showNestedButton={false}
-        displayInitButton
-        onOrClicked={onOrClicked}
-        onAndClicked={jest.fn()}
-        onNestedClicked={jest.fn()}
-      />
-    );
-
-    wrapper.find('[data-test-subj="exceptionsAddNewExceptionButton"] button').simulate('click');
-
-    expect(onOrClicked).toHaveBeenCalledTimes(1);
-  });
-
   test('it invokes "onOrClicked" when "or" button is clicked', () => {
     const onOrClicked = jest.fn();
 
@@ -76,11 +40,13 @@ describe('BuilderButtonOptions', () => {
       <BuilderButtonOptions
         isAndDisabled={false}
         isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested={false}
         showNestedButton={false}
-        displayInitButton={false}
         onOrClicked={onOrClicked}
         onAndClicked={jest.fn()}
         onNestedClicked={jest.fn()}
+        onAddClickWhenNested={jest.fn()}
       />
     );
 
@@ -89,18 +55,20 @@ describe('BuilderButtonOptions', () => {
     expect(onOrClicked).toHaveBeenCalledTimes(1);
   });
 
-  test('it invokes "onAndClicked" when "and" button is clicked', () => {
+  test('it invokes "onAndClicked" when "and" button is clicked and "isNested" is "false"', () => {
     const onAndClicked = jest.fn();
 
     const wrapper = mount(
       <BuilderButtonOptions
         isAndDisabled={false}
         isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested={false}
         showNestedButton={false}
-        displayInitButton={false}
         onOrClicked={jest.fn()}
         onAndClicked={onAndClicked}
         onNestedClicked={jest.fn()}
+        onAddClickWhenNested={jest.fn()}
       />
     );
 
@@ -109,16 +77,40 @@ describe('BuilderButtonOptions', () => {
     expect(onAndClicked).toHaveBeenCalledTimes(1);
   });
 
+  test('it invokes "onAddClickWhenNested" when "and" button is clicked and "isNested" is "true"', () => {
+    const onAddClickWhenNested = jest.fn();
+
+    const wrapper = mount(
+      <BuilderButtonOptions
+        isAndDisabled={false}
+        isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested
+        showNestedButton={false}
+        onOrClicked={jest.fn()}
+        onAndClicked={jest.fn()}
+        onNestedClicked={jest.fn()}
+        onAddClickWhenNested={onAddClickWhenNested}
+      />
+    );
+
+    wrapper.find('[data-test-subj="exceptionsAndButton"] button').simulate('click');
+
+    expect(onAddClickWhenNested).toHaveBeenCalledTimes(1);
+  });
+
   test('it disables "and" button if "isAndDisabled" is true', () => {
     const wrapper = mount(
       <BuilderButtonOptions
         showNestedButton={false}
-        displayInitButton={false}
         isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested={false}
         isAndDisabled
         onOrClicked={jest.fn()}
         onAndClicked={jest.fn()}
         onNestedClicked={jest.fn()}
+        onAddClickWhenNested={jest.fn()}
       />
     );
 
@@ -127,16 +119,18 @@ describe('BuilderButtonOptions', () => {
     expect(andButton.prop('disabled')).toBeTruthy();
   });
 
-  test('it disables "or" button if "isOrDisabled" is true', () => {
+  test('it disables "or" button if "isOrDisabled" is "true"', () => {
     const wrapper = mount(
       <BuilderButtonOptions
         showNestedButton={false}
-        displayInitButton={false}
         isOrDisabled
         isAndDisabled={false}
+        isNestedDisabled={false}
+        isNested={false}
         onOrClicked={jest.fn()}
         onAndClicked={jest.fn()}
         onNestedClicked={jest.fn()}
+        onAddClickWhenNested={jest.fn()}
       />
     );
 
@@ -145,23 +139,67 @@ describe('BuilderButtonOptions', () => {
     expect(orButton.prop('disabled')).toBeTruthy();
   });
 
-  test('it invokes "onNestedClicked" when "and" button is clicked', () => {
+  test('it disables "add nested" button if "isNestedDisabled" is "true"', () => {
+    const wrapper = mount(
+      <BuilderButtonOptions
+        showNestedButton
+        isOrDisabled={false}
+        isAndDisabled={false}
+        isNestedDisabled
+        isNested={false}
+        onOrClicked={jest.fn()}
+        onAndClicked={jest.fn()}
+        onNestedClicked={jest.fn()}
+        onAddClickWhenNested={jest.fn()}
+      />
+    );
+
+    const nestedButton = wrapper.find('[data-test-subj="exceptionsNestedButton"] button').at(0);
+
+    expect(nestedButton.prop('disabled')).toBeTruthy();
+  });
+
+  test('it invokes "onNestedClicked" when "isNested" is "false" and "nested" button is clicked', () => {
     const onNestedClicked = jest.fn();
 
     const wrapper = mount(
       <BuilderButtonOptions
         isAndDisabled={false}
         isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested={false}
         showNestedButton
-        displayInitButton={false}
         onOrClicked={jest.fn()}
         onAndClicked={jest.fn()}
         onNestedClicked={onNestedClicked}
+        onAddClickWhenNested={jest.fn()}
       />
     );
 
     wrapper.find('[data-test-subj="exceptionsNestedButton"] button').simulate('click');
 
     expect(onNestedClicked).toHaveBeenCalledTimes(1);
+  });
+
+  test('it invokes "onAndClicked" when "isNested" is "true" and "nested" button is clicked', () => {
+    const onAndClicked = jest.fn();
+
+    const wrapper = mount(
+      <BuilderButtonOptions
+        isAndDisabled={false}
+        isOrDisabled={false}
+        isNestedDisabled={false}
+        isNested
+        showNestedButton
+        onOrClicked={jest.fn()}
+        onAndClicked={onAndClicked}
+        onNestedClicked={jest.fn()}
+        onAddClickWhenNested={jest.fn()}
+      />
+    );
+
+    wrapper.find('[data-test-subj="exceptionsNestedButton"] button').simulate('click');
+
+    expect(onAndClicked).toHaveBeenCalledTimes(1);
   });
 });

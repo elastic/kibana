@@ -14,7 +14,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
-import { ServiceIntegrations } from './ServiceIntegrations';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { AlertIntegrations } from './AlertIntegrations';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
@@ -53,9 +52,6 @@ export function ServiceDetails({ tab }: Props) {
             <EuiTitle size="l">
               <h1>{serviceName}</h1>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ServiceIntegrations urlParams={urlParams} />
           </EuiFlexItem>
           {isAlertingAvailable && (
             <EuiFlexItem grow={false}>

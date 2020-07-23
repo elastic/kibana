@@ -69,18 +69,8 @@
  *    `appSearchSource`.
  */
 
-import {
-  uniqueId,
-  uniq,
-  extend,
-  pick,
-  difference,
-  omit,
-  setWith,
-  isObject,
-  keys,
-  isFunction,
-} from 'lodash';
+import { setWith } from '@elastic/safer-lodash-set';
+import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
