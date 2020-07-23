@@ -55,6 +55,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     geoField: documentSource.getGeoFieldName(),
     requestType: RENDER_AS.POINT,
   });
+  clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,

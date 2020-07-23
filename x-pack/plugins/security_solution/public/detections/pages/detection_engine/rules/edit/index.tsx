@@ -273,7 +273,8 @@ const EditRulePageComponent: FC = () => {
             : myScheduleRuleForm.data) as ScheduleStepRule,
           (activeFormId === RuleStep.ruleActions
             ? activeForm.data
-            : myActionsRuleForm.data) as ActionsStepRule
+            : myActionsRuleForm.data) as ActionsStepRule,
+          rule
         ),
         ...(ruleId ? { id: ruleId } : {}),
       });
