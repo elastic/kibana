@@ -213,7 +213,7 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
           fields,
         }}
-        showLabel={false}
+        showLabel={true}
         listType="detection"
         addNested={false}
         onChange={jest.fn()}
@@ -245,7 +245,7 @@ describe('BuilderEntryItem', () => {
           title: 'logstash-*',
           fields,
         }}
-        showLabel={false}
+        showLabel={true}
         listType="detection"
         addNested={false}
         onChange={jest.fn()}
