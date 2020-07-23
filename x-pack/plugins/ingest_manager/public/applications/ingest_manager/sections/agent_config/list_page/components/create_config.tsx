@@ -156,7 +156,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <FlyoutWithHigherZIndex onClose={onClose} size="l" maxWidth={400} {...restOfProps}>
+    <FlyoutWithHigherZIndex onClose={() => onClose()} size="l" maxWidth={400} {...restOfProps}>
       {header}
       {body}
       {footer}

@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect, useState, Fragment } from 'react';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSelectable,
+  EuiComboBox,
   EuiSpacer,
   EuiTextColor,
   EuiPortal,
   EuiButtonEmpty,
+  EuiFormRow,
+  EuiLink,
 } from '@elastic/eui';
 import { Error } from '../../../components';
 import { AgentConfig, PackageInfo, GetAgentConfigsResponseItem } from '../../../types';
@@ -25,6 +28,22 @@ import {
   useCapabilities,
 } from '../../../hooks';
 import { CreateAgentConfigFlyout } from '../list_page/components';
+
+const AgentConfigWrapper = styled(EuiFormRow)`
+  .euiFormRow__label {
+    width: 100%;
+  }
+`;
+
+const AgentConfigNameColumn = styled(EuiFlexItem)`
+  max-width: ${(2 / 9) * 100}%;
+  overflow: hidden;
+`;
+
+const AgentConfigDescriptionColumn = styled(EuiFlexItem)`
+  max-width: ${(5 / 9) * 100}%;
+  overflow: hidden;
+`;
 
 export const StepSelectConfig: React.FunctionComponent<{
   pkgkey: string;
@@ -106,6 +125,38 @@ export const StepSelectConfig: React.FunctionComponent<{
     }
   }, [selectedConfigId, agentConfig, updateAgentConfig, setIsLoadingSecondStep]);
 
+  const agentConfigOptions = packageInfoData
+    ? agentConfigs.map((agentConf) => {
+        const alreadyHasLimitedPackage =
+          (isLimitedPackage &&
+            doesAgentConfigAlreadyIncludePackage(agentConf, packageInfoData.response.name)) ||
+          false;
+        return {
+          label: agentConf.name,
+          key: agentConf.id,
+          disabled: alreadyHasLimitedPackage,
+          'data-test-subj': 'agentConfigItem',
+        };
+      })
+    : [];
+
+  const selectedConfigOption = agentConfigOptions.find((option) => option.key === selectedConfigId);
+
+  // Try to select default agent config
+  useEffect(() => {
+    if (!selectedConfigId && agentConfigs.length && agentConfigOptions.length) {
+      const defaultAgentConfig = agentConfigs.find((config) => config.is_default);
+      if (defaultAgentConfig) {
+        const defaultAgentConfigOption = agentConfigOptions.find(
+          (option) => option.key === defaultAgentConfig.id
+        );
+        if (defaultAgentConfigOption && !defaultAgentConfigOption.disabled) {
+          setSelectedConfigId(defaultAgentConfig.id);
+        }
+      }
+    }
+  }, [agentConfigs, agentConfigOptions, selectedConfigId]);
+
   // Display package error if there is one
   if (packageInfoError) {
     return (
@@ -154,77 +205,92 @@ export const StepSelectConfig: React.FunctionComponent<{
       ) : null}
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiSelectable
-            searchable
-            allowExclusions={false}
-            singleSelection={true}
-            isLoading={isAgentConfigsLoading || isPackageInfoLoading}
-            options={agentConfigs.map((agentConf) => {
-              const alreadyHasLimitedPackage =
-                (isLimitedPackage &&
-                  packageInfoData &&
-                  doesAgentConfigAlreadyIncludePackage(agentConf, packageInfoData.response.name)) ||
-                false;
-              return {
-                label: agentConf.name,
-                key: agentConf.id,
-                checked: selectedConfigId === agentConf.id ? 'on' : undefined,
-                disabled: alreadyHasLimitedPackage,
-                'data-test-subj': 'agentConfigItem',
-              };
-            })}
-            renderOption={(option) => (
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
+          <AgentConfigWrapper
+            fullWidth={true}
+            label={
+              <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
-                  <EuiTextColor color="subdued">
-                    {agentConfigsById[option.key!].description}
-                  </EuiTextColor>
+                  <FormattedMessage
+                    id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigLabel"
+                    defaultMessage="Agent configuration"
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiTextColor color="subdued">
-                    <FormattedMessage
-                      id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsCountText"
-                      defaultMessage="{count, plural, one {# agent} other {# agents}}"
-                      values={{
-                        count: agentConfigsById[option.key!].agents || 0,
-                      }}
-                    />
-                  </EuiTextColor>
+                  <div>
+                    <EuiLink
+                      isDisabled={!hasWriteCapabilites}
+                      onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
+                    >
+                      <FormattedMessage
+                        id="xpack.ingestManager.createPackageConfig.StepSelectConfig.addButton"
+                        defaultMessage="Create agent configuration"
+                      />
+                    </EuiLink>
+                  </div>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            )}
-            listProps={{
-              bordered: true,
-            }}
-            searchProps={{
-              placeholder: i18n.translate(
-                'xpack.ingestManager.createPackageConfig.StepSelectConfig.filterAgentConfigsInputPlaceholder',
-                {
-                  defaultMessage: 'Search for agent configurations',
-                }
-              ),
-            }}
-            height={180}
-            onChange={(options) => {
-              const selectedOption = options.find((option) => option.checked === 'on');
-              if (selectedOption) {
-                if (selectedOption.key !== selectedConfigId) {
-                  setSelectedConfigId(selectedOption.key);
-                }
-              } else {
-                setSelectedConfigId(undefined);
-              }
-            }}
+            }
+            helpText={
+              selectedConfigId ? (
+                <FormattedMessage
+                  id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsCountText"
+                  defaultMessage="{count, plural, one {# agent} other {# agents}} are enrolled with the selected agent configuration."
+                  values={{
+                    count: agentConfigsById[selectedConfigId].agents || 0,
+                  }}
+                />
+              ) : null
+            }
           >
-            {(list, search) => (
-              <Fragment>
-                {search}
-                <EuiSpacer size="m" />
-                {list}
-              </Fragment>
-            )}
-          </EuiSelectable>
+            <EuiComboBox
+              placeholder={i18n.translate(
+                'pack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigPlaceholderText',
+                {
+                  defaultMessage: 'Select an agent configuration to add this integration to',
+                }
+              )}
+              singleSelection={{ asPlainText: true }}
+              fullWidth={true}
+              isLoading={isAgentConfigsLoading || isPackageInfoLoading}
+              options={agentConfigOptions}
+              renderOption={(option) => {
+                return (
+                  <EuiFlexGroup>
+                    <AgentConfigNameColumn grow={2}>
+                      <span className="eui-textTruncate">{option.label}</span>
+                    </AgentConfigNameColumn>
+                    <AgentConfigDescriptionColumn grow={5}>
+                      <EuiTextColor className="eui-textTruncate" color="subdued">
+                        {agentConfigsById[option.key!].description}
+                      </EuiTextColor>
+                    </AgentConfigDescriptionColumn>
+                    <EuiFlexItem grow={2} className="eui-textRight">
+                      <EuiTextColor color="subdued">
+                        <FormattedMessage
+                          id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsCountText"
+                          defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
+                          values={{
+                            count: agentConfigsById[option.key!].agents || 0,
+                          }}
+                        />
+                      </EuiTextColor>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }}
+              selectedOptions={selectedConfigOption ? [selectedConfigOption] : []}
+              onChange={(options) => {
+                const selectedOption = options[0] || undefined;
+                if (selectedOption) {
+                  if (selectedOption.key !== selectedConfigId) {
+                    setSelectedConfigId(selectedOption.key);
+                  }
+                } else {
+                  setSelectedConfigId(undefined);
+                }
+              }}
+            />
+          </AgentConfigWrapper>
         </EuiFlexItem>
         {/* Display selected agent config error if there is one */}
         {selectedConfigError ? (
@@ -240,22 +306,6 @@ export const StepSelectConfig: React.FunctionComponent<{
             />
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem>
-          <div>
-            <EuiButtonEmpty
-              iconType="plusInCircle"
-              isDisabled={!hasWriteCapabilites}
-              onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
-              flush="left"
-              size="s"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.StepSelectConfig.addButton"
-                defaultMessage="New agent configuration"
-              />
-            </EuiButtonEmpty>
-          </div>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
