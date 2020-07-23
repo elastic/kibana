@@ -163,7 +163,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
 
         toastNotifications.addSuccess(
           i18n.translate('xpack.spaces.management.copyToSpace.resolveCopySuccessTitle', {
-            defaultMessage: 'Overwrite successful',
+            defaultMessage: 'Copy successful',
           })
         );
 

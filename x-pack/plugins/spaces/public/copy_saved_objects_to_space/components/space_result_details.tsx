@@ -62,9 +62,8 @@ export const SpaceCopyResultDetails = (props: Props) => {
     <div className="spcCopyToSpaceResultDetails">
       {objects.map((object, index) => {
         const { type, id, name, icon, conflict } = object;
-        const objectOverwritePending = Boolean(
-          props.retries.find((r) => r.type === type && r.id === id)?.overwrite
-        );
+        const pendingObjectRetry = props.retries.find((r) => r.type === type && r.id === id);
+        const isOverwritePending = Boolean(pendingObjectRetry?.overwrite);
         const switchProps = {
           show: conflict && !props.conflictResolutionInProgress,
           label: i18n.translate('xpack.spaces.management.copyToSpace.copyDetail.overwriteSwitch', {
@@ -124,7 +123,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
           },
         };
         const selectContainerClass =
-          selectProps.options.length > 0 && objectOverwritePending ? '' : ' euiAccordion-isClosed';
+          selectProps.options.length > 0 && isOverwritePending ? '' : ' euiAccordion-isClosed';
 
         return (
           <Fragment key={index}>
@@ -152,7 +151,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
                   <EuiSwitch
                     label={switchProps.label}
                     compressed={true}
-                    checked={objectOverwritePending}
+                    checked={isOverwritePending}
                     onChange={switchProps.onChange}
                     data-test-subj={`cts-overwrite-conflict-${type}:${id}`}
                   />
@@ -163,9 +162,9 @@ export const SpaceCopyResultDetails = (props: Props) => {
                   <CopyStatusIndicator
                     summarizedCopyResult={props.summarizedCopyResult}
                     object={object}
-                    overwritePending={objectOverwritePending}
+                    pendingObjectRetry={pendingObjectRetry}
                     conflictResolutionInProgress={
-                      props.conflictResolutionInProgress && objectOverwritePending
+                      props.conflictResolutionInProgress && isOverwritePending
                     }
                   />
                 </div>

@@ -7,17 +7,18 @@
 import React, { Fragment } from 'react';
 import { EuiLoadingSpinner, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ImportRetry } from '../types';
 import { SummarizedCopyToSpaceResult, SummarizedSavedObjectResult } from '..';
 
 interface Props {
   summarizedCopyResult: SummarizedCopyToSpaceResult;
   object: { type: string; id: string };
-  overwritePending: boolean;
+  pendingObjectRetry?: ImportRetry;
   conflictResolutionInProgress: boolean;
 }
 
 export const CopyStatusIndicator = (props: Props) => {
-  const { summarizedCopyResult, conflictResolutionInProgress } = props;
+  const { summarizedCopyResult, conflictResolutionInProgress, pendingObjectRetry } = props;
   if (summarizedCopyResult.processing || conflictResolutionInProgress) {
     return <EuiLoadingSpinner />;
   }
@@ -25,26 +26,51 @@ export const CopyStatusIndicator = (props: Props) => {
   const objectResult = summarizedCopyResult.objects.find(
     (o) => o.type === props.object!.type && o.id === props.object!.id
   ) as SummarizedSavedObjectResult;
-  const { conflict, hasMissingReferences, hasUnresolvableErrors } = objectResult;
-  const hasConflicts = conflict && !props.overwritePending;
-
+  const { conflict, hasMissingReferences, hasUnresolvableErrors, overwrite } = objectResult;
+  const hasConflicts = conflict && !pendingObjectRetry?.overwrite;
   const successful = !hasMissingReferences && !hasUnresolvableErrors && !hasConflicts;
-  const successColor = props.overwritePending ? 'warning' : 'success';
 
-  if (successful) {
-    const message = props.overwritePending ? (
+  if (successful && !pendingObjectRetry) {
+    // there is no retry pending, so this object was actually copied
+    const message = overwrite ? (
+      // the object was overwritten
       <FormattedMessage
-        id="xpack.spaces.management.copyToSpace.copyStatus.pendingOverwriteMessage"
-        defaultMessage="Saved object will be overwritten. Disable 'Overwrite' to cancel this operation."
+        id="xpack.spaces.management.copyToSpace.copyStatus.successAutomaticOverwriteMessage"
+        defaultMessage="Saved object overwritten successfully."
       />
     ) : (
+      // the object was not overwritten
       <FormattedMessage
         id="xpack.spaces.management.copyToSpace.copyStatus.successMessage"
         defaultMessage="Saved object copied successfully."
       />
     );
-    return <EuiIconTip type={'check'} color={successColor} content={message} />;
+    return <EuiIconTip type={'check'} color={'success'} content={message} />;
   }
+
+  if (successful && pendingObjectRetry) {
+    const message = overwrite ? (
+      // this is an "automatic overwrite", e.g., the "Overwrite all conflicts" option was selected
+      <FormattedMessage
+        id="xpack.spaces.management.copyToSpace.copyStatus.pendingAutomaticOverwriteMessage"
+        defaultMessage="Saved object will be overwritten."
+      />
+    ) : pendingObjectRetry?.overwrite ? (
+      // this is a manual overwrite, e.g., the individual "Overwrite?" switch was enabled
+      <FormattedMessage
+        id="xpack.spaces.management.copyToSpace.copyStatus.pendingOverwriteMessage"
+        defaultMessage="Saved object will be overwritten. Disable 'Overwrite' to cancel this operation."
+      />
+    ) : (
+      // this object is pending success, but it will not result in an overwrite
+      <FormattedMessage
+        id="xpack.spaces.management.copyToSpace.copyStatus.pendingMessage"
+        defaultMessage="Saved object will be copied."
+      />
+    );
+    return <EuiIconTip type={'check'} color={'warning'} content={message} />;
+  }
+
   if (hasUnresolvableErrors) {
     return (
       <EuiIconTip
@@ -60,6 +86,7 @@ export const CopyStatusIndicator = (props: Props) => {
       />
     );
   }
+
   if (hasConflicts) {
     return (
       <EuiIconTip
@@ -84,13 +111,19 @@ export const CopyStatusIndicator = (props: Props) => {
       />
     );
   }
+
   return hasMissingReferences ? (
     <EuiIconTip
       type={'link'}
       color={'warning'}
       data-test-subj={`cts-object-result-missing-references-${objectResult.id}`}
       content={
-        conflict ? (
+        overwrite ? (
+          <FormattedMessage
+            id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesAutomaticOverwriteMessage"
+            defaultMessage="This object has missing references; it will be overwritten, but one or more of its references are broken."
+          />
+        ) : conflict ? (
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.copyStatus.missingReferencesOverwriteMessage"
             defaultMessage="This object has missing references; it will be overwritten, but one or more of its references are broken. Disable 'Overwrite' to cancel this operation."

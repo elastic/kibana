@@ -22,30 +22,43 @@ interface Props {
   onCopyFinish: () => void;
 }
 
-const isConflict = (failure: FailedImport) =>
-  failure.error.type === 'conflict' || failure.error.type === 'ambiguous_conflict';
+const isResolvableError = ({ error: { type } }: FailedImport) =>
+  ['conflict', 'ambiguous_conflict', 'missing_references'].includes(type);
+const isUnresolvableError = (failure: FailedImport) => !isResolvableError(failure);
 
 export const CopyToSpaceFlyoutFooter = (props: Props) => {
   const { copyInProgress, initialCopyFinished, copyResult, retries } = props;
 
   let summarizedResults = {
     successCount: 0,
-    overwriteConflictCount: 0,
-    conflictCount: 0,
-    unresolvableErrorCount: 0,
+    pendingCount: 0,
+    skippedCount: 0,
+    errorCount: 0,
   };
   if (copyResult) {
     summarizedResults = Object.entries(copyResult).reduce((acc, result) => {
       const [spaceId, spaceResult] = result;
-      const overwriteCount = (retries[spaceId] || []).filter((c) => c.overwrite).length;
+      let successCount = 0;
+      let pendingCount = 0;
+      let skippedCount = 0;
+      let errorCount = 0;
+      if (spaceResult.status === 'success') {
+        successCount = spaceResult.importCount;
+      } else {
+        const uniqueResolvableErrors = spaceResult.failedImports
+          .filter(isResolvableError)
+          .reduce((set, { obj: { type, id } }) => set.add(`${type}:${id}`), new Set<string>());
+        pendingCount = (retries[spaceId] || []).length;
+        skippedCount =
+          uniqueResolvableErrors.size + spaceResult.successfulImports.length - pendingCount;
+        errorCount = spaceResult.failedImports.filter(isUnresolvableError).length;
+      }
       return {
         loading: false,
-        successCount: acc.successCount + spaceResult.importCount,
-        overwriteConflictCount: acc.overwriteConflictCount + overwriteCount,
-        conflictCount:
-          acc.conflictCount + spaceResult.failedImports.filter(isConflict).length - overwriteCount,
-        unresolvableErrorCount:
-          acc.unresolvableErrorCount + spaceResult.failedImports.filter(isConflict).length,
+        successCount: acc.successCount + successCount,
+        pendingCount: acc.pendingCount + pendingCount,
+        skippedCount: acc.skippedCount + skippedCount,
+        errorCount: acc.errorCount + errorCount,
       };
     }, summarizedResults);
   }
@@ -53,13 +66,13 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
   const getButton = () => {
     let actionButton;
     if (initialCopyFinished) {
-      const hasPendingOverwrites = summarizedResults.overwriteConflictCount > 0;
+      const hasPendingRetries = summarizedResults.pendingCount > 0;
 
-      const buttonText = hasPendingOverwrites ? (
+      const buttonText = hasPendingRetries ? (
         <FormattedMessage
           id="xpack.spaces.management.copyToSpace.finishPendingOverwritesCopyToSpacesButton"
-          defaultMessage="Overwrite {overwriteCount} objects"
-          values={{ overwriteCount: summarizedResults.overwriteConflictCount }}
+          defaultMessage="Copy {overwriteCount} objects"
+          values={{ overwriteCount: summarizedResults.pendingCount }}
         />
       ) : (
         <FormattedMessage
@@ -142,30 +155,28 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
             }
           />
         </EuiFlexItem>
-        {summarizedResults.overwriteConflictCount > 0 && (
-          <EuiFlexItem>
-            <EuiStat
-              data-test-subj={`cts-summary-overwrite-count`}
-              title={summarizedResults.overwriteConflictCount}
-              titleSize="s"
-              titleColor={summarizedResults.overwriteConflictCount > 0 ? 'primary' : 'subdued'}
-              isLoading={!initialCopyFinished}
-              textAlign="center"
-              description={
-                <FormattedMessage
-                  id="xpack.spaces.management.copyToSpaceFlyoutFooter.pendingCount"
-                  defaultMessage="Pending"
-                />
-              }
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <EuiStat
+            data-test-subj={`cts-summary-overwrite-count`}
+            title={summarizedResults.pendingCount}
+            titleSize="s"
+            titleColor={summarizedResults.pendingCount > 0 ? 'primary' : 'subdued'}
+            isLoading={!initialCopyFinished}
+            textAlign="center"
+            description={
+              <FormattedMessage
+                id="xpack.spaces.management.copyToSpaceFlyoutFooter.pendingCount"
+                defaultMessage="Pending"
+              />
+            }
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiStat
             data-test-subj={`cts-summary-conflict-count`}
-            title={summarizedResults.conflictCount}
+            title={summarizedResults.skippedCount}
             titleSize="s"
-            titleColor={summarizedResults.conflictCount > 0 ? 'primary' : 'subdued'}
+            titleColor={summarizedResults.skippedCount > 0 ? 'primary' : 'subdued'}
             isLoading={!initialCopyFinished}
             textAlign="center"
             description={
@@ -179,9 +190,9 @@ export const CopyToSpaceFlyoutFooter = (props: Props) => {
         <EuiFlexItem>
           <EuiStat
             data-test-subj={`cts-summary-error-count`}
-            title={summarizedResults.unresolvableErrorCount}
+            title={summarizedResults.errorCount}
             titleSize="s"
-            titleColor={summarizedResults.unresolvableErrorCount > 0 ? 'danger' : 'subdued'}
+            titleColor={summarizedResults.errorCount > 0 ? 'danger' : 'subdued'}
             isLoading={!initialCopyFinished}
             textAlign="center"
             description={

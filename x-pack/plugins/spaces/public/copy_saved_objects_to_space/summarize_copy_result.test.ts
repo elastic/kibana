@@ -13,9 +13,9 @@ import {
 
 // Sample data references:
 //
-//             /-> Visualization foo -> Index pattern foo
+//             /-> Visualization bar -> Index pattern foo
 // My dashboard
-//             \-> Visualization bar -> Index pattern bar
+//             \-> Visualization baz -> Index pattern bar
 //
 // Dashboard has references to visualizations, and transitive references to index patterns
 
@@ -85,12 +85,13 @@ const createCopyResult = (
     withConflicts?: boolean;
     withMissingReferencesError?: boolean;
     withUnresolvableError?: boolean;
+    overwrite?: boolean;
   } = {}
 ) => {
-  const successfulImports: ProcessedImportResponse['successfulImports'] = [
+  let successfulImports: ProcessedImportResponse['successfulImports'] = [
     createSuccessResult(OBJECTS.MY_DASHBOARD),
   ];
-  const failedImports: ProcessedImportResponse['failedImports'] = [];
+  let failedImports: ProcessedImportResponse['failedImports'] = [];
   if (opts.withConflicts) {
     failedImports.push(createFailureConflict(OBJECTS.VISUALIZATION_FOO));
   } else {
@@ -109,6 +110,14 @@ const createCopyResult = (
       createSuccessResult(OBJECTS.VISUALIZATION_BAR),
       createSuccessResult(OBJECTS.INDEX_PATTERN_BAR)
     );
+  }
+
+  if (opts.overwrite) {
+    failedImports = failedImports.map(({ obj, error }) => ({
+      obj: { ...obj, overwrite: true },
+      error,
+    }));
+    successfulImports = successfulImports.map((obj) => ({ ...obj, overwrite: true }));
   }
 
   const copyResult: ProcessedImportResponse = {
@@ -134,6 +143,7 @@ describe('summarizeCopyResult', () => {
             "icon": "dashboardApp",
             "id": "foo",
             "name": "my-dashboard-title",
+            "overwrite": false,
             "type": "dashboard",
           },
         ],
@@ -159,6 +169,7 @@ describe('summarizeCopyResult', () => {
             "icon": "dashboardApp",
             "id": "foo",
             "name": "my-dashboard-title",
+            "overwrite": false,
             "type": "dashboard",
           },
           Object {
@@ -181,6 +192,7 @@ describe('summarizeCopyResult', () => {
             "icon": "visualizeApp",
             "id": "bar",
             "name": "visualization-foo-title",
+            "overwrite": false,
             "type": "visualization",
           },
           Object {
@@ -190,6 +202,7 @@ describe('summarizeCopyResult', () => {
             "icon": "indexPatternApp",
             "id": "foo",
             "name": "index-pattern-foo-title",
+            "overwrite": false,
             "type": "index-pattern",
           },
           Object {
@@ -199,6 +212,7 @@ describe('summarizeCopyResult', () => {
             "icon": "indexPatternApp",
             "id": "bar",
             "name": "index-pattern-bar-title",
+            "overwrite": false,
             "type": "index-pattern",
           },
           Object {
@@ -208,6 +222,7 @@ describe('summarizeCopyResult', () => {
             "icon": "visualizeApp",
             "id": "baz",
             "name": "visualization-bar-title",
+            "overwrite": false,
             "type": "visualization",
           },
         ],
@@ -234,6 +249,7 @@ describe('summarizeCopyResult', () => {
             "icon": "dashboardApp",
             "id": "foo",
             "name": "my-dashboard-title",
+            "overwrite": false,
             "type": "dashboard",
           },
           Object {
@@ -243,6 +259,7 @@ describe('summarizeCopyResult', () => {
             "icon": "visualizeApp",
             "id": "baz",
             "name": "visualization-bar-title",
+            "overwrite": false,
             "type": "visualization",
           },
           Object {
@@ -252,6 +269,7 @@ describe('summarizeCopyResult', () => {
             "icon": "indexPatternApp",
             "id": "foo",
             "name": "index-pattern-foo-title",
+            "overwrite": false,
             "type": "index-pattern",
           },
           Object {
@@ -261,6 +279,7 @@ describe('summarizeCopyResult', () => {
             "icon": "visualizeApp",
             "id": "bar",
             "name": "visualization-foo-title",
+            "overwrite": false,
             "type": "visualization",
           },
         ],
@@ -287,6 +306,7 @@ describe('summarizeCopyResult', () => {
             "icon": "dashboardApp",
             "id": "foo",
             "name": "my-dashboard-title",
+            "overwrite": false,
             "type": "dashboard",
           },
           Object {
@@ -296,6 +316,7 @@ describe('summarizeCopyResult', () => {
             "icon": "indexPatternApp",
             "id": "foo",
             "name": "index-pattern-foo-title",
+            "overwrite": false,
             "type": "index-pattern",
           },
           Object {
@@ -305,6 +326,7 @@ describe('summarizeCopyResult', () => {
             "icon": "indexPatternApp",
             "id": "bar",
             "name": "index-pattern-bar-title",
+            "overwrite": false,
             "type": "index-pattern",
           },
           Object {
@@ -314,6 +336,7 @@ describe('summarizeCopyResult', () => {
             "icon": "visualizeApp",
             "id": "bar",
             "name": "visualization-foo-title",
+            "overwrite": false,
             "type": "visualization",
           },
           Object {
@@ -323,6 +346,7 @@ describe('summarizeCopyResult', () => {
             "icon": "visualizeApp",
             "id": "baz",
             "name": "visualization-bar-title",
+            "overwrite": false,
             "type": "visualization",
           },
         ],
@@ -349,6 +373,7 @@ describe('summarizeCopyResult', () => {
             "icon": "dashboardApp",
             "id": "foo",
             "name": "my-dashboard-title",
+            "overwrite": false,
             "type": "dashboard",
           },
           Object {
@@ -358,6 +383,7 @@ describe('summarizeCopyResult', () => {
             "icon": "indexPatternApp",
             "id": "foo",
             "name": "index-pattern-foo-title",
+            "overwrite": false,
             "type": "index-pattern",
           },
           Object {
@@ -367,6 +393,7 @@ describe('summarizeCopyResult', () => {
             "icon": "indexPatternApp",
             "id": "bar",
             "name": "index-pattern-bar-title",
+            "overwrite": false,
             "type": "index-pattern",
           },
           Object {
@@ -376,6 +403,7 @@ describe('summarizeCopyResult', () => {
             "icon": "visualizeApp",
             "id": "bar",
             "name": "visualization-foo-title",
+            "overwrite": false,
             "type": "visualization",
           },
           Object {
@@ -385,6 +413,7 @@ describe('summarizeCopyResult', () => {
             "icon": "visualizeApp",
             "id": "baz",
             "name": "visualization-bar-title",
+            "overwrite": false,
             "type": "visualization",
           },
         ],
@@ -392,5 +421,15 @@ describe('summarizeCopyResult', () => {
         "successful": true,
       }
     `);
+  });
+
+  it('indicates when successes and failures have been overwritten', () => {
+    const copyResult = createCopyResult({ withMissingReferencesError: true, overwrite: true });
+    const summarizedResult = summarizeCopyResult(OBJECTS.MY_DASHBOARD, copyResult);
+
+    expect(summarizedResult.objects).toHaveLength(4);
+    for (const obj of summarizedResult.objects) {
+      expect(obj.overwrite).toBe(true);
+    }
   });
 });

@@ -22,6 +22,7 @@ export interface SummarizedSavedObjectResult {
   conflict?: FailedImportConflict;
   hasMissingReferences: boolean;
   hasUnresolvableErrors: boolean;
+  overwrite: boolean;
 }
 
 interface SuccessfulResponse {
@@ -72,15 +73,24 @@ export function summarizeCopyResult(
   const missingReferences = copyResult?.failedImports.filter(isMissingReferences) ?? [];
   const unresolvableErrors =
     copyResult?.failedImports.filter((failed) => isUnresolvableError(failed)) ?? [];
-  const getErrorFields = ({ type, id }: { type: string; id: string }) => {
+  const getExtraFields = ({ type, id }: { type: string; id: string }) => {
     const conflict = conflicts.find(({ obj }) => obj.type === type && obj.id === id);
-    const hasMissingReferences = missingReferences.some(
+    const missingReference = missingReferences.find(
       ({ obj }) => obj.type === type && obj.id === id
     );
+    const hasMissingReferences = missingReference !== undefined;
     const hasUnresolvableErrors = unresolvableErrors.some(
       ({ obj }) => obj.type === type && obj.id === id
     );
-    return { conflict, hasMissingReferences, hasUnresolvableErrors };
+    const overwrite = conflict
+      ? false
+      : missingReference
+      ? missingReference.obj.overwrite === true
+      : copyResult?.successfulImports.some(
+          (obj) => obj.type === type && obj.id === id && obj.overwrite
+        ) === true;
+
+    return { conflict, hasMissingReferences, hasUnresolvableErrors, overwrite };
   };
 
   const objectMap = new Map<string, SummarizedSavedObjectResult>();
@@ -89,7 +99,7 @@ export function summarizeCopyResult(
     id: savedObject.id,
     name: savedObject.meta.title,
     icon: savedObject.meta.icon,
-    ...getErrorFields(savedObject),
+    ...getExtraFields(savedObject),
   });
 
   const addObjectsToMap = (
@@ -102,7 +112,7 @@ export function summarizeCopyResult(
         id,
         name: meta.title || `${type} [id=${id}]`,
         icon: meta.icon || 'apps',
-        ...getErrorFields(obj),
+        ...getExtraFields(obj),
       });
     });
   };
