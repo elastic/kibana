@@ -78,7 +78,11 @@ const defaultOnQuerySubmit = (
       !_.isEqual(payload.query, currentQuery);
     if (isUpdate) {
       timefilter.setTime(payload.dateRange);
-      queryService.queryString.setQuery(payload.query);
+      if (payload.query) {
+        queryService.queryString.setQuery(payload.query);
+      } else {
+        queryService.queryString.clearQuery();
+      }
     } else {
       // Refresh button triggered for an update
       if (props.onQuerySubmit)

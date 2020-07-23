@@ -60,7 +60,7 @@ export class QueryStringManager {
     }
   }
 
-  public getQueryUpdate$ = () => {
+  public getUpdates$ = () => {
     return this.query$.asObservable();
   };
 

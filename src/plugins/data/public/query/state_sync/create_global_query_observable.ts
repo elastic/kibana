@@ -45,7 +45,7 @@ export function createQueryStateObservable({
 
     let currentChange: QueryStateChange = {};
     const subs: Subscription[] = [
-      queryString.getQueryUpdate$().subscribe(() => {
+      queryString.getUpdates$().subscribe(() => {
         currentChange.query = true;
         state.set({ ...state.get(), query: queryString.getQuery() });
       }),

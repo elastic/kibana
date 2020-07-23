@@ -25,12 +25,11 @@ import React, { useState, ReactElement } from 'react';
 import ReactDOM from 'react-dom';
 import angular from 'angular';
 
-import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subscription, merge } from 'rxjs';
+import { map, debounceTime } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { TimeRange } from 'src/plugins/data/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -38,7 +37,6 @@ import {
   esFilters,
   IndexPattern,
   IndexPatternsContract,
-  Query,
   QueryState,
   SavedQuery,
   syncQueryStateWithUrl,
@@ -80,7 +78,6 @@ import {
   addFatalError,
   AngularHttpError,
   KibanaLegacyStart,
-  migrateLegacyQuery,
   subscribeWithScope,
 } from '../../../kibana_legacy/public';
 
@@ -126,7 +123,6 @@ export class DashboardAppController {
     $route,
     $routeParams,
     dashboardConfig,
-    localStorage,
     indexPatterns,
     savedQueryService,
     embeddable,
@@ -153,7 +149,7 @@ export class DashboardAppController {
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const timefilter = queryService.timefilter.timefilter;
-    const queryStringMananger = queryService.queryString;
+    const queryStringManager = queryService.queryString;
     const isEmbeddedExternally = Boolean($routeParams.embed);
 
     // url param rules should only apply when embedded (e.g. url?embed=true)
@@ -189,7 +185,7 @@ export class DashboardAppController {
       {
         set: ({ filters, query }) => {
           dashboardStateManager.setFilters(filters || []);
-          dashboardStateManager.setQuery(query || queryStringMananger.getDefaultQuery());
+          dashboardStateManager.setQuery(query || queryStringManager.getDefaultQuery());
         },
         get: () => ({
           filters: dashboardStateManager.appState.filters,
@@ -198,7 +194,7 @@ export class DashboardAppController {
         state$: dashboardStateManager.appState$.pipe(
           map((state) => ({
             filters: state.filters,
-            query: queryStringMananger.formatQuery(state.query),
+            query: queryStringManager.formatQuery(state.query),
           }))
         ),
       },
@@ -470,7 +466,7 @@ export class DashboardAppController {
     });
 
     dashboardStateManager.applyFilters(
-      dashboardStateManager.getQuery() || queryStringMananger.getDefaultQuery(),
+      dashboardStateManager.getQuery() || queryStringManager.getDefaultQuery(),
       filterManager.getFilters()
     );
 
@@ -545,21 +541,13 @@ export class DashboardAppController {
       }
     };
 
-    $scope.updateQueryAndFetch = function ({ query, dateRange }) {
-      if (dateRange) {
-        timefilter.setTime(dateRange);
-      }
-
-      const oldQuery = $scope.model.query;
-      if (_.isEqual(oldQuery, query)) {
+    $scope.handleRefresh = function (_payload, isUpdate) {
+      if (!isUpdate) {
         // The user can still request a reload in the query bar, even if the
         // query is the same, and in that case, we have to explicitly ask for
         // a reload, since no state changes will cause it.
         lastReloadRequestTime = new Date().getTime();
         refreshDashboardContainer();
-      } else {
-        $scope.model.query = query;
-        dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
       }
     };
 
@@ -611,11 +599,6 @@ export class DashboardAppController {
 
     $scope.indexPatterns = [];
 
-    $scope.$watch('model.query', (newQuery: Query) => {
-      const query = migrateLegacyQuery(newQuery) as Query;
-      $scope.updateQueryAndFetch({ query });
-    });
-
     $scope.$watch(
       () => dashboardCapabilities.saveQuery,
       (newCapability) => {
@@ -656,18 +639,11 @@ export class DashboardAppController {
         showFilterBar,
         indexPatterns: $scope.indexPatterns,
         showSaveQuery: $scope.showSaveQuery,
-        query: $scope.model.query,
         savedQuery: $scope.savedQuery,
         onSavedQueryIdChange,
         savedQueryId: dashboardStateManager.getSavedQueryId(),
         useDefaultBehaviors: true,
-        onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
-          if (!payload.query) {
-            $scope.updateQueryAndFetch({ query: $scope.model.query, dateRange: payload.dateRange });
-          } else {
-            $scope.updateQueryAndFetch({ query: payload.query, dateRange: payload.dateRange });
-          }
-        },
+        onQuerySubmit: $scope.handleRefresh,
       };
     };
     const dashboardNavBar = document.getElementById('dashboardChrome');
@@ -682,25 +658,11 @@ export class DashboardAppController {
     };
 
     $scope.timefilterSubscriptions$ = new Subscription();
-
+    const timeChanges$ = merge(timefilter.getRefreshIntervalUpdate$(), timefilter.getTimeUpdate$());
     $scope.timefilterSubscriptions$.add(
       subscribeWithScope(
         $scope,
-        timefilter.getRefreshIntervalUpdate$(),
-        {
-          next: () => {
-            updateState();
-            refreshDashboardContainer();
-          },
-        },
-        (error: AngularHttpError | Error | string) => addFatalError(fatalErrors, error)
-      )
-    );
-
-    $scope.timefilterSubscriptions$.add(
-      subscribeWithScope(
-        $scope,
-        timefilter.getTimeUpdate$(),
+        timeChanges$,
         {
           next: () => {
             updateState();
@@ -1073,13 +1035,21 @@ export class DashboardAppController {
 
     updateViewMode(dashboardStateManager.getViewMode());
 
+    const filterChanges = merge(filterManager.getUpdates$(), queryStringManager.getUpdates$()).pipe(
+      debounceTime(100)
+    );
+
     // update root source when filters update
-    const updateSubscription = filterManager.getUpdates$().subscribe({
+    const updateSubscription = filterChanges.subscribe({
       next: () => {
         $scope.model.filters = filterManager.getFilters();
+        $scope.model.query = queryStringManager.getQuery();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         if (dashboardContainer) {
-          dashboardContainer.updateInput({ filters: $scope.model.filters });
+          dashboardContainer.updateInput({
+            filters: $scope.model.filters,
+            query: $scope.model.query,
+          });
         }
       },
     });

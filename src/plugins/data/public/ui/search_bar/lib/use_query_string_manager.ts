@@ -34,7 +34,7 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
     const subscriptions = new Subscription();
 
     subscriptions.add(
-      props.queryStringManager.getQueryUpdate$().subscribe({
+      props.queryStringManager.getUpdates$().subscribe({
         next: () => {
           const newQuery = props.queryStringManager.getQuery();
           setQuery(newQuery);
