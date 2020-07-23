@@ -189,16 +189,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController(
-  $element,
-  $route,
-  $scope,
-  $timeout,
-  $window,
-  Promise,
-  localStorage,
-  uiCapabilities
-) {
+function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const $fetchObservable = new Subject();
@@ -244,11 +235,15 @@ function discoverController(
 
   // sync initial app filters from state to filterManager
   filterManager.setAppFilters(_.cloneDeep(appStateContainer.getState().filters));
+  data.query.queryString.setQuery(appStateContainer.getState().query);
 
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
     data.query,
     appStateContainer,
-    { filters: esFilters.FilterStateStore.APP_STATE }
+    {
+      filters: esFilters.FilterStateStore.APP_STATE,
+      query: true,
+    }
   );
 
   const appStateUnsubscribe = appStateContainer.subscribe(async (newState) => {
@@ -292,7 +287,6 @@ function discoverController(
       filterManager.getUpdates$(),
       {
         next: () => {
-          $scope.state.filters = filterManager.getAppFilters();
           $scope.updateDataSource();
         },
       },
@@ -628,12 +622,7 @@ function discoverController(
 
   const init = _.once(() => {
     $scope.updateDataSource().then(async () => {
-      const searchBarChanges = merge(
-        timefilter.getAutoRefreshFetch$(),
-        timefilter.getFetch$(),
-        filterManager.getFetches$(),
-        $fetchObservable
-      ).pipe(debounceTime(100));
+      const searchBarChanges = merge(data.query.state$, $fetchObservable).pipe(debounceTime(100));
 
       subscriptions.add(
         subscribeWithScope(
@@ -817,13 +806,6 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function ({ query }, isUpdate = true) {
-    if (!_.isEqual(query, appStateContainer.getState().query) || isUpdate === false) {
-      setAppState({ query });
-      $fetchObservable.next();
-    }
-  };
-
   $scope.updateSavedQueryId = (newSavedQueryId) => {
     if (newSavedQueryId) {
       setAppState({ savedQuery: newSavedQueryId });
@@ -969,7 +951,7 @@ function discoverController(
           config.get(SORT_DEFAULT_ORDER_SETTING)
         )
       )
-      .setField('query', $scope.state.query || null)
+      .setField('query', data.query.queryString.getQuery() || null)
       .setField('filter', filterManager.getFilters());
     return Promise.resolve();
   };
