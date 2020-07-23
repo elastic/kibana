@@ -387,8 +387,8 @@ describe('The metric threshold alert type', () => {
       expect(action.group).toBe('*');
       expect(action.reason).toContain('current value is 100%');
       expect(action.reason).toContain('threshold of 75%');
-      expect(action.threshold.condition0[0]).toBe(75);
-      expect(action.value.condition0).toBe(100);
+      expect(action.threshold.condition0[0]).toBe('75%');
+      expect(action.value.condition0).toBe('100%');
       expect(action.timestamp).toBe(new Date(now).toISOString());
     });
   });

@@ -29,7 +29,11 @@ export const stateToAlertMessage = {
   }),
 };
 
-const comparatorToI18n = (comparator: Comparator, threshold: number[], currentValue: number) => {
+const comparatorToI18n = (
+  comparator: Comparator,
+  threshold: Array<number | string>,
+  currentValue: number | string
+) => {
   const gtText = i18n.translate('xpack.infra.metrics.alerting.threshold.gtComparator', {
     defaultMessage: 'greater than',
   });
@@ -54,17 +58,22 @@ const comparatorToI18n = (comparator: Comparator, threshold: number[], currentVa
     case Comparator.LT:
       return ltText;
     case Comparator.GT_OR_EQ:
-    case Comparator.LT_OR_EQ:
-      if (threshold[0] === currentValue) return eqText;
-      else if (threshold[0] < currentValue) return ltText;
+    case Comparator.LT_OR_EQ: {
+      const currentValueAsNumber =
+        typeof currentValue === 'string' ? parseFloat(currentValue) : currentValue;
+      const threshold0AsNumber =
+        typeof threshold[0] === 'string' ? parseFloat(threshold[0]) : threshold[0];
+      if (threshold0AsNumber === currentValueAsNumber) return eqText;
+      else if (threshold0AsNumber < currentValueAsNumber) return ltText;
       return gtText;
+    }
   }
 };
 
 const recoveredComparatorToI18n = (
   comparator: Comparator,
-  threshold: number[],
-  currentValue: number
+  threshold: Array<number | string>,
+  currentValue: number | string
 ) => {
   const belowText = i18n.translate('xpack.infra.metrics.alerting.threshold.belowRecovery', {
     defaultMessage: 'below',
@@ -72,9 +81,13 @@ const recoveredComparatorToI18n = (
   const aboveText = i18n.translate('xpack.infra.metrics.alerting.threshold.aboveRecovery', {
     defaultMessage: 'above',
   });
+  const currentValueAsNumber =
+    typeof currentValue === 'string' ? parseFloat(currentValue) : currentValue;
+  const threshold0AsNumber =
+    typeof threshold[0] === 'string' ? parseFloat(threshold[0]) : threshold[0];
   switch (comparator) {
     case Comparator.BETWEEN:
-      return currentValue < threshold[0] ? belowText : aboveText;
+      return currentValueAsNumber < threshold0AsNumber ? belowText : aboveText;
     case Comparator.OUTSIDE_RANGE:
       return i18n.translate('xpack.infra.metrics.alerting.threshold.betweenRecovery', {
         defaultMessage: 'between',
@@ -88,7 +101,7 @@ const recoveredComparatorToI18n = (
   }
 };
 
-const thresholdToI18n = ([a, b]: number[]) => {
+const thresholdToI18n = ([a, b]: Array<number | string>) => {
   if (typeof b === 'undefined') return a;
   return i18n.translate('xpack.infra.metrics.alerting.threshold.thresholdRange', {
     defaultMessage: '{a} and {b}',
@@ -96,13 +109,11 @@ const thresholdToI18n = ([a, b]: number[]) => {
   });
 };
 
-const pctIfMetricIsPct = (metric: string) => (metric.endsWith('.pct') ? '%' : '');
-
 export const buildFiredAlertReason: (alertResult: {
   metric: string;
   comparator: Comparator;
-  threshold: number[];
-  currentValue: number;
+  threshold: Array<number | string>;
+  currentValue: number | string;
 }) => string = ({ metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
@@ -110,16 +121,16 @@ export const buildFiredAlertReason: (alertResult: {
     values: {
       metric,
       comparator: comparatorToI18n(comparator, threshold, currentValue),
-      threshold: `${thresholdToI18n(threshold)}${pctIfMetricIsPct(metric)}`,
-      currentValue: `${currentValue}${pctIfMetricIsPct(metric)}`,
+      threshold: thresholdToI18n(threshold),
+      currentValue,
     },
   });
 
 export const buildRecoveredAlertReason: (alertResult: {
   metric: string;
   comparator: Comparator;
-  threshold: number[];
-  currentValue: number;
+  threshold: Array<number | string>;
+  currentValue: number | string;
 }) => string = ({ metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.recoveredAlertReason', {
     defaultMessage:
@@ -127,8 +138,8 @@ export const buildRecoveredAlertReason: (alertResult: {
     values: {
       metric,
       comparator: recoveredComparatorToI18n(comparator, threshold, currentValue),
-      threshold: `${thresholdToI18n(threshold)}${pctIfMetricIsPct(metric)}`,
-      currentValue: `${currentValue}${pctIfMetricIsPct(metric)}`,
+      threshold: thresholdToI18n(threshold),
+      currentValue,
     },
   });
 

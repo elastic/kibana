@@ -5,7 +5,6 @@
  */
 
 import { mapValues, first, last, isNaN } from 'lodash';
-import { decimalToPct } from '../../../../../common/utils/corrected_percent_convert';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
@@ -62,9 +61,8 @@ export const evaluateAlert = (
       const comparisonFunction = comparatorMap[comparator];
       return mapValues(currentValues, (points: any[] | typeof NaN | null) => {
         if (isTooManyBucketsPreviewException(points)) throw points;
-        const payload = {
+        return {
           ...criterion,
-          threshold,
           metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
           currentValue: Array.isArray(points) ? last(points)?.value : NaN,
           timestamp: Array.isArray(points) ? last(points)?.key : NaN,
@@ -74,12 +72,6 @@ export const evaluateAlert = (
           isNoData: points === null,
           isError: isNaN(points),
         };
-        const isMetricPct = payload.metric.endsWith('.pct');
-        if (isMetricPct) {
-          payload.threshold = payload.threshold.map((v: number) => decimalToPct(v));
-          payload.currentValue = decimalToPct(payload.currentValue);
-        }
-        return payload;
       });
     })
   );
