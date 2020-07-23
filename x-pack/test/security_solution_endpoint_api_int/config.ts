@@ -5,7 +5,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { createEndpointDockerConfig, getRegistryUrl } from './docker';
+import { createEndpointDockerConfig, getRegistryUrlOrEmptyStr } from './registry';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -21,7 +21,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
-      serverArgs: [...xPackAPITestsConfig.get('kbnTestServer.serverArgs'), getRegistryUrl()],
+      serverArgs: [
+        ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        getRegistryUrlOrEmptyStr(),
+      ],
     },
   };
 }
