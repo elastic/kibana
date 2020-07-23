@@ -195,8 +195,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       visibility: makeVisible,
     });
     if (makeVisible) {
-      // Need to re-select layer to get updated state.
-      dispatch<any>(syncDataForLayer(getLayerById(layerId, getState())));
+      dispatch<any>(syncDataForLayerId(layerId));
     }
   };
 }
