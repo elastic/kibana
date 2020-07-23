@@ -35,7 +35,12 @@ const setup = (
     timeFieldName,
     filters = [],
     dashboardOnlyMode = false,
-  }: { useRangeEvent?: boolean; filters: Filter[]; timeFieldName?: string, dashboardOnlyMode?: boolean } = { filters: [] }
+  }: {
+    useRangeEvent?: boolean;
+    filters: Filter[];
+    timeFieldName?: string;
+    dashboardOnlyMode?: boolean;
+  } = { filters: [] }
 ) => {
   type UrlGenerator = UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
 
