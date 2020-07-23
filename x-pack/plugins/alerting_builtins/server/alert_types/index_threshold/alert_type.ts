@@ -89,8 +89,7 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
   };
 
   async function executor(options: AlertExecutorOptions<Params, {}, {}, ActionContext>) {
-    const { alertId, name, services } = options;
-    const params = options.params;
+    const { alertId, name, services, params } = options;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
     if (compareFn == null) {

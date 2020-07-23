@@ -95,8 +95,10 @@ export class AlertTypeRegistry {
 
   public get<
     Params extends AlertTypeParams = AlertTypeParams,
-    State extends AlertTypeState = AlertTypeState
-  >(id: string): AlertType<Params, State> {
+    State extends AlertTypeState = AlertTypeState,
+    AlertInstanceStateType extends AlertInstanceState = AlertInstanceState,
+    AlertInstanceContextType extends AlertInstanceContext = AlertInstanceContext
+  >(id: string): AlertType<Params, State, AlertInstanceStateType, AlertInstanceContextType> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerts.alertTypeRegistry.get.missingAlertTypeError', {
@@ -107,7 +109,12 @@ export class AlertTypeRegistry {
         })
       );
     }
-    return this.alertTypes.get(id)! as AlertType<Params, State>;
+    return this.alertTypes.get(id)! as AlertType<
+      Params,
+      State,
+      AlertInstanceStateType,
+      AlertInstanceContextType
+    >;
   }
 
   public list(): Set<RegistryAlertType> {
