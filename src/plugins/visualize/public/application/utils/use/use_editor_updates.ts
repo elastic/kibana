@@ -21,7 +21,6 @@ import { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 import { EventEmitter } from 'events';
 
-import { migrateLegacyQuery } from '../../../../../kibana_legacy/public';
 import {
   VisualizeServices,
   VisualizeAppState,
