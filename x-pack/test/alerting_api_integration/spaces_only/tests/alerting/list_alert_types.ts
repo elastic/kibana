@@ -29,6 +29,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         name: 'Test: Noop',
         actionVariables: {
           state: [],
+          params: [],
           context: [],
         },
         producer: 'alertsFixture',
@@ -48,6 +49,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
       expect(fixtureAlertType.actionVariables).to.eql({
         state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
+        params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
         context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
       });
     });
@@ -64,6 +66,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
       expect(fixtureAlertType.actionVariables).to.eql({
         state: [],
+        params: [],
         context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
       });
     });
@@ -81,6 +84,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       expect(fixtureAlertType.actionVariables).to.eql({
         state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
         context: [],
+        params: [],
       });
     });
   });

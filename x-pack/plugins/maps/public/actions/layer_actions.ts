@@ -35,12 +35,7 @@ import {
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
-import {
-  clearDataRequests,
-  syncDataForLayerId,
-  syncDataForLayer,
-  updateStyleMeta,
-} from './data_request_actions';
+import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { JoinDescriptor, LayerDescriptor, StyleDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
@@ -175,7 +170,7 @@ export function promotePreviewLayers() {
 }
 
 export function setLayerVisibility(layerId: string, makeVisible: boolean) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
     // if the current-state is invisible, we also want to sync data
     // e.g. if a layer was invisible at start-up, it won't have any data loaded
     const layer = getLayerById(layerId, getState());
@@ -189,19 +184,19 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
       dispatch<any>(cleanTooltipStateForLayer(layerId));
     }
 
-    await dispatch({
+    dispatch({
       type: SET_LAYER_VISIBILITY,
       layerId,
       visibility: makeVisible,
     });
     if (makeVisible) {
-      dispatch<any>(syncDataForLayer(layer));
+      dispatch<any>(syncDataForLayerId(layerId));
     }
   };
 }
 
 export function toggleLayerVisible(layerId: string) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;

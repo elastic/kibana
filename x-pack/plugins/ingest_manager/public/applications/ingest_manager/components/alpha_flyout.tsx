@@ -73,7 +73,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         </EuiText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+        <EuiButtonEmpty onClick={onClose} flush="left">
           <FormattedMessage
             id="xpack.ingestManager.alphaMessging.closeFlyoutLabel"
             defaultMessage="Close"
