@@ -43,6 +43,7 @@ import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_obje
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
+import { Filter } from '../../../data/common';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -51,6 +52,15 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<Pick<VisualizationsStartDeps, 'inspector' | 'embeddable'>>;
 }
+
+type FilterOrFilterList = undefined | Filter | Filter[];
+type SearchSourceFilters = FilterOrFilterList | (() => FilterOrFilterList);
+
+const toFilterArray = (filters: Filter | Filter[] | undefined) =>
+  !filters ? [] : Array.isArray(filters) ? filters : [filters];
+
+const getSearchSourceFilters = (filters: SearchSourceFilters): Filter[] =>
+  typeof filters === 'function' ? toFilterArray(filters()) : toFilterArray(filters);
 
 export class VisualizeEmbeddableFactory
   implements
@@ -115,6 +125,15 @@ export class VisualizeEmbeddableFactory
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
       const visState = convertToSerializedVis(savedObject);
+
+      input = {
+        ...input,
+        filters: [
+          ...(input.filters || []),
+          ...getSearchSourceFilters(visState.data.searchSource.filter),
+        ],
+      };
+
       const vis = new Vis(savedObject.visState.type, visState);
       await vis.setState(visState);
       return createVisEmbeddableFromObject(this.deps)(vis, input, parent);

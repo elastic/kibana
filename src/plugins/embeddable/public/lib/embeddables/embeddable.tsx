@@ -73,8 +73,9 @@ export abstract class Embeddable<
         // Make sure this panel hasn't been removed immediately after it was added, but before it finished loading.
         if (!parent.getInput().panels[this.id]) return;
 
-        const newInput = parent.getInputForChild<TEmbeddableInput>(this.id);
-        this.onResetInput(newInput);
+        // WARNING: This line removes vis filters filters.
+        // const newInput = parent.getInputForChild<TEmbeddableInput>(this.id);
+        // this.onResetInput(newInput);
       });
     }
   }
