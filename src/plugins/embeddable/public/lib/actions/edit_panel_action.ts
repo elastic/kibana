@@ -114,7 +114,6 @@ export class EditPanelAction implements Action<ActionContext> {
         const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
         const state: EmbeddableEditorState = {
           originatingApp: this.currentAppId,
-          byValueMode,
           valueInput: byValueMode ? embeddable.getInput() : undefined,
           embeddableId: embeddable.getInput().id,
         };
