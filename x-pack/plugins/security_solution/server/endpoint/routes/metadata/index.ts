@@ -21,6 +21,7 @@ import { EndpointAppContext } from '../../types';
 import { AgentService } from '../../../../../ingest_manager/server';
 import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
+import { findAgentIDsByStatus } from './support/agent_status';
 
 interface HitSource {
   _source: HostMetadata;
@@ -80,6 +81,10 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
              * filter to be applied, it could be a kql expression or discrete filter to be implemented
              */
             filter: schema.nullable(schema.oneOf([schema.string()])),
+            /**
+             * filtering specifically by agent_status
+             */
+            agent_status: schema.nullable(schema.arrayOf(schema.string())),
           })
         ),
       },
@@ -103,7 +108,13 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           context.core.savedObjects.client
         );
 
-        // placeholder: host status filter
+        const statusIDs = req.body?.agent_status?.length
+          ? await findAgentIDsByStatus(
+              agentService,
+              context.core.savedObjects.client,
+              req.body?.agent_status
+            )
+          : [];
 
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
@@ -111,6 +122,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           metadataIndexPattern,
           {
             unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
+            statusAgentIDs: statusIDs,
           }
         );
 
