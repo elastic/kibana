@@ -8,13 +8,25 @@ exports[`renders correctly 1`] = `
     >
       <EuiFlexItem
         grow={false}
+        style={
+          Object {
+            "maxWidth": 283,
+          }
+        }
       >
-        <EuiButton
-          fill={true}
-          href="my/url/from/nowwhere"
-        >
-          Do Something
-        </EuiButton>
+        <EuiCard
+          description={false}
+          footer={
+            <EuiButton
+              data-test-subj="empty-page-actions-action"
+              fill={true}
+              href="my/url/from/nowwhere"
+            >
+              Do Something
+            </EuiButton>
+          }
+          title={false}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   }
