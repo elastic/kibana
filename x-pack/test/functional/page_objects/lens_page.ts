@@ -167,5 +167,33 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.existOrFail('visTypeTitle');
       });
     },
+
+    /**
+     * Checks a specific subvisualization in the chart switcher for a "data loss" indicator
+     *
+     * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
+     * lnsDatatable or bar_stacked
+     */
+    async hasChartSwitchWarning(subVisualizationId: string) {
+      await this.openChartSwitchPopover();
+
+      const element = await testSubjects.find(`lnsChartSwitchPopover_${subVisualizationId}`);
+      return await testSubjects.descendantExists('euiKeyPadMenuItem__betaBadgeWrapper', element);
+    },
+
+    /**
+     * Returns the number of layers visible in the chart configuration
+     */
+    async getLayerCount() {
+      const elements = await testSubjects.findAll('lnsLayerRemove');
+      return elements.length;
+    },
+
+    /**
+     * Adds a new layer to the chart, fails if the chart does not support new layers
+     */
+    async createLayer() {
+      await testSubjects.click('lnsLayerAddButton');
+    },
   });
 }

@@ -13,6 +13,7 @@ import {
   deleteAllAlerts,
   deleteAllTimelines,
   deleteSignalsIndex,
+  waitFor,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -20,8 +21,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/71814
-  describe.skip('add_prepackaged_rules', () => {
+  describe('add_prepackaged_rules', () => {
     describe('validation errors', () => {
       it('should give an error that the index must exist first if it does not exist before adding prepackaged rules', async () => {
         const { body } = await supertest
@@ -90,6 +90,16 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
+
+        // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
+        // This is to reduce flakiness where it can for a short period of time try to install the same rule the same rule twice.
+        await waitFor(async () => {
+          const { body } = await supertest
+            .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+          return body.rules_not_installed === 0;
+        });
 
         const { body } = await supertest
           .put(DETECTION_ENGINE_PREPACKAGED_URL)

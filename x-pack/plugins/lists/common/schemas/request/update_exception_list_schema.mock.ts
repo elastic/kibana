@@ -10,6 +10,7 @@ import { UpdateExceptionListSchema } from './update_exception_list_schema';
 
 export const getUpdateExceptionListSchemaMock = (): UpdateExceptionListSchema => ({
   _tags: _TAGS,
+  _version: undefined,
   description: DESCRIPTION,
   id: ID,
   list_id: LIST_ID,
