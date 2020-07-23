@@ -5,14 +5,17 @@
  */
 import * as t from 'io-ts';
 
-export const createComments = t.exact(
+import { NonEmptyString } from '../../siem_common_deps';
+
+export const createComment = t.exact(
   t.type({
-    comment: t.string,
+    comment: NonEmptyString,
   })
 );
 
-export const createCommentsArray = t.array(createComments);
+export type CreateComment = t.TypeOf<typeof createComment>;
+export const createCommentsArray = t.array(createComment);
 export type CreateCommentsArray = t.TypeOf<typeof createCommentsArray>;
-export type CreateComments = t.TypeOf<typeof createComments>;
+export type CreateComments = t.TypeOf<typeof createComment>;
 export const createCommentsArrayOrUndefined = t.union([createCommentsArray, t.undefined]);
 export type CreateCommentsArrayOrUndefined = t.TypeOf<typeof createCommentsArrayOrUndefined>;

@@ -377,7 +377,7 @@ export const ExceptionBuilder = ({
           )}
           <EuiFlexItem grow={1}>
             <BuilderButtonOptions
-              isOrDisabled={disableOr}
+              isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
               isAndDisabled={disableAnd}
               isNestedDisabled={isNestedDisabled}
               isNested={addNested}

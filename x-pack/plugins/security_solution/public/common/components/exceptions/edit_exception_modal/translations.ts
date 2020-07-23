@@ -67,3 +67,18 @@ export const EXCEPTION_BUILDER_INFO = i18n.translate(
     defaultMessage: "Alerts are generated when the rule's conditions are met, except when:",
   }
 );
+
+export const VERSION_CONFLICT_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.versionConflictTitle',
+  {
+    defaultMessage: 'Sorry, there was an error',
+  }
+);
+
+export const VERSION_CONFLICT_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.versionConflictDescription',
+  {
+    defaultMessage:
+      "It appears this item was updated since you first selected to edit it. Selecting 'Cancel' and re-entering the modal should remove this error.",
+  }
+);

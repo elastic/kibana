@@ -20,13 +20,14 @@ import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
 import {
   CommentsArray,
-  Comments,
-  CreateComments,
+  Comment,
+  CreateComment,
   Entry,
   ExceptionListItemSchema,
   NamespaceType,
   OperatorTypeEnum,
   CreateExceptionListItemSchema,
+  comment,
   entry,
   entriesNested,
   createExceptionListItemSchema,
@@ -34,7 +35,7 @@ import {
   UpdateExceptionListItemSchema,
   ExceptionListType,
   EntryNested,
-} from '../../../lists_plugin_deps';
+} from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
 import { TimelineNonEcsData } from '../../../graphql/types';
@@ -140,16 +141,16 @@ export const getTagsInclude = ({
  * @param comments ExceptionItem.comments
  */
 export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[] =>
-  comments.map((comment) => ({
-    username: comment.created_by,
-    timestamp: moment(comment.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
+  comments.map((commentItem) => ({
+    username: commentItem.created_by,
+    timestamp: moment(commentItem.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
     event: i18n.COMMENT_EVENT,
-    timelineIcon: <EuiAvatar size="l" name={comment.created_by.toUpperCase()} />,
-    children: <EuiText size="s">{comment.comment}</EuiText>,
+    timelineIcon: <EuiAvatar size="l" name={commentItem.created_by.toUpperCase()} />,
+    children: <EuiText size="s">{commentItem.comment}</EuiText>,
     actions: (
       <WithCopyToClipboard
         data-test-subj="copy-to-clipboard"
-        text={comment.comment}
+        text={commentItem.comment}
         titleSummary={i18n.ADD_TO_CLIPBOARD}
       />
     ),
@@ -271,11 +272,11 @@ export const prepareExceptionItemsForBulkClose = (
 /**
  * Adds new and existing comments to all new exceptionItems if not present already
  * @param exceptionItems new or existing ExceptionItem[]
- * @param comments new Comments
+ * @param comments new Comment
  */
-export const enrichExceptionItemsWithComments = (
+export const enrichNewExceptionItemsWithComments = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  comments: Array<Comments | CreateComments>
+  comments: Array<Comment | CreateComment>
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
   return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
     return {
@@ -283,6 +284,36 @@ export const enrichExceptionItemsWithComments = (
       comments,
     };
   });
+};
+
+/**
+ * Adds new and existing comments to exceptionItem
+ * @param exceptionItem existing ExceptionItem
+ * @param comments array of comments that can include existing
+ * and new comments
+ */
+export const enrichExistingExceptionItemWithComments = (
+  exceptionItem: ExceptionListItemSchema | CreateExceptionListItemSchema,
+  comments: Array<Comment | CreateComment>
+): ExceptionListItemSchema | CreateExceptionListItemSchema => {
+  const formattedComments = comments.map((item) => {
+    if (comment.is(item)) {
+      const { id, comment: existingComment } = item;
+      return {
+        id,
+        comment: existingComment,
+      };
+    } else {
+      return {
+        comment: item.comment,
+      };
+    }
+  });
+
+  return {
+    ...exceptionItem,
+    comments: formattedComments,
+  };
 };
 
 /**

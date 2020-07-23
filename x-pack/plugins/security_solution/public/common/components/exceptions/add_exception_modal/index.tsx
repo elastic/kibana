@@ -38,7 +38,7 @@ import { useSignalIndex } from '../../../../detections/containers/detection_engi
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
-  enrichExceptionItemsWithComments,
+  enrichNewExceptionItemsWithComments,
   enrichExceptionItemsWithOS,
   defaultEndpointExceptionItems,
   entryHasListType,
@@ -240,7 +240,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
     enriched =
       comment !== ''
-        ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
+        ? enrichNewExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
       const osTypes = retrieveAlertOsTypes();

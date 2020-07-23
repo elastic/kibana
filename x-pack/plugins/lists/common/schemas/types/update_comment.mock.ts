@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCommentsMock } from './comments.mock';
-import { getCreateCommentsMock } from './create_comments.mock';
-import { UpdateCommentsArray } from './update_comments';
+import { ID } from '../../constants.mock';
+
+import { UpdateComment, UpdateCommentsArray } from './update_comment';
+
+export const getUpdateCommentMock = (): UpdateComment => ({
+  comment: 'some comment',
+  id: ID,
+});
 
 export const getUpdateCommentsArrayMock = (): UpdateCommentsArray => [
-  getCommentsMock(),
-  getCreateCommentsMock(),
+  getUpdateCommentMock(),
+  getUpdateCommentMock(),
 ];

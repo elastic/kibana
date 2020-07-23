@@ -3,26 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/* eslint-disable @typescript-eslint/camelcase */
+
 import * as t from 'io-ts';
 
-export const comments = t.intersection([
+import { NonEmptyString } from '../../siem_common_deps';
+import { created_at, created_by, id, updated_at, updated_by } from '../common/schemas';
+
+export const comment = t.intersection([
   t.exact(
     t.type({
-      comment: t.string,
-      created_at: t.string, // TODO: Make this into an ISO Date string check,
-      created_by: t.string,
+      comment: NonEmptyString,
+      created_at,
+      created_by,
+      id,
     })
   ),
   t.exact(
     t.partial({
-      updated_at: t.string,
-      updated_by: t.string,
+      updated_at,
+      updated_by,
     })
   ),
 ]);
 
-export const commentsArray = t.array(comments);
+export const commentsArray = t.array(comment);
 export type CommentsArray = t.TypeOf<typeof commentsArray>;
-export type Comments = t.TypeOf<typeof comments>;
+export type Comment = t.TypeOf<typeof comment>;
 export const commentsArrayOrUndefined = t.union([commentsArray, t.undefined]);
 export type CommentsArrayOrUndefined = t.TypeOf<typeof commentsArrayOrUndefined>;

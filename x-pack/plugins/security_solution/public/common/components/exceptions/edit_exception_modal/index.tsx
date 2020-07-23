@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -34,7 +35,7 @@ import { ExceptionBuilder } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
-  enrichExceptionItemsWithComments,
+  enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
   getOperatingSystems,
   entryHasListType,
@@ -88,6 +89,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 }: EditExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
+  const [hasVersionConflict, setHasVersionConflict] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
@@ -106,8 +108,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onError = useCallback(
     (error) => {
-      addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
-      onCancel();
+      if (error.message.includes('Conflict')) {
+        setHasVersionConflict(true);
+      } else {
+        addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
+        onCancel();
+      }
     },
     [addError, onCancel]
   );
@@ -172,11 +178,16 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   );
 
   const enrichExceptionItems = useCallback(() => {
+    const [exceptionItemToEdit] = exceptionItemsToAdd;
     let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
-    enriched = enrichExceptionItemsWithComments(exceptionItemsToAdd, [
-      ...(exceptionItem.comments ? exceptionItem.comments : []),
-      ...(comment !== '' ? [{ comment }] : []),
-    ]);
+    enriched = [
+      {
+        ...enrichExistingExceptionItemWithComments(exceptionItemToEdit, [
+          ...exceptionItem.comments,
+          ...(comment.trim() !== '' ? [{ comment }] : []),
+        ]),
+      },
+    ];
     if (exceptionListType === 'endpoint') {
       const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
@@ -212,12 +223,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
               <ExceptionBuilder
-                exceptionListItems={[exceptionItem]}
+                exceptionListItems={hasVersionConflict ? exceptionItemsToAdd : [exceptionItem]}
                 listType={exceptionListType}
                 listId={exceptionItem.list_id}
                 listNamespaceType={exceptionItem.namespace_type}
                 ruleName={ruleName}
-                isOrDisabled={false}
+                isOrDisabled
                 isAndDisabled={false}
                 isNestedDisabled={false}
                 data-test-subj="edit-exception-modal-builder"
@@ -256,6 +267,14 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               </EuiFormRow>
             </ModalBodySection>
           </>
+        )}
+
+        {hasVersionConflict && (
+          <ModalBodySection>
+            <EuiCallOut title={i18n.VERSION_CONFLICT_ERROR_TITLE} color="danger" iconType="alert">
+              <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
+            </EuiCallOut>
+          </ModalBodySection>
         )}
 
         <EuiModalFooter>
