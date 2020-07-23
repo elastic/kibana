@@ -139,7 +139,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
                 id="xpack.ingestManager.newEnrollmentKey.cancelButtonLabel"
                 defaultMessage="Cancel"

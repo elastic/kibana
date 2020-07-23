@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
@@ -126,7 +127,23 @@ export const fetchRules = async ({
  * @throws An error if response is not OK
  */
 export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> =>
-  KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+  pureFetchRuleById({ id, http: KibanaServices.get().http, signal });
+
+/**
+ * Fetch a Rule by providing a Rule ID
+ *
+ * @param id Rule ID's (not rule_id)
+ * @param http Kibana http service
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const pureFetchRuleById = async ({
+  id,
+  http,
+  signal,
+}: FetchRuleProps & { http: HttpStart }): Promise<Rule> =>
+  http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     query: { id },
     signal,

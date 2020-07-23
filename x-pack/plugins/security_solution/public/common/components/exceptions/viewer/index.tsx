@@ -57,6 +57,7 @@ interface ExceptionsViewerProps {
   exceptionListsMeta: ExceptionIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
+  onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
@@ -66,6 +67,7 @@ const ExceptionsViewerComponent = ({
   exceptionListsMeta,
   availableListTypes,
   commentsAccordionId,
+  onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const [, dispatchToaster] = useStateToaster();
@@ -276,6 +278,7 @@ const ExceptionsViewerComponent = ({
           exceptionListType={exceptionListTypeToEdit}
           onCancel={handleOnCancelExceptionModal}
           onConfirm={handleOnConfirmExceptionModal}
+          onRuleChange={onRuleChange}
         />
       )}
 
