@@ -33,6 +33,11 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
 
   public readonly order = 200;
 
+  public async isCompatible(context: ExploreDataChartActionContext): Promise<boolean> {
+    if (context.embeddable?.type === 'map') return false; // TODO: https://github.com/elastic/kibana/issues/73043
+    return super.isCompatible(context);
+  }
+
   protected readonly getUrl = async (
     context: ExploreDataChartActionContext
   ): Promise<KibanaURL> => {
