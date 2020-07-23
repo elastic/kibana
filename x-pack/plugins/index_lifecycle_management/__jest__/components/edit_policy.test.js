@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import moment from 'moment-timezone';
 import { Provider } from 'react-redux';
 // axios has a $http like interface so using it to simulate $http
@@ -14,7 +15,7 @@ import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
-import { fetchedPolicies, fetchedNodes } from '../../public/application/store/actions';
+import { fetchedPolicies } from '../../public/application/store/actions';
 import { indexLifecycleManagementStore } from '../../public/application/store';
 import { EditPolicy } from '../../public/application/sections/edit_policy';
 import { init as initHttp } from '../../public/application/services/http';
@@ -37,9 +38,15 @@ import {
 
 initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
 initUiMetric({ reportUiStats: () => {} });
-initNotification({
-  addDanger: () => {},
-});
+initNotification(
+  {
+    addDanger: () => {},
+    addSuccess: () => {},
+  },
+  {
+    add: () => {},
+  }
+);
 
 let server;
 let store;
@@ -70,9 +77,11 @@ for (let i = 0; i < 105; i++) {
 window.scrollTo = jest.fn();
 window.TextEncoder = null;
 let component;
-const activatePhase = (rendered, phase) => {
+const activatePhase = async (rendered, phase) => {
   const testSubject = `enablePhaseSwitch-${phase}`;
-  findTestSubject(rendered, testSubject).simulate('click');
+  await act(async () => {
+    await findTestSubject(rendered, testSubject).simulate('click');
+  });
   rendered.update();
 };
 const expectedErrorMessages = (rendered, expectedErrorMessages) => {
@@ -120,7 +129,7 @@ describe('edit policy', () => {
     store = indexLifecycleManagementStore();
     component = (
       <Provider store={store}>
-        <EditPolicy />
+        <EditPolicy history={{ push: () => {} }} />
       </Provider>
     );
     store.dispatch(fetchedPolicies(policies));
@@ -242,48 +251,57 @@ describe('edit policy', () => {
     });
   });
   describe('warm phase', () => {
-    test('should show number required error when trying to save empty warm phase', () => {
+    beforeEach(() => {
+      server.respondImmediately = true;
+      server.respondWith('/api/index_lifecycle_management/nodes/list', [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify({}),
+      ]);
+    });
+
+    test('should show number required error when trying to save empty warm phase', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', '');
       save(rendered);
       expectedErrorMessages(rendered, [numberRequiredMessage]);
     });
-    test('should allow 0 for phase timing', () => {
+    test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 0);
       save(rendered);
       expectedErrorMessages(rendered, []);
     });
-    test('should show positive number required error when trying to save warm phase with -1 for after', () => {
+    test('should show positive number required error when trying to save warm phase with -1 for after', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', -1);
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
-    test('should show positive number required error when trying to save warm phase with -1 for index priority', () => {
+    test('should show positive number required error when trying to save warm phase with -1 for index priority', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
       setPhaseIndexPriority(rendered, 'warm', -1);
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
-    test('should show positive number required above zero error when trying to save warm phase with 0 for shrink', () => {
+    test('should show positive number required above zero error when trying to save warm phase with 0 for shrink', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       findTestSubject(rendered, 'shrinkSwitch').simulate('click');
       rendered.update();
       setPhaseAfter(rendered, 'warm', 1);
@@ -293,11 +311,11 @@ describe('edit policy', () => {
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show positive number above 0 required error when trying to save warm phase with -1 for shrink', () => {
+    test('should show positive number above 0 required error when trying to save warm phase with -1 for shrink', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
       findTestSubject(rendered, 'shrinkSwitch').simulate('click');
       rendered.update();
@@ -307,11 +325,11 @@ describe('edit policy', () => {
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show positive number required above zero error when trying to save warm phase with 0 for force merge', () => {
+    test('should show positive number required above zero error when trying to save warm phase with 0 for force merge', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
       findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
       rendered.update();
@@ -321,11 +339,11 @@ describe('edit policy', () => {
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show positive number above 0 required error when trying to save warm phase with -1 for force merge', () => {
+    test('should show positive number above 0 required error when trying to save warm phase with -1 for force merge', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', 1);
       findTestSubject(rendered, 'forceMergeSwitch').simulate('click');
       rendered.update();
@@ -335,43 +353,51 @@ describe('edit policy', () => {
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
-    test('should show spinner for node attributes input when loading', () => {
+    test('should show spinner for node attributes input when loading', async () => {
+      server.respondImmediately = false;
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
-    test('should show warning instead of node attributes input when none exist', () => {
-      store.dispatch(fetchedNodes({}));
+    test('should show warning instead of node attributes input when none exist', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeTruthy();
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
-    test('should show node attributes input when attributes exist', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
+    test('should show node attributes input when attributes exist', async () => {
+      server.respondWith('/api/index_lifecycle_management/nodes/list', [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify({ 'attribute:true': ['node1'] }),
+      ]);
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'warm');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
-    test('should show view node attributes link when attribute selected and show flyout when clicked', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
+    test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
+      server.respondWith('/api/index_lifecycle_management/nodes/list', [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify({ 'attribute:true': ['node1'] }),
+      ]);
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'warm');
+      await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'warm');
@@ -388,61 +414,77 @@ describe('edit policy', () => {
     });
   });
   describe('cold phase', () => {
-    test('should allow 0 for phase timing', () => {
+    beforeEach(() => {
+      server.respondImmediately = true;
+      server.respondWith('/api/index_lifecycle_management/nodes/list', [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify({}),
+      ]);
+    });
+    test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'cold');
+      await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', 0);
       save(rendered);
       expectedErrorMessages(rendered, []);
     });
-    test('should show positive number required error when trying to save cold phase with -1 for after', () => {
+    test('should show positive number required error when trying to save cold phase with -1 for after', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'cold');
+      await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', -1);
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
-    test('should show spinner for node attributes input when loading', () => {
+    test('should show spinner for node attributes input when loading', async () => {
+      server.respondImmediately = false;
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'cold');
+      await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
-    test('should show warning instead of node attributes input when none exist', () => {
-      store.dispatch(fetchedNodes({}));
+    test('should show warning instead of node attributes input when none exist', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'cold');
+      await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeTruthy();
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
-    test('should show node attributes input when attributes exist', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
+    test('should show node attributes input when attributes exist', async () => {
+      server.respondWith('/api/index_lifecycle_management/nodes/list', [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify({ 'attribute:true': ['node1'] }),
+      ]);
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'cold');
+      await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
-    test('should show view node attributes link when attribute selected and show flyout when clicked', () => {
-      store.dispatch(fetchedNodes({ 'attribute:true': ['node1'] }));
+    test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
+      server.respondWith('/api/index_lifecycle_management/nodes/list', [
+        200,
+        { 'Content-Type': 'application/json' },
+        JSON.stringify({ 'attribute:true': ['node1'] }),
+      ]);
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'cold');
+      await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
@@ -457,11 +499,11 @@ describe('edit policy', () => {
       rendered.update();
       expect(rendered.find('.euiFlyout').exists()).toBeTruthy();
     });
-    test('should show positive number required error when trying to save with -1 for index priority', () => {
+    test('should show positive number required error when trying to save with -1 for index priority', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'cold');
+      await activatePhase(rendered, 'cold');
       setPhaseAfter(rendered, 'cold', 1);
       setPhaseIndexPriority(rendered, 'cold', -1);
       save(rendered);
@@ -469,20 +511,20 @@ describe('edit policy', () => {
     });
   });
   describe('delete phase', () => {
-    test('should allow 0 for phase timing', () => {
+    test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'delete');
+      await activatePhase(rendered, 'delete');
       setPhaseAfter(rendered, 'delete', 0);
       save(rendered);
       expectedErrorMessages(rendered, []);
     });
-    test('should show positive number required error when trying to save delete phase with -1 for after', () => {
+    test('should show positive number required error when trying to save delete phase with -1 for after', async () => {
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
-      activatePhase(rendered, 'delete');
+      await activatePhase(rendered, 'delete');
       setPhaseAfter(rendered, 'delete', -1);
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
