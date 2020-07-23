@@ -50,6 +50,7 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
         name:
           // For Endpoint packages, the user must fill in the name, thus we don't attempt to generate
           // a default one here.
+          // FIXME: Improve package configs name uniqueness - https://github.com/elastic/kibana/issues/72948
           packageInfo.name !== 'endpoint'
             ? `${packageInfo.name}-${
                 dsWithMatchingNames.length
