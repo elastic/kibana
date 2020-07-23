@@ -79,6 +79,7 @@ import {
   AngularHttpError,
   KibanaLegacyStart,
   subscribeWithScope,
+  migrateLegacyQuery,
 } from '../../../kibana_legacy/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
@@ -179,6 +180,8 @@ export class DashboardAppController {
     // sync initial app filters from state to filterManager
     // if there is an existing similar global filter, then leave it as global
     filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
+    queryStringManager.setQuery(migrateLegacyQuery(dashboardStateManager.appState.query));
+
     // setup syncing of app filters between appState and filterManager
     const stopSyncingAppFilters = connectToQueryState(
       queryService,
