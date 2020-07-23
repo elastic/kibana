@@ -14,18 +14,15 @@ import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../common/components/
 import { State } from '../../../common/store';
 import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { UNTITLED_TIMELINE } from '../../../timelines/components/timeline/properties/translations';
 
 import { AllCasesModal } from './all_cases_modal';
 
 export interface UseAllCasesModalProps {
   timelineId: string;
-  graphEventId?: string;
-  title?: string;
 }
 
 export interface UseAllCasesModalReturnedValues {
-  modal: JSX.Element | null;
+  Modal: React.FC;
   showModal: boolean;
   onCloseModal: () => void;
   onOpenModal: () => void;
@@ -34,13 +31,11 @@ export interface UseAllCasesModalReturnedValues {
 
 export const useAllCasesModal = ({
   timelineId,
-  graphEventId,
-  title,
 }: UseAllCasesModalProps): UseAllCasesModalReturnedValues => {
   const dispatch = useDispatch();
   const { navigateToApp } = useKibana().services.application;
-  const timelineSavedObjectId = useSelector(
-    (state: State) => timelineSelectors.selectTimeline(state, timelineId)?.savedObjectId ?? ''
+  const timeline = useSelector((state: State) =>
+    timelineSelectors.selectTimeline(state, timelineId)
   );
 
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -57,26 +52,27 @@ export const useAllCasesModal = ({
 
       dispatch(
         setInsertTimeline({
-          graphEventId,
+          graphEventId: timeline.graphEventId ?? '',
           timelineId,
-          timelineSavedObjectId,
-          timelineTitle: title && title.length > 0 ? title : UNTITLED_TIMELINE,
+          timelineSavedObjectId: timeline.savedObjectId ?? '',
+          timelineTitle: timeline.title,
         })
       );
     },
     // dispatch causes unnecessary rerenders
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timelineSavedObjectId, graphEventId, navigateToApp, onCloseModal, timelineId, title]
+    [timeline, navigateToApp, onCloseModal, timelineId]
   );
 
-  const Modal = useMemo(
-    () => <AllCasesModal onCloseCaseModal={onCloseModal} onRowClick={onRowClick} />,
-    [onCloseModal, onRowClick]
+  const Modal: React.FC = useCallback(
+    () =>
+      showModal ? <AllCasesModal onCloseCaseModal={onCloseModal} onRowClick={onRowClick} /> : null,
+    [onCloseModal, onRowClick, showModal]
   );
 
   const state = useMemo(
     () => ({
-      modal: showModal ? Modal : null,
+      Modal,
       showModal,
       onCloseModal,
       onOpenModal,

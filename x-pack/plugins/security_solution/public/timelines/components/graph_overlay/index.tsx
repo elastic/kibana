@@ -113,11 +113,7 @@ const GraphOverlayComponent = ({
     timelineSelectors.selectTimeline(state, timelineId)
   );
 
-  const { modal: allCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({
-    timelineId,
-    graphEventId,
-    title,
-  });
+  const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
 
   const {
     timelineFullScreen,
@@ -188,7 +184,7 @@ const GraphOverlayComponent = ({
         databaseDocumentID={graphEventId}
         resolverComponentInstanceID={currentTimeline.id}
       />
-      {allCasesModal}
+      <AllCasesModal />
     </OverlayContainer>
   );
 };

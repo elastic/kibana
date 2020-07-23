@@ -17,7 +17,7 @@ import { useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
 import { AllCases } from '../all_cases';
 import * as i18n from './translations';
 
-interface AllCasesModalProps {
+export interface AllCasesModalProps {
   onCloseCaseModal: () => void;
   onRowClick: (id?: string) => void;
 }

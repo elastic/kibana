@@ -44,7 +44,6 @@ describe('useAllCasesModal', () => {
       }
     );
 
-    expect(result.current.modal).toBe(null);
     expect(result.current.showModal).toBe(false);
   });
 
@@ -60,7 +59,6 @@ describe('useAllCasesModal', () => {
       result.current.onOpenModal();
     });
 
-    expect(result.current.modal).not.toBe(null);
     expect(result.current.showModal).toBe(true);
   });
 
@@ -77,7 +75,6 @@ describe('useAllCasesModal', () => {
       result.current.onCloseModal();
     });
 
-    expect(result.current.modal).toBe(null);
     expect(result.current.showModal).toBe(false);
   });
 
@@ -109,7 +106,6 @@ describe('useAllCasesModal', () => {
       result.current.onRowClick();
     });
 
-    expect(result.current.modal).toBe(null);
     expect(result.current.showModal).toBe(false);
   });
 
