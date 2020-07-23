@@ -55,6 +55,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     geoField: documentSource.getGeoFieldName(),
     requestType: RENDER_AS.POINT,
   });
+  clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,
@@ -235,6 +236,10 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
   getJoins() {
     return [];
+  }
+
+  hasJoins() {
+    return false;
   }
 
   getSource() {
