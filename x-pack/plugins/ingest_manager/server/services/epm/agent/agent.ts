@@ -90,7 +90,7 @@ function buildTemplateVariables(variables: PackageConfigConfigRecord, streamTemp
 }
 
 function containsHelper(this: any, item: string, list: string[], options: any) {
-  if (list instanceof Array && list.indexOf(item) > -1) {
+  if (Array.isArray(list) && list.includes(item)) {
     if (options && options.fn) {
       return options.fn(this);
     }
