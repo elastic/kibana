@@ -88,7 +88,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
               {indicesExist !== true ? (
                 <SidebarFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem grow={false}>
-                    <EuiLoadingContent lines={10} />
+                    <EuiLoadingContent lines={10} data-test-subj="sidebar-loading" />
                   </EuiFlexItem>
                 </SidebarFlexGroup>
               ) : (
