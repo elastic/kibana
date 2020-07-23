@@ -52,7 +52,7 @@ export const EMPTY_TITLE = i18n.translate('xpack.securitySolution.detectionEngin
 });
 
 export const EMPTY_ACTION_BEATS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.emptyActionPrimary',
+  'xpack.securitySolution.detectionEngine.emptyActionBeats',
   {
     defaultMessage: 'View setup instructions',
   }
