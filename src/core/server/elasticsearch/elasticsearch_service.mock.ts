@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { ILegacyClusterClient, ILegacyCustomClusterClient } from './legacy';
 import {
   elasticsearchClientMock,
@@ -32,13 +32,14 @@ import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
 
 interface MockedElasticSearchServiceSetup {
+  config$: Observable<ElasticsearchConfig>;
   legacy: {
     createClient: jest.Mock<ILegacyCustomClusterClient, any>;
     client: jest.Mocked<ILegacyClusterClient>;
   };
 }
 
-type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup;
+type MockedElasticSearchServiceStart = Omit<MockedElasticSearchServiceSetup, 'config$'>;
 
 interface MockedInternalElasticSearchServiceStart extends MockedElasticSearchServiceStart {
   client: ClusterClientMock;
@@ -47,6 +48,7 @@ interface MockedInternalElasticSearchServiceStart extends MockedElasticSearchSer
 
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = {
+    config$: new BehaviorSubject({} as ElasticsearchConfig),
     legacy: {
       createClient: jest.fn(),
       client: legacyClientMock.createClusterClient(),
@@ -92,6 +94,7 @@ type MockedInternalElasticSearchServiceSetup = jest.Mocked<
 >;
 const createInternalSetupContractMock = () => {
   const setupContract: MockedInternalElasticSearchServiceSetup = {
+    config$: new BehaviorSubject({} as ElasticsearchConfig),
     esNodesCompatibility$: new BehaviorSubject<NodesVersionCompatibility>({
       isCompatible: true,
       incompatibleNodes: [],
@@ -103,7 +106,6 @@ const createInternalSetupContractMock = () => {
       summary: 'Elasticsearch is available',
     }),
     legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
       ...createSetupContractMock().legacy,
     },
   };

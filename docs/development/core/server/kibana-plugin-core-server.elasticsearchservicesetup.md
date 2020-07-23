@@ -15,5 +15,6 @@ export interface ElasticsearchServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [config$](./kibana-plugin-core-server.elasticsearchservicesetup.config_.md) | <code>Observable&lt;ElasticsearchConfig&gt;</code> | Provide direct access to the current elasticsearch configuration. |
 |  [legacy](./kibana-plugin-core-server.elasticsearchservicesetup.legacy.md) | <code>{</code><br/><code>        readonly createClient: (type: string, clientConfig?: Partial&lt;LegacyElasticsearchClientConfig&gt;) =&gt; ILegacyCustomClusterClient;</code><br/><code>        readonly client: ILegacyClusterClient;</code><br/><code>    }</code> |  |
 

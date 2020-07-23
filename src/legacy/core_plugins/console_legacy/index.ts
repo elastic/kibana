@@ -33,7 +33,7 @@ export default function (kibana: any) {
     id: 'console_legacy',
 
     async init(server: any) {
-      _legacyEsConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
+      _legacyEsConfig = await server.newPlatform.__internals.elasticsearch.config$
         .pipe(first())
         .toPromise();
     },

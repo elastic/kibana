@@ -669,6 +669,8 @@ export class ElasticsearchConfig {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
+    // @deprecated
+    readonly config$: Observable<ElasticsearchConfig>;
     // @deprecated (undocumented)
     legacy: {
         readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;

@@ -35,10 +35,16 @@ import { ServiceStatus } from '../status';
  */
 export interface ElasticsearchServiceSetup {
   /**
+   * Provide direct access to the current elasticsearch configuration.
+   *
+   * @deprecated this will be removed in a later version.
+   */
+  readonly config$: Observable<ElasticsearchConfig>;
+
+  /**
    * @deprecated
    * Use {@link ElasticsearchServiceStart.legacy} instead.
-   *
-   * */
+   */
   legacy: {
     /**
      * @deprecated
@@ -82,11 +88,7 @@ export interface ElasticsearchServiceSetup {
 }
 
 /** @internal */
-export interface InternalElasticsearchServiceSetup {
-  // Required for the BWC with the legacy Kibana only.
-  readonly legacy: ElasticsearchServiceSetup['legacy'] & {
-    readonly config$: Observable<ElasticsearchConfig>;
-  };
+export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceSetup {
   esNodesCompatibility$: Observable<NodesVersionCompatibility>;
   status$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
 }

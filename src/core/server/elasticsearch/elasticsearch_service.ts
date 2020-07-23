@@ -94,8 +94,8 @@ export class ElasticsearchService
     };
 
     return {
+      config$: this.config$,
       legacy: {
-        config$: this.config$,
         client: this.legacyClient,
         createClient: this.createLegacyCustomClient,
       },

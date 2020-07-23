@@ -147,6 +147,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       createContextContainer: deps.context.createContextContainer,
     },
     elasticsearch: {
+      config$: deps.elasticsearch.config$,
       legacy: deps.elasticsearch.legacy,
     },
     http: {
