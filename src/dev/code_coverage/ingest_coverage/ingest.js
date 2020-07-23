@@ -77,6 +77,7 @@ async function send(logF, idx, redactedEsHostUrl, client, requestBody) {
 const sendMsg = (actuallySent, redactedEsHostUrl, payload) => {
   const { index, body } = payload;
   return `### ${actuallySent ? 'Sent' : 'Fake Sent'}:
+${payload.pipeline ? `\t### Team Assignment Pipeline: ${green(payload.pipeline)}` : ''}
 ${redactedEsHostUrl ? `\t### ES Host: ${redactedEsHostUrl}` : ''}
 \t### Index: ${green(index)}
 \t### payload.body: ${body}

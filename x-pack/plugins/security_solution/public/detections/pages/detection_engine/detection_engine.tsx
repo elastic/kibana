@@ -51,10 +51,15 @@ import {
   MIN_EVENTS_VIEWER_BODY_HEIGHT,
 } from '../../../timelines/components/timeline/body/helpers';
 import { footerHeight } from '../../../timelines/components/timeline/footer';
+import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
+  graphEventId,
   query,
   setAbsoluteRangeDatePicker,
 }) => {
@@ -151,7 +156,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       {indicesExist ? (
         <StickyContainer>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal>
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
@@ -232,13 +237,19 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
 
 const makeMapStateToProps = () => {
   const getGlobalInputs = inputsSelectors.globalSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   return (state: State) => {
     const globalInputs: InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
 
+    const timeline: TimelineModel =
+      getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults;
+    const { graphEventId } = timeline;
+
     return {
       query,
       filters,
+      graphEventId,
     };
   };
 };
