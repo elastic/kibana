@@ -10,7 +10,7 @@ Timeouts for processing durations. Default value: { server: false }
 
 ```typescript
 timeout?: {
-        server?: boolean | number;
-        socket?: boolean | number;
+        server?: false | number;
+        socket?: false | number;
     };
 ```

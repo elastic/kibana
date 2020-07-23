@@ -162,13 +162,13 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
      * Response timeout in milliseconds. Sets the maximum time allowed for the server to respond to an incoming request before giving up and responding with a Service Unavailable (503) error response.
      * Default value: false.
      */
-    server?: boolean | number;
+    server?: false | number;
 
     /**
      * By default, node sockets automatically timeout after 2 minutes. Use this option to override this behavior. Set to false to disable socket timeouts.
      * Default value: none (use node default of 2 minutes).
      */
-    socket?: boolean | number;
+    socket?: false | number;
   };
 }
 

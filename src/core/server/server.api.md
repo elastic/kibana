@@ -1791,8 +1791,8 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
     timeout?: {
-        server?: boolean | number;
-        socket?: boolean | number;
+        server?: false | number;
+        socket?: false | number;
     };
     xsrfRequired?: Method extends 'get' ? never : boolean;
 }
