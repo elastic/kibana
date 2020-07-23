@@ -37,7 +37,7 @@ const setup = (
     dashboardOnlyMode = false,
   }: {
     useRangeEvent?: boolean;
-    filters: Filter[];
+    filters?: Filter[];
     timeFieldName?: string;
     dashboardOnlyMode?: boolean;
   } = { filters: [] }
