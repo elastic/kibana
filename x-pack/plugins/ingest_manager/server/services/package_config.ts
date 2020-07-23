@@ -121,7 +121,7 @@ class PackageConfigService {
     options?: { user?: AuthenticatedUser; bumpConfigRevision?: boolean }
   ): Promise<PackageConfig[]> {
     const isoDate = new Date().toISOString();
-    const { saved_objects: newSos } = await soClient.bulkCreate<PackageConfigSOAttributes>(
+    const { saved_objects } = await soClient.bulkCreate<PackageConfigSOAttributes>(
       packageConfigs.map((packageConfig) => ({
         type: SAVED_OBJECT_TYPE,
         attributes: {
@@ -135,6 +135,9 @@ class PackageConfigService {
         },
       }))
     );
+
+    // Filter out invalid SOs
+    const newSos = saved_objects.filter((so) => !so.error && so.attributes);
 
     // Assign it to the given agent config
     await agentConfigService.assignPackageConfigs(
