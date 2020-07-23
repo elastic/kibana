@@ -47,6 +47,40 @@ describe('7.9.0', () => {
   });
 });
 
+describe('7.10.0', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(
+      (shouldMigrateWhenPredicate, migration) => migration
+    );
+  });
+
+  test('changes nothing on alerts by other plugins', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({});
+    expect(migration710(alert, { log })).toMatchObject(alert);
+
+    expect(encryptedSavedObjectsSetup.createMigration).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function)
+    );
+  });
+
+  test('migrates the consumer for metrics', () => {
+    const migration710 = getMigrations(encryptedSavedObjectsSetup)['7.10.0'];
+    const alert = getMockData({
+      consumer: 'metrics',
+    });
+    expect(migration710(alert, { log })).toMatchObject({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        consumer: 'infrastructure',
+      },
+    });
+  });
+});
+
 function getMockData(
   overwrites: Record<string, unknown> = {}
 ): SavedObjectUnsanitizedDoc<RawAlert> {

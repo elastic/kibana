@@ -17,6 +17,7 @@ describe('date', () => {
 
     const initialTime = new Date('6/1/2020').getTime();
 
+    const oneMillisecond = new Date(initialTime + 1).getTime();
     const oneSecond = new Date(initialTime + 1 * second).getTime();
     const oneMinute = new Date(initialTime + 1 * minute).getTime();
     const oneHour = new Date(initialTime + 1 * hour).getTime();
@@ -25,6 +26,7 @@ describe('date', () => {
     const oneMonth = new Date(initialTime + 1 * month).getTime();
     const oneYear = new Date(initialTime + 1 * year).getTime();
 
+    const almostASecond = new Date(initialTime + 999).getTime();
     const almostAMinute = new Date(initialTime + 59.9 * second).getTime();
     const almostAnHour = new Date(initialTime + 59.9 * minute).getTime();
     const almostADay = new Date(initialTime + 23.9 * hour).getTime();
@@ -34,6 +36,14 @@ describe('date', () => {
     const threeYears = new Date(initialTime + 3 * year).getTime();
 
     it('should return the correct singular relative time', () => {
+      expect(getFriendlyElapsedTime(initialTime, initialTime)).toEqual({
+        duration: '<1',
+        durationType: 'millisecond',
+      });
+      expect(getFriendlyElapsedTime(initialTime, oneMillisecond)).toEqual({
+        duration: 1,
+        durationType: 'millisecond',
+      });
       expect(getFriendlyElapsedTime(initialTime, oneSecond)).toEqual({
         duration: 1,
         durationType: 'second',
@@ -65,6 +75,10 @@ describe('date', () => {
     });
 
     it('should return the correct pluralized relative time', () => {
+      expect(getFriendlyElapsedTime(initialTime, almostASecond)).toEqual({
+        duration: 999,
+        durationType: 'milliseconds',
+      });
       expect(getFriendlyElapsedTime(initialTime, almostAMinute)).toEqual({
         duration: 59,
         durationType: 'seconds',
