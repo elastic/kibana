@@ -17,30 +17,22 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
+import { read, Task } from '../lib';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
-
-export const InstallChromium = {
-  description: 'Installing Chromium',
+export const UuidVerification: Task = {
+  description: 'Verify that no UUID file is baked into the build',
 
   async run(config, log, build) {
-    if (build.isOss()) {
-      return;
-    } else {
-      for (const platform of config.getNodePlatforms()) {
-        log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
-
-        const { binaryPath$ } = installBrowser(
-          // TODO: https://github.com/elastic/kibana/issues/72496
-          log,
-          build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
-          platform.getName(),
-          platform.getArchitecture()
-        );
-        await binaryPath$.pipe(first()).toPromise();
+    const uuidFilePath = build.resolvePath('data', 'uuid');
+    await read(uuidFilePath).then(
+      function success() {
+        throw new Error(`UUID file should not exist at [${uuidFilePath}]`);
+      },
+      function error(err) {
+        if (err.code !== 'ENOENT') {
+          throw err;
+        }
       }
-    }
+    );
   },
 };
