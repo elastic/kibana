@@ -6,14 +6,16 @@
 
 import { toPath } from 'lodash';
 
-export function prepend(path, value) {
+export type Path = Array<string | number>;
+
+export function prepend(path: string | Path, value: string | Path): Path {
   return toPath(value).concat(toPath(path));
 }
 
-export function append(path, value) {
+export function append(path: string | Path, value: string | Path): Path {
   return toPath(path).concat(toPath(value));
 }
 
-export function convert(path) {
+export function convert(path: string | Path): Path {
   return toPath(path);
 }

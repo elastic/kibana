@@ -4,39 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { getState, getValue, getError } from '../resolved_arg';
+import { getState, getValue, getError } from './resolved_arg';
 
 describe('resolved arg helper', () => {
   describe('getState', () => {
     it('returns pending by default', () => {
-      expect(getState()).to.be(null);
+      expect(getState()).toBe(null);
     });
 
     it('returns the state', () => {
-      expect(getState({ state: 'pending' })).to.equal('pending');
-      expect(getState({ state: 'ready' })).to.equal('ready');
-      expect(getState({ state: 'error' })).to.equal('error');
+      expect(getState({ state: 'pending' })).toEqual('pending');
+      expect(getState({ state: 'ready' })).toEqual('ready');
+      expect(getState({ state: 'error' })).toEqual('error');
     });
   });
 
   describe('getValue', () => {
     it('returns null by default', () => {
-      expect(getValue()).to.be(null);
+      expect(getValue()).toBe(null);
     });
 
     it('returns the value', () => {
-      expect(getValue({ value: 'hello test' })).to.equal('hello test');
+      expect(getValue({ value: 'hello test' })).toEqual('hello test');
     });
   });
 
   describe('getError', () => {
     it('returns null by default', () => {
-      expect(getError()).to.be(null);
+      expect(getError()).toBe(null);
     });
 
     it('returns null when state is not error', () => {
-      expect(getError({ state: 'pending', error: 'nope' })).to.be(null);
+      expect(getError({ state: 'pending', error: 'nope' })).toBe(null);
     });
 
     it('returns the error', () => {
@@ -46,8 +45,7 @@ describe('resolved arg helper', () => {
         error: new Error('i failed'),
       };
 
-      expect(getError(arg)).to.be.an(Error);
-      expect(getError(arg).toString()).to.match(/i failed/);
+      expect(getError(arg)).toMatchInlineSnapshot(`[Error: i failed]`);
     });
   });
 });

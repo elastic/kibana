@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import * as actions from '../../actions/resolved_args';
-import { flushContextAfterIndex } from '../../actions/elements';
-import { resolvedArgsReducer } from '../resolved_args';
-import { actionCreator } from './fixtures/action_creator';
+import * as actions from '../actions/resolved_args';
+import { flushContextAfterIndex } from '../actions/elements';
+import { resolvedArgsReducer } from './resolved_args';
+import { actionCreator } from './__fixtures__/action_creator';
 
 describe('resolved args reducer', () => {
   let state;
@@ -41,13 +40,15 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-1']).to.eql([
-        {
-          state: 'pending',
-          value: null,
-          error: null,
-        },
-      ]);
+      expect(newState.resolvedArgs['element-1']).toMatchInlineSnapshot(`
+        Object {
+          "0": Object {
+            "error": null,
+            "state": "pending",
+            "value": null,
+          },
+        }
+      `);
     });
 
     it('sets state to loading, with array path', () => {
@@ -56,13 +57,15 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-1']).to.eql([
-        {
-          state: 'pending',
-          value: null,
-          error: null,
-        },
-      ]);
+      expect(newState.resolvedArgs['element-1']).toMatchInlineSnapshot(`
+        Object {
+          "0": Object {
+            "error": null,
+            "state": "pending",
+            "value": null,
+          },
+        }
+      `);
     });
   });
 
@@ -75,13 +78,15 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-1']).to.eql([
-        {
-          state: 'ready',
-          value,
-          error: null,
-        },
-      ]);
+      expect(newState.resolvedArgs['element-1']).toMatchInlineSnapshot(`
+        Object {
+          "0": Object {
+            "error": null,
+            "state": "ready",
+            "value": "hello world",
+          },
+        }
+      `);
     });
 
     it('handles error values', () => {
@@ -92,13 +97,15 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-1']).to.eql([
-        {
-          state: 'error',
-          value: null,
-          error: err,
-        },
-      ]);
+      expect(newState.resolvedArgs['element-1']).toMatchInlineSnapshot(`
+        Object {
+          "0": Object {
+            "error": [Error: farewell world],
+            "state": "error",
+            "value": null,
+          },
+        }
+      `);
     });
 
     it('preserves old value on error', () => {
@@ -109,11 +116,13 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-0'][0]).to.eql({
-        state: 'error',
-        value: 'testing',
-        error: err,
-      });
+      expect(newState.resolvedArgs['element-0'][0]).toMatchInlineSnapshot(`
+        Object {
+          "error": [Error: farewell world],
+          "state": "error",
+          "value": "testing",
+        }
+      `);
     });
   });
 
@@ -124,14 +133,15 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-0']).to.have.length(1);
-      expect(newState.resolvedArgs['element-0']).to.eql([
-        {
-          state: 'ready',
-          value: 'testing',
-          error: null,
-        },
-      ]);
+      expect(newState.resolvedArgs['element-0']).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "error": null,
+            "state": "ready",
+            "value": "testing",
+          },
+        ]
+      `);
     });
 
     it('deeply removes resolved values', () => {
@@ -140,7 +150,7 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-0']).to.be(undefined);
+      expect(newState.resolvedArgs['element-0']).toBe(undefined);
     });
   });
 
@@ -183,12 +193,22 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-1']).to.eql({
-        expressionContext: {
-          '1': { state: 'ready', value: 'test-1', error: null },
-          '2': { state: 'ready', value: 'test-2', error: null },
-        },
-      });
+      expect(newState.resolvedArgs['element-1']).toMatchInlineSnapshot(`
+        Object {
+          "expressionContext": Object {
+            "1": Object {
+              "error": null,
+              "state": "ready",
+              "value": "test-1",
+            },
+            "2": Object {
+              "error": null,
+              "state": "ready",
+              "value": "test-2",
+            },
+          },
+        }
+      `);
     });
   });
 });

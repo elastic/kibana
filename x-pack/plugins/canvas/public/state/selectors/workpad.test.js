@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import * as selector from '../workpad';
+import * as selector from './workpad';
 
 describe('workpad selectors', () => {
   let asts;
@@ -125,42 +124,42 @@ describe('workpad selectors', () => {
 
   describe('empty state', () => {
     it('returns undefined', () => {
-      expect(selector.getSelectedPage({})).to.be(undefined);
-      expect(selector.getPageById({}, 'page-1')).to.be(undefined);
-      expect(selector.getSelectedElement({})).to.be(undefined);
-      expect(selector.getElementById({}, 'element-1')).to.be(undefined);
-      expect(selector.getResolvedArgs({}, 'element-1')).to.be(undefined);
-      expect(selector.getSelectedResolvedArgs({})).to.be(undefined);
-      expect(selector.isWriteable({})).to.be(true);
+      expect(selector.getSelectedPage({})).toBe(undefined);
+      expect(selector.getPageById({}, 'page-1')).toBe(undefined);
+      expect(selector.getSelectedElement({})).toBe(undefined);
+      expect(selector.getElementById({}, 'element-1')).toBe(undefined);
+      expect(selector.getResolvedArgs({}, 'element-1')).toBe(undefined);
+      expect(selector.getSelectedResolvedArgs({})).toBe(undefined);
+      expect(selector.isWriteable({})).toBe(true);
     });
   });
 
   describe('getSelectedPage', () => {
     it('returns the selected page', () => {
-      expect(selector.getSelectedPage(state)).to.equal('page-1');
+      expect(selector.getSelectedPage(state)).toEqual('page-1');
     });
   });
 
   describe('getPages', () => {
     it('return an empty array with no pages', () => {
-      expect(selector.getPages({})).to.eql([]);
+      expect(selector.getPages({})).toEqual([]);
     });
 
     it('returns all pages in persisent state', () => {
-      expect(selector.getPages(state)).to.eql(state.persistent.workpad.pages);
+      expect(selector.getPages(state)).toEqual(state.persistent.workpad.pages);
     });
   });
 
   describe('getPageById', () => {
     it('should return matching page', () => {
-      expect(selector.getPageById(state, 'page-1')).to.eql(state.persistent.workpad.pages[0]);
+      expect(selector.getPageById(state, 'page-1')).toEqual(state.persistent.workpad.pages[0]);
     });
   });
 
   describe('getSelectedElement', () => {
     it('returns selected element', () => {
       const { elements } = state.persistent.workpad.pages[0];
-      expect(selector.getSelectedElement(state)).to.eql({
+      expect(selector.getSelectedElement(state)).toEqual({
         ...elements[1],
         ast: asts['element-1'],
       });
@@ -169,7 +168,7 @@ describe('workpad selectors', () => {
 
   describe('getElements', () => {
     it('is an empty array with no state', () => {
-      expect(selector.getElements({})).to.eql([]);
+      expect(selector.getElements({})).toEqual([]);
     });
 
     it('returns all elements on the page', () => {
@@ -179,18 +178,18 @@ describe('workpad selectors', () => {
         ...element,
         ast: asts[element.id],
       }));
-      expect(selector.getElements(state)).to.eql(expected);
+      expect(selector.getElements(state)).toEqual(expected);
     });
   });
 
   describe('getElementById', () => {
     it('returns element matching id', () => {
       const { elements } = state.persistent.workpad.pages[0];
-      expect(selector.getElementById(state, 'element-0')).to.eql({
+      expect(selector.getElementById(state, 'element-0')).toEqual({
         ...elements[0],
         ast: asts['element-0'],
       });
-      expect(selector.getElementById(state, 'element-1')).to.eql({
+      expect(selector.getElementById(state, 'element-1')).toEqual({
         ...elements[1],
         ast: asts['element-1'],
       });
@@ -199,18 +198,18 @@ describe('workpad selectors', () => {
 
   describe('getResolvedArgs', () => {
     it('returns resolved args by element id', () => {
-      expect(selector.getResolvedArgs(state, 'element-0')).to.equal('test resolved arg, el 0');
+      expect(selector.getResolvedArgs(state, 'element-0')).toEqual('test resolved arg, el 0');
     });
 
     it('returns resolved args at given path', () => {
       const arg = selector.getResolvedArgs(state, 'element-2', 'example1');
-      expect(arg).to.equal('first thing');
+      expect(arg).toEqual('first thing');
     });
   });
 
   describe('getSelectedResolvedArgs', () => {
     it('returns resolved args for selected element', () => {
-      expect(selector.getSelectedResolvedArgs(state)).to.equal('test resolved arg, el 1');
+      expect(selector.getSelectedResolvedArgs(state)).toEqual('test resolved arg, el 1');
     });
 
     it('returns resolved args at given path', () => {
@@ -222,7 +221,7 @@ describe('workpad selectors', () => {
         },
       };
       const arg = selector.getSelectedResolvedArgs(tmpState, 'example2');
-      expect(arg).to.eql(['why not', 'an array?']);
+      expect(arg).toEqual(['why not', 'an array?']);
     });
 
     it('returns resolved args at given deep path', () => {
@@ -234,14 +233,14 @@ describe('workpad selectors', () => {
         },
       };
       const arg = selector.getSelectedResolvedArgs(tmpState, ['example3', 'deeper', 'object']);
-      expect(arg).to.be(true);
+      expect(arg).toBe(true);
     });
   });
 
   describe('getGlobalFilters', () => {
     it('gets filters from all elements', () => {
       const filters = selector.getGlobalFilters(state);
-      expect(filters).to.eql([
+      expect(filters).toEqual([
         'exactly value="beats" column="project"',
         'timefilter filterGroup=one column=@timestamp from=now-24h to=now',
       ]);
@@ -249,17 +248,14 @@ describe('workpad selectors', () => {
 
     it('gets returns empty array with no elements', () => {
       const filters = selector.getGlobalFilters({});
-      expect(filters).to.be.an(Array);
-      expect(filters).to.have.length(0);
+      expect(filters).toEqual([]);
     });
   });
 
   describe('getGlobalFilterGroups', () => {
     it('gets filter group from elements', () => {
       const filterGroups = selector.getGlobalFilterGroups(state);
-      expect(filterGroups).to.be.an(Array);
-      expect(filterGroups).to.have.length(1);
-      expect(filterGroups[0]).to.equal('one');
+      expect(filterGroups).toEqual(['one']);
     });
 
     it('gets all unique filter groups', () => {
@@ -282,7 +278,7 @@ describe('workpad selectors', () => {
       });
 
       // filters are alphabetical
-      expect(filterGroups).to.eql(['one', 'two']);
+      expect(filterGroups).toEqual(['one', 'two']);
     });
 
     it('gets filter groups in filter function args', () => {
@@ -311,13 +307,13 @@ describe('workpad selectors', () => {
       // {string two} is skipped, only primitive values are extracted
       // filterGroup=one and {filters one} are de-duped
       // filters are alphabetical
-      expect(filterGroups).to.eql(['four', 'one', 'three']);
+      expect(filterGroups).toEqual(['four', 'one', 'three']);
     });
   });
 
   describe('isWriteable', () => {
     it('returns boolean for if the workpad is writeable', () => {
-      expect(selector.isWriteable(state)).to.equal(false);
+      expect(selector.isWriteable(state)).toEqual(false);
     });
   });
 });

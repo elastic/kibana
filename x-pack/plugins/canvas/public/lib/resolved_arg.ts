@@ -6,15 +6,15 @@
 
 import { get } from 'lodash';
 
-export function getState(resolvedArg) {
+export function getState(resolvedArg?: any): any {
   return get(resolvedArg, 'state', null);
 }
 
-export function getValue(resolvedArg) {
+export function getValue(resolvedArg?: any): any {
   return get(resolvedArg, 'value', null);
 }
 
-export function getError(resolvedArg) {
+export function getError(resolvedArg?: any): any {
   if (getState(resolvedArg) !== 'error') {
     return null;
   }

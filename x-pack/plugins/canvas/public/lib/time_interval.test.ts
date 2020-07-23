@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTimeInterval, createTimeInterval, isValidTimeInterval } from '../time_interval';
+import { getTimeInterval, createTimeInterval, isValidTimeInterval } from './time_interval';
 
 describe('time_interval', () => {
   test('getTimeInterval', () => {

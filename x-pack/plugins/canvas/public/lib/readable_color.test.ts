@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { readableColor } from '../readable_color';
+import { readableColor } from './readable_color';
 
 describe('readableColor', () => {
   test('light', () => {

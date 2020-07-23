@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { get } from 'lodash';
-import { elementsReducer } from '../elements';
-import { actionCreator } from './fixtures/action_creator';
+import { elementsReducer } from './elements';
+import { actionCreator } from './__fixtures__/action_creator';
 
 describe('elements reducer', () => {
   let state;
@@ -46,8 +44,8 @@ describe('elements reducer', () => {
     });
 
     const newState = elementsReducer(state, action);
-    const newElement = get(newState, ['pages', 0, 'elements', 1]);
+    const newElement = newState?.pages?.[0]?.elements?.[1];
 
-    expect(newElement).to.eql(expected);
+    expect(newElement).toEqual(expected);
   });
 });
