@@ -23,22 +23,20 @@ export default function ({ getService }: FtrProviderContext) {
   const deletePackage = async (pkg: string) => {
     await supertest.delete(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
   };
+  const installPackage = async (pkg: string) => {
+    await supertest.post(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+  };
 
   const server = dockerServers.get('registry');
 
   describe('installs and uninstalls all assets', async () => {
     describe('installs all assets when installing a package for the first time', async () => {
-      it('should install the es_assets package', async function () {
+      before(async () => {
         if (server.enabled) {
-          await supertest
-            .post(`/api/ingest_manager/epm/packages/${pkgKey}`)
-            .set('kbn-xsrf', 'xxxx')
-            .expect(200);
-        } else {
-          warnAndSkipTest(this, log);
+          await installPackage(pkgKey);
         }
       });
-      it('should install the ILM policy', async function () {
+      it('should have installed the ILM policy', async function () {
         if (server.enabled) {
           const resPolicy = await es.transport.request({
             method: 'GET',
@@ -49,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
           warnAndSkipTest(this, log);
         }
       });
-      it('should install the index templates', async function () {
+      it('should have installed the index templates', async function () {
         if (server.enabled) {
           const resLogsTemplate = await es.transport.request({
             method: 'GET',
@@ -66,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
           warnAndSkipTest(this, log);
         }
       });
-      it('should install the pipelines', async function () {
+      it('should have installed the pipelines', async function () {
         if (server.enabled) {
           const res = await es.transport.request({
             method: 'GET',
@@ -77,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
           warnAndSkipTest(this, log);
         }
       });
-      it('should install the template components', async function () {
+      it('should have installed the template components', async function () {
         if (server.enabled) {
           const res = await es.transport.request({
             method: 'GET',
@@ -93,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
           warnAndSkipTest(this, log);
         }
       });
-      it('should install the kibana assets', async function () {
+      it('should have installed the kibana assets', async function () {
         if (server.enabled) {
           const resIndexPatternLogs = await kibanaServer.savedObjects.get({
             type: 'index-pattern',
@@ -142,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
           await deletePackage(pkgKey);
         }
       });
-      it('should uninstall the index templates', async function () {
+      it('should have uninstalled the index templates', async function () {
         if (server.enabled) {
           const resLogsTemplate = await es.transport.request(
             {
@@ -169,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
           warnAndSkipTest(this, log);
         }
       });
-      it('should uninstall the pipelines', async function () {
+      it('should have uninstalled the pipelines', async function () {
         if (server.enabled) {
           const res = await es.transport.request(
             {
@@ -185,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
           warnAndSkipTest(this, log);
         }
       });
-      it('should uninstall the kibana assets', async function () {
+      it('should have uninstalled the kibana assets', async function () {
         if (server.enabled) {
           let resDashboard;
           try {
