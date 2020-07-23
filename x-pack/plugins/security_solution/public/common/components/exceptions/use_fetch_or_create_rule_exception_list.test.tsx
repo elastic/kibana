@@ -38,6 +38,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
     ReturnUseFetchOrCreateRuleExceptionList
   >;
   const onError = jest.fn();
+  const onSuccess = jest.fn();
   const error = new Error('Something went wrong');
   const ruleId = 'myRuleId';
   const abortCtrl = new AbortController();
@@ -94,6 +95,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
             ruleId,
             exceptionListType: listType,
             onError,
+            onSuccess,
           })
       );
   });
@@ -169,17 +171,8 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       });
     });
     it('invokes onSuccess indicating that the rule changed', async () => {
-      const onSuccess = jest.fn();
       await act(async () => {
-        const { waitForNextUpdate } = renderHook(() =>
-          useFetchOrCreateRuleExceptionList({
-            http: mockKibanaHttpService,
-            ruleId,
-            exceptionListType: detectionListType,
-            onError,
-            onSuccess,
-          })
-        );
+        const { waitForNextUpdate } = render();
         await waitForNextUpdate();
         await waitForNextUpdate();
         await waitForNextUpdate();
@@ -226,17 +219,8 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       });
     });
     it('invokes onSuccess indicating that the rule did not change', async () => {
-      const onSuccess = jest.fn();
       await act(async () => {
-        const { waitForNextUpdate } = renderHook(() =>
-          useFetchOrCreateRuleExceptionList({
-            http: mockKibanaHttpService,
-            ruleId,
-            exceptionListType: detectionListType,
-            onError,
-            onSuccess,
-          })
-        );
+        const { waitForNextUpdate } = render();
         await waitForNextUpdate();
         await waitForNextUpdate();
         await waitForNextUpdate();
@@ -396,6 +380,15 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         await waitForNextUpdate();
         expect(onError).toHaveBeenCalledTimes(1);
         expect(onError).toHaveBeenCalledWith(error);
+      });
+    });
+
+    it('does not call onSuccess', async () => {
+      await act(async () => {
+        const { waitForNextUpdate } = render();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        expect(onSuccess).not.toHaveBeenCalled();
       });
     });
   });
