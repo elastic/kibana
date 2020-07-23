@@ -142,3 +142,17 @@ export const KEYWORDS_RADIO = i18n.translate(
     defaultMessage: 'Keywords',
   }
 );
+
+export const IP_RANGE_RADIO = i18n.translate(
+  'xpack.securitySolution.lists.valueListsForm.ipRangesRadioLabel',
+  {
+    defaultMessage: 'IP ranges',
+  }
+);
+
+export const TEXT_RADIO = i18n.translate(
+  'xpack.securitySolution.lists.valueListsForm.textRadioLabel',
+  {
+    defaultMessage: 'Text',
+  }
+);

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, ReactNode, useEffect, useRef } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,34 +13,30 @@ import {
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiRadioGroup,
+  EuiSelect,
+  EuiSelectOption,
 } from '@elastic/eui';
 
 import { useImportList, ListSchema, Type } from '../../../shared_imports';
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 
-const InlineRadioGroup = styled(EuiRadioGroup)`
-  display: flex;
-
-  .euiRadioGroup__item + .euiRadioGroup__item {
-    margin: 0 0 0 12px;
-  }
-`;
-
-interface ListTypeOptions {
-  id: Type;
-  label: ReactNode;
-}
-
-const options: ListTypeOptions[] = [
+const options: EuiSelectOption[] = [
   {
-    id: 'keyword',
-    label: i18n.KEYWORDS_RADIO,
+    value: 'keyword',
+    text: i18n.KEYWORDS_RADIO,
   },
   {
-    id: 'ip',
-    label: i18n.IP_RADIO,
+    value: 'ip',
+    text: i18n.IP_RADIO,
+  },
+  {
+    value: 'ip_range',
+    text: i18n.IP_RANGE_RADIO,
+  },
+  {
+    value: 'text',
+    text: i18n.TEXT_RADIO,
   },
 ];
 
@@ -63,8 +58,10 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
 
   const fileIsValid = !file || validFileTypes.some((fileType) => file.type === fileType);
 
-  // EuiRadioGroup's onChange only infers 'string' from our options
-  const handleRadioChange = useCallback((t: string) => setType(t as Type), [setType]);
+  const handleRadioChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => setType(event.target.value as Type),
+    [setType]
+  );
 
   const handleFileChange = useCallback((files: FileList | null) => {
     setFile(files?.item(0) ?? null);
@@ -146,16 +143,16 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow label={i18n.LIST_TYPES_RADIO_LABEL}>
-              <InlineRadioGroup
+              <EuiSelect
                 options={options}
-                idSelected={type}
+                value={type}
                 onChange={handleRadioChange}
                 name="valueListType"
               />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow>
+            <EuiFormRow hasEmptyLabelSpace={true}>
               <EuiFlexGroup alignItems="flexEnd">
                 <EuiFlexItem>
                   {importState.loading && (
