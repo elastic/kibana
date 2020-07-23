@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
+  AGG_TYPE,
   FIELD_ORIGIN,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
@@ -174,7 +175,11 @@ export class AbstractLayer implements ILayer {
 
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
-          joinDescriptor.right.metrics.forEach((metricsDescriptor: AggDescriptor) => {
+          const metrics =
+            joinDescriptor.right.metrics && joinDescriptor.right.metrics.length
+              ? joinDescriptor.right.metrics
+              : [{ type: AGG_TYPE.COUNT }];
+          metrics.forEach((metricsDescriptor: AggDescriptor) => {
             const originalJoinKey = getJoinAggKey({
               aggType: metricsDescriptor.type,
               aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',

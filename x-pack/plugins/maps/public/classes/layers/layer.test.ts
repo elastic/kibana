@@ -33,7 +33,7 @@ class MockSource {
 class MockStyle {}
 
 describe('cloneDescriptor', () => {
-  test('Should update data driven styling properties using join fields', async () => {
+  describe('with joins', () => {
     const styleDescriptor = {
       type: LAYER_STYLE_TYPE.VECTOR,
       properties: {
@@ -56,41 +56,73 @@ describe('cloneDescriptor', () => {
       origin: FIELD_ORIGIN.JOIN,
     };
 
-    const layerDescriptor = AbstractLayer.createDescriptor({
-      style: styleDescriptor,
-      joins: [
-        {
-          leftField: 'iso2',
-          right: {
-            id: '557d0f15',
-            indexPatternId: 'myIndexPattern',
-            indexPatternTitle: 'logs-*',
-            metrics: [{ type: AGG_TYPE.COUNT }],
-            term: 'myTermField',
-            type: 'joinSource',
+    test('Should update data driven styling properties using join fields', async () => {
+      const layerDescriptor = AbstractLayer.createDescriptor({
+        style: styleDescriptor,
+        joins: [
+          {
+            leftField: 'iso2',
+            right: {
+              id: '557d0f15',
+              indexPatternId: 'myIndexPattern',
+              indexPatternTitle: 'logs-*',
+              metrics: [{ type: AGG_TYPE.COUNT }],
+              term: 'myTermField',
+              type: 'joinSource',
+            },
           },
-        },
-      ],
+        ],
+      });
+      const layer = new MockLayer({
+        layerDescriptor,
+        source: (new MockSource() as unknown) as ISource,
+        style: (new MockStyle() as unknown) as IStyle,
+      });
+      const clonedDescriptor = await layer.cloneDescriptor();
+      const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
+      // Should update style field belonging to join
+      // @ts-expect-error
+      expect(clonedStyleProps[VECTOR_STYLES.FILL_COLOR].options.field.name).toEqual(
+        '__kbnjoin__count__12345'
+      );
+      // Should not update style field belonging to source
+      // @ts-expect-error
+      expect(clonedStyleProps[VECTOR_STYLES.LINE_COLOR].options.field.name).toEqual('bytes');
+      // Should not update style feild belonging to different join
+      // @ts-expect-error
+      expect(clonedStyleProps[VECTOR_STYLES.LABEL_BORDER_COLOR].options.field.name).toEqual(
+        '__kbnjoin__count__6666666666'
+      );
     });
-    const layer = new MockLayer({
-      layerDescriptor,
-      source: (new MockSource() as unknown) as ISource,
-      style: (new MockStyle() as unknown) as IStyle,
+
+    test('Should update data driven styling properties using join fields when metrics is not provided', async () => {
+      const layerDescriptor = AbstractLayer.createDescriptor({
+        style: styleDescriptor,
+        joins: [
+          {
+            leftField: 'iso2',
+            right: {
+              id: '557d0f15',
+              indexPatternId: 'myIndexPattern',
+              indexPatternTitle: 'logs-*',
+              term: 'myTermField',
+              type: 'joinSource',
+            },
+          },
+        ],
+      });
+      const layer = new MockLayer({
+        layerDescriptor,
+        source: (new MockSource() as unknown) as ISource,
+        style: (new MockStyle() as unknown) as IStyle,
+      });
+      const clonedDescriptor = await layer.cloneDescriptor();
+      const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
+      // Should update style field belonging to join
+      // @ts-expect-error
+      expect(clonedStyleProps[VECTOR_STYLES.FILL_COLOR].options.field.name).toEqual(
+        '__kbnjoin__count__12345'
+      );
     });
-    const clonedDescriptor = await layer.cloneDescriptor();
-    const clonedStyleProps = (clonedDescriptor.style as VectorStyleDescriptor).properties;
-    // Should update style field belonging to join
-    // @ts-expect-error
-    expect(clonedStyleProps[VECTOR_STYLES.FILL_COLOR].options.field.name).toEqual(
-      '__kbnjoin__count__12345'
-    );
-    // Should not update style field belonging to source
-    // @ts-expect-error
-    expect(clonedStyleProps[VECTOR_STYLES.LINE_COLOR].options.field.name).toEqual('bytes');
-    // Should not update style feild belonging to different join
-    // @ts-expect-error
-    expect(clonedStyleProps[VECTOR_STYLES.LABEL_BORDER_COLOR].options.field.name).toEqual(
-      '__kbnjoin__count__6666666666'
-    );
   });
 });
