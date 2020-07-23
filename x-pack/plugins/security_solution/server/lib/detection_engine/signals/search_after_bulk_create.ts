@@ -53,6 +53,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
+  errorMessage: string | undefined;
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -96,17 +97,27 @@ export const searchAfterAndBulkCreate = async ({
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
   let signalsCreatedCount = 0;
+  let totalToFromTuples;
 
-  const totalToFromTuples = getSignalTimeTuples({
-    logger,
-    ruleParamsFrom: ruleParams.from,
-    ruleParamsTo: ruleParams.to,
-    ruleParamsMaxSignals: ruleParams.maxSignals,
-    gap,
-    previousStartedAt,
-    interval,
-    buildRuleMessage,
-  });
+  try {
+    totalToFromTuples = getSignalTimeTuples({
+      logger,
+      ruleParamsFrom: ruleParams.from,
+      ruleParamsTo: ruleParams.to,
+      ruleParamsMaxSignals: ruleParams.maxSignals,
+      gap,
+      previousStartedAt,
+      interval,
+      buildRuleMessage,
+    });
+  } catch (exc) {
+    const errorMessage = buildRuleMessage(`[-] Failed to parse rule interval: ${exc}`);
+    logger.error(errorMessage);
+    toReturn.success = false;
+    toReturn.errorMessage = errorMessage;
+    return toReturn;
+  }
+
   logger.debug(buildRuleMessage(`totalToFromTuples: ${totalToFromTuples.length}`));
   while (totalToFromTuples.length > 0) {
     const tuple = totalToFromTuples.pop();

@@ -96,7 +96,10 @@ export const getGapMaxCatchupRatio = ({
   logger.debug(buildRuleMessage(`intervalMoment: ${shorthandMap[unit].asFn(intervalMoment)}`));
   const calculatedFromAsMoment = dateMath.parse(calculatedFrom);
   const dateMathRuleParamsFrom = dateMath.parse(ruleParamsFrom);
-  if (dateMathRuleParamsFrom != null && intervalMoment != null) {
+  if (dateMathRuleParamsFrom == null || isNaN(dateMathRuleParamsFrom.valueOf())) {
+    throw Error('failed to parse from and to dates on rule. Check lookback / interval');
+  }
+  if (intervalMoment != null) {
     const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
     const gapDiffInUnits = dateMathRuleParamsFrom.diff(calculatedFromAsMoment, momentUnit);
 
@@ -467,10 +470,15 @@ export const getSignalTimeTuples = ({
       ];
     }
   } else {
+    const from = dateMath.parse(ruleParamsFrom);
+    const to = dateMath.parse(ruleParamsTo);
+    if (from == null || to == null || isNaN(from.valueOf()) || isNaN(to.valueOf())) {
+      throw Error('failed to parse from and to dates on rule. Check lookback / interval');
+    }
     totalToFromTuples = [
       {
-        to: dateMath.parse(ruleParamsTo),
-        from: dateMath.parse(ruleParamsFrom),
+        to,
+        from,
         maxSignals: ruleParamsMaxSignals,
       },
     ];

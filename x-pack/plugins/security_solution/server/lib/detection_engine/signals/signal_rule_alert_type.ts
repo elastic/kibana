@@ -389,7 +389,7 @@ export const signalRulesAlertType = ({
           }
         } else {
           const errorMessage = buildRuleMessage(
-            'Bulk Indexing of signals failed. Check logs for further details.'
+            `Bulk Indexing of signals failed. ${result.errorMessage} Check logs for further details.`
           );
           logger.error(errorMessage);
           await ruleStatusService.error(errorMessage, {
