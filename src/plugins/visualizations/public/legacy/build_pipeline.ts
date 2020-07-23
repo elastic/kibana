@@ -255,7 +255,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
   },
-  metrics: (params, schemas, uiState = {}) => {
+  metrics: ({ title, ...params }, schemas, uiState = {}) => {
     const paramsJson = prepareJson('params', params);
     const uiStateJson = prepareJson('uiState', uiState);
 
@@ -535,7 +535,10 @@ export const buildPipeline = async (
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {
-      pipeline += `${prepareString('index', indexPattern.id)}`;
+      pipeline += `${prepareString('index', indexPattern.id)} `;
+      if (vis.data.aggs) {
+        pipeline += `${prepareJson('aggConfigs', vis.data.aggs!.aggs)}`;
+      }
     }
   }
 

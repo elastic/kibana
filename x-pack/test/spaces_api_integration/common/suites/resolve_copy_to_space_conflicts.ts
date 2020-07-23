@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { EsArchiver } from 'src/es_archiver';
+import { EsArchiver } from '@kbn/es-archiver';
 import { SavedObject } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
