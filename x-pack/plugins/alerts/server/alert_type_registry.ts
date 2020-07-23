@@ -88,7 +88,7 @@ export class AlertTypeRegistry {
         title: alertType.name,
         type: `alerting:${alertType.id}`,
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(alertType as AlertType, context),
+          this.taskRunnerFactory.create({ ...alertType } as AlertType, context),
       },
     });
   }
