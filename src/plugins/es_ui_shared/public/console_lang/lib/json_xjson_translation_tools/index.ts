@@ -27,7 +27,26 @@ export function collapseLiteralStrings(data: string) {
   return splitData.join('');
 }
 
+// 5 megabytes
+const MAX_EXPANDABLE_JSON_SIZE = 5 * 1024 * 1024;
+
+/**
+ * Takes in a string representing some JSON data and expands strings,
+ * where needed, to a string literal representation.
+ *
+ * For example; given a value like: "{ "my_string": "\nhey!\n" }"
+ *
+ * Will return: "{ "my_string": """
+ * hey!
+ * """
+ * }"
+ */
 export function expandLiteralStrings(data: string) {
+  // Assuming 1 byte per char
+  if (data.length > MAX_EXPANDABLE_JSON_SIZE) {
+    return data;
+  }
+
   const { stringValues } = extractJSONStringValues(data);
 
   if (stringValues.length === 0) {
