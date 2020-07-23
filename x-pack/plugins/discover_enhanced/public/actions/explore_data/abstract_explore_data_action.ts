@@ -46,7 +46,7 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
     const { core, plugins } = this.params.start();
     const { capabilities } = core.application;
 
-    if (capabilities.discover) if (!capabilities.discover.show) return false;
+    if (capabilities.discover && !capabilities.discover.show) return false;
     if (!plugins.discover.urlGenerator) return false;
     if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
