@@ -110,14 +110,13 @@ export function App({
         !!embeddableEditorIncomingState?.originatingApp &&
         (!!embeddableEditorIncomingState?.valueInput ||
           !embeddableEditorIncomingState?.embeddableId),
-      originatingApp: embeddableEditorIncomingState?.originatingApp,
       indexPatternsForTopNav: [],
       query: { query: '', language },
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
-      originatingApp,
+      originatingApp: embeddableEditorIncomingState?.originatingApp,
       filters: [],
       indicateNoData: false,
     };
@@ -344,7 +343,6 @@ export function App({
     const addedToLibrary = state.byValueMode && saveToLibrary;
     const newlyCreated =
       saveProps.newCopyOnSave || addedToLibrary || (!savedObjectId && !state.byValueMode);
-
     if (state.byValueMode && !saveToLibrary) {
       await setState((s: State) => ({ ...s, persistedDoc: doc }));
       redirectTo(doc.savedObjectId, doc, saveProps.returnToOrigin, newlyCreated);
@@ -372,6 +370,7 @@ export function App({
         .then(({ savedObjectId: newSavedObjectId }) => {
           // Prevents unnecessary network request and disables save button
           const newDoc: Document = { ...doc, savedObjectId: newSavedObjectId };
+          const currentOriginatingApp = state.originatingApp;
           setState((s) => ({
             ...s,
             byValueMode: false,
@@ -594,7 +593,7 @@ export function App({
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
             originatingApp={state.originatingApp}
-            onSave={(props) => runSave(props)}
+            onSave={(props) => runSave(props, true)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
               id: state.byValueMode ? undefined : lastKnownDoc.savedObjectId,
