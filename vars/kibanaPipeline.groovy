@@ -1,74 +1,57 @@
-def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
-  return {
-    jobRunner('tests-xl', true) {
-      try {
-        doSetup()
-        preWorkerClosure()
+def withPostBuildReporting(Closure closure) {
+  try {
+    closure()
+  } finally {
+    // disabled in 6.8
+    // catchErrors {
+    //   runErrorReporter()
+    // }
 
-        def nextWorker = 1
-        def worker = { workerClosure ->
-          def workerNumber = nextWorker
-          nextWorker++
+    catchErrors {
+      runbld.junit()
+    }
 
-          return {
-            // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
-            def delay = (workerNumber-1)*20
-            sleep(delay)
-
-            workerClosure(workerNumber)
-          }
-        }
-
-        def workers = [:]
-        workerClosures.each { workerName, workerClosure ->
-          workers[workerName] = worker(workerClosure)
-        }
-
-        parallel(workers)
-      } finally {
-        catchError {
-          uploadAllGcsArtifacts(name)
-        }
-
-        catchError {
-          runbld.junit()
-        }
-
-        catchError {
-          publishJunit()
-        }
-
-        // disabled in 6.8
-        // catchError {
-        //   runErrorReporter()
-        // }
-      }
+    catchErrors {
+      publishJunit()
     }
   }
 }
 
-def getPostBuildWorker(name, closure) {
-  return { workerNumber ->
-    def kibanaPort = "61${workerNumber}1"
-    def esPort = "61${workerNumber}2"
-    def esTransportPort = "61${workerNumber}3"
+def functionalTestProcess(String name, Closure closure) {
+  return { processNumber ->
+    def kibanaPort = "61${processNumber}1"
+    def esPort = "61${processNumber}2"
+    def esTransportPort = "61${processNumber}3"
+    def ingestManagementPackageRegistryPort = "61${processNumber}4"
 
     withEnv([
-      "PARALLEL_PIPELINE_WORKER_INDEX=${workerNumber}",
+      "CI_PARALLEL_PROCESS_NUMBER=${processNumber}",
+      "PARALLEL_PIPELINE_WORKER_INDEX=${processNumber}",
       "TEST_KIBANA_HOST=localhost",
       "TEST_KIBANA_PORT=${kibanaPort}",
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+      "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
       "IS_PIPELINE_JOB=1",
+      "JOB=${name}",
+      "KBN_NP_PLUGINS_BUILT=true",
     ]) {
       closure()
     }
   }
 }
 
-def getOssCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("ciGroup" + ciGroup, {
+def functionalTestProcess(String name, String script) {
+  return functionalTestProcess(name) {
+    retryable(name) {
+      runbld(script, "Execute ${name}")
+    }
+  }
+}
+
+def ossCiGroupProcess(ciGroup) {
+  return functionalTestProcess("ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -77,11 +60,11 @@ def getOssCiGroupWorker(ciGroup) {
         runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
       }
     }
-  })
+  }
 }
 
-def getXpackCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("xpack-ciGroup" + ciGroup, {
+def xpackCiGroupProcess(ciGroup) {
+  return functionalTestProcess("xpack-ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
@@ -90,104 +73,36 @@ def getXpackCiGroupWorker(ciGroup) {
         runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
       }
     }
-  })
-}
-
-def legacyJobRunner(name) {
-  return {
-    parallel([
-      "${name}": {
-        withEnv([
-          "JOB=${name}",
-        ]) {
-          jobRunner('linux && immutable', false) {
-            try {
-              runbld('.ci/run.sh', "Execute ${name}", true)
-            } finally {
-              catchError {
-                uploadAllGcsArtifacts(name)
-              }
-              catchError {
-                publishJunit()
-              }
-              catchError {
-                runErrorReporter()
-              }
-            }
-          }
-        }
-      }
-    ])
   }
 }
 
-def jobRunner(label, useRamDisk, closure) {
-  node(label) {
-    agentInfo.print()
-
-    if (useRamDisk) {
-      // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
-      def originalWorkspace = env.WORKSPACE
-      ws('/tmp/workspace') {
-        sh(
-          script: """
-            mkdir -p /dev/shm/workspace
-            mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
-            rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
-            ln -s /dev/shm/workspace '${originalWorkspace}'
-          """,
-          label: "Move workspace to RAM - /dev/shm/workspace"
-        )
-      }
-    }
-
-    def scmVars
-
-    // Try to clone from Github up to 8 times, waiting 15 secs between attempts
-    retryWithDelay(8, 15) {
-      scmVars = checkout scm
-    }
-
-    withEnv([
-      "CI=true",
-      "HOME=${env.JENKINS_HOME}",
-      "PR_SOURCE_BRANCH=${env.ghprbSourceBranch ?: ''}",
-      "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
-      "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
-      "TEST_BROWSER_HEADLESS=1",
-      "GIT_BRANCH=${scmVars.GIT_BRANCH}",
-    ]) {
-      withCredentials([
-        string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
-        string(credentialsId: 'vault-role-id', variable: 'VAULT_ROLE_ID'),
-        string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
-      ]) {
-        // scm is configured to check out to the ./kibana directory
-        dir('kibana') {
-          closure()
-        }
-      }
-    }
-  }
-}
-
-// TODO what should happen if GCS, Junit, or email publishing fails? Unstable build? Failed build?
-
-def uploadGcsArtifact(workerName, pattern) {
-  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}" // TODO
-
+def uploadGcsArtifact(uploadPrefix, pattern) {
   googleStorageUpload(
     credentialsId: 'kibana-ci-gcs-plugin',
-    bucket: storageLocation,
+    bucket: "gs://${uploadPrefix}",
     pattern: pattern,
     sharedPublicly: true,
     showInline: true,
   )
 }
 
-def uploadAllGcsArtifacts(workerName) {
+def downloadCoverageArtifacts() {
+  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
+  def targetLocation = "/tmp/downloaded_coverage"
+
+  sh "mkdir -p '${targetLocation}' && gsutil -m cp -r '${storageLocation}' '${targetLocation}'"
+}
+
+def uploadCoverageArtifacts(prefix, pattern) {
+  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${prefix}"
+  uploadGcsArtifact(uploadPrefix, pattern)
+}
+
+def withGcsArtifactUpload(workerName, closure) {
+  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
+    'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
     'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',
@@ -196,8 +111,23 @@ def uploadAllGcsArtifacts(workerName) {
     'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
   ]
 
-  ARTIFACT_PATTERNS.each { pattern ->
-    uploadGcsArtifact(workerName, pattern)
+  withEnv([
+    "GCS_UPLOAD_PREFIX=${uploadPrefix}"
+  ], {
+    try {
+      closure()
+    } finally {
+      catchErrors {
+        ARTIFACT_PATTERNS.each { pattern ->
+          uploadGcsArtifact(uploadPrefix, pattern)
+        }
+      }
+    }
+  })
+
+  if (env.CODE_COVERAGE) {
+    sh 'tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*'
+    uploadGcsArtifact("kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${workerName}", 'kibana-coverage.tar.gz')
   }
 }
 
@@ -220,7 +150,7 @@ def sendMail() {
 }
 
 def sendInfraMail() {
-  catchError {
+  catchErrors {
     step([
       $class: 'Mailer',
       notifyEveryUnstableBuild: true,
@@ -231,7 +161,7 @@ def sendInfraMail() {
 }
 
 def sendKibanaMail() {
-  catchError {
+  catchErrors {
     def buildStatus = buildUtils.getBuildStatus()
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
@@ -283,5 +213,49 @@ def runErrorReporter() {
     "Report failed tests, if necessary"
   )
 }
+
+def call(Map params = [:], Closure closure) {
+  def config = [timeoutMinutes: 135, checkPrChanges: false, setCommitStatus: false] + params
+
+  stage("Kibana Pipeline") {
+    timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
+      timestamps {
+        ansiColor('xterm') {
+          if (config.setCommitStatus) {
+            buildState.set('shouldSetCommitStatus', true)
+          }
+          if (config.checkPrChanges && githubPr.isPr()) {
+            pipelineLibraryTests()
+
+            print "Checking PR for changes to determine if CI needs to be run..."
+
+            if (prChanges.areChangesSkippable()) {
+              print "No changes requiring CI found in PR, skipping."
+              return
+            }
+          }
+          try {
+            closure()
+          } finally {
+            if (config.setCommitStatus) {
+              githubCommitStatus.onFinish()
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+def pipelineLibraryTests() {
+  whenChanged(['vars/', '.ci/pipeline-library/']) {
+    workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
+      dir('.ci/pipeline-library') {
+        sh './gradlew test'
+      }
+    }
+  }
+}
+
 
 return this
