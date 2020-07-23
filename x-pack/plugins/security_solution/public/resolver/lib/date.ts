@@ -18,7 +18,6 @@ export const getFriendlyElapsedTime = (
   const startTime = typeof from === 'number' ? from : parseInt(from, 10);
   const endTime = typeof to === 'number' ? to : parseInt(to, 10);
   const elapsedTimeInMs = endTime - startTime;
-
   if (Number.isNaN(elapsedTimeInMs)) {
     return null;
   }
@@ -31,7 +30,7 @@ export const getFriendlyElapsedTime = (
   const month = day * 30;
   const year = day * 365;
 
-  let duration: number;
+  let duration: DurationDetails['duration'];
   let singularType: DurationTypes;
   let pluralType: DurationTypes;
   switch (true) {
@@ -69,6 +68,11 @@ export const getFriendlyElapsedTime = (
       duration = Math.floor(elapsedTimeInMs / second);
       singularType = 'second';
       pluralType = 'seconds';
+      break;
+    case elapsedTimeInMs === 0:
+      duration = '<1';
+      singularType = 'millisecond';
+      pluralType = 'millisecond'; // Would never show
       break;
     default:
       duration = elapsedTimeInMs;

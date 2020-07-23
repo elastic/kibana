@@ -36,6 +36,10 @@ describe('date', () => {
     const threeYears = new Date(initialTime + 3 * year).getTime();
 
     it('should return the correct singular relative time', () => {
+      expect(getFriendlyElapsedTime(initialTime, initialTime)).toEqual({
+        duration: '<1',
+        durationType: 'millisecond',
+      });
       expect(getFriendlyElapsedTime(initialTime, oneMillisecond)).toEqual({
         duration: 1,
         durationType: 'millisecond',
