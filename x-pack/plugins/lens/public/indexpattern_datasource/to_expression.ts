@@ -25,15 +25,25 @@ function getExpressionForLayer(
     return operationDefinitionMap[column.operationType].toEsAggsConfig!(column, columnId);
   }
 
-  const esAggsColumnEntries = [];
+  let esAggsColumnEntries = [];
   const nodeQueue = [tree];
   const clientSideOperations = [];
   const handledClientSideNodes: Record<string, boolean> = {};
+  let bucketDepth = 0;
 
   while (nodeQueue.length > 0) {
     const currentNode = nodeQueue.shift();
     if (!currentNode!.isClientSideOperation) {
-      esAggsColumnEntries.push([currentNode!.id, currentNode]);
+      esAggsColumnEntries.push([currentNode!.id, currentNode!]);
+      if (currentNode?.isBucketed) {
+        bucketDepth++;
+      } else {
+        if (currentNode!.metricLevel) {
+          currentNode!.bucketDepth = currentNode!.metricLevel;
+        } else {
+          currentNode!.bucketDepth = bucketDepth;
+        }
+      }
     } else {
       if (!handledClientSideNodes[currentNode!.id]) {
         clientSideOperations.push(currentNode);
@@ -46,6 +56,11 @@ function getExpressionForLayer(
     nodeQueue.push(...(currentNode.children || []));
   }
 
+  // sort aggs for esaggs call
+  esAggsColumnEntries = [
+    ...esAggsColumnEntries.filter(([, entry]) => entry!.isBucketed),
+    ...esAggsColumnEntries.filter(([, entry]) => !entry!.isBucketed),
+  ];
   const bucketsCount = esAggsColumnEntries.filter(([, entry]) => entry!.isBucketed).length;
   const metricsCount = esAggsColumnEntries.length - bucketsCount;
 
@@ -68,9 +83,13 @@ function getExpressionForLayer(
      * Output: [`col-0-terms0`, `col-3-terms1`, `col-4-count`, `col-5-max`]
      */
     const idMap = esAggsColumnEntries.reduce((currentIdMap, [colId, column], index) => {
+      const metricLevelDelta = bucketDepth - (column as IndexPatternColumn).bucketDepth!;
       const newIndex = column.isBucketed
         ? index * (metricsCount + 1) // Buckets are spaced apart by N + 1
-        : (index ? index + 1 : 0) - bucketsCount + (bucketsCount - 1) * (metricsCount + 1);
+        : (index ? index + 1 : 0) -
+          bucketsCount +
+          (bucketsCount - 1) * (metricsCount + 1) -
+          metricLevelDelta * (metricsCount + 1);
       return {
         ...currentIdMap,
         [`col-${esAggsColumnEntries.length === 1 ? 0 : newIndex}-${colId}`]: {

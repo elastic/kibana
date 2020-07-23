@@ -275,4 +275,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn> = {
       </EuiForm>
     );
   },
+  fieldBased: true,
+  nonLeaveNode: true,
+  canAcceptChild(c, otherC) {
+    return true;
+  },
 };

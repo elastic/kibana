@@ -310,6 +310,11 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       </EuiForm>
     );
   },
+  fieldBased: true,
+  nonLeaveNode: true,
+  canAcceptChild(c, otherC) {
+    return true;
+  },
 };
 
 function parseInterval(currentInterval: string) {

@@ -183,7 +183,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
             defaultMessage: 'Y-axis',
           }),
           accessors: layer.accessors,
-          filterOperations: isNumericMetric,
+          filterOperations: () => true,
           supportsMoreColumns: true,
           required: true,
           dataTestSubj: 'lnsXY_yDimensionPanel',

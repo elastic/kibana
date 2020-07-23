@@ -37,6 +37,7 @@ import { IndexPattern, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 import uuid from 'uuid';
+import { EuiSelect } from '@elastic/eui';
 
 const varnames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
 
@@ -114,14 +115,18 @@ export function PopoverEditor(props: PopoverEditorProps) {
     return fields;
   }, [currentIndexPattern]);
 
-  function getOperationTypes() {
+  function getOperationTypes(showAll: boolean = false) {
     const possibleOperationTypes = Object.keys(fieldByOperation) as OperationType[];
     const validOperationTypes: OperationType[] = [];
 
-    if (!selectedColumn) {
-      validOperationTypes.push(...(Object.keys(fieldByOperation) as OperationType[]));
-    } else if (hasField(selectedColumn) && operationByField[selectedColumn.sourceField]) {
-      validOperationTypes.push(...operationByField[selectedColumn.sourceField]!);
+    if (showAll) {
+      validOperationTypes.push(...Object.keys(operationDefinitionMap));
+    } else {
+      if (!selectedColumn) {
+        validOperationTypes.push(...(Object.keys(fieldByOperation) as OperationType[]));
+      } else if (hasField(selectedColumn) && operationByField[selectedColumn.sourceField]) {
+        validOperationTypes.push(...operationByField[selectedColumn.sourceField]!);
+      }
     }
 
     return _.uniqBy(
@@ -235,7 +240,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
   }
 
   function getBuilderSideNavItems(): EuiListGroupItemProps[] {
-    return getOperationTypes().map(({ operationType, compatibleWithCurrentField }) => {
+    return getOperationTypes(true).map(({ operationType, compatibleWithCurrentField }) => {
       const color: EuiListGroupItemProps['color'] = 'primary';
 
       const label: EuiListGroupItemProps['label'] = operationPanels[operationType].displayName;
@@ -529,7 +534,8 @@ export function PopoverEditor(props: PopoverEditorProps) {
           >
             {column.operationType === 'math' ? 'Calculate ' : `${column.operationType} of`}
           </EuiFlexItem>
-          {!operationDefinitionMap[column.operationType].nonLeaveNode && (
+          {(!operationDefinitionMap[column.operationType].nonLeaveNode ||
+            operationDefinitionMap[column.operationType].fieldBased) && (
             <EuiFlexItem grow={true}>
               <FieldSelect
                 currentIndexPattern={currentIndexPattern}
@@ -569,6 +575,71 @@ export function PopoverEditor(props: PopoverEditorProps) {
                   }
                 }}
               />
+            </EuiFlexItem>
+          )}
+          {!operationDefinitionMap[column.operationType].nonLeaveNode && (
+            <EuiFlexItem grow={true}>
+              {!column.metricLevel && (
+                <EuiButton
+                  onClick={() => {
+                    const newColumn = { ...column, metricLevel: 1 };
+                    const nodeQueue = [editState];
+
+                    while (nodeQueue.length > 0) {
+                      const currentNode = nodeQueue.shift();
+                      if (currentNode.id === column.id) {
+                        // eslint-disable-next-line guard-for-in
+                        for (const key in newColumn) {
+                          currentNode[key] = newColumn[key];
+                        }
+                        break;
+                      }
+                      nodeQueue.push(...(currentNode.children || []));
+                    }
+
+                    // TODO this is super dirty - as we mutated the original tree, we just set it back to itself. Should make a copy
+                    const newEditState = { ...editState };
+                    setEditState(newEditState);
+                    if (cursor === editState) {
+                      setCursor(newEditState);
+                    }
+                  }}
+                >
+                  Make overall metric
+                </EuiButton>
+              )}
+              {column.metricLevel && (
+                <>overall all of <EuiSelect
+                  options={state.layers[layerId].columnOrder
+                    .map((cId) => state.layers[layerId].columns[cId])
+                    .filter((c) => c.isBucketed)
+                    .map((c, index) => ({ value: index, text: c.label }))}
+                  value={column.metricLevel}
+                  onChange={(e) => {
+                    const newColumn = { ...column, metricLevel: Number(e.target.value) };
+                    const nodeQueue = [editState];
+
+                    while (nodeQueue.length > 0) {
+                      const currentNode = nodeQueue.shift();
+                      if (currentNode.id === column.id) {
+                        // eslint-disable-next-line guard-for-in
+                        for (const key in newColumn) {
+                          currentNode[key] = newColumn[key];
+                        }
+                        break;
+                      }
+                      nodeQueue.push(...(currentNode.children || []));
+                    }
+
+                    // TODO this is super dirty - as we mutated the original tree, we just set it back to itself. Should make a copy
+                    const newEditState = { ...editState };
+                    setEditState(newEditState);
+                    if (cursor === editState) {
+                      setCursor(newEditState);
+                    }
+                  }}
+                /></>
+              )}
             </EuiFlexItem>
           )}
           {BuilderParamEditor && (

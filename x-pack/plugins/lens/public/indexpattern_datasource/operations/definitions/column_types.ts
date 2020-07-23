@@ -20,6 +20,11 @@ export interface BaseIndexPatternColumn extends Operation {
   customLabel?: boolean;
   children?: BaseIndexPatternColumn[];
   isClientSideOperation?: boolean;
+  // The level of buckets to apply this metric to. No value means using the position in the tree
+  metricLevel?: number;
+  // change order of aggregations even if the tree has a different order
+  runBefore?: string;
+  bucketDepth?: number;
 }
 
 // Formatting can optionally be added to any column

@@ -99,7 +99,7 @@ export const metricVisualization: Visualization<State, PersistableState> = {
           layerId: props.state.layerId,
           accessors: props.state.accessor ? [props.state.accessor] : [],
           supportsMoreColumns: !props.state.accessor,
-          filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+          filterOperations: (op: OperationMetadata) => true,
         },
       ],
     };
