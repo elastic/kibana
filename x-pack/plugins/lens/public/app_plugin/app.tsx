@@ -44,6 +44,7 @@ interface State {
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
+  originatingApp?: string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -97,6 +98,7 @@ export function App({
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
+      originatingApp,
       filters: [],
       indicateNoData: false,
     };
@@ -321,9 +323,14 @@ export function App({
       .then(({ id }) => {
         // Prevents unnecessary network request and disables save button
         const newDoc = { ...doc, id };
+        const currentOriginatingApp = state.originatingApp;
         setState((s) => ({
           ...s,
           isSaveModalVisible: false,
+          originatingApp:
+            saveProps.newCopyOnSave && !saveProps.returnToOrigin
+              ? undefined
+              : currentOriginatingApp,
           persistedDoc: newDoc,
           lastKnownDoc: newDoc,
         }));
@@ -368,7 +375,7 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...(!!originatingApp && lastKnownDoc?.id
+                ...(!!state.originatingApp && lastKnownDoc?.id
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -393,14 +400,14 @@ export function App({
                   : []),
                 {
                   label:
-                    lastKnownDoc?.id && !!originatingApp
+                    lastKnownDoc?.id && !!state.originatingApp
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !originatingApp || !lastKnownDoc?.id,
+                  emphasize: !state.originatingApp || !lastKnownDoc?.id,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
@@ -523,7 +530,7 @@ export function App({
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
-            originatingApp={originatingApp}
+            originatingApp={state.originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
