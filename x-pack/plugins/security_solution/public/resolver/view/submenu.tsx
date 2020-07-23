@@ -169,6 +169,28 @@ const NodeSubMenuComponents = React.memo(
 
     const isMenuLoading = optionsWithActions === 'waitingForRelatedEventData';
 
+    // The last projection matrix that was used to position the popover
+    const projectionMatrixAtLastRender = useRef<Matrix3>();
+
+    useLayoutEffect(() => {
+      if (
+        /**
+         * If there is a popover component reference,
+         * and this isn't the first render,
+         * and the projectionMatrix has changed since last render,
+         * then force the popover to reposition itself.
+         */
+        popoverRef.current &&
+        projectionMatrixAtLastRender.current &&
+        projectionMatrixAtLastRender.current !== projectionMatrix
+      ) {
+        popoverRef.current.positionPopoverFixed();
+      }
+
+      // no matter what, keep track of the last project matrix that was used to size the popover
+      projectionMatrixAtLastRender.current = projectionMatrix;
+    }, [projectionMatrixAtLastRender, projectionMatrix]);
+
     if (!optionsWithActions) {
       /**
        * When called with a `menuAction`
