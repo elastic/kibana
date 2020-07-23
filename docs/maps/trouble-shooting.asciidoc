@@ -30,7 +30,7 @@ image::maps/images/inspector.png[]
   ** Open your index pattern in <<management, Stack Management>>.
   ** Ensure your geospatial field type is `geo_point` or `geo_shape`.
   ** Ensure your geospatial field is searchable and aggregatable.
-  ** If your geospatial field type does not match your Elasticsearch mapping, click the `refresh` button to refresh the field list from Elasticsearch.
+  ** If your geospatial field type does not match your Elasticsearch mapping, click the *Refresh* button to refresh the field list from Elasticsearch.
 * Index patterns with thousands of fields can exceed the default maximum payload size.
 Increase `server.maxPayloadBytes` in <<settings>> for large index patterns.
 
