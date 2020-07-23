@@ -17,8 +17,5 @@
  * under the License.
  */
 
-import { PluginInitializer } from 'kibana/public';
-import { StatusPagePlugin, StatusPagePluginSetup, StatusPagePluginStart } from './plugin';
-
-export const plugin: PluginInitializer<StatusPagePluginSetup, StatusPagePluginStart> = () =>
-  new StatusPagePlugin();
+export { formatNumber, DataType } from './format_number';
+export { loadStatus, Metric, FormattedStatus, ProcessedServerResponse } from './load_status';

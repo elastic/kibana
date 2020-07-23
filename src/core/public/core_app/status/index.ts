@@ -17,23 +17,4 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-
-export class StatusPagePlugin implements Plugin<StatusPagePluginSetup, StatusPagePluginStart> {
-  public setup(core: CoreSetup) {
-    const isStatusPageAnonymous = core.injectedMetadata.getInjectedVar(
-      'isStatusPageAnonymous'
-    ) as boolean;
-
-    if (isStatusPageAnonymous) {
-      core.http.anonymousPaths.register('/status');
-    }
-  }
-
-  public start() {}
-
-  public stop() {}
-}
-
-export type StatusPagePluginSetup = ReturnType<StatusPagePlugin['setup']>;
-export type StatusPagePluginStart = ReturnType<StatusPagePlugin['start']>;
+export { renderApp } from './render_app';

@@ -17,17 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import ServerStatus from './server_status';
-
-const STATE = {
-  id: 'green',
-  title: 'Green',
-  uiColor: 'secondary',
-};
-
-test('render', () => {
-  const component = shallow(<ServerStatus serverState={STATE} name="My Computer" />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
+export { MetricTile, MetricTiles } from './metric_tiles';
+export { ServerStatus } from './server_status';
+export { StatusTable } from './status_table';
