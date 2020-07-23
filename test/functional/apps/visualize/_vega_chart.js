@@ -22,7 +22,6 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['timePicker', 'visualize', 'visChart', 'vegaChart']);
   const filterBar = getService('filterBar');
-  const inspector = getService('inspector');
   const log = getService('log');
 
   describe('vega chart in visualize app', () => {
@@ -35,10 +34,6 @@ export default function ({ getService, getPageObjects }) {
 
     describe('vega chart', () => {
       describe('initial render', () => {
-        it('should not have inspector enabled', async function () {
-          await inspector.expectIsNotEnabled();
-        });
-
         it.skip('should have some initial vega spec text', async function () {
           const vegaSpec = await PageObjects.vegaChart.getSpec();
           expect(vegaSpec).to.contain('{').and.to.contain('data');

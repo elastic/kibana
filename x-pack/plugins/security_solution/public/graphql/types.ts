@@ -428,6 +428,10 @@ export enum FlowDirection {
   biDirectional = 'biDirectional',
 }
 
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
+
 export type ToStringArray = string[];
 
 export type Date = string;
@@ -627,6 +631,10 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<ToStringArrayNoNullable>;
+
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 export interface AuthenticationsData {
@@ -2780,6 +2788,10 @@ export namespace SourceQuery {
     aggregatable: boolean;
 
     format: Maybe<string>;
+
+    esTypes: Maybe<ToStringArrayNoNullable>;
+
+    subType: Maybe<ToIFieldSubTypeNonNullable>;
   };
 }
 

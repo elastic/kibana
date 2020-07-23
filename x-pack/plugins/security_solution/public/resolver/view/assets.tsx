@@ -422,7 +422,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
 export const useResolverTheme = (): {
   colorMap: ColorMap;
   nodeAssets: NodeStyleMap;
-  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessOrigin: boolean) => NodeStyleConfig;
+  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessTrigger: boolean) => NodeStyleConfig;
 } => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
@@ -497,10 +497,14 @@ export const useResolverTheme = (): {
     },
   };
 
-  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessOrigin: boolean) {
+  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessTrigger: boolean) {
     if (isProcessTerminated) {
-      return nodeAssets[processTypeToCube.processTerminated];
-    } else if (isProcessOrigin) {
+      if (isProcessTrigger) {
+        return nodeAssets.terminatedTriggerCube;
+      } else {
+        return nodeAssets[processTypeToCube.processTerminated];
+      }
+    } else if (isProcessTrigger) {
       return nodeAssets[processTypeToCube.processCausedAlert];
     } else {
       return nodeAssets[processTypeToCube.processRan];

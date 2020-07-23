@@ -101,7 +101,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     },
 
     async startImportAndWaitForProcessing() {
-      await testSubjects.click('mlFileDataVisImportButton');
+      await testSubjects.clickWhenNotDisabled('mlFileDataVisImportButton');
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('mlFileImportSuccessCallout');
       });
