@@ -18,7 +18,8 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 export type EmailActionType = ActionType<
   ActionTypeConfigType,
   ActionTypeSecretsType,
-  ActionParamsType
+  ActionParamsType,
+  unknown
 >;
 export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
   ActionTypeConfigType,
@@ -147,7 +148,7 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
 async function executor(
   { logger }: { logger: Logger },
   execOptions: EmailActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
   const config = execOptions.config;
   const secrets = execOptions.secrets;

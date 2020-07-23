@@ -10,24 +10,27 @@ import { ActionType, ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } fro
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-  Params extends ActionTypeParams = ActionTypeParams
->(actionType: ActionType<Config, Secrets, Params>, value: unknown) {
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'params', value);
 }
 
 export function validateConfig<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-  Params extends ActionTypeParams = ActionTypeParams
->(actionType: ActionType<Config, Secrets, Params>, value: unknown) {
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'config', value);
 }
 
 export function validateSecrets<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-  Params extends ActionTypeParams = ActionTypeParams
->(actionType: ActionType<Config, Secrets, Params>, value: unknown) {
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+>(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
   return validateWithSchema(actionType, 'secrets', value);
 }
 
@@ -36,9 +39,10 @@ type ValidKeys = 'params' | 'config' | 'secrets';
 function validateWithSchema<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-  Params extends ActionTypeParams = ActionTypeParams
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
 >(
-  actionType: ActionType<Config, Secrets, Params>,
+  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,
   value: unknown
 ): Record<string, unknown> {

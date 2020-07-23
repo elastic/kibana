@@ -19,7 +19,8 @@ const PAGER_DUTY_API_URL = 'https://events.pagerduty.com/v2/enqueue';
 export type PagerDutyActionType = ActionType<
   ActionTypeConfigType,
   ActionTypeSecretsType,
-  ActionParamsType
+  ActionParamsType,
+  unknown
 >;
 export type PagerDutyActionTypeExecutorOptions = ActionTypeExecutorOptions<
   ActionTypeConfigType,
@@ -154,7 +155,7 @@ function getPagerDutyApiUrl(config: ActionTypeConfigType): string {
 async function executor(
   { logger }: { logger: Logger },
   execOptions: PagerDutyActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
   const config = execOptions.config;
   const secrets = execOptions.secrets;

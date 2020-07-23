@@ -94,7 +94,7 @@ export class TaskRunnerFactory {
           },
         } as unknown) as KibanaRequest;
 
-        let executorResult: ActionTypeExecutorResult;
+        let executorResult: ActionTypeExecutorResult<unknown>;
         try {
           executorResult = await actionExecutor.execute({
             params,

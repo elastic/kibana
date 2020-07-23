@@ -80,7 +80,7 @@ export interface FindActionResult extends ActionResult {
 }
 
 // the result returned from an action type executor function
-export interface ActionTypeExecutorResult<Data = unknown> {
+export interface ActionTypeExecutorResult<Data> {
   actionId: string;
   status: 'ok' | 'error';
   message?: string;
@@ -90,9 +90,9 @@ export interface ActionTypeExecutorResult<Data = unknown> {
 }
 
 // signature of the action type executor function
-export type ExecutorType<Config, Secrets, Params> = (
+export type ExecutorType<Config, Secrets, Params, ResultData> = (
   options: ActionTypeExecutorOptions<Config, Secrets, Params>
-) => Promise<ActionTypeExecutorResult | null | undefined | void>;
+) => Promise<ActionTypeExecutorResult<ResultData>>;
 
 interface ValidatorType<Type> {
   validate(value: unknown): Type;
@@ -106,7 +106,8 @@ export interface ActionValidationService {
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-  Params extends ActionTypeParams = ActionTypeParams
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
 > {
   id: string;
   name: string;
@@ -117,7 +118,7 @@ export interface ActionType<
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
   };
-  executor: ExecutorType<Config, Secrets, Params>;
+  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
 export interface RawAction extends SavedObjectAttributes {

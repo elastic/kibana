@@ -18,7 +18,9 @@ let actionType: SlackActionType;
 
 beforeAll(() => {
   actionType = getActionType({
-    async executor() {},
+    async executor(options) {
+      return { status: 'ok', actionId: options.actionId };
+    },
     configurationUtilities: actionsConfigMock.create(),
   });
 });
@@ -129,7 +131,7 @@ describe('execute()', () => {
         text: `slack mockExecutor success: ${message}`,
         actionId: '',
         status: 'ok',
-      } as ActionTypeExecutorResult;
+      } as ActionTypeExecutorResult<void>;
     }
 
     actionType = getActionType({

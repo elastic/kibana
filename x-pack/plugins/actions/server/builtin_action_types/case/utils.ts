@@ -27,6 +27,7 @@ import {
   TransformFieldsArgs,
   Comment,
   ExecutorSubActionPushParams,
+  PushToServiceResponse,
 } from './types';
 
 import { transformers } from './transformers';
@@ -72,13 +73,12 @@ export const createConnectorExecutor = ({
     ExternalIncidentServiceSecretConfiguration,
     ExecutorParams
   >
-): Promise<ActionTypeExecutorResult> => {
+): Promise<ActionTypeExecutorResult<PushToServiceResponse | {}>> => {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
   let data = {};
 
-  const res: Pick<ActionTypeExecutorResult, 'status'> &
-    Pick<ActionTypeExecutorResult, 'actionId'> = {
+  const res: ActionTypeExecutorResult<void> = {
     status: 'ok',
     actionId,
   };

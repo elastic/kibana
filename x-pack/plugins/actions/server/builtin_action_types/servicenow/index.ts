@@ -41,7 +41,8 @@ export function getActionType(
 ): ActionType<
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
-  ExecutorParams
+  ExecutorParams,
+  PushToServiceResponse | {}
 > {
   const { logger, configurationUtilities } = params;
   return {
@@ -70,7 +71,7 @@ async function executor(
     ServiceNowSecretConfigurationType,
     ExecutorParams
   >
-): Promise<ActionTypeExecutorResult> {
+): Promise<ActionTypeExecutorResult<PushToServiceResponse | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
   let data: PushToServiceResponse | null = null;

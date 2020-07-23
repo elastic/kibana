@@ -25,7 +25,8 @@ export enum WebhookMethods {
 export type WebhookActionType = ActionType<
   ActionTypeConfigType,
   ActionTypeSecretsType,
-  ActionParamsType
+  ActionParamsType,
+  unknown
 >;
 export type WebhookActionTypeExecutorOptions = ActionTypeExecutorOptions<
   ActionTypeConfigType,
@@ -124,7 +125,7 @@ function validateActionTypeConfig(
 export async function executor(
   { logger }: { logger: Logger },
   execOptions: WebhookActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
   const { method, url, headers = {} } = execOptions.config;
   const { body: data } = execOptions.params;
@@ -183,11 +184,14 @@ export async function executor(
 }
 
 // Action Executor Result w/ internationalisation
-function successResult(actionId: string, data: unknown): ActionTypeExecutorResult {
+function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };
 }
 
-function errorResultInvalid(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
+function errorResultInvalid(
+  actionId: string,
+  serviceMessage: string
+): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
   });
@@ -199,7 +203,7 @@ function errorResultInvalid(actionId: string, serviceMessage: string): ActionTyp
   };
 }
 
-function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult {
+function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
     defaultMessage: 'error calling webhook, unexpected error',
   });
@@ -210,7 +214,7 @@ function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult 
   };
 }
 
-function retryResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
+function retryResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate(
     'xpack.actions.builtin.webhook.invalidResponseRetryLaterErrorMessage',
     {
@@ -231,7 +235,7 @@ function retryResultSeconds(
   serviceMessage: string,
 
   retryAfter: number
-): ActionTypeExecutorResult {
+): ActionTypeExecutorResult<void> {
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();

@@ -58,7 +58,7 @@ export function getActionType({ logger }: { logger: Logger }): ServerLogActionTy
 async function executor(
   { logger }: { logger: Logger },
   execOptions: ServerLogActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+): Promise<ActionTypeExecutorResult<void>> {
   const actionId = execOptions.actionId;
   const params = execOptions.params;
 
