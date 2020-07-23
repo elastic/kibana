@@ -74,7 +74,7 @@ describe('OperatorComponent', () => {
     expect(wrapper.find(`button[data-test-subj="comboBoxClearButton"]`).exists()).toBeTruthy();
   });
 
-  test('it displays "operatorOptions" if param is passed in', () => {
+  test('it displays "operatorOptions" if param is passed in with items', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <OperatorComponent
@@ -93,6 +93,52 @@ describe('OperatorComponent', () => {
     expect(
       wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"]`).at(0).prop('options')
     ).toEqual([{ label: 'is not' }]);
+  });
+
+  test('it does not display "operatorOptions" if param is passed in with no items', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <OperatorComponent
+          placeholder="Placeholder text"
+          selectedField={getField('machine.os.raw')}
+          operator={isOperator}
+          isDisabled={false}
+          isLoading={false}
+          isClearable={false}
+          onChange={jest.fn()}
+          operatorOptions={[]}
+        />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="operatorAutocompleteComboBox"]`).at(0).prop('options')
+    ).toEqual([
+      {
+        label: 'is',
+      },
+      {
+        label: 'is not',
+      },
+      {
+        label: 'is one of',
+      },
+      {
+        label: 'is not one of',
+      },
+      {
+        label: 'exists',
+      },
+      {
+        label: 'does not exist',
+      },
+      {
+        label: 'is in list',
+      },
+      {
+        label: 'is not in list',
+      },
+    ]);
   });
 
   test('it correctly displays selected operator', () => {

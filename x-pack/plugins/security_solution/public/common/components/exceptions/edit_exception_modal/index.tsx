@@ -97,9 +97,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const [
     { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : []);
+  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
 
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
+  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    ruleIndices,
+    'rules'
+  );
 
   const onError = useCallback(
     (error) => {
@@ -216,6 +219,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 ruleName={ruleName}
                 isOrDisabled={false}
                 isAndDisabled={false}
+                isNestedDisabled={false}
                 data-test-subj="edit-exception-modal-builder"
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
