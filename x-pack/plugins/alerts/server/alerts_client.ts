@@ -386,15 +386,20 @@ export class AlertsClient {
           updateResult.scheduledTaskId &&
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
+          // eslint-disable-next-line no-console
           console.log(`:::::::::::::::::::::::::::::::::::::::::::::::::`);
+          // eslint-disable-next-line no-console
           console.log(`RESCHEDULING:${updateResult.scheduledTaskId}`);
+          // eslint-disable-next-line no-console
           console.log(`:::::::::::::::::::::::::::::::::::::::::::::::::`);
           return this.taskManager
             .runNow(updateResult.scheduledTaskId)
-            .then((res: any) => {
+            .then((res: unknown) => {
+              // eslint-disable-next-line no-console
               console.log(`RES:${res}`);
             })
             .catch((err: Error) => {
+              // eslint-disable-next-line no-console
               console.log(`ERROR:${err}`);
               this.logger.error(
                 `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
