@@ -88,31 +88,29 @@ export const Sidebar = React.memo<{
 
     return (
       <SidebarFlexGroup direction="column" gutterSize="none">
-        <>
-          <EuiFlexItem grow={false}>
-            <SidebarHeader title={i18n.RECENT_CASES}>{recentCasesFilters}</SidebarHeader>
-            <StatefulRecentCases filterOptions={recentCasesFilterOptions} />
-          </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SidebarHeader title={i18n.RECENT_CASES}>{recentCasesFilters}</SidebarHeader>
+          <StatefulRecentCases filterOptions={recentCasesFilterOptions} />
+        </EuiFlexItem>
 
-          <Spacer />
+        <Spacer />
 
-          <EuiFlexItem grow={false}>
-            <SidebarHeader title={i18n.RECENT_TIMELINES}>{recentTimelinesFilters}</SidebarHeader>
-            <StatefulRecentTimelines
-              apolloClient={apolloClient!}
-              filterBy={recentTimelinesFilterBy}
-            />
-          </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SidebarHeader title={i18n.RECENT_TIMELINES}>{recentTimelinesFilters}</SidebarHeader>
+          <StatefulRecentTimelines
+            apolloClient={apolloClient!}
+            filterBy={recentTimelinesFilterBy}
+          />
+        </EuiFlexItem>
 
-          <Spacer />
+        <Spacer />
 
-          <EuiFlexItem grow={false}>
-            <StatefulNewsFeed
-              enableNewsFeedSetting={ENABLE_NEWS_FEED_SETTING}
-              newsFeedSetting={NEWS_FEED_URL_SETTING}
-            />
-          </EuiFlexItem>
-        </>
+        <EuiFlexItem grow={false}>
+          <StatefulNewsFeed
+            enableNewsFeedSetting={ENABLE_NEWS_FEED_SETTING}
+            newsFeedSetting={NEWS_FEED_URL_SETTING}
+          />
+        </EuiFlexItem>
       </SidebarFlexGroup>
     );
   }

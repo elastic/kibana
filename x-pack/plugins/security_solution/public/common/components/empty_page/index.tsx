@@ -78,6 +78,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
                       onClick={onClick}
                       iconType={icon}
                       target={target}
+                      fill={fill}
                       data-test-subj={`empty-page-${titles[idx]}-action`}
                     >
                       {label}
