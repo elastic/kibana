@@ -8,7 +8,6 @@ import path from 'path';
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { defineDockerServersConfig } from '@kbn/test';
-import { services } from '../api_integration/services';
 
 // Docker image to use for Ingest Manager API integration tests.
 // This hash comes from the commit hash here: https://github.com/elastic/package-storage/commit/48f3935a72b0c5aacc6fec8ef36d559b089a238b
@@ -50,9 +49,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     }),
     esArchiver: xPackAPITestsConfig.get('esArchiver'),
     services: {
-      ...services,
-      supertest: xPackAPITestsConfig.get('services.supertest'),
-      es: xPackAPITestsConfig.get('services.es'),
+      ...xPackAPITestsConfig.get('services'),
     },
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',
