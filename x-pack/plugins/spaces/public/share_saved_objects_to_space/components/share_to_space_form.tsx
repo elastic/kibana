@@ -31,6 +31,7 @@ export const ShareToSpaceForm = (props: Props) => {
     return (
       <Fragment>
         <EuiCallOut
+          size="s"
           title={
             <FormattedMessage
               id="xpack.spaces.management.shareToSpace.shareWarningTitle"
@@ -39,16 +40,15 @@ export const ShareToSpaceForm = (props: Props) => {
           }
           color="warning"
         >
-          {/* <p> */}
           <FormattedMessage
             id="xpack.spaces.management.shareToSpace.shareWarningBody"
             defaultMessage="To avoid changes across spaces, make a copy instead."
           />
-          {/* </p> */}
           <EuiButton
             onClick={() => props.makeCopy()}
             color="warning"
             data-test-subj="sts-copy-button"
+            size="s"
           >
             <FormattedMessage
               id="xpack.spaces.management.shareToSpace.shareWarningButton"

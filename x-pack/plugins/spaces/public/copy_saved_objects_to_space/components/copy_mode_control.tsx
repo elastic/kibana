@@ -30,7 +30,10 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
     ),
     text: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledText',
-      { defaultMessage: 'Check each copied object for similar origin IDs in the destination space' }
+      {
+        defaultMessage:
+          'Check if each object was previously copied or imported into the destination space.',
+      }
     ),
   };
   const enabledOption = {
@@ -41,7 +44,7 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
     ),
     text: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledText',
-      { defaultMessage: 'All copied objects will be created with new random IDs' }
+      { defaultMessage: 'All copied objects will be created with new random IDs.' }
     ),
   };
   const createLabel = ({ title, text }: { title: string; text: string }) => (

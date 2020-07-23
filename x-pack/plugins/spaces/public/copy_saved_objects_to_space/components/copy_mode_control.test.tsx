@@ -51,7 +51,7 @@ describe('CopyModeControl', () => {
                   <EuiText
                     color="subdued"
                   >
-                    Check each copied object for similar origin IDs in the destination space
+                    Check if each object was previously copied or imported into the destination space.
                   </EuiText>
                 </React.Fragment>
                 <EuiSpacer
@@ -82,7 +82,7 @@ describe('CopyModeControl', () => {
                 <EuiText
                   color="subdued"
                 >
-                  All copied objects will be created with new random IDs
+                  All copied objects will be created with new random IDs.
                 </EuiText>
               </React.Fragment>,
             },
