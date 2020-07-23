@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -11,10 +11,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiComboBox,
-  EuiSpacer,
+  EuiComboBoxOptionOption,
   EuiTextColor,
   EuiPortal,
-  EuiButtonEmpty,
   EuiFormRow,
   EuiLink,
 } from '@elastic/eui';
@@ -37,12 +36,12 @@ const AgentConfigWrapper = styled(EuiFormRow)`
 `;
 
 const AgentConfigNameColumn = styled(EuiFlexItem)`
-  max-width: ${(props) => `${(props.grow / 9) * 100}%`};
+  max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
   overflow: hidden;
 `;
 
 const AgentConfigDescriptionColumn = styled(EuiFlexItem)`
-  max-width: ${(props) => `${(props.grow / 9) * 100}%`};
+  max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
   overflow: hidden;
 `;
 
@@ -128,7 +127,7 @@ export const StepSelectConfig: React.FunctionComponent<{
     }
   }, [selectedConfigId, agentConfig, updateAgentConfig, setIsLoadingSecondStep]);
 
-  const agentConfigOptions = packageInfoData
+  const agentConfigOptions: Array<EuiComboBoxOptionOption<string>> = packageInfoData
     ? agentConfigs.map((agentConf) => {
         const alreadyHasLimitedPackage =
           (isLimitedPackage &&
@@ -136,14 +135,16 @@ export const StepSelectConfig: React.FunctionComponent<{
           false;
         return {
           label: agentConf.name,
-          key: agentConf.id,
+          value: agentConf.id,
           disabled: alreadyHasLimitedPackage,
           'data-test-subj': 'agentConfigItem',
         };
       })
     : [];
 
-  const selectedConfigOption = agentConfigOptions.find((option) => option.key === selectedConfigId);
+  const selectedConfigOption = agentConfigOptions.find(
+    (option) => option.value === selectedConfigId
+  );
 
   // Try to select default agent config
   useEffect(() => {
@@ -151,7 +152,7 @@ export const StepSelectConfig: React.FunctionComponent<{
       const defaultAgentConfig = agentConfigs.find((config) => config.is_default);
       if (defaultAgentConfig) {
         const defaultAgentConfigOption = agentConfigOptions.find(
-          (option) => option.key === defaultAgentConfig.id
+          (option) => option.value === defaultAgentConfig.id
         );
         if (defaultAgentConfigOption && !defaultAgentConfigOption.disabled) {
           setSelectedConfigId(defaultAgentConfig.id);
@@ -221,7 +222,7 @@ export const StepSelectConfig: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <div>
                     <EuiLink
-                      isDisabled={!hasWriteCapabilites}
+                      disabled={!hasWriteCapabilites}
                       onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
                     >
                       <FormattedMessage
@@ -253,10 +254,11 @@ export const StepSelectConfig: React.FunctionComponent<{
                 }
               )}
               singleSelection={{ asPlainText: true }}
+              isClearable={false}
               fullWidth={true}
               isLoading={isAgentConfigsLoading || isPackageInfoLoading}
               options={agentConfigOptions}
-              renderOption={(option) => {
+              renderOption={(option: EuiComboBoxOptionOption<string>) => {
                 return (
                   <EuiFlexGroup>
                     <AgentConfigNameColumn grow={2}>
@@ -264,7 +266,7 @@ export const StepSelectConfig: React.FunctionComponent<{
                     </AgentConfigNameColumn>
                     <AgentConfigDescriptionColumn grow={isFleetReady ? 5 : 7}>
                       <EuiTextColor className="eui-textTruncate" color="subdued">
-                        {agentConfigsById[option.key!].description}
+                        {agentConfigsById[option.value!].description}
                       </EuiTextColor>
                     </AgentConfigDescriptionColumn>
                     {isFleetReady ? (
@@ -274,7 +276,7 @@ export const StepSelectConfig: React.FunctionComponent<{
                             id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsCountText"
                             defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
                             values={{
-                              count: agentConfigsById[option.key!].agents || 0,
+                              count: agentConfigsById[option.value!].agents || 0,
                             }}
                           />
                         </EuiTextColor>
@@ -287,8 +289,8 @@ export const StepSelectConfig: React.FunctionComponent<{
               onChange={(options) => {
                 const selectedOption = options[0] || undefined;
                 if (selectedOption) {
-                  if (selectedOption.key !== selectedConfigId) {
-                    setSelectedConfigId(selectedOption.key);
+                  if (selectedOption.value !== selectedConfigId) {
+                    setSelectedConfigId(selectedOption.value);
                   }
                 } else {
                   setSelectedConfigId(undefined);
