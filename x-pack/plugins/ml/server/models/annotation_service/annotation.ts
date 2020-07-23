@@ -76,7 +76,7 @@ export interface DeleteParams {
   id: string;
 }
 
-export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
+export function annotationProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.
@@ -103,7 +103,7 @@ export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
       delete params.body.key;
     }
 
-    return await callAsCurrentUser('index', params);
+    return await callAsInternalUser('index', params);
   }
 
   async function getAnnotations({
@@ -286,7 +286,7 @@ export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
     };
 
     try {
-      const resp = await callAsCurrentUser('search', params);
+      const resp = await callAsInternalUser('search', params);
 
       if (resp.error !== undefined && resp.message !== undefined) {
         // No need to translate, this will not be exposed in the UI.
@@ -335,7 +335,7 @@ export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterCl
       refresh: 'wait_for',
     };
 
-    return await callAsCurrentUser('delete', param);
+    return await callAsInternalUser('delete', param);
   }
 
   return {
