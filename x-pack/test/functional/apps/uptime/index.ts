@@ -51,23 +51,24 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         await esArchiver.unload('uptime/blank');
       });
 
-      // loadTestFile(require.resolve('./locations'));
-      // loadTestFile(require.resolve('./settings'));
+      loadTestFile(require.resolve('./locations'));
+      loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./certificates'));
     });
-    // describe('with real-world data', () => {
-    //   before(async () => {
-    //     await esArchiver.unload(ARCHIVE);
-    //     await esArchiver.load(ARCHIVE);
-    //     await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
-    //     await uptime.navigation.goToUptime();
-    //   });
-    //   after(async () => await esArchiver.unload(ARCHIVE));
 
-    //   loadTestFile(require.resolve('./overview'));
-    //   loadTestFile(require.resolve('./monitor'));
-    //   loadTestFile(require.resolve('./ml_anomaly'));
-    //   loadTestFile(require.resolve('./feature_controls'));
-    // });
+    describe('with real-world data', () => {
+      before(async () => {
+        await esArchiver.unload(ARCHIVE);
+        await esArchiver.load(ARCHIVE);
+        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+        await uptime.navigation.goToUptime();
+      });
+      after(async () => await esArchiver.unload(ARCHIVE));
+
+      loadTestFile(require.resolve('./overview'));
+      loadTestFile(require.resolve('./monitor'));
+      loadTestFile(require.resolve('./ml_anomaly'));
+      loadTestFile(require.resolve('./feature_controls'));
+    });
   });
 };
