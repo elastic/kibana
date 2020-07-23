@@ -72,7 +72,7 @@ export const ConfigYamlFlyout = memo<{ configId: string; onClose: () => void }>(
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+              <EuiButtonEmpty onClick={onClose} flush="left">
                 <FormattedMessage
                   id="xpack.ingestManager.configDetails.yamlFlyoutCloseButtonLabel"
                   defaultMessage="Close"

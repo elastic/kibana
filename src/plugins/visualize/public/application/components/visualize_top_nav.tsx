@@ -40,6 +40,7 @@ interface VisualizeTopNavProps {
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
   originatingApp?: string;
+  setOriginatingApp?: (originatingApp: string | undefined) => void;
   savedVisInstance: SavedVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
@@ -53,6 +54,7 @@ const TopNav = ({
   setHasUnsavedChanges,
   hasUnappliedChanges,
   originatingApp,
+  setOriginatingApp,
   savedVisInstance,
   stateContainer,
   visualizationIdFromUrl,
@@ -86,6 +88,7 @@ const TopNav = ({
           hasUnappliedChanges,
           openInspector,
           originatingApp,
+          setOriginatingApp,
           savedVisInstance,
           stateContainer,
           visualizationIdFromUrl,
@@ -100,6 +103,7 @@ const TopNav = ({
     hasUnappliedChanges,
     openInspector,
     originatingApp,
+    setOriginatingApp,
     savedVisInstance,
     stateContainer,
     visualizationIdFromUrl,

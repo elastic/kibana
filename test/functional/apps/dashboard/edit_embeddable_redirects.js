@@ -75,5 +75,17 @@ export default function ({ getService, getPageObjects }) {
       const titles = await PageObjects.dashboard.getPanelTitles();
       expect(titles.indexOf(newTitle)).to.not.be(-1);
     });
+
+    it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {
+      const newTitle = 'wowee, my title just got cooler again';
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickEdit();
+      await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
+        saveAsNew: true,
+        redirectToOrigin: false,
+      });
+      await PageObjects.visualize.notLinkedToOriginatingApp();
+    });
   });
 }
