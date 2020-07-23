@@ -31,8 +31,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       .then((response: SupertestResponse) => response.body);
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/72803
-  describe.skip('update', () => {
+  describe.only('update', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -713,7 +712,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should handle updates to an alert schedule by rescheduling the underlying task', async () => {
+        it.only('should handle updates to an alert schedule by rescheduling the underlying task', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
