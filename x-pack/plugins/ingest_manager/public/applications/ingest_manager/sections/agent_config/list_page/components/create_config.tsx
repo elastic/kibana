@@ -19,6 +19,7 @@ import {
   EuiButton,
   EuiText,
   EuiFlyoutProps,
+  EuiSpacer,
 } from '@elastic/eui';
 import { NewAgentConfig, AgentConfig } from '../../../../types';
 import { useCapabilities, useCore, sendCreateAgentConfig } from '../../../../hooks';
@@ -70,11 +71,14 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({
           />
         </h2>
       </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiText size="s">
-        <FormattedMessage
-          id="xpack.ingestManager.createAgentConfig.flyoutTitleDescription"
-          defaultMessage="Agent configurations are used to manage settings across a group of agents. You can add integrations to your agent configuration to specify what data your agents collect. When you edit an agent configuration, you can use Fleet to deploy updates to a specified group of agents."
-        />
+        <p>
+          <FormattedMessage
+            id="xpack.ingestManager.createAgentConfig.flyoutTitleDescription"
+            defaultMessage="Agent configurations are used to manage settings across a group of agents. You can add integrations to your agent configuration to specify what data your agents collect. When you edit an agent configuration, you can use Fleet to deploy updates to a specified group of agents."
+          />
+        </p>
       </EuiText>
     </EuiFlyoutHeader>
   );
@@ -95,7 +99,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={() => onClose()} flush="left">
+          <EuiButtonEmpty onClick={() => onClose()} flush="left">
             <FormattedMessage
               id="xpack.ingestManager.createAgentConfig.cancelButtonLabel"
               defaultMessage="Cancel"
