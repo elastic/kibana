@@ -2,6 +2,7 @@
 
 exports[`RenderingService setup() render() renders "core" from legacy request 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -74,6 +75,7 @@ Object {
 
 exports[`RenderingService setup() render() renders "core" page 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -146,6 +148,7 @@ Object {
 
 exports[`RenderingService setup() render() renders "core" page driven by settings 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -222,6 +225,7 @@ Object {
 
 exports[`RenderingService setup() render() renders "core" page for blank basepath 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -294,6 +298,7 @@ Object {
 
 exports[`RenderingService setup() render() renders "core" with excluded user settings 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -366,6 +371,7 @@ Object {
 
 exports[`RenderingService setup() render() renders "legacy" page 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -438,6 +444,7 @@ Object {
 
 exports[`RenderingService setup() render() renders "legacy" page for blank basepath 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -510,6 +517,7 @@ Object {
 
 exports[`RenderingService setup() render() renders "legacy" with custom vars 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -584,6 +592,7 @@ Object {
 
 exports[`RenderingService setup() render() renders "legacy" with excluded user settings 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
@@ -656,6 +665,7 @@ Object {
 
 exports[`RenderingService setup() render() renders "legacy" with excluded user settings and custom vars 1`] = `
 Object {
+  "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,

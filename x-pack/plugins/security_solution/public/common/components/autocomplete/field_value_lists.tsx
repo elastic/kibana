@@ -9,7 +9,7 @@ import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
 import { useFindLists, ListSchema } from '../../../lists_plugin_deps';
 import { useKibana } from '../../../common/lib/kibana';
-import { getGenericComboBoxProps } from './helpers';
+import { getGenericComboBoxProps, paramIsValid } from './helpers';
 
 interface AutocompleteFieldListsProps {
   placeholder: string;
@@ -75,6 +75,8 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
     [labels, optionsMemo, onChange]
   );
 
+  const setIsTouchedValue = useCallback(() => setIsTouched(true), [setIsTouched]);
+
   useEffect(() => {
     if (result != null) {
       setLists(result.data);
@@ -91,17 +93,24 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
     }
   }, [selectedField, start, http]);
 
+  const isValid = useMemo(
+    (): boolean => paramIsValid(selectedValue, selectedField, isRequired, touched),
+    [selectedField, selectedValue, isRequired, touched]
+  );
+
+  const isLoadingState = useMemo((): boolean => isLoading || loading, [isLoading, loading]);
+
   return (
     <EuiComboBox
       placeholder={placeholder}
       isDisabled={isDisabled}
-      isLoading={isLoading || loading}
+      isLoading={isLoadingState}
       isClearable={isClearable}
       options={comboOptions}
       selectedOptions={selectedComboOptions}
       onChange={handleValuesChange}
-      isInvalid={isRequired ? touched && (selectedValue == null || selectedValue === '') : false}
-      onFocus={() => setIsTouched(true)}
+      isInvalid={!isValid}
+      onFocus={setIsTouchedValue}
       singleSelection={{ asPlainText: true }}
       sortMatchesBy="startsWith"
       data-test-subj="valuesAutocompleteComboBox listsComboxBox"

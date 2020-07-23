@@ -23,3 +23,4 @@ export const FTR_REPORT = Fs.readFileSync(require.resolve('./ftr_report.xml'), '
 export const JEST_REPORT = Fs.readFileSync(require.resolve('./jest_report.xml'), 'utf8');
 export const KARMA_REPORT = Fs.readFileSync(require.resolve('./karma_report.xml'), 'utf8');
 export const MOCHA_REPORT = Fs.readFileSync(require.resolve('./mocha_report.xml'), 'utf8');
+export const CYPRESS_REPORT = Fs.readFileSync(require.resolve('./cypress_report.xml'), 'utf8');
