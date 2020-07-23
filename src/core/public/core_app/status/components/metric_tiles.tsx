@@ -17,53 +17,43 @@
  * under the License.
  */
 
-import formatNumber from '../lib/format_number';
-import React, { Component } from 'react';
-import { Metric as MetricPropType } from '../lib/prop_types';
-import PropTypes from 'prop-types';
+import React, { FunctionComponent } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiCard } from '@elastic/eui';
+import { formatNumber, Metric } from '../lib';
 
 /*
-Displays a metric with the correct format.
-*/
-export class MetricTile extends Component {
-  static propTypes = {
-    metric: MetricPropType.isRequired,
-  };
-
-  formattedMetric() {
-    const { value, type } = this.props.metric;
-
-    const metrics = [].concat(value);
-    return metrics
-      .map(function (metric) {
-        return formatNumber(metric, type);
-      })
-      .join(', ');
-  }
-
-  render() {
-    const { name } = this.props.metric;
-
-    return <EuiCard layout="horizontal" title={this.formattedMetric()} description={name} />;
-  }
-}
+ * Displays a metric with the correct format.
+ */
+export const MetricTile: FunctionComponent<{ metric: Metric }> = ({ metric }) => {
+  const { name } = metric;
+  return (
+    <EuiCard
+      data-test-subj={`serverMetric-${formatMetricId(metric)}`}
+      layout="horizontal"
+      title={formatMetric(metric)}
+      description={name}
+    />
+  );
+};
 
 /*
-Wrapper component that simply maps each metric to MetricTile inside a FlexGroup
-*/
-const MetricTiles = ({ metrics }) => (
+ * Wrapper component that simply maps each metric to MetricTile inside a FlexGroup
+ */
+export const MetricTiles: FunctionComponent<{ metrics: Metric[] }> = ({ metrics }) => (
   <EuiFlexGrid columns={3}>
     {metrics.map((metric) => (
-      <EuiFlexItem key={metric.name}>
+      <EuiFlexItem key={metric.name} data-test-subj="serverMetric">
         <MetricTile metric={metric} />
       </EuiFlexItem>
     ))}
   </EuiFlexGrid>
 );
 
-MetricTiles.propTypes = {
-  metrics: PropTypes.arrayOf(MetricPropType).isRequired,
+const formatMetric = ({ value, type }: Metric) => {
+  const metrics = Array.isArray(value) ? value : [value];
+  return metrics.map((metric) => formatNumber(metric, type)).join(', ');
 };
 
-export default MetricTiles;
+const formatMetricId = ({ name }: Metric) => {
+  return name.toLowerCase().replace(/[ ]+/g, '-');
+};

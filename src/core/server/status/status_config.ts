@@ -17,25 +17,16 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { ServiceConfigDescriptor } from '../internal_types';
 
-export default function ({ getService, getPageObjects }) {
-  const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+const statusConfigSchema = schema.object({
+  allowAnonymous: schema.boolean({ defaultValue: false }),
+});
 
-  describe('status page', function () {
-    this.tags('ciGroup1');
+export type StatusConfigType = TypeOf<typeof statusConfigSchema>;
 
-    beforeEach(async () => {
-      await PageObjects.common.navigateToApp('status_page');
-    });
-
-    it('should show the kibana plugin as ready', async function () {
-      await retry.tryForTime(6000, async () => {
-        const text = await testSubjects.getVisibleText('statusBreakdown');
-        expect(text.indexOf('plugin:kibana')).to.be.above(-1);
-      });
-    });
-  });
-}
+export const config: ServiceConfigDescriptor<StatusConfigType> = {
+  path: 'status',
+  schema: statusConfigSchema,
+};

@@ -17,17 +17,28 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
+import numeral from '@elastic/numeral';
 
-export const State = PropTypes.shape({
-  id: PropTypes.string.isRequired,
-  message: PropTypes.string, // optional
-  title: PropTypes.string, // optional
-  uiColor: PropTypes.string.isRequired,
-});
+export type DataType = 'byte' | 'float' | 'integer' | 'time';
 
-export const Metric = PropTypes.shape({
-  name: PropTypes.string.isRequired,
-  value: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.number), PropTypes.number]).isRequired,
-  type: PropTypes.string, // optional
-});
+export function formatNumber(num: number, type?: DataType) {
+  let format: string;
+  let postfix = '';
+  switch (type) {
+    case 'byte':
+      format = '0.00 b';
+      break;
+    case 'time':
+      format = '0.00';
+      postfix = ' ms';
+      break;
+    case 'integer':
+      format = '0';
+      break;
+    case 'float':
+    default:
+      format = '0.00';
+  }
+
+  return numeral(num).format(format) + postfix;
+}
