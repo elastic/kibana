@@ -35,9 +35,8 @@ const data = [
 ];
 
 describe('CustomLink', () => {
-  let callApmApiSpy: jest.SpyInstance<any, never>;
   beforeAll(() => {
-    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
+    jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
   });
   afterAll(() => {
     jest.resetAllMocks();
