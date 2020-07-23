@@ -17,30 +17,24 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
+import { write, read, Task } from '../lib';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
-
-export const InstallChromium = {
-  description: 'Installing Chromium',
+export const UpdateLicenseFile: Task = {
+  description: 'Updating LICENSE.txt file',
 
   async run(config, log, build) {
     if (build.isOss()) {
-      return;
+      log.info('Copying Apache 2.0 license to LICENSE.txt');
+      await write(
+        build.resolvePath('LICENSE.txt'),
+        await read(config.resolveFromRepo('licenses/APACHE-LICENSE-2.0.txt'))
+      );
     } else {
-      for (const platform of config.getNodePlatforms()) {
-        log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
-
-        const { binaryPath$ } = installBrowser(
-          // TODO: https://github.com/elastic/kibana/issues/72496
-          log,
-          build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
-          platform.getName(),
-          platform.getArchitecture()
-        );
-        await binaryPath$.pipe(first()).toPromise();
-      }
+      log.info('Copying Elastic license to LICENSE.txt');
+      await write(
+        build.resolvePath('LICENSE.txt'),
+        await read(config.resolveFromRepo('licenses/ELASTIC-LICENSE.txt'))
+      );
     }
   },
 };
