@@ -14,13 +14,13 @@ import {
   Description,
   DescriptionOrUndefined,
   EntriesArray,
-  EntriesArrayOrUndefined,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
   FilterOrUndefined,
   IdOrUndefined,
+  Immutable,
   ItemId,
   ItemIdOrUndefined,
   ListId,
@@ -36,6 +36,8 @@ import {
   Tags,
   TagsOrUndefined,
   UpdateCommentsArray,
+  Version,
+  VersionOrUndefined,
   _Tags,
   _TagsOrUndefined,
   _VersionOrUndefined,
@@ -61,6 +63,8 @@ export interface CreateExceptionListOptions {
   meta: MetaOrUndefined;
   tags: Tags;
   type: ExceptionListType;
+  immutable: Immutable;
+  version: Version;
 }
 
 export interface UpdateExceptionListOptions {
@@ -74,6 +78,7 @@ export interface UpdateExceptionListOptions {
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
   type: ExceptionListTypeOrUndefined;
+  version: VersionOrUndefined;
 }
 
 export interface DeleteExceptionListOptions {
@@ -134,7 +139,7 @@ export interface UpdateExceptionListItemOptions {
   _tags: _TagsOrUndefined;
   _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
-  entries: EntriesArrayOrUndefined;
+  entries: EntriesArray;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
   namespaceType: NamespaceType;
@@ -149,7 +154,7 @@ export interface UpdateEndpointListItemOptions {
   _tags: _TagsOrUndefined;
   _version: _VersionOrUndefined;
   comments: UpdateCommentsArray;
-  entries: EntriesArrayOrUndefined;
+  entries: EntriesArray;
   id: IdOrUndefined;
   itemId: ItemIdOrUndefined;
   name: NameOrUndefined;

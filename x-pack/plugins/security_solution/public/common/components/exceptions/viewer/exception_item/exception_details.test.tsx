@@ -211,7 +211,7 @@ describe('ExceptionDetails', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('EuiDescriptionListTitle').at(3).text()).toEqual('Comment');
+    expect(wrapper.find('EuiDescriptionListTitle').at(3).text()).toEqual('Description');
     expect(wrapper.find('EuiDescriptionListDescription').at(3).text()).toEqual('some description');
   });
 });

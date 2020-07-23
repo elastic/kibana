@@ -60,10 +60,10 @@ const PanelContent = memo(function PanelContent() {
   // The "selected" node (and its corresponding event) in the tree control.
   // It may need to be synchronized with the ID indicated as selected via the `idFromParams`
   // memo above. When this is the case, it is handled by the layout effect below.
-  const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
+  const selectedNode = useSelector(selectors.selectedNode);
   const uiSelectedEvent = useMemo(() => {
-    return graphableProcesses.find((evt) => event.entityId(evt) === selectedDescendantProcessId);
-  }, [graphableProcesses, selectedDescendantProcessId]);
+    return graphableProcesses.find((evt) => event.entityId(evt) === selectedNode);
+  }, [graphableProcesses, selectedNode]);
 
   // Until an event is dispatched during update, the event indicated as selected by params may
   // be different than the one in state.
