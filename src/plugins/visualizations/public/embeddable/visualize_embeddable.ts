@@ -60,9 +60,6 @@ export interface VisualizeEmbeddableConfiguration {
 }
 
 export interface VisualizeInput extends EmbeddableInput {
-  timeRange?: TimeRange;
-  query?: Query;
-  filters?: Filter[];
   vis?: {
     colors?: { [key: string]: string };
   };
