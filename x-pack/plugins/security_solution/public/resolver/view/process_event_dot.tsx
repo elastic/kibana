@@ -313,6 +313,13 @@ const UnstyledProcessEventDot = React.memo(
         <svg
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
+          onClick={
+            () => {
+              handleFocus();
+              handleClick();
+            } /* a11y note: this is strictly an alternate to the button, so no tabindex  is necessary*/
+          }
+          role="button"
           style={{
             display: 'block',
             width: '100%',
@@ -320,6 +327,8 @@ const UnstyledProcessEventDot = React.memo(
             position: 'absolute',
             top: '0',
             left: '0',
+            outline: 'transparent',
+            border: 'none',
           }}
         >
           <g>
