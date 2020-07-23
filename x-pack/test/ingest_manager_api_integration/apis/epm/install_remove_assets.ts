@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         if (server.enabled) {
           const resPolicy = await es.transport.request({
             method: 'GET',
-            path: `/_ilm/policy/es_assets`,
+            path: `/_ilm/policy/all_assets`,
           });
           expect(resPolicy.statusCode).equal(200);
         } else {
