@@ -17,21 +17,27 @@
  * under the License.
  */
 
-export { BinderBase } from './binder';
-export { BinderFor } from './binder_for';
-export { deepCloneWithBuffers } from './deep_clone_with_buffers';
-export { unset } from './unset';
-export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
-export { IS_KIBANA_RELEASE } from './artifact_type';
+import Path from 'path';
 
-export {
-  concatStreamProviders,
-  createConcatStream,
-  createIntersperseStream,
-  createListStream,
-  createPromiseFromStreams,
-  createReduceStream,
-  createSplitStream,
-  createMapStream,
-  createReplaceStream,
-} from './streams';
+import { untar, GlobalTask, copy } from '../../lib';
+import { getNodeDownloadInfo } from './node_download_info';
+
+export const ExtractNodeBuilds: GlobalTask = {
+  global: true,
+  description: 'Extracting node.js builds for all platforms',
+  async run(config) {
+    await Promise.all(
+      config.getNodePlatforms().map(async (platform) => {
+        const { downloadPath, extractDir } = getNodeDownloadInfo(config, platform);
+        if (platform.isWindows()) {
+          // windows executable is not extractable, it's just an .exe file
+          await copy(downloadPath, Path.resolve(extractDir, 'node.exe'), {
+            clone: true,
+          });
+        } else {
+          await untar(downloadPath, extractDir, { strip: 1 });
+        }
+      })
+    );
+  },
+};
