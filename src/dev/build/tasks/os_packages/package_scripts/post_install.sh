@@ -3,6 +3,23 @@ set -e
 
 export KBN_PATH_CONF=${KBN_PATH_CONF:-<%= configDir %>}
 
+set_chmod() {
+  chmod -f 660 ${KBN_PATH_CONF}/kibana.yml || true
+  chmod -f 2750 <%= dataDir %> || true
+  chmod -f 2750 ${KBN_PATH_CONF} || true
+}
+
+set_chown() {
+  chown <%= user %>:<%= group %> <%= dataDir %>
+  chown root:<%= group %> ${KBN_PATH_CONF}
+  chown root:<%= group %> ${KBN_PATH_CONF}/kibana.yml
+}
+
+set_access() {
+  set_chmod
+  set_chown
+}
+
 case $1 in
   # Debian
   configure)
@@ -14,12 +31,16 @@ case $1 in
       adduser --quiet --system --no-create-home --disabled-password \
       --ingroup "<%= group %>" --shell /bin/false "<%= user %>"
     fi
+
+    set_access
   ;;
   abort-deconfigure|abort-upgrade|abort-remove)
   ;;
 
   # Red Hat
   1|2)
+
+
     if ! getent group "<%= group %>" >/dev/null; then
       groupadd -r "<%= group %>"
     fi
@@ -28,6 +49,8 @@ case $1 in
       useradd -r -g "<%= group %>" -M -s /sbin/nologin \
       -c "kibana service user" "<%= user %>"
     fi
+
+    set_access
   ;;
 
   *)
@@ -35,12 +58,3 @@ case $1 in
       exit 1
   ;;
 esac
-
-chown -R <%= user %>:<%= group %> <%= dataDir %>
-chmod 2750 <%= dataDir %>
-chmod -R 2755 <%= dataDir %>/*
-
-chown :<%= group %> ${KBN_PATH_CONF}
-chown :<%= group %> ${KBN_PATH_CONF}/kibana.yml
-chmod 2750 ${KBN_PATH_CONF}
-chmod 660 ${KBN_PATH_CONF}/kibana.yml
