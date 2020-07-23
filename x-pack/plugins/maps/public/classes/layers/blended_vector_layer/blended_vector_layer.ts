@@ -33,6 +33,7 @@ import {
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
+  LayerDescriptor,
   VectorLayerDescriptor,
 } from '../../../../common/descriptor_types';
 import { IStyle } from '../../styles/style';
@@ -210,7 +211,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     }
   }
 
-  async getDisplayName(source: ISource) {
+  async getDisplayName(source?: ISource) {
     const displayName = await super.getDisplayName(source);
     return this._isClustered
       ? i18n.translate('xpack.maps.blendedVectorLayer.clusteredLayerName', {
@@ -230,6 +231,19 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
 
   getJoins() {
     return [];
+  }
+
+  async cloneDescriptor(): Promise<LayerDescriptor> {
+    const clonedDescriptor = await super.cloneDescriptor();
+
+    // Use super getDisplayName instead of instance getDisplayName to avoid getting 'Clustered Clone of Clustered'
+    const displayName = await super.getDisplayName();
+    clonedDescriptor.label = `Clone of ${displayName}`;
+
+    // sourceDescriptor must be document source descriptor
+    clonedDescriptor.sourceDescriptor = this._documentSource.cloneDescriptor();
+
+    return clonedDescriptor;
   }
 
   getSource() {
