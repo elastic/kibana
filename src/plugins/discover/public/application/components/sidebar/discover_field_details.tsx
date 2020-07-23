@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiLink, EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiLink, EuiIconTip, EuiText, EuiPopoverFooter } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
@@ -41,62 +41,66 @@ export function DiscoverFieldDetails({
   const warnings = getWarnings(field);
 
   return (
-    <div className="dscFieldDetails">
-      {!details.error && (
-        <EuiText size="xs">
-          <FormattedMessage
-            id="discover.fieldChooser.detailViews.topValuesInRecordsDescription"
-            defaultMessage="Top 5 values in"
-          />{' '}
-          {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
-            <EuiLink onClick={() => onAddFilter('_exists_', field.name, '+')}>
-              {details.exists}
-            </EuiLink>
-          ) : (
-            <span>{details.exists}</span>
-          )}{' '}
-          / {details.total}{' '}
-          <FormattedMessage
-            id="discover.fieldChooser.detailViews.recordsText"
-            defaultMessage="records"
-          />
-        </EuiText>
-      )}
-      {details.error && <EuiText size="xs">{details.error}</EuiText>}
-      {!details.error && (
-        <div style={{ marginTop: '4px' }}>
-          {details.buckets.map((bucket: Bucket, idx: number) => (
-            <DiscoverFieldBucket
-              key={`bucket${idx}`}
-              bucket={bucket}
-              field={field}
-              onAddFilter={onAddFilter}
-            />
-          ))}
-        </div>
-      )}
+    <>
+      <div className="dscFieldDetails">
+        {details.error && <EuiText size="xs">{details.error}</EuiText>}
+        {!details.error && (
+          <div style={{ marginTop: '4px' }}>
+            {details.buckets.map((bucket: Bucket, idx: number) => (
+              <DiscoverFieldBucket
+                key={`bucket${idx}`}
+                bucket={bucket}
+                field={field}
+                onAddFilter={onAddFilter}
+              />
+            ))}
+          </div>
+        )}
 
-      {details.visualizeUrl && (
-        <>
-          <EuiLink
-            onClick={() => {
-              getServices().core.application.navigateToApp(details.visualizeUrl.app, {
-                path: details.visualizeUrl.path,
-              });
-            }}
-            className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
-            data-test-subj={`fieldVisualize-${field.name}`}
-          >
+        {details.visualizeUrl && (
+          <>
+            <EuiLink
+              onClick={() => {
+                getServices().core.application.navigateToApp(details.visualizeUrl.app, {
+                  path: details.visualizeUrl.path,
+                });
+              }}
+              className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
+              data-test-subj={`fieldVisualize-${field.name}`}
+            >
+              <FormattedMessage
+                id="discover.fieldChooser.detailViews.visualizeLinkText"
+                defaultMessage="Visualize"
+              />
+              {warnings.length > 0 && (
+                <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
+              )}
+            </EuiLink>
+          </>
+        )}
+      </div>
+      <EuiPopoverFooter>
+        {!details.error && (
+          <EuiText size="xs" textAlign="center">
             <FormattedMessage
-              id="discover.fieldChooser.detailViews.visualizeLinkText"
-              defaultMessage="Visualize"
+              id="discover.fieldChooser.detailViews.topValuesInRecordsDescription"
+              defaultMessage="Top 5 values in"
+            />{' '}
+            {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
+              <EuiLink onClick={() => onAddFilter('_exists_', field.name, '+')}>
+                {details.exists}
+              </EuiLink>
+            ) : (
+              <span>{details.exists}</span>
+            )}{' '}
+            / {details.total}{' '}
+            <FormattedMessage
+              id="discover.fieldChooser.detailViews.recordsText"
+              defaultMessage="records"
             />
-            {warnings.length > 0 && (
-              <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
-            )}
-          </EuiLink>
-        </>
-      )}
-    </div>
+          </EuiText>
+        )}
+      </EuiPopoverFooter>
+    </>
   );
 }

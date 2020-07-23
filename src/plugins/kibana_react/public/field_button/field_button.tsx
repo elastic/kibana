@@ -30,12 +30,29 @@ export interface FieldButtonProps extends Omit<EuiTokenProps, 'iconType'> {
   fieldInfoIcon?: node;
   fieldAction?: node;
   isDraggable?: boolean;
+  size?: ButtonSize;
 }
+
+/**
+ * Wraps Object.keys with proper typescript definition of the resulting array
+ */
+function keysOf<T, K extends keyof T>(obj: T): K[] {
+  return Object.keys(obj) as K[];
+}
+
+export type ButtonSize = 's' | 'm';
+
+const sizeToClassNameMap: { [size in ButtonSize]: string | null } = {
+  s: 'kbnFieldButton--small',
+  m: null,
+};
+
+export const SIZES = keysOf(sizeToClassNameMap);
 
 export function FieldButton({
   // type,
   // label,
-  // size = 's',
+  size = 'm',
   // scripted,
   isOpen,
   fieldIcon,
@@ -50,6 +67,7 @@ export function FieldButton({
 
   const classes = classNames(
     'kbnFieldButton',
+    size ? sizeToClassNameMap[size] : null,
     { 'kbnFieldButton-isOpen': isOpen },
     { 'kbnFieldButton--isDraggable': isDraggable },
     className

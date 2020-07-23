@@ -20,6 +20,15 @@
   }
 }
 
+.kbnFieldButton--small {
+  font-size: $euiFontSizeXS;
+  .kbnFieldButton__info {
+    .kbnFieldButton__fieldIcon {
+      margin-top: 0;
+    }
+  }
+}
+
 .kbnFieldButton__info {
   border-radius: $euiBorderRadius - 1px;
   padding: $euiSizeS;

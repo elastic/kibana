@@ -189,6 +189,7 @@ export function DiscoverField({
             // className={`dscSidebarField dscSidebarItem ${
             //   showDetails ? 'dscSidebarItem--active' : ''
             // }`}
+            size="s"
             className="dscSidebarItem"
             isOpen={showDetails}
             tabIndex={0}
