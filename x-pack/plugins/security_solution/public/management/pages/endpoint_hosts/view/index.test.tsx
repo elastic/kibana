@@ -112,14 +112,16 @@ describe('when on the hosts page', () => {
       let firstPolicyID: string;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
-          const hostListData = mockHostResultList({ total: 3 });
+          const hostListData = mockHostResultList({ total: 4 });
           firstPolicyID = hostListData.hosts[0].metadata.Endpoint.policy.applied.id;
-          [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE].forEach((status, index) => {
-            hostListData.hosts[index] = {
-              metadata: hostListData.hosts[index].metadata,
-              host_status: status,
-            };
-          });
+          [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE, HostStatus.UNENROLLING].forEach(
+            (status, index) => {
+              hostListData.hosts[index] = {
+                metadata: hostListData.hosts[index].metadata,
+                host_status: status,
+              };
+            }
+          );
           hostListData.hosts.forEach((item, index) => {
             generatedPolicyStatuses[index] = item.metadata.Endpoint.policy.applied.status;
           });
@@ -134,12 +136,12 @@ describe('when on the hosts page', () => {
       it('should display rows in the table', async () => {
         const renderResult = render();
         const rows = await renderResult.findAllByRole('row');
-        expect(rows).toHaveLength(4);
+        expect(rows).toHaveLength(5);
       });
       it('should show total', async () => {
         const renderResult = render();
         const total = await renderResult.findByTestId('hostListTableTotal');
-        expect(total.textContent).toEqual('3 Hosts');
+        expect(total.textContent).toEqual('4 Hosts');
       });
       it('should display correct status', async () => {
         const renderResult = render();
@@ -156,6 +158,11 @@ describe('when on the hosts page', () => {
         expect(hostStatuses[2].textContent).toEqual('Offline');
         expect(
           hostStatuses[2].querySelector('[data-euiicon-type][color="subdued"]')
+        ).not.toBeNull();
+
+        expect(hostStatuses[3].textContent).toEqual('Unenrolling');
+        expect(
+          hostStatuses[3].querySelector('[data-euiicon-type][color="warning"]')
         ).not.toBeNull();
       });
 
