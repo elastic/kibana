@@ -17,22 +17,28 @@
  * under the License.
  */
 
-import {
-  fatalErrorsServiceMock,
-  notificationServiceMock,
-  overlayServiceMock,
-} from '../../../../../core/public/mocks';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import type { AppMountParameters } from '../../application';
+import type { HttpSetup } from '../../http';
+import type { NotificationsSetup } from '../../notifications';
+import { StatusApp } from './status_app';
 
-jest.doMock('ui/new_platform', () => ({
-  npSetup: {
-    core: {
-      fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-      notifications: notificationServiceMock.createSetupContract(),
-    },
-  },
-  npStart: {
-    core: {
-      overlays: overlayServiceMock.createStartContract(),
-    },
-  },
-}));
+interface Deps {
+  http: HttpSetup;
+  notifications: NotificationsSetup;
+}
+
+export const renderApp = ({ element }: AppMountParameters, { http, notifications }: Deps) => {
+  ReactDOM.render(
+    <I18nProvider>
+      <StatusApp http={http} notifications={notifications} />
+    </I18nProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};

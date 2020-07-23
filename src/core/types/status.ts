@@ -17,22 +17,36 @@
  * under the License.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import StatusTable from './status_table';
+import type { OpsMetrics } from '../server/metrics';
 
-const STATE = {
-  id: 'green',
-  uiColor: 'secondary',
-  message: 'Ready',
+export interface ServerStatus {
+  id: string;
+  title: string;
+  state: string;
+  message: string;
+  uiColor: string;
+  icon?: string;
+  since?: string;
+}
+
+export type ServerMetrics = OpsMetrics & {
+  collection_interval_in_millis: number;
 };
 
-test('render', () => {
-  const component = shallow(<StatusTable statuses={[{ id: 'plugin:1', state: STATE }]} />);
-  expect(component).toMatchSnapshot(); // eslint-disable-line
-});
+export interface ServerVersion {
+  number: string;
+  build_hash: string;
+  build_number: string;
+  build_snapshot: string;
+}
 
-test('render empty', () => {
-  const component = shallow(<StatusTable />);
-  expect(component.isEmptyRender()).toBe(true); // eslint-disable-line
-});
+export interface StatusResponse {
+  name: string;
+  uuid: string;
+  version: ServerVersion;
+  status: {
+    overall: ServerStatus;
+    statuses: ServerStatus[];
+  };
+  metrics: ServerMetrics;
+}
