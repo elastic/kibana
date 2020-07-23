@@ -319,7 +319,8 @@ const UnstyledProcessEventDot = React.memo(
               handleClick();
             } /* a11y note: this is strictly an alternate to the button, so no tabindex  is necessary*/
           }
-          role="button"
+          role="img"
+          aria-labelledby={labelHTMLID}
           style={{
             display: 'block',
             width: '100%',
