@@ -35,12 +35,7 @@ import {
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
-import {
-  clearDataRequests,
-  syncDataForLayerId,
-  syncDataForLayer,
-  updateStyleMeta,
-} from './data_request_actions';
+import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import { JoinDescriptor, LayerDescriptor, StyleDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
