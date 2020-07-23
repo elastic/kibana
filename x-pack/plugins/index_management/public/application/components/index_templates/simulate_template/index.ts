@@ -6,7 +6,7 @@
 
 export {
   SimulateTemplateFlyoutContent,
-  flyoutProps as simulateTemplateFlyoutProps,
+  defaultFlyoutProps as simulateTemplateFlyoutProps,
   Props as SimulateTemplateProps,
 } from './simulate_template_flyout';
 

@@ -97,7 +97,7 @@ export const TemplateForm = ({
   onSave,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
-  const { addContent, closeFlyout } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, closeFlyout } = useGlobalFlyout();
 
   const indexTemplate = defaultValue ?? {
     name: '',
@@ -154,38 +154,6 @@ export const TemplateForm = ({
       <EuiSpacer size="m" />
     </>
   ) : null;
-
-  const showPreviewFlyout = () => {
-    addContent<SimulateTemplateProps>({
-      id: 'simulateTemplate',
-      Component: SimulateTemplateFlyoutContent,
-      props: {
-        getTemplate: getTemplateSimulate,
-        onClose: closeFlyout,
-      },
-      flyoutProps: simulateTemplateFlyoutProps,
-    });
-  };
-
-  const getRightContentWizardNav = (stepId: WizardSection) => {
-    if (isLegacy) {
-      return null;
-    }
-
-    // Don't show "Preview template" button on logistics and review steps
-    if (stepId === 'logistics' || stepId === 'review') {
-      return null;
-    }
-
-    return (
-      <EuiButton size="s" onClick={showPreviewFlyout}>
-        <FormattedMessage
-          id="xpack.idxMgmt.templateForm.previewIndexTemplateButtonLabel"
-          defaultMessage="Preview index template"
-        />
-      </EuiButton>
-    );
-  };
 
   /**
    * If no mappings, settings or aliases are defined, it is better to not send empty
@@ -253,7 +221,7 @@ export const TemplateForm = ({
     [indexTemplate, buildTemplateObject, onSave, clearSaveError]
   );
 
-  const getTemplateSimulate = useCallback(async () => {
+  const getSimulateTemplate = useCallback(async () => {
     if (!wizardContent) {
       return;
     }
@@ -265,6 +233,38 @@ export const TemplateForm = ({
     const template = buildTemplateObject(indexTemplate)(wizardData);
     return template;
   }, [buildTemplateObject, indexTemplate, wizardContent]);
+
+  const showPreviewFlyout = () => {
+    addContentToGlobalFlyout<SimulateTemplateProps>({
+      id: 'simulateTemplate',
+      Component: SimulateTemplateFlyoutContent,
+      props: {
+        getTemplate: getSimulateTemplate,
+        onClose: closeFlyout,
+      },
+      flyoutProps: simulateTemplateFlyoutProps,
+    });
+  };
+
+  const getRightContentWizardNav = (stepId: WizardSection) => {
+    if (isLegacy) {
+      return null;
+    }
+
+    // Don't show "Preview template" button on logistics and review steps
+    if (stepId === 'logistics' || stepId === 'review') {
+      return null;
+    }
+
+    return (
+      <EuiButton size="s" onClick={showPreviewFlyout}>
+        <FormattedMessage
+          id="xpack.idxMgmt.templateForm.previewIndexTemplateButtonLabel"
+          defaultMessage="Preview index template"
+        />
+      </EuiButton>
+    );
+  };
 
   return (
     <>

@@ -17,7 +17,7 @@ import { attemptToDecodeURI } from '../lib';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import {
   ComponentTemplateDetailsFlyoutContent,
-  flyoutProps,
+  defaultFlyoutProps,
   ComponentTemplateDetailsProps,
 } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
@@ -36,7 +36,10 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
   history,
 }) => {
-  const { addContent, removeContent } = useGlobalFlyout();
+  const {
+    addContent: addContentToGlobalFlyout,
+    removeContent: removeContentFromGlobalFlyout,
+  } = useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
 
   const { data, isLoading, error, sendRequest } = api.useLoadComponentTemplates();
@@ -106,7 +109,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
       ];
 
       // Open the flyout with the Component Template Details content
-      addContent<ComponentTemplateDetailsProps>({
+      addContentToGlobalFlyout<ComponentTemplateDetailsProps>({
         id: 'componentTemplateDetails',
         Component: ComponentTemplateDetailsFlyoutContent,
         props: {
@@ -115,7 +118,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
           showSummaryCallToAction: true,
           actions,
         },
-        flyoutProps: { ...flyoutProps, onClose: goToComponentTemplateList },
+        flyoutProps: { ...defaultFlyoutProps, onClose: goToComponentTemplateList },
       });
     }
   }, [
@@ -123,15 +126,15 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     goToComponentTemplateList,
     goToEditComponentTemplate,
     goToCloneComponentTemplate,
-    addContent,
+    addContentToGlobalFlyout,
     history,
   ]);
 
   useEffect(() => {
     if (!componentTemplateName) {
-      removeContent('componentTemplateDetails');
+      removeContentFromGlobalFlyout('componentTemplateDetails');
     }
-  }, [componentTemplateName, removeContent]);
+  }, [componentTemplateName, removeContentFromGlobalFlyout]);
 
   let content: React.ReactNode;
 

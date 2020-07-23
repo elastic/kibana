@@ -34,7 +34,7 @@ export interface Props {
   showSummaryCallToAction?: boolean;
 }
 
-export const flyoutProps = {
+export const defaultFlyoutProps = {
   'data-test-subj': 'componentTemplateDetails',
   'aria-labelledby': 'componentTemplateDetailsFlyoutTitle',
 };

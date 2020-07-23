@@ -10,7 +10,7 @@ import { useDispatch, useMappingsState } from '../../../../mappings_state_contex
 import { Field } from '../../../../types';
 import { fieldSerializer, fieldDeserializer } from '../../../../lib';
 import { ModalConfirmationDeleteFields } from '../modal_confirmation_delete_fields';
-import { EditField, flyoutProps, Props as EditFieldProps } from './edit_field';
+import { EditField, defaultFlyoutProps, Props as EditFieldProps } from './edit_field';
 import { useUpdateField } from './use_update_field';
 
 const { useGlobalFlyout } = GlobalFlyout;
@@ -18,9 +18,11 @@ const { useGlobalFlyout } = GlobalFlyout;
 export const EditFieldContainer = React.memo(() => {
   const { fields, documentFields } = useMappingsState();
   const dispatch = useDispatch();
-  const { addContent, removeContent } = useGlobalFlyout();
+  const {
+    addContent: addContentToGlobalFlyout,
+    removeContent: removeContentFromGlobalFlyout,
+  } = useGlobalFlyout();
   const { updateField, modal } = useUpdateField();
-  const isMounted = useRef(false);
 
   const { status, fieldToEdit } = documentFields;
   const isEditing = status === 'editingField';
@@ -53,17 +55,9 @@ export const EditFieldContainer = React.memo(() => {
   }, [dispatch]);
 
   useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
     if (isEditing) {
       // Open the flyout with the <EditField /> content
-      addContent<EditFieldProps>({
+      addContentToGlobalFlyout<EditFieldProps>({
         id: 'mappingsEditField',
         Component: EditField,
         props: {
@@ -73,21 +67,30 @@ export const EditFieldContainer = React.memo(() => {
           allFields: fields.byId,
           updateField,
         },
-        flyoutProps: { ...flyoutProps, onClose: exitEdit },
+        flyoutProps: { ...defaultFlyoutProps, onClose: exitEdit },
         cleanUpFunc: exitEdit,
       });
     }
-  }, [isEditing, field, form, addContent, fields.byId, fieldToEdit, exitEdit, updateField]);
+  }, [
+    isEditing,
+    field,
+    form,
+    addContentToGlobalFlyout,
+    fields.byId,
+    fieldToEdit,
+    exitEdit,
+    updateField,
+  ]);
 
   useEffect(() => {
     if (!isEditing) {
-      removeContent('mappingsEditField');
+      removeContentFromGlobalFlyout('mappingsEditField');
     }
-  }, [isEditing, removeContent]);
+  }, [isEditing, removeContentFromGlobalFlyout]);
 
   useEffect(() => {
     return () => {
-      if (!isMounted.current && isEditing) {
+      if (isEditing) {
         // When the component unmounts, exit edit mode.
         exitEdit();
       }

@@ -36,8 +36,6 @@ describe('Mappings editor: shape datatype', () => {
 
   test('initial view and default parameters values', async () => {
     const defaultMappings = {
-      _meta: {},
-      _source: {},
       properties: {
         myField: {
           type: 'shape',

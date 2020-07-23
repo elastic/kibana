@@ -43,7 +43,7 @@ export interface Props {
   updateField: UpdateFieldFunc;
 }
 
-export const flyoutProps = {
+export const defaultFlyoutProps = {
   'data-test-subj': 'mappingsEditorFieldEdit',
   'aria-labelledby': 'mappingsEditorFieldEditTitle',
   className: 'mappingsEditor__editField',

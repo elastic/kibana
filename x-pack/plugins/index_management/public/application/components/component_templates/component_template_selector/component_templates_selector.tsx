@@ -14,7 +14,7 @@ import { ComponentTemplateListItem } from '../../../../../common';
 import { SectionError, SectionLoading, GlobalFlyout } from '../shared_imports';
 import {
   ComponentTemplateDetailsFlyoutContent,
-  flyoutProps,
+  defaultFlyoutProps,
   ComponentTemplateDetailsProps,
 } from '../component_template_details';
 import { CreateButtonPopOver } from './components';
@@ -59,7 +59,10 @@ export const ComponentTemplatesSelector = ({
   emptyPrompt: { text, showCreateButton } = {},
 }: Props) => {
   const { data: components, isLoading, error } = useApi().useLoadComponentTemplates();
-  const { addContent, removeContent } = useGlobalFlyout();
+  const {
+    addContent: addContentToGlobalFlyout,
+    removeContent: removeContentFromGlobalFlyout,
+  } = useGlobalFlyout();
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [componentsSelected, setComponentsSelected] = useState<ComponentTemplateListItem[]>([]);
   const isInitialized = useRef(false);
@@ -103,26 +106,26 @@ export const ComponentTemplatesSelector = ({
   useEffect(() => {
     if (selectedComponent) {
       // Open the flyout with the Component Template Details content
-      addContent<ComponentTemplateDetailsProps>({
+      addContentToGlobalFlyout<ComponentTemplateDetailsProps>({
         id: 'componentTemplateDetails',
         Component: ComponentTemplateDetailsFlyoutContent,
         props: {
           onClose: closeComponentTemplateDetails,
           componentTemplateName: selectedComponent,
         },
-        flyoutProps: { ...flyoutProps, onClose: closeComponentTemplateDetails },
+        flyoutProps: { ...defaultFlyoutProps, onClose: closeComponentTemplateDetails },
         cleanUpFunc: () => {
           setSelectedComponent(null);
         },
       });
     }
-  }, [selectedComponent, addContent]);
+  }, [selectedComponent, addContentToGlobalFlyout]);
 
   useEffect(() => {
     if (!selectedComponent) {
-      removeContent('componentTemplateDetails');
+      removeContentFromGlobalFlyout('componentTemplateDetails');
     }
-  }, [selectedComponent, removeContent]);
+  }, [selectedComponent, removeContentFromGlobalFlyout]);
 
   const onSelectionReorder = (reorderedComponents: ComponentTemplateListItem[]) => {
     setComponentsSelected(reorderedComponents);

@@ -10,7 +10,7 @@ export { ComponentTemplateList } from './component_template_list';
 
 export {
   ComponentTemplateDetailsFlyoutContent,
-  flyoutProps as componentDetailsFlyoutProps,
+  defaultFlyoutProps as componentDetailsFlyoutProps,
 } from './component_template_details';
 
 export {

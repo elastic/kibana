@@ -24,7 +24,7 @@
 import * as Forms from './forms';
 import * as Monaco from './monaco';
 import * as ace from './ace';
-import * as GlobalFlyout from './flyout_multi_content';
+import * as GlobalFlyout from './global_flyout';
 
 export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
 

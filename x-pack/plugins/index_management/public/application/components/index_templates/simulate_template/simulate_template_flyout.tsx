@@ -26,7 +26,7 @@ export interface Props {
   getTemplate: () => { [key: string]: any };
 }
 
-export const flyoutProps = {
+export const defaultFlyoutProps = {
   'data-test-subj': 'simulateTemplateFlyout',
   'aria-labelledby': 'simulateTemplateFlyoutTitle',
 };

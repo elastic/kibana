@@ -127,8 +127,8 @@ export const useGlobalFlyout = () => {
    * during its lifecycle. When it unmounts, we will remove
    * all those content added to the flyout.
    */
-  const contentAdded = useRef<Set<string> | undefined>(undefined);
-  const { removeContent, addContent: addContentContext } = ctx;
+  const contents = useRef<Set<string> | undefined>(undefined);
+  const { removeContent, addContent: addContentToContext } = ctx;
 
   useEffect(() => {
     isMounted.current = true;
@@ -138,26 +138,26 @@ export const useGlobalFlyout = () => {
     };
   }, []);
 
-  const getContentAdded = useCallback(() => {
-    if (contentAdded.current === undefined) {
-      contentAdded.current = new Set();
+  const getContents = useCallback(() => {
+    if (contents.current === undefined) {
+      contents.current = new Set();
     }
-    return contentAdded.current;
+    return contents.current;
   }, []);
 
   const addContent: Context['addContent'] = useCallback(
     (content) => {
-      getContentAdded().add(content.id);
-      return addContentContext(content);
+      getContents().add(content.id);
+      return addContentToContext(content);
     },
-    [getContentAdded, addContentContext]
+    [getContents, addContentToContext]
   );
 
   useEffect(() => {
     return () => {
       if (!isMounted.current) {
         // When the component unmounts, remove all the content it has added to the flyout
-        Array.from(getContentAdded()).forEach(removeContent);
+        Array.from(getContents()).forEach(removeContent);
       }
     };
   }, [removeContent]);

@@ -29,6 +29,15 @@ import { IndexSettingsProvider } from './index_settings_context';
 
 type TabName = 'fields' | 'advanced' | 'templates';
 
+interface MappingsEditorParsedMetadata {
+  parsedDefaultValue?: {
+    configuration: MappingsConfiguration;
+    fields: { [key: string]: Field };
+    templates: MappingsTemplates;
+  };
+  multipleMappingsDeclared: boolean;
+}
+
 interface Props {
   onChange: OnUpdateHandler;
   value?: { [key: string]: any };
@@ -36,14 +45,9 @@ interface Props {
 }
 
 export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Props) => {
-  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<{
-    parsedDefaultValue?: {
-      configuration: MappingsConfiguration;
-      fields: { [key: string]: Field };
-      templates: MappingsTemplates;
-    };
-    multipleMappingsDeclared: boolean;
-  }>(() => {
+  const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<
+    MappingsEditorParsedMetadata
+  >(() => {
     const mappingsDefinition = extractMappingsDefinition(value);
 
     if (mappingsDefinition === null) {

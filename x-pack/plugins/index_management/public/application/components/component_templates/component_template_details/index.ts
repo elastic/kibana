@@ -6,6 +6,6 @@
 
 export {
   ComponentTemplateDetailsFlyoutContent,
-  flyoutProps,
+  defaultFlyoutProps,
   Props as ComponentTemplateDetailsProps,
 } from './component_template_details';
