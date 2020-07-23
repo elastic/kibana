@@ -95,7 +95,7 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
 
     return (
       <>
-        {indicesExist ? (
+        {indicesExist !== false ? (
           <StickyContainer>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>

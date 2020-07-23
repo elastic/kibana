@@ -122,3 +122,4 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
 EmptyPageComponent.displayName = 'EmptyPageComponent';
 
 export const EmptyPage = React.memo(EmptyPageComponent);
+EmptyPage.displayName = 'EmptyPage';

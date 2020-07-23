@@ -75,7 +75,7 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
       <Main data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          {indicesExist && showTimeline && (
+          {indicesExist !== false && showTimeline && (
             <>
               <AutoSaveWarningMsg />
               <Flyout

@@ -153,7 +153,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     <>
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
-      {indicesExist ? (
+      {indicesExist !== false ? (
         <StickyContainer>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>

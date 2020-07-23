@@ -33,7 +33,7 @@ describe('Index Fields & Browser Fields', () => {
         title:
           'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
       },
-      indicesExist: true,
+      indicesExist: null,
       loading: true,
     });
   });

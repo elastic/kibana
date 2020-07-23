@@ -82,7 +82,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
 
           <FlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-              {indicesExist && window.location.pathname.includes(APP_DETECTIONS_PATH) && (
+              {indicesExist !== false && window.location.pathname.includes(APP_DETECTIONS_PATH) && (
                 <FlexItem grow={false}>
                   <MlPopover />
                 </FlexItem>
