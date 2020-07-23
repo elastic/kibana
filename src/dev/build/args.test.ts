@@ -46,7 +46,6 @@ Object {
     "createArchives": true,
     "createDebPackage": false,
     "createDockerPackage": false,
-    "createDockerUbiPackage": false,
     "createRpmPackage": false,
     "downloadFreshNode": true,
     "isRelease": false,
@@ -69,7 +68,6 @@ Object {
     "createArchives": true,
     "createDebPackage": true,
     "createDockerPackage": true,
-    "createDockerUbiPackage": true,
     "createRpmPackage": true,
     "downloadFreshNode": true,
     "isRelease": false,
@@ -92,7 +90,6 @@ Object {
     "createArchives": true,
     "createDebPackage": false,
     "createDockerPackage": false,
-    "createDockerUbiPackage": false,
     "createRpmPackage": true,
     "downloadFreshNode": true,
     "isRelease": false,
@@ -115,7 +112,6 @@ Object {
     "createArchives": true,
     "createDebPackage": true,
     "createDockerPackage": false,
-    "createDockerUbiPackage": false,
     "createRpmPackage": false,
     "downloadFreshNode": true,
     "isRelease": false,
@@ -138,30 +134,6 @@ Object {
     "createArchives": true,
     "createDebPackage": false,
     "createDockerPackage": true,
-    "createDockerUbiPackage": true,
-    "createRpmPackage": false,
-    "downloadFreshNode": true,
-    "isRelease": false,
-    "targetAllPlatforms": true,
-    "versionQualifier": "",
-  },
-  "log": "<ToolingLog>",
-  "showHelp": false,
-  "unknownFlags": Array [],
-}
-`);
-});
-
-it('limits packages if --docker passed with --skip-docker-ubi and --all-platforms', () => {
-  expect(fn('--all-platforms', '--docker', '--skip-docker-ubi')).toMatchInlineSnapshot(`
-Object {
-  "buildArgs": Object {
-    "buildDefaultDist": true,
-    "buildOssDist": true,
-    "createArchives": true,
-    "createDebPackage": false,
-    "createDockerPackage": true,
-    "createDockerUbiPackage": false,
     "createRpmPackage": false,
     "downloadFreshNode": true,
     "isRelease": false,

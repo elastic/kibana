@@ -40,7 +40,6 @@ export function readCliArgs(argv: string[]): ParsedArgs {
       'rpm',
       'deb',
       'docker',
-      'skip-docker-ubi',
       'release',
       'skip-node-download',
       'verbose',
@@ -117,7 +116,6 @@ export function readCliArgs(argv: string[]): ParsedArgs {
       createRpmPackage: isOsPackageDesired('rpm'),
       createDebPackage: isOsPackageDesired('deb'),
       createDockerPackage: isOsPackageDesired('docker'),
-      createDockerUbiPackage: isOsPackageDesired('docker') && !Boolean(flags['skip-docker-ubi']),
       targetAllPlatforms: Boolean(flags['all-platforms']),
     },
   };

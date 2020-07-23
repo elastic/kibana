@@ -21,5 +21,4 @@ export {
   CreateRpmPackageTask,
   CreateDebPackageTask,
   CreateDockerPackageTask,
-  CreateDockerUbiPackageTask,
 } from './create_os_package_tasks';
