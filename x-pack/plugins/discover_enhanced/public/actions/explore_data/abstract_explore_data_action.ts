@@ -57,6 +57,7 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
     if (!this.params.start().plugins.discover.urlGenerator) return false;
     if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
+
     return true;
   }
 

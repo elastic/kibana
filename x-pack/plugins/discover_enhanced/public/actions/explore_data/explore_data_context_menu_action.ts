@@ -7,7 +7,6 @@
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import { EmbeddableContext } from '../../../../../../src/plugins/embeddable/public';
 import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
-import { isTimeRange, isQuery, isFilters } from '../../../../../../src/plugins/data/public';
 import { KibanaURL } from './kibana_url';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
@@ -42,9 +41,9 @@ export class ExploreDataContextMenuAction extends AbstractExploreDataAction<Embe
 
       const input = embeddable.getInput();
 
-      if (isTimeRange(input.timeRange) && !state.timeRange) state.timeRange = input.timeRange;
-      if (isQuery(input.query)) state.query = input.query;
-      if (isFilters(input.filters)) state.filters = [...input.filters, ...(state.filters || [])];
+      if (input.timeRange && !state.timeRange) state.timeRange = input.timeRange;
+      if (input.query) state.query = input.query;
+      if (input.filters) state.filters = [...input.filters, ...(state.filters || [])];
     }
 
     const path = await urlGenerator.createUrl(state);
