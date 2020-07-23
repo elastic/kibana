@@ -120,15 +120,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(numTimes).to.be(3);
           expect(timerangeUnit).to.be('h');
           expect(timerangeCount).to.be(1);
-          expect(Array.isArray(filters['url.port'])).to.be(true);
-          expect(filters['url.port']).to.have.length(1);
-          expect(filters['url.port'][0]).to.be('5678');
-          expect(Array.isArray(filters['observer.geo.name'])).to.be(true);
-          expect(filters['observer.geo.name']).to.have.length(1);
-          expect(filters['observer.geo.name'][0]).to.be('mpls');
-          expect(Array.isArray(filters['monitor.type'])).to.be(true);
-          expect(filters['monitor.type']).to.have.length(1);
-          expect(filters['monitor.type'][0]).to.be('http');
+          expect(JSON.stringify(filters)).to.eql(
+            `{"url.port":["5678"],"observer.geo.name":["mpls"],"monitor.type":["http"],"tags":[]}`
+          );
         } finally {
           await supertest.delete(`/api/alerts/alert/${id}`).set('kbn-xsrf', 'true').expect(204);
         }
