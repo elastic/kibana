@@ -51,7 +51,7 @@ export const EMPTY_TITLE = i18n.translate('xpack.securitySolution.detectionEngin
     'It looks like you don’t have any indices relevant to the detection engine in the Security application',
 });
 
-export const EMPTY_ACTION_PRIMARY = i18n.translate(
+export const EMPTY_ACTION_BEATS = i18n.translate(
   'xpack.securitySolution.detectionEngine.emptyActionPrimary',
   {
     defaultMessage: 'View setup instructions',
