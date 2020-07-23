@@ -134,7 +134,9 @@ def intake(jobName, String script) {
   return {
     ci(name: jobName, size: 's-highmem', ramDisk: true) {
       withEnv(["JOB=${jobName}"]) {
-        runbld(script, "Execute ${jobName}")
+        githubPr.sendCommentOnError {
+          runbld(script, "Execute ${jobName}")
+        }
       }
     }
   }

@@ -56,8 +56,10 @@ def functionalTestProcess(String name, Closure closure) {
 
 def functionalTestProcess(String name, String script) {
   return functionalTestProcess(name) {
-    retryable(name) {
-      runbld(script, "Execute ${name}")
+    githubPr.sendCommentOnError {
+      retryable(name) {
+        runbld(script, "Execute ${name}")
+      }
     }
   }
 }
@@ -211,29 +213,35 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  retryWithDelay(2, 15) {
-    try {
-      runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
-    } catch (ex) {
+  githubPr.sendCommentOnError {
+    retryWithDelay(2, 15) {
       try {
-        // Setup expects this directory to be missing, so we need to remove it before we do a retry
-        bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
-      } finally {
-        throw ex
+        runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+      } catch (ex) {
+        try {
+          // Setup expects this directory to be missing, so we need to remove it before we do a retry
+          bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+        } finally {
+          throw ex
+        }
       }
     }
   }
 }
 
 def buildOss(maxWorkers = '') {
-  withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
-    runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  githubPr.sendCommentOnError {
+    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+      runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+    }
   }
 }
 
 def buildXpack(maxWorkers = '') {
-  withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
-    runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  githubPr.sendCommentOnError {
+    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+      runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+    }
   }
 }
 
@@ -301,7 +309,9 @@ def withCiTaskQueue(Map options = [:], Closure closure) {
 def scriptTask(description, script) {
   return {
     withFunctionalTestEnv {
-      runbld(script, description)
+      githubPr.sendCommentOnError {
+        runbld(script, description)
+      }
     }
   }
 }
