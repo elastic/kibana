@@ -5,15 +5,18 @@
  */
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
-
 import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
 import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
+import {
+  ML_ANNOTATIONS_INDEX_ALIAS_READ,
+  ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+} from '../../../../plugins/ml/common/constants/index_patterns';
+import { IndexParams } from '../../../../plugins/ml/server/models/annotation_service/annotation';
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
@@ -514,6 +517,78 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           }
         }
       );
+    },
+
+    async getAnnotations(jobId: string) {
+      log.debug(`Fetching annotations for job '${jobId}'...`);
+
+      const results = await es.search({
+        index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+        body: {
+          size: 1,
+          query: {
+            match: {
+              job_id: jobId,
+            },
+          },
+        },
+      });
+      expect(results).to.not.be(undefined);
+      expect(results).to.have.property('hits');
+      return results.hits.hits;
+    },
+
+    async getAnnotationById(annotationId: string) {
+      log.debug(`Fetching annotation '${annotationId}'...`);
+
+      const result = await es.search({
+        index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+        body: {
+          size: 1,
+          query: {
+            match: {
+              _id: annotationId,
+            },
+          },
+        },
+      });
+      if (result.hits.total.value === 1) {
+        return result?.hits?.hits[0]?._source;
+      }
+      return undefined;
+    },
+
+    async indexAnnotation(annotationRequestBody: Annotation) {
+      log.debug(`Indexing annotation '${JSON.stringify(annotationRequestBody)}'...`);
+      const params: IndexParams = {
+        index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+        body: annotationRequestBody,
+        refresh: 'wait_for',
+      };
+      const results = await es.index(params);
+
+      await this.waitForAnnotationToExist(results._id);
+      return results;
+    },
+
+    async waitForAnnotationToExist(annotationId: string, errorMsg?: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if ((await this.getAnnotationById(annotationId)) !== undefined) {
+          return true;
+        } else {
+          throw new Error(errorMsg ?? `annotation '${annotationId}' should exist`);
+        }
+      });
+    },
+
+    async waitForAnnotationNotToExist(annotationId: string, errorMsg?: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if ((await this.getAnnotationById(annotationId)) === undefined) {
+          return true;
+        } else {
+          throw new Error(errorMsg ?? `annotation '${annotationId}' should not exist`);
+        }
+      });
     },
   };
 }
