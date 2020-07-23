@@ -54,32 +54,32 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
         ),
       },
       {
-        name: 'valueOf',
+        name: 'value',
         description: i18n.translate(
-          'xpack.infra.metrics.alerting.threshold.alerting.valueOfActionVariableDescription',
+          'xpack.infra.metrics.alerting.threshold.alerting.valueActionVariableDescription',
           {
             defaultMessage:
-              'Record of the current value of the watched metric; grouped by condition, i.e valueOf.condition0, valueOf.condition1, etc.',
+              'Record of the current value of the watched metric; grouped by condition, i.e value.condition0, value.condition1, etc.',
           }
         ),
       },
       {
-        name: 'thresholdOf',
+        name: 'threshold',
         description: i18n.translate(
-          'xpack.infra.metrics.alerting.threshold.alerting.thresholdOfActionVariableDescription',
+          'xpack.infra.metrics.alerting.threshold.alerting.thresholdActionVariableDescription',
           {
             defaultMessage:
-              'Record of the alerting threshold; grouped by condition, i.e thresholdOf.condition0, thresholdOf.condition1, etc.',
+              'Record of the alerting threshold; grouped by condition, i.e threshold.condition0, threshold.condition1, etc.',
           }
         ),
       },
       {
-        name: 'metricOf',
+        name: 'metric',
         description: i18n.translate(
-          'xpack.infra.metrics.alerting.threshold.alerting.metricOfActionVariableDescription',
+          'xpack.infra.metrics.alerting.threshold.alerting.metricActionVariableDescription',
           {
             defaultMessage:
-              'Record of the watched metric; grouped by condition, i.e metricOf.condition0, metricOf.condition1, etc.',
+              'Record of the watched metric; grouped by condition, i.e metric.condition0, metric.condition1, etc.',
           }
         ),
       },
