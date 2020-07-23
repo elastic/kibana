@@ -17,12 +17,12 @@ export async function SiemCypressTestRunner({ getService }: FtrProviderContext) 
   const esArchiver = getService('esArchiver');
 
   await esArchiver.load('empty_kibana');
-  // await esArchiver.load('auditbeat');
+  await esArchiver.load('auditbeat');
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:open'],
+      args: ['cypress:run'],
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
