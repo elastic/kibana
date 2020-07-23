@@ -29,13 +29,7 @@ const linkAsync = promisify(link);
 const unlinkAsync = promisify(unlink);
 const chmodAsync = promisify(chmod);
 
-export async function runDockerGenerator(config, log, build, ubi = false) {
-  // UBI var config
-  const baseOSImage = ubi ? 'registry.access.redhat.com/ubi7/ubi-minimal:7.7' : 'centos:7';
-  const ubiVersionTag = 'ubi7';
-  const ubiImageFlavor = ubi ? `-${ubiVersionTag}` : '';
-
-  // General docker var config
+export async function runDockerGenerator(config, log, build) {
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
   const imageFlavor = build.isOss() ? '-oss' : '';
   const imageTag = 'docker.elastic.co/kibana/kibana';
@@ -47,10 +41,10 @@ export async function runDockerGenerator(config, log, build, ubi = false) {
   const dockerBuildDir = config.resolveFromRepo(
     'build',
     'kibana-docker',
-    build.isOss() ? `oss` : `default${ubiImageFlavor}`
+    build.isOss() ? 'oss' : 'default'
   );
   const dockerOutputDir = config.resolveFromTarget(
-    `kibana${imageFlavor}${ubiImageFlavor}-${versionTag}-docker.tar.gz`
+    `kibana${imageFlavor}-${versionTag}-docker.tar.gz`
   );
   const scope = {
     artifactTarball,
@@ -61,8 +55,6 @@ export async function runDockerGenerator(config, log, build, ubi = false) {
     imageTag,
     dockerBuildDir,
     dockerOutputDir,
-    baseOSImage,
-    ubiImageFlavor,
     dockerBuildDate,
   };
 
@@ -113,13 +105,4 @@ export async function runDockerGenerator(config, log, build, ubi = false) {
 
   // Pack Dockerfiles and create a target for them
   await bundleDockerFiles(config, log, build, scope);
-}
-
-export async function runDockerGeneratorForUBI(config, log, build) {
-  // Only run ubi docker image build for default distribution
-  if (build.isOss()) {
-    return;
-  }
-
-  await runDockerGenerator(config, log, build, true);
 }

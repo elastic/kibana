@@ -19,29 +19,13 @@
 
 import dedent from 'dedent';
 
-function generator({
-  artifactTarball,
-  versionTag,
-  license,
-  usePublicArtifact,
-  baseOSImage,
-  ubiImageFlavor,
-  dockerBuildDate,
-}) {
+function generator({ artifactTarball, versionTag, license, usePublicArtifact, dockerBuildDate }) {
   const copyArtifactTarballInsideDockerOptFolder = () => {
     if (usePublicArtifact) {
       return `RUN cd /opt && curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/${artifactTarball} && cd -`;
     }
 
     return `COPY ${artifactTarball} /opt`;
-  };
-
-  const packageManager = () => {
-    if (ubiImageFlavor) {
-      return 'microdnf';
-    }
-
-    return 'yum';
   };
 
   return dedent(`
@@ -53,9 +37,7 @@ function generator({
   # Build stage 0
   # Extract Kibana and make various file manipulations.
   ################################################################################
-  FROM ${baseOSImage} AS prep_files
-  # Add tar and gzip
-  RUN ${packageManager()} update -y && ${packageManager()} install -y tar gzip && ${packageManager()} clean all
+  FROM centos:7 AS prep_files
   ${copyArtifactTarballInsideDockerOptFolder()}
   RUN mkdir /usr/share/kibana
   WORKDIR /usr/share/kibana
@@ -71,11 +53,11 @@ function generator({
   # Build stage 1
   # Copy prepared files from the previous stage and complete the image.
   ################################################################################
-  FROM ${baseOSImage}
+  FROM centos:7
   EXPOSE 5601
 
   # Add Reporting dependencies.
-  RUN ${packageManager()} update -y && ${packageManager()} install -y fontconfig freetype shadow-utils && ${packageManager()} clean all
+  RUN yum update -y && yum install -y fontconfig freetype && yum clean all
 
   # Add an init process, check the checksum to make sure it's a match
   RUN curl -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
