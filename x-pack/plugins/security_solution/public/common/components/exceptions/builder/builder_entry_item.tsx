@@ -127,7 +127,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     const operatorOptions = getOperatorOptions(
       entry,
       listType,
-      entry.field != null && entry.field.type === 'boolean'
+      entry.field != null && entry.field.type === 'boolean',
+      isFirst
     );
     const comboBox = (
       <OperatorComponent

@@ -90,3 +90,12 @@ export const EXCEPTION_OPERATORS: OperatorOption[] = [
   isInListOperator,
   isNotInListOperator,
 ];
+
+export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
+  isOperator,
+  isNotOperator,
+  isOneOfOperator,
+  isNotOneOfOperator,
+  existsOperator,
+  doesNotExistOperator,
+];

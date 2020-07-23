@@ -22,6 +22,7 @@ import {
   existsOperator,
   isOneOfOperator,
   EXCEPTION_OPERATORS,
+  EXCEPTION_OPERATORS_SANS_LISTS,
 } from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
 import {
@@ -40,7 +41,6 @@ import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
  *
  * @param patterns IIndexPattern containing available fields on rule index
  * @param item exception item entry
- * @param addNested boolean noting whether or not UI is currently
  * set to add a nested field
  */
 export const getFilteredIndexPatterns = (
@@ -295,12 +295,14 @@ export const getEntryFromOperator = (
  *
  * @param item
  * @param listType
- *
+ * @param isBoolean
+ * @param includeValueListOperators whether or not to include the 'is in list' and 'is not in list' operators
  */
 export const getOperatorOptions = (
   item: FormattedBuilderEntry,
   listType: ExceptionListType,
-  isBoolean: boolean
+  isBoolean: boolean,
+  includeValueListOperators = true
 ): OperatorOption[] => {
   if (item.nested === 'parent' || item.field == null) {
     return [isOperator];
@@ -309,7 +311,11 @@ export const getOperatorOptions = (
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
   } else {
-    return isBoolean ? [isOperator, existsOperator] : EXCEPTION_OPERATORS;
+    return isBoolean
+      ? [isOperator, existsOperator]
+      : includeValueListOperators
+      ? EXCEPTION_OPERATORS
+      : EXCEPTION_OPERATORS_SANS_LISTS;
   }
 };
 

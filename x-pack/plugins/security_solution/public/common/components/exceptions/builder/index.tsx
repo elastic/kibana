@@ -44,6 +44,7 @@ const MyButtonsContainer = styled(EuiFlexItem)`
 
 const initialState: State = {
   disableAnd: false,
+  disableNested: false,
   disableOr: false,
   andLogicIncluded: false,
   addNested: false,
@@ -82,12 +83,21 @@ export const ExceptionBuilder = ({
   onChange,
 }: ExceptionBuilderProps) => {
   const [
-    { exceptions, exceptionsToDelete, andLogicIncluded, disableAnd, disableOr, addNested },
+    {
+      exceptions,
+      exceptionsToDelete,
+      andLogicIncluded,
+      disableAnd,
+      disableNested,
+      disableOr,
+      addNested,
+    },
     dispatch,
   ] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
     disableAnd: isAndDisabled,
     disableOr: isOrDisabled,
+    disableNested: isNestedDisabled,
   });
 
   const setUpdateExceptions = useCallback(
@@ -379,7 +389,7 @@ export const ExceptionBuilder = ({
             <BuilderButtonOptions
               isOrDisabled={disableOr}
               isAndDisabled={disableAnd}
-              isNestedDisabled={isNestedDisabled}
+              isNestedDisabled={disableNested}
               isNested={addNested}
               showNestedButton
               onOrClicked={handleAddNewExceptionItem}

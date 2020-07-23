@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ExceptionsBuilderExceptionItem } from '../types';
-import { ExceptionListItemSchema } from '../../../../../public/lists_plugin_deps';
+import { ExceptionListItemSchema, OperatorTypeEnum } from '../../../../../public/lists_plugin_deps';
 import { getDefaultEmptyEntry } from './helpers';
 
 export type ViewerModalName = 'addModal' | 'editModal' | null;
 
 export interface State {
   disableAnd: boolean;
+  disableNested: boolean;
   disableOr: boolean;
   andLogicIncluded: boolean;
   addNested: boolean;
@@ -59,14 +60,18 @@ export const exceptionsBuilderReducer = () => (state: State, action: Action): St
       const isAndDisabled =
         lastEntry != null && lastEntry.type === 'nested' && lastEntry.entries.length === 0;
       const isOrDisabled = lastEntry != null && lastEntry.type === 'nested';
+      const containsValueList = action.exceptions.some(
+        ({ entries }) => entries.filter(({ type }) => type === OperatorTypeEnum.LIST).length > 0
+      );
 
       return {
         ...state,
         andLogicIncluded: isAndLogicIncluded,
         exceptions: action.exceptions,
         addNested: isAddNested,
-        disableAnd: isAndDisabled,
-        disableOr: isOrDisabled,
+        disableAnd: isAndDisabled || containsValueList,
+        disableOr: isOrDisabled || containsValueList,
+        disableNested: containsValueList,
       };
     }
     case 'setDefault': {
