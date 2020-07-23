@@ -5,6 +5,7 @@
  */
 
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import LRU from 'lru-cache';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
@@ -16,7 +17,6 @@ import {
   Manifest,
   buildArtifact,
   getFullEndpointExceptionList,
-  ExceptionsCache,
   ManifestDiff,
   getArtifactId,
 } from '../../../lib/artifacts';
@@ -33,7 +33,7 @@ export interface ManifestManagerContext {
   exceptionListClient: ExceptionListClient;
   packageConfigService: PackageConfigServiceInterface;
   logger: Logger;
-  cache: ExceptionsCache;
+  cache: LRU<string, Buffer>;
 }
 
 export interface ManifestSnapshotOpts {
@@ -51,7 +51,7 @@ export class ManifestManager {
   protected packageConfigService: PackageConfigServiceInterface;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
-  protected cache: ExceptionsCache;
+  protected cache: LRU<string, Buffer>;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;

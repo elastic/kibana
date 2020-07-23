@@ -69,7 +69,8 @@ export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): Sig
 
 export const sampleDocWithSortId = (
   someUuid: string = sampleIdGuid,
-  ip?: string
+  ip?: string,
+  destIp?: string
 ): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
   _type: 'doc',
@@ -81,6 +82,9 @@ export const sampleDocWithSortId = (
     '@timestamp': '2020-04-20T21:27:45+0000',
     source: {
       ip: ip ?? '127.0.0.1',
+    },
+    destination: {
+      ip: destIp ?? '127.0.0.1',
     },
   },
   sort: ['1234567891111'],
@@ -307,7 +311,8 @@ export const repeatedSearchResultsWithSortId = (
   total: number,
   pageSize: number,
   guids: string[],
-  ips?: string[]
+  ips?: string[],
+  destIps?: string[]
 ) => ({
   took: 10,
   timed_out: false,
@@ -321,7 +326,11 @@ export const repeatedSearchResultsWithSortId = (
     total,
     max_score: 100,
     hits: Array.from({ length: pageSize }).map((x, index) => ({
-      ...sampleDocWithSortId(guids[index], ips ? ips[index] : '127.0.0.1'),
+      ...sampleDocWithSortId(
+        guids[index],
+        ips ? ips[index] : '127.0.0.1',
+        destIps ? destIps[index] : '127.0.0.1'
+      ),
     })),
   },
 });

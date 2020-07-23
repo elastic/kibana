@@ -42,6 +42,7 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
 
   public async setup({
     http,
+    status,
     legacyPlugins,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
@@ -79,6 +80,7 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
             serverBasePath,
             env,
             legacyMode: appId !== 'core',
+            anonymousStatusPage: status.isStatusPageAnonymous(),
             i18n: {
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
             },
