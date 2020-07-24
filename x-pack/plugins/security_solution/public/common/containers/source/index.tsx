@@ -156,7 +156,7 @@ export const useWithSource = (
       try {
         const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
           query: sourceQuery,
-          fetchPolicy: 'network-only',
+          fetchPolicy: 'cache-first',
           variables: {
             sourceId,
             defaultIndex,
