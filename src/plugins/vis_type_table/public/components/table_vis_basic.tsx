@@ -62,7 +62,9 @@ export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps
         setVisibleColumns: () => {},
       }}
       toolbarVisibility={{
-        additionalControls: <TableVisControls cols={columns} rows={rows} table={table} />,
+        additionalControls: (
+          <TableVisControls cols={columns} rows={rows} table={table} filename={visParams.title} />
+        ),
       }}
       renderCellValue={renderCellValue}
       pagination={pagination}
