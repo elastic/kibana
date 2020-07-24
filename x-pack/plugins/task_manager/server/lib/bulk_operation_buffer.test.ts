@@ -33,7 +33,8 @@ function errorAttempts(task: TaskInstance): Err<OperationError<TaskInstance, Err
   });
 }
 
-describe('Bulk Operation Buffer', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/72864
+describe.skip('Bulk Operation Buffer', () => {
   describe('createBuffer()', () => {
     test('batches up multiple Operation calls', async () => {
       const bulkUpdate: jest.Mocked<BulkOperation<TaskInstance, Error>> = jest.fn(
