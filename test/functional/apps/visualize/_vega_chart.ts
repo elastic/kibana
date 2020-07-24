@@ -43,10 +43,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('vega chart', () => {
       describe('initial render', () => {
-        it('should not have inspector enabled', async function () {
-          await inspector.expectIsNotEnabled();
-        });
-
         it('should have some initial vega spec text', async function () {
           const vegaSpec = await PageObjects.vegaChart.getSpec();
           expect(vegaSpec).to.contain('{');
