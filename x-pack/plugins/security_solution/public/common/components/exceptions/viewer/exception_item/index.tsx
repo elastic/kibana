@@ -17,7 +17,8 @@ import styled from 'styled-components';
 
 import { ExceptionDetails } from './exception_details';
 import { ExceptionEntries } from './exception_entries';
-import { getFormattedEntries, getFormattedComments } from '../../helpers';
+import { getFormattedComments } from '../../helpers';
+import { getFormattedEntries } from '../helpers';
 import { FormattedEntry, ExceptionListItemIdentifiers } from '../../types';
 import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
 

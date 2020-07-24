@@ -36,13 +36,67 @@ describe('has()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     });
     expect(registry.has('foo')).toEqual(true);
   });
 });
 
 describe('register()', () => {
+  test('throws if AlertType Id contains invalid characters', () => {
+    const alertType = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerts',
+    };
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+
+    const invalidCharacters = [' ', ':', '*', '*', '/'];
+    for (const char of invalidCharacters) {
+      expect(() => registry.register({ ...alertType, id: `${alertType.id}${char}` })).toThrowError(
+        new Error(`expected AlertType Id not to include invalid character: ${char}`)
+      );
+    }
+
+    const [first, second] = invalidCharacters;
+    expect(() =>
+      registry.register({ ...alertType, id: `${first}${alertType.id}${second}` })
+    ).toThrowError(
+      new Error(`expected AlertType Id not to include invalid characters: ${first}, ${second}`)
+    );
+  });
+
+  test('throws if AlertType Id isnt a string', () => {
+    const alertType = {
+      id: (123 as unknown) as string,
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerts',
+    };
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+
+    expect(() => registry.register(alertType)).toThrowError(
+      new Error(`expected value of type [string] but got [number]`)
+    );
+  });
+
   test('registers the executor with the task manager', () => {
     const alertType = {
       id: 'test',
@@ -55,7 +109,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
@@ -86,7 +140,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     };
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register(alertType);
@@ -107,7 +161,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     });
     expect(() =>
       registry.register({
@@ -121,7 +175,7 @@ describe('register()', () => {
         ],
         defaultActionGroupId: 'default',
         executor: jest.fn(),
-        producer: 'alerting',
+        producer: 'alerts',
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
   });
@@ -141,7 +195,7 @@ describe('get()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
@@ -154,13 +208,14 @@ describe('get()', () => {
         ],
         "actionVariables": Object {
           "context": Array [],
+          "params": Array [],
           "state": Array [],
         },
         "defaultActionGroupId": "default",
         "executor": [MockFunction],
         "id": "test",
         "name": "Test",
-        "producer": "alerting",
+        "producer": "alerts",
       }
     `);
   });
@@ -177,7 +232,7 @@ describe('list()', () => {
   test('should return empty when nothing is registered', () => {
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     const result = registry.list();
-    expect(result).toMatchInlineSnapshot(`Array []`);
+    expect(result).toMatchInlineSnapshot(`Set {}`);
   });
 
   test('should return registered types', () => {
@@ -193,11 +248,11 @@ describe('list()', () => {
       ],
       defaultActionGroupId: 'testActionGroup',
       executor: jest.fn(),
-      producer: 'alerting',
+      producer: 'alerts',
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
-      Array [
+      Set {
         Object {
           "actionGroups": Array [
             Object {
@@ -207,14 +262,15 @@ describe('list()', () => {
           ],
           "actionVariables": Object {
             "context": Array [],
+            "params": Array [],
             "state": Array [],
           },
           "defaultActionGroupId": "testActionGroup",
           "id": "test",
           "name": "Test",
-          "producer": "alerting",
+          "producer": "alerts",
         },
-      ]
+      }
     `);
   });
 
@@ -260,7 +316,7 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     actionGroups: [],
     defaultActionGroupId: id,
     async executor() {},
-    producer: 'alerting',
+    producer: 'alerts',
   };
 
   if (!context && !state) {
