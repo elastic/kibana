@@ -19,6 +19,7 @@
 
 import './table_visualization.scss';
 import React, { useEffect } from 'react';
+import classNames from 'classnames';
 
 import { CoreSetup } from 'kibana/public';
 import { ReactVisComponentProps } from 'src/plugins/visualizations/public';
@@ -38,9 +39,13 @@ export const createTableVisualizationComponent = (core: CoreSetup) => ({
     renderComplete();
   }, [renderComplete]);
 
+  const className = classNames('tbvChart', {
+    tbvChart__splitColumns: direction === 'column',
+  });
+
   return (
     <KibanaContextProvider services={core}>
-      <div className="tbvChart" data-test-subj="tableVis">
+      <div className={className} data-test-subj="tableVis">
         {table ? (
           <TableVisBasic table={table} vis={vis} visParams={visParams} />
         ) : (

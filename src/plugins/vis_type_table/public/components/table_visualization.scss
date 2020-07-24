@@ -10,4 +10,19 @@
   flex-direction: column;
   flex: 1 0 100%;
   overflow: auto;
+
+  @include euiScrollBar;
+}
+
+.tbvChart__split {
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeL;
+
+  > h3 {
+    text-align: center;
+  }
+}
+
+.tbvChart__splitColumns {
+  flex-direction: row;
 }

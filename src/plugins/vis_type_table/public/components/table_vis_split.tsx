@@ -18,12 +18,12 @@
  */
 
 import React, { memo } from 'react';
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 
 import { ExprVis } from 'src/plugins/visualizations/public';
-import { createTableVisCell } from './table_vis_cell';
 import { TableGroup } from '../table_vis_response_handler';
 import { TableVisParams } from '../types';
+import { TableVisBasic } from './table_vis_basic';
 
 interface TableVisSplitProps {
   tables: TableGroup[];
@@ -34,28 +34,13 @@ interface TableVisSplitProps {
 export const TableVisSplit = memo(({ tables, vis, visParams }: TableVisSplitProps) => {
   return (
     <>
-      {tables.map(({ table }, key) => (
-        <EuiDataGrid
-          key={key}
-          aria-label=""
-          columns={table.columns.map((col) => ({
-            id: col.id,
-            display: col.name,
-          }))}
-          rowCount={table.rows.length}
-          columnVisibility={{
-            visibleColumns: table.columns.map((col) => col.id),
-            setVisibleColumns: () => {},
-          }}
-          renderCellValue={createTableVisCell(table, vis, visParams)}
-          pagination={{
-            pageIndex: 0,
-            pageSize: 10,
-            pageSizeOptions: [50, 100, 200],
-            onChangePage: () => {},
-            onChangeItemsPerPage: () => {},
-          }}
-        />
+      {tables.map(({ tables: dataTable, key, title }) => (
+        <div key={key} className="tbvChart__split">
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+          <TableVisBasic table={dataTable[0]} vis={vis} visParams={visParams} />
+        </div>
       ))}
     </>
   );
