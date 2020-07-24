@@ -69,13 +69,16 @@ describe('KibanaMigrator', () => {
       const options = mockOptions();
 
       options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createClientResponse({ templates: [] }, { statusCode: 404 })
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          { templates: [] },
+          { statusCode: 404 }
+        )
       );
       options.client.indices.get.mockReturnValue(
-        elasticsearchClientMock.createClientResponse({}, { statusCode: 404 })
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
       options.client.indices.getAlias.mockReturnValue(
-        elasticsearchClientMock.createClientResponse({}, { statusCode: 404 })
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
       const migrator = new KibanaMigrator(options);
@@ -90,13 +93,16 @@ describe('KibanaMigrator', () => {
       const options = mockOptions();
 
       options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createClientResponse({ templates: [] }, { statusCode: 404 })
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          { templates: [] },
+          { statusCode: 404 }
+        )
       );
       options.client.indices.get.mockReturnValue(
-        elasticsearchClientMock.createClientResponse({}, { statusCode: 404 })
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
       options.client.indices.getAlias.mockReturnValue(
-        elasticsearchClientMock.createClientResponse({}, { statusCode: 404 })
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
       const migrator = new KibanaMigrator(options);

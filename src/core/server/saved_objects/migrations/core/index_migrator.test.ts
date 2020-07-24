@@ -401,24 +401,32 @@ function withIndex(
   let scrollCallCounter = 1;
 
   client.indices.get.mockReturnValue(
-    elasticsearchClientMock.createClientResponse(index, { statusCode: index.statusCode })
+    elasticsearchClientMock.createSuccessTransportRequestPromise(index, {
+      statusCode: index.statusCode,
+    })
   );
   client.indices.getAlias.mockReturnValue(
-    elasticsearchClientMock.createClientResponse(alias, { statusCode: index.statusCode })
+    elasticsearchClientMock.createSuccessTransportRequestPromise(alias, {
+      statusCode: index.statusCode,
+    })
   );
   client.reindex.mockReturnValue(
-    elasticsearchClientMock.createClientResponse({
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
       task: 'zeid',
       _shards: { successful: 1, total: 1 },
     })
   );
   client.tasks.get.mockReturnValue(
-    elasticsearchClientMock.createClientResponse({ completed: true })
+    elasticsearchClientMock.createSuccessTransportRequestPromise({ completed: true })
   );
-  client.search.mockReturnValue(elasticsearchClientMock.createClientResponse(searchResult(0)));
-  client.bulk.mockReturnValue(elasticsearchClientMock.createClientResponse({ items: [] }));
+  client.search.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult(0))
+  );
+  client.bulk.mockReturnValue(
+    elasticsearchClientMock.createSuccessTransportRequestPromise({ items: [] })
+  );
   client.count.mockReturnValue(
-    elasticsearchClientMock.createClientResponse({
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
       count: numOutOfDate,
       _shards: { successful: 1, total: 1 },
     })
@@ -427,8 +435,8 @@ function withIndex(
     if (scrollCallCounter <= docs.length) {
       const result = searchResult(scrollCallCounter);
       scrollCallCounter++;
-      return elasticsearchClientMock.createClientResponse(result);
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(result);
     }
-    return elasticsearchClientMock.createClientResponse({});
+    return elasticsearchClientMock.createSuccessTransportRequestPromise({});
   });
 }

@@ -175,7 +175,9 @@ describe('SavedObjectsService', () => {
         .mockImplementationOnce(() =>
           Promise.reject(new esErrors.NoLivingConnectionsError('reason', {} as any))
         )
-        .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse('success'));
+        .mockImplementationOnce(() =>
+          elasticsearchClientMock.createSuccessTransportRequestPromise('success')
+        );
 
       await soService.setup(coreSetup);
       await soService.start(coreStart, 1);
