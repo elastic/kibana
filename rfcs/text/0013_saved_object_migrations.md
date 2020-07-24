@@ -97,7 +97,7 @@ The proposed design makes several important assumptions and tradeoffs.
 
 **Background:**
 
-The 7.x upgrade documentation lists taking an Elacsearch snapshot as a
+The 7.x upgrade documentation lists taking an Elasticsearch snapshot as a
 required step, but we instruct users to retry migrations and perform rollbacks
 by deleting the failed `.kibana_n` index and pointing the `.kibana` alias to
 `.kibana_n-1`:
@@ -107,14 +107,14 @@ migrations.](https://github.com/elastic/kibana/blob/75444a9f1879c5702f9f2b8ad4a7
  - Server logs from failed migrations.
 
 **Assumptions and tradeoffs:**
-1. The simplicity of idempotent, coordination-free migrations outweighs the
+1. It is critical to maintain a backup index during 7.x to ensure that anyone 
+   following the existing upgrade / rollback procedures don't end up in a
+   position where they no longer can recover their data.
+   1. This excludes us from introducing in-place migrations to support huge
+      indices during 7.x.
+2. The simplicity of idempotent, coordination-free migrations outweighs the
    restrictions this will impose on the kinds of migrations we're able to
    support in the future. See (4.2.1)
-2. Maintaining the upgrade behaviour and rollback procedures of previous
-   Kibana 7.x releases is more important than introducing enhancements like:
-   1. (2.6) _mixed Kibana versions shouldn't cause data loss_.
-   2. In-place migrations to support > 10k saved objects, reduce the downtime
-      window, and slightly improve the reliability. See (4.5.1)
 3. For 8.x, in-place migrations to support > 10k saved objects, reduce the
    downtime window, and slightly improve the reliability is more important
    than (2.7) _maintain read-only functionality during the downtime
