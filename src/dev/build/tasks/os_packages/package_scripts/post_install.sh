@@ -38,8 +38,6 @@ case $1 in
 
   # Red Hat
   1|2)
-
-
     if ! getent group "<%= group %>" >/dev/null; then
       groupadd -r "<%= group %>"
     fi
