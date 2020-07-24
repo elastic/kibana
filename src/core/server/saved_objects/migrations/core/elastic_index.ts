@@ -24,7 +24,7 @@
 
 import _ from 'lodash';
 import { MigrationEsClient } from './migration_es_client';
-import { SearchResponse } from '../../../elasticsearch';
+import { CountResponse, SearchResponse } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, RawDoc, ShardsInfo } from './call_cluster';
@@ -60,10 +60,6 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
   return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
 }
 
-interface CountResponse {
-  _shards: ShardsInfo;
-  count: number;
-}
 /**
  * Creates a reader function that serves up batches of documents from the index. We aren't using
  * an async generator, as that feature currently breaks Kibana's tooling.

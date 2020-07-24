@@ -39,4 +39,5 @@ export {
   SearchResponse,
   GetResponse,
   DeleteDocumentResponse,
+  CountResponse,
 } from './client';

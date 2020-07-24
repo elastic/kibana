@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
@@ -46,26 +45,26 @@ const methods = [
 type MethodName = typeof methods[number];
 
 export interface MigrationEsClient {
-  bulk: KibanaClient['bulk'];
+  bulk: ElasticsearchClient['bulk'];
   cat: {
-    templates: KibanaClient['cat']['templates'];
+    templates: ElasticsearchClient['cat']['templates'];
   };
-  clearScroll: KibanaClient['clearScroll'];
-  count: KibanaClient['count'];
+  clearScroll: ElasticsearchClient['clearScroll'];
+  count: ElasticsearchClient['count'];
   indices: {
-    create: KibanaClient['indices']['create'];
-    delete: KibanaClient['indices']['delete'];
-    deleteTemplate: KibanaClient['indices']['deleteTemplate'];
-    get: KibanaClient['indices']['get'];
-    getAlias: KibanaClient['indices']['getAlias'];
-    refresh: KibanaClient['indices']['refresh'];
-    updateAliases: KibanaClient['indices']['updateAliases'];
+    create: ElasticsearchClient['indices']['create'];
+    delete: ElasticsearchClient['indices']['delete'];
+    deleteTemplate: ElasticsearchClient['indices']['deleteTemplate'];
+    get: ElasticsearchClient['indices']['get'];
+    getAlias: ElasticsearchClient['indices']['getAlias'];
+    refresh: ElasticsearchClient['indices']['refresh'];
+    updateAliases: ElasticsearchClient['indices']['updateAliases'];
   };
-  reindex: KibanaClient['reindex'];
-  search: KibanaClient['search'];
-  scroll: KibanaClient['scroll'];
+  reindex: ElasticsearchClient['reindex'];
+  search: ElasticsearchClient['search'];
+  scroll: ElasticsearchClient['scroll'];
   tasks: {
-    get: KibanaClient['tasks']['get'];
+    get: ElasticsearchClient['tasks']['get'];
   };
 }
 

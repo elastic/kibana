@@ -254,20 +254,17 @@ export class SavedObjectsRepository {
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
+    const requestParams = {
+      id: raw._id,
+      index: this.getIndexForType(type),
+      refresh,
+      body: raw._source,
+    };
+
     const { body } =
       id && overwrite
-        ? await this.client.index({
-            id: raw._id,
-            index: this.getIndexForType(type),
-            refresh,
-            body: raw._source,
-          })
-        : await this.client.create({
-            id: raw._id,
-            index: this.getIndexForType(type),
-            refresh,
-            body: raw._source,
-          });
+        ? await this.client.index(requestParams)
+        : await this.client.create(requestParams);
 
     return this._rawToSavedObject<T>({
       ...raw,

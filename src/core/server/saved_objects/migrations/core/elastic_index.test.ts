@@ -22,10 +22,14 @@ import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+
+  beforeEach(() => {
+    client = elasticsearchClientMock.createElasticSearchClient();
+  });
   describe('fetchInfo', () => {
     test('it handles 404', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.indices.get = jest.fn<any, any>(() =>
+      client.indices.get.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
@@ -41,8 +45,7 @@ describe('ElasticIndex', () => {
     });
 
     test('fails if the index doc type is unsupported', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.indices.get = jest.fn<any, any>(({ index }: { index: string }) =>
+      client.indices.get.mockImplementation(({ index }: { index: string }) =>
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
@@ -57,8 +60,7 @@ describe('ElasticIndex', () => {
     });
 
     test('fails if there are multiple root types', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.indices.get = jest.fn<any, any>(({ index }: { index: string }) =>
+      client.indices.get.mockImplementation(({ index }: { index: string }) =>
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
@@ -76,8 +78,7 @@ describe('ElasticIndex', () => {
     });
 
     test('decorates index info with exists and indexName', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.indices.get = jest.fn<any, any>(({ index }: { index: string }) =>
+      client.indices.get.mockImplementation(({ index }: { index: string }) =>
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
@@ -98,8 +99,6 @@ describe('ElasticIndex', () => {
 
   describe('createIndex', () => {
     test('calls indices.create', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-
       await Index.createIndex(client, '.abcd', { foo: 'bar' } as any);
 
       expect(client.indices.create).toHaveBeenCalledTimes(1);
@@ -118,8 +117,6 @@ describe('ElasticIndex', () => {
 
   describe('deleteIndex', () => {
     test('calls indices.delete', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-
       await Index.deleteIndex(client, '.lotr');
 
       expect(client.indices.delete).toHaveBeenCalledTimes(1);
@@ -131,8 +128,7 @@ describe('ElasticIndex', () => {
 
   describe('claimAlias', () => {
     test('handles unaliased indices', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.indices.getAlias = jest.fn<any, any>(() =>
+      client.indices.getAlias.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
       );
 
@@ -155,8 +151,7 @@ describe('ElasticIndex', () => {
     });
 
     test('removes existing alias', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.indices.getAlias = jest.fn<any, any>(() =>
+      client.indices.getAlias.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': '.muchacha',
         })
@@ -179,8 +174,7 @@ describe('ElasticIndex', () => {
     });
 
     test('allows custom alias actions', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.indices.getAlias = jest.fn<any, any>(() =>
+      client.indices.getAlias.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': '.muchacha',
         })
@@ -208,16 +202,15 @@ describe('ElasticIndex', () => {
 
   describe('convertToAlias', () => {
     test('it creates the destination index, then reindexes to it', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.indices.getAlias = jest.fn<any, any>(() =>
+      client.indices.getAlias.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': '.muchacha',
         })
       );
-      client.reindex = jest.fn<any, any>(() =>
+      client.reindex.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
       );
-      client.tasks.get = jest.fn<any, any>(() =>
+      client.tasks.get.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ completed: true })
       );
 
@@ -283,16 +276,15 @@ describe('ElasticIndex', () => {
     });
 
     test('throws error if re-index task fails', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.indices.getAlias = jest.fn<any, any>(() =>
+      client.indices.getAlias.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           '.my-fanci-index': '.muchacha',
         })
       );
-      client.reindex = jest.fn<any, any>(() =>
+      client.reindex.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
       );
-      client.tasks.get = jest.fn<any, any>(() =>
+      client.tasks.get.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
           error: {
@@ -345,8 +337,7 @@ describe('ElasticIndex', () => {
 
   describe('write', () => {
     test('writes documents in bulk to the index', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.bulk = jest.fn<any, any>(() =>
+      client.bulk.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({ items: [] })
       );
 
@@ -381,8 +372,7 @@ describe('ElasticIndex', () => {
     });
 
     test('fails if any document fails', async () => {
-      const client = elasticsearchClientMock.createElasticSearchClient();
-      client.bulk = jest.fn<any, any>(() =>
+      client.bulk.mockResolvedValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           items: [{ index: { error: { type: 'shazm', reason: 'dern' } } }],
         })
@@ -430,7 +420,6 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      const client = elasticsearchClientMock.createElasticSearchClient();
       client.search = jest.fn().mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'x',
@@ -493,7 +482,6 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      const client = elasticsearchClientMock.createElasticSearchClient();
       client.search = jest.fn().mockReturnValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'x',
@@ -520,7 +508,6 @@ describe('ElasticIndex', () => {
     test('fails if not all shards were successful', async () => {
       const index = '.myalias';
 
-      const client = elasticsearchClientMock.createElasticSearchClient();
       client.search = jest.fn().mockReturnValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           _shards: { successful: 1, total: 2 },
@@ -549,7 +536,6 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      const client = elasticsearchClientMock.createElasticSearchClient();
       client.search = jest.fn().mockReturnValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'x',
@@ -580,7 +566,6 @@ describe('ElasticIndex', () => {
       count,
       migrations,
     }: any) {
-      const client = elasticsearchClientMock.createElasticSearchClient();
       client.indices.get = jest.fn().mockReturnValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: { mappings },
@@ -593,23 +578,12 @@ describe('ElasticIndex', () => {
         })
       );
 
-      // const callCluster = jest.fn(async (path: string) => {
-      //   if (path === 'indices.get') {
-      //     return {
-      //       [index]: { mappings },
-      //     };
-      //   }
-      //   if (path === 'count') {
-      //     return { count, _shards: { success: 1, total: 1 } };
-      //   }
-      //   throw new Error(`Unknown command ${path}.`);
-      // });
       const hasMigrations = await Index.migrationsUpToDate(client, index, migrations);
-      return { hasMigrations, client };
+      return { hasMigrations };
     }
 
     test('is false if the index mappings do not contain migrationVersion', async () => {
-      const { hasMigrations, client } = await testMigrationsUpToDate({
+      const { hasMigrations } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {
@@ -632,7 +606,7 @@ describe('ElasticIndex', () => {
     });
 
     test('is true if there are no migrations defined', async () => {
-      const { hasMigrations, client } = await testMigrationsUpToDate({
+      const { hasMigrations } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {
@@ -652,7 +626,7 @@ describe('ElasticIndex', () => {
     });
 
     test('is true if there are no documents out of date', async () => {
-      const { hasMigrations, client } = await testMigrationsUpToDate({
+      const { hasMigrations } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {
@@ -673,7 +647,7 @@ describe('ElasticIndex', () => {
     });
 
     test('is false if there are documents out of date', async () => {
-      const { hasMigrations, client } = await testMigrationsUpToDate({
+      const { hasMigrations } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {
@@ -694,7 +668,7 @@ describe('ElasticIndex', () => {
     });
 
     test('counts docs that are out of date', async () => {
-      const { client } = await testMigrationsUpToDate({
+      await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {

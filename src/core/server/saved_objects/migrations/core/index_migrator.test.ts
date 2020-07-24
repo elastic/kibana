@@ -350,13 +350,13 @@ describe('IndexMigrator', () => {
     });
 
     expect(client.bulk).toHaveBeenCalledTimes(2);
-    expect(client.bulk).toHaveBeenCalledWith({
+    expect(client.bulk).toHaveBeenNthCalledWith(1, {
       body: [
         { index: { _id: 'foo:1', _index: '.kibana_2' } },
         { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
       ],
     });
-    expect(client.bulk).toHaveBeenCalledWith({
+    expect(client.bulk).toHaveBeenNthCalledWith(2, {
       body: [
         { index: { _id: 'foo:2', _index: '.kibana_2' } },
         { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },

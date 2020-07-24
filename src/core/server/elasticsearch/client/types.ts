@@ -55,6 +55,11 @@ interface Explanation {
   details: Explanation[];
 }
 
+export interface CountResponse {
+  _shards: ShardsInfo;
+  count: number;
+}
+
 /**
  * Maintained until elasticsearch provides response typings out of the box
  * https://github.com/elastic/elasticsearch-js/pull/970

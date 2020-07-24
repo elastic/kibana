@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 
 import { ElasticsearchClient } from '../../../elasticsearch/';
@@ -37,7 +36,7 @@ const methods = [
 
 type MethodName = typeof methods[number];
 
-export type RepositoryEsClient = Pick<KibanaClient, MethodName>;
+export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName>;
 
 export function createRepositoryEsClient(client: ElasticsearchClient): RepositoryEsClient {
   return methods.reduce((acc: RepositoryEsClient, key: MethodName) => {
