@@ -137,6 +137,8 @@ describe('configureClient', () => {
       const client = configureClient(config, { logger, scoped: false });
 
       const response = createApiResponse({
+        statusCode: 400,
+        headers: {},
         body: {
           error: {
             type: 'illegal_argument_exception',
