@@ -220,7 +220,7 @@ const getNonExistingPoliciesForHostsList = async (
   http: HttpSetup,
   hosts: HostResultList['hosts'],
   currentNonExistingPolicies: HostState['nonExistingPolicies']
-): HostState['nonExistingPolicies'] | undefined => {
+): Promise<HostState['nonExistingPolicies'] | undefined> => {
   if (hosts.length === 0) {
     return;
   }
@@ -250,7 +250,7 @@ const getNonExistingPoliciesForHostsList = async (
         )})`,
       },
     })
-  ).items.reduce((list, policy) => {
+  ).items.reduce<HostState['nonExistingPolicies']>((list, policy) => {
     list[policy.id] = true;
     return list;
   }, {});
