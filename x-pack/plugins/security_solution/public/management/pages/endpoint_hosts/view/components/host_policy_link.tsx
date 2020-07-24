@@ -5,7 +5,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiLink, EuiLinkProps } from '@elastic/eui';
+import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { useHostSelector } from '../hooks';
 import { nonExistingPolicies } from '../../store/selectors';
 import { getPolicyDetailPath } from '../../../../common/routing';
@@ -19,7 +19,7 @@ import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/end
  * text is returned.
  */
 export const HostPolicyLink = memo<
-  Omit<EuiLinkProps, 'href'> & {
+  Omit<EuiLinkAnchorProps, 'href'> & {
     policyId: string;
   }
 >(({ policyId, children, onClick, ...otherProps }) => {
@@ -44,7 +44,7 @@ export const HostPolicyLink = memo<
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink href={toRouteUrl} onClick={clickHandler}>
+    <EuiLink href={toRouteUrl} onClick={clickHandler} {...otherProps}>
       {children}
     </EuiLink>
   );
