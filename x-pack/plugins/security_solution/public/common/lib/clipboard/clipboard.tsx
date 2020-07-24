@@ -6,7 +6,7 @@
 
 import { EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
@@ -27,32 +27,39 @@ interface Props {
   toastLifeTimeMs?: number;
 }
 
-export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTimeMs }: Props) => {
-  const { addSuccess } = useAppToasts();
-  const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
+export const Clipboard = React.memo(
+  ({ children, content, onCopy, titleSummary, toastLifeTimeMs }: Props) => {
+    const { addSuccess } = useAppToasts();
+    const onClick = useCallback(
+      (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
 
-    const isSuccess = copy(`${content}`, { debug: true });
+        const isSuccess = copy(`${content}`, { debug: true });
 
-    if (onCopy != null) {
-      onCopy({ content, isSuccess });
-    }
+        if (onCopy != null) {
+          onCopy({ content, isSuccess });
+        }
 
-    if (isSuccess) {
-      addSuccess(`${i18n.COPIED} ${titleSummary} ${i18n.TO_THE_CLIPBOARD}`, { toastLifeTimeMs });
-    }
-  };
+        if (isSuccess) {
+          addSuccess(`${i18n.COPIED} ${titleSummary} ${i18n.TO_THE_CLIPBOARD}`, {
+            toastLifeTimeMs,
+          });
+        }
+      },
+      [addSuccess, content, onCopy, titleSummary, toastLifeTimeMs]
+    );
 
-  return (
-    <EuiButtonIcon
-      aria-label={i18n.COPY_TO_THE_CLIPBOARD}
-      color="text"
-      data-test-subj="clipboard"
-      iconType="copyClipboard"
-      onClick={onClick}
-    >
-      {children}
-    </EuiButtonIcon>
-  );
-};
+    return (
+      <EuiButtonIcon
+        aria-label={i18n.COPY_TO_THE_CLIPBOARD}
+        color="text"
+        data-test-subj="clipboard"
+        iconType="copyClipboard"
+        onClick={onClick}
+      >
+        {children}
+      </EuiButtonIcon>
+    );
+  }
+);

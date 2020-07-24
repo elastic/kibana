@@ -51,18 +51,25 @@ export const WithHoverActions = React.memo<Props>(
   ({ alwaysShow = false, closePopOverTrigger, hoverContent, render }) => {
     const [isOpen, setIsOpen] = useState(hoverContent != null && alwaysShow);
     const [showHoverContent, setShowHoverContent] = useState(false);
+    const [delayHandler, setDelayHandler] = useState<NodeJS.Timeout | null>(null);
+
     const onMouseEnter = useCallback(() => {
-      // NOTE: the following read from the DOM is expensive, but not as
-      // expensive as the default behavior, which adds a div to the body,
-      // which-in turn performs a more expensive change to the layout
-      if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
-        setShowHoverContent(true);
-      }
+      setDelayHandler(
+        setTimeout(() => {
+          // NOTE: the following read from the DOM is expensive, but not as
+          // expensive as the default behavior, which adds a div to the body,
+          // which-in turn performs a more expensive change to the layout
+          if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
+            setShowHoverContent(true);
+          }
+        }, 300)
+      );
     }, []);
 
     const onMouseLeave = useCallback(() => {
+      if (delayHandler) clearTimeout(delayHandler);
       setShowHoverContent(false);
-    }, []);
+    }, [delayHandler]);
 
     const content = useMemo(
       () => (

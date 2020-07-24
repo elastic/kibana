@@ -123,6 +123,15 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
 
   const { browserFields, indexPattern } = useWithSource('default', indexToAdd);
 
+  const showAllowTopContent = useMemo(
+    () =>
+      allowTopN({
+        browserField: getAllFieldsByName(browserFields)[field],
+        fieldName: field,
+      }),
+    [browserFields, field]
+  );
+
   return (
     <>
       {!showTopN && value != null && (
@@ -163,40 +172,35 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         </EuiToolTip>
       )}
 
-      <>
-        {allowTopN({
-          browserField: getAllFieldsByName(browserFields)[field],
-          fieldName: field,
-        }) && (
-          <>
-            {!showTopN && (
-              <EuiToolTip content={i18n.SHOW_TOP(field)}>
-                <EuiButtonIcon
-                  aria-label={i18n.SHOW_TOP(field)}
-                  color="text"
-                  data-test-subj="show-top-field"
-                  iconType="visBarVertical"
-                  onClick={toggleTopN}
-                  onMouseEnter={handleGoGetTimelineId}
-                />
-              </EuiToolTip>
-            )}
-
-            {showTopN && (
-              <StatefulTopN
-                browserFields={browserFields}
-                field={field}
-                indexPattern={indexPattern}
-                indexToAdd={indexToAdd}
-                onFilterAdded={onFilterAdded}
-                timelineId={timelineId ?? undefined}
-                toggleTopN={toggleTopN}
-                value={value}
+      {showAllowTopContent && (
+        <>
+          {!showTopN && (
+            <EuiToolTip content={i18n.SHOW_TOP(field)}>
+              <EuiButtonIcon
+                aria-label={i18n.SHOW_TOP(field)}
+                color="text"
+                data-test-subj="show-top-field"
+                iconType="visBarVertical"
+                onClick={toggleTopN}
+                onMouseEnter={handleGoGetTimelineId}
               />
-            )}
-          </>
-        )}
-      </>
+            </EuiToolTip>
+          )}
+
+          {showTopN && (
+            <StatefulTopN
+              browserFields={browserFields}
+              field={field}
+              indexPattern={indexPattern}
+              indexToAdd={indexToAdd}
+              onFilterAdded={onFilterAdded}
+              timelineId={timelineId ?? undefined}
+              toggleTopN={toggleTopN}
+              value={value}
+            />
+          )}
+        </>
+      )}
 
       {!showTopN && (
         <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
