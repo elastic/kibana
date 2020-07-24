@@ -237,7 +237,7 @@ export const StepSelectConfig: React.FunctionComponent<{
             helpText={
               isFleetReady && selectedConfigId ? (
                 <FormattedMessage
-                  id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsCountText"
+                  id="xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigAgentsDescriptionText"
                   defaultMessage="{count, plural, one {# agent} other {# agents}} are enrolled with the selected agent configuration."
                   values={{
                     count: agentConfigsById[selectedConfigId].agents || 0,
@@ -248,7 +248,7 @@ export const StepSelectConfig: React.FunctionComponent<{
           >
             <EuiComboBox
               placeholder={i18n.translate(
-                'pack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigPlaceholderText',
+                'xpack.ingestManager.createPackageConfig.StepSelectConfig.agentConfigPlaceholderText',
                 {
                   defaultMessage: 'Select an agent configuration to add this integration to',
                 }
