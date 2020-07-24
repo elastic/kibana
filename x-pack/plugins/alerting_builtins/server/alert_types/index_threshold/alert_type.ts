@@ -14,6 +14,7 @@ import { BUILT_IN_ALERTS_FEATURE_ID } from '../../../common';
 
 export const ID = '.index-threshold';
 
+import { CoreQueryParamsSchemaProperties } from './lib/core_query_types';
 const ActionGroupId = 'threshold met';
 const ComparatorFns = getComparatorFns();
 export const ComparatorFnNames = new Set(ComparatorFns.keys());
@@ -67,6 +68,30 @@ export function getAlertType(service: Service): AlertType {
     }
   );
 
+  const actionVariableContextThresholdLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdLabel',
+    {
+      defaultMessage:
+        "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+    }
+  );
+
+  const actionVariableContextThresholdComparatorLabel = i18n.translate(
+    'xpack.alertingBuiltins.indexThreshold.actionVariableContextThresholdComparatorLabel',
+    {
+      defaultMessage: 'A comparison function to use to determine if the threshold as been met.',
+    }
+  );
+
+  const alertParamsVariables = Object.keys(CoreQueryParamsSchemaProperties).map(
+    (propKey: string) => {
+      return {
+        name: propKey,
+        description: propKey,
+      };
+    }
+  );
+
   return {
     id: ID,
     name: alertTypeName,
@@ -82,6 +107,11 @@ export function getAlertType(service: Service): AlertType {
         { name: 'group', description: actionVariableContextGroupLabel },
         { name: 'date', description: actionVariableContextDateLabel },
         { name: 'value', description: actionVariableContextValueLabel },
+      ],
+      params: [
+        { name: 'threshold', description: actionVariableContextThresholdLabel },
+        { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
+        ...alertParamsVariables,
       ],
     },
     executor,
