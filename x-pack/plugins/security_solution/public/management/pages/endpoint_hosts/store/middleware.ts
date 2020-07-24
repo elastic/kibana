@@ -250,8 +250,10 @@ const getNonExistingPoliciesForHostsList = async (
         )})`,
       },
     })
-  ).items.reduce<HostState['nonExistingPolicies']>((list, policy) => {
-    list[policy.id] = true;
+  ).items.reduce<HostState['nonExistingPolicies']>((list, agentConfig) => {
+    (agentConfig.package_configs as string[]).forEach((packageConfig) => {
+      list[packageConfig as string] = true;
+    });
     return list;
   }, {});
 
