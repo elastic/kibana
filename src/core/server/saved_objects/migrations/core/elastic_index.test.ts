@@ -45,14 +45,15 @@ describe('ElasticIndex', () => {
     });
 
     test('fails if the index doc type is unsupported', async () => {
-      client.indices.get.mockImplementation(({ index }: { index: string }) =>
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+      client.indices.get.mockImplementation((params) => {
+        const index = params!.index as string;
+        return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: { spock: { dynamic: 'strict', properties: { a: 'b' } } },
           },
-        })
-      );
+        });
+      });
 
       await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
         /cannot be automatically migrated/
@@ -60,8 +61,9 @@ describe('ElasticIndex', () => {
     });
 
     test('fails if there are multiple root types', async () => {
-      client.indices.get.mockImplementation(({ index }: { index: string }) =>
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+      client.indices.get.mockImplementation((params) => {
+        const index = params!.index as string;
+        return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: {
@@ -69,8 +71,8 @@ describe('ElasticIndex', () => {
               doctor: { dynamic: 'strict', properties: { a: 'b' } },
             },
           },
-        })
-      );
+        });
+      });
 
       await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
         /cannot be automatically migrated/
@@ -78,14 +80,15 @@ describe('ElasticIndex', () => {
     });
 
     test('decorates index info with exists and indexName', async () => {
-      client.indices.get.mockImplementation(({ index }: { index: string }) =>
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
+      client.indices.get.mockImplementation((params) => {
+        const index = params!.index as string;
+        return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: { dynamic: 'strict', properties: { a: 'b' } },
           },
-        })
-      );
+        });
+      });
 
       const info = await Index.fetchInfo(client, '.baz');
       expect(info).toEqual({

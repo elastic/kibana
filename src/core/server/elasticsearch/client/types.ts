@@ -55,6 +55,13 @@ interface Explanation {
   details: Explanation[];
 }
 
+interface ShardsInfo {
+  total: number;
+  successful: number;
+  skipped: number;
+  failed: number;
+}
+
 export interface CountResponse {
   _shards: ShardsInfo;
   count: number;
