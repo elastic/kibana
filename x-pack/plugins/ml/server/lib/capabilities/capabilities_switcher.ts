@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CapabilitiesSwitcher, CoreSetup, Logger } from 'src/core/server';
 import { ILicense } from '../../../../licensing/common/types';
-import { isFullLicense, isMinimumLicense } from '../../../common/license';
+import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import { MlCapabilities, basicLicenseMlCapabilities } from '../../../common/types/capabilities';
 
 export const setupCapabilitiesSwitcher = (
@@ -30,19 +30,23 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
 
     try {
       const license = await license$.pipe(take(1)).toPromise();
+      const mlCaps = capabilities.ml as MlCapabilities;
+      // console.dir(license.getFeature('ml'));
+      // console.dir(license.getFeature('graph'));
+      if (isMlEnabled(license) === false) {
+        disableAllCapabilities(mlCaps);
+        return capabilities;
+      }
 
       // full license, leave capabilities as they were
       if (isFullLicense(license)) {
         return capabilities;
       }
 
-      const mlCaps = capabilities.ml as MlCapabilities;
       const originalCapabilities = cloneDeep(mlCaps);
 
       // not full licence, switch off all capabilities
-      Object.keys(mlCaps).forEach((k) => {
-        mlCaps[k as keyof MlCapabilities] = false;
-      });
+      disableAllCapabilities(mlCaps);
 
       // for a basic license, reapply the original capabilities for the basic license features
       if (isMinimumLicense(license)) {
@@ -55,4 +59,10 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
       return capabilities;
     }
   };
+}
+
+function disableAllCapabilities(mlCaps: MlCapabilities) {
+  Object.keys(mlCaps).forEach((k) => {
+    mlCaps[k as keyof MlCapabilities] = false;
+  });
 }
