@@ -26,10 +26,11 @@ import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
-import { getHostDetailsPath, getPolicyDetailPath } from '../../../../common/routing';
+import { getHostDetailsPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { AgentDetailsReassignConfigAction } from '../../../../../../../ingest_manager/public';
+import { HostPolicyLink } from '../components/host_policy_link';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -116,15 +117,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
 
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
-  const [policyDetailsRoutePath, policyDetailsRouteUrl] = useMemo(() => {
-    return [
-      getPolicyDetailPath(details.Endpoint.policy.applied.id),
-      formatUrl(getPolicyDetailPath(details.Endpoint.policy.applied.id)),
-    ];
-  }, [details.Endpoint.policy.applied.id, formatUrl]);
-
-  const policyDetailsClickHandler = useNavigateByRouterEventHandler(policyDetailsRoutePath);
-
   const detailsResultsPolicy = useMemo(() => {
     return [
       {
@@ -133,14 +125,12 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         }),
         description: (
           <>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiLink
+            <HostPolicyLink
+              policyId={details.Endpoint.policy.applied.id}
               data-test-subj="policyDetailsValue"
-              href={policyDetailsRouteUrl}
-              onClick={policyDetailsClickHandler}
             >
               {details.Endpoint.policy.applied.name}
-            </EuiLink>
+            </HostPolicyLink>
           </>
         ),
       },
@@ -171,14 +161,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         ),
       },
     ];
-  }, [
-    details,
-    policyResponseUri,
-    policyStatus,
-    policyStatusClickHandler,
-    policyDetailsRouteUrl,
-    policyDetailsClickHandler,
-  ]);
+  }, [details, policyResponseUri, policyStatus, policyStatusClickHandler]);
   const detailsResultsLower = useMemo(() => {
     return [
       {
