@@ -115,7 +115,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setJobDescription(testData.jobDescription);
         });
 
-        it('inputs the destination index', async () => {
+        it('should default the set destination index to job id switch to true', async () => {
+          await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdSwitchExists();
+          await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdCheckState(true);
+        });
+
+        it('should input the destination index', async () => {
+          await ml.dataFrameAnalyticsCreation.setDestIndexSameAsIdCheckState(false);
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
         });

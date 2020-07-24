@@ -168,6 +168,9 @@ export const AlertAdd = ({
               dispatch={dispatch}
               errors={errors}
               canChangeTrigger={canChangeTrigger}
+              operation={i18n.translate('xpack.triggersActionsUI.sections.alertAdd.operationName', {
+                defaultMessage: 'create',
+              })}
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>

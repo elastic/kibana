@@ -18,12 +18,12 @@
  */
 
 import { createFailError } from '@kbn/dev-utils';
-import { RESEARCH_CLUSTER_ES_HOST } from '../constants';
+import { ES_HOST } from '../constants';
 import { pretty, green } from '../utils';
 
 const { Client } = require('@elastic/elasticsearch');
 
-const node = RESEARCH_CLUSTER_ES_HOST;
+const node = ES_HOST;
 const client = new Client({ node });
 
 export const update = (id) => (log) => async (body) => {

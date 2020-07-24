@@ -8,7 +8,7 @@ import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
   DescriptionOrUndefined,
-  EntriesArrayOrUndefined,
+  EntriesArray,
   ExceptionListItemSchema,
   ExceptionListItemTypeOrUndefined,
   ExceptionListSoSchema,
@@ -37,7 +37,7 @@ interface UpdateExceptionListItemOptions {
   _version: _VersionOrUndefined;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
-  entries: EntriesArrayOrUndefined;
+  entries: EntriesArray;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   itemId: ItemIdOrUndefined;

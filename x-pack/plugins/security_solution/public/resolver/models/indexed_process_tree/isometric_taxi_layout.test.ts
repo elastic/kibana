@@ -5,7 +5,7 @@
  */
 import { IsometricTaxiLayout } from '../../types';
 import { LegacyEndpointEvent } from '../../../../common/endpoint/types';
-import { isometricTaxiLayout } from './isometric_taxi_layout';
+import { isometricTaxiLayoutFactory } from './isometric_taxi_layout';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
 import { factory } from './index';
 
@@ -107,7 +107,7 @@ describe('resolver graph layout', () => {
         unique_ppid: 0,
       },
     });
-    layout = () => isometricTaxiLayout(factory(events));
+    layout = () => isometricTaxiLayoutFactory(factory(events));
     events = [];
   });
   describe('when rendering no nodes', () => {
