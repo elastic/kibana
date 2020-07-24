@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Protect East Coastrev. 1',
           'elastic',
           'elastic',
-          `${policyInfo.packageConfig.package?.title} v${policyInfo.packageConfig.package?.version}`,
+          `v${policyInfo.packageConfig.package?.version}`,
           '',
         ]);
         [policyRow[2], policyRow[4]].forEach((relativeDate) => {
