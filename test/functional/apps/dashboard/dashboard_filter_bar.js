@@ -72,6 +72,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('shows index pattern of vis when one is added', async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');
