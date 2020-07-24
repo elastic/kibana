@@ -56,6 +56,24 @@ export default function (providerContext: FtrProviderContext) {
       packageConfigId = packageConfigResponse.item.id;
     });
 
+    after(async function () {
+      if (!server.enabled) {
+        return;
+      }
+
+      await supertest
+        .post(`/api/ingest_manager/agent_configs/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentConfigId })
+        .expect(200);
+
+      await supertest
+        .post(`/api/ingest_manager/package_configs/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ packageConfigIds: [packageConfigId] })
+        .expect(200);
+    });
+
     it('should succeed with a valid id', async function () {
       const { body: apiResponse } = await supertest
         .get(`/api/ingest_manager/package_configs/${packageConfigId}`)
