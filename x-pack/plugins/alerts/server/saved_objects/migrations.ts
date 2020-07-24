@@ -15,23 +15,27 @@ export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
   return {
-    '7.9.0': changeAlertingConsumer(encryptedSavedObjects),
+    /**
+     * In v7.9.0 we changed the Alerting plugin so it uses the `consumer` value of `alerts`
+     * prior to that we were using `alerting` and we need to keep these in sync
+     */
+    '7.9.0': changeAlertingConsumer(encryptedSavedObjects, 'alerting', 'alerts'),
+    /**
+     * In v7.10.0 we changed the Matrics plugin so it uses the `consumer` value of `infrastructure`
+     * prior to that we were using `metrics` and we need to keep these in sync
+     */
+    '7.10.0': changeAlertingConsumer(encryptedSavedObjects, 'metrics', 'infrastructure'),
   };
 }
 
-/**
- * In v7.9.0 we changed the Alerting plugin so it uses the `consumer` value of `alerts`
- * prior to that we were using `alerting` and we need to keep these in sync
- */
 function changeAlertingConsumer(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  from: string,
+  to: string
 ): SavedObjectMigrationFn<RawAlert, RawAlert> {
-  const consumerMigration = new Map<string, string>();
-  consumerMigration.set('alerting', 'alerts');
-
   return encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
     function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
-      return consumerMigration.has(doc.attributes.consumer);
+      return doc.attributes.consumer === from;
     },
     (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
       const {
@@ -41,7 +45,7 @@ function changeAlertingConsumer(
         ...doc,
         attributes: {
           ...doc.attributes,
-          consumer: consumerMigration.get(consumer) ?? consumer,
+          consumer: consumer === from ? to : consumer,
         },
       };
     }

@@ -39,16 +39,27 @@ const Wrapper = styled.aside<{ isSticky?: boolean }>`
 `;
 Wrapper.displayName = 'Wrapper';
 
+const FiltersGlobalContainer = styled.header<{ show: boolean }>`
+  ${({ show }) => css`
+    ${show ? '' : 'display: none;'};
+  `}
+`;
+
+FiltersGlobalContainer.displayName = 'FiltersGlobalContainer';
+
 export interface FiltersGlobalProps {
   children: React.ReactNode;
+  show?: boolean;
 }
 
-export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => (
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children, show = true }) => (
   <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
-      <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
-        {children}
-      </Wrapper>
+      <FiltersGlobalContainer show={show}>
+        <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
+          {children}
+        </Wrapper>
+      </FiltersGlobalContainer>
     )}
   </Sticky>
 ));

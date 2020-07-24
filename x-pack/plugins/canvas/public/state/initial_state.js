@@ -9,11 +9,13 @@ import { platformService } from '../services';
 import { getDefaultWorkpad } from './defaults';
 
 export const getInitialState = (path) => {
+  const { getHasWriteAccess } = platformService.getService();
+
   const state = {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here
     transient: {
-      canUserWrite: platformService.getService().coreStart.application.capabilities.canvas.save,
+      canUserWrite: getHasWriteAccess(),
       zoomScale: 1,
       elementStats: {
         total: 0,

@@ -45,6 +45,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
           meta,
           namespace_type: namespaceType,
           type,
+          version,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
         if (id == null && listId == null) {
@@ -64,6 +65,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
             namespaceType,
             tags,
             type,
+            version,
           });
           if (list == null) {
             return siemResponse.error({
