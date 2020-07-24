@@ -179,7 +179,7 @@ export class IndexPattern implements IIndexPattern {
       return true;
     }
 
-    return this.fields.every((spec) => {
+    return specs.every((spec) => {
       // See https://github.com/elastic/kibana/pull/8421
       const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
 
@@ -259,7 +259,7 @@ export class IndexPattern implements IIndexPattern {
     }
     this.version = response.version;
 
-    return this.indexFields(forceFieldRefresh, response._source.fields);
+    return this.indexFields(forceFieldRefresh, response.fields);
   }
 
   getComputedFields() {
