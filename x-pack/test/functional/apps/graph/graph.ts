@@ -80,6 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await buildGraph();
       const { nodes } = await PageObjects.graph.getGraphObjects();
       const circlesText = nodes.map(({ label }) => label);
+      await PageObjects.common.sleep(1000);
       expect(circlesText.length).to.equal(expectedNodes.length);
       const unexpectedCircleTexts = circlesText.filter((t) => !expectedNodes.includes(t));
 
