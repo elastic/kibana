@@ -5,13 +5,13 @@
 //   margin-bottom: $euiSizeXS;
 // }
 
-.lnsFieldItem__popoverAnchor:hover,
-.lnsFieldItem__popoverAnchor:focus,
-.lnsFieldItem__popoverAnchor:focus-within {
-  @include euiBottomShadowMedium;
-  border-radius: $euiBorderRadius;
-  z-index: 2;
-}
+// .lnsFieldItem__popoverAnchor:hover,
+// .lnsFieldItem__popoverAnchor:focus,
+// .lnsFieldItem__popoverAnchor:focus-within {
+//   @include euiBottomShadowMedium;
+//   border-radius: $euiBorderRadius;
+//   z-index: 2;
+// }
 
 .lnsFieldItem--missing {
   background: lightOrDarkTheme(transparentize($euiColorMediumShade, 0.9), $euiColorEmptyShade);

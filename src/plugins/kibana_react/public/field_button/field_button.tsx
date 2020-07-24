@@ -16,19 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import classNames from 'classnames';
-// import { EuiToken, EuiTokenProps, EuiKeyboardAccessible } from '@elastic/eui';
 import './field_button.scss';
 
-export interface FieldButtonProps extends Omit<EuiTokenProps, 'iconType'> {
-  // label?: string;
-  // scripted?: boolean;
+export interface FieldButtonProps {
   isOpen?: boolean;
-  fieldIcon?: node;
-  fieldName?: node;
-  fieldInfoIcon?: node;
-  fieldAction?: node;
+  fieldIcon?: ReactNode;
+  fieldName?: ReactNode;
+  fieldInfoIcon?: ReactNode;
+  fieldAction?: ReactNode;
   isDraggable?: boolean;
   size?: ButtonSize;
 }
@@ -50,10 +47,7 @@ const sizeToClassNameMap: { [size in ButtonSize]: string | null } = {
 export const SIZES = keysOf(sizeToClassNameMap);
 
 export function FieldButton({
-  // type,
-  // label,
   size = 'm',
-  // scripted,
   isOpen,
   fieldIcon,
   fieldName,
@@ -63,8 +57,6 @@ export function FieldButton({
   isDraggable = false,
   ...rest
 }: FieldButtonProps) {
-  // const token = typeToEuiIconMap[type] || defaultIcon;
-
   const classes = classNames(
     'kbnFieldButton',
     size ? sizeToClassNameMap[size] : null,
@@ -74,22 +66,13 @@ export function FieldButton({
   );
 
   return (
-    // <>
-    <div
-      // {...token}
-      className={classes}
-      // aria-label={label || type}
-      // title={label || type}
-      // size={size as EuiTokenProps['size']}
-      {...rest}
-    >
-      <div className="kbnFieldButton__info">
+    <div className={classes} {...rest}>
+      <div className="kbnFieldButton__content">
         <div className="kbnFieldButton__fieldIcon">{fieldIcon}</div>
         <div className="kbnFieldButton__name">{fieldName}</div>
         <div className="kbnFieldButton__fieldAction">{fieldAction}</div>
         <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>
       </div>
     </div>
-    // </>
   );
 }

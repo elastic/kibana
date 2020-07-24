@@ -12,7 +12,15 @@
 .kbnFieldButton--isDraggable {
   background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
 
-  .kbnFieldButton__info {
+  &:hover,
+  &:focus,
+  &:focus-within {
+    @include euiBottomShadowMedium;
+    border-radius: $euiBorderRadius;
+    z-index: 2;
+  }
+
+  .kbnFieldButton__content {
     &:hover,
     &:focus {
       cursor: grab;
@@ -22,14 +30,14 @@
 
 .kbnFieldButton--small {
   font-size: $euiFontSizeXS;
-  .kbnFieldButton__info {
+  .kbnFieldButton__content {
     .kbnFieldButton__fieldIcon {
       margin-top: 0;
     }
   }
 }
 
-.kbnFieldButton__info {
+.kbnFieldButton__content {
   border-radius: $euiBorderRadius - 1px;
   padding: $euiSizeS;
   display: flex;
