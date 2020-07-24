@@ -1,0 +1,237 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`attribution validation should provide no validation errors when attribution text and attribution url are provided 1`] = `
+<EuiPanel>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Url"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Attribution url must have accompanying text",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Attribution text"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value="myAttribtionLabel"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Attribution text must have an accompanying link",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Attribution link"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value="http://mySource"
+    />
+  </EuiFormRow>
+</EuiPanel>
+`;
+
+exports[`attribution validation should provide validation error when attribution text is provided without attribution url 1`] = `
+<EuiPanel>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Url"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Attribution url must have accompanying text",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Attribution text"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value="myAttribtionLabel"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Attribution text must have an accompanying link",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={true}
+    label="Attribution link"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+</EuiPanel>
+`;
+
+exports[`attribution validation should provide validation error when attribution url is provided without attribution text 1`] = `
+<EuiPanel>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Url"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Attribution url must have accompanying text",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={true}
+    label="Attribution text"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Attribution text must have an accompanying link",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Attribution link"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value="http://mySource"
+    />
+  </EuiFormRow>
+</EuiPanel>
+`;
+
+exports[`should render 1`] = `
+<EuiPanel>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Url"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Attribution url must have accompanying text",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Attribution text"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={
+      Array [
+        "Attribution text must have an accompanying link",
+      ]
+    }
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Attribution link"
+    labelType="label"
+  >
+    <EuiFieldText
+      onChange={[Function]}
+      value=""
+    />
+  </EuiFormRow>
+</EuiPanel>
+`;
