@@ -73,7 +73,7 @@ export const <%= upperCamelCaseName %>App = ({ basename, notifications, http, na
     <Router basename={basename}>
       <I18nProvider>
         <>
-          <navigation.ui.TopNavMenu appName={ PLUGIN_ID } showSearchBar={true} />
+          <navigation.ui.TopNavMenu appName={ PLUGIN_ID } showSearchBar={true} useDefaultBehaviors={true}/>
           <EuiPage restrictWidth="1000px">
             <EuiPageBody>
               <EuiPageHeader>

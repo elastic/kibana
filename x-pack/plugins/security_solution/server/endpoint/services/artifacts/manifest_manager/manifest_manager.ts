@@ -5,23 +5,27 @@
  */
 
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
-import { createHash } from 'crypto';
+import LRU from 'lru-cache';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
+import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
+
 import {
   ArtifactConstants,
   ManifestConstants,
   Manifest,
   buildArtifact,
   getFullEndpointExceptionList,
-  ExceptionsCache,
   ManifestDiff,
+  getArtifactId,
 } from '../../../lib/artifacts';
-import { InternalArtifactSchema } from '../../../schemas/artifacts';
+import {
+  InternalArtifactCompleteSchema,
+  internalArtifactCompleteSchema,
+} from '../../../schemas/artifacts';
 import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
-import { compressExceptionList } from '../../../lib/artifacts/lists';
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
@@ -29,7 +33,7 @@ export interface ManifestManagerContext {
   exceptionListClient: ExceptionListClient;
   packageConfigService: PackageConfigServiceInterface;
   logger: Logger;
-  cache: ExceptionsCache;
+  cache: LRU<string, Buffer>;
 }
 
 export interface ManifestSnapshotOpts {
@@ -47,7 +51,7 @@ export class ManifestManager {
   protected packageConfigService: PackageConfigServiceInterface;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
-  protected cache: ExceptionsCache;
+  protected cache: LRU<string, Buffer>;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -73,82 +77,86 @@ export class ManifestManager {
    * state of exception-list-agnostic SOs.
    *
    * @param schemaVersion The schema version of the artifact
-   * @returns {Promise<InternalArtifactSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
+   * @returns {Promise<InternalArtifactCompleteSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
    * @throws Throws/rejects if there are errors building the list.
    */
   protected async buildExceptionListArtifacts(
     schemaVersion: string
-  ): Promise<InternalArtifactSchema[]> {
-    // TODO: should wrap in try/catch?
-    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce(
-      async (acc: Promise<InternalArtifactSchema[]>, os) => {
-        const exceptionList = await getFullEndpointExceptionList(
-          this.exceptionListClient,
-          os,
-          schemaVersion
-        );
-        const artifacts = await acc;
-        const artifact = await buildArtifact(exceptionList, os, schemaVersion);
-        artifacts.push(artifact);
-        return Promise.resolve(artifacts);
-      },
-      Promise.resolve([])
-    );
+  ): Promise<InternalArtifactCompleteSchema[]> {
+    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce<
+      Promise<InternalArtifactCompleteSchema[]>
+    >(async (acc, os) => {
+      const exceptionList = await getFullEndpointExceptionList(
+        this.exceptionListClient,
+        os,
+        schemaVersion
+      );
+      const artifacts = await acc;
+      const artifact = await buildArtifact(exceptionList, os, schemaVersion);
+      return Promise.resolve([...artifacts, artifact]);
+    }, Promise.resolve([]));
   }
 
   /**
-   * Writes new artifact SOs based on provided snapshot.
+   * Writes new artifact SO.
    *
-   * @param snapshot A ManifestSnapshot to use for writing the artifacts.
+   * @param artifact An InternalArtifactCompleteSchema representing the artifact.
+   * @returns {Promise<Error | null>} An error, if encountered, or null.
+   */
+  protected async pushArtifact(artifact: InternalArtifactCompleteSchema): Promise<Error | null> {
+    const artifactId = getArtifactId(artifact);
+    try {
+      // Write the artifact SO
+      await this.artifactClient.createArtifact(artifact);
+
+      // Cache the compressed body of the artifact
+      this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
+    } catch (err) {
+      if (err.status === 409) {
+        this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
+      } else {
+        return err;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Writes new artifact SOs.
+   *
+   * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  private async writeArtifacts(snapshot: ManifestSnapshot): Promise<Error[]> {
+  public async pushArtifacts(artifacts: InternalArtifactCompleteSchema[]): Promise<Error[]> {
     const errors: Error[] = [];
-    for (const diff of snapshot.diffs) {
-      const artifact = snapshot.manifest.getArtifact(diff.id);
-      if (artifact === undefined) {
-        throw new Error(
-          `Corrupted manifest detected. Diff contained artifact ${diff.id} not in manifest.`
-        );
-      }
-
-      const compressedArtifact = await compressExceptionList(Buffer.from(artifact.body, 'base64'));
-      artifact.body = compressedArtifact.toString('base64');
-      artifact.encodedSize = compressedArtifact.byteLength;
-      artifact.compressionAlgorithm = 'zlib';
-      artifact.encodedSha256 = createHash('sha256').update(compressedArtifact).digest('hex');
-
-      try {
-        // Write the artifact SO
-        await this.artifactClient.createArtifact(artifact);
-        // Cache the compressed body of the artifact
-        this.cache.set(diff.id, Buffer.from(artifact.body, 'base64'));
-      } catch (err) {
-        if (err.status === 409) {
-          this.logger.debug(`Tried to create artifact ${diff.id}, but it already exists.`);
-        } else {
-          // TODO: log error here?
+    for (const artifact of artifacts) {
+      if (internalArtifactCompleteSchema.is(artifact)) {
+        const err = await this.pushArtifact(artifact);
+        if (err) {
           errors.push(err);
         }
+      } else {
+        errors.push(new Error(`Incomplete artifact: ${getArtifactId(artifact)}`));
       }
     }
     return errors;
   }
 
   /**
-   * Deletes old artifact SOs based on provided snapshot.
+   * Deletes outdated artifact SOs.
    *
-   * @param snapshot A ManifestSnapshot to use for deleting the artifacts.
+   * The artifact may still remain in the cache.
+   *
+   * @param artifactIds The IDs of the artifact to delete..
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  private async deleteArtifacts(snapshot: ManifestSnapshot): Promise<Error[]> {
+  public async deleteArtifacts(artifactIds: string[]): Promise<Error[]> {
     const errors: Error[] = [];
-    for (const diff of snapshot.diffs) {
+    for (const artifactId of artifactIds) {
       try {
-        // Delete the artifact SO
-        await this.artifactClient.deleteArtifact(diff.id);
-        // TODO: should we delete the cache entry here?
-        this.logger.info(`Cleaned up artifact ${diff.id}`);
+        await this.artifactClient.deleteArtifact(artifactId);
+        this.logger.info(`Cleaned up artifact ${artifactId}`);
       } catch (err) {
         errors.push(err);
       }
@@ -157,14 +165,14 @@ export class ManifestManager {
   }
 
   /**
-   * Returns the last dispatched manifest based on the current state of the
+   * Returns the last computed manifest based on the state of the
    * user-artifact-manifest SO.
    *
    * @param schemaVersion The schema version of the manifest.
-   * @returns {Promise<Manifest | null>} The last dispatched manifest, or null if does not exist.
+   * @returns {Promise<Manifest | null>} The last computed manifest, or null if does not exist.
    * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
    */
-  public async getLastDispatchedManifest(schemaVersion: string): Promise<Manifest | null> {
+  public async getLastComputedManifest(schemaVersion: string): Promise<Manifest | null> {
     try {
       const manifestClient = this.getManifestClient(schemaVersion);
       const manifestSo = await manifestClient.getManifest();
@@ -173,11 +181,7 @@ export class ManifestManager {
         throw new Error('No version returned for manifest.');
       }
 
-      const manifest = new Manifest(
-        new Date(manifestSo.attributes.created),
-        schemaVersion,
-        manifestSo.version
-      );
+      const manifest = new Manifest(schemaVersion, manifestSo.version);
 
       for (const id of manifestSo.attributes.ids) {
         const artifactSo = await this.artifactClient.getArtifact(id);
@@ -193,89 +197,42 @@ export class ManifestManager {
   }
 
   /**
-   * Snapshots a manifest based on current state of exception-list-agnostic SOs.
+   * Builds a new manifest based on the current user exception list.
    *
-   * @param opts Optional parameters for snapshot retrieval.
-   * @param opts.initialize Initialize a new Manifest when no manifest SO can be retrieved.
-   * @returns {Promise<ManifestSnapshot | null>} A snapshot of the manifest, or null if not initialized.
+   * @param schemaVersion The schema version of the manifest.
+   * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
+   * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
-  public async getSnapshot(opts?: ManifestSnapshotOpts): Promise<ManifestSnapshot | null> {
-    try {
-      let oldManifest: Manifest | null;
+  public async buildNewManifest(
+    schemaVersion: string,
+    baselineManifest?: Manifest
+  ): Promise<Manifest> {
+    // Build new exception list artifacts
+    const artifacts = await this.buildExceptionListArtifacts(ArtifactConstants.SCHEMA_VERSION);
 
-      // Get the last-dispatched manifest
-      oldManifest = await this.getLastDispatchedManifest(ManifestConstants.SCHEMA_VERSION);
+    // Build new manifest
+    const manifest = Manifest.fromArtifacts(
+      artifacts,
+      ManifestConstants.SCHEMA_VERSION,
+      baselineManifest ?? Manifest.getDefault(schemaVersion)
+    );
 
-      if (oldManifest === null && opts !== undefined && opts.initialize) {
-        oldManifest = new Manifest(
-          new Date(),
-          ManifestConstants.SCHEMA_VERSION,
-          ManifestConstants.INITIAL_VERSION
-        ); // create empty manifest
-      } else if (oldManifest == null) {
-        this.logger.debug('Manifest does not exist yet. Waiting...');
-        return null;
-      }
-
-      // Build new exception list artifacts
-      const artifacts = await this.buildExceptionListArtifacts(ArtifactConstants.SCHEMA_VERSION);
-
-      // Build new manifest
-      const newManifest = Manifest.fromArtifacts(
-        artifacts,
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest
-      );
-
-      // Get diffs
-      const diffs = newManifest.diff(oldManifest);
-
-      return {
-        manifest: newManifest,
-        diffs,
-      };
-    } catch (err) {
-      this.logger.error(err);
-      return null;
-    }
+    return manifest;
   }
 
   /**
-   * Syncs artifacts based on provided snapshot.
-   *
-   * Creates artifacts that do not yet exist and cleans up old artifacts that have been
-   * superceded by this snapshot.
-   *
-   * @param snapshot A ManifestSnapshot to use for sync.
-   * @returns {Promise<Error[]>} Any errors encountered.
-   */
-  public async syncArtifacts(
-    snapshot: ManifestSnapshot,
-    diffType: 'add' | 'delete'
-  ): Promise<Error[]> {
-    const filteredDiffs = snapshot.diffs.filter((diff) => {
-      return diff.type === diffType;
-    });
-
-    const tmpSnapshot = { ...snapshot };
-    tmpSnapshot.diffs = filteredDiffs;
-
-    if (diffType === 'add') {
-      return this.writeArtifacts(tmpSnapshot);
-    } else if (diffType === 'delete') {
-      return this.deleteArtifacts(tmpSnapshot);
-    }
-
-    return [new Error(`Unsupported diff type: ${diffType}`)];
-  }
-
-  /**
-   * Dispatches the manifest by writing it to the endpoint package config.
+   * Dispatches the manifest by writing it to the endpoint package config, if different
+   * from the manifest already in the config.
    *
    * @param manifest The Manifest to dispatch.
    * @returns {Promise<Error[]>} Any errors encountered.
    */
-  public async dispatch(manifest: Manifest): Promise<Error[]> {
+  public async tryDispatch(manifest: Manifest): Promise<Error[]> {
+    const serializedManifest = manifest.toEndpointFormat();
+    if (!manifestDispatchSchema.is(serializedManifest)) {
+      return [new Error('Invalid manifest')];
+    }
+
     let paging = true;
     let page = 1;
     const errors: Error[] = [];
@@ -293,16 +250,25 @@ export class ManifestManager {
           const artifactManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
             value: {},
           };
-          artifactManifest.value = manifest.toEndpointFormat();
-          newPackageConfig.inputs[0].config.artifact_manifest = artifactManifest;
 
-          try {
-            await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
-            this.logger.debug(
-              `Updated package config ${id} with manifest version ${manifest.getVersion()}`
-            );
-          } catch (err) {
-            errors.push(err);
+          const oldManifest =
+            Manifest.fromPkgConfig(artifactManifest.value) ??
+            Manifest.getDefault(ManifestConstants.SCHEMA_VERSION);
+          if (!manifest.equals(oldManifest)) {
+            newPackageConfig.inputs[0].config.artifact_manifest = {
+              value: serializedManifest,
+            };
+
+            try {
+              await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
+              this.logger.debug(
+                `Updated package config ${id} with manifest version ${manifest.getSha256()}`
+              );
+            } catch (err) {
+              errors.push(err);
+            }
+          } else {
+            this.logger.debug(`No change in package config: ${id}`);
           }
         } else {
           errors.push(new Error(`Package config ${id} has no config.`));
@@ -317,46 +283,32 @@ export class ManifestManager {
   }
 
   /**
-   * Commits a manifest to indicate that it has been dispatched.
+   * Commits a manifest to indicate that a new version has been computed.
    *
    * @param manifest The Manifest to commit.
-   * @returns {Promise<Error | null>} An error if encountered, or null if successful.
+   * @returns {Promise<Error | null>} An error, if encountered, or null.
    */
   public async commit(manifest: Manifest): Promise<Error | null> {
     try {
       const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
 
       // Commit the new manifest
-      if (manifest.getVersion() === ManifestConstants.INITIAL_VERSION) {
-        await manifestClient.createManifest(manifest.toSavedObject());
+      const manifestSo = manifest.toSavedObject();
+      const version = manifest.getSoVersion();
+
+      if (version == null) {
+        await manifestClient.createManifest(manifestSo);
       } else {
-        const version = manifest.getVersion();
-        if (version === ManifestConstants.INITIAL_VERSION) {
-          throw new Error('Updating existing manifest with baseline version. Bad state.');
-        }
-        await manifestClient.updateManifest(manifest.toSavedObject(), {
+        await manifestClient.updateManifest(manifestSo, {
           version,
         });
       }
 
-      this.logger.info(`Committed manifest ${manifest.getVersion()}`);
+      this.logger.info(`Committed manifest ${manifest.getSha256()}`);
     } catch (err) {
       return err;
     }
 
     return null;
-  }
-
-  /**
-   * Confirms that a packageConfig exists with provided name.
-   */
-  public async confirmPackageConfigExists(name: string) {
-    // TODO: what if there are multiple results? uh oh.
-    const { total } = await this.packageConfigService.list(this.savedObjectsClient, {
-      page: 1,
-      perPage: 20,
-      kuery: `ingest-package-configs.name:${name}`,
-    });
-    return total > 0;
   }
 }

@@ -1,4 +1,7 @@
 {
+  "author": [
+    "Elastic"
+  ],
   "description": "Strace runs in a privileged context and can be used to escape restrictive environments by instantiating a shell in order to elevate privileges or move laterally.",
   "false_positives": [
     "Strace is a dual-use tool that can be used for benign or malicious activity. Some normal use of this command may originate from developers or SREs engaged in debugging or system call tracing."
@@ -7,8 +10,9 @@
     "auditbeat-*"
   ],
   "language": "kuery",
+  "license": "Elastic License",
   "name": "Strace Process Activity",
-  "query": "process.name:strace and event.action:executed",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:strace",
   "references": [
     "https://en.wikipedia.org/wiki/Strace"
   ],
@@ -20,5 +24,5 @@
     "Linux"
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

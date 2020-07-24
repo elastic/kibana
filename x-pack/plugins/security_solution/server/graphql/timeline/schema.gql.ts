@@ -34,8 +34,8 @@ const kueryFilterQuery = `
 `;
 
 const dateRange = `
-  start: Float
-  end: Float
+  start: ToAny
+  end: ToAny
 `;
 
 const favoriteTimeline = `
@@ -183,8 +183,8 @@ export const timelineSchema = gql`
   }
 
   input PageInfoTimeline {
-    pageIndex: Float!
-    pageSize: Float!
+    pageIndex: Float
+    pageSize: Float
   }
 
   enum SortFieldTimeline {

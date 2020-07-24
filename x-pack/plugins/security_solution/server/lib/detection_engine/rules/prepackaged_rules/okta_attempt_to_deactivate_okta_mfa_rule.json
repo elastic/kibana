@@ -1,0 +1,29 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to deactivate an Okta multi-factor authentication (MFA) rule in order to remove or weaken an organization's security controls.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if Okta MFA rules are regularly deactivated in your organization."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Deactivate Okta MFA Rule",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:policy.rule.deactivate",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "cc92c835-da92-45c9-9f29-b4992ad621a0",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "type": "query",
+  "version": 1
+}

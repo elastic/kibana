@@ -14,7 +14,7 @@ import {
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
 } from './constants';
-import { ManagementSubTab } from '../types';
+import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { HostIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 
@@ -47,7 +47,7 @@ export const getHostListPath = (
 
   if (name === 'hostList') {
     return `${generatePath(MANAGEMENT_ROUTING_HOSTS_PATH, {
-      tabName: ManagementSubTab.hosts,
+      tabName: AdministrationSubTab.hosts,
     })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
   }
   return `${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
@@ -65,17 +65,17 @@ export const getHostDetailsPath = (
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
   return `${generatePath(MANAGEMENT_ROUTING_HOSTS_PATH, {
-    tabName: ManagementSubTab.hosts,
+    tabName: AdministrationSubTab.hosts,
   })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
 };
 
 export const getPoliciesPath = (search?: string) =>
   `${generatePath(MANAGEMENT_ROUTING_POLICIES_PATH, {
-    tabName: ManagementSubTab.policies,
+    tabName: AdministrationSubTab.policies,
   })}${appendSearch(search)}`;
 
 export const getPolicyDetailPath = (policyId: string, search?: string) =>
   `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_PATH, {
-    tabName: ManagementSubTab.policies,
+    tabName: AdministrationSubTab.policies,
     policyId,
   })}${appendSearch(search)}`;

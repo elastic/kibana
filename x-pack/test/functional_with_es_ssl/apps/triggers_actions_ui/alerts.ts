@@ -28,7 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         name: generateUniqueKey(),
         tags: ['foo', 'bar'],
         alertTypeId: 'test.noop',
-        consumer: 'test',
+        consumer: 'alerts',
         schedule: { interval: '1m' },
         throttle: '1m',
         actions: [],
@@ -372,7 +372,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('deleteAll');
       await testSubjects.existOrFail('deleteIdsConfirmation');
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('deleteIdsConfirmation');
+      await testSubjects.missingOrFail('deleteIdsConfirmation', { timeout: 5000 });
 
       await pageObjects.common.closeToast();
 

@@ -12,13 +12,10 @@ import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
 
-export function estimateBucketSpanFactory(
-  callAsCurrentUser,
-  callAsInternalUser,
-  isSecurityDisabled
-) {
-  const PolledDataChecker = polledDataCheckerFactory(callAsCurrentUser);
-  const SingleSeriesChecker = singleSeriesCheckerFactory(callAsCurrentUser);
+export function estimateBucketSpanFactory(mlClusterClient) {
+  const { callAsCurrentUser, callAsInternalUser } = mlClusterClient;
+  const PolledDataChecker = polledDataCheckerFactory(mlClusterClient);
+  const SingleSeriesChecker = singleSeriesCheckerFactory(mlClusterClient);
 
   class BucketSpanEstimator {
     constructor(
@@ -334,99 +331,65 @@ export function estimateBucketSpanFactory(
     }
 
     return new Promise((resolve, reject) => {
-      function getBucketSpanEstimation() {
-        // fetch the `search.max_buckets` cluster setting so we're able to
-        // adjust aggregations to not exceed that limit.
-        callAsInternalUser('cluster.getSettings', {
-          flatSettings: true,
-          includeDefaults: true,
-          filterPath: '*.*max_buckets',
+      // fetch the `search.max_buckets` cluster setting so we're able to
+      // adjust aggregations to not exceed that limit.
+      callAsInternalUser('cluster.getSettings', {
+        flatSettings: true,
+        includeDefaults: true,
+        filterPath: '*.*max_buckets',
+      })
+        .then((settings) => {
+          if (typeof settings !== 'object') {
+            reject('Unable to retrieve cluster settings');
+          }
+
+          // search.max_buckets could exist in default, persistent or transient cluster settings
+          const maxBucketsSetting = (settings.defaults ||
+            settings.persistent ||
+            settings.transient ||
+            {})['search.max_buckets'];
+
+          if (maxBucketsSetting === undefined) {
+            reject('Unable to retrieve cluster setting search.max_buckets');
+          }
+
+          const maxBuckets = parseInt(maxBucketsSetting);
+
+          const runEstimator = (splitFieldValues = []) => {
+            const bucketSpanEstimator = new BucketSpanEstimator(
+              formConfig,
+              splitFieldValues,
+              maxBuckets
+            );
+
+            bucketSpanEstimator
+              .run()
+              .then((resp) => {
+                resolve(resp);
+              })
+              .catch((resp) => {
+                reject(resp);
+              });
+          };
+
+          // a partition has been selected, so we need to load some field values to use in the
+          // bucket span tests.
+          if (formConfig.splitField !== undefined) {
+            getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
+              .then((splitFieldValues) => {
+                runEstimator(splitFieldValues);
+              })
+              .catch((resp) => {
+                reject(resp);
+              });
+          } else {
+            // no partition field selected or we're in the single metric config
+            runEstimator();
+          }
         })
-          .then((settings) => {
-            if (typeof settings !== 'object') {
-              reject('Unable to retrieve cluster settings');
-            }
-
-            // search.max_buckets could exist in default, persistent or transient cluster settings
-            const maxBucketsSetting = (settings.defaults ||
-              settings.persistent ||
-              settings.transient ||
-              {})['search.max_buckets'];
-
-            if (maxBucketsSetting === undefined) {
-              reject('Unable to retrieve cluster setting search.max_buckets');
-            }
-
-            const maxBuckets = parseInt(maxBucketsSetting);
-
-            const runEstimator = (splitFieldValues = []) => {
-              const bucketSpanEstimator = new BucketSpanEstimator(
-                formConfig,
-                splitFieldValues,
-                maxBuckets
-              );
-
-              bucketSpanEstimator
-                .run()
-                .then((resp) => {
-                  resolve(resp);
-                })
-                .catch((resp) => {
-                  reject(resp);
-                });
-            };
-
-            // a partition has been selected, so we need to load some field values to use in the
-            // bucket span tests.
-            if (formConfig.splitField !== undefined) {
-              getRandomFieldValues(formConfig.index, formConfig.splitField, formConfig.query)
-                .then((splitFieldValues) => {
-                  runEstimator(splitFieldValues);
-                })
-                .catch((resp) => {
-                  reject(resp);
-                });
-            } else {
-              // no partition field selected or we're in the single metric config
-              runEstimator();
-            }
-          })
-          .catch((resp) => {
-            reject(resp);
-          });
-      }
-
-      if (isSecurityDisabled) {
-        getBucketSpanEstimation();
-      } else {
-        // if security is enabled, check that the user has permission to
-        // view jobs before calling getBucketSpanEstimation.
-        // getBucketSpanEstimation calls the 'cluster.getSettings' endpoint as the internal user
-        // and so could give the user access to more information than
-        // they are entitled to.
-        const body = {
-          cluster: [
-            'cluster:monitor/xpack/ml/job/get',
-            'cluster:monitor/xpack/ml/job/stats/get',
-            'cluster:monitor/xpack/ml/datafeeds/get',
-            'cluster:monitor/xpack/ml/datafeeds/stats/get',
-          ],
-        };
-        callAsCurrentUser('ml.privilegeCheck', { body })
-          .then((resp) => {
-            if (
-              resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/job/stats/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/datafeeds/get'] &&
-              resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']
-            ) {
-              getBucketSpanEstimation();
-            } else {
-              reject('Insufficient permissions to call bucket span estimation.');
-            }
-          })
-          .catch(reject);
-      }
+        .catch((resp) => {
+          reject(resp);
+        });
     });
   };
 }

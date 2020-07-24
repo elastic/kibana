@@ -96,8 +96,8 @@ exports[`LayerPanel is rendered 1`] = `
               "getId": [Function],
               "getImmutableSourceProperties": [Function],
               "getLayerTypeIconName": [Function],
-              "isJoinable": [Function],
               "renderSourceSettingsEditor": [Function],
+              "showJoinEditor": [Function],
               "supportsElasticsearchFilters": [Function],
             }
           }
@@ -107,6 +107,17 @@ exports[`LayerPanel is rendered 1`] = `
         </div>
         <EuiPanel>
           <JoinEditor
+            layer={
+              Object {
+                "getDisplayName": [Function],
+                "getId": [Function],
+                "getImmutableSourceProperties": [Function],
+                "getLayerTypeIconName": [Function],
+                "renderSourceSettingsEditor": [Function],
+                "showJoinEditor": [Function],
+                "supportsElasticsearchFilters": [Function],
+              }
+            }
             layerDisplayName="layer 1"
             leftJoinFields={Array []}
           />

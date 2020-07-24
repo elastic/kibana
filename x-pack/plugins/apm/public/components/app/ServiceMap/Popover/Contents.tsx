@@ -14,7 +14,7 @@ import cytoscape from 'cytoscape';
 import React, { MouseEvent } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
-import { ServiceMetricFetcher } from './ServiceMetricFetcher';
+import { ServiceStatsFetcher } from './ServiceStatsFetcher';
 import { popoverWidth } from '../cytoscapeOptions';
 
 interface ContentsProps {
@@ -70,7 +70,7 @@ export function Contents({
       </FlexColumnItem>
       <FlexColumnItem>
         {isService ? (
-          <ServiceMetricFetcher
+          <ServiceStatsFetcher
             serviceName={selectedNodeServiceName}
             serviceAnomalyStats={selectedNodeData.serviceAnomalyStats}
           />

@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of various Amazon Simple Storage Service (S3) bucket configuration components.",
+  "false_positives": [
+    "Bucket components may be deleted by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Bucket component deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS S3 Bucket Configuration Deletion",
+  "query": "event.action:(DeleteBucketPolicy or DeleteBucketReplication or DeleteBucketCors or DeleteBucketEncryption or DeleteBucketLifecycle) and event.dataset:aws.cloudtrail and event.provider:s3.amazonaws.com and event.outcome:success",
+  "references": [
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketPolicy.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketReplication.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketCors.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketEncryption.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketLifecycle.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "227dc608-e558-43d9-b521-150772250bae",
+  "severity": "low",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

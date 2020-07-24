@@ -51,7 +51,7 @@ interface Props {
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
-  from: number;
+  from: string;
   fromStr: string;
   indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
@@ -64,7 +64,7 @@ interface Props {
   setSavedQueryId: (savedQueryId: string | null) => void;
   filters: Filter[];
   savedQueryId: string | null;
-  to: number;
+  to: string;
   toStr: string;
   updateEventType: (eventType: EventType) => void;
   updateReduxTime: DispatchUpdateReduxTime;

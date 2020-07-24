@@ -172,7 +172,7 @@ describe('Policy Details', () => {
       cancelbutton.simulate('click', { button: 0 });
       const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
       expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
-        'securitySolution:management',
+        'securitySolution:administration',
         { path: policyListPathUrl },
       ]);
     });

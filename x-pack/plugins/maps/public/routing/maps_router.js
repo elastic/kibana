@@ -17,18 +17,18 @@ import { LoadMapAndRender } from './routes/maps_app/load_map_and_render';
 export let goToSpecifiedPath;
 export let kbnUrlStateStorage;
 
-export async function renderApp(context, { appBasePath, element, history }) {
+export async function renderApp(context, { appBasePath, element, history, onAppLeave }) {
   goToSpecifiedPath = (path) => history.push(path);
   kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 
-  render(<App history={history} appBasePath={appBasePath} />, element);
+  render(<App history={history} appBasePath={appBasePath} onAppLeave={onAppLeave} />, element);
 
   return () => {
     unmountComponentAtNode(element);
   };
 }
 
-const App = ({ history, appBasePath }) => {
+const App = ({ history, appBasePath, onAppLeave }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
@@ -37,8 +37,20 @@ const App = ({ history, appBasePath }) => {
       <Provider store={store}>
         <Router basename={appBasePath} history={history}>
           <Switch>
-            <Route path={`/map/:savedMapId`} component={LoadMapAndRender} />
-            <Route exact path={`/map`} component={LoadMapAndRender} />
+            <Route
+              path={`/map/:savedMapId`}
+              render={(props) => (
+                <LoadMapAndRender
+                  savedMapId={props.match.params.savedMapId}
+                  onAppLeave={onAppLeave}
+                />
+              )}
+            />
+            <Route
+              exact
+              path={`/map`}
+              render={() => <LoadMapAndRender onAppLeave={onAppLeave} />}
+            />
             // Redirect other routes to list, or if hash-containing, their non-hash equivalents
             <Route
               path={``}

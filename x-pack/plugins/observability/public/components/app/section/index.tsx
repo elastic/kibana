@@ -4,21 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiAccordion, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ErrorPanel } from './error_panel';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+
+interface AppLink {
+  label: string;
+  href?: string;
+}
 
 interface Props {
   title: string;
   hasError: boolean;
   children: React.ReactNode;
-  minHeight?: number;
-  appLink?: string;
-  appLinkName?: string;
+  appLink?: AppLink;
 }
 
-export const SectionContainer = ({ title, appLink, children, hasError, appLinkName }: Props) => {
+export const SectionContainer = ({ title, appLink, children, hasError }: Props) => {
   const { core } = usePluginContext();
   return (
     <EuiAccordion
@@ -31,15 +33,9 @@ export const SectionContainer = ({ title, appLink, children, hasError, appLinkNa
         </EuiTitle>
       }
       extraAction={
-        appLink && (
-          <EuiLink href={core.http.basePath.prepend(appLink)}>
-            <EuiText size="s">
-              {appLinkName
-                ? appLinkName
-                : i18n.translate('xpack.observability.chart.viewInAppLabel', {
-                    defaultMessage: 'View in app',
-                  })}
-            </EuiText>
+        appLink?.href && (
+          <EuiLink href={core.http.basePath.prepend(appLink.href)}>
+            <EuiText size="s">{appLink.label}</EuiText>
           </EuiLink>
         )
       }

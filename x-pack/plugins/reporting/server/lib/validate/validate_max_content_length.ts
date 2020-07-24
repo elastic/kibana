@@ -8,7 +8,7 @@ import numeral from '@elastic/numeral';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { defaults, get } from 'lodash';
 import { ReportingConfig } from '../../';
-import { LevelLogger } from '../../lib';
+import { LevelLogger } from '../';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';

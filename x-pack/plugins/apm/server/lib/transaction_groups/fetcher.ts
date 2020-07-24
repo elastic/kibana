@@ -72,7 +72,9 @@ export async function transactionGroupsFetcher(
       aggs: {
         transaction_groups: {
           composite: {
-            size: bucketSize + 1, // 1 extra bucket is added to check whether the total number of buckets exceed the specified bucket size.
+            // traces overview is hardcoded to 10000
+            // transactions overview: 1 extra bucket is added to check whether the total number of buckets exceed the specified bucket size.
+            size: isTopTraces ? 10000 : bucketSize + 1,
             sources: [
               ...(isTopTraces
                 ? [{ service: { terms: { field: SERVICE_NAME } } }]

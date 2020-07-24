@@ -15,8 +15,6 @@ export const EmptySection = ({ section }: Props) => {
   return (
     <EuiEmptyPrompt
       style={{ maxWidth: 'none' }}
-      iconType={section.icon}
-      iconColor="default"
       title={<h2>{section.title}</h2>}
       titleSize="xs"
       body={<EuiText color="default">{section.description}</EuiText>}

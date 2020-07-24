@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import moment from 'moment';
 
 import { showAllOthersBucket } from '../../../../common/constants';
 import { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
@@ -28,8 +29,8 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
 
 export const getAlertsHistogramQuery = (
   stackByField: string,
-  from: number,
-  to: number,
+  from: string,
+  to: string,
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
   }>
@@ -55,7 +56,7 @@ export const getAlertsHistogramQuery = (
           alerts: {
             date_histogram: {
               field: '@timestamp',
-              fixed_interval: `${Math.floor((to - from) / 32)}ms`,
+              fixed_interval: `${Math.floor(moment(to).diff(moment(from)) / 32)}ms`,
               min_doc_count: 0,
               extended_bounds: {
                 min: from,

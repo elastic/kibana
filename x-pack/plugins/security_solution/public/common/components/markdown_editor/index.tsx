@@ -74,7 +74,7 @@ export const MarkdownEditor = React.memo<{
   content: string;
   isDisabled?: boolean;
   onChange: (description: string) => void;
-  onClickTimeline?: (timelineId: string) => void;
+  onClickTimeline?: (timelineId: string, graphEventId?: string) => void;
   onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
   placeholder?: string;
 }>(
@@ -95,15 +95,18 @@ export const MarkdownEditor = React.memo<{
       [onChange]
     );
 
-    const setCursorPosition = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      if (onCursorPositionUpdate) {
-        onCursorPositionUpdate({
-          start: e!.target!.selectionStart ?? 0,
-          end: e!.target!.selectionEnd ?? 0,
-        });
-      }
-      return false;
-    };
+    const setCursorPosition = useCallback(
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (onCursorPositionUpdate) {
+          onCursorPositionUpdate({
+            start: e!.target!.selectionStart ?? 0,
+            end: e!.target!.selectionEnd ?? 0,
+          });
+        }
+        return false;
+      },
+      [onCursorPositionUpdate]
+    );
 
     const tabs = useMemo(
       () => [
@@ -135,8 +138,7 @@ export const MarkdownEditor = React.memo<{
           ),
         },
       ],
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [content, isDisabled, placeholder]
+      [content, handleOnChange, isDisabled, onClickTimeline, placeholder, setCursorPosition]
     );
     return (
       <Container>

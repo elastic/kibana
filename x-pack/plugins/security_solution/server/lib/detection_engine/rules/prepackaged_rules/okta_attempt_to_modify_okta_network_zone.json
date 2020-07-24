@@ -1,0 +1,29 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Okta network zones can be configured to limit or restrict access to a network based on IP addresses or geolocations. An adversary may attempt to modify, delete, or deactivate an Okta network zone in order to remove or weaken an organization's security controls.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if Oyour organization's Okta network zones are regularly modified."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Modify Okta Network Zone",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:(zone.update or zone.deactivate or zone.delete or network_zone.rule.disabled or zone.remove_blacklist)",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 47,
+  "rule_id": "e48236ca-b67a-4b4e-840c-fdc7782bc0c3",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "type": "query",
+  "version": 1
+}

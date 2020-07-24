@@ -9,7 +9,8 @@ import { INGEST_API_PACKAGE_CONFIGS, INGEST_API_EPM_PACKAGES } from './services/
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse } from '../../types';
 import {
-  AssetReference,
+  KibanaAssetReference,
+  EsAssetReference,
   GetPackagesResponse,
   InstallationStatus,
 } from '../../../../../../../ingest_manager/common';
@@ -43,26 +44,28 @@ export const apiPathMockResponseProviders = {
             type: 'epm-packages',
             id: 'endpoint',
             attributes: {
-              installed: [
+              installed_kibana: [
                 { id: '826759f0-7074-11ea-9bc8-6b38f4d29a16', type: 'dashboard' },
                 { id: '1cfceda0-728b-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
                 { id: '1e525190-7074-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
                 { id: '55387750-729c-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
                 { id: '92b1edc0-706a-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
                 { id: 'a3a3bd10-706b-11ea-9bc8-6b38f4d29a16', type: 'map' },
-                { id: 'logs-endpoint.alerts', type: 'index-template' },
-                { id: 'events-endpoint', type: 'index-template' },
-                { id: 'logs-endpoint.events.file', type: 'index-template' },
-                { id: 'logs-endpoint.events.library', type: 'index-template' },
-                { id: 'metrics-endpoint.metadata', type: 'index-template' },
-                { id: 'metrics-endpoint.metadata_mirror', type: 'index-template' },
-                { id: 'logs-endpoint.events.network', type: 'index-template' },
-                { id: 'metrics-endpoint.policy', type: 'index-template' },
-                { id: 'logs-endpoint.events.process', type: 'index-template' },
-                { id: 'logs-endpoint.events.registry', type: 'index-template' },
-                { id: 'logs-endpoint.events.security', type: 'index-template' },
-                { id: 'metrics-endpoint.telemetry', type: 'index-template' },
-              ] as AssetReference[],
+              ] as KibanaAssetReference[],
+              installed_es: [
+                { id: 'logs-endpoint.alerts', type: 'index_template' },
+                { id: 'events-endpoint', type: 'index_template' },
+                { id: 'logs-endpoint.events.file', type: 'index_template' },
+                { id: 'logs-endpoint.events.library', type: 'index_template' },
+                { id: 'metrics-endpoint.metadata', type: 'index_template' },
+                { id: 'metrics-endpoint.metadata_mirror', type: 'index_template' },
+                { id: 'logs-endpoint.events.network', type: 'index_template' },
+                { id: 'metrics-endpoint.policy', type: 'index_template' },
+                { id: 'logs-endpoint.events.process', type: 'index_template' },
+                { id: 'logs-endpoint.events.registry', type: 'index_template' },
+                { id: 'logs-endpoint.events.security', type: 'index_template' },
+                { id: 'metrics-endpoint.telemetry', type: 'index_template' },
+              ] as EsAssetReference[],
               es_index_patterns: {
                 alerts: 'logs-endpoint.alerts-*',
                 events: 'events-endpoint-*',

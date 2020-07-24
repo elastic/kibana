@@ -81,6 +81,7 @@ describe('GET /api/saved_objects/_find', () => {
           attributes: {},
           score: 1,
           references: [],
+          namespaces: ['default'],
         },
         {
           type: 'index-pattern',
@@ -91,6 +92,7 @@ describe('GET /api/saved_objects/_find', () => {
           attributes: {},
           score: 1,
           references: [],
+          namespaces: ['default'],
         },
       ],
     };
@@ -238,6 +240,40 @@ describe('GET /api/saved_objects/_find', () => {
       perPage: 20,
       page: 1,
       type: ['index-pattern', 'visualization'],
+      defaultSearchOperator: 'OR',
+    });
+  });
+
+  it('accepts the query parameter namespaces as a string', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=index-pattern&namespaces=foo')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual({
+      perPage: 20,
+      page: 1,
+      type: ['index-pattern'],
+      namespaces: ['foo'],
+      defaultSearchOperator: 'OR',
+    });
+  });
+
+  it('accepts the query parameter namespaces as an array', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=index-pattern&namespaces=default&namespaces=foo')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual({
+      perPage: 20,
+      page: 1,
+      type: ['index-pattern'],
+      namespaces: ['default', 'foo'],
       defaultSearchOperator: 'OR',
     });
   });

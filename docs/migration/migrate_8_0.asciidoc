@@ -115,12 +115,17 @@ URL that it derived from the actual server address and `xpack.security.public` s
 
 *Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
+[float]]
+=== kibana.keystore has moved from the `data` folder to the `config` folder
+*Details:* By default, kibana.keystore has moved from the configured `path.data` folder to `<root>/config` for archive distributions
+and `/etc/kibana` for package distributions.  If a pre-existing keystore exists in the data directory that path will continue to be used.
+
 [float]
 [[breaking_80_user_role_changes]]
 === User role changes
 
 [float]
-==== `kibana_user` role has been removed and `kibana_admin` has been added.
+=== `kibana_user` role has been removed and `kibana_admin` has been added.
 
 *Details:* The `kibana_user` role has been removed and `kibana_admin` has been added to better
 reflect its intended use. This role continues to grant all access to every

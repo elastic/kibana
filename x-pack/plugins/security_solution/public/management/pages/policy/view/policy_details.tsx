@@ -16,6 +16,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiLoadingSpinner,
+  EuiHideFor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -55,7 +56,7 @@ export const PolicyDetails = React.memo(() => {
       application: { navigateToApp },
     },
   } = useKibana();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 
   // Store values
@@ -149,7 +150,7 @@ export const PolicyDetails = React.memo(() => {
             <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
         ) : null}
-        <SpyRoute pageName={SecurityPageName.management} />
+        <SpyRoute pageName={SecurityPageName.administration} />
       </ManagementPageView>
     );
   }
@@ -168,7 +169,7 @@ export const PolicyDetails = React.memo(() => {
           defaultMessage="Back to policy list"
         />
       </EuiButtonEmpty>
-      <PageViewHeaderTitle>{policyItem.name}</PageViewHeaderTitle>
+      <PageViewHeaderTitle className="eui-textTruncate">{policyItem.name}</PageViewHeaderTitle>
     </div>
   );
 
@@ -182,9 +183,11 @@ export const PolicyDetails = React.memo(() => {
           error={policyAgentStatusSummary?.error ?? 0}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <VerticalDivider spacing="l" />
-      </EuiFlexItem>
+      <EuiHideFor sizes={['xs', 's']}>
+        <EuiFlexItem>
+          <VerticalDivider spacing="l" />
+        </EuiFlexItem>
+      </EuiHideFor>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty onClick={handleCancelOnClick} data-test-subj="policyDetailsCancelButton">
           <FormattedMessage
@@ -251,7 +254,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiSpacer size="l" />
         <LinuxEvents />
       </ManagementPageView>
-      <SpyRoute pageName={SecurityPageName.management} />
+      <SpyRoute pageName={SecurityPageName.administration} />
     </>
   );
 });

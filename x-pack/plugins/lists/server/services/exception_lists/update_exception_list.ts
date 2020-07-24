@@ -17,7 +17,9 @@ import {
   NameOrUndefined,
   NamespaceType,
   TagsOrUndefined,
+  VersionOrUndefined,
   _TagsOrUndefined,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectUpdateToExceptionList } from './utils';
@@ -26,6 +28,7 @@ import { getExceptionList } from './get_exception_list';
 interface UpdateExceptionListOptions {
   id: IdOrUndefined;
   _tags: _TagsOrUndefined;
+  _version: _VersionOrUndefined;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
@@ -36,10 +39,12 @@ interface UpdateExceptionListOptions {
   tags: TagsOrUndefined;
   tieBreaker?: string;
   type: ExceptionListTypeOrUndefined;
+  version: VersionOrUndefined;
 }
 
 export const updateExceptionList = async ({
   _tags,
+  _version,
   id,
   savedObjectsClient,
   namespaceType,
@@ -50,12 +55,14 @@ export const updateExceptionList = async ({
   user,
   tags,
   type,
+  version,
 }: UpdateExceptionListOptions): Promise<ExceptionListSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const exceptionList = await getExceptionList({ id, listId, namespaceType, savedObjectsClient });
   if (exceptionList == null) {
     return null;
   } else {
+    const calculatedVersion = version == null ? exceptionList.version + 1 : version;
     const savedObject = await savedObjectsClient.update<ExceptionListSoSchema>(
       savedObjectType,
       exceptionList.id,
@@ -67,8 +74,12 @@ export const updateExceptionList = async ({
         tags,
         type,
         updated_by: user,
+        version: calculatedVersion,
+      },
+      {
+        version: _version,
       }
     );
-    return transformSavedObjectUpdateToExceptionList({ exceptionList, namespaceType, savedObject });
+    return transformSavedObjectUpdateToExceptionList({ exceptionList, savedObject });
   }
 };

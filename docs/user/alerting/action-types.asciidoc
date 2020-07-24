@@ -23,6 +23,10 @@ a| <<server-log-action-type, ServerLog>>
 
 | Add a message to a Kibana log.
 
+a| <<servicenow-action-type, ServiceNow>>
+
+| Push or update data to a new incident in ServiceNow.
+
 a| <<slack-action-type, Slack>>
 
 | Send a message to a Slack channel or user.
@@ -55,3 +59,4 @@ include::action-types/server-log.asciidoc[]
 include::action-types/slack.asciidoc[]
 include::action-types/webhook.asciidoc[]
 include::action-types/pre-configured-connectors.asciidoc[]
+include::action-types/servicenow.asciidoc[]

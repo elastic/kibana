@@ -18,11 +18,9 @@ import { PROJECTION } from '../../../../common/projections/typings';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
-import { ErrorRateChart } from '../../shared/charts/ErrorRateChart';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 
 const ErrorGroupOverview: React.FC = () => {
   const { urlParams, uiFilters } = useUrlParams();
@@ -99,28 +97,17 @@ const ErrorGroupOverview: React.FC = () => {
           <LocalUIFilters {...localUIFiltersConfig} />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiFlexGroup gutterSize="s">
-            <ChartsSyncContextProvider>
-              <EuiFlexItem>
-                <EuiPanel>
-                  <ErrorDistribution
-                    distribution={errorDistributionData}
-                    title={i18n.translate(
-                      'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                      {
-                        defaultMessage: 'Error occurrences',
-                      }
-                    )}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiPanel>
-                  <ErrorRateChart />
-                </EuiPanel>
-              </EuiFlexItem>
-            </ChartsSyncContextProvider>
-          </EuiFlexGroup>
+          <EuiPanel>
+            <ErrorDistribution
+              distribution={errorDistributionData}
+              title={i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                {
+                  defaultMessage: 'Error occurrences',
+                }
+              )}
+            />
+          </EuiPanel>
 
           <EuiSpacer size="s" />
 

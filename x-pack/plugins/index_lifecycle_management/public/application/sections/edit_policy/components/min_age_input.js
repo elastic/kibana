@@ -179,7 +179,7 @@ export const MinAgeInput = (props) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem style={{ maxWidth: 188 }}>
+      <EuiFlexItem style={{ maxWidth: 140 }}>
         <ErrableFormRow
           id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
           label={getTimingLabelForPhase(phase)}
@@ -208,7 +208,7 @@ export const MinAgeInput = (props) => {
           />
         </ErrableFormRow>
       </EuiFlexItem>
-      <EuiFlexItem style={{ maxWidth: 220 }}>
+      <EuiFlexItem style={{ maxWidth: 236 }}>
         <EuiFormRow hasEmptyLabelSpace>
           <EuiSelect
             aria-label={getUnitsAriaLabelForPhase(phase)}

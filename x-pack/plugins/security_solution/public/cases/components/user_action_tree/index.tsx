@@ -21,6 +21,7 @@ import { UserActionMarkdown } from './user_action_markdown';
 import { Connector } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
+import { OnUpdateFields } from '../case_view';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -30,7 +31,7 @@ export interface UserActionTreeProps {
   fetchUserActions: () => void;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
-  onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
+  onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
 }
@@ -138,7 +139,7 @@ export const UserActionTree = React.memo(
           content={caseData.description}
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
           onSaveContent={(content: string) => {
-            onUpdateField(DESCRIPTION_ID, content);
+            onUpdateField({ key: DESCRIPTION_ID, value: content });
           }}
           onChangeEditable={handleManageMarkdownEditId}
         />

@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An attempt was made to modify AWS EC2 snapshot attributes. Snapshots are sometimes shared by threat actors in order to exfiltrate bulk data from an EC2 fleet. If the permissions were modified, verify the snapshot was not shared with an unauthorized or unexpected AWS account.",
+  "false_positives": [
+    "IAM users may occasionally share EC2 snapshots with another AWS account belonging to the same organization. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS EC2 Snapshot Activity",
+  "query": "event.module:aws and event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.action:ModifySnapshotAttribute",
+  "references": [
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/modify-snapshot-attribute.html",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ModifySnapshotAttribute.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "98fd7407-0bd5-5817-cda0-3fcc33113a56",
+  "severity": "medium",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
+      },
+      "technique": [
+        {
+          "id": "T1537",
+          "name": "Transfer Data to Cloud Account",
+          "reference": "https://attack.mitre.org/techniques/T1537/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

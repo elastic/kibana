@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of a specified AWS Web Application Firewall (WAF) rule or rule group.",
+  "false_positives": [
+    "WAF rules or rule groups may be deleted by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Rule deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS WAF Rule or Rule Group Deletion",
+  "query": "event.module:aws and event.dataset:aws.cloudtrail and event.action:(DeleteRule or DeleteRuleGroup) and event.outcome:success",
+  "references": [
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/waf/delete-rule-group.html",
+    "https://docs.aws.amazon.com/waf/latest/APIReference/API_waf_DeleteRuleGroup.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "5beaebc1-cc13-4bfc-9949-776f9e0dc318",
+  "severity": "medium",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1089",
+          "name": "Disabling Security Tools",
+          "reference": "https://attack.mitre.org/techniques/T1089/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

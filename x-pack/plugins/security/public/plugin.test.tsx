@@ -33,7 +33,9 @@ describe('Security Plugin', () => {
           coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<
             PluginStartDependencies
           >,
-          { licensing: licensingMock.createSetup() }
+          {
+            licensing: licensingMock.createSetup(),
+          }
         )
       ).toEqual({
         __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
@@ -117,7 +119,6 @@ describe('Security Plugin', () => {
       });
 
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
-      expect(startManagementServiceMock).toHaveBeenCalledWith({ management: managementStartMock });
     });
   });
 

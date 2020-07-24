@@ -1,0 +1,42 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An instance of MSBuild, the Microsoft Build Engine, was started after being renamed. This is uncommon behavior and may indicate an attempt to run unnoticed or undetected.",
+  "false_positives": [
+    "The Build Engine is commonly used by Windows developers but use by non-engineers is unusual."
+  ],
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Microsoft Build Engine Using an Alternate Name",
+  "query": "event.category:process and event.type:(start or process_started) and (pe.original_file_name:MSBuild.exe or winlog.event_data.OriginalFileName:MSBuild.exe) and not process.name: MSBuild.exe",
+  "risk_score": 21,
+  "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae4",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

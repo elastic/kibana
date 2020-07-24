@@ -5,7 +5,6 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { get } from 'lodash/fp';
 import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
@@ -14,8 +13,8 @@ import { RuleAlertAction, RuleType } from '../../../../../common/detection_engin
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
+import { ENDPOINT_LIST_ID } from '../../../../shared_imports';
 import { Rule } from '../../../containers/detection_engine/rules';
-import { FormData, FormHook, FormSchema } from '../../../../shared_imports';
 import {
   AboutStepRule,
   AboutStepRuleDetails,
@@ -84,6 +83,10 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     id: rule.timeline_id ?? null,
     title: rule.timeline_title ?? null,
   },
+  threshold: {
+    field: rule.threshold?.field ? [rule.threshold.field] : [],
+    value: `${rule.threshold?.value || 100}`,
+  },
 });
 
 export const getScheduleStepsData = (rule: Rule): ScheduleStepRule => {
@@ -118,6 +121,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   const {
     author,
     building_block_type: buildingBlockType,
+    exceptions_list: exceptionsList,
     license,
     risk_score_mapping: riskScoreMapping,
     rule_name_override: ruleNameOverride,
@@ -134,6 +138,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
   return {
     isNew: false,
     author,
+    isAssociatedToEndpointList: exceptionsList?.some(({ id }) => id === ENDPOINT_LIST_ID) ?? false,
     isBuildingBlock: buildingBlockType !== undefined,
     license: license ?? '',
     ruleNameOverride: ruleNameOverride ?? '',
@@ -182,6 +187,13 @@ export type PrePackagedRuleStatus =
   | 'someRuleUninstall'
   | 'unknown';
 
+export type PrePackagedTimelineStatus =
+  | 'timelinesNotInstalled'
+  | 'timelinesInstalled'
+  | 'someTimelineUninstall'
+  | 'timelineNeedUpdate'
+  | 'unknown';
+
 export const getPrePackagedRuleStatus = (
   rulesInstalled: number | null,
   rulesNotInstalled: number | null,
@@ -221,27 +233,70 @@ export const getPrePackagedRuleStatus = (
   }
   return 'unknown';
 };
-export const setFieldValue = (
-  form: FormHook<FormData>,
-  schema: FormSchema<FormData>,
-  defaultValues: unknown
-) =>
-  Object.keys(schema).forEach((key) => {
-    const val = get(key, defaultValues);
-    if (val != null) {
-      form.setFieldValue(key, val);
-    }
-  });
+export const getPrePackagedTimelineStatus = (
+  timelinesInstalled: number | null,
+  timelinesNotInstalled: number | null,
+  timelinesNotUpdated: number | null
+): PrePackagedTimelineStatus => {
+  if (
+    timelinesNotInstalled != null &&
+    timelinesInstalled === 0 &&
+    timelinesNotInstalled > 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'timelinesNotInstalled';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled === 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'timelinesInstalled';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesNotInstalled != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled > 0 &&
+    timelinesNotUpdated === 0
+  ) {
+    return 'someTimelineUninstall';
+  } else if (
+    timelinesInstalled != null &&
+    timelinesNotInstalled != null &&
+    timelinesNotUpdated != null &&
+    timelinesInstalled > 0 &&
+    timelinesNotInstalled >= 0 &&
+    timelinesNotUpdated > 0
+  ) {
+    return 'timelineNeedUpdate';
+  }
+  return 'unknown';
+};
 
 export const redirectToDetections = (
   isSignalIndexExists: boolean | null,
   isAuthenticated: boolean | null,
-  hasEncryptionKey: boolean | null
+  hasEncryptionKey: boolean | null,
+  needsListsConfiguration: boolean
 ) =>
-  isSignalIndexExists != null &&
-  isAuthenticated != null &&
-  hasEncryptionKey != null &&
-  (!isSignalIndexExists || !isAuthenticated || !hasEncryptionKey);
+  isSignalIndexExists === false ||
+  isAuthenticated === false ||
+  hasEncryptionKey === false ||
+  needsListsConfiguration;
+
+const getRuleSpecificRuleParamKeys = (ruleType: RuleType) => {
+  const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+
+  if (isMlRule(ruleType)) {
+    return ['anomaly_threshold', 'machine_learning_job_id'];
+  }
+
+  if (ruleType === 'threshold') {
+    return ['threshold', ...queryRuleParams];
+  }
+
+  return queryRuleParams;
+};
 
 export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   const commonRuleParamsKeys = [
@@ -265,9 +320,7 @@ export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
 
   const ruleParamsKeys = [
     ...commonRuleParamsKeys,
-    ...(isMlRule(ruleType)
-      ? ['anomaly_threshold', 'machine_learning_job_id']
-      : ['index', 'filters', 'language', 'query', 'saved_id']),
+    ...getRuleSpecificRuleParamKeys(ruleType),
   ].sort();
 
   return ruleParamsKeys;

@@ -5,18 +5,17 @@
  */
 
 import { encode } from 'rison-node';
-import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'src/plugins/data/public';
-import { DEFAULT_SOURCE_ID } from '../../common/constants';
-import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
 import {
   FetchData,
-  LogsFetchDataResponse,
-  HasData,
   FetchDataParams,
+  HasData,
+  LogsFetchDataResponse,
 } from '../../../observability/public';
+import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
+import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
 
 interface StatsAggregation {
   buckets: Array<{ key: string; doc_count: number }>;
@@ -69,15 +68,11 @@ export function getLogsOverviewDataFetcher(
       data
     );
 
-    const timeSpanInMinutes =
-      (Date.parse(params.endTime).valueOf() - Date.parse(params.startTime).valueOf()) / (1000 * 60);
+    const timeSpanInMinutes = (params.absoluteTime.end - params.absoluteTime.start) / (1000 * 60);
 
     return {
-      title: i18n.translate('xpack.infra.logs.logOverview.logOverviewTitle', {
-        defaultMessage: 'Logs',
-      }),
-      appLink: `/app/logs/stream?logPosition=(end:${encode(params.endTime)},start:${encode(
-        params.startTime
+      appLink: `/app/logs/stream?logPosition=(end:${encode(params.relativeTime.end)},start:${encode(
+        params.relativeTime.start
       )})`,
       stats: normalizeStats(stats, timeSpanInMinutes),
       series: normalizeSeries(series),
@@ -122,8 +117,8 @@ function buildLogOverviewQuery(logParams: LogParams, params: FetchDataParams) {
   return {
     range: {
       [logParams.timestampField]: {
-        gt: params.startTime,
-        lte: params.endTime,
+        gt: new Date(params.absoluteTime.start).toISOString(),
+        lte: new Date(params.absoluteTime.end).toISOString(),
         format: 'strict_date_optional_time',
       },
     },

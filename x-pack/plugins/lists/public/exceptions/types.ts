@@ -110,3 +110,8 @@ export interface UpdateExceptionListItemProps {
   listItem: UpdateExceptionListItemSchema;
   signal: AbortSignal;
 }
+
+export interface AddEndpointExceptionListProps {
+  http: HttpStart;
+  signal: AbortSignal;
+}

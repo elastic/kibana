@@ -10,7 +10,23 @@ NOTE: The {kib} Console supports only Elasticsearch APIs. You are unable to inte
 [float]
 [[api-authentication]]
 === Authentication
-{kib} supports token-based authentication with the same username and password that you use to log into the {kib} Console.  In a given HTTP tool, and when available, you can select to use its 'Basic Authentication' option, which is where the username and password are stored in order to be passed as part of the call. 
+The {kib} APIs support key- and token-based authentication. 
+
+[float]
+[[token-api-authentication]]
+==== Token-based authentication
+
+To use token-based authentication, you use the same username and password that you use to log into Elastic.  
+In a given HTTP tool, and when available, you can select to use its 'Basic Authentication' option, 
+which is where the username and password are stored in order to be passed as part of the call. 
+
+[float]
+[[key-authentication]]
+==== Key-based authentication
+
+To use key-based authentication, you create an API key using the Elastic Console, then specify the key in the header of your API calls.
+
+For information about API keys, refer to <<api-keys,API keys>>.
 
 [float]
 [[api-calls]]
@@ -31,7 +47,7 @@ For example, the following `curl` command exports a dashboard:
 
 [source,sh]
 --
-curl -X POST -u $USER:$PASSWORD "localhost:5601/api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c"
+curl -X POST api/kibana/dashboards/export?dashboard=942dcef0-b2cd-11e8-ad8e-85441f0c2e5c
 --
 // KIBANA
 
@@ -51,7 +67,8 @@ For all APIs, you must use a request header. The {kib} APIs support the `kbn-xsr
 * XSRF protections are disabled using the `server.xsrf.disableProtection` setting
 
 `Content-Type: application/json`::
-  Applicable only when you send a payload in the API request. {kib} API requests and responses use JSON. Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header.
+  Applicable only when you send a payload in the API request. {kib} API requests and responses use JSON. 
+  Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header.
 
 Request header example:
 

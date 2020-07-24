@@ -9,6 +9,7 @@ import React from 'react';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
+import '../../../../common/mock/match_media';
 import { FlyoutHeaderWithCloseButton } from '.';
 
 jest.mock('react-router-dom', () => {

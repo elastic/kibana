@@ -27,6 +27,9 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   let fetchRuleById: jest.SpyInstance<ReturnType<typeof rulesApi.fetchRuleById>>;
   let patchRule: jest.SpyInstance<ReturnType<typeof rulesApi.patchRule>>;
   let addExceptionList: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionList>>;
+  let addEndpointExceptionList: jest.SpyInstance<ReturnType<
+    typeof listsApi.addEndpointExceptionList
+  >>;
   let fetchExceptionListById: jest.SpyInstance<ReturnType<typeof listsApi.fetchExceptionListById>>;
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']
@@ -74,6 +77,10 @@ describe('useFetchOrCreateRuleExceptionList', () => {
     addExceptionList = jest
       .spyOn(listsApi, 'addExceptionList')
       .mockResolvedValue(newDetectionExceptionList);
+
+    addEndpointExceptionList = jest
+      .spyOn(listsApi, 'addEndpointExceptionList')
+      .mockResolvedValue(newEndpointExceptionList);
 
     fetchExceptionListById = jest
       .spyOn(listsApi, 'fetchExceptionListById')
@@ -299,7 +306,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
           await waitForNextUpdate();
           await waitForNextUpdate();
           await waitForNextUpdate();
-          expect(addExceptionList).toHaveBeenCalledTimes(1);
+          expect(addEndpointExceptionList).toHaveBeenCalledTimes(1);
         });
       });
       it('should update the rule', async () => {

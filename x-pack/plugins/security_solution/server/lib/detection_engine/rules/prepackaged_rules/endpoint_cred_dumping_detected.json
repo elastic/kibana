@@ -1,0 +1,24 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Elastic Endpoint detected Credential Dumping. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.",
+  "from": "now-15m",
+  "index": [
+    "endgame-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Credential Dumping - Detected - Elastic Endpoint",
+  "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:detection and (event.action:cred_theft_event or endgame.event_subtype_full:cred_theft_event)",
+  "risk_score": 73,
+  "rule_id": "571afc56-5ed9-465d-a2a9-045f099f6e7e",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Endpoint"
+  ],
+  "type": "query",
+  "version": 3
+}

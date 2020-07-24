@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { AlertsBadge } from '../../alerts/badge';
 
 const zoomOutBtn = (zoomInfo) => {
   if (!zoomInfo || !zoomInfo.showZoomOutBtn()) {
@@ -67,42 +68,56 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
     }),
   ].concat(series.map((item) => `${item.metric.label}: ${item.metric.description}`));
 
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s" className="monRhythmChart__wrapper">
+  let alertStatus = null;
+  if (series.alerts) {
+    alertStatus = (
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <AlertsBadge alerts={series.alerts} />
+      </EuiFlexItem>
+    );
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s" className={`monRhythmChart__wrapper`}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" tabIndex="0">
-              <h2>
-                {getTitle(series)}
-                {units ? ` (${units})` : ''}
-                <EuiScreenReaderOnly>
-                  <span>
-                    <FormattedMessage
-                      id="xpack.monitoring.chart.screenReaderUnaccessibleTitle"
-                      defaultMessage="This chart is not screen reader accessible"
-                    />
-                  </span>
-                </EuiScreenReaderOnly>
-              </h2>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s" tabIndex="0">
+                  <h2>
+                    {getTitle(series)}
+                    {units ? ` (${units})` : ''}
+                    <EuiScreenReaderOnly>
+                      <span>
+                        <FormattedMessage
+                          id="xpack.monitoring.chart.screenReaderUnaccessibleTitle"
+                          defaultMessage="This chart is not screen reader accessible"
+                        />
+                      </span>
+                    </EuiScreenReaderOnly>
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <Fragment>
+                  <EuiIconTip
+                    anchorClassName="eui-textRight eui-alignMiddle monChart__tooltipTrigger"
+                    type="iInCircle"
+                    position="right"
+                    content={<InfoTooltip series={series} bucketSize={bucketSize} />}
+                  />
+                  <EuiScreenReaderOnly>
+                    <span id={`monitoringChart${titleForAriaIds}`}>
+                      {seriesScreenReaderTextList.join('. ')}
+                    </span>
+                  </EuiScreenReaderOnly>
+                </Fragment>
+              </EuiFlexItem>
+              {zoomOutBtn(zoomInfo)}
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <Fragment>
-              <EuiIconTip
-                anchorClassName="eui-textRight eui-alignMiddle monChart__tooltipTrigger"
-                type="iInCircle"
-                position="right"
-                content={<InfoTooltip series={series} bucketSize={bucketSize} />}
-              />
-              <EuiScreenReaderOnly>
-                <span id={`monitoringChart${titleForAriaIds}`}>
-                  {seriesScreenReaderTextList.join('. ')}
-                </span>
-              </EuiScreenReaderOnly>
-            </Fragment>
-          </EuiFlexItem>
-          {zoomOutBtn(zoomInfo)}
+          {alertStatus}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem style={{ minHeight: '200px' }}>

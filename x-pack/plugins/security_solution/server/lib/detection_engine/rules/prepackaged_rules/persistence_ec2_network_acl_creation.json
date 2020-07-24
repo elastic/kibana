@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation of an AWS Elastic Compute Cloud (EC2) network access control list (ACL) or an entry in a network ACL with a specified rule number.",
+  "false_positives": [
+    "Network ACL's may be created by a network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Network ACL creations from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS EC2 Network Access Control List Creation",
+  "query": "event.action:(CreateNetworkAcl or CreateNetworkAclEntry) and event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.outcome:success",
+  "references": [
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/create-network-acl.html",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateNetworkAcl.html",
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/create-network-acl-entry.html",
+    "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateNetworkAclEntry.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "39144f38-5284-4f8e-a2ae-e3fd628d90b0",
+  "severity": "low",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1108",
+          "name": "Redundant Access",
+          "reference": "https://attack.mitre.org/techniques/T1108/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

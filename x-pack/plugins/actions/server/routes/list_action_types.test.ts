@@ -10,6 +10,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { LicenseType } from '../../../../plugins/licensing/server';
+import { actionsClientMock } from '../mocks';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -29,13 +30,6 @@ describe('listActionTypesRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_action_types"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-read",
-        ],
-      }
-    `);
 
     const listTypes = [
       {
@@ -48,7 +42,9 @@ describe('listActionTypesRoute', () => {
       },
     ];
 
-    const [context, req, res] = mockHandlerArguments({ listTypes }, {}, ['ok']);
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce(listTypes);
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
 
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
@@ -65,8 +61,6 @@ describe('listActionTypesRoute', () => {
       }
     `);
 
-    expect(context.actions!.listTypes).toHaveBeenCalledTimes(1);
-
     expect(res.ok).toHaveBeenCalledWith({
       body: listTypes,
     });
@@ -81,13 +75,6 @@ describe('listActionTypesRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_action_types"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-read",
-        ],
-      }
-    `);
 
     const listTypes = [
       {
@@ -100,8 +87,11 @@ describe('listActionTypesRoute', () => {
       },
     ];
 
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce(listTypes);
+
     const [context, req, res] = mockHandlerArguments(
-      { listTypes },
+      { actionsClient },
       {
         params: { id: '1' },
       },
@@ -126,13 +116,6 @@ describe('listActionTypesRoute', () => {
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/list_action_types"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:actions-read",
-        ],
-      }
-    `);
 
     const listTypes = [
       {
@@ -145,8 +128,11 @@ describe('listActionTypesRoute', () => {
       },
     ];
 
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce(listTypes);
+
     const [context, req, res] = mockHandlerArguments(
-      { listTypes },
+      { actionsClient },
       {
         params: { id: '1' },
       },

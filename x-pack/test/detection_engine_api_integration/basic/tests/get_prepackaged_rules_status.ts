@@ -16,6 +16,7 @@ import {
   deleteAllAlerts,
   deleteSignalsIndex,
   getSimpleRule,
+  deleteAllTimelines,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -32,9 +33,10 @@ export default ({ getService }: FtrProviderContext): void => {
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(es);
+        await deleteAllTimelines(es);
       });
 
-      it('should return expected JSON keys of the pre-packaged rules status', async () => {
+      it('should return expected JSON keys of the pre-packaged rules and pre-packaged timelines status', async () => {
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
           .set('kbn-xsrf', 'true')
@@ -46,6 +48,9 @@ export default ({ getService }: FtrProviderContext): void => {
           'rules_installed',
           'rules_not_installed',
           'rules_not_updated',
+          'timelines_installed',
+          'timelines_not_installed',
+          'timelines_not_updated',
         ]);
       });
 
@@ -58,6 +63,15 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.rules_not_installed).to.be.greaterThan(0);
       });
 
+      it('should return that timelines_not_installed are greater than zero', async () => {
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+        expect(body.timelines_not_installed).to.be.greaterThan(0);
+      });
+
       it('should return that rules_custom_installed, rules_installed, and rules_not_updated are zero', async () => {
         const { body } = await supertest
           .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
@@ -67,6 +81,16 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.rules_custom_installed).to.eql(0);
         expect(body.rules_installed).to.eql(0);
         expect(body.rules_not_updated).to.eql(0);
+      });
+
+      it('should return that timelines_installed, and timelines_not_updated are zero', async () => {
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+        expect(body.timelines_installed).to.eql(0);
+        expect(body.timelines_not_updated).to.eql(0);
       });
 
       it('should show that one custom rule is installed when a custom rule is added', async () => {
@@ -84,9 +108,11 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.rules_custom_installed).to.eql(1);
         expect(body.rules_installed).to.eql(0);
         expect(body.rules_not_updated).to.eql(0);
+        expect(body.timelines_installed).to.eql(0);
+        expect(body.timelines_not_updated).to.eql(0);
       });
 
-      it('should show rules are installed when adding pre-packaged rules', async () => {
+      it('should show rules and timelines are installed when adding pre-packaged rules', async () => {
         await supertest
           .put(DETECTION_ENGINE_PREPACKAGED_URL)
           .set('kbn-xsrf', 'true')
@@ -99,6 +125,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
         expect(body.rules_installed).to.be.greaterThan(0);
+        expect(body.timelines_installed).to.be.greaterThan(0);
       });
     });
   });

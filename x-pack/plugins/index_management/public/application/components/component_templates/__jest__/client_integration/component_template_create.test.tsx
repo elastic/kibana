@@ -185,7 +185,7 @@ describe('<ComponentTemplateCreate />', () => {
             },
             aliases: ALIASES,
           },
-          _kbnMeta: { usedBy: [] },
+          _kbnMeta: { usedBy: [], isManaged: false },
         };
 
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);

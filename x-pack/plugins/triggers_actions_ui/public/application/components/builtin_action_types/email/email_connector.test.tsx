@@ -30,6 +30,7 @@ describe('EmailActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        readOnly={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();

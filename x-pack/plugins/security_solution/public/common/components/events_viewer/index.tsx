@@ -27,9 +27,10 @@ import { InspectButtonContainer } from '../inspect';
 export interface OwnProps {
   defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
-  end: number;
+  end: string;
+  height?: number;
   id: string;
-  start: number;
+  start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
@@ -48,6 +49,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
+  height,
   id,
   isLive,
   itemsPerPage,
@@ -62,10 +64,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   updateItemsPerPage,
   upsertColumn,
   utilityBar,
+  // If truthy, the graph viewer (Resolver) is showing
+  graphEventId,
 }) => {
-  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
-    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
-  );
+  const [
+    { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
+  ] = useFetchIndexPatterns(defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY));
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -118,12 +122,15 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       <EventsViewer
         browserFields={browserFields}
         columns={columns}
+        docValueFields={docValueFields}
         id={id}
         dataProviders={dataProviders!}
         deletedEventIds={deletedEventIds}
         end={end}
+        isLoadingIndexPattern={isLoadingIndexPattern}
         filters={globalFilters}
         headerFilterGroup={headerFilterGroup}
+        height={height}
         indexPattern={indexPatterns}
         isLive={isLive}
         itemsPerPage={itemsPerPage!}
@@ -135,6 +142,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         sort={sort}
         toggleColumn={toggleColumn}
         utilityBar={utilityBar}
+        graphEventId={graphEventId}
       />
     </InspectButtonContainer>
   );
@@ -145,6 +153,7 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
@@ -174,6 +183,9 @@ const makeMapStateToProps = () => {
       query: getGlobalQuerySelector(state),
       sort,
       showCheckboxes,
+      // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
+      // `getTimeline` actually returns `TimelineModel | undefined`
+      graphEventId: (getTimeline(state, id) as TimelineModel | undefined)?.graphEventId,
     };
   };
   return mapStateToProps;
@@ -194,6 +206,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
+    // eslint-disable-next-line complexity
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
       deepEqual(prevProps.columns, nextProps.columns) &&
@@ -203,6 +216,7 @@ export const StatefulEventsViewer = connector(
       prevProps.deletedEventIds === nextProps.deletedEventIds &&
       prevProps.end === nextProps.end &&
       deepEqual(prevProps.filters, nextProps.filters) &&
+      prevProps.height === nextProps.height &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
@@ -213,6 +227,7 @@ export const StatefulEventsViewer = connector(
       deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
       prevProps.showCheckboxes === nextProps.showCheckboxes &&
       prevProps.start === nextProps.start &&
-      prevProps.utilityBar === nextProps.utilityBar
+      prevProps.utilityBar === nextProps.utilityBar &&
+      prevProps.graphEventId === nextProps.graphEventId
   )
 );

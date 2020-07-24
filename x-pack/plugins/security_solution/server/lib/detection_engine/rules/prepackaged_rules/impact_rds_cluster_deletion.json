@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of an Amazon Relational Database Service (RDS) Aurora database cluster or global database cluster.",
+  "false_positives": [
+    "Clusters may be deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Cluster deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "AWS RDS Cluster Deletion",
+  "query": "event.action:(DeleteDBCluster or DeleteGlobalCluster) and event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.outcome:success",
+  "references": [
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/delete-db-cluster.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DeleteDBCluster.html",
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/rds/delete-global-cluster.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_DeleteGlobalCluster.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "9055ece6-2689-4224-a0e0-b04881e1f8ad",
+  "severity": "medium",
+  "tags": [
+    "AWS",
+    "Elastic"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1485",
+          "name": "Data Destruction",
+          "reference": "https://attack.mitre.org/techniques/T1485/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

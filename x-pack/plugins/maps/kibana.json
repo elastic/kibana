@@ -21,7 +21,6 @@
   "server": true,
   "extraPublicDirs": ["common/constants"],
   "requiredBundles": [
-    "charts",
     "kibanaReact",
     "kibanaUtils",
     "savedObjects"

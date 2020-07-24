@@ -95,7 +95,7 @@ export type ColorStylePropertyDescriptor =
   | ColorDynamicStylePropertyDescriptor;
 
 export type IconDynamicOptions = {
-  iconPaletteId?: string;
+  iconPaletteId: string | null;
   customIconStops?: IconStop[];
   useCustomIconMap?: boolean;
   field?: StylePropertyField;

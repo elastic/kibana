@@ -24,7 +24,6 @@ import { ComponentStrings } from '../../../i18n';
 import { Navbar } from '../navbar';
 // @ts-expect-error untyped local
 import { WorkpadManager } from '../workpad_manager';
-// @ts-expect-error untyped local
 import { PageManager } from '../page_manager';
 // @ts-expect-error untyped local
 import { Expression } from '../expression';
@@ -102,7 +101,7 @@ export const Toolbar = (props: Props) => {
   );
 
   const trays = {
-    pageManager: <PageManager previousPage={previousPage} />,
+    pageManager: <PageManager onPreviousPage={previousPage} />,
     expression: !elementIsSelected ? null : <Expression done={done} />,
   };
 

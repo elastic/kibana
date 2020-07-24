@@ -14,12 +14,12 @@ export const HelpMenu = React.memo(() => {
   useEffect(() => {
     chrome.setHelpExtension({
       appName: i18n.translate('xpack.securitySolution.chrome.help.appName', {
-        defaultMessage: 'SIEM',
+        defaultMessage: 'Security',
       }),
       links: [
         {
           content: i18n.translate('xpack.securitySolution.chrome.helpMenu.documentation', {
-            defaultMessage: 'SIEM documentation',
+            defaultMessage: 'Security documentation',
           }),
           href: docLinks.links.siem.guide,
           iconType: 'documents',

@@ -11,7 +11,11 @@ import {
   BytesPercentageUsage,
   DisabledIfNoDataAndInSetupModeLink,
 } from './helpers';
-import { LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
+import {
+  LOGSTASH,
+  LOGSTASH_SYSTEM_ID,
+  ALERT_LOGSTASH_VERSION_MISMATCH,
+} from '../../../../common/constants';
 
 import {
   EuiFlexGrid,
@@ -31,11 +35,16 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsBadge } from '../../../alerts/badge';
+import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+
+const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
   const nodesCount = props.node_count || 0;
   const queueTypes = props.queue_types || {};
+  const alerts = props.alerts;
 
   // Do not show if we are not in setup mode
   if (!nodesCount && !setupMode.enabled) {
@@ -55,6 +64,16 @@ export function LogstashPanel(props) {
         badgeClickLink={goToNodes()}
       />
     ) : null;
+
+  let nodesAlertStatus = null;
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {
+    const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+    nodesAlertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertsBadge alerts={alertsList} />
+      </EuiFlexItem>
+    );
+  }
 
   return (
     <ClusterItemContainer
@@ -113,7 +132,7 @@ export function LogstashPanel(props) {
 
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
@@ -141,7 +160,12 @@ export function LogstashPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeTooltip}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  {setupModeTooltip}
+                  {nodesAlertStatus}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">

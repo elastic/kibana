@@ -22,7 +22,7 @@ export interface TemplateSerialized {
   version?: number;
   priority?: number;
   _meta?: { [key: string]: any };
-  data_stream?: { timestamp_field: string };
+  data_stream?: {};
 }
 
 /**
@@ -46,7 +46,7 @@ export interface TemplateDeserialized {
     name: string;
   };
   _meta?: { [key: string]: any }; // Composable template only
-  dataStream?: { timestamp_field: string }; // Composable template only
+  dataStream?: {}; // Composable template only
   _kbnMeta: {
     type: TemplateType;
     hasDatastream: boolean;

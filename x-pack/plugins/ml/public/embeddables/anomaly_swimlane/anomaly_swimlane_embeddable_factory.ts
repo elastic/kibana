@@ -19,19 +19,22 @@ import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableServices,
 } from './anomaly_swimlane_embeddable';
-import { MlStartDependencies } from '../../plugin';
 import { HttpService } from '../../application/services/http_service';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { AnomalyTimelineService } from '../../application/services/anomaly_timeline_service';
 import { mlResultsServiceProvider } from '../../application/services/results_service';
 import { resolveAnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
 import { mlApiServicesProvider } from '../../application/services/ml_api_service';
+import { MlPluginStart, MlStartDependencies } from '../../plugin';
+import { MlDependencies } from '../../application/app';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
   public readonly type = ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
 
-  constructor(private getStartServices: StartServicesAccessor<MlStartDependencies>) {}
+  constructor(
+    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  ) {}
 
   public async isEditable() {
     return true;
@@ -64,7 +67,11 @@ export class AnomalySwimlaneEmbeddableFactory
       mlResultsServiceProvider(mlApiServicesProvider(httpService))
     );
 
-    return [coreStart, pluginsStart, { anomalyDetectorService, anomalyTimelineService }];
+    return [
+      coreStart,
+      pluginsStart as MlDependencies,
+      { anomalyDetectorService, anomalyTimelineService },
+    ];
   }
 
   public async create(

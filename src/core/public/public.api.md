@@ -1282,7 +1282,7 @@ export interface SavedObjectsCreateOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsFindOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
@@ -1293,6 +1293,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
         type: string;
         id: string;
     };
+    // (undocumented)
+    namespaces?: string[];
     // (undocumented)
     page?: number;
     // (undocumented)

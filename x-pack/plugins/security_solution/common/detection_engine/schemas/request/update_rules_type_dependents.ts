@@ -102,6 +102,19 @@ export const validateId = (rule: UpdateRulesSchema): string[] => {
   }
 };
 
+export const validateThreshold = (rule: UpdateRulesSchema): string[] => {
+  if (rule.type === 'threshold') {
+    if (!rule.threshold) {
+      return ['when "type" is "threshold", "threshold" is required'];
+    } else if (rule.threshold.value <= 0) {
+      return ['"threshold.value" has to be bigger than 0'];
+    } else {
+      return [];
+    }
+  }
+  return [];
+};
+
 export const updateRuleValidateTypeDependents = (schema: UpdateRulesSchema): string[] => {
   return [
     ...validateId(schema),
@@ -112,5 +125,6 @@ export const updateRuleValidateTypeDependents = (schema: UpdateRulesSchema): str
     ...validateMachineLearningJobId(schema),
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
+    ...validateThreshold(schema),
   ];
 };

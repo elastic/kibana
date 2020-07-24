@@ -14,6 +14,7 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { IngestManagerStart } from '../../ingest_manager/public';
+import { PluginStart as ListsPluginStart } from '../../lists/public';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -33,6 +34,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   ingestManager?: IngestManagerStart;
+  lists?: ListsPluginStart;
   newsfeed?: NewsfeedStart;
   triggers_actions_ui: TriggersActionsStart;
   uiActions: UiActionsStart;

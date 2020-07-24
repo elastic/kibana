@@ -11,7 +11,7 @@ export const ConfigSchema = schema.object({
   importBufferSize: schema.number({ defaultValue: 1000, min: 1 }),
   listIndex: schema.string({ defaultValue: '.lists' }),
   listItemIndex: schema.string({ defaultValue: '.items' }),
-  maxImportPayloadBytes: schema.number({ defaultValue: 40000000, min: 1 }),
+  maxImportPayloadBytes: schema.number({ defaultValue: 9000000, min: 1 }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

@@ -14,23 +14,50 @@ import { delay } from './lib/delay';
 import { EVENT_LOGGED_PREFIX } from './event_logger';
 
 const KIBANA_SERVER_UUID = '424-24-2424';
+const WRITE_LOG_WAIT_MILLIS = 3000;
 
 describe('EventLogger', () => {
   let systemLogger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let esContext: EsContext;
+  let esContext: jest.Mocked<EsContext>;
   let service: IEventLogService;
   let eventLogger: IEventLogger;
 
   beforeEach(() => {
+    jest.resetAllMocks();
     systemLogger = loggingSystemMock.createLogger();
     esContext = contextMock.create();
     service = new EventLogService({
       esContext,
       systemLogger,
-      config: { enabled: true, logEntries: true, indexEntries: false },
+      config: { enabled: true, logEntries: true, indexEntries: true },
       kibanaUUID: KIBANA_SERVER_UUID,
     });
     eventLogger = service.getLogger({});
+  });
+
+  test('handles successful initialization', async () => {
+    service.registerProviderActions('test-provider', ['test-action-1']);
+    eventLogger = service.getLogger({
+      event: { provider: 'test-provider', action: 'test-action-1' },
+    });
+
+    eventLogger.logEvent({});
+    await waitForLogEvent(systemLogger);
+    delay(WRITE_LOG_WAIT_MILLIS); // sleep a bit since event logging is async
+    expect(esContext.esAdapter.indexDocument).toHaveBeenCalled();
+  });
+
+  test('handles failed initialization', async () => {
+    service.registerProviderActions('test-provider', ['test-action-1']);
+    eventLogger = service.getLogger({
+      event: { provider: 'test-provider', action: 'test-action-1' },
+    });
+    esContext.waitTillReady.mockImplementation(async () => false);
+
+    eventLogger.logEvent({});
+    await waitForLogEvent(systemLogger);
+    delay(WRITE_LOG_WAIT_MILLIS); // sleep a bit longer since event logging is async
+    expect(esContext.esAdapter.indexDocument).not.toHaveBeenCalled();
   });
 
   test('method logEvent() writes expected default values', async () => {

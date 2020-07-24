@@ -11,6 +11,7 @@ import {
   SourceConfiguration,
   TimelineData,
   TimelineDetailsData,
+  DocValueFieldsInput,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions, RequestOptionsPaginated } from '../framework';
 import { SearchHit } from '../types';
@@ -61,13 +62,15 @@ export interface LastEventTimeRequestOptions {
   details: LastTimeDetails;
   sourceConfiguration: SourceConfiguration;
   defaultIndex: string[];
+  docValueFields: DocValueFieldsInput[];
 }
 
 export interface TimerangeFilter {
   range: {
     [timestamp: string]: {
-      gte: number;
-      lte: number;
+      gte: string;
+      lte: string;
+      format: string;
     };
   };
 }
@@ -76,6 +79,7 @@ export interface RequestDetailsOptions {
   indexName: string;
   eventId: string;
   defaultIndex: string[];
+  docValueFields?: DocValueFieldsInput[];
 }
 
 interface EventsOverTimeHistogramData {

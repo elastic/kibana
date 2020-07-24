@@ -88,7 +88,6 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj="noPoliciesCallout"
-          size="s"
           iconType="help"
           color="warning"
           title={

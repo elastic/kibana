@@ -27,7 +27,7 @@ export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
-        data: { sourceId, timeRange, bucketDuration },
+        data: { sourceId, timeRange, bucketDuration, datasets },
       } = request.body;
 
       try {
@@ -38,7 +38,8 @@ export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
           sourceId,
           timeRange.startTime,
           timeRange.endTime,
-          bucketDuration
+          bucketDuration,
+          datasets
         );
 
         return response.ok({

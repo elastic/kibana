@@ -8,14 +8,12 @@ export * from './rest_spec';
 
 export interface IngestManagerConfigType {
   enabled: boolean;
-  epm: {
-    enabled: boolean;
-    registryUrl?: string;
-  };
+  registryUrl?: string;
   fleet: {
     enabled: boolean;
     tlsCheckDisabled: boolean;
     pollingRequestTimeout: number;
+    maxConcurrentConnections: number;
     kibana: {
       host?: string;
       ca_sha256?: string;

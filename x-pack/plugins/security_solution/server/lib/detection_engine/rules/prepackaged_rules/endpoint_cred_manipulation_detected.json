@@ -1,0 +1,24 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Elastic Endpoint detected Credential Manipulation. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.",
+  "from": "now-15m",
+  "index": [
+    "endgame-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Credential Manipulation - Detected - Elastic Endpoint",
+  "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:detection and (event.action:token_manipulation_event or endgame.event_subtype_full:token_manipulation_event)",
+  "risk_score": 73,
+  "rule_id": "c0be5f31-e180-48ed-aa08-96b36899d48f",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Endpoint"
+  ],
+  "type": "query",
+  "version": 3
+}

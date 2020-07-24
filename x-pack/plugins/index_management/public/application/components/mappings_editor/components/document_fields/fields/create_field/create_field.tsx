@@ -50,13 +50,15 @@ export const CreateField = React.memo(function CreateFieldComponent({
     options: { stripEmptyFields: false },
   });
 
+  const { subscribe } = form;
+
   useEffect(() => {
-    const subscription = form.subscribe((updatedFieldForm) => {
+    const subscription = subscribe((updatedFieldForm) => {
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
     });
 
     return subscription.unsubscribe;
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, subscribe]);
 
   const cancel = () => {
     dispatch({ type: 'documentField.changeStatus', value: 'idle' });

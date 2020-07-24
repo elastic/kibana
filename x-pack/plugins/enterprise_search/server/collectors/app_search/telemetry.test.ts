@@ -4,20 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { mockLogger } from '../../routes/__mocks__';
 
-jest.mock('../../../../../../src/core/server', () => ({
-  SavedObjectsErrorHelpers: {
-    isNotFoundError: jest.fn(),
-  },
-}));
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-
-import { registerTelemetryUsageCollector, incrementUICounter } from './telemetry';
+import { registerTelemetryUsageCollector } from './telemetry';
 
 describe('App Search Telemetry Usage Collector', () => {
-  const mockLogger = loggingSystemMock.create().get();
-
   const makeUsageCollectorStub = jest.fn();
   const registerStub = jest.fn();
   const usageCollectionMock = {
@@ -102,42 +93,6 @@ describe('App Search Telemetry Usage Collector', () => {
           engine_table_link: 0,
         },
       });
-    });
-
-    it('should not throw but log a warning if saved objects errors', async () => {
-      const errorSavedObjectsMock = { createInternalRepository: () => ({}) } as any;
-      registerTelemetryUsageCollector(usageCollectionMock, errorSavedObjectsMock, mockLogger);
-
-      // Without log warning (not found)
-      (SavedObjectsErrorHelpers.isNotFoundError as jest.Mock).mockImplementationOnce(() => true);
-      await makeUsageCollectorStub.mock.calls[0][0].fetch();
-
-      expect(mockLogger.warn).not.toHaveBeenCalled();
-
-      // With log warning
-      (SavedObjectsErrorHelpers.isNotFoundError as jest.Mock).mockImplementationOnce(() => false);
-      await makeUsageCollectorStub.mock.calls[0][0].fetch();
-
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Failed to retrieve App Search telemetry data: TypeError: savedObjectsRepository.get is not a function'
-      );
-    });
-  });
-
-  describe('incrementUICounter', () => {
-    it('should increment the saved objects internal repository', async () => {
-      const response = await incrementUICounter({
-        savedObjects: savedObjectsMock,
-        uiAction: 'ui_clicked',
-        metric: 'button',
-      });
-
-      expect(savedObjectsRepoStub.incrementCounter).toHaveBeenCalledWith(
-        'app_search_telemetry',
-        'app_search_telemetry',
-        'ui_clicked.button'
-      );
-      expect(response).toEqual({ success: true });
     });
   });
 });

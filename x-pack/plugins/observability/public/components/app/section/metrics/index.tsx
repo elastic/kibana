@@ -18,8 +18,8 @@ import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 
 interface Props {
-  startTime?: string;
-  endTime?: string;
+  absoluteTime: { start?: number; end?: number };
+  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
@@ -46,17 +46,23 @@ const StyledProgress = styled.div<{ color?: string }>`
   }
 `;
 
-export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
+export const MetricsSection = ({ absoluteTime, relativeTime, bucketSize }: Props) => {
   const theme = useContext(ThemeContext);
+
+  const { start, end } = absoluteTime;
   const { data, status } = useFetcher(() => {
-    if (startTime && endTime && bucketSize) {
-      return getDataHandler('infra_metrics')?.fetchData({ startTime, endTime, bucketSize });
+    if (start && end && bucketSize) {
+      return getDataHandler('infra_metrics')?.fetchData({
+        absoluteTime: { start, end },
+        relativeTime,
+        bucketSize,
+      });
     }
-  }, [startTime, endTime, bucketSize]);
+  }, [start, end, bucketSize]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const { title = 'Metrics', appLink, stats, series } = data || {};
+  const { appLink, stats, series } = data || {};
 
   const cpuColor = theme.eui.euiColorVis7;
   const memoryColor = theme.eui.euiColorVis0;
@@ -65,9 +71,15 @@ export const MetricsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
-      minHeight={135}
-      title={title}
-      appLink={appLink}
+      title={i18n.translate('xpack.observability.overview.metrics.title', {
+        defaultMessage: 'Metrics',
+      })}
+      appLink={{
+        href: appLink,
+        label: i18n.translate('xpack.observability.overview.metrics.appLink', {
+          defaultMessage: 'View in app',
+        }),
+      }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiFlexGroup>

@@ -9,7 +9,7 @@
 import * as t from 'io-ts';
 
 import { cursor, filter, list_id, sort_field, sort_order } from '../common/schemas';
-import { Identity, RequiredKeepUndefined } from '../../types';
+import { RequiredKeepUndefined } from '../../types';
 import { StringToPositiveNumber } from '../types/string_to_positive_number';
 
 export const findListItemSchema = t.intersection([
@@ -26,6 +26,7 @@ export const findListItemSchema = t.intersection([
   ),
 ]);
 
-export type FindListItemSchemaPartial = Identity<t.TypeOf<typeof findListItemSchema>>;
+export type FindListItemSchema = t.OutputOf<typeof findListItemSchema>;
 
-export type FindListItemSchema = RequiredKeepUndefined<t.TypeOf<typeof findListItemSchema>>;
+// This type is used after a decode since some things are defaults after a decode.
+export type FindListItemSchemaDecoded = RequiredKeepUndefined<t.TypeOf<typeof findListItemSchema>>;

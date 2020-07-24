@@ -10,7 +10,14 @@ import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/comm
 // @ts-expect-error untyped local
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
-import { State, CanvasWorkpad, CanvasPage, CanvasElement, ResolvedArgType } from '../../../types';
+import {
+  State,
+  CanvasWorkpad,
+  CanvasPage,
+  CanvasElement,
+  CanvasVariable,
+  ResolvedArgType,
+} from '../../../types';
 import {
   ExpressionContext,
   CanvasGroup,
@@ -47,6 +54,23 @@ export function getFullWorkpadPersisted(state: State) {
 
 export function getWorkpadPersisted(state: State) {
   return getWorkpad(state);
+}
+
+export function getWorkpadVariables(state: State) {
+  const workpad = getWorkpad(state);
+  return get(workpad, 'variables', []);
+}
+
+export function getWorkpadVariablesAsObject(state: State) {
+  const variables = getWorkpadVariables(state);
+  if (variables.length === 0) {
+    return {};
+  }
+
+  return (variables as CanvasVariable[]).reduce(
+    (vars: Record<string, any>, v: CanvasVariable) => ({ ...vars, [v.name]: v.value }),
+    {}
+  );
 }
 
 export function getWorkpadInfo(state: State): WorkpadInfo {
@@ -326,7 +350,9 @@ export function getElements(
     return elements.map((el) => omit(el, ['ast']));
   }
 
-  return elements.map(appendAst);
+  const elementAppendAst = (elem: CanvasElement) => appendAst(elem);
+
+  return elements.map(elementAppendAst);
 }
 
 const augment = (type: string) => <T extends CanvasElement | CanvasGroup>(n: T): T => ({

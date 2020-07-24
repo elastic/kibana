@@ -1,0 +1,58 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Users can mark specific files as hidden simply by putting a \".\" as the first character in the file or folder name. Adversaries can use this to their advantage to hide files and folders on the system for persistence and defense evasion. This rule looks for hidden files or folders in common writable directories.",
+  "false_positives": [
+    "Certain tools may create hidden temporary files or directories upon installation or as part of their normal behavior. These events can be filtered by the process arguments, username, or process name values."
+  ],
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "lucene",
+  "license": "Elastic License",
+  "max_signals": 33,
+  "name": "Creation of Hidden Files and Directories",
+  "query": "event.category:process AND event.type:(start or process_started) AND process.working_directory:(\"/tmp\" or \"/var/tmp\" or \"/dev/shm\") AND process.args:/\\.[a-zA-Z0-9_\\-][a-zA-Z0-9_\\-\\.]{1,254}/ AND NOT process.name:(ls or find)",
+  "risk_score": 47,
+  "rule_id": "b9666521-4742-49ce-9ddc-b8e84c35acae",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1158",
+          "name": "Hidden Files and Directories",
+          "reference": "https://attack.mitre.org/techniques/T1158/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1158",
+          "name": "Hidden Files and Directories",
+          "reference": "https://attack.mitre.org/techniques/T1158/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

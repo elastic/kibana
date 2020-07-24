@@ -1,0 +1,29 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to modify an Okta policy in order to weaken an organization's security controls. For example, an adversary may attempt to modify an Okta multi-factor authentication (MFA) policy in order to weaken the authentication requirements for user accounts.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if Okta policies are regularly modified in your organization."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Modify Okta Policy",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:policy.lifecycle.update",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "6731fbf2-8f28-49ed-9ab9-9a918ceb5a45",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "type": "query",
+  "version": 1
+}

@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may create an Okta API token to maintain access to an organization's network while they work to achieve their objectives. An attacker may abuse an API token to execute techniques such as creating user accounts or disabling security rules or policies.",
+  "false_positives": [
+    "If the behavior of creating Okta API tokens is expected, consider adding exceptions to this rule to filter false positives."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Create Okta API Token",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:system.api_token.create",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "96b9f4ea-0e8c-435b-8d53-2096e75fcac5",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1136",
+          "name": "Create Account",
+          "reference": "https://attack.mitre.org/techniques/T1136/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

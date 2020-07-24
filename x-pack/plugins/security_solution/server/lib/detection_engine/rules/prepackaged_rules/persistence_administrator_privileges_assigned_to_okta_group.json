@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to assign administrator privileges to an Okta group in order to assign additional permissions to compromised user accounts.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if administrator privileges are regularly assigned to Okta groups in your organization."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Administrator Privileges Assigned to Okta Group",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:group.privilege.grant",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "b8075894-0b62-46e5-977c-31275da34419",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

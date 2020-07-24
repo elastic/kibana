@@ -5,7 +5,6 @@
  */
 
 import { Location } from 'history';
-import { TIMEPICKER_DEFAULTS } from '../../../context/UrlParamsContext/constants';
 import { toQuery } from './url_helpers';
 
 export interface TimepickerRisonData {
@@ -21,18 +20,20 @@ export interface TimepickerRisonData {
 
 export function getTimepickerRisonData(currentSearch: Location['search']) {
   const currentQuery = toQuery(currentSearch);
-  const nextQuery = {
-    ...TIMEPICKER_DEFAULTS,
-    ...currentQuery,
-  };
   return {
     time: {
-      from: encodeURIComponent(nextQuery.rangeFrom),
-      to: encodeURIComponent(nextQuery.rangeTo),
+      from: currentQuery.rangeFrom
+        ? encodeURIComponent(currentQuery.rangeFrom)
+        : '',
+      to: currentQuery.rangeTo ? encodeURIComponent(currentQuery.rangeTo) : '',
     },
     refreshInterval: {
-      pause: String(nextQuery.refreshPaused),
-      value: String(nextQuery.refreshInterval),
+      pause: currentQuery.refreshPaused
+        ? String(currentQuery.refreshPaused)
+        : '',
+      value: currentQuery.refreshInterval
+        ? String(currentQuery.refreshInterval)
+        : '',
     },
   };
 }

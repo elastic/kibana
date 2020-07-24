@@ -1,0 +1,29 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may attempt to delete an Okta policy in order to weaken an organization's security controls. For example, an adversary may attempt to delete an Okta multi-factor authentication (MFA) policy in order to weaken the authentication requirements for user accounts.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if Okta policies are regularly deleted in your organization."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Attempt to Delete Okta Policy",
+  "query": "event.module:okta and event.dataset:okta.system and event.action:policy.lifecycle.delete",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "b4bb1440-0fcb-4ed1-87e5-b06d58efc5e9",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Okta"
+  ],
+  "type": "query",
+  "version": 1
+}

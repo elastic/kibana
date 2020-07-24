@@ -38,7 +38,7 @@ import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
+import { getSortForSearchSource } from '../angular/doc_table';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -307,7 +307,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       this.updateOutput({ loading: false, error: undefined });
 
       // Log response to inspector
-      inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+      inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
 
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {

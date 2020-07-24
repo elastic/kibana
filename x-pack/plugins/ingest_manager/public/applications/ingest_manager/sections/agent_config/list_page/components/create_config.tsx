@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -17,16 +18,24 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
+  EuiFlyoutProps,
 } from '@elastic/eui';
-import { NewAgentConfig } from '../../../../types';
+import { NewAgentConfig, AgentConfig } from '../../../../types';
 import { useCapabilities, useCore, sendCreateAgentConfig } from '../../../../hooks';
 import { AgentConfigForm, agentConfigFormValidation } from '../../components';
 
-interface Props {
-  onClose: () => void;
+const FlyoutWithHigherZIndex = styled(EuiFlyout)`
+  z-index: ${(props) => props.theme.eui.euiZLevel5};
+`;
+
+interface Props extends EuiFlyoutProps {
+  onClose: (createdAgentConfig?: AgentConfig) => void;
 }
 
-export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
+export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({
+  onClose,
+  ...restOfProps
+}) => {
   const { notifications } = useCore();
   const hasWriteCapabilites = useCapabilities().write;
   const [agentConfig, setAgentConfig] = useState<NewAgentConfig>({
@@ -86,7 +95,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+          <EuiButtonEmpty iconType="cross" onClick={() => onClose()} flush="left">
             <FormattedMessage
               id="xpack.ingestManager.createAgentConfig.cancelButtonLabel"
               defaultMessage="Cancel"
@@ -113,7 +122,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
                       }
                     )
                   );
-                  onClose();
+                  onClose(data.item);
                 } else {
                   notifications.toasts.addDanger(
                     error
@@ -147,10 +156,10 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="l" maxWidth={400}>
+    <FlyoutWithHigherZIndex onClose={onClose} size="l" maxWidth={400} {...restOfProps}>
       {header}
       {body}
       {footer}
-    </EuiFlyout>
+    </FlyoutWithHigherZIndex>
   );
 };
