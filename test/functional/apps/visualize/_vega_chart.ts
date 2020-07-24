@@ -30,7 +30,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'vegaChart',
   ]);
   const filterBar = getService('filterBar');
-  const inspector = getService('inspector');
   const log = getService('log');
 
   describe('vega chart in visualize app', () => {

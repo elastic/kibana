@@ -54,6 +54,8 @@ export const useDeleteAction = () => {
       );
       if (ip !== undefined) {
         setIndexPatternExists(true);
+      } else {
+        setIndexPatternExists(false);
       }
     } catch (e) {
       const { toasts } = notifications;
@@ -101,7 +103,7 @@ export const useDeleteAction = () => {
 
     // Check if an user has permission to delete the index & index pattern
     checkUserIndexPermission();
-  }, []);
+  }, [isModalVisible]);
 
   const closeModal = () => setModalVisible(false);
   const deleteAndCloseModal = () => {

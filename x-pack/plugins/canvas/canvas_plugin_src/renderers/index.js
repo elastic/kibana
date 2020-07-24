@@ -4,40 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { advancedFilter } from './advanced_filter';
-import { debug } from './debug';
-import { dropdownFilter } from './dropdown_filter';
-import { embeddableRendererFactory } from './embeddable/embeddable';
-import { error } from './error';
-import { image } from './image';
-import { markdown } from './markdown';
-import { metric } from './metric';
-import { pie } from './pie';
-import { plot } from './plot';
-import { progress } from './progress';
-import { repeatImage } from './repeat_image';
-import { revealImage } from './reveal_image';
-import { shape } from './shape';
-import { table } from './table';
-import { text } from './text';
-import { timeFilterFactory } from './time_filter';
+import {
+  renderFunctions as embeddableFunctions,
+  renderFunctionFactories as embeddableFactories,
+} from './embeddable';
 
-export const renderFunctions = [
-  advancedFilter,
-  debug,
-  dropdownFilter,
-  error,
-  image,
-  markdown,
-  metric,
-  pie,
-  plot,
-  progress,
-  repeatImage,
-  revealImage,
-  shape,
-  table,
-  text,
+import {
+  renderFunctions as filterFunctions,
+  renderFunctionFactories as filterFactories,
+} from './filters';
+
+import { renderFunctions as coreFunctions, renderFunctionFactories as coreFactories } from './core';
+
+export const renderFunctions = [...coreFunctions, ...filterFunctions, ...embeddableFunctions];
+export const renderFunctionFactories = [
+  ...coreFactories,
+  ...embeddableFactories,
+  ...filterFactories,
 ];
-
-export const renderFunctionFactories = [embeddableRendererFactory, timeFilterFactory];

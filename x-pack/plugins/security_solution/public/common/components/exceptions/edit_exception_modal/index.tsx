@@ -20,7 +20,6 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
-import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import {
@@ -41,9 +40,11 @@ import {
   entryHasListType,
   entryHasNonEcsType,
 } from '../helpers';
+import { Loader } from '../../loader';
 
 interface EditExceptionModalProps {
   ruleName: string;
+  ruleIndices: string[];
   exceptionItem: ExceptionListItemSchema;
   exceptionListType: ExceptionListType;
   onCancel: () => void;
@@ -57,10 +58,8 @@ const Modal = styled(EuiModal)`
 `;
 
 const ModalHeader = styled(EuiModalHeader)`
-  ${({ theme }) => css`
-    flex-direction: column;
-    align-items: flex-start;
-  `}
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const ModalHeaderSubtitle = styled.div`
@@ -81,6 +80,7 @@ const ModalBodySection = styled.section`
 
 export const EditExceptionModal = memo(function EditExceptionModal({
   ruleName,
+  ruleIndices,
   exceptionItem,
   exceptionListType,
   onCancel,
@@ -95,9 +95,13 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const [
+    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
+  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
 
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    signalIndexName !== null ? [signalIndexName] : []
+  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    ruleIndices,
+    'rules'
   );
 
   const onError = useCallback(
@@ -121,18 +125,19 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   );
 
   useEffect(() => {
-    if (indexPatternLoading === false && isSignalIndexLoading === false) {
+    if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
+          exceptionItemsToAdd.length === 0
       );
     }
   }, [
     setShouldDisableBulkClose,
     exceptionItemsToAdd,
-    indexPatternLoading,
+    isSignalIndexPatternLoading,
     isSignalIndexLoading,
-    indexPatterns,
+    signalIndexPatterns,
   ]);
 
   useEffect(() => {
@@ -187,15 +192,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     }
   }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
 
-  const indexPatternConfig = useCallback(() => {
-    if (exceptionListType === 'endpoint') {
-      return [alertsIndexPattern];
-    }
-    return signalIndexName ? [signalIndexName] : [];
-  }, [exceptionListType, signalIndexName]);
-
   return (
-    <EuiOverlayMask>
+    <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
           <EuiModalHeaderTitle>{i18n.EDIT_EXCEPTION_TITLE}</EuiModalHeaderTitle>
@@ -204,7 +202,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           </ModalHeaderSubtitle>
         </ModalHeader>
 
-        {!isSignalIndexLoading && (
+        {(addExceptionIsLoading || isIndexPatternLoading || isSignalIndexLoading) && (
+          <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
+        )}
+
+        {!isSignalIndexLoading && !addExceptionIsLoading && !isIndexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
@@ -215,13 +217,13 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 listId={exceptionItem.list_id}
                 listNamespaceType={exceptionItem.namespace_type}
                 ruleName={ruleName}
-                isLoading={false}
                 isOrDisabled={false}
                 isAndDisabled={false}
+                isNestedDisabled={false}
                 data-test-subj="edit-exception-modal-builder"
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
-                indexPatternConfig={indexPatternConfig()}
+                indexPatterns={indexPatterns}
               />
 
               <EuiSpacer />

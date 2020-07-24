@@ -55,22 +55,27 @@ export class LicenseManagementUIPlugin
       title: PLUGIN.title,
       order: 0,
       mount: async ({ element, setBreadcrumbs, history }) => {
-        const [core, { telemetry }] = await getStartServices();
+        const [coreStart, { telemetry }] = await getStartServices();
         const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
 
         // Setup documentation links
-        const { docLinks } = core;
+        const {
+          docLinks,
+          chrome: { docTitle },
+        } = coreStart;
         const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
         const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
         const appDocLinks = {
           security: `${esBase}/security-settings.html`,
         };
 
+        docTitle.change(PLUGIN.title);
+
         // Setup services
         this.breadcrumbService.setup(setBreadcrumbs);
 
         const appDependencies: AppDependencies = {
-          core,
+          core: coreStart,
           config,
           plugins: {
             licensing,
@@ -87,8 +92,12 @@ export class LicenseManagementUIPlugin
         };
 
         const { renderApp } = await import('./application');
+        const unmountAppCallback = renderApp(element, appDependencies);
 
-        return renderApp(element, appDependencies);
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
 

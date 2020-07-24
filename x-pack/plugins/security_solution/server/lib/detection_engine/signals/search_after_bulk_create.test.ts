@@ -11,6 +11,7 @@ import {
   sampleRuleGuid,
   mockLogger,
   repeatedSearchResultsWithSortId,
+  repeatedSearchResultsWithNoSortId,
   sampleDocSearchResultsNoSortIdNoHits,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
@@ -354,6 +355,212 @@ describe('searchAfterAndBulkCreate', () => {
     expect(mockService.callCluster).toHaveBeenCalledTimes(3);
     expect(createdSignalsCount).toEqual(4); // should not create any signals because all events were in the allowlist
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+  });
+
+  test('should return success when all search results are in the allowlist and with sortId present', async () => {
+    listClient.getListItemByValues = jest
+      .fn()
+      .mockResolvedValue([{ value: '1.1.1.1' }, { value: '2.2.2.2' }, { value: '3.3.3.3' }]);
+    const sampleParams = sampleRuleAlertParams(30);
+    mockService.callCluster
+      .mockResolvedValueOnce(
+        repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
+          '1.1.1.1',
+          '2.2.2.2',
+          '2.2.2.2',
+          '2.2.2.2',
+        ])
+      )
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      ruleParams: sampleParams,
+      gap: null,
+      previousStartedAt: new Date(),
+      listClient,
+      exceptionsList: [exceptionItem],
+      services: mockService,
+      logger: mockLogger,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+      buildRuleMessage,
+    });
+    expect(success).toEqual(true);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(2);
+    expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+  });
+
+  test('should return success when all search results are in the allowlist and no sortId present', async () => {
+    listClient.getListItemByValues = jest
+      .fn()
+      .mockResolvedValue([{ value: '1.1.1.1' }, { value: '2.2.2.2' }, { value: '3.3.3.3' }]);
+    const sampleParams = sampleRuleAlertParams(30);
+    mockService.callCluster.mockResolvedValueOnce(
+      repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3), [
+        '1.1.1.1',
+        '2.2.2.2',
+        '2.2.2.2',
+        '2.2.2.2',
+      ])
+    );
+
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      ruleParams: sampleParams,
+      gap: null,
+      previousStartedAt: new Date(),
+      listClient,
+      exceptionsList: [exceptionItem],
+      services: mockService,
+      logger: mockLogger,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+      buildRuleMessage,
+    });
+    expect(success).toEqual(true);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(1);
+    expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+    // I don't like testing log statements since logs change but this is the best
+    // way I can think of to ensure this section is getting hit with this test case.
+    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[8][0]).toContain(
+      'sortIds was empty on searchResult'
+    );
+  });
+
+  test('should return success when no sortId present but search results are in the allowlist', async () => {
+    const sampleParams = sampleRuleAlertParams(30);
+    mockService.callCluster
+      .mockResolvedValueOnce(repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      });
+
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      ruleParams: sampleParams,
+      gap: null,
+      previousStartedAt: new Date(),
+      listClient,
+      exceptionsList: [exceptionItem],
+      services: mockService,
+      logger: mockLogger,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+      buildRuleMessage,
+    });
+    expect(success).toEqual(true);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(2);
+    expect(createdSignalsCount).toEqual(4); // should not create any signals because all events were in the allowlist
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+    // I don't like testing log statements since logs change but this is the best
+    // way I can think of to ensure this section is getting hit with this test case.
+    expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[15][0]).toContain(
+      'sortIds was empty on filteredEvents'
+    );
   });
 
   test('should return success when no exceptions list provided', async () => {

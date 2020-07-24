@@ -2183,6 +2183,17 @@
     pump "^3.0.0"
     secure-json-parse "^2.1.0"
 
+"@elastic/elasticsearch@7.9.0-rc.2":
+  version "7.9.0-rc.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.9.0-rc.2.tgz#cbc935f30940a15484b5ec3758c9b1ef119a5e5c"
+  integrity sha512-1FKCQJVr7s/LasKq6VbrmbWCI0LjoPcnjgmh2vKPzC+yyEEHVoYlmEfR5wBRchK1meATTXZtDhCVF95+Q9kVbA==
+  dependencies:
+    debug "^4.1.1"
+    decompress-response "^4.2.0"
+    ms "^2.1.1"
+    pump "^3.0.0"
+    secure-json-parse "^2.1.0"
+
 "@elastic/ems-client@7.9.3":
   version "7.9.3"
   resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.9.3.tgz#71b79914f76e347f050ead8474ad65d761e94a8a"
@@ -4614,10 +4625,10 @@
   resolved "https://registry.yarnpkg.com/@types/anymatch/-/anymatch-1.3.1.tgz#336badc1beecb9dacc38bea2cf32adf627a8421a"
   integrity sha512-/+CRPXpBDpo2RK9C68N3b2cOvO0Cf5B9aPijHsoDQTHivnGSObdOF2BRQOYjojWTDy6nQvMjmqRXIxH55VjxxA==
 
-"@types/archiver@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/archiver/-/archiver-3.0.0.tgz#c0a53e0ed3b7aef626ce683d081d7821d8c638b4"
-  integrity sha512-orghAMOF+//wSg4ru2znk6jt0eIPvKTtMVLH7XcYcjbcRyAXRClDlh27QVdqnAvVM37yu9xDP6Nh7egRhNr8tQ==
+"@types/archiver@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/archiver/-/archiver-3.1.0.tgz#0d5bd922ba5cf06e137cd6793db7942439b1805e"
+  integrity sha512-nTvHwgWONL+iXG+9CX+gnQ/tTOV+qucAjwpXqeUn4OCRMxP42T29FFP/7XaOo0EqqO3TlENhObeZEe7RUJAriw==
   dependencies:
     "@types/glob" "*"
 

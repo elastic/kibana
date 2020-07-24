@@ -7,13 +7,10 @@
 import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
-import {
-  ArtifactConstants,
-  ManifestConstants,
-  ExceptionsCache,
-  isCompleteArtifact,
-} from '../../../lib/artifacts';
+import { ArtifactConstants, ManifestConstants, isCompleteArtifact } from '../../../lib/artifacts';
+
 import { getManifestManagerMock } from './manifest_manager.mock';
+import LRU from 'lru-cache';
 
 describe('manifest_manager', () => {
   describe('ManifestManager sanity checks', () => {
@@ -41,7 +38,7 @@ describe('manifest_manager', () => {
     });
 
     test('ManifestManager populates cache properly', async () => {
-      const cache = new ExceptionsCache(5);
+      const cache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 });
       const manifestManager = getManifestManagerMock({ cache });
       const oldManifest = await manifestManager.getLastComputedManifest(
         ManifestConstants.SCHEMA_VERSION

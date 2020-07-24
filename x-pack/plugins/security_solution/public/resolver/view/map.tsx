@@ -10,6 +10,7 @@
 
 import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
+import { useEffectOnce } from 'react-use';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as selectors from '../store/selectors';
@@ -19,6 +20,7 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions, useResolverTheme } from './assets';
 import { useStateSyncingActions } from './use_state_syncing_actions';
+import { useResolverQueryParams } from './use_resolver_query_params';
 import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
 import { entityId } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
@@ -60,13 +62,16 @@ export const ResolverMap = React.memo(function ({
   const { processNodePositions, connectingEdgeLineSegments } = useSelector(
     selectors.visibleNodesAndEdgeLines
   )(timeAtRender);
-  const relatedEventsStats = useSelector(selectors.relatedEventsStats);
   const terminatedProcesses = useSelector(selectors.terminatedProcesses);
   const { projectionMatrix, ref, onMouseDown } = useCamera();
   const isLoading = useSelector(selectors.isLoading);
   const hasError = useSelector(selectors.hasError);
-  const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+  const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
   const { colorMap } = useResolverTheme();
+  const { cleanUpQueryParams } = useResolverQueryParams();
+  useEffectOnce(() => {
+    return () => cleanUpQueryParams();
+  });
 
   return (
     <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
@@ -110,11 +115,7 @@ export const ResolverMap = React.memo(function ({
                 position={position}
                 projectionMatrix={projectionMatrix}
                 event={processEvent}
-                relatedEventsStatsForProcess={
-                  relatedEventsStats ? relatedEventsStats.get(entityId(processEvent)) : undefined
-                }
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
-                isProcessOrigin={false}
                 timeAtRender={timeAtRender}
               />
             );

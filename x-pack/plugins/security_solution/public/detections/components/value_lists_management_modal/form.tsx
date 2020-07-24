@@ -46,6 +46,7 @@ const options: ListTypeOptions[] = [
 ];
 
 const defaultListType: Type = 'keyword';
+const validFileTypes = ['text/csv', 'text/plain'];
 
 export interface ValueListsFormProps {
   onError: (error: Error) => void;
@@ -54,23 +55,29 @@ export interface ValueListsFormProps {
 
 export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError, onSuccess }) => {
   const ctrl = useRef(new AbortController());
-  const [files, setFiles] = useState<FileList | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [type, setType] = useState<Type>(defaultListType);
   const filePickerRef = useRef<EuiFilePicker | null>(null);
   const { http } = useKibana().services;
   const { start: importList, ...importState } = useImportList();
 
+  const fileIsValid = !file || validFileTypes.some((fileType) => file.type === fileType);
+
   // EuiRadioGroup's onChange only infers 'string' from our options
   const handleRadioChange = useCallback((t: string) => setType(t as Type), [setType]);
+
+  const handleFileChange = useCallback((files: FileList | null) => {
+    setFile(files?.item(0) ?? null);
+  }, []);
 
   const resetForm = useCallback(() => {
     if (filePickerRef.current?.fileInput) {
       filePickerRef.current.fileInput.value = '';
       filePickerRef.current.handleChange();
     }
-    setFiles(null);
+    setFile(null);
     setType(defaultListType);
-  }, [setType]);
+  }, []);
 
   const handleCancel = useCallback(() => {
     ctrl.current.abort();
@@ -91,17 +98,17 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
   );
 
   const handleImport = useCallback(() => {
-    if (!importState.loading && files && files.length) {
+    if (!importState.loading && file) {
       ctrl.current = new AbortController();
       importList({
-        file: files[0],
+        file,
         listId: undefined,
         http,
         signal: ctrl.current.signal,
         type,
       });
     }
-  }, [importState.loading, files, importList, http, type]);
+  }, [importState.loading, file, importList, http, type]);
 
   useEffect(() => {
     if (!importState.loading && importState.result) {
@@ -117,14 +124,22 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
 
   return (
     <EuiForm>
-      <EuiFormRow label={i18n.FILE_PICKER_LABEL} fullWidth>
+      <EuiFormRow
+        data-test-subj="value-list-file-picker-row"
+        label={i18n.FILE_PICKER_LABEL}
+        fullWidth
+        isInvalid={!fileIsValid}
+        error={[i18n.FILE_PICKER_INVALID_FILE_TYPE(validFileTypes.join(', '))]}
+      >
         <EuiFilePicker
+          accept={validFileTypes.join()}
           id="value-list-file-picker"
           initialPromptText={i18n.FILE_PICKER_PROMPT}
           ref={filePickerRef}
-          onChange={setFiles}
+          onChange={handleFileChange}
           fullWidth={true}
           isLoading={importState.loading}
+          isInvalid={!fileIsValid}
         />
       </EuiFormRow>
       <EuiFormRow fullWidth>
@@ -151,7 +166,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
                   <EuiButton
                     data-test-subj="value-lists-form-import-action"
                     onClick={handleImport}
-                    disabled={!files?.length || importState.loading}
+                    disabled={file == null || !fileIsValid || importState.loading}
                   >
                     {i18n.UPLOAD_BUTTON}
                   </EuiButton>

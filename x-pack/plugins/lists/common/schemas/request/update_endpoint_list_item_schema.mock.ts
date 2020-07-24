@@ -21,6 +21,7 @@ import { UpdateEndpointListItemSchema } from './update_endpoint_list_item_schema
 
 export const getUpdateEndpointListItemSchemaMock = (): UpdateEndpointListItemSchema => ({
   _tags: _TAGS,
+  _version: undefined,
   comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,

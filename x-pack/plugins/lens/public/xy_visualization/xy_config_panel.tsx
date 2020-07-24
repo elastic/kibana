@@ -7,6 +7,7 @@
 import './xy_config_panel.scss';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
@@ -16,12 +17,14 @@ import {
   EuiFormRow,
   EuiPopover,
   EuiText,
+  EuiSelect,
   htmlIdGenerator,
   EuiForm,
   EuiColorPicker,
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import {
   VisualizationLayerWidgetProps,
@@ -45,6 +48,30 @@ function updateLayer(state: State, layer: UnwrapArray<State['layers']>, index: n
     layers: newLayers,
   };
 }
+
+const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
+  {
+    id: `xy_legend_auto`,
+    value: 'auto',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.auto', {
+      defaultMessage: 'auto',
+    }),
+  },
+  {
+    id: `xy_legend_show`,
+    value: 'show',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.show', {
+      defaultMessage: 'show',
+    }),
+  },
+  {
+    id: `xy_legend_hide`,
+    value: 'hide',
+    label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
+      defaultMessage: 'hide',
+    }),
+  },
+];
 
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
@@ -95,6 +122,12 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const hasNonBarSeries = props.state?.layers.some(
     (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
   );
+  const legendMode =
+    props.state?.legend.isVisible && !props.state?.legend.showSingleSeries
+      ? 'auto'
+      : !props.state?.legend.isVisible
+      ? 'hide'
+      : 'show';
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
@@ -157,6 +190,67 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               />
             </EuiFormRow>
           </EuiToolTip>
+          <EuiHorizontalRule margin="s" />
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+              defaultMessage: 'Legend display',
+            })}
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.xyChart.legendVisibilityLabel', {
+                defaultMessage: 'Legend display',
+              })}
+              name="legendDisplay"
+              buttonSize="compressed"
+              options={legendOptions}
+              idSelected={legendOptions.find(({ value }) => value === legendMode)!.id}
+              onChange={(optionId) => {
+                const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
+                if (newMode === 'auto') {
+                  props.setState({
+                    ...props.state,
+                    legend: { ...props.state.legend, isVisible: true, showSingleSeries: false },
+                  });
+                } else if (newMode === 'show') {
+                  props.setState({
+                    ...props.state,
+                    legend: { ...props.state.legend, isVisible: true, showSingleSeries: true },
+                  });
+                } else if (newMode === 'hide') {
+                  props.setState({
+                    ...props.state,
+                    legend: { ...props.state.legend, isVisible: false, showSingleSeries: false },
+                  });
+                }
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.xyChart.legendPositionLabel', {
+              defaultMessage: 'Legend position',
+            })}
+          >
+            <EuiSelect
+              disabled={legendMode === 'hide'}
+              compressed
+              options={[
+                { value: Position.Top, text: 'Top' },
+                { value: Position.Left, text: 'Left' },
+                { value: Position.Right, text: 'Right' },
+                { value: Position.Bottom, text: 'Bottom' },
+              ]}
+              value={props.state?.legend.position}
+              onChange={(e) => {
+                props.setState({
+                  ...props.state,
+                  legend: { ...props.state.legend, position: e.target.value as Position },
+                });
+              }}
+            />
+          </EuiFormRow>
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>

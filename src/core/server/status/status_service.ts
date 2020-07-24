@@ -20,7 +20,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { Observable, combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { map, distinctUntilChanged, shareReplay, take } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
 import { CoreService } from '../../types';
@@ -29,6 +29,7 @@ import { Logger } from '../logging';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 
+import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 
@@ -39,12 +40,15 @@ interface SetupDeps {
 
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly logger: Logger;
+  private readonly config$: Observable<StatusConfigType>;
 
   constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('status');
+    this.config$ = coreContext.configService.atPath<StatusConfigType>(config.path);
   }
 
-  public setup(core: SetupDeps) {
+  public async setup(core: SetupDeps) {
+    const statusConfig = await this.config$.pipe(take(1)).toPromise();
     const core$ = this.setupCoreStatus(core);
     const overall$: Observable<ServiceStatus> = core$.pipe(
       map((coreStatus) => {
@@ -58,6 +62,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     return {
       core$,
       overall$,
+      isStatusPageAnonymous: () => statusConfig.allowAnonymous,
     };
   }
 
