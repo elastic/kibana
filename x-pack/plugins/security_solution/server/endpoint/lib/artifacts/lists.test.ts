@@ -8,7 +8,7 @@ import { ExceptionListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types/entries';
+import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types';
 import { buildArtifact, getFullEndpointExceptionList } from './lists';
 import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 

@@ -63,7 +63,7 @@ export function WorkspacePanelWrapper({
         clearStagedPreview: false,
       });
     },
-    [dispatch]
+    [dispatch, activeVisualization]
   );
   return (
     <>
