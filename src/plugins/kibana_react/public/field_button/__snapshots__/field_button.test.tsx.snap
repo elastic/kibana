@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`isDraggable is rendered 1`] = `
+<div
+  className="kbnFieldButton kbnFieldButton--isDraggable"
+>
+  <div
+    className="kbnFieldButton__content"
+  >
+    <div
+      className="kbnFieldButton__fieldIcon"
+    />
+    <div
+      className="kbnFieldButton__name"
+    />
+    <div
+      className="kbnFieldButton__fieldAction"
+    />
+    <div
+      className="kbnFieldButton__infoIcon"
+    />
+  </div>
+</div>
+`;
+
+exports[`sizes m is applied 1`] = `
+<div
+  className="kbnFieldButton"
+>
+  <div
+    className="kbnFieldButton__content"
+  >
+    <div
+      className="kbnFieldButton__fieldIcon"
+    />
+    <div
+      className="kbnFieldButton__name"
+    />
+    <div
+      className="kbnFieldButton__fieldAction"
+    />
+    <div
+      className="kbnFieldButton__infoIcon"
+    />
+  </div>
+</div>
+`;
+
+exports[`sizes s is applied 1`] = `
+<div
+  className="kbnFieldButton kbnFieldButton--small"
+>
+  <div
+    className="kbnFieldButton__content"
+  >
+    <div
+      className="kbnFieldButton__fieldIcon"
+    />
+    <div
+      className="kbnFieldButton__name"
+    />
+    <div
+      className="kbnFieldButton__fieldAction"
+    />
+    <div
+      className="kbnFieldButton__infoIcon"
+    />
+  </div>
+</div>
+`;
