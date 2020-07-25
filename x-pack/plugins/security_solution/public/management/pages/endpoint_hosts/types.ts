@@ -50,6 +50,8 @@ export interface HostState {
   selectedPolicyId?: string;
   /** Endpoint package info */
   endpointPackageInfo?: GetPackagesResponse['response'][0];
+  /** Tracks whether hosts exist and helps control if onboarding should be visible */
+  hostsExist: boolean;
 }
 
 /**

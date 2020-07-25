@@ -75,6 +75,11 @@ interface ServerReturnedEndpointPackageInfo {
   payload: GetPackagesResponse['response'][0];
 }
 
+interface ServerReturnedHostExistValue {
+  type: 'serverReturnedHostExistValue';
+  payload: boolean;
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
@@ -86,5 +91,6 @@ export type HostAction =
   | ServerFailedToReturnPoliciesForOnboarding
   | UserSelectedEndpointPolicy
   | ServerCancelledHostListLoading
+  | ServerReturnedHostExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo;

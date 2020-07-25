@@ -195,3 +195,9 @@ export const policyResponseStatus: (state: Immutable<HostState>) => string = cre
     return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
   }
 );
+
+/**
+ * Return boolean that indicates whether hosts exist
+ * @param state
+ */
+export const hostsExist: (state: Immutable<HostState>) => boolean = (state) => state.hostsExist;
