@@ -91,7 +91,6 @@ export const apiPathMockResponseProviders = {
           },
         },
       ],
-      success: true,
     }),
 };
 
@@ -113,7 +112,6 @@ export const setPolicyListApiMockImplementation = (
           total: 10,
           page: 1,
           perPage: 10,
-          success: true,
         });
       }
 

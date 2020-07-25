@@ -34,7 +34,6 @@ export const mockPolicyResultList: (options?: {
     total,
     page: requestPageIndex,
     perPage: requestPageSize,
-    success: true,
   };
   return mock;
 };
