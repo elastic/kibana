@@ -59,7 +59,7 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
         agentConfigId: agentConfig!,
       });
 
-      if (data?.success) {
+      if (data) {
         notifications.toasts.addSuccess(
           i18n.translate('xpack.ingestManager.deleteAgentConfig.successSingleNotificationTitle', {
             defaultMessage: "Deleted agent config '{id}'",
@@ -69,9 +69,7 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
         if (onSuccessCallback.current) {
           onSuccessCallback.current(agentConfig!);
         }
-      }
-
-      if (!data?.success) {
+      } else {
         notifications.toasts.addDanger(
           i18n.translate('xpack.ingestManager.deleteAgentConfig.failureSingleNotificationTitle', {
             defaultMessage: "Error deleting agent config '{id}'",

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { warnAndSkipTest } from '../../helpers';
 
@@ -18,9 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  // Temporarily skipped to promote snapshot
-  // Re-enabled in https://github.com/elastic/kibana/pull/71727
-  describe.skip('Package Config - create', async function () {
+  describe('Package Config - create', async function () {
     let agentConfigId: string;
 
     before(async function () {
@@ -36,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should work with valid values', async function () {
       if (server.enabled) {
-        const { body: apiResponse } = await supertest
+        await supertest
           .post(`/api/ingest_manager/package_configs`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -54,8 +51,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-
-        expect(apiResponse.success).to.be(true);
       } else {
         warnAndSkipTest(this, log);
       }

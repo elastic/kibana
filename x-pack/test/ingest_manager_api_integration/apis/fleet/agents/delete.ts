@@ -68,7 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
 
       expect(apiResponse).not.to.eql({
-        success: true,
         action: 'deleted',
       });
     });
@@ -88,7 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xx')
         .expect(200);
       expect(apiResponse).to.eql({
-        success: true,
         action: 'deleted',
       });
     });

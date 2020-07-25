@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('ingest_manager_agent_configs', () => {
     describe('POST /api/ingest_manager/agent_configs', () => {
       it('should work with valid values', async () => {
-        const { body: apiResponse } = await supertest
+        await supertest
           .post(`/api/ingest_manager/agent_configs`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -22,8 +22,6 @@ export default function ({ getService }: FtrProviderContext) {
             namespace: 'default',
           })
           .expect(200);
-
-        expect(apiResponse.success).to.be(true);
       });
 
       it('should return a 400 with an invalid namespace', async () => {
@@ -50,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should work with valid values', async () => {
         const {
-          body: { success, item },
+          body: { item },
         } = await supertest
           .post(`/api/ingest_manager/agent_configs/${TEST_CONFIG_ID}/copy`)
           .set('kbn-xsrf', 'xxxx')
@@ -61,7 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { id, updated_at, ...newConfig } = item;
 
-        expect(success).to.be(true);
         expect(newConfig).to.eql({
           name: 'Copied config',
           description: 'Test',

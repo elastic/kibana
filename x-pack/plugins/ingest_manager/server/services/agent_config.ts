@@ -361,7 +361,6 @@ class AgentConfigService {
     await this.triggerAgentConfigUpdatedEvent(soClient, 'deleted', id);
     return {
       id,
-      success: true,
     };
   }
 

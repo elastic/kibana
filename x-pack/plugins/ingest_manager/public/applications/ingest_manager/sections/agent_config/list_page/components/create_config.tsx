@@ -116,7 +116,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({
               try {
                 const { data, error } = await createAgentConfig();
                 setIsLoading(false);
-                if (data?.success) {
+                if (data) {
                   notifications.toasts.addSuccess(
                     i18n.translate(
                       'xpack.ingestManager.createAgentConfig.successNotificationTitle',

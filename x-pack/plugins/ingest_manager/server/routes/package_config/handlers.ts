@@ -34,7 +34,6 @@ export const getPackageConfigsHandler: RequestHandler<
         total,
         page,
         perPage,
-        success: true,
       },
     });
   } catch (e) {
@@ -55,7 +54,6 @@ export const getOnePackageConfigHandler: RequestHandler<TypeOf<
       return response.ok({
         body: {
           item: packageConfig,
-          success: true,
         },
       });
     } else {
@@ -110,7 +108,7 @@ export const createPackageConfigHandler: RequestHandler<
     const packageConfig = await packageConfigService.create(soClient, callCluster, newData, {
       user,
     });
-    const body: CreatePackageConfigResponse = { item: packageConfig, success: true };
+    const body: CreatePackageConfigResponse = { item: packageConfig };
     return response.ok({
       body,
     });
@@ -158,7 +156,7 @@ export const updatePackageConfigHandler: RequestHandler<
       { user }
     );
     return response.ok({
-      body: { item: updatedPackageConfig, success: true },
+      body: { item: updatedPackageConfig },
     });
   } catch (e) {
     return response.customError({

@@ -20,7 +20,6 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
       page: outputs.page,
       perPage: outputs.perPage,
       total: outputs.total,
-      success: true,
     };
 
     return response.ok({ body });
@@ -41,7 +40,6 @@ export const getOneOuputHandler: RequestHandler<TypeOf<
 
     const body: GetOneOutputResponse = {
       item: output,
-      success: true,
     };
 
     return response.ok({ body });
@@ -71,7 +69,6 @@ export const putOuputHandler: RequestHandler<
 
     const body: GetOneOutputResponse = {
       item: output,
-      success: true,
     };
 
     return response.ok({ body });

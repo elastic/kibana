@@ -81,7 +81,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
           namespace,
           monitoring_enabled,
         });
-        if (data?.success) {
+        if (data) {
           notifications.toasts.addSuccess(
             i18n.translate('xpack.ingestManager.editAgentConfig.successNotificationTitle', {
               defaultMessage: "Successfully updated '{name}' settings",

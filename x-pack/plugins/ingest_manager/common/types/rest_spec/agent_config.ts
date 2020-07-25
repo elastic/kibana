@@ -19,7 +19,6 @@ export interface GetAgentConfigsResponse {
   total: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
 
 export interface GetOneAgentConfigRequest {
@@ -30,7 +29,6 @@ export interface GetOneAgentConfigRequest {
 
 export interface GetOneAgentConfigResponse {
   item: AgentConfig;
-  success: boolean;
 }
 
 export interface CreateAgentConfigRequest {
@@ -39,7 +37,6 @@ export interface CreateAgentConfigRequest {
 
 export interface CreateAgentConfigResponse {
   item: AgentConfig;
-  success: boolean;
 }
 
 export type UpdateAgentConfigRequest = GetOneAgentConfigRequest & {
@@ -48,7 +45,6 @@ export type UpdateAgentConfigRequest = GetOneAgentConfigRequest & {
 
 export interface UpdateAgentConfigResponse {
   item: AgentConfig;
-  success: boolean;
 }
 
 export interface CopyAgentConfigRequest {
@@ -57,7 +53,6 @@ export interface CopyAgentConfigRequest {
 
 export interface CopyAgentConfigResponse {
   item: AgentConfig;
-  success: boolean;
 }
 
 export interface DeleteAgentConfigRequest {
@@ -68,7 +63,6 @@ export interface DeleteAgentConfigRequest {
 
 export interface DeleteAgentConfigResponse {
   id: string;
-  success: boolean;
 }
 
 export interface GetFullAgentConfigRequest {
@@ -79,5 +73,4 @@ export interface GetFullAgentConfigRequest {
 
 export interface GetFullAgentConfigResponse {
   item: FullAgentConfig;
-  success: boolean;
 }

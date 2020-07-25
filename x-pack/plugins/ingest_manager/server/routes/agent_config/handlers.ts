@@ -49,7 +49,6 @@ export const getAgentConfigsHandler: RequestHandler<
       total,
       page,
       perPage,
-      success: true,
     };
 
     await bluebird.map(
@@ -82,7 +81,6 @@ export const getOneAgentConfigHandler: RequestHandler<TypeOf<
     if (agentConfig) {
       const body: GetOneAgentConfigResponse = {
         item: agentConfig,
-        success: true,
       };
       return response.ok({
         body,
@@ -141,7 +139,6 @@ export const createAgentConfigHandler: RequestHandler<
 
     const body: CreateAgentConfigResponse = {
       item: agentConfig,
-      success: true,
     };
 
     return response.ok({
@@ -171,7 +168,7 @@ export const updateAgentConfigHandler: RequestHandler<
         user: user || undefined,
       }
     );
-    const body: UpdateAgentConfigResponse = { item: agentConfig, success: true };
+    const body: UpdateAgentConfigResponse = { item: agentConfig };
     return response.ok({
       body,
     });
@@ -199,7 +196,7 @@ export const copyAgentConfigHandler: RequestHandler<
         user: user || undefined,
       }
     );
-    const body: CopyAgentConfigResponse = { item: agentConfig, success: true };
+    const body: CopyAgentConfigResponse = { item: agentConfig };
     return response.ok({
       body,
     });
@@ -248,7 +245,6 @@ export const getFullAgentConfig: RequestHandler<
     if (fullAgentConfig) {
       const body: GetFullAgentConfigResponse = {
         item: fullAgentConfig,
-        success: true,
       };
       return response.ok({
         body,

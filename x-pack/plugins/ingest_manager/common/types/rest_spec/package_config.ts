@@ -18,7 +18,6 @@ export interface GetPackageConfigsResponse {
   total: number;
   page: number;
   perPage: number;
-  success: boolean;
 }
 
 export interface GetOnePackageConfigRequest {
@@ -29,7 +28,6 @@ export interface GetOnePackageConfigRequest {
 
 export interface GetOnePackageConfigResponse {
   item: PackageConfig;
-  success: boolean;
 }
 
 export interface CreatePackageConfigRequest {
@@ -38,7 +36,6 @@ export interface CreatePackageConfigRequest {
 
 export interface CreatePackageConfigResponse {
   item: PackageConfig;
-  success: boolean;
 }
 
 export type UpdatePackageConfigRequest = GetOnePackageConfigRequest & {

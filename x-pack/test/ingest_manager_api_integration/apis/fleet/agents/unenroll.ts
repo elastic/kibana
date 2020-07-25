@@ -65,29 +65,23 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('allow to unenroll using a list of ids', async () => {
-      const { body } = await supertest
+      await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
           force: true,
         })
         .expect(200);
-
-      expect(body).to.have.keys('success');
-      expect(body.success).to.be(true);
     });
 
     it('should invalidate related API keys', async () => {
-      const { body } = await supertest
+      await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
           force: true,
         })
         .expect(200);
-
-      expect(body).to.have.keys('success');
-      expect(body.success).to.be(true);
 
       const {
         body: { api_keys: accessAPIKeys },

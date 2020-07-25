@@ -23,9 +23,7 @@ export const postAgentsUnenrollHandler: RequestHandler<
       await AgentService.unenrollAgent(soClient, request.params.agentId);
     }
 
-    const body: PostAgentUnenrollResponse = {
-      success: true,
-    };
+    const body: PostAgentUnenrollResponse = {};
     return response.ok({ body });
   } catch (e) {
     return response.customError({

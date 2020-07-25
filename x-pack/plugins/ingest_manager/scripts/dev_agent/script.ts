@@ -111,24 +111,23 @@ async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promi
       },
     },
   };
-  const res = await fetch(`${kibanaURL}/api/ingest_manager/fleet/agents/enroll`, {
-    method: 'POST',
-    body: JSON.stringify(body),
-    headers: {
-      'kbn-xsrf': 'xxx',
-      Authorization: `ApiKey ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  const obj: PostAgentEnrollResponse = await res.json();
-
-  if (!obj.success) {
-    log.error(JSON.stringify(obj, null, 2));
+  try {
+    const res = await fetch(`${kibanaURL}/api/ingest_manager/fleet/agents/enroll`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'kbn-xsrf': 'xxx',
+        Authorization: `ApiKey ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    const obj: PostAgentEnrollResponse = await res.json();
+    return {
+      id: obj.item.id,
+      access_api_key: obj.item.access_api_key,
+    };
+  } catch (e) {
+    log.error(e);
     throw new Error('unable to enroll');
   }
-
-  return {
-    id: obj.item.id,
-    access_api_key: obj.item.access_api_key,
-  };
 }

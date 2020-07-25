@@ -61,7 +61,7 @@ export const AgentConfigCopyProvider: React.FunctionComponent<Props> = ({ childr
     try {
       const { data } = await sendCopyAgentConfig(agentConfig!.id, newAgentConfig!);
 
-      if (data?.success) {
+      if (data) {
         notifications.toasts.addSuccess(
           i18n.translate('xpack.ingestManager.copyAgentConfig.successNotificationTitle', {
             defaultMessage: 'Agent config copied',
@@ -70,9 +70,7 @@ export const AgentConfigCopyProvider: React.FunctionComponent<Props> = ({ childr
         if (onSuccessCallback.current) {
           onSuccessCallback.current(data.item);
         }
-      }
-
-      if (!data?.success) {
+      } else {
         notifications.toasts.addDanger(
           i18n.translate('xpack.ingestManager.copyAgentConfig.failureNotificationTitle', {
             defaultMessage: "Error copying agent config '{id}'",
