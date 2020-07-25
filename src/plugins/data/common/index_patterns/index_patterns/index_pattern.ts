@@ -168,12 +168,6 @@ export class IndexPattern implements IIndexPattern {
     );
   }
 
-  private initFields(input?: any) {
-    const newValue = input || this.fields;
-
-    this.fields = this.createFieldList(this, newValue, this.shortDotsEnable);
-  }
-
   private isFieldRefreshRequired(specs?: FieldSpec[]): boolean {
     if (!specs) {
       return true;
@@ -221,9 +215,7 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
 
-    // ignoring this because the same thing happens elsewhere but via _.assign
-    // @ts-expect-error
-    this.fields = spec.fields || [];
+    this.fields.replaceAll(spec.fields || []);
     this.typeMeta = spec.typeMeta;
     // /*
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
@@ -231,8 +223,6 @@ export class IndexPattern implements IIndexPattern {
     });
     // */
     // this.fieldFormatMap = fieldFormatMap
-
-    this.initFields();
     return this;
   }
 

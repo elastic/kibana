@@ -59,9 +59,12 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   );
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
+  this.getFormatterForField = () => ({
+    convert: () => ({}),
+  });
 
   this._reindexFields = function () {
-    this.fields = new FieldList(this, this.fields || fields, false);
+    this.fields = new FieldList(this, this.fields || fields, false); // createFieldList(this, this.fields || fields, false);
   };
 
   this.stubSetFieldFormat = function (fieldName, id, params) {

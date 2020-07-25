@@ -287,9 +287,9 @@ describe('IndexPattern', () => {
       // const saveSpy = sinon.spy(indexPattern, 'save');
       const scriptedFields = indexPattern.getScriptedFields();
       const oldCount = scriptedFields.length;
-      const scriptedField = last(scriptedFields) as any;
+      const scriptedField = last(scriptedFields)!;
 
-      await indexPattern.removeScriptedField(scriptedField);
+      await indexPattern.removeScriptedField(scriptedField.name);
 
       // expect(saveSpy.callCount).to.equal(1);
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
