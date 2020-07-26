@@ -14,6 +14,8 @@ import {
   notificationServiceMock,
   docLinksServiceMock,
 } from '../../../../../../src/core/public/mocks';
+import { GlobalFlyout } from '../../../../../../src/plugins/es_ui_shared/public';
+
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
@@ -23,9 +25,11 @@ import { ExtensionsService } from '../../../public/services';
 import { UiMetricService } from '../../../public/application/services/ui_metric';
 import { setUiMetricService } from '../../../public/application/services/api';
 import { setExtensionsService } from '../../../public/application/store/selectors';
+import { MappingsEditorProvider } from '../../../public/application/components';
 import { init as initHttpRequests } from './http_requests';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export const services = {
   extensionsService: new ExtensionsService(),
@@ -62,7 +66,11 @@ export const WithAppDependencies = (Comp: any, overridingDependencies: any = {})
   const mergedDependencies = merge({}, appDependencies, overridingDependencies);
   return (
     <AppContextProvider value={mergedDependencies}>
-      <Comp {...props} />
+      <MappingsEditorProvider>
+        <GlobalFlyoutProvider>
+          <Comp {...props} />
+        </GlobalFlyoutProvider>
+      </MappingsEditorProvider>
     </AppContextProvider>
   );
 };
