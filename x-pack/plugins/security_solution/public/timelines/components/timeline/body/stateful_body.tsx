@@ -62,6 +62,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     data,
     docValueFields,
     eventIdToNoteIds,
+    eventType,
     excludedRowRendererIds,
     height,
     id,
@@ -197,10 +198,10 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         data={data}
         docValueFields={docValueFields}
         eventIdToNoteIds={eventIdToNoteIds}
+        eventType={eventType}
         getNotesByIds={getNotesByIds}
         graphEventId={graphEventId}
         height={height}
-        id={id}
         isEventViewer={isEventViewer}
         isSelectAllChecked={isSelectAllChecked}
         loadingEventIds={loadingEventIds}
@@ -219,6 +220,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         show={id === TimelineId.active ? show : true}
         showCheckboxes={showCheckboxes}
         sort={sort}
+        timelineId={id}
         timelineType={timelineType}
         toggleColumn={toggleColumn}
         updateNote={onUpdateNote}
@@ -232,6 +234,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+    prevProps.eventType === nextProps.eventType &&
     prevProps.graphEventId === nextProps.graphEventId &&
     deepEqual(prevProps.notesById, nextProps.notesById) &&
     prevProps.height === nextProps.height &&

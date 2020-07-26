@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { TimelineDetailsQuery } from '../../../../containers/details';
 import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../../graphql/types';
@@ -130,9 +131,9 @@ const StatefulEventComponent: React.FC<Props> = ({
 }) => {
   const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-  const timeline = useSelector<StoreState, TimelineModel>((state) => {
-    return state.timeline.timelineById['timeline-1'];
-  });
+  const { status: timelineStatus } = useSelector<StoreState, TimelineModel>(
+    (state) => state.timeline.timelineById[TimelineId.active]
+  );
   const divElement = useRef<HTMLDivElement | null>(null);
 
   const onToggleShowNotes = useCallback(() => {
@@ -226,7 +227,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                         getNotesByIds={getNotesByIds}
                         noteIds={eventIdToNoteIds[event._id] || emptyNotes}
                         showAddNote={!!showNotes[event._id]}
-                        status={timeline.status}
+                        status={timelineStatus}
                         toggleShowAddNote={onToggleShowNotes}
                         updateNote={updateNote}
                       />

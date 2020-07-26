@@ -24,7 +24,12 @@ import {
   DataProviderResult,
 } from '../../../graphql/types';
 
-import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import {
+  DataProviderType,
+  TimelineId,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../common/types/timeline';
 
 import {
   addNotes as dispatchAddNotes,
@@ -318,7 +323,7 @@ export const queryTimelineById = <TCache>({
   updateIsLoading,
   updateTimeline,
 }: QueryTimelineById<TCache>) => {
-  updateIsLoading({ id: 'timeline-1', isLoading: true });
+  updateIsLoading({ id: TimelineId.active, isLoading: true });
   if (apolloClient) {
     apolloClient
       .query<GetOneTimeline.Query, GetOneTimeline.Variables>({
@@ -347,7 +352,7 @@ export const queryTimelineById = <TCache>({
           updateTimeline({
             duplicate,
             from,
-            id: 'timeline-1',
+            id: TimelineId.active,
             notes,
             timeline: {
               ...timeline,
@@ -359,7 +364,7 @@ export const queryTimelineById = <TCache>({
         }
       })
       .finally(() => {
-        updateIsLoading({ id: 'timeline-1', isLoading: false });
+        updateIsLoading({ id: TimelineId.active, isLoading: false });
       });
   }
 };

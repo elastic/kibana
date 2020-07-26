@@ -121,7 +121,7 @@ export const userInfoReducer = (state: State, action: Action): State => {
 
 const StateUserInfoContext = createContext<[State, Dispatch<Action>]>([initialState, () => noop]);
 
-const useUserData = () => useContext(StateUserInfoContext);
+export const useUserData = () => useContext(StateUserInfoContext);
 
 interface ManageUserInfoProps {
   children: React.ReactNode;

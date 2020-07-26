@@ -42,7 +42,7 @@ import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
 
@@ -115,7 +115,7 @@ describe('epicLocalStorage', () => {
   });
 
   it('filters correctly page timelines', () => {
-    expect(isPageTimeline('timeline-1')).toBe(false);
+    expect(isPageTimeline(TimelineId.active)).toBe(false);
     expect(isPageTimeline('hosts-page-alerts')).toBe(true);
   });
 

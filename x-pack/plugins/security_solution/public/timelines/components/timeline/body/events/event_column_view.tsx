@@ -4,29 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback } from 'react';
 import uuid from 'uuid';
+import { useSelector } from 'react-redux';
 
-import {
-  EuiButtonIcon,
-  EuiToolTip,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiContextMenuItem,
-} from '@elastic/eui';
-import styled from 'styled-components';
 import { TimelineNonEcsData, Ecs } from '../../../../../graphql/types';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { AssociateNote, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
-import { EventsTd, EventsTdContent, EventsTrData } from '../../styles';
+import { EventsTrData } from '../../styles';
 import { Actions } from '../actions';
 import { DataDrivenColumns } from '../data_driven_columns';
-import { eventHasNotes, getPinOnClick } from '../helpers';
+import {
+  eventHasNotes,
+  getEventType,
+  getPinOnClick,
+  InvestigateInResolverAction,
+} from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
-import { useManageTimeline } from '../../../manage_timeline';
+import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
+import { AddEventNoteAction } from '../actions/add_note_icon_item';
+import { PinEventAction } from '../actions/pin_event_action';
+import { StoreState } from '../../../../../common/store/types';
+import { TimelineId } from '../../../../../../common/types/timeline';
+
+import { TimelineModel } from '../../../../store/timeline/model';
 
 interface Props {
   id: string;
@@ -88,114 +92,9 @@ export const EventColumnView = React.memo<Props>(
     toggleShowNotes,
     updateNote,
   }) => {
-    const { getManageTimelineById } = useManageTimeline();
-    const timelineActions = useMemo(
-      () => getManageTimelineById(timelineId).timelineRowActions({ nonEcsData: data, ecsData }),
-      [data, ecsData, getManageTimelineById, timelineId]
+    const { timelineType, status } = useSelector<StoreState, TimelineModel>(
+      (state) => state.timeline.timelineById[timelineId]
     );
-    const [isPopoverOpen, setPopover] = useState(false);
-
-    const onButtonClick = useCallback(() => {
-      setPopover(!isPopoverOpen);
-    }, [isPopoverOpen]);
-
-    const closePopover = useCallback(() => {
-      setPopover(false);
-    }, []);
-
-    const button = (
-      <EuiButtonIcon
-        aria-label="context menu"
-        data-test-subj="timeline-context-menu-button"
-        size="s"
-        iconType="boxesHorizontal"
-        onClick={onButtonClick}
-      />
-    );
-
-    const onClickCb = useCallback((cb: () => void) => {
-      cb();
-      closePopover();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const additionalActions = useMemo<JSX.Element[]>(() => {
-      const grouped = timelineActions.reduce(
-        (
-          acc: {
-            contextMenu: JSX.Element[];
-            icon: JSX.Element[];
-          },
-          action
-        ) => {
-          if (action.displayType === 'icon') {
-            return {
-              ...acc,
-              icon: [
-                ...acc.icon,
-                <EventsTd key={action.id}>
-                  <EventsTdContent textAlign="center" width={action.width}>
-                    <EuiToolTip
-                      data-test-subj={`${action.dataTestSubj}-tool-tip`}
-                      content={action.content}
-                    >
-                      <EuiButtonIcon
-                        aria-label={action.ariaLabel}
-                        data-test-subj={`${action.dataTestSubj}-button`}
-                        iconType={action.iconType}
-                        isDisabled={
-                          action.isActionDisabled != null ? action.isActionDisabled(ecsData) : false
-                        }
-                        onClick={() => action.onClick({ eventId: id, ecsData, data })}
-                      />
-                    </EuiToolTip>
-                  </EventsTdContent>
-                </EventsTd>,
-              ],
-            };
-          }
-          return {
-            ...acc,
-            contextMenu: [
-              ...acc.contextMenu,
-              <EuiContextMenuItem
-                aria-label={action.ariaLabel}
-                data-test-subj={action.dataTestSubj}
-                disabled={
-                  action.isActionDisabled != null ? action.isActionDisabled(ecsData) : false
-                }
-                icon={action.iconType}
-                key={action.id}
-                onClick={() => onClickCb(() => action.onClick({ eventId: id, ecsData, data }))}
-              >
-                {action.content}
-              </EuiContextMenuItem>,
-            ],
-          };
-        },
-        { icon: [], contextMenu: [] }
-      );
-      return grouped.contextMenu.length > 0
-        ? [
-            ...grouped.icon,
-            <EventsTd key="actions-context-menu">
-              <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-                <EuiPopover
-                  id="singlePanel"
-                  button={button}
-                  isOpen={isPopoverOpen}
-                  closePopover={closePopover}
-                  panelPaddingSize="none"
-                  anchorPosition="downLeft"
-                  repositionOnScroll
-                >
-                  <ContextMenuPanel items={grouped.contextMenu} />
-                </EuiPopover>
-              </EventsTdContent>
-            </EventsTd>,
-          ]
-        : grouped.icon;
-    }, [button, closePopover, id, onClickCb, data, ecsData, timelineActions, isPopoverOpen]);
 
     const handlePinClicked = useCallback(
       () =>
@@ -209,29 +108,71 @@ export const EventColumnView = React.memo<Props>(
       [eventIdToNoteIds, id, isEventPinned, onPinEvent, onUnPinEvent]
     );
 
+    const eventType = getEventType(ecsData);
+
+    const additionalActions = [
+      <InvestigateInResolverAction
+        key="investigate-in-resolver"
+        timelineId={timelineId}
+        ecsData={ecsData}
+      />,
+      ...(timelineId !== TimelineId.active && eventType === 'signal'
+        ? [
+            <InvestigateInTimelineAction
+              key="investigate-in-timeline"
+              ecsRowData={ecsData}
+              nonEcsRowData={data}
+            />,
+          ]
+        : []),
+      ...(!isEventViewer
+        ? [
+            <AddEventNoteAction
+              key="add-event-note"
+              associateNote={associateNote}
+              getNotesByIds={getNotesByIds}
+              noteIds={eventIdToNoteIds[id] || emptyNotes}
+              showNotes={showNotes}
+              toggleShowNotes={toggleShowNotes}
+              updateNote={updateNote}
+              status={status}
+              timelineType={timelineType}
+            />,
+            <PinEventAction
+              key="pin-event"
+              onPinClicked={handlePinClicked}
+              noteIds={eventIdToNoteIds[id] || emptyNotes}
+              eventIsPinned={isEventPinned}
+              timelineType={timelineType}
+            />,
+          ]
+        : []),
+      ...(eventType === 'signal'
+        ? [
+            <AlertContextMenu
+              key="alert-context-menu"
+              ecsRowData={ecsData}
+              nonEcsRowData={data}
+              timelineId={timelineId}
+            />,
+          ]
+        : []),
+    ];
+
     return (
       <EventsTrData data-test-subj="event-column-view">
         <Actions
           actionsColumnWidth={actionsColumnWidth}
           additionalActions={additionalActions}
-          associateNote={associateNote}
           checked={Object.keys(selectedEventIds).includes(id)}
           onRowSelected={onRowSelected}
           expanded={expanded}
           data-test-subj="actions"
           eventId={id}
-          eventIsPinned={isEventPinned}
-          getNotesByIds={getNotesByIds}
-          isEventViewer={isEventViewer}
           loading={loading}
           loadingEventIds={loadingEventIds}
-          noteIds={eventIdToNoteIds[id] || emptyNotes}
           onEventToggled={onEventToggled}
-          onPinClicked={handlePinClicked}
           showCheckboxes={showCheckboxes}
-          showNotes={showNotes}
-          toggleShowNotes={toggleShowNotes}
-          updateNote={updateNote}
         />
 
         <DataDrivenColumns
@@ -266,8 +207,5 @@ export const EventColumnView = React.memo<Props>(
     );
   }
 );
-const ContextMenuPanel = styled(EuiContextMenuPanel)`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-`;
 
-ContextMenuPanel.displayName = 'ContextMenuPanel';
+EventColumnView.displayName = 'EventColumnView';

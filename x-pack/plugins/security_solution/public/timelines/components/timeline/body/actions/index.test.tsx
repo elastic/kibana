@@ -30,22 +30,14 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={true}
-          showNotes={false}
-          toggleShowNotes={jest.fn()}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );
@@ -58,22 +50,14 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={jest.fn()}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );
@@ -86,22 +70,14 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={jest.fn()}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );
@@ -116,22 +92,14 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={onEventToggled}
-          onPinClicked={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={jest.fn()}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );
@@ -142,29 +110,18 @@ describe('Actions', () => {
   });
 
   test('it does NOT render a notes button when isEventsViewer is true', () => {
-    const toggleShowNotes = jest.fn();
-
     const wrapper = mount(
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
-          isEventViewer={true}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={toggleShowNotes}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );
@@ -179,22 +136,14 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={toggleShowNotes}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );
@@ -205,28 +154,18 @@ describe('Actions', () => {
   });
 
   test('it renders correct tooltip for NotesButton - timeline', () => {
-    const toggleShowNotes = jest.fn();
-
     const wrapper = mount(
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={toggleShowNotes}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );
@@ -239,28 +178,19 @@ describe('Actions', () => {
       ...mockTimelineModel,
       timelineType: TimelineType.template,
     });
-    const toggleShowNotes = jest.fn();
 
     const wrapper = mount(
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={toggleShowNotes}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );
@@ -272,29 +202,18 @@ describe('Actions', () => {
   });
 
   test('it does NOT render a pin button when isEventViewer is true', () => {
-    const onPinClicked = jest.fn();
-
     const wrapper = mount(
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
-          isEventViewer={true}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={onPinClicked}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={jest.fn()}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );
@@ -309,22 +228,14 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
-          eventIsPinned={false}
-          getNotesByIds={jest.fn()}
           loading={false}
           loadingEventIds={[]}
-          noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={onPinClicked}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
-          showNotes={false}
-          toggleShowNotes={jest.fn()}
-          updateNote={jest.fn()}
         />
       </TestProviders>
     );

@@ -10,6 +10,7 @@ import dateMath from '@elastic/datemath';
 import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
 
+import { TimelineId } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
 import {
@@ -64,7 +65,6 @@ export const getFilterAndRuleBounds = (
 export const updateAlertStatusAction = async ({
   query,
   alertIds,
-  status,
   selectedStatus,
   setEventsLoading,
   setEventsDeleted,
@@ -152,7 +152,7 @@ export const sendAlertToTimelineAction = async ({
 
   if (timelineId !== '' && apolloClient != null) {
     try {
-      updateTimelineIsLoading({ id: 'timeline-1', isLoading: true });
+      updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const responseTimeline = await apolloClient.query<
         GetOneTimeline.Query,
         GetOneTimeline.Variables
@@ -221,7 +221,7 @@ export const sendAlertToTimelineAction = async ({
       }
     } catch {
       openAlertInBasicTimeline = true;
-      updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
+      updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
     }
   }
 
@@ -250,7 +250,7 @@ export const sendAlertToTimelineAction = async ({
           },
           ...getThresholdAggregationDataProvider(ecsData, nonEcsData),
         ],
-        id: 'timeline-1',
+        id: TimelineId.active,
         dateRange: {
           start: from,
           end: to,
@@ -299,7 +299,7 @@ export const sendAlertToTimelineAction = async ({
             },
           },
         ],
-        id: 'timeline-1',
+        id: TimelineId.active,
         dateRange: {
           start: from,
           end: to,

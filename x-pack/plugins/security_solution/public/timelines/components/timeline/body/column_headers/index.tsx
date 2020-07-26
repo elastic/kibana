@@ -235,7 +235,6 @@ export const ColumnHeadersComponent = ({
               columnHeaders={columnHeaders}
               data-test-subj="field-browser"
               height={FIELD_BROWSER_HEIGHT}
-              isEventViewer={isEventViewer}
               onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
               toggleColumn={toggleColumn}

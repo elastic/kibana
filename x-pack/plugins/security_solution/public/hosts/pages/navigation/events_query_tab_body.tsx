@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useWindowSize } from 'react-use';
 
@@ -24,7 +24,6 @@ import { HistogramType } from '../../../graphql/types';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import {
   getEventsViewerBodyHeight,
-  getInvestigateInResolverAction,
   MIN_EVENTS_VIEWER_BODY_HEIGHT,
 } from '../../../timelines/components/timeline/body/helpers';
 import { FILTERS_GLOBAL_HEIGHT } from '../../../../common/constants';
@@ -61,14 +60,14 @@ export const histogramConfigs: MatrixHisrogramConfigs = {
   title: i18n.NAVIGATION_EVENTS_TITLE,
 };
 
-export const EventsQueryTabBody = ({
+const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
   pageFilters,
   setQuery,
   startDate,
-}: HostsComponentsQueryProps) => {
+}) => {
   const { initializeTimeline } = useManageTimeline();
   const dispatch = useDispatch();
   const { height: windowHeight } = useWindowSize();
@@ -77,9 +76,6 @@ export const EventsQueryTabBody = ({
     initializeTimeline({
       id: TimelineId.hostsPageEvents,
       defaultModel: eventsDefaultModel,
-      timelineRowActions: () => [
-        getInvestigateInResolverAction({ dispatch, timelineId: TimelineId.hostsPageEvents }),
-      ],
     });
   }, [dispatch, initializeTimeline]);
 
@@ -90,6 +86,20 @@ export const EventsQueryTabBody = ({
       }
     };
   }, [deleteQuery]);
+
+  const eventsViewerHeight = useMemo(
+    () =>
+      globalFullScreen
+        ? getEventsViewerBodyHeight({
+            footerHeight,
+            headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
+            kibanaChromeHeight: globalHeaderHeightPx,
+            otherContentHeight: FILTERS_GLOBAL_HEIGHT,
+            windowHeight,
+          })
+        : MIN_EVENTS_VIEWER_BODY_HEIGHT,
+    [globalFullScreen, windowHeight]
+  );
 
   return (
     <>
@@ -108,17 +118,7 @@ export const EventsQueryTabBody = ({
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
         end={endDate}
-        height={
-          globalFullScreen
-            ? getEventsViewerBodyHeight({
-                footerHeight,
-                headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
-                kibanaChromeHeight: globalHeaderHeightPx,
-                otherContentHeight: FILTERS_GLOBAL_HEIGHT,
-                windowHeight,
-              })
-            : MIN_EVENTS_VIEWER_BODY_HEIGHT
-        }
+        height={eventsViewerHeight}
         id={TimelineId.hostsPageEvents}
         start={startDate}
         pageFilters={pageFilters}
@@ -127,4 +127,6 @@ export const EventsQueryTabBody = ({
   );
 };
 
-EventsQueryTabBody.displayName = 'EventsQueryTabBody';
+EventsQueryTabBodyComponent.displayName = 'EventsQueryTabBodyComponent';
+
+export const EventsQueryTabBody = React.memo(EventsQueryTabBodyComponent);

@@ -18,6 +18,7 @@ import { useWithSource } from '../../common/containers/source';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useUserInfo } from '../../detections/components/user_info';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -67,6 +68,8 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
 
   const [showTimeline] = useShowTimeline();
   const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
+
+  useUserInfo();
 
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>

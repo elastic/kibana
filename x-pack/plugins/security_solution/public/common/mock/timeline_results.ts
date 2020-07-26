@@ -5,7 +5,7 @@
  */
 import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 
-import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
@@ -2221,7 +2221,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
-    id: 'timeline-1',
+    id: TimelineId.active,
     isFavorite: false,
     isLive: false,
     isLoading: false,
