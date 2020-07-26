@@ -23,10 +23,7 @@ const observabilityLabelBreadcrumb = {
 };
 
 function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
-  return breadcrumbs
-    .map(({ text }) => text)
-    .reverse()
-    .join(' | ');
+  return breadcrumbs.map(({ text }) => text).reverse();
 }
 
 const App = () => {
@@ -42,7 +39,7 @@ const App = () => {
             const breadcrumb = [observabilityLabelBreadcrumb, ...route.breadcrumb];
             useEffect(() => {
               core.chrome.setBreadcrumbs(breadcrumb);
-              document.title = getTitleFromBreadCrumbs(breadcrumb);
+              core.chrome.docTitle.change(getTitleFromBreadCrumbs(breadcrumb));
             }, [core, breadcrumb]);
 
             const { query, path: pathParams } = useRouteParams(route.params);
