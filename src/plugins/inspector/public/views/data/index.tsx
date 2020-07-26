@@ -37,7 +37,7 @@ export const getDataViewDescription = (
   shouldShow(adapters: Adapters) {
     return Boolean(adapters.data);
   },
-  Component: (props: InspectorViewProps) => (
+  component: (props: InspectorViewProps) => (
     <DataViewComponent {...props} uiSettings={uiSettings} />
   ),
 });

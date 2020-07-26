@@ -50,7 +50,7 @@ export interface InspectorViewProps<TAdapters extends Adapters = Adapters> {
  *    the view will always be visible.
  */
 export interface InspectorViewDescription {
-  Component: React.ComponentType<InspectorViewProps>;
+  component: React.ComponentType<InspectorViewProps>;
   help?: string;
   order?: number;
   shouldShow?: (adapters: Adapters) => boolean;
