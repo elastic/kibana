@@ -16,28 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { ElasticsearchService } from './elasticsearch_service';
-export { config, configSchema, ElasticsearchConfig } from './elasticsearch_config';
-export { NodesVersionCompatibility } from './version_check/ensure_es_version';
-export {
-  ElasticsearchServiceSetup,
-  ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-  InternalElasticsearchServiceSetup,
-  InternalElasticsearchServiceStart,
-  FakeRequest,
-  ScopeableRequest,
-} from './types';
-export * from './legacy';
-export {
-  IClusterClient,
-  ICustomClusterClient,
-  ElasticsearchClientConfig,
-  ElasticsearchClient,
-  IScopedClusterClient,
-  SearchResponse,
-  GetResponse,
-  DeleteDocumentResponse,
-  CountResponse,
-} from './client';
+export const retryCallClusterMock = jest.fn((fn) => fn());
+jest.doMock('../../../elasticsearch/client/retry_call_cluster', () => ({
+  retryCallCluster: retryCallClusterMock,
+}));
