@@ -296,6 +296,34 @@ export const UserActionTree = React.memo(
             index === caseServices[parsedConnectorId].lastPushIndex &&
             caseServices[parsedConnectorId].hasDataToPush;
 
+          let footers: EuiCommentProps[] = [];
+
+          if (showTopFooter) {
+            footers = [
+              ...footers,
+              {
+                username: '',
+                type: 'update',
+
+                event: 'Already pushed to',
+                timelineIcon: 'sortUp',
+              },
+            ];
+          }
+
+          if (showBottomFooter) {
+            footers = [
+              ...footers,
+              {
+                username: '',
+                type: 'update',
+
+                event: 'Requires update to',
+                timelineIcon: 'sortDown',
+              },
+            ];
+          }
+
           return [
             ...comments,
             {
@@ -320,6 +348,7 @@ export const UserActionTree = React.memo(
                 </EuiFlexGroup>
               ),
             },
+            ...footers,
           ];
         }
 
