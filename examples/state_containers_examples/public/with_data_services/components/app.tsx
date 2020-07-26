@@ -66,7 +66,7 @@ interface StateDemoAppDeps {
 interface AppState {
   name: string;
   filters: Filter[];
-  queryString?: Query;
+  query?: Query;
 }
 const defaultAppState: AppState = {
   name: '',
@@ -191,7 +191,7 @@ function useAppStateSyncing<AppState extends QueryState>(
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       query,
       appStateContainer,
-      { filters: esFilters.FilterStateStore.APP_STATE, queryString: true }
+      { filters: esFilters.FilterStateStore.APP_STATE, query: true }
     );
 
     // sets up syncing app state container with url
