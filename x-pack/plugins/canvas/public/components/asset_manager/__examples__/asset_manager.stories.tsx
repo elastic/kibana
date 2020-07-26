@@ -4,35 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
-import React from 'react';
+import { reduxDecorator, getAddonPanelParameters } from '../../../../storybook';
 
 import { AssetManager, AssetManagerComponent } from '../';
-
-import { Provider, AIRPLANE, MARKER } from './provider';
+import { assets } from './assets';
 
 storiesOf('components/Assets/AssetManager', module)
-  .add('redux: AssetManager', () => (
-    <Provider>
-      <AssetManager onClose={action('onClose')} />
-    </Provider>
-  ))
+  .addDecorator(reduxDecorator({ assets }))
+  .addParameters(getAddonPanelParameters())
+  .add('redux: AssetManager', () => <AssetManager onClose={action('onClose')} />)
   .add('no assets', () => (
-    <Provider>
-      <AssetManagerComponent
-        assets={[]}
-        onClose={action('onClose')}
-        onAddAsset={action('onAddAsset')}
-      />
-    </Provider>
+    <AssetManagerComponent
+      assets={[]}
+      onClose={action('onClose')}
+      onAddAsset={action('onAddAsset')}
+    />
   ))
   .add('two assets', () => (
-    <Provider>
-      <AssetManagerComponent
-        assets={[AIRPLANE, MARKER]}
-        onClose={action('onClose')}
-        onAddAsset={action('onAddAsset')}
-      />
-    </Provider>
+    <AssetManagerComponent
+      assets={assets}
+      onClose={action('onClose')}
+      onAddAsset={action('onAddAsset')}
+    />
   ));
