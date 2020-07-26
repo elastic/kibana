@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiCommentList,
+  EuiCommentProps,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -17,7 +23,9 @@ import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import { getLabelTitle } from './helpers';
 import { UserActionItem } from './user_action_item';
+import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
+import { UserActionTimestamp } from './user_action_timestamp';
 import { Connector } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
@@ -172,8 +180,82 @@ export const UserActionTree = React.memo(
         }
       }
     }, [commentId, initLoading, isLoadingUserActions, isLoadingIds, handleOutlineComment]);
+
+    const descriptionCommentListObj: EuiCommentProps = {
+      username: caseData.createdBy.username ?? i18n.UNKNOWN,
+      event: i18n.ADDED_DESCRIPTION,
+      timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
+      children: MarkdownDescription,
+      timelineIcon: (
+        <UserActionAvatar name={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''} />
+      ),
+    };
+
+    const comments: EuiCommentProps[] = caseUserActions.map((action, index) => {
+      if (action.commentId != null && action.action === 'create') {
+        const comment = caseData.comments.find((c) => c.id === action.commentId);
+        if (comment != null) {
+          return {
+            username: comment.createdBy.username ?? '',
+            timestamp: (
+              <UserActionTimestamp createdAt={comment.createdAt} updatedAt={comment.updatedAt} />
+            ),
+            children: (
+              <UserActionMarkdown
+                id={comment.id}
+                content={comment.comment}
+                isEditable={manageMarkdownEditIds.includes(comment.id)}
+                onChangeEditable={handleManageMarkdownEditId}
+                onSaveContent={handleSaveComment.bind(null, {
+                  id: comment.id,
+                  version: comment.version,
+                })}
+              />
+            ),
+            timelineIcon: (
+              <UserActionAvatar
+                name={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
+              />
+            ),
+          };
+        }
+      }
+
+      if (action.actionField.length === 1) {
+        const myField = action.actionField[0];
+        const parsedValue = parseString(`${action.newValue}`);
+        const { firstPush, parsedConnectorId, parsedConnectorName } =
+          parsedValue != null
+            ? {
+                firstPush: caseServices[parsedValue.connector_id].firstPushIndex === index,
+                parsedConnectorId: parsedValue.connector_id,
+                parsedConnectorName: parsedValue.connector_name,
+              }
+            : {
+                firstPush: false,
+                parsedConnectorId: 'none',
+                parsedConnectorName: 'none',
+              };
+        const labelTitle: string | JSX.Element = getLabelTitle({
+          action,
+          field: myField,
+          firstPush,
+          connectors,
+        });
+
+        return {
+          username: action.actionBy.username ?? '',
+          type: 'update',
+          event: labelTitle,
+          timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+          timelineIcon: action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
+        };
+      }
+    });
+    const commentsList = <EuiCommentList comments={[descriptionCommentListObj, ...comments]} />;
     return (
       <>
+        {commentsList}
         <UserActionItem
           createdAt={caseData.createdAt}
           data-test-subj="description-action"
