@@ -276,8 +276,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     signalIndexName,
   ]);
 
-  const isSubmitButtonDisabled = useCallback(
-    () => fetchOrCreateListError || exceptionItemsToAdd.length === 0,
+  const isSubmitButtonDisabled = useMemo(
+    () => fetchOrCreateListError || exceptionItemsToAdd.every((item) => item.entries.length === 0),
     [fetchOrCreateListError, exceptionItemsToAdd]
   );
 
@@ -296,9 +296,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             <p>{i18n.ADD_EXCEPTION_FETCH_ERROR}</p>
           </EuiCallOut>
         )}
-        {fetchOrCreateListError === false && isLoadingExceptionList === true && (
-          <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
-        )}
+        {fetchOrCreateListError === false &&
+          (isLoadingExceptionList ||
+            isIndexPatternLoading ||
+            isSignalIndexLoading ||
+            isSignalIndexPatternLoading) && (
+            <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
+          )}
         {fetchOrCreateListError === false &&
           !isSignalIndexLoading &&
           !isSignalIndexPatternLoading &&
@@ -373,7 +377,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           <EuiButton
             onClick={onAddExceptionConfirm}
             isLoading={addExceptionIsLoading}
-            isDisabled={isSubmitButtonDisabled()}
+            isDisabled={isSubmitButtonDisabled}
             fill
           >
             {i18n.ADD_EXCEPTION}
