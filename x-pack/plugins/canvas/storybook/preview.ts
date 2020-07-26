@@ -12,6 +12,9 @@ import { addDecorators } from './decorators';
 // Import the modules from the DLL.
 import './dll_contexts';
 
+// Import Canvas CSS
+import '../public/style/index.scss';
+
 startServices({
   notify: {
     success: (message) => action(`success: ${message}`)(),
@@ -20,6 +23,7 @@ startServices({
     warning: (message) => action(`warning: ${message}`)(),
   },
 });
+
 addDecorators();
 
 // Only gather and require CSS files related to Canvas.  The other CSS files
@@ -30,6 +34,3 @@ const css = require.context(
   /plugins\/(?=canvas).*light\.css/
 );
 css.keys().forEach((filename) => css(filename));
-
-// Import Canvas CSS
-import '../public/style/index.scss';

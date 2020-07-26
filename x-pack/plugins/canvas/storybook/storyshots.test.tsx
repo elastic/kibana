@@ -17,9 +17,9 @@ import { addSerializer } from 'jest-specific-snapshot';
 
 // Several of the renderers, used by the runtime, use jQuery.
 import jquery from 'jquery';
-// @ts-expect-error
+// @ts-expect-error jQuery global
 global.$ = jquery;
-// @ts-expect-error
+// @ts-expect-error jQuery global
 global.jQuery = jquery;
 
 // Set our default timezone to UTC for tests so we can generate predictable snapshots
@@ -57,9 +57,10 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
 });
 
 // Mock React Portal for components that use modals, tooltips, etc
-// @ts-expect-error
+// @ts-expect-error Portal mocks are notoriously difficult to type
 ReactDOM.createPortal = jest.fn((element) => element);
 
+// Mock the EUI HTML ID Generator so elements have a predictable ID in snapshots
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
     htmlIdGenerator: () => () => `generated-id`,
@@ -82,7 +83,7 @@ jest.mock(
   }
 );
 
-// @ts-expect-error
+// @ts-expect-error untyped library
 import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
@@ -99,5 +100,6 @@ addSerializer(styleSheetSerializer);
 initStoryshots({
   configPath: path.resolve(__dirname, './../storybook'),
   test: multiSnapshotWithOptions({}),
+  // Don't snapshot tests that start with 'redux'
   storyNameRegex: /^((?!.*?redux).)*$/,
 });
