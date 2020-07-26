@@ -26,6 +26,9 @@ import { UserActionItem } from './user_action_item';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
+import { UserActionCopyLink } from './user_action_copy_link';
+import { UserActionPropertyActions } from './user_action_property_actions';
+import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Connector } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
@@ -189,70 +192,144 @@ export const UserActionTree = React.memo(
       timelineIcon: (
         <UserActionAvatar name={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''} />
       ),
+      actions: (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <UserActionCopyLink id={DESCRIPTION_ID} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <UserActionPropertyActions
+              id={DESCRIPTION_ID}
+              editLabel={i18n.EDIT_DESCRIPTION}
+              quoteLabel={i18n.QUOTE}
+              disabled={!userCanCrud}
+              onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
+              onQuote={handleManageQuote.bind(null, caseData.description)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
     };
 
-    const comments: EuiCommentProps[] = caseUserActions.map((action, index) => {
-      if (action.commentId != null && action.action === 'create') {
-        const comment = caseData.comments.find((c) => c.id === action.commentId);
-        if (comment != null) {
-          return {
-            username: comment.createdBy.username ?? '',
-            timestamp: (
-              <UserActionTimestamp createdAt={comment.createdAt} updatedAt={comment.updatedAt} />
-            ),
-            children: (
-              <UserActionMarkdown
-                id={comment.id}
-                content={comment.comment}
-                isEditable={manageMarkdownEditIds.includes(comment.id)}
-                onChangeEditable={handleManageMarkdownEditId}
-                onSaveContent={handleSaveComment.bind(null, {
-                  id: comment.id,
-                  version: comment.version,
-                })}
-              />
-            ),
-            timelineIcon: (
-              <UserActionAvatar
-                name={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
-              />
-            ),
-          };
+    const commentsToList: EuiCommentProps[] = caseUserActions.reduce<EuiCommentProps[]>(
+      (comments, action, index) => {
+        if (action.commentId != null && action.action === 'create') {
+          const comment = caseData.comments.find((c) => c.id === action.commentId);
+          if (comment != null) {
+            return [
+              ...comments,
+              {
+                username: comment.createdBy.username ?? '',
+                timestamp: (
+                  <UserActionTimestamp
+                    createdAt={comment.createdAt}
+                    updatedAt={comment.updatedAt}
+                  />
+                ),
+                children: (
+                  <UserActionMarkdown
+                    id={comment.id}
+                    content={comment.comment}
+                    isEditable={manageMarkdownEditIds.includes(comment.id)}
+                    onChangeEditable={handleManageMarkdownEditId}
+                    onSaveContent={handleSaveComment.bind(null, {
+                      id: comment.id,
+                      version: comment.version,
+                    })}
+                  />
+                ),
+                timelineIcon: (
+                  <UserActionAvatar
+                    name={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
+                  />
+                ),
+                actions: (
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <UserActionCopyLink id={DESCRIPTION_ID} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <UserActionPropertyActions
+                        id={DESCRIPTION_ID}
+                        editLabel={i18n.EDIT_COMMENT}
+                        quoteLabel={i18n.QUOTE}
+                        disabled={!userCanCrud}
+                        onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
+                        onQuote={handleManageQuote.bind(null, comment.comment)}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              },
+            ];
+          }
         }
-      }
 
-      if (action.actionField.length === 1) {
-        const myField = action.actionField[0];
-        const parsedValue = parseString(`${action.newValue}`);
-        const { firstPush, parsedConnectorId, parsedConnectorName } =
-          parsedValue != null
-            ? {
-                firstPush: caseServices[parsedValue.connector_id].firstPushIndex === index,
-                parsedConnectorId: parsedValue.connector_id,
-                parsedConnectorName: parsedValue.connector_name,
-              }
-            : {
-                firstPush: false,
-                parsedConnectorId: 'none',
-                parsedConnectorName: 'none',
-              };
-        const labelTitle: string | JSX.Element = getLabelTitle({
-          action,
-          field: myField,
-          firstPush,
-          connectors,
-        });
+        if (action.actionField.length === 1) {
+          const myField = action.actionField[0];
+          const parsedValue = parseString(`${action.newValue}`);
+          const { firstPush, parsedConnectorId, parsedConnectorName } =
+            parsedValue != null
+              ? {
+                  firstPush: caseServices[parsedValue.connector_id].firstPushIndex === index,
+                  parsedConnectorId: parsedValue.connector_id,
+                  parsedConnectorName: parsedValue.connector_name,
+                }
+              : {
+                  firstPush: false,
+                  parsedConnectorId: 'none',
+                  parsedConnectorName: 'none',
+                };
+          const labelTitle: string | JSX.Element = getLabelTitle({
+            action,
+            field: myField,
+            firstPush,
+            connectors,
+          });
 
-        return {
-          username: action.actionBy.username ?? '',
-          type: 'update',
-          event: labelTitle,
-          timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-          timelineIcon: action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
-        };
-      }
-    });
-    const commentsList = <EuiCommentList comments={[descriptionCommentListObj, ...comments]} />;
+          const showTopFooter =
+            action.action === 'push-to-service' &&
+            index === caseServices[parsedConnectorId].lastPushIndex;
+
+          const showBottomFooter =
+            action.action === 'push-to-service' &&
+            index === caseServices[parsedConnectorId].lastPushIndex &&
+            caseServices[parsedConnectorId].hasDataToPush;
+
+          return [
+            ...comments,
+            {
+              username: action.actionBy.username ?? '',
+              type: 'update',
+              event: labelTitle,
+              timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+              timelineIcon: action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
+              actions: (
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <UserActionCopyLink id={DESCRIPTION_ID} />
+                  </EuiFlexItem>
+                  {action.action === 'update' && action.commentId != null && (
+                    <EuiFlexItem>
+                      <UserActionMoveToReference
+                        id={action.commentId}
+                        outlineComment={handleOutlineComment}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              ),
+            },
+          ];
+        }
+
+        return comments;
+      },
+      [descriptionCommentListObj]
+    );
+
+    const commentsList = <EuiCommentList comments={commentsToList} />;
+
     return (
       <>
         {commentsList}
