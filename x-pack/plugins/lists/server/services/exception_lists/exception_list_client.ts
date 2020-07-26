@@ -85,6 +85,7 @@ export class ExceptionListClient {
     return createEndpointList({
       savedObjectsClient,
       user,
+      version: 1,
     });
   };
 
@@ -176,17 +177,20 @@ export class ExceptionListClient {
   public createExceptionList = async ({
     _tags,
     description,
+    immutable,
     listId,
     meta,
     name,
     namespaceType,
     tags,
     type,
+    version,
   }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
     const { savedObjectsClient, user } = this;
     return createExceptionList({
       _tags,
       description,
+      immutable,
       listId,
       meta,
       name,
@@ -195,6 +199,7 @@ export class ExceptionListClient {
       tags,
       type,
       user,
+      version,
     });
   };
 
@@ -209,6 +214,7 @@ export class ExceptionListClient {
     namespaceType,
     tags,
     type,
+    version,
   }: UpdateExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return updateExceptionList({
@@ -224,6 +230,7 @@ export class ExceptionListClient {
       tags,
       type,
       user,
+      version,
     });
   };
 

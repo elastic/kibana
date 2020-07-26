@@ -44,6 +44,8 @@ const StyledResizable = styled(Resizable)`
 
 const RESIZABLE_ENABLE = { left: true };
 
+const RESIZABLE_DISABLED = { left: false };
+
 const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   children,
   onClose,
@@ -98,10 +100,10 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         size="l"
       >
         <StyledResizable
-          enable={RESIZABLE_ENABLE}
+          enable={timelineFullScreen ? RESIZABLE_DISABLED : RESIZABLE_ENABLE}
           defaultSize={resizableDefaultSize}
-          minWidth={timelineFullScreen ? '100vw' : minWidthPixels}
-          maxWidth={timelineFullScreen ? '100vw' : `${maxWidthPercent}vw`}
+          minWidth={timelineFullScreen ? 'calc(100vw - 8px)' : minWidthPixels}
+          maxWidth={timelineFullScreen ? 'calc(100vw - 8px)' : `${maxWidthPercent}vw`}
           handleComponent={resizableHandleComponent}
           onResizeStop={onResizeStop}
         >

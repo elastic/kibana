@@ -372,5 +372,197 @@ describe('CpuUsageAlert', () => {
         state: 'firing',
       });
     });
+
+    it('should show proper counts for resolved and firing nodes', async () => {
+      (fetchCpuUsageNodeStats as jest.Mock).mockImplementation(() => {
+        return [
+          {
+            ...stat,
+            cpuUsage: 1,
+          },
+          {
+            ...stat,
+            nodeId: 'anotherNode',
+            nodeName: 'anotherNode',
+            cpuUsage: 99,
+          },
+        ];
+      });
+      (getState as jest.Mock).mockImplementation(() => {
+        return {
+          alertStates: [
+            {
+              cluster: {
+                clusterUuid,
+                clusterName,
+              },
+              ccs: null,
+              cpuUsage: 91,
+              nodeId,
+              nodeName,
+              ui: {
+                isFiring: true,
+                message: null,
+                severity: 'danger',
+                resolvedMS: 0,
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+            {
+              cluster: {
+                clusterUuid,
+                clusterName,
+              },
+              ccs: null,
+              cpuUsage: 100,
+              nodeId: 'anotherNode',
+              nodeName: 'anotherNode',
+              ui: {
+                isFiring: true,
+                message: null,
+                severity: 'danger',
+                resolvedMS: 0,
+                triggeredMS: 1,
+                lastCheckedMS: 0,
+              },
+            },
+          ],
+        };
+      });
+      const alert = new CpuUsageAlert();
+      alert.initializeAlertType(
+        getUiSettingsService as any,
+        monitoringCluster as any,
+        getLogger as any,
+        config as any,
+        kibanaUrl
+      );
+      const type = alert.getAlertType();
+      await type.executor({
+        ...executorOptions,
+        // @ts-ignore
+        params: alert.defaultParams,
+      } as any);
+      const count = 1;
+      expect(replaceState).toHaveBeenCalledWith({
+        alertStates: [
+          {
+            cluster: { clusterUuid, clusterName },
+            ccs: null,
+            cpuUsage: 1,
+            nodeId,
+            nodeName,
+            ui: {
+              isFiring: false,
+              message: {
+                text:
+                  'The cpu usage on node myNodeName is now under the threshold, currently reporting at 1.00% as of #resolved',
+                tokens: [
+                  {
+                    startToken: '#resolved',
+                    type: 'time',
+                    isAbsolute: true,
+                    isRelative: false,
+                    timestamp: 1,
+                  },
+                ],
+              },
+              severity: 'danger',
+              resolvedMS: 1,
+              triggeredMS: 1,
+              lastCheckedMS: 0,
+            },
+          },
+          {
+            ccs: null,
+            cluster: { clusterUuid, clusterName },
+            cpuUsage: 99,
+            nodeId: 'anotherNode',
+            nodeName: 'anotherNode',
+            ui: {
+              isFiring: true,
+              message: {
+                text:
+                  'Node #start_linkanotherNode#end_link is reporting cpu usage of 99.00% at #absolute',
+                nextSteps: [
+                  {
+                    text: '#start_linkCheck hot threads#end_link',
+                    tokens: [
+                      {
+                        startToken: '#start_link',
+                        endToken: '#end_link',
+                        type: 'docLink',
+                        partialUrl:
+                          '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html',
+                      },
+                    ],
+                  },
+                  {
+                    text: '#start_linkCheck long running tasks#end_link',
+                    tokens: [
+                      {
+                        startToken: '#start_link',
+                        endToken: '#end_link',
+                        type: 'docLink',
+                        partialUrl:
+                          '{elasticWebsiteUrl}/guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html',
+                      },
+                    ],
+                  },
+                ],
+                tokens: [
+                  {
+                    startToken: '#absolute',
+                    type: 'time',
+                    isAbsolute: true,
+                    isRelative: false,
+                    timestamp: 1,
+                  },
+                  {
+                    startToken: '#start_link',
+                    endToken: '#end_link',
+                    type: 'link',
+                    url: 'elasticsearch/nodes/anotherNode',
+                  },
+                ],
+              },
+              severity: 'danger',
+              resolvedMS: 0,
+              triggeredMS: 1,
+              lastCheckedMS: 0,
+            },
+          },
+        ],
+      });
+      expect(scheduleActions).toHaveBeenCalledTimes(1);
+      // expect(scheduleActions.mock.calls[0]).toEqual([
+      //   'default',
+      //   {
+      //     internalFullMessage: `CPU usage alert is resolved for ${count} node(s) in cluster: ${clusterName}.`,
+      //     internalShortMessage: `CPU usage alert is resolved for ${count} node(s) in cluster: ${clusterName}.`,
+      //     clusterName,
+      //     count,
+      //     nodes: `${nodeName}:1.00`,
+      //     state: 'resolved',
+      //   },
+      // ]);
+      expect(scheduleActions.mock.calls[0]).toEqual([
+        'default',
+        {
+          action:
+            '[View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
+          actionPlain: 'Verify CPU levels across affected nodes.',
+          internalFullMessage:
+            'CPU usage alert is firing for 1 node(s) in cluster: testCluster. [View nodes](http://localhost:5601/app/monitoring#elasticsearch/nodes?_g=(cluster_uuid:abc123))',
+          internalShortMessage:
+            'CPU usage alert is firing for 1 node(s) in cluster: testCluster. Verify CPU levels across affected nodes.',
+          nodes: 'anotherNode:99.00',
+          clusterName,
+          count,
+          state: 'firing',
+        },
+      ]);
+    });
   });
 });

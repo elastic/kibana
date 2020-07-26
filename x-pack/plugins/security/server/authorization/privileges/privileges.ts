@@ -90,7 +90,6 @@ export function privilegesFactory(
           delete featurePrivileges[feature.id];
         }
       }
-
       return {
         features: featurePrivileges,
         global: {

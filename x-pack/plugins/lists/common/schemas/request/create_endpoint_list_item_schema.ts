@@ -20,7 +20,7 @@ import {
   tags,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
-import { CreateCommentsArray, DefaultCreateCommentsArray, DefaultEntryArray } from '../types';
+import { CreateCommentsArray, DefaultCreateCommentsArray, nonEmptyEntriesArray } from '../types';
 import { EntriesArray } from '../types/entries';
 import { DefaultUuid } from '../../siem_common_deps';
 
@@ -28,6 +28,7 @@ export const createEndpointListItemSchema = t.intersection([
   t.exact(
     t.type({
       description,
+      entries: nonEmptyEntriesArray,
       name,
       type: exceptionListItemType,
     })
@@ -36,7 +37,6 @@ export const createEndpointListItemSchema = t.intersection([
     t.partial({
       _tags, // defaults to empty array if not set during decode
       comments: DefaultCreateCommentsArray, // defaults to empty array if not set during decode
-      entries: DefaultEntryArray, // defaults to empty array if not set during decode
       item_id: DefaultUuid, // defaults to GUID (uuid v4) if not set during decode
       meta, // defaults to undefined if not set during decode
       tags, // defaults to empty array if not set during decode
