@@ -22,6 +22,8 @@ interface TagsFilterPopoverProps {
   selectedTags: string[];
   tags: string[];
   onSelectedTagsChanged: Dispatch<SetStateAction<string[]>>;
+  // eslint-disable-next-line react/no-unused-prop-types
+  isLoading: boolean; // TO DO reimplement?
 }
 
 const ScrollableDiv = styled.div`
