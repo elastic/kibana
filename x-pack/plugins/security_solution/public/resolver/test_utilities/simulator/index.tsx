@@ -23,7 +23,7 @@ import { ResolverAction } from '../../store/actions';
  */
 export class Simulator {
   /**
-   * A string that uniquely identifies this Resolver instance amoung others mounted in the DOM.
+   * A string that uniquely identifies this Resolver instance among others mounted in the DOM.
    */
   private readonly resolverComponentInstanceID: string;
   /**
@@ -54,7 +54,7 @@ export class Simulator {
      */
     dataAccessLayer: DataAccessLayer;
     /**
-     * A string that uniquely identifies this Resolver instance amoung others mounted in the DOM.
+     * A string that uniquely identifies this Resolver instance among others mounted in the DOM.
      */
     resolverComponentInstanceID: string;
     /**
@@ -76,13 +76,13 @@ export class Simulator {
       this.spyMiddleware.middleware
     );
 
-    // Create a redux store w/ the top level Resolver reducer and the enhancer that includes the Resolver middleware and the spyMiddleware
+    // Create a redux store w/ the top level Resolver reducer and the enhancer that includes the Resolver middleware and the `spyMiddleware`
     this.store = createStore(resolverReducer, middlewareEnhancer);
 
     // Create a fake 'history' instance that Resolver will use to read and write query string values
     this.history = createMemoryHistory();
 
-    // Used for KibanaContextProvider
+    // Used for `KibanaContextProvider`
     const coreStart: CoreStart = coreMock.createStart();
 
     // Render Resolver via the `MockResolver` component, using `enzyme`.
@@ -121,7 +121,7 @@ export class Simulator {
     let resolveState: (() => void) | null = null;
 
     const promise: Promise<undefined> = new Promise((resolve) => {
-      // immedatiely expose the resolve function in the outer scope. it will be resolved when the next state transition occurs.
+      // Immediately expose the resolve function in the outer scope. It will be resolved when the next state transition occurs.
       resolveState = resolve;
     });
 
@@ -150,16 +150,16 @@ export class Simulator {
      *
      * Code will test assertions after each state transition. If the assertion hasn't passed and no further state transitions occur,
      * then the jest timeout will happen. The timeout doesn't give a useful message about the assertion.
-     * By shortcircuiting this function, code that uses it can short circuit the test timeout and print a useful error message.
+     * By short-circuiting this function, code that uses it can short circuit the test timeout and print a useful error message.
      *
-     * NB: the logic to shortcircuit the loop is here because knowledge of state is a concern of the simulator, not tests.
+     * NB: the logic to short-circuit the loop is here because knowledge of state is a concern of the simulator, not tests.
      */
     let timeoutCount = 0;
     while (true) {
       /**
        * `await` a race between the next state transition and a timeout that happens after `0`ms.
        * If the timeout wins, no `dispatch` call caused a state transition in the last loop.
-       * If this keeps happening, assume that Resolver isn't going to do anythig else.
+       * If this keeps happening, assume that Resolver isn't going to do anything else.
        *
        * If Resolver adds intentional delay logic (e.g. waiting before making a request), this code might have to change.
        * In that case, Resolver should use the side effect context to schedule future work. This code could then subscribe to some event published by the side effect context. That way, this code will be aware of Resolver's intention to do work.
@@ -186,7 +186,7 @@ export class Simulator {
           return;
         }
       } else {
-        // If a state transition occurs, reset the timout count and yield the value
+        // If a state transition occurs, reset the timeout count and yield the value
         timeoutCount = 0;
         yield mapper();
       }
@@ -263,7 +263,7 @@ const baseResolverSelector = '[data-test-subj="resolver:node"]';
 
 interface ProcessNodeElementSelectorOptions {
   /**
-   * Entity ID of the node. If passed, will be used to create an data-attribtue CSS selector that should only get the related node element.
+   * Entity ID of the node. If passed, will be used to create an data-attribute CSS selector that should only get the related node element.
    */
   entityID?: string;
   /**

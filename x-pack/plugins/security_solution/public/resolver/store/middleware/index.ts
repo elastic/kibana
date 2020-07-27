@@ -17,9 +17,9 @@ type MiddlewareFactory<S = ResolverState> = (
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
 /**
- * The redux middleware that the app uses to trigger side effects.
+ * The `redux` middleware that the application uses to trigger side effects.
  * All data fetching should be done here.
- * For actions that the app triggers directly, use `app` as a prefix for the type.
+ * For actions that the application triggers directly, use `app` as a prefix for the type.
  * For actions that are triggered as a result of server interaction, use `server` as a prefix for the type.
  */
 export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: DataAccessLayer) => {

@@ -46,7 +46,7 @@ expect.extend({
     // Set to true if the test passes.
     let pass: boolean = false;
 
-    // Aysync iterate over the iterable
+    // Async iterate over the iterable
     for await (const received of receivedIterable) {
       // keep track of the last value. Used in both pass and fail messages
       lastReceived = received;

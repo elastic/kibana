@@ -39,7 +39,7 @@ export function dataAccessLayerFactory(
     },
 
     /**
-     * Used to get the default index pattern from the SIEM app.
+     * Used to get the default index pattern from the SIEM application.
      */
     indexPatterns(): string[] {
       return context.services.uiSettings.get(defaultIndexKey);

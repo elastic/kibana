@@ -30,7 +30,7 @@ type MockResolverProps = {
    */
   rasterHeight?: number;
   /**
-   * Used for the KibanaContextProvider
+   * Used for the `KibanaContextProvider`
    */
   coreStart: CoreStart;
   /**

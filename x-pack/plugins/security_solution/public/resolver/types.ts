@@ -38,21 +38,21 @@ export interface ResolverState {
 }
 
 /**
- * Piece of redux state that models an animation for the camera.
+ * Piece of `redux` state that models an animation for the camera.
  */
 export interface ResolverUIState {
   /**
-   * The nodeID for the process that is selected (in the aria-activedescendent sense of being selected.)
+   * The `nodeID` for the process that is selected (in the `aria-activedescendent` sense of being selected.)
    */
   readonly ariaActiveDescendant: string | null;
   /**
-   * nodeID of the selected node
+   * `nodeID` of the selected node
    */
   readonly selectedNode: string | null;
 }
 
 /**
- * Piece of redux state that models an animation for the camera.
+ * Piece of `redux` state that models an animation for the camera.
  */
 export interface CameraAnimationState {
   /**
@@ -76,7 +76,7 @@ export interface CameraAnimationState {
 }
 
 /**
- * The redux state for the `useCamera` hook.
+ * The `redux` state for the `useCamera` hook.
  */
 export type CameraState = {
   /**
@@ -96,7 +96,7 @@ export type CameraState = {
   readonly translationNotCountingCurrentPanning: Vector2;
 
   /**
-   * The world coordinates that the pointing device was last over. This is used during mousewheel zoom.
+   * The world coordinates that the pointing device was last over. This is used during mouse-wheel zoom.
    */
   readonly latestFocusedWorldCoordinates: Vector2 | null;
 } & (
@@ -143,7 +143,7 @@ export type CameraState = {
 export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
 
 /**
- * The entity stored in rbush for resolver edge lines.
+ * The entity stored in `rbush` for resolver edge lines.
  */
 export interface IndexedEdgeLineSegment extends BBox {
   type: 'edgeLine';
@@ -151,7 +151,7 @@ export interface IndexedEdgeLineSegment extends BBox {
 }
 
 /**
- * The entity store in rbush for resolver process nodes.
+ * The entity store in `rbush` for resolver process nodes.
  */
 export interface IndexedProcessNode extends BBox {
   type: 'processNode';
@@ -168,7 +168,7 @@ export interface VisibleEntites {
 }
 
 /**
- * State for `data` reducer which handles receiving Resolver data from the backend.
+ * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
 export interface DataState {
   readonly relatedEvents: Map<string, ResolverRelatedEvents>;
@@ -221,11 +221,11 @@ export type Vector2 = readonly [number, number];
  */
 export interface AABB {
   /**
-   * Vector who's `x` component is the _left_ side of the AABB and who's `y` component is the _bottom_ side of the AABB.
+   * Vector who's `x` component is the _left_ side of the `AABB` and who's `y` component is the _bottom_ side of the `AABB`.
    **/
   readonly minimum: Vector2;
   /**
-   * Vector who's `x` component is the _right_ side of the AABB and who's `y` component is the _bottom_ side of the AABB.
+   * Vector who's `x` component is the _right_ side of the `AABB` and who's `y` component is the _bottom_ side of the `AABB`.
    **/
   readonly maximum: Vector2;
 }
@@ -274,7 +274,7 @@ export interface ProcessEvent {
 }
 
 /**
- * A represention of a process tree with indices for O(1) access to children and values by id.
+ * A representation of a process tree with indices for O(1) access to children and values by id.
  */
 export interface IndexedProcessTree {
   /**
@@ -288,7 +288,7 @@ export interface IndexedProcessTree {
 }
 
 /**
- * A map of ProcessEvents (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
+ * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
  */
 export type ProcessWidths = Map<ResolverEvent, number>;
 /**
@@ -326,16 +326,16 @@ export interface DurationDetails {
  */
 export interface EdgeLineMetadata {
   elapsedTime?: DurationDetails;
-  // A string of the two joined process nodes concatted together.
+  // A string of the two joined process nodes concatenated together.
   uniqueId: string;
 }
 /**
- * A tuple of 2 vector2 points forming a polyline. Used to connect process nodes in the graph.
+ * A tuple of 2 vector2 points forming a poly-line. Used to connect process nodes in the graph.
  */
 export type EdgeLinePoints = Vector2[];
 
 /**
- * Edge line components including the points joining the edgeline and any optional associated metadata
+ * Edge line components including the points joining the edge-line and any optional associated metadata
  */
 export interface EdgeLineSegment {
   points: EdgeLinePoints;
@@ -343,7 +343,7 @@ export interface EdgeLineSegment {
 }
 
 /**
- * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
+ * Used to provide pre-calculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
   process: ResolverEvent;
@@ -431,11 +431,11 @@ export type ResolverStore = Store<ResolverState, ResolverAction>;
  */
 export interface IsometricTaxiLayout {
   /**
-   * A map of events to position. each event represents its own node.
+   * A map of events to position. Each event represents its own node.
    */
   processNodePositions: Map<ResolverEvent, Vector2>;
   /**
-   * A map of edgline segments, which graphically connect nodes.
+   * A map of edge-line segments, which graphically connect nodes.
    */
   edgeLineSegments: EdgeLineSegment[];
 
@@ -494,8 +494,8 @@ export interface ResolverProps {
    */
   databaseDocumentID?: string;
   /**
-   * A string literal describing where in the app resolver is located,
-   * used to prevent collisions in things like query params
+   * A string literal describing where in the application resolver is located.
+   * Used to prevent collisions in things like query parameters.
    */
   resolverComponentInstanceID: string;
 }
