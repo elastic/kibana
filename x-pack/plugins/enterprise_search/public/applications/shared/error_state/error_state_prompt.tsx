@@ -38,7 +38,7 @@ export const ErrorStatePrompt: React.FC = () => {
               }}
             />
           </p>
-          <ol className="eui-textLeft">
+          <ol className="troubleshootingSteps">
             <li>
               <FormattedMessage
                 id="xpack.enterpriseSearch.errorConnectingState.description2"
@@ -53,6 +53,26 @@ export const ErrorStatePrompt: React.FC = () => {
                 id="xpack.enterpriseSearch.errorConnectingState.description3"
                 defaultMessage="Confirm that the Enterprise Search server is responsive."
               />
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuth"
+                defaultMessage="Check your user authentication:"
+              />
+              <ul>
+                <li>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuthNative"
+                    defaultMessage="Are you using Elasticsearch Native auth?"
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuthSAML"
+                    defaultMessage="If you’re on SSO or SAML, is your SAML realm also set up on Enterprise Search?"
+                  />
+                </li>
+              </ul>
             </li>
             <li>
               <FormattedMessage
