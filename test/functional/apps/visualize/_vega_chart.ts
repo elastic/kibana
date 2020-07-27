@@ -18,9 +18,17 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['timePicker', 'visualize', 'visChart', 'vegaChart']);
+// eslint-disable-next-line import/no-default-export
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const PageObjects = getPageObjects([
+    'timePicker',
+    'visualize',
+    'visChart',
+    'visEditor',
+    'vegaChart',
+  ]);
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
   const log = getService('log');
@@ -31,17 +39,15 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVega');
       await PageObjects.visualize.clickVega();
+      await PageObjects.visChart.waitForVisualizationRenderingStabilized();
     });
 
     describe('vega chart', () => {
       describe('initial render', () => {
-        it('should not have inspector enabled', async function () {
-          await inspector.expectIsNotEnabled();
-        });
-
-        it.skip('should have some initial vega spec text', async function () {
+        it('should have some initial vega spec text', async function () {
           const vegaSpec = await PageObjects.vegaChart.getSpec();
-          expect(vegaSpec).to.contain('{').and.to.contain('data');
+          expect(vegaSpec).to.contain('{');
+          expect(vegaSpec).to.contain('data');
           expect(vegaSpec.length).to.be.above(500);
         });
 
@@ -49,7 +55,8 @@ export default function ({ getService, getPageObjects }) {
           const view = await PageObjects.vegaChart.getViewContainer();
           expect(view).to.be.ok();
           const size = await view.getSize();
-          expect(size).to.have.property('width').and.to.have.property('height');
+          expect(size).to.have.property('width');
+          expect(size).to.have.property('height');
           expect(size.width).to.be.above(0);
           expect(size.height).to.be.above(0);
 
@@ -68,10 +75,18 @@ export default function ({ getService, getPageObjects }) {
           await filterBar.removeAllFilters();
         });
 
-        it.skip('should render different data in response to filter change', async function () {
-          await PageObjects.vegaChart.expectVisToMatchScreenshot('vega_chart');
+        it('should render different data in response to filter change', async function () {
+          await PageObjects.vegaChart.typeInSpec('"config": { "kibana": {"renderer": "svg"} },');
+          await PageObjects.visEditor.clickGo();
+          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+          const fullDataLabels = await PageObjects.vegaChart.getYAxisLabels();
+          expect(fullDataLabels[0]).to.eql('0');
+          expect(fullDataLabels[fullDataLabels.length - 1]).to.eql('1,600');
           await filterBar.addFilter('@tags.raw', 'is', 'error');
-          await PageObjects.vegaChart.expectVisToMatchScreenshot('vega_chart_filtered');
+          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+          const filteredDataLabels = await PageObjects.vegaChart.getYAxisLabels();
+          expect(filteredDataLabels[0]).to.eql('0');
+          expect(filteredDataLabels[filteredDataLabels.length - 1]).to.eql('90');
         });
       });
     });
