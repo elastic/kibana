@@ -14,7 +14,7 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from './operators';
-import { getOperators, validateParams, getGenericComboBoxProps } from './helpers';
+import { getOperators, paramIsValid, getGenericComboBoxProps } from './helpers';
 
 describe('helpers', () => {
   describe('#getOperators', () => {
@@ -53,27 +53,67 @@ describe('helpers', () => {
     });
   });
 
-  describe('#validateParams', () => {
-    test('returns false if value is undefined', () => {
-      const isValid = validateParams(undefined, getField('@timestamp'));
+  describe('#paramIsValid', () => {
+    test('returns false if value is undefined and "isRequired" nad "touched" are true', () => {
+      const isValid = paramIsValid(undefined, getField('@timestamp'), true, true);
 
       expect(isValid).toBeFalsy();
     });
 
-    test('returns false if value is empty string', () => {
-      const isValid = validateParams('', getField('@timestamp'));
-
-      expect(isValid).toBeFalsy();
-    });
-
-    test('returns true if type is "date" and value is valid', () => {
-      const isValid = validateParams('1994-11-05T08:15:30-05:00', getField('@timestamp'));
+    test('returns true if value is undefined and "isRequired" is true but "touched" is false', () => {
+      const isValid = paramIsValid(undefined, getField('@timestamp'), true, false);
 
       expect(isValid).toBeTruthy();
     });
 
-    test('returns false if type is "date" and value is not valid', () => {
-      const isValid = validateParams('1593478826', getField('@timestamp'));
+    test('returns true if value is undefined and "isRequired" is false', () => {
+      const isValid = paramIsValid(undefined, getField('@timestamp'), false, false);
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns false if value is empty string when "isRequired" is true and "touched" is false', () => {
+      const isValid = paramIsValid('', getField('@timestamp'), true, false);
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns true if value is empty string and "isRequired" is false', () => {
+      const isValid = paramIsValid('', getField('@timestamp'), false, false);
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns true if type is "date" and value is valid and "isRequired" is false', () => {
+      const isValid = paramIsValid(
+        '1994-11-05T08:15:30-05:00',
+        getField('@timestamp'),
+        false,
+        false
+      );
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns true if type is "date" and value is valid and "isRequired" is true', () => {
+      const isValid = paramIsValid(
+        '1994-11-05T08:15:30-05:00',
+        getField('@timestamp'),
+        true,
+        false
+      );
+
+      expect(isValid).toBeTruthy();
+    });
+
+    test('returns false if type is "date" and value is not valid and "isRequired" is false', () => {
+      const isValid = paramIsValid('1593478826', getField('@timestamp'), false, false);
+
+      expect(isValid).toBeFalsy();
+    });
+
+    test('returns false if type is "date" and value is not valid and "isRequired" is true', () => {
+      const isValid = paramIsValid('1593478826', getField('@timestamp'), true, true);
 
       expect(isValid).toBeFalsy();
     });
