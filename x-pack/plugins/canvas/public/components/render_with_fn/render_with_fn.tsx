@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
 import { useDebounce } from 'react-use';
 
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useNotifyService } from '../../services';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
 import { RendererHandlers } from '../../../types';
@@ -39,8 +39,7 @@ export const RenderWithFn: FC<Props> = ({
   width,
   height,
 }) => {
-  const { services } = useKibana();
-  const onError = services.canvas.notify.error;
+  const { error: onError } = useNotifyService();
 
   const [domNode, setDomNode] = useState<HTMLElement | null>(null);
 
