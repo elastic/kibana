@@ -6,8 +6,6 @@
 
 import { LegacyAPICaller } from '../../../../../../src/core/server';
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
-import { jobServiceProvider } from '../../../../ml/server/models/job_service';
-import { DataRecognizer } from '../../../../ml/server/models/data_recognizer';
 import { mlServicesMock } from '../../lib/machine_learning/mocks';
 import {
   getMockJobSummaryResponse,
@@ -15,9 +13,6 @@ import {
   getMockRulesResponse,
 } from './detections.mocks';
 import { fetchDetectionsUsage } from './index';
-
-jest.mock('../../../../ml/server/models/job_service');
-jest.mock('../../../../ml/server/models/data_recognizer');
 
 describe('Detections Usage', () => {
   describe('fetchDetectionsUsage()', () => {
@@ -79,12 +74,12 @@ describe('Detections Usage', () => {
     it('tallies jobs data given jobs results', async () => {
       const mockJobSummary = jest.fn().mockResolvedValue(getMockJobSummaryResponse());
       const mockListModules = jest.fn().mockResolvedValue(getMockListModulesResponse());
-      (jobServiceProvider as jest.Mock).mockImplementation(() => ({
-        jobsSummary: mockJobSummary,
-      }));
-      (DataRecognizer as jest.Mock).mockImplementation(() => ({
+      mlMock.modulesProvider.mockReturnValue(({
         listModules: mockListModules,
-      }));
+      } as unknown) as ReturnType<typeof mlMock.modulesProvider>);
+      mlMock.jobServiceProvider.mockReturnValue({
+        jobsSummary: mockJobSummary,
+      });
 
       const result = await fetchDetectionsUsage('', callClusterMock, mlMock);
 

@@ -10,7 +10,11 @@ import {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
 } from '../../../../../services/ml_api_service/data_frame_analytics';
-import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  REFRESH_ANALYTICS_LIST_STATE,
+  refreshAnalyticsList$,
+} from '../../../../common';
 
 import {
   DATA_FRAME_MODE,
@@ -136,10 +140,12 @@ export const getAnalyticsFactory = (
 
             // Table with expandable rows requires `id` on the outer most level
             reducedtableRows.push({
+              checkpointing: {},
               config,
               id: config.id,
-              checkpointing: {},
+              job_type: Object.keys(config.analysis)[0] as ANALYSIS_CONFIG_TYPE,
               mode: DATA_FRAME_MODE.BATCH,
+              state: stats.state,
               stats,
             });
             return reducedtableRows;

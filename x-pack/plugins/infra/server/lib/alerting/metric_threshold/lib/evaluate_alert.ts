@@ -15,6 +15,7 @@ import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler
 import { AlertServices, AlertExecutorOptions } from '../../../../../../alerts/server';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
+import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { MetricExpressionParams, Comparator, Aggregators } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
 
@@ -133,21 +134,21 @@ const getMetric: (
       index,
     });
 
-    return { '*': getValuesFromAggregations(result.aggregations, aggType) };
+    return { [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(result.aggregations, aggType) };
   } catch (e) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it
       const causedByType = e.body?.error?.caused_by?.type;
       if (causedByType === 'too_many_buckets_exception') {
         return {
-          '*': {
+          [UNGROUPED_FACTORY_KEY]: {
             [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION]: true,
             maxBuckets: e.body.error.caused_by.max_buckets,
           },
         };
       }
     }
-    return { '*': NaN }; // Trigger an Error state
+    return { [UNGROUPED_FACTORY_KEY]: NaN }; // Trigger an Error state
   }
 };
 

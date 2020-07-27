@@ -5,7 +5,7 @@
  */
 
 import { difference } from 'lodash';
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { EventManager, CalendarEvent } from './event_manager';
 
 interface BasicCalendar {
@@ -23,16 +23,16 @@ export interface FormCalendar extends BasicCalendar {
 }
 
 export class CalendarManager {
-  private _callAsCurrentUser: LegacyAPICaller;
+  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
   private _eventManager: EventManager;
 
-  constructor(callAsCurrentUser: LegacyAPICaller) {
-    this._callAsCurrentUser = callAsCurrentUser;
-    this._eventManager = new EventManager(callAsCurrentUser);
+  constructor(mlClusterClient: ILegacyScopedClusterClient) {
+    this._callAsInternalUser = mlClusterClient.callAsInternalUser;
+    this._eventManager = new EventManager(mlClusterClient);
   }
 
   async getCalendar(calendarId: string) {
-    const resp = await this._callAsCurrentUser('ml.calendars', {
+    const resp = await this._callAsInternalUser('ml.calendars', {
       calendarId,
     });
 
@@ -43,7 +43,7 @@ export class CalendarManager {
   }
 
   async getAllCalendars() {
-    const calendarsResp = await this._callAsCurrentUser('ml.calendars');
+    const calendarsResp = await this._callAsInternalUser('ml.calendars');
 
     const events: CalendarEvent[] = await this._eventManager.getAllEvents();
     const calendars: Calendar[] = calendarsResp.calendars;
@@ -74,7 +74,7 @@ export class CalendarManager {
     const events = calendar.events;
     delete calendar.calendarId;
     delete calendar.events;
-    await this._callAsCurrentUser('ml.addCalendar', {
+    await this._callAsInternalUser('ml.addCalendar', {
       calendarId,
       body: calendar,
     });
@@ -109,7 +109,7 @@ export class CalendarManager {
 
     // add all new jobs
     if (jobsToAdd.length) {
-      await this._callAsCurrentUser('ml.addJobToCalendar', {
+      await this._callAsInternalUser('ml.addJobToCalendar', {
         calendarId,
         jobId: jobsToAdd.join(','),
       });
@@ -117,7 +117,7 @@ export class CalendarManager {
 
     // remove all removed jobs
     if (jobsToRemove.length) {
-      await this._callAsCurrentUser('ml.removeJobFromCalendar', {
+      await this._callAsInternalUser('ml.removeJobFromCalendar', {
         calendarId,
         jobId: jobsToRemove.join(','),
       });
@@ -140,6 +140,6 @@ export class CalendarManager {
   }
 
   async deleteCalendar(calendarId: string) {
-    return this._callAsCurrentUser('ml.deleteCalendar', { calendarId });
+    return this._callAsInternalUser('ml.deleteCalendar', { calendarId });
   }
 }

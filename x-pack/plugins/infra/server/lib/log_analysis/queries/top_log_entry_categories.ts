@@ -11,6 +11,7 @@ import {
   createResultTypeFilters,
   createTimeRangeFilters,
   defaultRequestParameters,
+  createDatasetsFilters,
 } from './common';
 
 export const createTopLogEntryCategoriesQuery = (
@@ -121,17 +122,6 @@ export const createTopLogEntryCategoriesQuery = (
   },
   size: 0,
 });
-
-const createDatasetsFilters = (datasets: string[]) =>
-  datasets.length > 0
-    ? [
-        {
-          terms: {
-            partition_field_value: datasets,
-          },
-        },
-      ]
-    : [];
 
 const metricAggregationRT = rt.type({
   value: rt.union([rt.number, rt.null]),

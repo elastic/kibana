@@ -18,7 +18,7 @@
  */
 
 import path from 'path';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 
 import { Keystore } from '../../legacy/server/keystore';
 import { getDataPath } from '../../core/server/path';

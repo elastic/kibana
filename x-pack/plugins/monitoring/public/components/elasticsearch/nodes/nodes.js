@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ClusterStatus } from '../cluster_status';
@@ -25,12 +24,14 @@ import {
   EuiButton,
   EuiText,
   EuiScreenReaderOnly,
+  EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { AlertsStatus } from '../../../alerts/status';
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -56,7 +57,7 @@ const getNodeTooltip = (node) => {
 };
 
 const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
-const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
+const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts) => {
   const cols = [];
 
   const cpuUsageColumnTitle = i18n.translate(
@@ -124,6 +125,18 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
   });
 
   cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.alertsColumnTitle', {
+      defaultMessage: 'Alerts',
+    }),
+    field: 'alerts',
+    width: '175px',
+    sortable: true,
+    render: () => {
+      return <AlertsStatus showBadge={true} alerts={alerts} />;
+    },
+  });
+
+  cols.push({
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
@@ -138,9 +151,20 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
             defaultMessage: 'Offline',
           });
       return (
-        <div className="monTableCell__status">
-          <NodeStatusIcon isOnline={value} status={status} /> {status}
-        </div>
+        <EuiToolTip content={status} position="bottom" trigger="hover">
+          <EuiHealth
+            color={value ? 'success' : 'subdued'}
+            data-test-subj="statusIcon"
+            alt={i18n.translate('xpack.monitoring.elasticsearch.nodes.healthAltIcon', {
+              defaultMessage: 'Status: {status}',
+              values: {
+                status,
+              },
+            })}
+          >
+            {status}
+          </EuiHealth>
+        </EuiToolTip>
       );
     },
   });
@@ -197,14 +221,16 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
       name: cpuUsageColumnTitle,
       field: 'node_cpu_utilization',
       sortable: getSortHandler('node_cpu_utilization'),
-      render: (value, node) => (
-        <MetricCell
-          isOnline={node.isOnline}
-          metric={value}
-          isPercent={true}
-          data-test-subj="cpuUsage"
-        />
-      ),
+      render: (value, node) => {
+        return (
+          <MetricCell
+            isOnline={node.isOnline}
+            metric={value}
+            isPercent={true}
+            data-test-subj="cpuUsage"
+          />
+        );
+      },
     });
 
     cols.push({
@@ -263,8 +289,17 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const { sorting, pagination, onTableChange, clusterUuid, setupMode, fetchMoreData } = props;
-  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid);
+  const {
+    sorting,
+    pagination,
+    onTableChange,
+    clusterUuid,
+    setupMode,
+    fetchMoreData,
+    alerts,
+  } = props;
+
+  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts);
 
   // Merge the nodes data with the setup data if enabled
   const nodes = props.nodes || [];
@@ -392,7 +427,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
     return (
       <Fragment>
         <EuiPanel>
-          <ClusterStatus stats={clusterStatus} />
+          <ClusterStatus stats={clusterStatus} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
       </Fragment>

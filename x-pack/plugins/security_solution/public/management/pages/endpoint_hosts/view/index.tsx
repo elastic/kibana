@@ -226,7 +226,7 @@ export const HostList = () => {
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpointList.hostStatusValue"
-                defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
+                defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
                 values={{ hostStatus }}
               />
             </EuiHealth>
@@ -377,7 +377,7 @@ export const HostList = () => {
       data-test-subj="hostPage"
       headerLeft={
         <>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="l">
                 <h1 data-test-subj="pageViewHeaderLeftTitle">

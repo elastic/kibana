@@ -32,9 +32,9 @@ export function eventName(event: ResolverEvent): string {
   }
 }
 
-export function eventId(event: ResolverEvent): string {
+export function eventId(event: ResolverEvent): number | undefined | string {
   if (isLegacyEvent(event)) {
-    return event.endgame.serial_event_id ? String(event.endgame.serial_event_id) : '';
+    return event.endgame.serial_event_id;
   }
   return event.event.id;
 }
@@ -57,7 +57,9 @@ export function ancestryArray(event: ResolverEvent): string[] | undefined {
   if (isLegacyEvent(event)) {
     return undefined;
   }
-  return event.process.Ext.ancestry;
+  // this is to guard against the endpoint accidentally not sending the ancestry array
+  // otherwise the request will fail when really we should just try using the parent entity id
+  return event.process.Ext?.ancestry;
 }
 
 export function getAncestryAsArray(event: ResolverEvent | undefined): string[] {

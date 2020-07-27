@@ -49,19 +49,19 @@ export default function ({
       const getTitles = async () =>
         (await testSubjects.getVisibleText('dataGridHeader')).replace(/\s|\r?\n|\r/g, ' ');
 
-      expect(await getTitles()).to.be('Time _source');
+      expect(await getTitles()).to.be('Time (@timestamp) _source');
 
       await PageObjects.discover.clickFieldListItemAdd('bytes');
-      expect(await getTitles()).to.be('Time bytes');
+      expect(await getTitles()).to.be('Time (@timestamp) bytes');
 
       await PageObjects.discover.clickFieldListItemAdd('agent');
-      expect(await getTitles()).to.be('Time bytes agent');
+      expect(await getTitles()).to.be('Time (@timestamp) bytes agent');
 
       await PageObjects.discover.clickFieldListItemAdd('bytes');
-      expect(await getTitles()).to.be('Time agent');
+      expect(await getTitles()).to.be('Time (@timestamp) agent');
 
       await PageObjects.discover.clickFieldListItemAdd('agent');
-      expect(await getTitles()).to.be('Time _source');
+      expect(await getTitles()).to.be('Time (@timestamp) _source');
     });
   });
 }

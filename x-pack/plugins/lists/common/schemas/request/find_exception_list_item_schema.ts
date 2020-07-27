@@ -26,7 +26,7 @@ export const findExceptionListItemSchema = t.intersection([
   ),
   t.exact(
     t.partial({
-      filter: EmptyStringArray, // defaults to undefined if not set during decode
+      filter: EmptyStringArray, // defaults to an empty array [] if not set during decode
       namespace_type: DefaultNamespaceArray, // defaults to ['single'] if not set during decode
       page: StringToPositiveNumber, // defaults to undefined if not set during decode
       per_page: StringToPositiveNumber, // defaults to undefined if not set during decode
@@ -36,22 +36,13 @@ export const findExceptionListItemSchema = t.intersection([
   ),
 ]);
 
-export type FindExceptionListItemSchemaPartial = t.OutputOf<typeof findExceptionListItemSchema>;
+export type FindExceptionListItemSchema = t.OutputOf<typeof findExceptionListItemSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
-export type FindExceptionListItemSchemaPartialDecoded = Omit<
-  t.TypeOf<typeof findExceptionListItemSchema>,
+export type FindExceptionListItemSchemaDecoded = Omit<
+  RequiredKeepUndefined<t.TypeOf<typeof findExceptionListItemSchema>>,
   'namespace_type' | 'filter'
 > & {
   filter: EmptyStringArrayDecoded;
   namespace_type: DefaultNamespaceArrayTypeDecoded;
 };
-
-// This type is used after a decode since some things are defaults after a decode.
-export type FindExceptionListItemSchemaDecoded = RequiredKeepUndefined<
-  FindExceptionListItemSchemaPartialDecoded
->;
-
-export type FindExceptionListItemSchema = RequiredKeepUndefined<
-  t.TypeOf<typeof findExceptionListItemSchema>
->;

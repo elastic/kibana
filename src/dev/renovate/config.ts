@@ -21,7 +21,7 @@ import { RENOVATE_PACKAGE_GROUPS } from './package_groups';
 import { PACKAGE_GLOBS } from './package_globs';
 import { wordRegExp, maybeFlatMap, maybeMap, getTypePackageName } from './utils';
 
-const DEFAULT_LABELS = ['release_note:skip', 'Team:Operations', 'renovate', 'v8.0.0', 'v7.9.0'];
+const DEFAULT_LABELS = ['release_note:skip', 'Team:Operations', 'renovate', 'v8.0.0', 'v7.10.0'];
 
 export const RENOVATE_CONFIG = {
   extends: ['config:base'],

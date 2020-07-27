@@ -36,22 +36,19 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.visualize.clickLensWidget();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
 
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });

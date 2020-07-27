@@ -99,6 +99,7 @@ export function buildEuiGridColumn(
   }
   if (column.id === indexPattern.timeFieldName) {
     column.display = `${timeString} (${indexPattern.timeFieldName})`;
+    column.initialWidth = 180;
   }
   const listItems = [
     {

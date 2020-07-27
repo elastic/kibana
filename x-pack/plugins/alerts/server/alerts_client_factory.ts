@@ -70,7 +70,7 @@ export class AlertsClientFactory {
         const user = await securityPluginSetup.authc.getCurrentUser(request);
         return user ? user.username : null;
       },
-      async createAPIKey() {
+      async createAPIKey(name: string) {
         if (!securityPluginSetup) {
           return { apiKeysEnabled: false };
         }
@@ -78,7 +78,11 @@ export class AlertsClientFactory {
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
         const createAPIKeyResult = await securityPluginSetup.authc.grantAPIKeyAsInternalUser(
-          request
+          request,
+          {
+            name,
+            role_descriptors: {},
+          }
         );
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };

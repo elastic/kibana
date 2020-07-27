@@ -16,26 +16,12 @@ addDecorator((storyFn) => (
 ));
 
 storiesOf('Components|Exceptions|BuilderButtonOptions', module)
-  .add('init button', () => {
-    return (
-      <BuilderButtonOptions
-        isAndDisabled={false}
-        isOrDisabled={false}
-        showNestedButton={false}
-        displayInitButton
-        onOrClicked={action('onClick')}
-        onAndClicked={action('onClick')}
-        onNestedClicked={action('onClick')}
-      />
-    );
-  })
   .add('and/or buttons', () => {
     return (
       <BuilderButtonOptions
         isAndDisabled={false}
         isOrDisabled={false}
         showNestedButton={false}
-        displayInitButton={false}
         onOrClicked={action('onClick')}
         onAndClicked={action('onClick')}
         onNestedClicked={action('onClick')}
@@ -48,7 +34,6 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
         isAndDisabled={false}
         isOrDisabled={false}
         showNestedButton
-        displayInitButton={false}
         onOrClicked={action('onClick')}
         onAndClicked={action('onClick')}
         onNestedClicked={action('onClick')}
@@ -61,7 +46,6 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
         isAndDisabled
         isOrDisabled={false}
         showNestedButton={false}
-        displayInitButton={false}
         onOrClicked={action('onClick')}
         onAndClicked={action('onClick')}
         onNestedClicked={action('onClick')}
@@ -74,7 +58,6 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
         isAndDisabled={false}
         isOrDisabled
         showNestedButton={false}
-        displayInitButton={false}
         onOrClicked={action('onClick')}
         onAndClicked={action('onClick')}
         onNestedClicked={action('onClick')}

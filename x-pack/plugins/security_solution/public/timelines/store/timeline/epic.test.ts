@@ -142,7 +142,7 @@ describe('Epic Timeline', () => {
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
-        dateRange: { start: 1572469587644, end: 1572555987644 },
+        dateRange: { start: '2019-10-30T21:06:27.644Z', end: '2019-10-31T21:06:27.644Z' },
         savedObjectId: '11169110-fc22-11e9-8ca9-072f15ce2685',
         selectedEventIds: {},
         show: true,
@@ -158,9 +158,9 @@ describe('Epic Timeline', () => {
       expect(
         convertTimelineAsInput(timelineModel, {
           kind: 'absolute',
-          from: 1572469587644,
+          from: '2019-10-30T21:06:27.644Z',
           fromStr: undefined,
-          to: 1572555987644,
+          to: '2019-10-31T21:06:27.644Z',
           toStr: undefined,
         })
       ).toEqual({
@@ -228,8 +228,8 @@ describe('Epic Timeline', () => {
           },
         ],
         dateRange: {
-          end: 1572555987644,
-          start: 1572469587644,
+          end: '2019-10-31T21:06:27.644Z',
+          start: '2019-10-30T21:06:27.644Z',
         },
         description: '',
         eventType: 'all',

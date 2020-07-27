@@ -21,7 +21,7 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
-import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -29,8 +29,8 @@ import {
 } from '../../../../../public/lists_plugin_deps';
 import * as i18n from './translations';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { errorToToaster, displaySuccessToast, useStateToaster } from '../../toasters';
 import { ExceptionBuilder } from '../builder';
 import { Loader } from '../../loader';
 import { useAddOrUpdateException } from '../use_add_exception';
@@ -47,26 +47,21 @@ import {
 } from '../helpers';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 
-export interface AddExceptionOnClick {
+export interface AddExceptionModalBaseProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
+  ruleIndices: string[];
   alertData?: {
     ecsData: Ecs;
     nonEcsData: TimelineNonEcsData[];
   };
 }
 
-interface AddExceptionModalProps {
-  ruleName: string;
-  ruleId: string;
-  exceptionListType: ExceptionListType;
-  alertData?: {
-    ecsData: Ecs;
-    nonEcsData: TimelineNonEcsData[];
-  };
+export interface AddExceptionModalProps extends AddExceptionModalBaseProps {
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean) => void;
+  alertStatus?: Status;
 }
 
 const Modal = styled(EuiModal)`
@@ -76,10 +71,8 @@ const Modal = styled(EuiModal)`
 `;
 
 const ModalHeader = styled(EuiModalHeader)`
-  ${({ theme }) => css`
-    flex-direction: column;
-    align-items: flex-start;
-  `}
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const ModalHeaderSubtitle = styled.div`
@@ -101,10 +94,12 @@ const ModalBodySection = styled.section`
 export const AddExceptionModal = memo(function AddExceptionModal({
   ruleName,
   ruleId,
+  ruleIndices,
   exceptionListType,
   alertData,
   onCancel,
   onConfirm,
+  alertStatus,
 }: AddExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
@@ -115,24 +110,28 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const [
+    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
+  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
 
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    signalIndexName !== null ? [signalIndexName] : []
+  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    ruleIndices,
+    'rules'
   );
 
   const onError = useCallback(
     (error: Error) => {
-      errorToToaster({ title: i18n.ADD_EXCEPTION_ERROR, error, dispatchToaster });
+      addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
       onCancel();
     },
-    [dispatchToaster, onCancel]
+    [addError, onCancel]
   );
   const onSuccess = useCallback(() => {
-    displaySuccessToast(i18n.ADD_EXCEPTION_SUCCESS, dispatchToaster);
+    addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
     onConfirm(shouldCloseAlert);
-  }, [dispatchToaster, onConfirm, shouldCloseAlert]);
+  }, [addSuccess, onConfirm, shouldCloseAlert]);
 
   const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
     {
@@ -180,18 +179,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
 
   useEffect(() => {
-    if (indexPatternLoading === false && isSignalIndexLoading === false) {
+    if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
+          exceptionItemsToAdd.length === 0
       );
     }
   }, [
     setShouldDisableBulkClose,
     exceptionItemsToAdd,
-    indexPatternLoading,
+    isSignalIndexPatternLoading,
     isSignalIndexLoading,
-    indexPatterns,
+    signalIndexPatterns,
   ]);
 
   useEffect(() => {
@@ -270,15 +270,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [fetchOrCreateListError, exceptionItemsToAdd]
   );
 
-  const indexPatternConfig = useCallback(() => {
-    if (exceptionListType === 'endpoint') {
-      return [alertsIndexPattern];
-    }
-    return signalIndexName ? [signalIndexName] : [];
-  }, [exceptionListType, signalIndexName]);
-
   return (
-    <EuiOverlayMask>
+    <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
           <EuiModalHeaderTitle>{i18n.ADD_EXCEPTION}</EuiModalHeaderTitle>
@@ -297,8 +290,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         )}
         {fetchOrCreateListError === false &&
           !isSignalIndexLoading &&
-          !indexPatternLoading &&
+          !isSignalIndexPatternLoading &&
           !isLoadingExceptionList &&
+          !isIndexPatternLoading &&
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">
@@ -310,8 +304,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   listId={ruleExceptionList.list_id}
                   listNamespaceType={ruleExceptionList.namespace_type}
                   ruleName={ruleName}
-                  indexPatternConfig={indexPatternConfig()}
-                  isLoading={false}
+                  indexPatterns={indexPatterns}
                   isOrDisabled={false}
                   isAndDisabled={false}
                   data-test-subj="alert-exception-builder"
@@ -335,7 +328,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               </ModalBodySection>
               <EuiHorizontalRule />
               <ModalBodySection>
-                {alertData !== undefined && (
+                {alertData !== undefined && alertStatus !== 'closed' && (
                   <EuiFormRow fullWidth>
                     <EuiCheckbox
                       id="close-alert-on-add-add-exception-checkbox"

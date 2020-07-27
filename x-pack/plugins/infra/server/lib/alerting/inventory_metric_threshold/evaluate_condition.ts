@@ -20,6 +20,7 @@ import { parseFilterQuery } from '../../../utils/serialized_query';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
 import { InfraSourceConfiguration } from '../../sources';
+import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
 type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean | boolean[];
@@ -129,14 +130,14 @@ const getData = async (
       const causedByType = e.body?.error?.caused_by?.type;
       if (causedByType === 'too_many_buckets_exception') {
         return {
-          '*': {
+          [UNGROUPED_FACTORY_KEY]: {
             [TOO_MANY_BUCKETS_PREVIEW_EXCEPTION]: true,
             maxBuckets: e.body.error.caused_by.max_buckets,
           },
         };
       }
     }
-    return { '*': undefined };
+    return { [UNGROUPED_FACTORY_KEY]: undefined };
   }
 };
 

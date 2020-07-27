@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import React from 'react';
+import { noop } from 'lodash/fp';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+  EuiToolTip,
+} from '@elastic/eui';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -15,8 +22,26 @@ import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
+import { COLLAPSE, COLLAPSE_EVENT } from '../../../timelines/components/timeline/body/translations';
 
 export type View = 'table-view' | 'json-view';
+
+const PopoverContainer = styled.div`
+  left: -40px;
+  position: relative;
+  top: 10px;
+
+  .euiPopover {
+    position: fixed;
+    z-index: 10;
+  }
+`;
+
+const CollapseButton = styled(EuiButtonIcon)`
+  border: 1px solid;
+`;
+
+CollapseButton.displayName = 'CollapseButton';
 
 interface Props {
   browserFields: BrowserFields;
@@ -24,6 +49,7 @@ interface Props {
   data: DetailItem[];
   id: string;
   view: View;
+  onEventToggled: () => void;
   onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: View) => void;
   timelineId: string;
@@ -43,11 +69,27 @@ export const EventDetails = React.memo<Props>(
     data,
     id,
     view,
+    onEventToggled,
     onUpdateColumns,
     onViewSelected,
     timelineId,
     toggleColumn,
   }) => {
+    const button = useMemo(
+      () => (
+        <EuiToolTip content={COLLAPSE_EVENT}>
+          <CollapseButton
+            aria-label={COLLAPSE}
+            data-test-subj="collapse"
+            iconType="cross"
+            size="s"
+            onClick={onEventToggled}
+          />
+        </EuiToolTip>
+      ),
+      [onEventToggled]
+    );
+
     const tabs: EuiTabbedContentTab[] = [
       {
         id: 'table-view',
@@ -73,6 +115,14 @@ export const EventDetails = React.memo<Props>(
 
     return (
       <Details data-test-subj="eventDetails">
+        <PopoverContainer>
+          <EuiPopover
+            button={button}
+            isOpen={false}
+            closePopover={noop}
+            repositionOnScroll={true}
+          />
+        </PopoverContainer>
         <EuiTabbedContent
           tabs={tabs}
           selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}

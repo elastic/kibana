@@ -6,11 +6,15 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { setupIngest } from './agents/services';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function (providerContext: FtrProviderContext) {
+  const { getService } = providerContext;
   const supertest = getService('supertest');
 
   describe('fleet_install', () => {
+    setupIngest(providerContext);
+
     it('should return a 400 if we try download an install script for a not supported OS', async () => {
       await supertest.get(`/api/ingest_manager/fleet/install/gameboy`).expect(400);
     });

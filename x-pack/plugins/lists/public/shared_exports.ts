@@ -24,6 +24,7 @@ export {
   updateExceptionListItem,
   fetchExceptionListById,
   addExceptionList,
+  addEndpointExceptionList,
 } from './exceptions/api';
 export {
   ExceptionList,

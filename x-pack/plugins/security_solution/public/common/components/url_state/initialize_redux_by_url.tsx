@@ -120,6 +120,7 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
       const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
         get('timeline.timerange', timerangeStateData)
       );
+
       dispatch(
         inputsActions.setAbsoluteRangeDatePicker({
           ...absoluteRange,
@@ -127,10 +128,12 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
         })
       );
     }
+
     if (timelineType === 'relative') {
       const relativeRange = normalizeTimeRange<RelativeTimeRange>(
         get('timeline.timerange', timerangeStateData)
       );
+
       dispatch(
         inputsActions.setRelativeRangeDatePicker({
           ...relativeRange,
@@ -145,6 +148,7 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
       const absoluteRange = normalizeTimeRange<AbsoluteTimeRange>(
         get('global.timerange', timerangeStateData)
       );
+
       dispatch(
         inputsActions.setAbsoluteRangeDatePicker({
           ...absoluteRange,
@@ -156,6 +160,7 @@ const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {
       const relativeRange = normalizeTimeRange<RelativeTimeRange>(
         get('global.timerange', timerangeStateData)
       );
+
       dispatch(
         inputsActions.setRelativeRangeDatePicker({
           ...relativeRange,

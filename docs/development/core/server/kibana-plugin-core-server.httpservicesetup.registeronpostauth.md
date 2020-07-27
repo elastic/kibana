@@ -14,5 +14,5 @@ registerOnPostAuth: (handler: OnPostAuthHandler) => void;
 
 ## Remarks
 
-The auth state is available at stage via http.auth.get(..) Can register any number of registerOnPreRouting, which are called in sequence (from the first registered to the last). See [OnPostAuthHandler](./kibana-plugin-core-server.onpostauthhandler.md)<!-- -->.
+The auth state is available at stage via http.auth.get(..) Can register any number of registerOnPostAuth, which are called in sequence (from the first registered to the last). See [OnPostAuthHandler](./kibana-plugin-core-server.onpostauthhandler.md)<!-- -->.
 

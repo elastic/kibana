@@ -5,7 +5,7 @@
   ],
   "description": "Identifies an unusually high number of authentication attempts.",
   "false_positives": [
-    "Security audits may trigger this signal. Conditions that generate bursts of failed logins, such as misconfigured applications or account lockouts could trigger this signal."
+    "Security audits may trigger this alert. Conditions that generate bursts of failed logins, such as misconfigured applications or account lockouts could trigger this alert."
   ],
   "from": "now-45m",
   "interval": "15m",

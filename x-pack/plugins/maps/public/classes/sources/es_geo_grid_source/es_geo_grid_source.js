@@ -63,7 +63,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
   getSyncMeta() {
     return {
       requestType: this._descriptor.requestType,
-      sourceType: SOURCE_TYPES.ES_GEO_GRID,
     };
   }
 
@@ -162,6 +161,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
                   bounds: makeESBbox(bufferedExtent),
                   field: this._descriptor.geoField,
                   precision,
+                  size: DEFAULT_MAX_BUCKETS_LIMIT,
                 },
               },
             },
@@ -246,6 +246,8 @@ export class ESGeoGridSource extends AbstractESAggSource {
           bounds: makeESBbox(bufferedExtent),
           field: this._descriptor.geoField,
           precision,
+          size: DEFAULT_MAX_BUCKETS_LIMIT,
+          shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
         },
         aggs: {
           gridCentroid: {

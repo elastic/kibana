@@ -28,7 +28,8 @@ describe('DiscoverLinks', () => {
     const href = await getRenderedHref(
       () => <DiscoverTransactionLink transaction={transaction} />,
       {
-        search: '?rangeFrom=now/w&rangeTo=now',
+        search:
+          '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
       } as Location
     );
 
@@ -45,7 +46,8 @@ describe('DiscoverLinks', () => {
     } as Span;
 
     const href = await getRenderedHref(() => <DiscoverSpanLink span={span} />, {
-      search: '?rangeFrom=now/w&rangeTo=now',
+      search:
+        '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
     } as Location);
 
     expect(href).toEqual(
@@ -65,7 +67,8 @@ describe('DiscoverLinks', () => {
     const href = await getRenderedHref(
       () => <DiscoverErrorLink error={error} />,
       {
-        search: '?rangeFrom=now/w&rangeTo=now',
+        search:
+          '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
       } as Location
     );
 
@@ -87,7 +90,8 @@ describe('DiscoverLinks', () => {
     const href = await getRenderedHref(
       () => <DiscoverErrorLink error={error} kuery="some:kuery-string" />,
       {
-        search: '?rangeFrom=now/w&rangeTo=now',
+        search:
+          '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
       } as Location
     );
 

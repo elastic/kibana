@@ -85,7 +85,7 @@ exports[`Should render join editor 1`] = `
   >
     <EuiButtonEmpty
       aria-label="Add join"
-      iconType="plusInCircle"
+      iconType="plusInCircleFilled"
       onClick={[Function]}
       size="xs"
     >

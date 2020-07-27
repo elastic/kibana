@@ -5,7 +5,7 @@
  */
 
 import { EuiCodeEditor } from '@elastic/eui';
-import { set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
 import React from 'react';
 import styled from 'styled-components';
 

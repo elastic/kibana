@@ -11,8 +11,12 @@ import {
   ES_TEST_INDEX_NAME,
   getUrlPrefix,
   ObjectRemover,
+  getEventLog,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { IValidatedEvent } from '../../../../../plugins/event_log/server';
+
+const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -106,6 +110,13 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 reference,
                 source: 'action:test.index-record',
+              });
+
+              await validateEventLog({
+                spaceId: space.id,
+                actionId: createdAction.id,
+                outcome: 'success',
+                message: `action executed: test.index-record:${createdAction.id}: My action`,
               });
               break;
             default:
@@ -480,4 +491,66 @@ export default function ({ getService }: FtrProviderContext) {
       });
     }
   });
+
+  interface ValidateEventLogParams {
+    spaceId: string;
+    actionId: string;
+    outcome: string;
+    message: string;
+    errorMessage?: string;
+  }
+
+  async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
+    const { spaceId, actionId, outcome, message, errorMessage } = params;
+
+    const events: IValidatedEvent[] = await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId,
+        type: 'action',
+        id: actionId,
+        provider: 'actions',
+        actions: ['execute'],
+      });
+    });
+
+    expect(events.length).to.equal(1);
+
+    const event = events[0];
+
+    const duration = event?.event?.duration;
+    const eventStart = Date.parse(event?.event?.start || 'undefined');
+    const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    const dateNow = Date.now();
+
+    expect(typeof duration).to.be('number');
+    expect(eventStart).to.be.ok();
+    expect(eventEnd).to.be.ok();
+
+    const durationDiff = Math.abs(
+      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+    );
+
+    // account for rounding errors
+    expect(durationDiff < 1).to.equal(true);
+    expect(eventStart <= eventEnd).to.equal(true);
+    expect(eventEnd <= dateNow).to.equal(true);
+
+    expect(event?.event?.outcome).to.equal(outcome);
+
+    expect(event?.kibana?.saved_objects).to.eql([
+      {
+        rel: 'primary',
+        type: 'action',
+        id: actionId,
+        namespace: spaceId,
+      },
+    ]);
+
+    expect(event?.message).to.eql(message);
+
+    if (errorMessage) {
+      expect(event?.error?.message).to.eql(errorMessage);
+    }
+  }
 }

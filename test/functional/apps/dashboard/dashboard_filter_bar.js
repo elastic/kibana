@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
-  describe('dashboard filter bar', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/71987
+  describe.skip('dashboard filter bar', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({

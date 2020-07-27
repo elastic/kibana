@@ -15,4 +15,5 @@ export interface ISearchSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [registerSearchStrategy](./kibana-plugin-plugins-data-server.isearchsetup.registersearchstrategy.md) | <code>TRegisterSearchStrategy</code> | Extension point exposed for other plugins to register their own search strategies. |
+|  [usage](./kibana-plugin-plugins-data-server.isearchsetup.usage.md) | <code>SearchUsage</code> | Used internally for telemetry |
 

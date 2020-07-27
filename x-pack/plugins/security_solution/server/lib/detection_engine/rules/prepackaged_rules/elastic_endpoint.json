@@ -4,6 +4,13 @@
   ],
   "description": "Generates a detection alert each time an Elastic Endpoint alert is received. Enabling this rule allows you to immediately begin investigating your Elastic Endpoint alerts.",
   "enabled": true,
+  "exceptions_list": [
+    {
+      "id": "endpoint_list",
+      "namespace_type": "agnostic",
+      "type": "endpoint"
+    }
+  ],
   "from": "now-10m",
   "index": [
     "logs-endpoint.alerts-*"

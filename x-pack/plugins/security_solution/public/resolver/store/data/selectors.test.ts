@@ -9,6 +9,13 @@ import { DataState } from '../../types';
 import { dataReducer } from './reducer';
 import { DataAction } from './action';
 import { createStore } from 'redux';
+import {
+  mockTreeWithNoAncestorsAnd2Children,
+  mockTreeWith2AncestorsAndNoChildren,
+} from '../mocks/resolver_tree';
+import { uniquePidForProcess } from '../../models/process_event';
+import { EndpointEvent } from '../../../../common/endpoint/types';
+
 describe('data state', () => {
   let actions: DataAction[] = [];
 
@@ -53,11 +60,12 @@ describe('data state', () => {
 
   describe('when there is a databaseDocumentID but no pending request', () => {
     const databaseDocumentID = 'databaseDocumentID';
+    const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID },
+          payload: { databaseDocumentID, resolverComponentInstanceID },
         },
       ];
     });
@@ -104,11 +112,12 @@ describe('data state', () => {
   });
   describe('when there is a pending request for the current databaseDocumentID', () => {
     const databaseDocumentID = 'databaseDocumentID';
+    const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID },
+          payload: { databaseDocumentID, resolverComponentInstanceID },
         },
         {
           type: 'appRequestedResolverData',
@@ -160,12 +169,17 @@ describe('data state', () => {
   describe('when there is a pending request for a different databaseDocumentID than the current one', () => {
     const firstDatabaseDocumentID = 'first databaseDocumentID';
     const secondDatabaseDocumentID = 'second databaseDocumentID';
+    const resolverComponentInstanceID1 = 'resolverComponentInstanceID1';
+    const resolverComponentInstanceID2 = 'resolverComponentInstanceID2';
     beforeEach(() => {
       actions = [
         // receive the document ID, this would cause the middleware to starts the request
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID: firstDatabaseDocumentID },
+          payload: {
+            databaseDocumentID: firstDatabaseDocumentID,
+            resolverComponentInstanceID: resolverComponentInstanceID1,
+          },
         },
         // this happens when the middleware starts the request
         {
@@ -175,7 +189,10 @@ describe('data state', () => {
         // receive a different databaseDocumentID. this should cause the middleware to abort the existing request and start a new one
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID: secondDatabaseDocumentID },
+          payload: {
+            databaseDocumentID: secondDatabaseDocumentID,
+            resolverComponentInstanceID: resolverComponentInstanceID2,
+          },
         },
       ];
     });
@@ -187,6 +204,9 @@ describe('data state', () => {
     });
     it('should need to abort the request for the databaseDocumentID', () => {
       expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
+    });
+    it('should use the correct location for the second resolver', () => {
+      expect(selectors.resolverComponentInstanceID(state())).toBe(resolverComponentInstanceID2);
     });
     it('should not have an error, more children, or more ancestors.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -248,6 +268,89 @@ describe('data state', () => {
           `);
         });
       });
+    });
+  });
+  describe('with a tree with no descendants and 2 ancestors', () => {
+    const originID = 'c';
+    const firstAncestorID = 'b';
+    const secondAncestorID = 'a';
+    beforeEach(() => {
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: mockTreeWith2AncestorsAndNoChildren({
+            originID,
+            firstAncestorID,
+            secondAncestorID,
+          }),
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should have no flowto candidate for the origin', () => {
+      expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
+    });
+    it('should have no flowto candidate for the first ancestor', () => {
+      expect(selectors.ariaFlowtoCandidate(state())(firstAncestorID)).toBe(null);
+    });
+    it('should have no flowto candidate for the second ancestor ancestor', () => {
+      expect(selectors.ariaFlowtoCandidate(state())(secondAncestorID)).toBe(null);
+    });
+  });
+  describe('with a tree with 2 children and no ancestors', () => {
+    const originID = 'c';
+    const firstChildID = 'd';
+    const secondChildID = 'e';
+    beforeEach(() => {
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should have no flowto candidate for the origin', () => {
+      expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
+    });
+    it('should use the second child as the flowto candidate for the first child', () => {
+      expect(selectors.ariaFlowtoCandidate(state())(firstChildID)).toBe(secondChildID);
+    });
+    it('should have no flowto candidate for the second child', () => {
+      expect(selectors.ariaFlowtoCandidate(state())(secondChildID)).toBe(null);
+    });
+  });
+  describe('with a tree where the root process has no parent info at all', () => {
+    const originID = 'c';
+    const firstChildID = 'd';
+    const secondChildID = 'e';
+    beforeEach(() => {
+      const tree = mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID });
+      for (const event of tree.lifecycle) {
+        // delete the process.parent key, if present
+        // cast as `EndpointEvent` because `ResolverEvent` can also be `LegacyEndpointEvent` which has no `process` field
+        delete (event as EndpointEvent).process?.parent;
+      }
+
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: tree,
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should be able to calculate the aria flowto candidates for all processes nodes', () => {
+      const graphables = selectors.graphableProcesses(state());
+      expect(graphables.length).toBe(3);
+      for (const event of graphables) {
+        expect(() => {
+          selectors.ariaFlowtoCandidate(state())(uniquePidForProcess(event));
+        }).not.toThrow();
+      }
     });
   });
 });

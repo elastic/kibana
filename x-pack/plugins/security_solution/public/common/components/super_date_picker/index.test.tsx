@@ -156,8 +156,8 @@ describe('SIEM Super Date Picker', () => {
       });
 
       test('Make Sure to (end date) is superior than from (start date)', () => {
-        expect(store.getState().inputs.global.timerange.to).toBeGreaterThan(
-          store.getState().inputs.global.timerange.from
+        expect(new Date(store.getState().inputs.global.timerange.to).valueOf()).toBeGreaterThan(
+          new Date(store.getState().inputs.global.timerange.from).valueOf()
         );
       });
     });
@@ -321,7 +321,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.timerange.from = 999;
+        clone.inputs.global.timerange.from = '2020-07-07T09:20:18.966Z';
         const props2 = mapStateToProps(clone, { id: 'global' });
         expect(props1.start).not.toBe(props2.start);
       });
@@ -330,7 +330,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.timerange.to = 999;
+        clone.inputs.global.timerange.to = '2020-07-08T09:20:18.966Z';
         const props2 = mapStateToProps(clone, { id: 'global' });
         expect(props1.end).not.toBe(props2.end);
       });

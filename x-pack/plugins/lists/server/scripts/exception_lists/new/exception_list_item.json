@@ -8,7 +8,7 @@
   "name": "Sample Endpoint Exception List",
   "entries": [
     {
-      "field": "actingProcess.file.signer",
+      "field": "host.ip",
       "operator": "excluded",
       "type": "exists"
     },

@@ -31,12 +31,16 @@ export const getQueryFilter = (
     title: index.join(),
   };
 
-  const queries: DataQuery[] = buildQueryExceptions({
-    query,
-    language,
-    lists,
-    exclude: excludeExceptions,
-  });
+  const initialQuery = [{ query, language }];
+  /*
+   * Pinning exceptions to 'kuery' because lucene
+   * does not support nested queries, while our exceptions
+   * UI does, since we can pass both lucene and kql into
+   * buildEsQuery, this allows us to offer nested queries
+   * regardless
+   */
+  const exceptions = buildQueryExceptions({ language: 'kuery', lists, exclude: excludeExceptions });
+  const queries: DataQuery[] = [...initialQuery, ...exceptions];
 
   const config = {
     allowLeadingWildcards: true,

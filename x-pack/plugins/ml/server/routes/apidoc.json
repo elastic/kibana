@@ -105,6 +105,7 @@
     "MlNodeCount",
     "MlInfo",
     "MlEsSearch",
+    "MlIndexExists",
 
     "JobAuditMessages",
     "GetJobAuditMessages",

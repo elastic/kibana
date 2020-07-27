@@ -38,6 +38,7 @@ const ipOverviewSchema = gql`
       filterQuery: String
       ip: String!
       defaultIndex: [String!]!
+      docValueFields: [docValueFieldsInput!]!
     ): IpOverviewData
   }
 `;

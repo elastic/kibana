@@ -13,6 +13,7 @@ import { IIndexPattern } from 'src/plugins/data/common';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
 import {
   deleteAnalytics,
@@ -36,6 +37,8 @@ export const useDeleteAction = () => {
   const savedObjectsClient = savedObjects.client;
 
   const indexName = item?.config.dest.index ?? '';
+
+  const toastNotificationService = useToastNotificationService();
 
   const checkIndexPatternExists = async () => {
     try {
@@ -109,10 +112,11 @@ export const useDeleteAction = () => {
         deleteAnalyticsAndDestIndex(
           item,
           deleteTargetIndex,
-          indexPatternExists && deleteIndexPattern
+          indexPatternExists && deleteIndexPattern,
+          toastNotificationService
         );
       } else {
-        deleteAnalytics(item);
+        deleteAnalytics(item, toastNotificationService);
       }
     }
   };

@@ -30,6 +30,9 @@ export const commonMapping: SavedObjectsType['mappings'] = {
     description: {
       type: 'keyword',
     },
+    immutable: {
+      type: 'boolean',
+    },
     list_id: {
       type: 'keyword',
     },
@@ -52,6 +55,9 @@ export const commonMapping: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     updated_by: {
+      type: 'keyword',
+    },
+    version: {
       type: 'keyword',
     },
   },

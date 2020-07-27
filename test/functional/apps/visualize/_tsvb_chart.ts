@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
-  describe('visual builder', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/71979
+  describe.skip('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
     beforeEach(async () => {
       await security.testUser.setRoles([

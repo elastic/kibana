@@ -192,71 +192,66 @@ describe('get_filter', () => {
         index: ['auditbeat-*'],
         lists: [getExceptionListItemSchemaMock()],
       });
+
       expect(filter).toEqual({
         bool: {
+          must: [],
           filter: [
             {
               bool: {
-                filter: [
+                should: [
                   {
-                    bool: {
-                      minimum_should_match: 1,
-                      should: [
-                        {
-                          match: {
-                            'host.name': 'siem',
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          nested: {
-                            path: 'some.parentField',
-                            query: {
-                              bool: {
-                                minimum_should_match: 1,
-                                should: [
-                                  {
-                                    match: {
-                                      'some.parentField.nested.field': 'some value',
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                            score_mode: 'none',
-                          },
-                        },
-                        {
-                          bool: {
-                            must_not: {
-                              bool: {
-                                minimum_should_match: 1,
-                                should: [
-                                  {
-                                    match: {
-                                      'some.not.nested.field': 'some value',
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          },
-                        },
-                      ],
+                    match: {
+                      'host.name': 'siem',
                     },
                   },
                 ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                must_not: {
+                  bool: {
+                    filter: [
+                      {
+                        nested: {
+                          path: 'some.parentField',
+                          query: {
+                            bool: {
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'some.parentField.nested.field': 'some value',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                          score_mode: 'none',
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match_phrase: {
+                                'some.not.nested.field': 'some value',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                  },
+                },
               },
             },
           ],
-          must: [],
-          must_not: [],
           should: [],
+          must_not: [],
         },
       });
     });

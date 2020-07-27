@@ -191,11 +191,11 @@ export function defineAlertTypes(
         callClusterError = e;
       }
       // Call scoped cluster
-      const callScopedCluster = services.getScopedCallCluster(clusterClient);
+      const scopedClusterClient = services.getLegacyScopedClusterClient(clusterClient);
       let callScopedClusterSuccess = false;
       let callScopedClusterError;
       try {
-        await callScopedCluster('index', {
+        await scopedClusterClient.callAsCurrentUser('index', {
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {
@@ -286,6 +286,50 @@ export function defineAlertTypes(
     },
     async executor(opts: AlertExecutorOptions) {},
   };
+  const throwAlertType: AlertType = {
+    id: 'test.throw',
+    name: 'Test: Throw',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alerting',
+    defaultActionGroupId: 'default',
+    async executor({ services, params, state }: AlertExecutorOptions) {
+      throw new Error('this alert is intended to fail');
+    },
+  };
+  const patternFiringAlertType: AlertType = {
+    id: 'test.patternFiring',
+    name: 'Test: Firing on a Pattern',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alerting',
+    defaultActionGroupId: 'default',
+    async executor(alertExecutorOptions: AlertExecutorOptions) {
+      const { services, state, params } = alertExecutorOptions;
+      const pattern = params.pattern;
+      if (!Array.isArray(pattern)) throw new Error('pattern is not an array');
+      if (pattern.length === 0) throw new Error('pattern is empty');
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex > pattern.length) {
+        return { patternIndex };
+      }
+
+      // fire if pattern says to
+      if (pattern[patternIndex]) {
+        services.alertInstanceFactory('instance').scheduleActions('default');
+      }
+
+      return {
+        patternIndex: (patternIndex + 1) % pattern.length,
+      };
+    },
+  };
+
   alerts.registerType(alwaysFiringAlertType);
   alerts.registerType(cumulativeFiringAlertType);
   alerts.registerType(neverFiringAlertType);
@@ -295,4 +339,6 @@ export function defineAlertTypes(
   alerts.registerType(noopAlertType);
   alerts.registerType(onlyContextVariablesAlertType);
   alerts.registerType(onlyStateVariablesAlertType);
+  alerts.registerType(patternFiringAlertType);
+  alerts.registerType(throwAlertType);
 }

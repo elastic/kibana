@@ -18,6 +18,7 @@ interface AutocompleteFieldListsProps {
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
+  isRequired?: boolean;
   onChange: (arg: ListSchema) => void;
 }
 
@@ -28,16 +29,22 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   isLoading = false,
   isDisabled = false,
   isClearable = false,
+  isRequired = false,
   onChange,
 }): JSX.Element => {
+  const [touched, setIsTouched] = useState(false);
   const { http } = useKibana().services;
   const [lists, setLists] = useState<ListSchema[]>([]);
   const { loading, result, start } = useFindLists();
   const getLabel = useCallback(({ name }) => name, []);
 
   const optionsMemo = useMemo(() => {
-    if (selectedField != null) {
-      return lists.filter(({ type }) => type === selectedField.type);
+    if (
+      selectedField != null &&
+      selectedField.esTypes != null &&
+      selectedField.esTypes.length > 0
+    ) {
+      return lists.filter(({ type }) => selectedField.esTypes?.includes(type));
     } else {
       return [];
     }
@@ -93,6 +100,8 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
       options={comboOptions}
       selectedOptions={selectedComboOptions}
       onChange={handleValuesChange}
+      isInvalid={isRequired ? touched && (selectedValue == null || selectedValue === '') : false}
+      onFocus={() => setIsTouched(true)}
       singleSelection={{ asPlainText: true }}
       sortMatchesBy="startsWith"
       data-test-subj="valuesAutocompleteComboBox listsComboxBox"

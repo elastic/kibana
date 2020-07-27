@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 
@@ -13,10 +13,12 @@ import { i18n } from '@kbn/i18n';
 
 export function CreateSourceEditor({ onSourceConfigChange }) {
   const tilemap = getKibanaTileMap();
-
-  if (tilemap.url) {
-    onSourceConfigChange();
-  }
+  useEffect(() => {
+    if (tilemap.url) {
+      onSourceConfigChange();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <EuiPanel>
@@ -33,7 +35,7 @@ export function CreateSourceEditor({ onSourceConfigChange }) {
               })
         }
       >
-        <EuiFieldText readOnly value={tilemap.url} />
+        <EuiFieldText readOnly value={tilemap.url ? tilemap.url : ''} />
       </EuiFormRow>
     </EuiPanel>
   );

@@ -5,8 +5,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { curry } from 'lodash';
-import uuid from 'uuid';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -43,7 +41,7 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
   defaultActionGroupId: FIRED_ACTIONS.id,
   actionGroups: [FIRED_ACTIONS],
   producer: 'metrics',
-  executor: curry(createInventoryMetricThresholdExecutor)(libs, uuid.v4()),
+  executor: createInventoryMetricThresholdExecutor(libs),
   actionVariables: {
     context: [
       {

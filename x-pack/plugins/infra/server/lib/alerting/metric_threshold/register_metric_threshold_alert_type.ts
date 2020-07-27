@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { curry } from 'lodash';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
@@ -107,7 +105,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
-    executor: curry(createMetricThresholdExecutor)(libs, uuid.v4()),
+    executor: createMetricThresholdExecutor(libs),
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },

@@ -30,7 +30,8 @@ export async function getLogEntryRateBuckets(
   sourceId: string,
   startTime: number,
   endTime: number,
-  bucketDuration: number
+  bucketDuration: number,
+  datasets?: string[]
 ) {
   const logRateJobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
   let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
@@ -44,7 +45,8 @@ export async function getLogEntryRateBuckets(
         endTime,
         bucketDuration,
         COMPOSITE_AGGREGATION_BATCH_SIZE,
-        afterLatestBatchKey
+        afterLatestBatchKey,
+        datasets
       )
     );
 

@@ -18,6 +18,7 @@ import {
   TimerangeInput,
   Maybe,
   HistogramType,
+  DocValueFieldsInput,
 } from '../../graphql/types';
 
 export * from '../../utils/typed_resolvers';
@@ -115,6 +116,7 @@ export interface RequestBasicOptions {
   timerange: TimerangeInput;
   filterQuery: ESQuery | undefined;
   defaultIndex: string[];
+  docValueFields?: DocValueFieldsInput[];
 }
 
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {

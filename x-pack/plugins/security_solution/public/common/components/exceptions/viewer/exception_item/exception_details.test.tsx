@@ -179,7 +179,7 @@ describe('ExceptionDetails', () => {
 
     expect(wrapper.find('EuiDescriptionListTitle').at(1).text()).toEqual('Date created');
     expect(wrapper.find('EuiDescriptionListDescription').at(1).text()).toEqual(
-      'April 23rd 2020 @ 00:19:13'
+      'April 20th 2020 @ 15:25:31'
     );
   });
 
@@ -196,7 +196,7 @@ describe('ExceptionDetails', () => {
     );
 
     expect(wrapper.find('EuiDescriptionListTitle').at(2).text()).toEqual('Created by');
-    expect(wrapper.find('EuiDescriptionListDescription').at(2).text()).toEqual('user_name');
+    expect(wrapper.find('EuiDescriptionListDescription').at(2).text()).toEqual('some user');
   });
 
   test('it renders the description if one is included on the exception item', () => {
@@ -212,8 +212,6 @@ describe('ExceptionDetails', () => {
     );
 
     expect(wrapper.find('EuiDescriptionListTitle').at(3).text()).toEqual('Comment');
-    expect(wrapper.find('EuiDescriptionListDescription').at(3).text()).toEqual(
-      'This is a sample endpoint type exception'
-    );
+    expect(wrapper.find('EuiDescriptionListDescription').at(3).text()).toEqual('some description');
   });
 });

@@ -147,7 +147,7 @@ export class VegaBaseView {
             defaultMessage:
               'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
             values: {
-              enableExternalUrls: 'vega.enableExternalUrls: true',
+              enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
               kibanaConfigFileName: 'kibana.yml',
             },
           })
@@ -364,6 +364,11 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
+    this._parser.searchAPI.inspectorAdapters?.vega.bindInspectValues({
+      view,
+      spec: vlspec || spec,
+    });
+
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
         console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');

@@ -6,9 +6,10 @@
 
 import Boom from 'boom';
 import _ from 'lodash';
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 
-import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -19,13 +20,21 @@ import {
   Annotations,
   isAnnotation,
   isAnnotations,
+  getAnnotationFieldName,
+  getAnnotationFieldValue,
+  EsAggregationResult,
 } from '../../../common/types/annotations';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
 interface EsResult {
-  _source: object;
+  _source: Annotation;
   _id: string;
+}
+
+export interface FieldToBucket {
+  field: string;
+  missing?: string | number;
 }
 
 export interface IndexAnnotationArgs {
@@ -33,6 +42,13 @@ export interface IndexAnnotationArgs {
   earliestMs: number;
   latestMs: number;
   maxAnnotations: number;
+  fields?: FieldToBucket[];
+  detectorIndex?: number;
+  entities?: any[];
+}
+
+export interface AggTerm {
+  terms: FieldToBucket;
 }
 
 export interface GetParams {
@@ -43,9 +59,8 @@ export interface GetParams {
 
 export interface GetResponse {
   success: true;
-  annotations: {
-    [key: string]: Annotations;
-  };
+  annotations: Record<string, Annotations>;
+  aggregations: EsAggregationResult;
 }
 
 export interface IndexParams {
@@ -61,14 +76,7 @@ export interface DeleteParams {
   id: string;
 }
 
-type annotationProviderParams = DeleteParams | GetParams | IndexParams;
-
-export type callWithRequestType = (
-  action: string,
-  params: annotationProviderParams
-) => Promise<any>;
-
-export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
+export function annotationProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.
@@ -103,10 +111,14 @@ export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
     earliestMs,
     latestMs,
     maxAnnotations,
+    fields,
+    detectorIndex,
+    entities,
   }: IndexAnnotationArgs) {
     const obj: GetResponse = {
       success: true,
       annotations: {},
+      aggregations: {},
     };
 
     const boolCriteria: object[] = [];
@@ -189,6 +201,64 @@ export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
       });
     }
 
+    // Find unique buckets (e.g. events) from the queried annotations to show in dropdowns
+    const aggs: Record<string, AggTerm> = {};
+    if (fields) {
+      fields.forEach((fieldToBucket) => {
+        aggs[fieldToBucket.field] = {
+          terms: {
+            ...fieldToBucket,
+          },
+        };
+      });
+    }
+
+    // Build should clause to further query for annotations in SMV
+    // we want to show either the exact match with detector index and by/over/partition fields
+    // OR annotations without any partition fields defined
+    let shouldClauses;
+    if (detectorIndex !== undefined && Array.isArray(entities)) {
+      // build clause to get exact match of detector index and by/over/partition fields
+      const beExactMatch = [];
+      beExactMatch.push({
+        term: {
+          detector_index: detectorIndex,
+        },
+      });
+
+      entities.forEach(({ fieldName, fieldType, fieldValue }) => {
+        beExactMatch.push({
+          term: {
+            [getAnnotationFieldName(fieldType)]: fieldName,
+          },
+        });
+        beExactMatch.push({
+          term: {
+            [getAnnotationFieldValue(fieldType)]: fieldValue,
+          },
+        });
+      });
+
+      // clause to get annotations that have no partition fields
+      const haveAnyPartitionFields: object[] = [];
+      PARTITION_FIELDS.forEach((field) => {
+        haveAnyPartitionFields.push({
+          exists: {
+            field: getAnnotationFieldName(field),
+          },
+        });
+        haveAnyPartitionFields.push({
+          exists: {
+            field: getAnnotationFieldValue(field),
+          },
+        });
+      });
+      shouldClauses = [
+        { bool: { must_not: haveAnyPartitionFields } },
+        { bool: { must: beExactMatch } },
+      ];
+    }
+
     const params: GetParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: maxAnnotations,
@@ -208,8 +278,10 @@ export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
                 },
               },
             ],
+            ...(shouldClauses ? { should: shouldClauses, minimum_should_match: 1 } : {}),
           },
         },
+        ...(fields ? { aggs } : {}),
       },
     };
 
@@ -224,9 +296,19 @@ export function annotationProvider(callAsCurrentUser: LegacyAPICaller) {
       const docs: Annotations = _.get(resp, ['hits', 'hits'], []).map((d: EsResult) => {
         // get the original source document and the document id, we need it
         // to identify the annotation when editing/deleting it.
-        return { ...d._source, _id: d._id } as Annotation;
+        // if original `event` is undefined then substitute with 'user` by default
+        // since annotation was probably generated by user on the UI
+        return {
+          ...d._source,
+          event: d._source?.event ?? ANNOTATION_EVENT_USER,
+          _id: d._id,
+        } as Annotation;
       });
 
+      const aggregations = _.get(resp, ['aggregations'], {}) as EsAggregationResult;
+      if (fields) {
+        obj.aggregations = aggregations;
+      }
       if (isAnnotations(docs) === false) {
         // No need to translate, this will not be exposed in the UI.
         throw new Error(`Annotations didn't pass integrity check.`);

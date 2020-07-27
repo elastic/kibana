@@ -46,6 +46,7 @@ export const sampleRuleAlertParams = (
   machineLearningJobId: undefined,
   filters: undefined,
   savedId: undefined,
+  threshold: undefined,
   timelineId: undefined,
   timelineTitle: undefined,
   timestampOverride: undefined,
@@ -53,18 +54,6 @@ export const sampleRuleAlertParams = (
   threat: undefined,
   version: 1,
   exceptionsList: getListArrayMock(),
-});
-
-export const sampleDocNoSortId = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
-  _index: 'myFakeSignalIndex',
-  _type: 'doc',
-  _score: 100,
-  _version: 1,
-  _id: someUuid,
-  _source: {
-    someKey: 'someValue',
-    '@timestamp': '2020-04-20T21:27:45+0000',
-  },
 });
 
 export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
@@ -97,6 +86,25 @@ export const sampleDocWithSortId = (
   sort: ['1234567891111'],
 });
 
+export const sampleDocNoSortId = (
+  someUuid: string = sampleIdGuid,
+  ip?: string
+): SignalSourceHit => ({
+  _index: 'myFakeSignalIndex',
+  _type: 'doc',
+  _score: 100,
+  _version: 1,
+  _id: someUuid,
+  _source: {
+    someKey: 'someValue',
+    '@timestamp': '2020-04-20T21:27:45+0000',
+    source: {
+      ip: ip ?? '127.0.0.1',
+    },
+  },
+  sort: [],
+});
+
 export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
   took: 10,
   timed_out: false,
@@ -115,6 +123,8 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
 
 export const sampleDocWithAncestors = (): SignalSearchResponse => {
   const sampleDoc = sampleDocNoSortId();
+  delete sampleDoc.sort;
+  delete sampleDoc._source.source;
   sampleDoc._source.signal = {
     parent: {
       rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
@@ -312,6 +322,29 @@ export const repeatedSearchResultsWithSortId = (
     max_score: 100,
     hits: Array.from({ length: pageSize }).map((x, index) => ({
       ...sampleDocWithSortId(guids[index], ips ? ips[index] : '127.0.0.1'),
+    })),
+  },
+});
+
+export const repeatedSearchResultsWithNoSortId = (
+  total: number,
+  pageSize: number,
+  guids: string[],
+  ips?: string[]
+) => ({
+  took: 10,
+  timed_out: false,
+  _shards: {
+    total: 10,
+    successful: 10,
+    failed: 0,
+    skipped: 0,
+  },
+  hits: {
+    total,
+    max_score: 100,
+    hits: Array.from({ length: pageSize }).map((x, index) => ({
+      ...sampleDocNoSortId(guids[index], ips ? ips[index] : '127.0.0.1'),
     })),
   },
 });

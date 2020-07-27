@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
-import { BrowserFields } from '../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../common/containers/source';
 import { TimelineQuery } from '../../containers/index';
 import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -98,7 +98,8 @@ export interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
   dataProviders: DataProvider[];
-  end: number;
+  docValueFields: DocValueFields[];
+  end: string;
   eventType?: EventType;
   filters: Filter[];
   graphEventId?: string;
@@ -106,6 +107,7 @@ export interface Props {
   indexPattern: IIndexPattern;
   indexToAdd: string[];
   isLive: boolean;
+  isLoadingSource: boolean;
   isSaving: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
@@ -121,7 +123,7 @@ export interface Props {
   onToggleDataProviderType: OnToggleDataProviderType;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
-  start: number;
+  start: string;
   sort: Sort;
   status: TimelineStatusLiteral;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -134,6 +136,7 @@ export const TimelineComponent: React.FC<Props> = ({
   browserFields,
   columns,
   dataProviders,
+  docValueFields,
   end,
   eventType,
   filters,
@@ -142,6 +145,7 @@ export const TimelineComponent: React.FC<Props> = ({
   indexPattern,
   indexToAdd,
   isLive,
+  isLoadingSource,
   isSaving,
   itemsPerPage,
   itemsPerPageOptions,
@@ -167,17 +171,47 @@ export const TimelineComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
-  const combinedQueries = combineQueries({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    dataProviders,
-    indexPattern,
-    browserFields,
-    filters,
-    kqlQuery: { query: kqlQueryExpression, language: 'kuery' },
-    kqlMode,
-    start,
-    end,
-  });
+  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(kibana.services.uiSettings), [
+    kibana.services.uiSettings,
+  ]);
+  const kqlQuery = useMemo(() => ({ query: kqlQueryExpression, language: 'kuery' }), [
+    kqlQueryExpression,
+  ]);
+  const combinedQueries = useMemo(
+    () =>
+      combineQueries({
+        config: esQueryConfig,
+        dataProviders,
+        indexPattern,
+        browserFields,
+        filters,
+        kqlQuery,
+        kqlMode,
+        start,
+        end,
+      }),
+    [
+      browserFields,
+      dataProviders,
+      esQueryConfig,
+      start,
+      end,
+      filters,
+      indexPattern,
+      kqlMode,
+      kqlQuery,
+    ]
+  );
+
+  const canQueryTimeline = useMemo(
+    () =>
+      combinedQueries != null &&
+      isLoadingSource != null &&
+      !isLoadingSource &&
+      !isEmpty(start) &&
+      !isEmpty(end),
+    [isLoadingSource, combinedQueries, start, end]
+  );
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const timelineQueryFields = useMemo(() => columnsHeader.map((c) => c.id), [columnsHeader]);
   const timelineQuerySortField = useMemo(
@@ -239,16 +273,19 @@ export const TimelineComponent: React.FC<Props> = ({
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-      {combinedQueries != null ? (
+      {canQueryTimeline ? (
         <TimelineQuery
+          docValueFields={docValueFields}
+          endDate={end}
           eventType={eventType}
           id={id}
           indexToAdd={indexToAdd}
           fields={timelineQueryFields}
           sourceId="default"
           limit={itemsPerPage}
-          filterQuery={combinedQueries.filterQuery}
+          filterQuery={combinedQueries!.filterQuery}
           sortField={timelineQuerySortField}
+          startDate={start}
         >
           {({
             events,
@@ -277,32 +314,39 @@ export const TimelineComponent: React.FC<Props> = ({
                   <StatefulBody
                     browserFields={browserFields}
                     data={events}
+                    docValueFields={docValueFields}
                     id={id}
                     sort={sort}
                     toggleColumn={toggleColumn}
                   />
                 </StyledEuiFlyoutBody>
-                <StyledEuiFlyoutFooter
-                  data-test-subj="eui-flyout-footer"
-                  className="timeline-flyout-footer"
-                >
-                  <Footer
-                    getUpdatedAt={getUpdatedAt}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    height={footerHeight}
-                    id={id}
-                    isLive={isLive}
-                    isLoading={loading || loadingIndexName}
-                    itemsCount={events.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    onChangeItemsPerPage={onChangeItemsPerPage}
-                    onLoadMore={loadMore}
-                    serverSideEventCount={totalCount}
-                    tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                  />
-                </StyledEuiFlyoutFooter>
+                {
+                  /** Hide the footer if Resolver is showing. */
+                  !graphEventId && (
+                    <StyledEuiFlyoutFooter
+                      data-test-subj="eui-flyout-footer"
+                      className="timeline-flyout-footer"
+                    >
+                      <Footer
+                        data-test-subj="timeline-footer"
+                        getUpdatedAt={getUpdatedAt}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        height={footerHeight}
+                        id={id}
+                        isLive={isLive}
+                        isLoading={loading || loadingIndexName}
+                        itemsCount={events.length}
+                        itemsPerPage={itemsPerPage}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        onChangeItemsPerPage={onChangeItemsPerPage}
+                        onLoadMore={loadMore}
+                        serverSideEventCount={totalCount}
+                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+                      />
+                    </StyledEuiFlyoutFooter>
+                  )
+                }
               </>
             );
           }}

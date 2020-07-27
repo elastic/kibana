@@ -103,6 +103,7 @@ export class HistogramInner extends PureComponent {
       tooltipHeader,
       verticalLineHover,
       width: XY_WIDTH,
+      height,
       legends,
     } = this.props;
     const { hoveredBucket } = this.state;
@@ -181,7 +182,7 @@ export class HistogramInner extends PureComponent {
     );
 
     return (
-      <div style={{ position: 'relative', height: XY_HEIGHT }}>
+      <div style={{ position: 'relative', height }}>
         <ChartsWrapper>
           {noHits ? (
             <>{emptyStateChart}</>
@@ -250,7 +251,7 @@ export class HistogramInner extends PureComponent {
                 <Voronoi
                   extent={[
                     [XY_MARGIN.left, XY_MARGIN.top],
-                    [XY_WIDTH, XY_HEIGHT],
+                    [XY_WIDTH, height],
                   ]}
                   nodes={buckets.map((bucket) => {
                     return {
@@ -297,6 +298,7 @@ HistogramInner.propTypes = {
   tooltipHeader: PropTypes.func,
   verticalLineHover: PropTypes.func,
   width: PropTypes.number.isRequired,
+  height: PropTypes.number,
   xType: PropTypes.string,
   legends: PropTypes.array,
   noHits: PropTypes.bool,
@@ -311,6 +313,7 @@ HistogramInner.defaultProps = {
   verticalLineHover: () => null,
   xType: 'linear',
   noHits: false,
+  height: XY_HEIGHT,
 };
 
 export default makeWidthFlexible(HistogramInner);

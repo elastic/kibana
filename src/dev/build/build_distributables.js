@@ -22,7 +22,6 @@ import { getConfig, createRunner } from './lib';
 import {
   BuildKibanaPlatformPluginsTask,
   BuildPackagesTask,
-  CleanClientModulesOnDLLTask,
   CleanEmptyFoldersTask,
   CleanExtraBinScriptsTask,
   CleanExtraFilesFromModulesTask,
@@ -127,7 +126,6 @@ export async function buildDistributables(options) {
   await run(TranspileScssTask);
   await run(BuildKibanaPlatformPluginsTask);
   await run(OptimizeBuildTask);
-  await run(CleanClientModulesOnDLLTask);
   await run(CleanTypescriptTask);
   await run(CleanExtraFilesFromModulesTask);
   await run(CleanEmptyFoldersTask);

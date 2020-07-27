@@ -1022,7 +1022,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "id": "query:okjpgs",
+    "id": "query:OKJpgs",
     "source": {
       "query": {
         "title": "OKJpgs",

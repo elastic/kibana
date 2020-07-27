@@ -36,6 +36,7 @@ describe('WebhookActionConnectorFields renders', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookHeaderText"]').length > 0).toBeTruthy();
     wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="webhookMethodSelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();

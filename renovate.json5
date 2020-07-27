@@ -25,7 +25,7 @@
     'Team:Operations',
     'renovate',
     'v8.0.0',
-    'v7.9.0',
+    'v7.10.0',
   ],
   major: {
     labels: [
@@ -33,7 +33,7 @@
       'Team:Operations',
       'renovate',
       'v8.0.0',
-      'v7.9.0',
+      'v7.10.0',
       'renovate:major',
     ],
   },
@@ -254,7 +254,7 @@
           'Team:Operations',
           'renovate',
           'v8.0.0',
-          'v7.9.0',
+          'v7.10.0',
           ':ml',
         ],
       },
@@ -419,11 +419,27 @@
         ],
       },
       {
+        groupSlug: 'he',
+        groupName: 'he related packages',
+        packageNames: [
+          'he',
+          '@types/he',
+        ],
+      },
+      {
         groupSlug: 'history',
         groupName: 'history related packages',
         packageNames: [
           'history',
           '@types/history',
+        ],
+      },
+      {
+        groupSlug: 'hjson',
+        groupName: 'hjson related packages',
+        packageNames: [
+          'hjson',
+          '@types/hjson',
         ],
       },
       {

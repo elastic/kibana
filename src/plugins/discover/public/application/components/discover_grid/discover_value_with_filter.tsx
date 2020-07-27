@@ -73,7 +73,7 @@ export const DiscoverGridValueWithFilter = ({
             className="dscEuiDataGridRowCellBtn"
             iconSize="s"
             iconType="minusInCircle"
-            aria-label={i18n.translate('discover.grid.ariaFilterOn', {
+            aria-label={i18n.translate('discover.grid.ariaFilterOut', {
               defaultMessage: 'Filter out {value}',
               values: { value: columnId },
             })}

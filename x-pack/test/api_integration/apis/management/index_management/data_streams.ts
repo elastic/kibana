@@ -35,9 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         },
-        data_stream: {
-          timestamp_field: '@timestamp',
-        },
+        data_stream: {},
       },
     });
 

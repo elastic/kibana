@@ -43,10 +43,10 @@ function noWhiteSpace(html: string) {
 }
 
 const templateHtml = `
-  <dl class="dscFormatSource">
+  <dl class="source truncate-by-height">
     <% defPairs.forEach(function (def) { %>
-      <dt class="dscFormatSource__title"><%- def[0] %>:</dt>
-      <dd class="dscFormatSource__description"><%= def[1] %></dd>
+      <dt><%- def[0] %>:</dt>
+      <dd><%= def[1] %></dd>
       <%= ' ' %>
     <% }); %>
   </dl>`;

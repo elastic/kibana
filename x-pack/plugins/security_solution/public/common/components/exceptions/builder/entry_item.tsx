@@ -117,6 +117,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
         isDisabled={isLoading}
         onChange={handleFieldChange}
         data-test-subj="exceptionBuilderEntryField"
+        isRequired
       />
     );
 
@@ -170,6 +171,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
             isClearable={false}
             indexPattern={indexPattern}
             onChange={handleFieldMatchValueChange}
+            isRequired
             data-test-subj="exceptionBuilderEntryFieldMatch"
           />
         );
@@ -185,6 +187,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
             isClearable={false}
             indexPattern={indexPattern}
             onChange={handleFieldMatchAnyValueChange}
+            isRequired
             data-test-subj="exceptionBuilderEntryFieldMatchAny"
           />
         );
@@ -199,6 +202,7 @@ export const EntryItemComponent: React.FC<EntryItemProps> = ({
             isDisabled={isLoading}
             isClearable={false}
             onChange={handleFieldListValueChange}
+            isRequired
             data-test-subj="exceptionBuilderEntryFieldList"
           />
         );

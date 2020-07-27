@@ -490,7 +490,7 @@ export const buildPipeline = async (
   const { indexPattern, searchSource } = vis.data;
   const query = searchSource!.getField('query');
   const filters = searchSource!.getField('filter');
-  const { uiState } = vis;
+  const { uiState, title } = vis;
 
   // context
   let pipeline = `kibana | kibana_context `;
@@ -519,7 +519,7 @@ export const buildPipeline = async (
     timefilter: params.timefilter,
   });
   if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name](vis.params, schemas, uiState);
+    pipeline += buildPipelineVisFunction[vis.type.name]({ title, ...vis.params }, schemas, uiState);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = { ...vis.params };
     visConfig.dimensions = await buildVislibDimensions(vis, params);
@@ -535,7 +535,10 @@ export const buildPipeline = async (
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {
-      pipeline += `${prepareString('index', indexPattern.id)}`;
+      pipeline += `${prepareString('index', indexPattern.id)} `;
+      if (vis.data.aggs) {
+        pipeline += `${prepareJson('aggConfigs', vis.data.aggs!.aggs)}`;
+      }
     }
   }
 
