@@ -11,7 +11,7 @@ import { createMemoryHistory, History as HistoryPackageHistoryInterface } from '
 import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { connectEnzymeWrapperAndStore } from '../connect_enzyme_wrapper_and_store';
-import { spyMiddlewareFactory } from '../spy_middleware';
+import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';

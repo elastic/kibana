@@ -7,7 +7,10 @@
 import { ResolverAction } from '../store/actions';
 import { SpyMiddleware, SpyMiddlewareStateActionPair } from '../types';
 
-// TODO, rename file
+/**
+ * Return a `SpyMiddleware` to be used in testing. Use `debugActions` to console.log actions and the state they produced.
+ * For reducer/middleware tests, you can use `actions` to get access to each dispatched action along w/ the state it produced.
+ */
 export const spyMiddlewareFactory: () => SpyMiddleware = () => {
   const resolvers: Set<(stateActionPair: SpyMiddlewareStateActionPair) => void> = new Set();
 
