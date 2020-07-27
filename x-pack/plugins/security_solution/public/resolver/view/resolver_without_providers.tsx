@@ -30,6 +30,9 @@ import { ResolverProps } from '../types';
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
  */
 export const ResolverWithoutProviders = React.memo(
+  /**
+   * Use `forwardRef` so that the `Simulator` used in testing can access the top level DOM element.
+   */
   React.forwardRef(function (
     { className, databaseDocumentID, resolverComponentInstanceID }: ResolverProps,
     refToForward
