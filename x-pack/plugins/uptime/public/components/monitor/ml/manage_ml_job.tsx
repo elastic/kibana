@@ -6,7 +6,7 @@
 
 import React, { useContext, useState } from 'react';
 
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants';
 import {
@@ -55,16 +55,15 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
     dispatch(deleteAlertAction.get({ alertId: anomalyAlert?.id as string }));
 
   const button = (
-    <EuiButtonEmpty
+    <EuiButton
       data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
-      iconType={hasMLJob ? 'arrowDown' : 'machineLearningApp'}
-      iconSide={hasMLJob ? 'right' : 'left'}
       onClick={hasMLJob ? () => setIsPopOverOpen(true) : onEnableJob}
       disabled={hasMLJob && !canDeleteMLJob}
       isLoading={isMLJobCreating || isMLJobLoading}
+      size="s"
     >
       {hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 
   const panels = [
@@ -116,6 +115,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         button={button}
         isOpen={isPopOverOpen}
         closePopover={() => setIsPopOverOpen(false)}
+        panelPaddingSize="none"
       >
         <EuiContextMenu
           initialPanelId={0}

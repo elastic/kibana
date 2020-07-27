@@ -31,7 +31,7 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, services } from './services';
+import { startServices, services, ServicesProvider } from './services';
 // @ts-expect-error untyped local
 import { createHistory, destroyHistory } from './lib/history_provider';
 // @ts-expect-error untyped local
@@ -52,19 +52,16 @@ export const renderApp = (
 ) => {
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
-  const canvasServices = Object.entries(services).reduce((reduction, [key, provider]) => {
-    reduction[key] = provider.getService();
-
-    return reduction;
-  }, {} as Record<string, any>);
 
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...plugins, ...coreStart, canvas: canvasServices }}>
-      <I18nProvider>
-        <Provider store={canvasStore}>
-          <App />
-        </Provider>
-      </I18nProvider>
+    <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
+      <ServicesProvider providers={services}>
+        <I18nProvider>
+          <Provider store={canvasStore}>
+            <App />
+          </Provider>
+        </I18nProvider>
+      </ServicesProvider>
     </KibanaContextProvider>,
     element
   );
