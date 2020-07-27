@@ -38,6 +38,24 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('POST /api/ingest_manager/agent_configs/delete', () => {
+      it('should delete a config', async () => {
+        const { body: apiResponse } = await supertest
+          .post(`/api/ingest_manager/agent_configs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'asdfasf',
+            namespace: 'asfdasdfasdf',
+          })
+          .expect(200);
+
+        await supertest
+          .post(`/api/ingest_manager/agent_configs/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentConfigId: apiResponse.item.id })
+          .expect(200);
+      });
+    });
     describe('POST /api/ingest_manager/agent_configs/{agentConfigId}/copy', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('fleet/agents');
