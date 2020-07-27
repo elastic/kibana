@@ -75,7 +75,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         data-test-subj="timelineImmutableCallOut"
         title={i18n.CALL_OUT_IMMUTIABLE}
         color="primary"
-        iconType="info"
+        iconType="alert"
         size="s"
       />
     )}

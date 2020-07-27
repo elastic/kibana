@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { LocationProvider } from '../../../../context/LocationContext';
 import {
   UrlParamsContext,
@@ -21,18 +21,24 @@ import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContex
 
 const mockHistoryPush = jest.spyOn(history, 'push');
 const mockRefreshTimeRange = jest.fn();
-const MockUrlParamsProvider: React.FC<{
+function MockUrlParamsProvider({
+  params = {},
+  children,
+}: {
+  children: ReactNode;
   params?: IUrlParams;
-}> = ({ params = {}, children }) => (
-  <UrlParamsContext.Provider
-    value={{
-      urlParams: params,
-      refreshTimeRange: mockRefreshTimeRange,
-      uiFilters: useUiFilters(params),
-    }}
-    children={children}
-  />
-);
+}) {
+  return (
+    <UrlParamsContext.Provider
+      value={{
+        urlParams: params,
+        refreshTimeRange: mockRefreshTimeRange,
+        uiFilters: useUiFilters(params),
+      }}
+      children={children}
+    />
+  );
+}
 
 function mountDatePicker(params?: IUrlParams) {
   return mount(
