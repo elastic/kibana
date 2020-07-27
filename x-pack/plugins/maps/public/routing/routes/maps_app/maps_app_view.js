@@ -150,10 +150,6 @@ export class MapsAppView extends React.Component {
     });
   }
 
-  _getAppStateFilters = () => {
-    return this._appStateManager.getFilters() || [];
-  };
-
   _onQueryChange = ({
     filters,
     query = this.props.query,
@@ -200,13 +196,10 @@ export class MapsAppView extends React.Component {
         savedObjectFilters = mapState.filters;
       }
     }
+    const appFilters = this._appStateManager.getFilters() || [];
 
     this._onQueryChange({
-      filters: [
-        ..._.get(globalState, 'filters', []),
-        ...this._getAppStateFilters(),
-        ...savedObjectFilters,
-      ],
+      filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query: getInitialQuery({
         mapStateJSON,
         appState: this._appStateManager.getAppState(),
