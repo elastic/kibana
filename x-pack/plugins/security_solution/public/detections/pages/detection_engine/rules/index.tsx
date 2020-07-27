@@ -205,6 +205,7 @@ const RulesPageComponent: React.FC = () => {
             )}
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="open-value-lists-modal-button"
                 iconType="importAction"
                 isDisabled={userHasNoPermissions(canUserCRUD) || loading}
                 onClick={showValueListsModal}

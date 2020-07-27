@@ -24,7 +24,7 @@ const ScrollableContainer = styled.div`
   overflow: scroll;
 `;
 
-export const CustomLinkPopover = ({
+export function CustomLinkPopover({
   customLinks,
   onCreateCustomLinkClick,
   onClose,
@@ -34,7 +34,7 @@ export const CustomLinkPopover = ({
   onCreateCustomLinkClick: () => void;
   onClose: () => void;
   transaction: Transaction;
-}) => {
+}) {
   return (
     <>
       <EuiPopoverTitle>
@@ -71,4 +71,4 @@ export const CustomLinkPopover = ({
       </ScrollableContainer>
     </>
   );
-};
+}
