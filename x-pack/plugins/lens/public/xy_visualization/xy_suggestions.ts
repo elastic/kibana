@@ -318,11 +318,7 @@ function getSeriesType(
     return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultType;
   }
 
-  if (changeType === 'initial') {
-    return defaultType;
-  }
-
-  return closestSeriesType !== defaultType ? closestSeriesType : defaultType;
+  return closestSeriesType;
 }
 
 function getSuggestionTitle(
