@@ -81,7 +81,7 @@ const showIfLegacyAndMetricbeatIndices = () => {
         <p>
           {i18n.translate('xpack.monitoring.internalAndMetricbeatMonitoringToast.description', {
             defaultMessage: `It appears you are using both Metricbeat and "Legacy Collection" for Stack Monitoring. 
-            only Metricbeat type monitoring will be supported in the next major release (8.0.0). 
+            In 8.0.0, you must use Metricbeat to collect monitoring data. 
             Please follow the steps in setup mode to migrate the rest of the monitoring to Metricbeat.`,
           })}
         </p>
