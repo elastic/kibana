@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect/expect.js';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { deletePolicyStream } from './data_stream_helper';
 
 export default function ({ getService }: FtrProviderContext) {
