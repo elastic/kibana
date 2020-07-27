@@ -721,7 +721,7 @@ describe('utils', () => {
           findExceptionListsItem: jest.fn().mockResolvedValue({
             data: [getExceptionListItemSchemaMock()],
             page: 1,
-            per_page: 5000,
+            per_page: 10000,
             total: 1,
           }),
         } as unknown) as ExceptionListClient);
@@ -735,7 +735,7 @@ describe('utils', () => {
         listId: ['list_id_single', 'endpoint_list'],
         namespaceType: ['single', 'agnostic'],
         page: 1,
-        perPage: 5000,
+        perPage: 10000,
         filter: [],
         sortOrder: undefined,
         sortField: undefined,
