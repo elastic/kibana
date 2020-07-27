@@ -16,12 +16,12 @@ import {
   LegacyEndpointEvent,
   ResolverNodeStats,
   ResolverRelatedAlerts,
-} from '../../../../plugins/security_solution/common/endpoint/types';
+} from '../../../plugins/security_solution/common/endpoint/types';
 import {
   parentEntityId,
   eventId,
-} from '../../../../plugins/security_solution/common/endpoint/models/event';
-import { FtrProviderContext } from '../../ftr_provider_context';
+} from '../../../plugins/security_solution/common/endpoint/models/event';
+import { FtrProviderContext } from '../ftr_provider_context';
 import {
   Event,
   Tree,
@@ -29,8 +29,8 @@ import {
   RelatedEventCategory,
   RelatedEventInfo,
   categoryMapping,
-} from '../../../../plugins/security_solution/common/endpoint/generate_data';
-import { Options, GeneratedTrees } from '../../services/resolver';
+} from '../../../plugins/security_solution/common/endpoint/generate_data';
+import { Options, GeneratedTrees } from '../services/resolver';
 
 /**
  * Check that the given lifecycle is in the resolver tree's corresponding map
