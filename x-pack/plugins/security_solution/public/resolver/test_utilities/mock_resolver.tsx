@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// TODO, this is really part of the simulator. move it
-
 /* eslint-disable no-duplicate-imports */
-
 /* eslint-disable react/display-name */
 
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
@@ -21,15 +18,22 @@ import { coreMock } from '../../../../../../src/core/public/mocks';
 import { CoreStart } from '../../../../../../src/core/public';
 import { ResolverState, SideEffectSimulator, ResolverProps } from '../types';
 import { ResolverAction } from '../store/actions';
-import { ResolverWithoutProviders } from './resolver_without_providers';
-import { SideEffectContext } from './side_effect_context';
-import { sideEffectSimulator } from './side_effect_simulator';
+import { ResolverWithoutProviders } from '../view/resolver_without_providers';
+import { SideEffectContext } from '../view/side_effect_context';
+import { sideEffectSimulator } from '../view/side_effect_simulator';
 
 type MockResolverProps = {
-  // core start and history can be optionally passed
+  /**
+   * Used for the KibanaContextProvider. Defaulted if not provided.
+   */
   coreStart?: CoreStart;
+  /**
+   * Used for `react-router`. Defaulted if not provided.
+   */
   history?: React.ComponentProps<typeof Router>['history'];
-  // If passed, set the raster width to this value. Defaults to 800
+  /**
+   * Used to simulate a raster width. Defaults to 800.
+   */
   rasterWidth?: number;
   // If passed, set the raster height to this value. Defaults to 800
   rasterHeight?: number;

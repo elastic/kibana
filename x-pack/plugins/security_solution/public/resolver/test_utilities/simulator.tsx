@@ -12,7 +12,7 @@ import { connectEnzymeWrapperAndStore } from './connect_enzyme_wrapper_and_store
 import { spyMiddlewareFactory } from './spy_middleware';
 import { resolverMiddlewareFactory } from '../store/middleware';
 import { resolverReducer } from '../store/reducer';
-import { MockResolver } from '../view/mock';
+import { MockResolver } from './mock_resolver';
 import { ResolverState, DataAccessLayer, SpyMiddleware } from '../types';
 import { ResolverAction } from '../store/actions';
 
