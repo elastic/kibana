@@ -22,11 +22,11 @@ import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_fac
 
 type MockResolverProps = {
   /**
-   * Used to simulate a raster width. Defaults to 800.
+   * Used to simulate a raster width. Defaults to 1600.
    */
   rasterWidth?: number;
   /**
-   * Used to simulate a raster height. Defaults to 800.
+   * Used to simulate a raster height. Defaults to 1200.
    */
   rasterHeight?: number;
   /**
@@ -45,19 +45,18 @@ type MockResolverProps = {
 } & ResolverProps;
 
 /**
- * This is a mock Resolver component. It has faked versions of various services:
- *  * fake i18n
- *  * fake (memory) history (optionally provided)
- *  * fake coreStart services (optionally provided)
- *  * SideEffectContext
+ * This is a mock Resolver component. It is intended to be used with `enzyme` tests via the `Simulator` class. It wraps Resolver in the required providers:
+ *  * `i18n`
+ *  * `Router` using a provided `History`
+ *  * `SideEffectContext.Provider` using side effect simulator it creates
+ *  * `KibanaContextProvider` using a provided `CoreStart` instance
+ *  * `react-redux`'s `Provider` using a provided `Store`.
  *
- *  You will need to provide a store. Create one with `storyFactory`. The store will need a mock `DataAccessLayer`.
- *
- *  Props required by `ResolverWithoutStore` can be passed as well. If not passed, they are defaulted.
- *  * `databaseDocumentID`
- *  * `resolverComponentInstanceID`
- *
- *  Use this in jest tests. Render it w/ `@testing-library/react` or `enzyme`. Then either interact with the result using fake events, or dispatch actions to the store. You could also pass in a store with initial data.
+ * Resolver needs to measure its size in the DOM. The `SideEffectSimulator` instance can fake the size of an element.
+ * However in tests, React doesn't have good DOM reconciliation and the root element is often swapped out. When the
+ * element is replaced, the fake dimensions stop being applied. In order to get around this issue, this component will
+ * trigger a simulated resize on the root node reference any time it changes. This simulates the layout process a real
+ * browser would do when an element is attached to the DOM.
  */
 export const MockResolver = React.memo((props: MockResolverProps) => {
   const [resolverElement, setResolverElement] = useState<HTMLDivElement | null>(null);
