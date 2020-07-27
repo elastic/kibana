@@ -14,12 +14,10 @@ export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact',
   SUPPORTED_OPERATING_SYSTEMS: ['linux', 'macos', 'windows'],
-  SCHEMA_VERSION: 'v1',
 };
 
 export const ManifestConstants = {
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact-manifest',
-  SCHEMA_VERSION: 'v1',
 };
 
 export const getArtifactId = (artifact: InternalArtifactSchema) => {

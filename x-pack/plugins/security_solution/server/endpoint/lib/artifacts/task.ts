@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Logger } from 'src/core/server';
 import {
   ConcreteTaskInstance,
@@ -11,7 +10,7 @@ import {
   TaskManagerStartContract,
 } from '../../../../../task_manager/server';
 import { EndpointAppContext } from '../../types';
-import { reportErrors, ManifestConstants } from './common';
+import { reportErrors } from './common';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 
 export const ManifestTaskConstants = {
@@ -92,19 +91,14 @@ export class ManifestTask {
 
     try {
       // Last manifest we computed, which was saved to ES
-      const oldManifest = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
+      const oldManifest = await manifestManager.getLastComputedManifest();
       if (oldManifest == null) {
         this.logger.debug('User manifest not available yet.');
         return;
       }
 
       // New computed manifest based on current state of exception list
-      const newManifest = await manifestManager.buildNewManifest(
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest
-      );
+      const newManifest = await manifestManager.buildNewManifest(oldManifest);
       const diffs = newManifest.diff(oldManifest);
 
       // Compress new artifacts
@@ -131,6 +125,7 @@ export class ManifestTask {
 
       // Commit latest manifest state, if different
       if (diffs.length) {
+        newManifest.bumpSemanticVersion();
         const error = await manifestManager.commit(newManifest);
         if (error) {
           throw error;

@@ -49,21 +49,21 @@ export const getEmptyMockArtifacts = async (opts?: { compress: boolean }) => {
 };
 
 export const getMockManifest = async (opts?: { compress: boolean }) => {
-  const manifest = new Manifest('v1');
+  const manifest = new Manifest();
   const artifacts = await getMockArtifacts(opts);
   artifacts.forEach((artifact) => manifest.addEntry(artifact));
   return manifest;
 };
 
 export const getMockManifestWithDiffs = async (opts?: { compress: boolean }) => {
-  const manifest = new Manifest('v1');
+  const manifest = new Manifest();
   const artifacts = await getMockArtifactsWithDiff(opts);
   artifacts.forEach((artifact) => manifest.addEntry(artifact));
   return manifest;
 };
 
 export const getEmptyMockManifest = async (opts?: { compress: boolean }) => {
-  const manifest = new Manifest('v1');
+  const manifest = new Manifest();
   const artifacts = await getEmptyMockArtifacts(opts);
   artifacts.forEach((artifact) => manifest.addEntry(artifact));
   return manifest;
@@ -105,7 +105,7 @@ export const createPackageConfigWithInitialManifestMock = (): PackageConfig => {
             '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
         },
       },
-      manifest_version: 'a9b7ef358a363f327f479e31efc4f228b2277a7fb4d1914ca9b4e7ca9ffcf537',
+      manifest_version: '1.0.0',
       schema_version: 'v1',
     },
   };
@@ -148,7 +148,7 @@ export const createPackageConfigWithManifestMock = (): PackageConfig => {
             '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
         },
       },
-      manifest_version: '520f6cf88b3f36a065c6ca81058d5f8690aadadf6fe857f8dec4cc37589e7283',
+      manifest_version: '1.0.1',
       schema_version: 'v1',
     },
   };

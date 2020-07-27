@@ -83,6 +83,8 @@
       ],
       "endpoint:user-artifact-manifest": {
         "created": 1593183699663,
+        "schemaVersion": "v1",
+        "semanticVersion": "1.0.1",
         "ids": [
           "endpoint-exceptionlist-linux-v1-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
           "endpoint-exceptionlist-macos-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
