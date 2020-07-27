@@ -79,6 +79,9 @@ export const ResolverMap = React.memo(function ({
   });
 
   useEffect(() => {
+    // When you refresh the page after selecting a process in the table view (not the timeline view)
+    // The old crumbId still exists in the query string even though a resolver is no longer visible
+    // This just makes sure the activeDescendant and crumbId are in sync on load for that view as well as the timeline
     if (activeDescendantId && crumbId !== activeDescendantId) {
       pushToQueryParams({ crumbId: activeDescendantId, crumbEvent: '' });
     }
