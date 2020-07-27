@@ -31,6 +31,23 @@ describe('when on the hosts page', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
 
+  const dispatchHostsExist = () => {
+    reactTestingLibrary.act(() =>
+      store.dispatch({
+        type: 'serverReturnedHostExistValue',
+        payload: true,
+      })
+    );
+  };
+  const dispatchHostsDoNotExist = () => {
+    reactTestingLibrary.act(() =>
+      store.dispatch({
+        type: 'serverReturnedHostExistValue',
+        payload: false,
+      })
+    );
+  };
+
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
@@ -45,6 +62,7 @@ describe('when on the hosts page', () => {
 
   it('should show the empty state when there are no hosts or polices', async () => {
     const renderResult = render();
+    dispatchHostsDoNotExist();
     // Initially, there are no hosts or policies, so we prompt to add policies first.
     const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
@@ -80,18 +98,21 @@ describe('when on the hosts page', () => {
 
     it('should show the no hosts empty state', async () => {
       const renderResult = render();
+      dispatchHostsDoNotExist();
       const emptyHostsTable = await renderResult.findByTestId('emptyHostsTable');
       expect(emptyHostsTable).not.toBeNull();
     });
 
     it('should display the onboarding steps', async () => {
       const renderResult = render();
+      dispatchHostsDoNotExist();
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
       expect(onboardingSteps).not.toBeNull();
     });
 
     it('should show policy selection', async () => {
       const renderResult = render();
+      dispatchHostsDoNotExist();
       const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
       expect(onboardingPolicySelect).not.toBeNull();
     });
