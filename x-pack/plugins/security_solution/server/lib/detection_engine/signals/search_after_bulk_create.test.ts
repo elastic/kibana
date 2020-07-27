@@ -811,4 +811,58 @@ describe('searchAfterAndBulkCreate', () => {
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
     expect(lastLookBackDate).toEqual(null);
   });
+
+  test('if returns false with error message when from is NaN', async () => {
+    const sampleParams = sampleRuleAlertParams(10);
+    sampleParams.from = 'now-3755555555555555.67s';
+    const exceptionItem = getExceptionListItemSchemaMock();
+    exceptionItem.entries = [
+      {
+        field: 'source.ip',
+        operator: 'included',
+        type: 'list',
+        list: {
+          id: 'ci-badguys.txt',
+          type: 'ip',
+        },
+      },
+    ];
+    const {
+      success,
+      createdSignalsCount,
+      lastLookBackDate,
+      errorMessage,
+    } = await searchAfterAndBulkCreate({
+      listClient,
+      exceptionsList: [exceptionItem],
+      gap: null,
+      previousStartedAt: new Date(),
+      ruleParams: sampleParams,
+      services: mockService,
+      logger: mockLogger,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+      buildRuleMessage,
+    });
+    expect(success).toEqual(false);
+    expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
+    expect(lastLookBackDate).toEqual(null);
+    expect(errorMessage).toEqual(
+      '[-] Failed to parse rule interval: Error: failed to parse from and to dates on rule. Check lookback / interval name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+    );
+  });
 });

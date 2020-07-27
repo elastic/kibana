@@ -154,6 +154,22 @@ describe('rules_notification_alert_type', () => {
       });
     });
 
+    it('should throw error and set ruleStatus to error when it fails to parse "from" on rule', async () => {
+      payload.params.from = 'now-37555555555555.67s';
+      try {
+        await alert.executor(payload);
+      } catch (exc) {
+        // we expect the executor to throw an error so that we do not continue down
+        // to the process of searching for the events since the 'from' param
+        // was NaN. However we will still write a failed status
+        // before continuing on to throw the error.
+        expect(ruleStatusService.error).toHaveBeenCalled();
+        expect(ruleStatusService.error.mock.calls[0][0]).toContain(
+          '[-] Failed to parse rule interval: Error: failed to parse from and to dates on rule. Check lookback / interval name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+        );
+      }
+    });
+
     it('should NOT warn about the gap between runs if gap small', async () => {
       (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(1, 'm'));
       (getGapMaxCatchupRatio as jest.Mock).mockReturnValue({

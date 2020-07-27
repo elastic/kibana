@@ -712,6 +712,23 @@ describe('utils', () => {
       expect(ratio).toBeNull();
       expect(gapDiffInUnits).toBeNull();
     });
+
+    test('should throw an error when given a NaN for from param', () => {
+      try {
+        getGapMaxCatchupRatio({
+          logger: mockLogger,
+          previousStartedAt: moment().subtract(-15, 's').toDate(),
+          interval: '10s',
+          ruleParamsFrom: 'now-37555555555555555.67s',
+          buildRuleMessage,
+          unit: 's',
+        });
+      } catch (exc) {
+        expect(exc.message).to.eql(
+          'failed to parse from and to dates on rule. Check lookback / interval'
+        );
+      }
+    });
   });
 
   describe('#getExceptions', () => {
