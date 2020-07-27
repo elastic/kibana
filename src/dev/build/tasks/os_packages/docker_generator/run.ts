@@ -23,11 +23,9 @@ import { promisify } from 'util';
 
 import { ToolingLog } from '@kbn/dev-utils';
 
+import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
-import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
-
-// @ts-expect-error not ts yet
 import { bundleDockerFiles } from './bundle_dockerfiles';
 
 const accessAsync = promisify(access);
