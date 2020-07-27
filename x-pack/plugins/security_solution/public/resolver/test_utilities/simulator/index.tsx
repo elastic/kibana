@@ -8,13 +8,13 @@ import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
-import { connectEnzymeWrapperAndStore } from './connect_enzyme_wrapper_and_store';
-import { spyMiddlewareFactory } from './spy_middleware';
-import { resolverMiddlewareFactory } from '../store/middleware';
-import { resolverReducer } from '../store/reducer';
+import { connectEnzymeWrapperAndStore } from '../connect_enzyme_wrapper_and_store';
+import { spyMiddlewareFactory } from '../spy_middleware';
+import { resolverMiddlewareFactory } from '../../store/middleware';
+import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';
-import { ResolverState, DataAccessLayer, SpyMiddleware } from '../types';
-import { ResolverAction } from '../store/actions';
+import { ResolverState, DataAccessLayer, SpyMiddleware } from '../../types';
+import { ResolverAction } from '../../store/actions';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.

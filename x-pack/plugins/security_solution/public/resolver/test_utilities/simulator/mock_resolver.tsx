@@ -13,14 +13,14 @@ import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { CoreStart } from '../../../../../../src/core/public';
-import { ResolverState, SideEffectSimulator, ResolverProps } from '../types';
-import { ResolverAction } from '../store/actions';
-import { ResolverWithoutProviders } from '../view/resolver_without_providers';
-import { SideEffectContext } from '../view/side_effect_context';
-import { sideEffectSimulator } from '../view/side_effect_simulator';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { ResolverState, SideEffectSimulator, ResolverProps } from '../../types';
+import { ResolverAction } from '../../store/actions';
+import { ResolverWithoutProviders } from '../../view/resolver_without_providers';
+import { SideEffectContext } from '../../view/side_effect_context';
+import { sideEffectSimulator } from '../../view/side_effect_simulator';
 
 type MockResolverProps = {
   /**
