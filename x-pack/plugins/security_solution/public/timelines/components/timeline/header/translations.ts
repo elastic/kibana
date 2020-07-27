@@ -14,7 +14,7 @@ export const CALL_OUT_UNAUTHORIZED_MSG = i18n.translate(
   }
 );
 
-export const CALL_OUT_IMMUTIABLE = i18n.translate(
+export const CALL_OUT_IMMUTABLE = i18n.translate(
   'xpack.securitySolution.timeline.callOut.immutable.message.description',
   {
     defaultMessage:
