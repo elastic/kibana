@@ -39,7 +39,6 @@ export interface IOverviewActions {
 
 export interface IOverviewValues extends IOverviewServerData {
   dataLoading: boolean;
-  hideOnboarding: boolean;
   hasErrorConnecting: boolean;
   flashMessages: IFlashMessagesProps;
 }
