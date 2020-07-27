@@ -6,8 +6,6 @@
 import {
   ENDPOINT_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_NAMESPACE,
-  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   EXCEPTION_LIST_URL,
 } from '../../common/constants';
 import {
@@ -249,8 +247,8 @@ export const fetchExceptionListById = async ({
  * Fetch an ExceptionList's ExceptionItems by providing a ExceptionList list_id
  *
  * @param http Kibana http service
- * @param listId ExceptionList list_id (not ID)
- * @param namespaceType ExceptionList namespace_type
+ * @param listIds ExceptionList list_ids (not ID)
+ * @param namespaceTypes ExceptionList namespace_types
  * @param filterOptions optional - filter by field or tags
  * @param pagination optional
  * @param signal to cancel request
@@ -259,32 +257,18 @@ export const fetchExceptionListById = async ({
  */
 export const fetchExceptionListItemsByListId = async ({
   http,
-  listId,
-  namespaceType,
-  filterOptions = {
-    filter: '',
-    tags: [],
-  },
+  listIds,
+  namespaceTypes,
+  filterOptions,
   pagination,
   signal,
 }: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> => {
-  const namespace =
-    namespaceType === 'agnostic' ? EXCEPTION_LIST_NAMESPACE_AGNOSTIC : EXCEPTION_LIST_NAMESPACE;
-  const filters = [
-    ...(filterOptions.filter.length
-      ? [`${namespace}.attributes.entries.field:${filterOptions.filter}*`]
-      : []),
-    ...(filterOptions.tags.length
-      ? filterOptions.tags.map((t) => `${namespace}.attributes.tags:${t}`)
-      : []),
-  ];
-
   const query = {
-    list_id: listId,
-    namespace_type: namespaceType,
+    list_id: listIds,
+    namespace_type: namespaceTypes,
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
-    ...(filters.length ? { filter: filters.join(' AND ') } : {}),
+    ...(filterOptions != null ? { filtering: filterOptions } : {}),
   };
   const [validatedRequest, errorsRequest] = validate(query, findExceptionListItemSchema);
 

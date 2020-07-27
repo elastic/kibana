@@ -44,7 +44,6 @@ export interface ExceptionList extends ExceptionListSchema {
 }
 
 export interface UseExceptionListSuccess {
-  lists: ExceptionList[];
   exceptions: ExceptionListItemSchema[];
   pagination: Pagination;
 }
@@ -53,7 +52,7 @@ export interface UseExceptionListProps {
   http: HttpStart;
   lists: ExceptionIdentifiers[];
   onError?: (arg: string[]) => void;
-  filterOptions?: FilterExceptionsOptions;
+  filterOptions?: FilterExceptionsOptions[];
   pagination?: Pagination;
   onSuccess?: (arg: UseExceptionListSuccess) => void;
 }
@@ -66,9 +65,9 @@ export interface ExceptionIdentifiers {
 
 export interface ApiCallByListIdProps {
   http: HttpStart;
-  listId: string;
-  namespaceType: NamespaceType;
-  filterOptions?: FilterExceptionsOptions;
+  listIds: string;
+  namespaceTypes: string;
+  filterOptions: string | null;
   pagination: Partial<Pagination>;
   signal: AbortSignal;
 }

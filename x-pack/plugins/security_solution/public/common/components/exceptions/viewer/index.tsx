@@ -104,14 +104,9 @@ const ExceptionsViewerComponent = ({
   const { deleteExceptionItem } = useApi(services.http);
 
   const setExceptions = useCallback(
-    ({
-      lists: newLists,
-      exceptions: newExceptions,
-      pagination: newPagination,
-    }: UseExceptionListSuccess): void => {
+    ({ exceptions: newExceptions, pagination: newPagination }: UseExceptionListSuccess): void => {
       dispatch({
         type: 'setExceptions',
-        lists: newLists,
         exceptions: newExceptions,
         pagination: newPagination,
       });
@@ -121,7 +116,7 @@ const ExceptionsViewerComponent = ({
   const [loadingList, , , , fetchList] = useExceptionList({
     http: services.http,
     lists: loadingLists,
-    filterOptions,
+    filterOptions: [filterOptions],
     pagination: {
       page: pagination.pageIndex + 1,
       perPage: pagination.pageSize,

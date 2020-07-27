@@ -7,12 +7,14 @@ import { List, ListArray } from './lists';
 
 export const getListMock = (): List => ({
   id: 'some_uuid',
+  list_id: 'some_list_id',
   namespace_type: 'single',
   type: 'detection',
 });
 
 export const getListAgnosticMock = (): List => ({
   id: 'some_uuid',
+  list_id: 'some_other_list_id',
   namespace_type: 'agnostic',
   type: 'endpoint',
 });
