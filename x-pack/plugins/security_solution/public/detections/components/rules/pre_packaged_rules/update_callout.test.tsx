@@ -9,24 +9,10 @@ import { shallow } from 'enzyme';
 
 import { UpdatePrePackagedRulesCallOut } from './update_callout';
 import { useKibana } from '../../../../common/lib/kibana';
-import * as i18n from './translations';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('UpdatePrePackagedRulesCallOut', () => {
-  const spyUpdatePrepackagedRulesMsg = jest.spyOn(i18n, 'UPDATE_PREPACKAGED_RULES_MSG');
-  const spyUpdatePrepackagedRules = jest.spyOn(i18n, 'UPDATE_PREPACKAGED_RULES');
-  const spyUpdatePrepackagedTimelinesMsg = jest.spyOn(i18n, 'UPDATE_PREPACKAGED_TIMELINES_MSG');
-  const spyUpdatePrepackagedTimelines = jest.spyOn(i18n, 'UPDATE_PREPACKAGED_TIMELINES');
-  const spyUpdatePrepackagedRulesAndTimelinesMsg = jest.spyOn(
-    i18n,
-    'UPDATE_PREPACKAGED_RULES_AND_TIMELINES_MSG'
-  );
-  const spyUpdatePrepackagedRulesAndTimelines = jest.spyOn(
-    i18n,
-    'UPDATE_PREPACKAGED_RULES_AND_TIMELINES'
-  );
-
   beforeAll(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -36,15 +22,6 @@ describe('UpdatePrePackagedRulesCallOut', () => {
         },
       },
     });
-  });
-
-  beforeEach(() => {
-    spyUpdatePrepackagedRulesMsg.mockClear();
-    spyUpdatePrepackagedRules.mockClear();
-    spyUpdatePrepackagedTimelinesMsg.mockClear();
-    spyUpdatePrepackagedTimelines.mockClear();
-    spyUpdatePrepackagedRulesAndTimelinesMsg.mockClear();
-    spyUpdatePrepackagedRulesAndTimelines.mockClear();
   });
 
   it('renders correctly', () => {
@@ -61,7 +38,7 @@ describe('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines = 0', () => {
-    shallow(
+    const wrapper = shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={1}
@@ -70,11 +47,13 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       />
     );
 
-    expect(spyUpdatePrepackagedRulesMsg).toHaveBeenCalledWith(1);
+    expect(wrapper.find('[data-test-subj="update-callout"]').find('p').text()).toEqual(
+      'You can update 1 Elastic prebuilt ruleRelease notes'
+    );
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines = 0', () => {
-    shallow(
+    const wrapper = shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={1}
@@ -83,11 +62,13 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       />
     );
 
-    expect(spyUpdatePrepackagedRules).toHaveBeenCalledWith(1);
+    expect(wrapper.find('[data-test-subj="update-callout-button"]').prop('children')).toEqual(
+      'Update 1 Elastic prebuilt rule'
+    );
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules = 0 and numberOfUpdatedTimelines > 0', () => {
-    shallow(
+    const wrapper = shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={0}
@@ -96,11 +77,13 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       />
     );
 
-    expect(spyUpdatePrepackagedTimelinesMsg).toHaveBeenCalledWith(1);
+    expect(wrapper.find('[data-test-subj="update-callout"]').find('p').text()).toEqual(
+      'You can update 1 Elastic prebuilt timelineRelease notes'
+    );
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules = 0 and numberOfUpdatedTimelines > 0', () => {
-    shallow(
+    const wrapper = shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={0}
@@ -109,11 +92,13 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       />
     );
 
-    expect(spyUpdatePrepackagedTimelines).toHaveBeenCalledWith(1);
+    expect(wrapper.find('[data-test-subj="update-callout-button"]').prop('children')).toEqual(
+      'Update 1 Elastic prebuilt timeline'
+    );
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines > 0', () => {
-    shallow(
+    const wrapper = shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={1}
@@ -122,11 +107,13 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       />
     );
 
-    expect(spyUpdatePrepackagedRulesAndTimelinesMsg).toHaveBeenCalledWith(1, 1);
+    expect(wrapper.find('[data-test-subj="update-callout"]').find('p').text()).toEqual(
+      'You can update 1 Elastic prebuilt rule and 1 Elastic prebuilt timeline. Note that this will reload deleted Elastic prebuilt rules.Release notes'
+    );
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines > 0', () => {
-    shallow(
+    const wrapper = shallow(
       <UpdatePrePackagedRulesCallOut
         loading={false}
         numberOfUpdatedRules={1}
@@ -135,6 +122,8 @@ describe('UpdatePrePackagedRulesCallOut', () => {
       />
     );
 
-    expect(spyUpdatePrepackagedRulesAndTimelines).toHaveBeenCalledWith(1, 1);
+    expect(wrapper.find('[data-test-subj="update-callout-button"]').prop('children')).toEqual(
+      'Update 1 Elastic prebuilt rule and 1 Elastic prebuilt timeline'
+    );
   });
 });

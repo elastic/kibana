@@ -449,59 +449,85 @@ describe('rule helpers', () => {
 
       expect(result).toEqual('ruleNeedUpdate');
     });
+
+    test('unknown', () => {
+      const rulesInstalled = null;
+      const rulesNotInstalled = null;
+      const rulesNotUpdated = null;
+      const result: string = getPrePackagedRuleStatus(
+        rulesInstalled,
+        rulesNotInstalled,
+        rulesNotUpdated
+      );
+
+      expect(result).toEqual('unknown');
+    });
   });
 
   describe('getPrePackagedTimelineStatus', () => {
     test('timelinesNotInstalled', () => {
-      const rulesInstalled = 0;
-      const rulesNotInstalled = 1;
-      const rulesNotUpdated = 0;
+      const timelinesInstalled = 0;
+      const timelinesNotInstalled = 1;
+      const timelinesNotUpdated = 0;
       const result: string = getPrePackagedTimelineStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
       );
 
       expect(result).toEqual('timelinesNotInstalled');
     });
 
     test('timelinesInstalled', () => {
-      const rulesInstalled = 1;
-      const rulesNotInstalled = 0;
-      const rulesNotUpdated = 0;
+      const timelinesInstalled = 1;
+      const timelinesNotInstalled = 0;
+      const timelinesNotUpdated = 0;
       const result: string = getPrePackagedTimelineStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
       );
 
       expect(result).toEqual('timelinesInstalled');
     });
 
     test('someTimelineUninstall', () => {
-      const rulesInstalled = 1;
-      const rulesNotInstalled = 1;
-      const rulesNotUpdated = 0;
+      const timelinesInstalled = 1;
+      const timelinesNotInstalled = 1;
+      const timelinesNotUpdated = 0;
       const result: string = getPrePackagedTimelineStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
       );
 
       expect(result).toEqual('someTimelineUninstall');
     });
 
     test('timelineNeedUpdate', () => {
-      const rulesInstalled = 1;
-      const rulesNotInstalled = 0;
-      const rulesNotUpdated = 1;
+      const timelinesInstalled = 1;
+      const timelinesNotInstalled = 0;
+      const timelinesNotUpdated = 1;
       const result: string = getPrePackagedTimelineStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
       );
 
       expect(result).toEqual('timelineNeedUpdate');
+    });
+
+    test('unknown', () => {
+      const timelinesInstalled = null;
+      const timelinesNotInstalled = null;
+      const timelinesNotUpdated = null;
+      const result: string = getPrePackagedTimelineStatus(
+        timelinesInstalled,
+        timelinesNotInstalled,
+        timelinesNotUpdated
+      );
+
+      expect(result).toEqual('unknown');
     });
   });
 });
