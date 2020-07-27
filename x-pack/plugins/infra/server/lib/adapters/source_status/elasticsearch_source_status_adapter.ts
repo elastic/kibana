@@ -52,7 +52,7 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
       })
       .then(
         (response) => {
-          if (response._shards.total < 0) {
+          if (response._shards.total <= 0) {
             return 'missing' as const;
           }
 
