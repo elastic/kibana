@@ -9,7 +9,16 @@ import { TypeOf, schema } from '@kbn/config-schema';
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   importBufferSize: schema.number({ defaultValue: 1000, min: 1 }),
-  importTimeout: schema.number({ defaultValue: 300000, max: 6000000, min: 120000 }), // Default value is 300000 (3 minutes), maximum of 6000000 (100 minutes), minimum of 120000 (2 minutes)
+  importTimeout: schema.duration({
+    defaultValue: '5m',
+    validate: (value) => {
+      if (value.asMinutes() < 2) {
+        throw new Error('duration cannot be less than 2 minutes');
+      } else if (value.asHours() > 1) {
+        throw new Error('duration cannot be greater than 1 hour');
+      }
+    },
+  }),
   listIndex: schema.string({ defaultValue: '.lists' }),
   listItemIndex: schema.string({ defaultValue: '.items' }),
   maxImportPayloadBytes: schema.number({ defaultValue: 9000000, min: 1 }),

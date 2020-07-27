@@ -161,9 +161,10 @@ export class HttpServer {
         this.log.debug(`registering route handler for [${route.path}]`);
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
         const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-        const { authRequired, tags, body = {}, timeout = {} } = route.options;
-        const { accepts: allow, maxBytes, output, parse, timeout: payloadTimeout } = body;
-        const { server, socket } = timeout;
+        const { authRequired, tags, body = {}, timeout } = route.options;
+        const { accepts: allow, maxBytes, output, parse } = body;
+        // Hapi does not allow timeouts on payloads to be specified for 'head' or 'get' requests
+        const payloadTimeout = isSafeMethod(route.method) || timeout == null ? undefined : timeout;
 
         const kibanaRouteState: KibanaRouteState = {
           xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
@@ -185,11 +186,20 @@ export class HttpServer {
             payload: [allow, maxBytes, output, parse, payloadTimeout].some(
               (v) => typeof v !== 'undefined'
             )
-              ? { allow, maxBytes, output, parse, timeout: payloadTimeout }
+              ? {
+                  allow,
+                  maxBytes,
+                  output,
+                  parse,
+                  timeout: payloadTimeout,
+                }
               : undefined,
-            timeout: [server, socket].some((v) => typeof v !== 'undefined')
-              ? { server, socket }
-              : undefined,
+            timeout:
+              timeout != null
+                ? {
+                    socket: timeout + 1, // Hapi server requires the socket to be greater than payload settings so we add 1 millisecond
+                  }
+                : undefined,
           },
         });
       }

@@ -796,7 +796,6 @@ test('exposes route details of incoming request to a route handler', async () =>
       method: 'get',
       path: '/',
       options: {
-        timeout: { server: false }, // hapi populates the default
         authRequired: true,
         xsrfRequired: false,
         tags: [],
@@ -907,11 +906,9 @@ test('exposes route details of incoming request to a route handler (POST + paylo
         authRequired: true,
         xsrfRequired: true,
         tags: [],
-        timeout: { server: false }, // hapi populates the default
         body: {
           parse: true, // hapi populates the default
           maxBytes: 1024, // hapi populates the default
-          timeout: 10000, // hapi populates the default
           accepts: ['application/json'],
           output: 'data',
         },
@@ -990,99 +987,13 @@ describe('body options', () => {
     await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
       parse: false,
       maxBytes: 1024, // hapi populates the default
-      timeout: 10000, // hapi populates the default
-      output: 'data',
-    });
-  });
-
-  test('should accept a "timeout" in the body with "timeout" set to "false"', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
-    const router = new Router('', logger, enhanceWithContext);
-    router.post(
-      {
-        path: '/',
-        validate: false,
-        options: { body: { timeout: false } },
-      },
-      (context, req, res) => {
-        try {
-          return res.ok({ body: req.route.options.body });
-        } catch (err) {
-          return res.internalError({ body: err.message });
-        }
-      }
-    );
-    registerRouter(router);
-
-    await server.start();
-    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
-      parse: true,
-      maxBytes: 1024, // hapi populates the default
-      timeout: false,
-      output: 'data',
-    });
-  });
-
-  test('should accept a numeric "timeout" in the body which is 1 minutes in milliseconds, "60000"', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
-    const router = new Router('', logger, enhanceWithContext);
-    router.post(
-      {
-        path: '/',
-        validate: false,
-        options: { body: { timeout: 60000 } },
-      },
-      (context, req, res) => {
-        try {
-          return res.ok({ body: req.route.options.body });
-        } catch (err) {
-          return res.internalError({ body: err.message });
-        }
-      }
-    );
-    registerRouter(router);
-    await server.start();
-    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
-      parse: true,
-      maxBytes: 1024, // hapi populates the default
-      timeout: 60000,
-      output: 'data',
-    });
-  });
-
-  test('should accept a numeric "timeout" in the body which is 5 minutes in milliseconds, "300000" if the socket timeout is set above 5 minutes', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
-    const router = new Router('', logger, enhanceWithContext);
-    router.post(
-      {
-        path: '/',
-        validate: false,
-        options: { body: { timeout: 300000 }, timeout: { socket: 300001 } },
-      },
-      (context, req, res) => {
-        try {
-          return res.ok({ body: req.route.options.body });
-        } catch (err) {
-          return res.internalError({ body: err.message });
-        }
-      }
-    );
-    registerRouter(router);
-    await server.start();
-    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
-      parse: true,
-      maxBytes: 1024, // hapi populates the default
-      timeout: 300000,
       output: 'data',
     });
   });
 });
 
 describe('timeout options', () => {
-  test('should accept a socket "timeout" in the body which is 3 minutes in milliseconds, "300000"', async () => {
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a POST', async () => {
     const { registerRouter, server: innerServer } = await server.setup(config);
 
     const router = new Router('', logger, enhanceWithContext);
@@ -1090,11 +1001,11 @@ describe('timeout options', () => {
       {
         path: '/',
         validate: false,
-        options: { timeout: { socket: 300000 } },
+        options: { timeout: 300000 },
       },
       (context, req, res) => {
         try {
-          return res.ok({ body: req.route.options.timeout });
+          return res.ok({ body: { timeout: req.route.options.timeout } });
         } catch (err) {
           return res.internalError({ body: err.message });
         }
@@ -1103,24 +1014,23 @@ describe('timeout options', () => {
     registerRouter(router);
     await server.start();
     await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
-      server: false, // hapi populates the default
-      socket: 300000,
+      timeout: 300000,
     });
   });
 
-  test('should accept a socket "timeout" in the body which is "false"', async () => {
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a GET', async () => {
     const { registerRouter, server: innerServer } = await server.setup(config);
 
     const router = new Router('', logger, enhanceWithContext);
-    router.post(
+    router.get(
       {
         path: '/',
         validate: false,
-        options: { timeout: { socket: false } },
+        options: { timeout: 300000 },
       },
       (context, req, res) => {
         try {
-          return res.ok({ body: req.route.options.timeout });
+          return res.ok({ body: { timeout: req.route.options.timeout } });
         } catch (err) {
           return res.internalError({ body: err.message });
         }
@@ -1128,25 +1038,24 @@ describe('timeout options', () => {
     );
     registerRouter(router);
     await server.start();
-    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
-      server: false, // hapi populates the default
-      socket: false,
+    await supertest(innerServer.listener).get('/').expect(200, {
+      timeout: 300000,
     });
   });
 
-  test('should accept a server "timeout" in the body which is 1 minutes in milliseconds, "60000"', async () => {
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a DELETE', async () => {
     const { registerRouter, server: innerServer } = await server.setup(config);
 
     const router = new Router('', logger, enhanceWithContext);
-    router.post(
+    router.delete(
       {
         path: '/',
         validate: false,
-        options: { timeout: { server: 60000 } },
+        options: { timeout: 300000 },
       },
       (context, req, res) => {
         try {
-          return res.ok({ body: req.route.options.timeout });
+          return res.ok({ body: { timeout: req.route.options.timeout } });
         } catch (err) {
           return res.internalError({ body: err.message });
         }
@@ -1154,24 +1063,24 @@ describe('timeout options', () => {
     );
     registerRouter(router);
     await server.start();
-    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
-      server: 60000,
+    await supertest(innerServer.listener).delete('/').expect(200, {
+      timeout: 300000,
     });
   });
 
-  test('should accept a server "timeout" in the body which is "false"', async () => {
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a PUT', async () => {
     const { registerRouter, server: innerServer } = await server.setup(config);
 
     const router = new Router('', logger, enhanceWithContext);
-    router.post(
+    router.put(
       {
         path: '/',
         validate: false,
-        options: { timeout: { server: false } },
+        options: { timeout: 300000 },
       },
       (context, req, res) => {
         try {
-          return res.ok({ body: req.route.options.timeout });
+          return res.ok({ body: { timeout: req.route.options.timeout } });
         } catch (err) {
           return res.internalError({ body: err.message });
         }
@@ -1179,9 +1088,127 @@ describe('timeout options', () => {
     );
     registerRouter(router);
     await server.start();
-    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
-      server: false,
+    await supertest(innerServer.listener).put('/').expect(200, {
+      timeout: 300000,
     });
+  });
+
+  test('should accept a socket "timeout" which is 3 minutes in milliseconds, "300000" for a PATCH', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.patch(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 300000 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    await server.start();
+    await supertest(innerServer.listener).patch('/').expect(200, {
+      timeout: 300000,
+    });
+  });
+
+  test('should reject a socket "timeout" of "0" for a POST', async () => {
+    const { registerRouter } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 0 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    await expect(server.start()).rejects.toThrowError('Invalid routeConfig options');
+  });
+
+  test('should reject a socket "timeout" of "0" for a GET', async () => {
+    const { registerRouter } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.get(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 0 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    // NOTE: This error message actually indicates a bug from within Hapi Server as you cannot configure the payload timeout when you
+    // are using a GET or HEAD route. Because of this Hapi server bug you cannot technically set a timeout less than 10 seconds when
+    // configuring a GET route including 0
+    await expect(server.start()).rejects.toThrowError(
+      'Payload timeout must be shorter than socket timeout: get /'
+    );
+  });
+
+  test('should reject a socket "timeout" of "0" for a PUT', async () => {
+    const { registerRouter } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.put(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 0 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    await expect(server.start()).rejects.toThrowError('Invalid routeConfig options');
+  });
+
+  test('should reject a socket "timeout" of "0" for a PATCH', async () => {
+    const { registerRouter } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.patch(
+      {
+        path: '/',
+        validate: false,
+        options: { timeout: 0 },
+      },
+      (context, req, res) => {
+        try {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        } catch (err) {
+          return res.internalError({ body: err.message });
+        }
+      }
+    );
+    registerRouter(router);
+    await expect(server.start()).rejects.toThrowError('Invalid routeConfig options');
   });
 });
 
@@ -1210,7 +1237,6 @@ test('should return a stream in the body', async () => {
   await supertest(innerServer.listener).put('/').send({ test: 1 }).expect(200, {
     parse: true,
     maxBytes: 1024, // hapi populates the default
-    timeout: 10000, // hapi populates the default
     output: 'stream',
   });
 });
