@@ -65,13 +65,13 @@ export const ErrorStatePrompt: React.FC = () => {
                 <li>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuthNative"
-                    defaultMessage="Are you using Elasticsearch Native auth?"
+                    defaultMessage="You must authenticate using Elasticsearch Native auth or SSO/SAML."
                   />
                 </li>
                 <li>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.errorConnectingState.troubleshootAuthSAML"
-                    defaultMessage="If you’re on SSO or SAML, is your SAML realm also set up on Enterprise Search?"
+                    defaultMessage="If using SSO/SAML, your SAML realm must also be set up on Enterprise Search."
                   />
                 </li>
               </ul>
