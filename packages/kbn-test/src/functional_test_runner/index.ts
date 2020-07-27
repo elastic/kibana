@@ -18,6 +18,6 @@
  */
 
 export { FunctionalTestRunner } from './functional_test_runner';
-export { readConfigFile } from './lib';
+export { readConfigFile, Config } from './lib';
 export { runFtrCli } from './cli';
 export * from './lib/docker_servers';

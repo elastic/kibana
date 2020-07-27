@@ -15,8 +15,8 @@ import {
   getFindListItemSchemaMock,
 } from './find_list_item_schema.mock';
 import {
-  FindListItemSchemaPartial,
-  FindListItemSchemaPartialDecoded,
+  FindListItemSchema,
+  FindListItemSchemaDecoded,
   findListItemSchema,
 } from './find_list_item_schema';
 
@@ -31,12 +31,12 @@ describe('find_list_item_schema', () => {
   });
 
   test('it should validate just a list_id where it decodes into an array for list_id and adds a namespace_type of "single"', () => {
-    const payload: FindListItemSchemaPartial = { list_id: LIST_ID };
+    const payload: FindListItemSchema = { list_id: LIST_ID };
     const decoded = findListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    const expected: FindListItemSchemaPartialDecoded = {
+    const expected: FindListItemSchemaDecoded = {
       cursor: undefined,
       filter: undefined,
       list_id: LIST_ID,
@@ -97,7 +97,7 @@ describe('find_list_item_schema', () => {
   });
 
   test('it should not allow an extra key to be sent in', () => {
-    const payload: FindListItemSchemaPartial & {
+    const payload: FindListItemSchema & {
       extraKey: string;
     } = { ...getFindListItemSchemaMock(), extraKey: 'some new value' };
     const decoded = findListItemSchema.decode(payload);

@@ -129,7 +129,7 @@ export const getTermsBucketAgg = () =>
 
         const response = await nestedSearchSource.fetch({ abortSignal });
         request
-          .stats(getResponseInspectorStats(nestedSearchSource, response))
+          .stats(getResponseInspectorStats(response, nestedSearchSource))
           .ok({ json: response });
         resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
       }

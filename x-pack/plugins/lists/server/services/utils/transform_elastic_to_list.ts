@@ -8,6 +8,8 @@ import { SearchResponse } from 'elasticsearch';
 
 import { ListArraySchema, SearchEsListSchema } from '../../../common/schemas';
 
+import { encodeHitVersion } from './encode_hit_version';
+
 export interface TransformElasticToListOptions {
   response: SearchResponse<SearchEsListSchema>;
 }
@@ -17,6 +19,7 @@ export const transformElasticToList = ({
 }: TransformElasticToListOptions): ListArraySchema => {
   return response.hits.hits.map((hit) => {
     return {
+      _version: encodeHitVersion(hit),
       id: hit._id,
       ...hit._source,
     };

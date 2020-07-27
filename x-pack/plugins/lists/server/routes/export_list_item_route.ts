@@ -18,7 +18,7 @@ export const exportListItemRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: `${LIST_ITEM_URL}/_export`,
       validate: {

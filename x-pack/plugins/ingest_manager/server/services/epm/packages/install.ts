@@ -169,17 +169,20 @@ export async function installPackage(options: {
     );
   }
 
-  // update to newly installed version when all assets are successfully installed
-  if (isUpdate) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
   // get template refs to save
   const installedTemplateRefs = installedTemplates.map((template) => ({
     id: template.templateName,
     type: ElasticsearchAssetType.indexTemplate,
   }));
+
   const [installedKibanaAssets] = await Promise.all([
     installKibanaAssetsPromise,
     installIndexPatternPromise,
   ]);
+
+  await saveInstalledKibanaRefs(savedObjectsClient, pkgName, installedKibanaAssets);
+  // update to newly installed version when all assets are successfully installed
+  if (isUpdate) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
   return [...installedKibanaAssets, ...installedPipelines, ...installedTemplateRefs];
 }
 const updateVersion = async (
@@ -230,7 +233,7 @@ export async function createInstallation(options: {
 export const saveInstalledKibanaRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  installedAssets: AssetReference[]
+  installedAssets: KibanaAssetReference[]
 ) => {
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_kibana: installedAssets,

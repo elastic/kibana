@@ -148,7 +148,7 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
   timelineType: TimelineType = TimelineType.default
 ): T => {
   // Support for legacy "template-like" timeline behavior that is using hardcoded list of templateFields
-  if (timelineType === TimelineType.default) {
+  if (timelineType !== TimelineType.template) {
     if (templateFields.includes(dataProvider.queryMatch.field)) {
       const newValue = getStringArray(dataProvider.queryMatch.field, ecsData);
       if (newValue.length) {

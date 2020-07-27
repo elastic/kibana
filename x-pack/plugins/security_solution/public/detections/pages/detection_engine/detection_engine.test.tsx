@@ -82,6 +82,7 @@ describe('DetectionEnginePageComponent', () => {
       <TestProviders store={store}>
         <Router history={mockHistory}>
           <DetectionEnginePageComponent
+            graphEventId={undefined}
             query={{ query: 'query', language: 'language' }}
             filters={[]}
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}

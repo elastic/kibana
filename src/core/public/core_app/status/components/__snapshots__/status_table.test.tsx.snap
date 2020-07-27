@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatusTable renders when statuses is provided 1`] = `
+<EuiBasicTable
+  columns={
+    Array [
+      Object {
+        "field": "state",
+        "name": "",
+        "render": [Function],
+        "width": "32px",
+      },
+      Object {
+        "field": "id",
+        "name": "ID",
+      },
+      Object {
+        "field": "state",
+        "name": "Status",
+        "render": [Function],
+      },
+    ]
+  }
+  data-test-subj="statusBreakdown"
+  items={
+    Array [
+      Object {
+        "id": "plugin:1",
+        "state": Object {
+          "id": "green",
+          "message": "Ready",
+          "title": "green",
+          "uiColor": "secondary",
+        },
+      },
+    ]
+  }
+  noItemsMessage="No items found"
+  responsive={true}
+  rowProps={[Function]}
+  tableLayout="fixed"
+/>
+`;

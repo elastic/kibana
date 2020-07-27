@@ -346,7 +346,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: params.name,
-          consumer: 'function test',
+          consumer: 'alerts',
           enabled: true,
           alertTypeId: ALERT_TYPE_ID,
           schedule: { interval: `${ALERT_INTERVAL_SECONDS}s` },
