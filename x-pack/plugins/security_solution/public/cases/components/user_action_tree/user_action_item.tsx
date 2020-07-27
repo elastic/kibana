@@ -139,11 +139,7 @@ export const UserActionItem = ({
     <EuiFlexItem>
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem data-test-subj={`user-action-${id}-avatar`} grow={false}>
-          {(fullName && fullName.length > 0) || (username && username.length > 0) ? (
-            <UserActionAvatar name={fullName && fullName.length > 0 ? fullName : username ?? ''} />
-          ) : (
-            <EuiLoadingSpinner className="userAction_loadingAvatar" />
-          )}
+          <UserActionAvatar fullName={fullName} username={username} />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj={`user-action-${id}`}>
           {isEditable && markdown}

@@ -196,7 +196,10 @@ export const UserActionTree = React.memo(
       timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
       children: MarkdownDescription,
       timelineIcon: (
-        <UserActionAvatar name={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''} />
+        <UserActionAvatar
+          username={caseData.createdBy.username}
+          fullName={caseData.createdBy.fullName}
+        />
       ),
       actions: (
         <EuiFlexGroup>
@@ -253,7 +256,8 @@ export const UserActionTree = React.memo(
                 ),
                 timelineIcon: (
                   <UserActionAvatar
-                    name={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
+                    username={comment.createdBy.username}
+                    fullName={comment.createdBy.fullName}
                   />
                 ),
                 actions: (

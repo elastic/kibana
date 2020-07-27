@@ -5,14 +5,26 @@
  */
 
 import React, { memo } from 'react';
-import { EuiAvatar } from '@elastic/eui';
+import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 
 interface UserActionAvatarProps {
-  name: string;
+  username?: string | null;
+  fullName?: string | null;
 }
 
-const UserActionAvatarComponent = ({ name }: UserActionAvatarProps) => {
-  return <EuiAvatar data-test-subj={`user-action-avatar`} size="l" name={name} />;
+const UserActionAvatarComponent = ({ username, fullName }: UserActionAvatarProps) => {
+  return (
+    <>
+      {(fullName && fullName.length > 0) || (username && username.length > 0) ? (
+        <EuiAvatar
+          name={fullName && fullName.length > 0 ? fullName : username ?? ''}
+          data-test-subj={`user-action-avatar`}
+        />
+      ) : (
+        <EuiLoadingSpinner />
+      )}
+    </>
+  );
 };
 
 export const UserActionAvatar = memo(UserActionAvatarComponent);
