@@ -20,7 +20,7 @@ export function mockHandlerArguments(
   {
     alertsClient = alertsClientMock.create(),
     listTypes: listTypesRes = [],
-    esClient = elasticsearchServiceMock.createClusterClient(),
+    esClient = elasticsearchServiceMock.createLegacyClusterClient(),
   }: {
     alertsClient?: AlertsClientMock;
     listTypes?: AlertType[];

@@ -17,7 +17,10 @@ import {
   ResolverNodeStats,
   ResolverRelatedAlerts,
 } from '../../../../plugins/security_solution/common/endpoint/types';
-import { parentEntityId } from '../../../../plugins/security_solution/common/endpoint/models/event';
+import {
+  parentEntityId,
+  eventId,
+} from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   Event,
@@ -167,10 +170,14 @@ const compareArrays = (
   if (lengthCheck) {
     expect(expected.length).to.eql(toTest.length);
   }
+
   toTest.forEach((toTestEvent) => {
     expect(
       expected.find((arrEvent) => {
-        return JSON.stringify(arrEvent) === JSON.stringify(toTestEvent);
+        // we're only checking that the event ids are the same here. The reason we can't check the entire document
+        // is because ingest pipelines are used to add fields to the document when it is received by elasticsearch,
+        // therefore it will not be the same as the document created by the generator
+        return eventId(toTestEvent) === eventId(arrEvent);
       })
     ).to.be.ok();
   });
@@ -366,7 +373,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
         it('should error on invalid pagination values', async () => {
           await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=0`).expect(400);
-          await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=2000`).expect(400);
+          await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=20000`).expect(400);
           await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=-1`).expect(400);
         });
       });
@@ -444,14 +451,18 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
         it('should have a populated next parameter', async () => {
           const { body }: { body: ResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}`)
+            .get(
+              `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=0`
+            )
             .expect(200);
           expect(body.nextAncestor).to.eql('94041');
         });
 
         it('should handle an ancestors param request', async () => {
           let { body }: { body: ResolverAncestry } = await supertest
-            .get(`/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}`)
+            .get(
+              `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=0`
+            )
             .expect(200);
           const next = body.nextAncestor;
 
@@ -579,7 +590,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         it('errors on invalid pagination values', async () => {
           await supertest.get(`/api/endpoint/resolver/${entityID}/children?children=0`).expect(400);
           await supertest
-            .get(`/api/endpoint/resolver/${entityID}/children?children=2000`)
+            .get(`/api/endpoint/resolver/${entityID}/children?children=20000`)
             .expect(400);
           await supertest
             .get(`/api/endpoint/resolver/${entityID}/children?children=-1`)

@@ -127,12 +127,16 @@ export const buildExpression = (
                   function: 'lens_xy_legendConfig',
                   arguments: {
                     isVisible: [state.legend.isVisible],
+                    showSingleSeries: state.legend.showSingleSeries
+                      ? [state.legend.showSingleSeries]
+                      : [],
                     position: [state.legend.position],
                   },
                 },
               ],
             },
           ],
+          fittingFunction: [state.fittingFunction || 'None'],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
@@ -188,7 +192,8 @@ export const buildExpression = (
                               function: 'lens_xy_yConfig',
                               arguments: {
                                 forAccessor: [yConfig.forAccessor],
-                                axisMode: [yConfig.axisMode],
+                                axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
+                                color: yConfig.color ? [yConfig.color] : [],
                               },
                             },
                           ],

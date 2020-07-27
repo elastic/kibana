@@ -10,6 +10,7 @@ import { useForm, OnFormUpdateArg, FormData } from '../../../../../shared_import
 import { ProcessorInternal } from '../../types';
 
 import { ProcessorSettingsForm as ViewComponent } from './processor_settings_form';
+import { usePipelineProcessorsContext } from '../../context';
 
 export type ProcessorSettingsFromOnSubmitArg = Omit<ProcessorInternal, 'id'>;
 
@@ -32,6 +33,10 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   onSubmit,
   ...rest
 }) => {
+  const {
+    links: { esDocsBasePath },
+  } = usePipelineProcessorsContext();
+
   const handleSubmit = useCallback(
     async (data: FormData, isValid: boolean) => {
       if (isValid) {
@@ -60,5 +65,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onFormUpdate]);
 
-  return <ViewComponent processor={processor} form={form} {...rest} />;
+  return (
+    <ViewComponent {...rest} processor={processor} form={form} esDocsBasePath={esDocsBasePath} />
+  );
 };

@@ -32,7 +32,7 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
             <h1>
               <FormattedMessage
                 id="xpack.ingestManager.dataStreamList.pageTitle"
-                defaultMessage="Data streams"
+                defaultMessage="Datasets"
               />
             </h1>
           </EuiText>
@@ -75,7 +75,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         field: 'dataset',
         sortable: true,
         width: '25%',
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.datasetColumnTitle', {
           defaultMessage: 'Dataset',
         }),
@@ -83,7 +82,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'type',
         sortable: true,
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.typeColumnTitle', {
           defaultMessage: 'Type',
         }),
@@ -91,7 +89,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'namespace',
         sortable: true,
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.namespaceColumnTitle', {
           defaultMessage: 'Namespace',
         }),
@@ -102,7 +99,6 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'package',
         sortable: true,
-        truncateText: true,
         name: i18n.translate('xpack.ingestManager.dataStreamList.integrationColumnTitle', {
           defaultMessage: 'Integration',
         }),
@@ -177,7 +173,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           <h2>
             <FormattedMessage
               id="xpack.ingestManager.dataStreamList.noDataStreamsPrompt"
-              defaultMessage="No data streams"
+              defaultMessage="No datasets"
             />
           </h2>
         }
@@ -220,14 +216,14 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
           isLoading ? (
             <FormattedMessage
               id="xpack.ingestManager.dataStreamList.loadingDataStreamsMessage"
-              defaultMessage="Loading data streams…"
+              defaultMessage="Loading datasets…"
             />
           ) : dataStreamsData && !dataStreamsData.data_streams.length ? (
             emptyPrompt
           ) : (
             <FormattedMessage
               id="xpack.ingestManager.dataStreamList.noFilteredDataStreamsMessage"
-              defaultMessage="No matching data streams found"
+              defaultMessage="No matching datasets found"
             />
           )
         }
@@ -257,7 +253,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
             placeholder: i18n.translate(
               'xpack.ingestManager.dataStreamList.searchPlaceholderTitle',
               {
-                defaultMessage: 'Filter data streams',
+                defaultMessage: 'Filter datasets',
               }
             ),
             incremental: true,

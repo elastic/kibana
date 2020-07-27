@@ -90,14 +90,17 @@ export const useTimelineTypes = ({
   );
 
   const onFilterClicked = useCallback(
-    (tabId) => {
-      if (tabId === timelineType) {
-        setTimelineTypes(null);
-      } else {
-        setTimelineTypes(tabId);
-      }
+    (tabId, tabStyle: TimelineTabsStyle) => {
+      setTimelineTypes((prevTimelineTypes) => {
+        if (tabId === prevTimelineTypes && tabStyle === TimelineTabsStyle.filter) {
+          return null;
+        } else if (prevTimelineTypes !== tabId) {
+          setTimelineTypes(tabId);
+        }
+        return prevTimelineTypes;
+      });
     },
-    [timelineType, setTimelineTypes]
+    [setTimelineTypes]
   );
 
   const timelineTabs = useMemo(() => {
@@ -112,7 +115,7 @@ export const useTimelineTypes = ({
               href={tab.href}
               onClick={(ev) => {
                 tab.onClick(ev);
-                onFilterClicked(tab.id);
+                onFilterClicked(tab.id, TimelineTabsStyle.tab);
               }}
             >
               {tab.name}
@@ -133,7 +136,7 @@ export const useTimelineTypes = ({
         numFilters={tab.count}
         onClick={(ev: { preventDefault: () => void }) => {
           tab.onClick(ev);
-          onFilterClicked(tab.id);
+          onFilterClicked(tab.id, TimelineTabsStyle.filter);
         }}
         withNext={tab.withNext}
       >

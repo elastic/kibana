@@ -83,9 +83,14 @@ const confirmModalOptionsDelete = {
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { uiSettings, indexPatternManagementStart, overlays, savedObjects, chrome } = useKibana<
-      IndexPatternManagmentContext
-    >().services;
+    const {
+      uiSettings,
+      indexPatternManagementStart,
+      overlays,
+      savedObjects,
+      chrome,
+      data,
+    } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.filter((field) => field.type === 'conflict')
@@ -138,10 +143,11 @@ export const EditIndexPattern = withRouter(
             uiSettings.set('defaultIndex', otherPatterns[0].id);
           }
         }
-
-        Promise.resolve(indexPattern.destroy()).then(function () {
-          history.push('');
-        });
+        if (indexPattern.id) {
+          Promise.resolve(data.indexPatterns.delete(indexPattern.id)).then(function () {
+            history.push('');
+          });
+        }
       }
 
       overlays.openConfirm('', confirmModalOptionsDelete).then((isConfirmed) => {

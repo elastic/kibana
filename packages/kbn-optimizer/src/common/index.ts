@@ -29,3 +29,4 @@ export * from './array_helpers';
 export * from './event_stream_helpers';
 export * from './disallowed_syntax_plugin';
 export * from './parse_path';
+export * from './theme_tags';

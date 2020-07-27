@@ -57,7 +57,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
           return array;
         }, []);
         // force a refresh here otherwise the documents might not be available when the tests search for them
-        await client.bulk({ body, refresh: 'true' });
+        await client.bulk({ body, refresh: true });
         allTrees.push(tree);
       }
       return { trees: allTrees, eventsIndex, alertsIndex };

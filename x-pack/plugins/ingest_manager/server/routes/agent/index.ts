@@ -10,7 +10,7 @@
  */
 
 import { IRouter } from 'src/core/server';
-import { PLUGIN_ID, AGENT_API_ROUTES } from '../../constants';
+import { PLUGIN_ID, AGENT_API_ROUTES, LIMITED_CONCURRENCY_ROUTE_TAG } from '../../constants';
 import {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
@@ -33,7 +33,6 @@ import {
   getAgentEventsHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  postAgentsUnenrollHandler,
   getAgentStatusForConfigHandler,
   putAgentsReassignHandler,
 } from './handlers';
@@ -41,6 +40,7 @@ import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { appContextService } from '../../services';
+import { postAgentsUnenrollHandler } from './unenroll_handler';
 
 export const registerRoutes = (router: IRouter) => {
   // Get one
@@ -95,7 +95,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.ENROLL_PATTERN,
       validate: PostAgentEnrollRequestSchema,
-      options: { tags: [] },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
     },
     postAgentEnrollHandler
   );
@@ -105,7 +105,7 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: AGENT_API_ROUTES.ACKS_PATTERN,
       validate: PostAgentAcksRequestSchema,
-      options: { tags: [] },
+      options: { tags: [LIMITED_CONCURRENCY_ROUTE_TAG] },
     },
     postAgentAcksHandlerBuilder({
       acknowledgeAgentActions: AgentService.acknowledgeAgentActions,

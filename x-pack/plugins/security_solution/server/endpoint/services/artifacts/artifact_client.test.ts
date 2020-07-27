@@ -5,7 +5,7 @@
  */
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { ArtifactConstants } from '../../lib/artifacts';
+import { ArtifactConstants, getArtifactId } from '../../lib/artifacts';
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { getArtifactClientMock } from './artifact_client.mock';
 import { ArtifactClient } from './artifact_client';
@@ -27,12 +27,15 @@ describe('artifact_client', () => {
     test('can create artifact', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const artifactClient = getArtifactClientMock(savedObjectsClient);
-      const artifact = await getInternalArtifactMock('linux', '1.0.0');
+      const artifact = await getInternalArtifactMock('linux', 'v1');
       await artifactClient.createArtifact(artifact);
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        artifact,
-        { id: artifactClient.getArtifactId(artifact) }
+        {
+          ...artifact,
+          created: expect.any(Number),
+        },
+        { id: getArtifactId(artifact) }
       );
     });
 

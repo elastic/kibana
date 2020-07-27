@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

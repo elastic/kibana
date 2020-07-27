@@ -32,7 +32,6 @@ const branches = [
 export const FunctionForm = compose(...branches)(FunctionFormComponent);
 
 FunctionForm.propTypes = {
-  expressionType: PropTypes.object,
   context: PropTypes.object,
   expressionType: PropTypes.object,
 };

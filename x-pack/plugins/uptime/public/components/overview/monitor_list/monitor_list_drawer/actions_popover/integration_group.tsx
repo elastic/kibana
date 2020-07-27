@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IntegrationLink } from './integration_link';
 import {
@@ -26,6 +25,20 @@ interface IntegrationGroupProps {
   summary: MonitorSummary;
 }
 
+export const extractSummaryValues = (summary: Pick<MonitorSummary, 'state'>) => {
+  const domain = summary.state.url?.domain ?? '';
+  const podUid = summary.state.summaryPings?.[0]?.kubernetes?.pod?.uid ?? undefined;
+  const containerId = summary.state.summaryPings?.[0]?.container?.id ?? undefined;
+  const ip = summary.state.summaryPings?.[0]?.monitor.ip ?? undefined;
+
+  return {
+    domain,
+    podUid,
+    containerId,
+    ip,
+  };
+};
+
 export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
   const {
     basePath,
@@ -36,10 +49,7 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
 
-  const domain = get<string>(summary, 'state.url.domain', '');
-  const podUid = get<string | undefined>(summary, 'state.checks[0].kubernetes.pod.uid', undefined);
-  const containerId = get<string | undefined>(summary, 'state.checks[0].container.id', undefined);
-  const ip = get<string | undefined>(summary, 'state.checks[0].monitor.ip', undefined);
+  const { domain, podUid, containerId, ip } = extractSummaryValues(summary);
 
   return isApmAvailable || isInfraAvailable || isLogsAvailable ? (
     <EuiFlexGroup direction="column">
@@ -97,7 +107,7 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
                 {
                   defaultMessage: 'Check Infrastructure UI for the IP "{ip}"',
                   values: {
-                    ip,
+                    ip: Array.isArray(ip) ? ip[0] : ip,
                   },
                 }
               )}
@@ -184,7 +194,12 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
               )}
               tooltipContent={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.ip.tooltip',
-                { defaultMessage: 'Check Logging UI for the IP "{ip}"', values: { ip } }
+                {
+                  defaultMessage: 'Check Logging UI for the IP "{ip}"',
+                  values: {
+                    ip: Array.isArray(ip) ? ip[0] : ip,
+                  },
+                }
               )}
             />
           </EuiFlexItem>

@@ -21,6 +21,14 @@ export const createJobIdFilters = (jobId: string) => [
   },
 ];
 
+export const createJobIdsFilters = (jobIds: string[]) => [
+  {
+    terms: {
+      job_id: jobIds,
+    },
+  },
+];
+
 export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   {
     range: {
@@ -47,3 +55,14 @@ export const createCategoryIdFilters = (categoryIds: number[]) => [
     },
   },
 ];
+
+export const createDatasetsFilters = (datasets?: string[]) =>
+  datasets && datasets.length > 0
+    ? [
+        {
+          terms: {
+            partition_field_value: datasets,
+          },
+        },
+      ]
+    : [];

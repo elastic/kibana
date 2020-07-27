@@ -7,12 +7,8 @@
 import _ from 'lodash';
 import React from 'react';
 import { ResizeChecker } from '../../../../../../../src/plugins/kibana_utils/public';
-import {
-  syncLayerOrderForSingleLayer,
-  removeOrphanedSourcesAndLayers,
-  addSpritesheetToMap,
-  moveLayerToTop,
-} from './utils';
+import { removeOrphanedSourcesAndLayers, addSpritesheetToMap } from './utils';
+import { syncLayerOrder } from './sort_layers';
 import { getGlyphUrl, isRetina } from '../../../meta';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
@@ -265,8 +261,7 @@ export class MBMapContainer extends React.Component {
       this.props.spatialFiltersLayer
     );
     this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap));
-    syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
-    moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
+    syncLayerOrder(this.state.mbMap, this.props.spatialFiltersLayer, this.props.layerList);
   };
 
   _syncMbMapWithInspector = () => {

@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  SavedObjectsServiceStart,
   KibanaRequest,
+  Logger,
+  SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { AgentService, IngestManagerStartContract } from '../../../ingest_manager/server';
 import { getPackageConfigCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 
-export type EndpointAppContextServiceStartContract = Pick<
-  IngestManagerStartContract,
-  'agentService'
+export type EndpointAppContextServiceStartContract = Partial<
+  Pick<IngestManagerStartContract, 'agentService'>
 > & {
-  manifestManager?: ManifestManager | undefined;
-  registerIngestCallback: IngestManagerStartContract['registerExternalCallback'];
+  logger: Logger;
+  manifestManager?: ManifestManager;
+  registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
 };
 
@@ -35,20 +36,17 @@ export class EndpointAppContextService {
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
 
-    if (this.manifestManager !== undefined) {
+    if (this.manifestManager && dependencies.registerIngestCallback) {
       dependencies.registerIngestCallback(
         'packageConfigCreate',
-        getPackageConfigCreateCallback(this.manifestManager)
+        getPackageConfigCreateCallback(dependencies.logger, this.manifestManager)
       );
     }
   }
 
   public stop() {}
 
-  public getAgentService(): AgentService {
-    if (!this.agentService) {
-      throw new Error(`must call start on ${EndpointAppContextService.name} to call getter`);
-    }
+  public getAgentService(): AgentService | undefined {
     return this.agentService;
   }
 

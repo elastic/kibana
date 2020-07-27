@@ -8,5 +8,11 @@
     "visualizations",
     "data",
     "kibanaLegacy"
+  ],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "share",
+    "charts"
   ]
 }

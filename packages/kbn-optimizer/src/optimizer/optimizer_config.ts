@@ -20,10 +20,18 @@
 import Path from 'path';
 import Os from 'os';
 
-import { Bundle, WorkerConfig, CacheableWorkerConfig } from '../common';
+import {
+  Bundle,
+  WorkerConfig,
+  CacheableWorkerConfig,
+  ThemeTag,
+  ThemeTags,
+  parseThemeTags,
+} from '../common';
 
 import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
+import { filterById } from './filter_by_id';
 
 function pickMaxWorkerCount(dist: boolean) {
   // don't break if cpus() returns nothing, or an empty array
@@ -70,9 +78,33 @@ interface Options {
   pluginScanDirs?: string[];
   /** absolute paths that should be added to the default scan dirs */
   extraPluginScanDirs?: string[];
+  /**
+   * array of comma separated patterns that will be matched against bundle ids.
+   * bundles will only be built if they match one of the specified patterns.
+   * `*` can exist anywhere in each pattern and will match anything, `!` inverts the pattern
+   *
+   * examples:
+   *  --filter foo --filter bar # [foo, bar], excludes [foobar]
+   *  --filter foo,bar # [foo, bar], excludes [foobar]
+   *  --filter foo* # [foo, foobar], excludes [bar]
+   *  --filter f*r # [foobar], excludes [foo, bar]
+   */
+  filter?: string[];
 
   /** flag that causes the core bundle to be built along with plugins */
   includeCoreBundle?: boolean;
+
+  /**
+   * style themes that sass files will be converted to, the correct style will be
+   * loaded in the browser automatically by checking the global `__kbnThemeTag__`.
+   * Specifying additional styles increases build time.
+   *
+   * Defaults:
+   *  - "*" when building the dist
+   *  - comma separated list of themes in the `KBN_OPTIMIZER_THEMES` env var
+   *  - "k7light"
+   */
+  themes?: ThemeTag | '*' | ThemeTag[];
 }
 
 interface ParsedOptions {
@@ -84,8 +116,10 @@ interface ParsedOptions {
   dist: boolean;
   pluginPaths: string[];
   pluginScanDirs: string[];
+  filters: string[];
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
+  themeTags: ThemeTags;
 }
 
 export class OptimizerConfig {
@@ -98,6 +132,7 @@ export class OptimizerConfig {
     const inspectWorkers = !!options.inspectWorkers;
     const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
+    const filters = options.filter || [];
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -139,6 +174,10 @@ export class OptimizerConfig {
       throw new TypeError('worker count must be a number');
     }
 
+    const themeTags = parseThemeTags(
+      options.themes || (dist ? '*' : process.env.KBN_OPTIMIZER_THEMES)
+    );
+
     return {
       watch,
       dist,
@@ -148,8 +187,10 @@ export class OptimizerConfig {
       cache,
       pluginScanDirs,
       pluginPaths,
+      filters,
       inspectWorkers,
       includeCoreBundle,
+      themeTags,
     };
   }
 
@@ -173,7 +214,7 @@ export class OptimizerConfig {
     ];
 
     return new OptimizerConfig(
-      bundles,
+      filterById(options.filters, bundles),
       options.cache,
       options.watch,
       options.inspectWorkers,
@@ -181,7 +222,8 @@ export class OptimizerConfig {
       options.repoRoot,
       options.maxWorkerCount,
       options.dist,
-      options.profileWebpack
+      options.profileWebpack,
+      options.themeTags
     );
   }
 
@@ -194,7 +236,8 @@ export class OptimizerConfig {
     public readonly repoRoot: string,
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
-    public readonly profileWebpack: boolean
+    public readonly profileWebpack: boolean,
+    public readonly themeTags: ThemeTags
   ) {}
 
   getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
@@ -205,6 +248,7 @@ export class OptimizerConfig {
       repoRoot: this.repoRoot,
       watch: this.watch,
       optimizerCacheKey,
+      themeTags: this.themeTags,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
   }

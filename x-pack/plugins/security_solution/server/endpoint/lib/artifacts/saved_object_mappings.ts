@@ -16,11 +16,27 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
     identifier: {
       type: 'keyword',
     },
-    sha256: {
+    compressionAlgorithm: {
+      type: 'keyword',
+      index: false,
+    },
+    encryptionAlgorithm: {
+      type: 'keyword',
+      index: false,
+    },
+    encodedSha256: {
       type: 'keyword',
     },
-    encoding: {
+    encodedSize: {
+      type: 'long',
+      index: false,
+    },
+    decodedSha256: {
       type: 'keyword',
+      index: false,
+    },
+    decodedSize: {
+      type: 'long',
       index: false,
     },
     created: {
@@ -29,11 +45,6 @@ export const exceptionsArtifactSavedObjectMappings: SavedObjectsType['mappings']
     },
     body: {
       type: 'binary',
-      index: false,
-    },
-    size: {
-      type: 'long',
-      index: false,
     },
   },
 };
@@ -54,14 +65,14 @@ export const manifestSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const exceptionsArtifactType: SavedObjectsType = {
   name: exceptionsArtifactSavedObjectType,
-  hidden: false, // TODO: should these be hidden?
+  hidden: false,
   namespaceType: 'agnostic',
   mappings: exceptionsArtifactSavedObjectMappings,
 };
 
 export const manifestType: SavedObjectsType = {
   name: manifestSavedObjectType,
-  hidden: false, // TODO: should these be hidden?
+  hidden: false,
   namespaceType: 'agnostic',
   mappings: manifestSavedObjectMappings,
 };

@@ -13,13 +13,11 @@
     "test:generate": "ts-node --project scripts/endpoint/cli_tsconfig.json scripts/endpoint/resolver_generator.ts"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.110",
     "@types/md5": "^2.2.0"
   },
   "dependencies": {
     "@types/rbush": "^3.0.0",
     "@types/seedrandom": ">=2.0.0 <4.0.0",
-    "lodash": "^4.17.15",
     "querystring": "^0.2.0",
     "rbush": "^3.0.1",
     "redux-devtools-extension": "^2.13.8"

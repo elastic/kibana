@@ -14,6 +14,7 @@
     "tsd": "^0.7.4"
   },
   "peerDependencies": {
+    "lodash": "^4.17.15",
     "joi": "^13.5.2",
     "moment": "^2.24.0",
     "type-detect": "^4.0.8"

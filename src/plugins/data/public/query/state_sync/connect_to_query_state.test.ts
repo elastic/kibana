@@ -78,7 +78,11 @@ describe('connect_to_global_state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
     });
-    queryServiceStart = queryService.start(startMock.savedObjects);
+    queryServiceStart = queryService.start({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+      savedObjectsClient: startMock.savedObjects.client,
+    });
     filterManager = queryServiceStart.filterManager;
     timeFilter = queryServiceStart.timefilter.timefilter;
 
@@ -307,7 +311,11 @@ describe('connect_to_app_state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
     });
-    queryServiceStart = queryService.start(startMock.savedObjects);
+    queryServiceStart = queryService.start({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+      savedObjectsClient: startMock.savedObjects.client,
+    });
     filterManager = queryServiceStart.filterManager;
 
     appState = createStateContainer({});
@@ -481,7 +489,11 @@ describe('filters with different state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
     });
-    queryServiceStart = queryService.start(startMock.savedObjects);
+    queryServiceStart = queryService.start({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+      savedObjectsClient: startMock.savedObjects.client,
+    });
     filterManager = queryServiceStart.filterManager;
 
     state = createStateContainer({});

@@ -7,9 +7,11 @@
 export { deserializeDataStream, deserializeDataStreamList } from './data_stream_serialization';
 
 export {
-  deserializeLegacyTemplateList,
+  deserializeTemplate,
   deserializeTemplateList,
   deserializeLegacyTemplate,
+  deserializeLegacyTemplateList,
+  serializeTemplate,
   serializeLegacyTemplate,
 } from './template_serialization';
 
@@ -17,5 +19,6 @@ export { getTemplateParameter } from './utils';
 
 export {
   deserializeComponentTemplate,
-  deserializeComponenTemplateList,
+  deserializeComponentTemplateList,
+  serializeComponentTemplate,
 } from './component_template_serialization';

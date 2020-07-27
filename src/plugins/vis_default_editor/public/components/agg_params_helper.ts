@@ -87,7 +87,7 @@ function getAggParamsToRender({
       // should be refactored in the future to provide a more general way
       // for visualization to override some agg config settings
       if (agg.type.name === 'top_hits' && param.name === 'field') {
-        const allowStrings = _.get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
+        const allowStrings = get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
         if (!allowStrings) {
           availableFields = availableFields.filter((field) => field.type === 'number');
         }

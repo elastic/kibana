@@ -58,7 +58,7 @@ export const createNewTimeline = () => {
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} input`).type(`${query} {enter}`);
+  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
 };
 
 export const expandFirstTimelineEventDetails = () => {

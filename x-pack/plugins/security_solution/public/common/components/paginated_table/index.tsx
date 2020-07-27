@@ -249,7 +249,6 @@ const PaginatedTableComponent: FC<SiemTables> = ({
           <>
             <BasicTable
               columns={columns}
-              compressed
               items={pageOfItems}
               onChange={onChange}
               sorting={
@@ -273,6 +272,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                     isOpen={isPopoverOpen}
                     closePopover={closePopover}
                     panelPaddingSize="none"
+                    repositionOnScroll
                   >
                     <EuiContextMenuPanel items={rowItems} data-test-subj="loadingMorePickSizeRow" />
                   </EuiPopover>

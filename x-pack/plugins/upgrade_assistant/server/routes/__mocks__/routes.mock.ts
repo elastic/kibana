@@ -13,7 +13,7 @@ export const routeHandlerContextMock = ({
   core: {
     elasticsearch: {
       legacy: {
-        client: elasticsearchServiceMock.createScopedClusterClient(),
+        client: elasticsearchServiceMock.createLegacyScopedClusterClient(),
       },
     },
     savedObjects: { client: savedObjectsClientMock.create() },

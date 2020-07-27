@@ -18,9 +18,9 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/public';
-import { TodoSavedObjectAttributes } from '../common';
+import { TodoSavedObjectAttributes, BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../common';
 
-export async function createSampleData(client: SavedObjectsClientContract) {
+export async function createSampleData(client: SavedObjectsClientContract, overwrite = true) {
   await client.create<TodoSavedObjectAttributes>(
     'todo',
     {
@@ -30,7 +30,20 @@ export async function createSampleData(client: SavedObjectsClientContract) {
     },
     {
       id: 'sample-todo-saved-object',
-      overwrite: true,
+      overwrite,
+    }
+  );
+
+  await client.create<BookSavedObjectAttributes>(
+    BOOK_SAVED_OBJECT,
+    {
+      title: 'Pillars of the Earth',
+      author: 'Ken Follett',
+      readIt: true,
+    },
+    {
+      id: 'sample-book-saved-object',
+      overwrite,
     }
   );
 }

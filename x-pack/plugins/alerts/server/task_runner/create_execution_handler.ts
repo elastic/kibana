@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pluck } from 'lodash';
-import { AlertAction, State, Context, AlertType } from '../types';
+import { map } from 'lodash';
+import { AlertAction, State, Context, AlertType, AlertParams } from '../types';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
@@ -24,6 +24,7 @@ interface CreateExecutionHandlerOptions {
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;
+  alertParams: AlertParams;
 }
 
 interface ExecutionHandlerOptions {
@@ -45,8 +46,9 @@ export function createExecutionHandler({
   alertType,
   eventLogger,
   request,
+  alertParams,
 }: CreateExecutionHandlerOptions) {
-  const alertTypeActionGroups = new Set(pluck(alertType.actionGroups, 'id'));
+  const alertTypeActionGroups = new Set(map(alertType.actionGroups, 'id'));
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
@@ -66,6 +68,7 @@ export function createExecutionHandler({
             context,
             actionParams: action.params,
             state,
+            alertParams,
           }),
         };
       });

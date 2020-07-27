@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from 'kibana/server';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   Setup,
@@ -13,6 +14,7 @@ import {
 import { getAnomalySeries } from './get_anomaly_data';
 import { getApmTimeseriesData } from './get_timeseries_data';
 import { ApmTimeSeriesResponse } from './get_timeseries_data/transform';
+import { UIFilters } from '../../../../typings/ui_filters';
 
 function getDates(apmTimeseries: ApmTimeSeriesResponse) {
   return apmTimeseries.responseTimes.avg.map((p) => p.x);
@@ -26,6 +28,8 @@ export async function getTransactionCharts(options: {
   transactionType: string | undefined;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange & SetupUIFilters;
+  logger: Logger;
+  uiFilters: UIFilters;
 }) {
   const apmTimeseries = await getApmTimeseriesData(options);
   const anomalyTimeseries = await getAnomalySeries({

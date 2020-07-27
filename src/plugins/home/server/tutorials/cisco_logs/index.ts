@@ -37,6 +37,7 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.ciscoLogs.nameTitle', {
       defaultMessage: 'Cisco',
     }),
+    moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.ciscoLogs.shortDescription', {
       defaultMessage: 'Collect and parse logs received from Cisco ASA firewalls.',

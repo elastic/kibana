@@ -29,7 +29,7 @@ const allDoubleQuoteRE = /"/g;
 
 function escape(val: string, quoteValues: boolean) {
   if (isObject(val)) {
-    val = val.valueOf();
+    val = (val as any).valueOf();
   }
 
   val = String(val);

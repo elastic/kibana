@@ -43,6 +43,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     configPath: 'path',
     kibanaVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
+    requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
     server: true,
     ui: true,

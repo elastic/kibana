@@ -4,26 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
-import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 import {
   AnomalySwimlaneEmbeddable,
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableOutput,
+  EditSwimlanePanelContext,
 } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { resolveAnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
-import { HttpService } from '../application/services/http_service';
-import { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
+import { ViewMode } from '../../../../../src/plugins/embeddable/public';
+import { MlCoreSetup } from '../plugin';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
-export interface EditSwimlanePanelContext {
-  embeddable: IEmbeddable<AnomalySwimlaneEmbeddableInput, AnomalySwimlaneEmbeddableOutput>;
-}
-
-export function createEditSwimlanePanelAction(getStartServices: CoreSetup['getStartServices']) {
+export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['getStartServices']) {
   return createAction<typeof EDIT_SWIMLANE_PANEL_ACTION>({
     id: 'edit-anomaly-swimlane',
     type: EDIT_SWIMLANE_PANEL_ACTION,
@@ -39,18 +32,10 @@ export function createEditSwimlanePanelAction(getStartServices: CoreSetup['getSt
         throw new Error('Not possible to execute an action without the embeddable context');
       }
 
-      const [{ overlays, uiSettings, http }] = await getStartServices();
-      const anomalyDetectorService = new AnomalyDetectorService(new HttpService(http));
+      const [coreStart] = await getStartServices();
 
       try {
-        const result = await resolveAnomalySwimlaneUserInput(
-          {
-            anomalyDetectorService,
-            overlays,
-            uiSettings,
-          },
-          embeddable.getInput()
-        );
+        const result = await resolveAnomalySwimlaneUserInput(coreStart, embeddable.getInput());
         embeddable.updateInput(result);
       } catch (e) {
         return Promise.reject();
@@ -58,7 +43,8 @@ export function createEditSwimlanePanelAction(getStartServices: CoreSetup['getSt
     },
     isCompatible: async ({ embeddable }: EditSwimlanePanelContext) => {
       return (
-        embeddable instanceof AnomalySwimlaneEmbeddable && embeddable.getInput().viewMode === 'edit'
+        embeddable instanceof AnomalySwimlaneEmbeddable &&
+        embeddable.getInput().viewMode === ViewMode.EDIT
       );
     },
   });

@@ -37,6 +37,7 @@ export function azureLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.azureLogs.nameTitle', {
       defaultMessage: 'Azure logs',
     }),
+    moduleName,
     isBeta: true,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.azureLogs.shortDescription', {

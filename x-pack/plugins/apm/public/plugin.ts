@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { euiThemeVars as theme } from '@kbn/ui-shared-deps/theme';
 import { ConfigSchema } from '.';
 import { ObservabilityPluginSetup } from '../../observability/public';
 import {
@@ -40,9 +39,9 @@ import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { createStaticIndexPattern } from './services/rest/index_pattern';
 import {
-  fetchLandingPageData,
+  fetchOverviewPageData,
   hasData,
-} from './services/rest/observability_dashboard';
+} from './services/rest/apm_overview_fetchers';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -66,8 +65,9 @@ export interface ApmPluginStartDeps {
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
-  private readonly initializerContext: PluginInitializerContext<ConfigSchema>;
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(
+    private readonly initializerContext: PluginInitializerContext<ConfigSchema>
+  ) {
     this.initializerContext = initializerContext;
   }
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
@@ -81,9 +81,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     if (plugins.observability) {
       plugins.observability.dashboard.register({
         appName: 'apm',
-        fetchData: async (params) => {
-          return fetchLandingPageData(params, { theme });
-        },
+        fetchData: fetchOverviewPageData,
         hasData,
       });
     }

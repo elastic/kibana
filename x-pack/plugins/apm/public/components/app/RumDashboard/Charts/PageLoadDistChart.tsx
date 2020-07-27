@@ -70,6 +70,7 @@ export function PageLoadDistChart({
     onPercentileChange(minX, maxX);
   };
 
+  // eslint-disable-next-line react/function-component-definition
   const headerFormatter: TooltipValueFormatter = (tooltip: TooltipValue) => {
     return (
       <div>
@@ -119,7 +120,7 @@ export function PageLoadDistChart({
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
-            curve={CurveType.CURVE_NATURAL}
+            curve={CurveType.CURVE_CATMULL_ROM}
           />
           {breakdowns.map(({ name, type }) => (
             <BreakdownSeries

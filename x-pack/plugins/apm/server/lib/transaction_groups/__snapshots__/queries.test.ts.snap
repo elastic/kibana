@@ -44,7 +44,7 @@ Object {
           },
         },
         "composite": Object {
-          "size": 101,
+          "size": 10000,
           "sources": Array [
             Object {
               "service": Object {

@@ -5,10 +5,10 @@
  */
 import React, { Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
 import { ServerLogActionParams } from '.././types';
-import { AddMessageVariables } from '../../add_message_variables';
+import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 
 export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
   ServerLogActionParams
@@ -30,10 +30,6 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(paramsProperty, (message ?? '').concat(` {{${variable}}}`), index);
-  };
 
   return (
     <Fragment>
@@ -59,43 +55,20 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        id="loggingMessage"
-        fullWidth
-        error={errors.message}
-        isInvalid={errors.message.length > 0 && message !== undefined}
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editAction}
+        messageVariables={messageVariables}
+        paramsProperty={'message'}
+        inputTargetValue={message}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.logMessageFieldLabel',
           {
             defaultMessage: 'Message',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('message', variable)
-            }
-            paramsProperty="message"
-          />
-        }
-      >
-        <EuiTextArea
-          fullWidth
-          isInvalid={errors.message.length > 0 && message !== undefined}
-          value={message || ''}
-          name="message"
-          data-test-subj="loggingMessageInput"
-          onChange={(e) => {
-            editAction('message', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!message) {
-              editAction('message', '', index);
-            }
-          }}
-        />
-      </EuiFormRow>
+        errors={errors.message as string[]}
+      />
     </Fragment>
   );
 };

@@ -38,7 +38,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     if (!response.found) {
       return null;
     }
-    const beat = _get<CMBeat>(response, '_source.beat');
+    const beat = _get(response, '_source.beat') as CMBeat;
     beat.tags = beat.tags || [];
     return beat;
   }
@@ -101,7 +101,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
 
     const response = await this.database.search(user, params);
 
-    const beats = _get<CMBeat[]>(response, 'hits.hits', []);
+    const beats = _get(response, 'hits.hits', []) as CMBeat[];
 
     if (beats.length === 0) {
       return [];
@@ -127,14 +127,12 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
 
     const response = await this.database.search(user, params);
 
-    const beats = _get<CMBeat[]>(response, 'hits.hits', []);
+    const beats = _get(response, 'hits.hits', []) as CMBeat[];
 
     if (beats.length === 0) {
       return null;
     }
-    return omit<CMBeat, {}>(_get<CMBeat>(formatWithTags(beats[0]), '_source.beat'), [
-      'access_token',
-    ]);
+    return omit(_get(formatWithTags(beats[0]), '_source.beat'), ['access_token']) as CMBeat;
   }
 
   public async getAll(user: FrameworkUser, ESQuery?: any) {
@@ -171,7 +169,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     if (!response) {
       return [];
     }
-    const beats = _get<any>(response, 'hits.hits', []);
+    const beats = _get(response, 'hits.hits', []) as any;
 
     return beats.map((beat: any) =>
       formatWithTags(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat)
@@ -202,7 +200,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
     });
-    return _get<any>(response, 'items', []).map((item: any, resultIdx: number) => ({
+    return (_get(response, 'items', []) as any).map((item: any, resultIdx: number) => ({
       idxInRequest: removals[resultIdx].idxInRequest,
       result: item.update.result,
       status: item.update.status,
@@ -237,7 +235,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       refresh: 'wait_for',
     });
     // console.log(response.items[0].update.error);
-    return _get<any>(response, 'items', []).map((item: any, resultIdx: any) => ({
+    return (_get(response, 'items', []) as any).map((item: any, resultIdx: any) => ({
       idxInRequest: assignments[resultIdx].idxInRequest,
       result: item.update.result,
       status: item.update.status,

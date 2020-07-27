@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { all } from 'lodash';
+import { every } from 'lodash';
 import {
   EuiBadge,
   EuiButton,
@@ -66,11 +66,11 @@ export class IndexActionsContextMenu extends Component {
       unfreezeIndices,
       hasSystemIndex,
     } = this.props;
-    const allOpen = all(indexNames, (indexName) => {
+    const allOpen = every(indexNames, (indexName) => {
       return indexStatusByName[indexName] === INDEX_OPEN;
     });
-    const allFrozen = all(indices, (index) => index.isFrozen);
-    const allUnfrozen = all(indices, (index) => !index.isFrozen);
+    const allFrozen = every(indices, (index) => index.isFrozen);
+    const allUnfrozen = every(indices, (index) => !index.isFrozen);
     const selectedIndexCount = indexNames.length;
     const items = [];
     if (!detailPanel && selectedIndexCount === 1) {

@@ -24,7 +24,7 @@ import apm from 'elastic-apm-node';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Server, Request, ResponseToolkit } from 'hapi';
 import HapiProxy from 'h2o2';
-import { sample } from 'lodash';
+import { sampleSize } from 'lodash';
 import BrowserslistUserAgent from 'browserslist-useragent';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -90,7 +90,7 @@ export class BasePathProxyServer {
     httpConfig.maxPayload = new ByteSizeValue(ONE_GIGABYTE);
 
     if (!httpConfig.basePath) {
-      httpConfig.basePath = `/${sample(alphabet, 3).join('')}`;
+      httpConfig.basePath = `/${sampleSize(alphabet, 3).join('')}`;
     }
   }
 

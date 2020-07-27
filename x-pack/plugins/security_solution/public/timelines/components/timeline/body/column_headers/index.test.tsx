@@ -7,6 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import '../../../../../common/mock/match_media';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
 import { Direction } from '../../../../../graphql/types';
@@ -28,22 +29,24 @@ describe('ColumnHeaders', () => {
 
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <ColumnHeadersComponent
-          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          browserFields={mockBrowserFields}
-          columnHeaders={defaultHeaders}
-          isSelectAllChecked={false}
-          onColumnSorted={jest.fn()}
-          onColumnRemoved={jest.fn()}
-          onColumnResized={jest.fn()}
-          onSelectAll={jest.fn}
-          onUpdateColumns={jest.fn()}
-          showEventsSelect={false}
-          showSelectAllCheckbox={false}
-          sort={sort}
-          timelineId={'test'}
-          toggleColumn={jest.fn()}
-        />
+        <TestProviders>
+          <ColumnHeadersComponent
+            actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+            browserFields={mockBrowserFields}
+            columnHeaders={defaultHeaders}
+            isSelectAllChecked={false}
+            onColumnSorted={jest.fn()}
+            onColumnRemoved={jest.fn()}
+            onColumnResized={jest.fn()}
+            onSelectAll={jest.fn}
+            onUpdateColumns={jest.fn()}
+            showEventsSelect={false}
+            showSelectAllCheckbox={false}
+            sort={sort}
+            timelineId={'test'}
+            toggleColumn={jest.fn()}
+          />
+        </TestProviders>
       );
       expect(wrapper).toMatchSnapshot();
     });

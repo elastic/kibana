@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { trimLeft } from 'lodash';
+import { trimStart } from 'lodash';
 import { CoreSetup } from 'kibana/public';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import {
@@ -19,7 +19,7 @@ function defaultUrl(defaultAppId: string) {
 }
 
 function dashboardAppIdPrefix() {
-  return trimLeft(createDashboardEditUrl(''), '/');
+  return trimStart(createDashboardEditUrl(''), '/');
 }
 
 function migratePath(currentHash: string, kibanaLegacy: KibanaLegacyStart) {

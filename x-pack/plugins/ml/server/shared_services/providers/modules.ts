@@ -4,20 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import {
+  ILegacyScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from 'kibana/server';
+import { TypeOf } from '@kbn/config-schema';
 import { DataRecognizer } from '../../models/data_recognizer';
 import { SharedServicesChecks } from '../shared_services';
+import { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
+import { HasMlCapabilities } from '../../lib/capabilities';
+
+export type ModuleSetupPayload = TypeOf<typeof moduleIdParamSchema> &
+  TypeOf<typeof setupModuleBodySchema>;
 
 export interface ModulesProvider {
   modulesProvider(
-    callAsCurrentUser: LegacyAPICaller,
+    mlClusterClient: ILegacyScopedClusterClient,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ): {
     recognize: DataRecognizer['findMatches'];
     getModule: DataRecognizer['getModule'];
     listModules: DataRecognizer['listModules'];
-    setupModuleItems: DataRecognizer['setupModuleItems'];
+    setup(payload: ModuleSetupPayload): ReturnType<DataRecognizer['setup']>;
   };
 }
 
@@ -27,12 +37,18 @@ export function getModulesProvider({
 }: SharedServicesChecks): ModulesProvider {
   return {
     modulesProvider(
-      callAsCurrentUser: LegacyAPICaller,
+      mlClusterClient: ILegacyScopedClusterClient,
       request: KibanaRequest,
       savedObjectsClient: SavedObjectsClientContract
     ) {
-      const hasMlCapabilities = getHasMlCapabilities(request);
-      const dr = dataRecognizerFactory(callAsCurrentUser, savedObjectsClient);
+      let hasMlCapabilities: HasMlCapabilities;
+      if (request.params === 'DummyKibanaRequest') {
+        hasMlCapabilities = () => Promise.resolve();
+      } else {
+        hasMlCapabilities = getHasMlCapabilities(request);
+      }
+      const dr = dataRecognizerFactory(mlClusterClient, savedObjectsClient, request);
+
       return {
         async recognize(...args) {
           isFullLicense();
@@ -52,11 +68,24 @@ export function getModulesProvider({
 
           return dr.listModules();
         },
-        async setupModuleItems(...args) {
+        async setup(payload: ModuleSetupPayload) {
           isFullLicense();
           await hasMlCapabilities(['canCreateJob']);
 
-          return dr.setupModuleItems(...args);
+          return dr.setup(
+            payload.moduleId,
+            payload.prefix,
+            payload.groups,
+            payload.indexPatternName,
+            payload.query,
+            payload.useDedicatedIndex,
+            payload.startDatafeed,
+            payload.start,
+            payload.end,
+            payload.jobOverrides,
+            payload.datafeedOverrides,
+            payload.estimateModelMemory
+          );
         },
       };
     },
@@ -64,8 +93,9 @@ export function getModulesProvider({
 }
 
 function dataRecognizerFactory(
-  callAsCurrentUser: LegacyAPICaller,
-  savedObjectsClient: SavedObjectsClientContract
+  mlClusterClient: ILegacyScopedClusterClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  request: KibanaRequest
 ) {
-  return new DataRecognizer(callAsCurrentUser, savedObjectsClient);
+  return new DataRecognizer(mlClusterClient, savedObjectsClient, request);
 }

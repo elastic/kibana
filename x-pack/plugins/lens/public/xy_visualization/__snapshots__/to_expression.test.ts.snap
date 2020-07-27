@@ -5,6 +5,9 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "fittingFunction": Array [
+          "Carry",
+        ],
         "layers": Array [
           Object {
             "chain": Array [
@@ -61,6 +64,7 @@ Object {
                   "position": Array [
                     "bottom",
                   ],
+                  "showSingleSeries": Array [],
                 },
                 "function": "lens_xy_legendConfig",
                 "type": "function",

@@ -49,7 +49,7 @@ export interface TaskRunner {
   toString: () => string;
 }
 
-interface Updatable {
+export interface Updatable {
   readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
@@ -359,7 +359,7 @@ export class TaskManagerRunner implements TaskRunner {
     await this.bufferedTaskStore.update(
       defaults(
         {
-          ...fieldUpdates,
+          ...(fieldUpdates as Partial<ConcreteTaskInstance>),
           // reset fields that track the lifecycle of the concluded `task run`
           startedAt: null,
           retryAt: null,

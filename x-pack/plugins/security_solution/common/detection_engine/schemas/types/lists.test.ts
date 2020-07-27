@@ -30,7 +30,7 @@ describe('Lists', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should validate a list with "namespace_type" of"agnostic"', () => {
+    test('it should validate a list with "namespace_type" of "agnostic"', () => {
       const payload = getListAgnosticMock();
       const decoded = list.decode(payload);
       const message = pipe(decoded, foldLeftRight);
@@ -91,7 +91,7 @@ describe('Lists', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<{| id: string, namespace_type: "agnostic" | "single" |}>"',
+        'Invalid value "1" supplied to "Array<{| id: string, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |}>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -122,8 +122,8 @@ describe('Lists', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "(Array<{| id: string, namespace_type: "agnostic" | "single" |}> | undefined)"',
-        'Invalid value "[1]" supplied to "(Array<{| id: string, namespace_type: "agnostic" | "single" |}> | undefined)"',
+        'Invalid value "1" supplied to "(Array<{| id: string, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |}> | undefined)"',
+        'Invalid value "[1]" supplied to "(Array<{| id: string, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |}> | undefined)"',
       ]);
       expect(message.schema).toEqual({});
     });

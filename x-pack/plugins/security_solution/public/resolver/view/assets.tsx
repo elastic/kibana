@@ -21,7 +21,8 @@ type ResolverColorNames =
   | 'graphControlsBackground'
   | 'resolverBackground'
   | 'resolverEdge'
-  | 'resolverEdgeText';
+  | 'resolverEdgeText'
+  | 'resolverBreadcrumbBackground';
 
 type ColorMap = Record<ResolverColorNames, string>;
 interface NodeStyleConfig {
@@ -421,7 +422,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
 export const useResolverTheme = (): {
   colorMap: ColorMap;
   nodeAssets: NodeStyleMap;
-  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessOrigin: boolean) => NodeStyleConfig;
+  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessTrigger: boolean) => NodeStyleConfig;
 } => {
   const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
@@ -438,6 +439,7 @@ export const useResolverTheme = (): {
     processBackingFill: `${theme.euiColorPrimary}${getThemedOption('0F', '1F')}`, // Add opacity 0F = 6% , 1F = 12%
     resolverBackground: theme.euiColorEmptyShade,
     resolverEdge: getThemedOption(theme.euiColorLightestShade, theme.euiColorLightShade),
+    resolverBreadcrumbBackground: theme.euiColorLightestShade,
     resolverEdgeText: getThemedOption(theme.euiColorDarkShade, theme.euiColorFullShade),
     triggerBackingFill: `${theme.euiColorDanger}${getThemedOption('0F', '1F')}`,
   };
@@ -495,10 +497,14 @@ export const useResolverTheme = (): {
     },
   };
 
-  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessOrigin: boolean) {
+  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessTrigger: boolean) {
     if (isProcessTerminated) {
-      return nodeAssets[processTypeToCube.processTerminated];
-    } else if (isProcessOrigin) {
+      if (isProcessTrigger) {
+        return nodeAssets.terminatedTriggerCube;
+      } else {
+        return nodeAssets[processTypeToCube.processTerminated];
+      }
+    } else if (isProcessTrigger) {
       return nodeAssets[processTypeToCube.processCausedAlert];
     } else {
       return nodeAssets[processTypeToCube.processRan];

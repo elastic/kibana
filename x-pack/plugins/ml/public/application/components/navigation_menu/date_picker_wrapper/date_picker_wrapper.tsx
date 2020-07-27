@@ -9,10 +9,7 @@ import { Subscription } from 'rxjs';
 import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
 import { TimeRange, TimeHistoryContract } from 'src/plugins/data/public';
 
-import {
-  mlTimefilterRefresh$,
-  mlTimefilterTimeChange$,
-} from '../../../services/timefilter_refresh_service';
+import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUrlState } from '../../../util/url_state';
 import { useMlKibana } from '../../../contexts/kibana';
 
@@ -108,7 +105,6 @@ export const DatePickerWrapper: FC = () => {
     timefilter.setTime(newTime);
     setTime(newTime);
     setRecentlyUsedRanges(getRecentlyUsedRanges());
-    mlTimefilterTimeChange$.next({ lastRefresh: Date.now(), timeRange: { start, end } });
   }
 
   function updateInterval({

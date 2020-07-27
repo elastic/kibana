@@ -31,7 +31,7 @@ export async function getAgentEvents(
     perPage,
     page,
     sortField: 'timestamp',
-    sortOrder: 'DESC',
+    sortOrder: 'desc',
     defaultSearchOperator: 'AND',
     search: agentId,
     searchFields: ['agent_id'],

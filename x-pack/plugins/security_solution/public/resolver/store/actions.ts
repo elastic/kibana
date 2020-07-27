@@ -25,17 +25,6 @@ interface UserBroughtProcessIntoView {
 }
 
 /**
- * Dispatched to notify state that a different panel needs to be displayed
- */
-interface AppDisplayedDifferentPanel {
-  readonly type: 'appDisplayedDifferentPanel';
-  /**
-   * The name of the panel to display
-   */
-  readonly payload: string;
-}
-
-/**
  * When an examination of query params in the UI indicates that state needs to
  * be updated to reflect the new selection
  */
@@ -80,12 +69,9 @@ interface AppDetectedMissingEventData {
  */
 interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
-  readonly payload: {
-    /**
-     * Used to identify the process node that the user focused on (in the DOM)
-     */
-    readonly nodeId: string;
-  };
+
+  /** focused nodeID */
+  readonly payload: string;
 }
 
 /**
@@ -96,16 +82,10 @@ interface UserFocusedOnResolverNode {
  */
 interface UserSelectedResolverNode {
   readonly type: 'userSelectedResolverNode';
-  readonly payload: {
-    /**
-     * The HTML ID used to identify the process node's element that the user selected
-     */
-    readonly nodeId: string;
-    /**
-     * The process entity_id for the process the node represents
-     */
-    readonly selectedProcessId: string;
-  };
+  /**
+   * The nodeID (aka entity_id) that was select.
+   */
+  readonly payload: string;
 }
 
 /**
@@ -130,5 +110,4 @@ export type ResolverAction =
   | UserRequestedRelatedEventData
   | UserSelectedRelatedEventCategory
   | AppDetectedNewIdFromQueryParams
-  | AppDisplayedDifferentPanel
   | AppDetectedMissingEventData;

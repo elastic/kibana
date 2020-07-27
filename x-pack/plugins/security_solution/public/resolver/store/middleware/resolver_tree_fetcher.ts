@@ -70,10 +70,6 @@ export function ResolverTreeFetcher(
         const entityIDToFetch = matchingEntities[0].entity_id;
         result = await context.services.http.get(`/api/endpoint/resolver/${entityIDToFetch}`, {
           signal: lastRequestAbortController.signal,
-          query: {
-            children: 5,
-            ancestors: 5,
-          },
         });
       } catch (error) {
         // https://developer.mozilla.org/en-US/docs/Web/API/DOMException#exception-AbortError

@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { scaleUtc } from 'd3-scale';
-import mean from 'lodash.mean';
+import { mean } from 'lodash';
 import React from 'react';
 import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
@@ -88,6 +88,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <Histogram
+        height={180}
         noHits={distribution.noHits}
         tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}

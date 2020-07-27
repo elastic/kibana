@@ -13,5 +13,10 @@
   "optionalPlugins": [
     "usageCollection"
   ],
-  "configPath": ["xpack", "ccr"]
+  "configPath": ["xpack", "ccr"],
+  "requiredBundles": [
+    "kibanaReact",
+    "esUiShared",
+    "data"
+  ]
 }

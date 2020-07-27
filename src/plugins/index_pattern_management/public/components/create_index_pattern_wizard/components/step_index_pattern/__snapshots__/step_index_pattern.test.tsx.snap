@@ -11,8 +11,10 @@ Object {
       ]
     }
     goToNextStep={[Function]}
+    isIncludingSystemIndices={false}
     isInputInvalid={true}
     isNextStepDisabled={true}
+    onChangeIncludingSystemIndices={[Function]}
     onQueryChanged={[Function]}
     query="?"
   />,
@@ -25,6 +27,7 @@ exports[`StepIndexPattern renders indices which match the initial query 1`] = `
   indices={
     Array [
       Object {
+        "item": Object {},
         "name": "kibana",
       },
     ]
@@ -39,6 +42,7 @@ exports[`StepIndexPattern renders matching indices when input is valid 1`] = `
   indices={
     Array [
       Object {
+        "item": Object {},
         "name": "kibana",
       },
     ]

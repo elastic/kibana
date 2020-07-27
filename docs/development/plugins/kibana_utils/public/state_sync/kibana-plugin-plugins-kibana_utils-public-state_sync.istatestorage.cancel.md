@@ -4,7 +4,7 @@
 
 ## IStateStorage.cancel property
 
-Optional method to cancel any pending activity syncState() will call it, if it is provided by IStateStorage
+Optional method to cancel any pending activity [syncState()](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstate.md) will call it during destroy, if it is provided by IStateStorage
 
 <b>Signature:</b>
 

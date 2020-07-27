@@ -14,6 +14,7 @@ import {
   setName,
   setWriteable,
   setWorkpadCSS,
+  setWorkpadVariables,
   resetWorkpad,
 } from '../actions/workpad';
 
@@ -24,11 +25,7 @@ export const workpadReducer = handleActions(
     [setWorkpad]: (workpadState, { payload }) => {
       platformService
         .getService()
-        .coreStart.chrome.recentlyAccessed.add(
-          `${APP_ROUTE_WORKPAD}/${payload.id}`,
-          payload.name,
-          payload.id
-        );
+        .setRecentlyAccessed(`${APP_ROUTE_WORKPAD}/${payload.id}`, payload.name, payload.id);
       return payload;
     },
 
@@ -57,6 +54,10 @@ export const workpadReducer = handleActions(
 
     [setWorkpadCSS]: (workpadState, { payload }) => {
       return { ...workpadState, css: payload };
+    },
+
+    [setWorkpadVariables]: (workpadState, { payload }) => {
+      return { ...workpadState, variables: payload };
     },
 
     [resetWorkpad]: () => ({ ...getDefaultWorkpad() }),

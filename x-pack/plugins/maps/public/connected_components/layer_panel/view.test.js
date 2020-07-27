@@ -55,7 +55,7 @@ const mockLayer = {
   getImmutableSourceProperties: () => {
     return [{ label: 'source prop1', value: 'you get one chance to set me' }];
   },
-  isJoinable: () => {
+  showJoinEditor: () => {
     return true;
   },
   supportsElasticsearchFilters: () => {

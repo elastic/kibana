@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { ReactElement } from 'react';
 import { ScopedHistory, Capabilities } from 'kibana/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
@@ -26,8 +25,20 @@ export interface ManagementSetup {
   sections: SectionsServiceSetup;
 }
 
-export interface ManagementStart {
-  sections: SectionsServiceStart;
+export interface DefinedSections {
+  ingest: ManagementSection;
+  data: ManagementSection;
+  insightsAndAlerting: ManagementSection;
+  security: ManagementSection;
+  kibana: ManagementSection;
+  stack: ManagementSection;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ManagementStart {}
+
+export interface ManagementSectionsStartPrivate {
+  getSectionsEnabled: () => ManagementSection[];
 }
 
 export interface SectionsServiceStartDeps {
@@ -36,12 +47,10 @@ export interface SectionsServiceStartDeps {
 
 export interface SectionsServiceSetup {
   register: (args: Omit<RegisterManagementSectionArgs, 'capabilities'>) => ManagementSection;
-  getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
+  section: DefinedSections;
 }
 
 export interface SectionsServiceStart {
-  getSection: (sectionId: ManagementSectionId | string) => ManagementSection;
-  getAllSections: () => ManagementSection[];
   getSectionsEnabled: () => ManagementSection[];
 }
 
@@ -66,7 +75,8 @@ export interface ManagementAppMountParams {
 
 export interface CreateManagementItemArgs {
   id: string;
-  title: string | ReactElement;
+  title: string;
+  tip?: string;
   order?: number;
   euiIconType?: string; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`

@@ -6,7 +6,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
@@ -58,7 +58,7 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
     } = getSorting();
     const { pageIndex, pageSize } = getPagination();
 
-    const sortedRestores = sortByOrder(newRestoresList, [field], [direction]);
+    const sortedRestores = orderBy(newRestoresList, [field], [direction]);
     return sortedRestores.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
   };
 

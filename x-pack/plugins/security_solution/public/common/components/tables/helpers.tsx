@@ -195,6 +195,7 @@ export const PopoverComponent = ({
         closePopover={() => setIsOpen(!isOpen)}
         id={`${idPrefix}-popover`}
         isOpen={isOpen}
+        repositionOnScroll
       >
         {children}
       </EuiPopover>

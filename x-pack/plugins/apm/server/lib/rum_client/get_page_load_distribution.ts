@@ -12,6 +12,12 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 
+export const MICRO_TO_SEC = 1000000;
+
+export function microToSec(val: number) {
+  return Math.round((val / MICRO_TO_SEC + Number.EPSILON) * 100) / 100;
+}
+
 export async function getPageLoadDistribution({
   setup,
   minPercentile,
@@ -42,6 +48,9 @@ export async function getPageLoadDistribution({
           percentiles: {
             field: 'transaction.duration.us',
             percents: [50, 75, 90, 95, 99],
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
       },
@@ -59,20 +68,29 @@ export async function getPageLoadDistribution({
     return null;
   }
 
-  const minDuration = aggregations?.minDuration.value ?? 0;
+  const { durPercentiles, minDuration } = aggregations ?? {};
 
-  const minPerc = minPercentile ? +minPercentile : minDuration;
+  const minPerc = minPercentile
+    ? +minPercentile * MICRO_TO_SEC
+    : minDuration?.value ?? 0;
 
-  const maxPercQuery = aggregations?.durPercentiles.values['99.0'] ?? 10000;
+  const maxPercQuery = durPercentiles?.values['99.0'] ?? 10000;
 
-  const maxPerc = maxPercentile ? +maxPercentile : maxPercQuery;
+  const maxPerc = maxPercentile ? +maxPercentile * MICRO_TO_SEC : maxPercQuery;
 
   const pageDist = await getPercentilesDistribution(setup, minPerc, maxPerc);
+
+  Object.entries(durPercentiles?.values ?? {}).forEach(([key, val]) => {
+    if (durPercentiles?.values?.[key]) {
+      durPercentiles.values[key] = microToSec(val as number);
+    }
+  });
+
   return {
     pageLoadDistribution: pageDist,
-    percentiles: aggregations?.durPercentiles.values,
-    minDuration: minPerc,
-    maxDuration: maxPerc,
+    percentiles: durPercentiles?.values,
+    minDuration: microToSec(minPerc),
+    maxDuration: microToSec(maxPerc),
   };
 }
 
@@ -81,9 +99,9 @@ const getPercentilesDistribution = async (
   minDuration: number,
   maxDuration: number
 ) => {
-  const stepValue = (maxDuration - minDuration) / 50;
+  const stepValue = (maxDuration - minDuration) / 100;
   const stepValues = [];
-  for (let i = 1; i < 51; i++) {
+  for (let i = 1; i < 101; i++) {
     stepValues.push((stepValue * i + minDuration).toFixed(2));
   }
 
@@ -103,6 +121,9 @@ const getPercentilesDistribution = async (
             field: 'transaction.duration.us',
             values: stepValues,
             keyed: false,
+            hdr: {
+              number_of_significant_value_digits: 3,
+            },
           },
         },
       },
@@ -117,7 +138,7 @@ const getPercentilesDistribution = async (
 
   return pageDist.map(({ key, value }, index: number, arr) => {
     return {
-      x: Math.round(key / 1000),
+      x: microToSec(key),
       y: index === 0 ? value : value - arr[index - 1].value,
     };
   });

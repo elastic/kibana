@@ -36,7 +36,10 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
     agent.config_id
   );
 
-  const agentConfigsRequest = useGetAgentConfigs();
+  const agentConfigsRequest = useGetAgentConfigs({
+    page: 1,
+    perPage: 1000,
+  });
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -119,7 +122,7 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
                 id="xpack.ingestManager.agentReassignConfig.cancelButtonLabel"
                 defaultMessage="Cancel"

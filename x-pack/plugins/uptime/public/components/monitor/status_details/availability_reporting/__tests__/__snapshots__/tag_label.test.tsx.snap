@@ -26,13 +26,13 @@ exports[`TagLabel component renders correctly against snapshot 1`] = `
       <span
         class="euiBadge__text"
       >
-        <div
-          class="euiText euiText--small"
+        <span
+          class="euiTextColor euiTextColor--ghost"
         >
           <h4>
             US-East
           </h4>
-        </div>
+        </span>
       </span>
     </span>
   </span>
@@ -44,13 +44,13 @@ exports[`TagLabel component shallow render correctly against snapshot 1`] = `
   <EuiBadge
     color="#fff"
   >
-    <EuiText
-      size="s"
+    <EuiTextColor
+      color="default"
     >
       <h4>
         US-East
       </h4>
-    </EuiText>
+    </EuiTextColor>
   </EuiBadge>
 </styled.div>
 `;

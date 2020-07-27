@@ -156,6 +156,8 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
       </div>
       <table
         className="euiTable euiTable--compressed euiTable--responsive"
+        id="generated-id"
+        tabIndex={-1}
       >
         <caption
           className="euiScreenReaderOnly euiTableCaption"
@@ -508,9 +510,8 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
     <div
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <div
+      <nav
         className="euiPagination"
-        role="group"
       >
         <button
           aria-label="Previous page"
@@ -527,23 +528,33 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             size="m"
           />
         </button>
-        <button
-          aria-label="Page 1 of 1"
-          className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
-          data-test-subj="pagination-button-0"
-          onClick={[Function]}
-          type="button"
+        <ul
+          className="euiPagination__list"
         >
-          <span
-            className="euiButtonEmpty__content"
+          <li
+            className="euiPagination__item"
           >
-            <span
-              className="euiButtonEmpty__text"
+            <button
+              aria-current={true}
+              aria-label="Page 1 of 1"
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+              data-test-subj="pagination-button-0"
+              disabled={true}
+              onClick={[Function]}
+              type="button"
             >
-              1
-            </span>
-          </span>
-        </button>
+              <span
+                className="euiButtonEmpty__content"
+              >
+                <span
+                  className="euiButtonEmpty__text"
+                >
+                  1
+                </span>
+              </span>
+            </button>
+          </li>
+        </ul>
         <button
           aria-label="Next page"
           className="euiButtonIcon euiButtonIcon--text"
@@ -559,7 +570,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
             size="m"
           />
         </button>
-      </div>
+      </nav>
     </div>
   </div>
 </div>

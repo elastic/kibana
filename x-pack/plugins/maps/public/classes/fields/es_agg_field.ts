@@ -17,6 +17,8 @@ import { TopTermPercentageField } from './top_term_percentage_field';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../tooltips/es_agg_tooltip_property';
 
+const TERMS_AGG_SHARD_SIZE = 5;
+
 export interface IESAggField extends IField {
   getValueAggDsl(indexPattern: IndexPattern): unknown | null;
   getBucketCount(): number;
@@ -100,7 +102,7 @@ export class ESAggField implements IESAggField {
 
     const field = getField(indexPattern, this.getRootName());
     const aggType = this.getAggType();
-    const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: 1 } : {};
+    const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: TERMS_AGG_SHARD_SIZE } : {};
     return {
       [aggType]: addFieldToDSL(aggBody, field),
     };
@@ -108,7 +110,7 @@ export class ESAggField implements IESAggField {
 
   getBucketCount(): number {
     // terms aggregation increases the overall number of buckets per split bucket
-    return this.getAggType() === AGG_TYPE.TERMS ? 1 : 0;
+    return this.getAggType() === AGG_TYPE.TERMS ? TERMS_AGG_SHARD_SIZE : 0;
   }
 
   supportsFieldMeta(): boolean {

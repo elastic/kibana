@@ -20,11 +20,13 @@ export const getTickHash = (columns: PointSeriesColumns, rows: DatatableRow[]) =
   };
 
   if (get(columns, 'x.type') === 'string') {
-    sortBy(rows, ['x']).forEach((row) => {
-      if (!ticks.x.hash[row.x]) {
-        ticks.x.hash[row.x] = ticks.x.counter++;
-      }
-    });
+    sortBy(rows, ['x'])
+      .reverse()
+      .forEach((row) => {
+        if (!ticks.x.hash[row.x]) {
+          ticks.x.hash[row.x] = ticks.x.counter++;
+        }
+      });
   }
 
   if (get(columns, 'y.type') === 'string') {

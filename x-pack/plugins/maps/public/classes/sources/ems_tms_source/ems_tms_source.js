@@ -12,7 +12,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { getEmsTileLayerId, getUiSettings } from '../../../kibana_services';
+import { getEmsTileLayerId, getIsDarkMode } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
@@ -122,9 +122,8 @@ export class EMSTMSSource extends AbstractTMSSource {
       return this._descriptor.id;
     }
 
-    const isDarkMode = getUiSettings().get('theme:darkMode', false);
     const emsTileLayerId = getEmsTileLayerId();
-    return isDarkMode ? emsTileLayerId.dark : emsTileLayerId.bright;
+    return getIsDarkMode() ? emsTileLayerId.dark : emsTileLayerId.bright;
   }
 }
 

@@ -152,7 +152,6 @@ export const getFieldItems = ({
                     fieldId={field.name || ''}
                     highlight={highlight}
                     onUpdateColumns={onUpdateColumns}
-                    timelineId={timelineId}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

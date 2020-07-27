@@ -4,38 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent, ReactChildren } from 'react';
+import React, { ErrorInfo, FC, ReactElement } from 'react';
 import { withState, withHandlers, lifecycle, mapProps, compose } from 'recompose';
 import PropTypes from 'prop-types';
 import { omit } from 'lodash';
 
-type ResetErrorState = ({
-  setError,
-  setErrorInfo,
-}: {
-  setError: Function;
-  setErrorInfo: Function;
-}) => void;
-
 interface Props {
-  error: Error;
-  errorInfo: any;
-  resetErrorState: ResetErrorState;
+  error?: Error;
+  errorInfo?: ErrorInfo;
+  resetErrorState: (state: { error: Error; errorInfo: ErrorInfo }) => void;
+  setError: (error: Error | null) => void;
+  setErrorInfo: (info: ErrorInfo | null) => void;
+  children: (props: ChildrenProps) => ReactElement | null;
 }
 
-interface ComponentProps extends Props {
-  children: (props: Props) => ReactChildren;
-}
+type ComponentProps = Pick<Props, 'children' | 'errorInfo' | 'resetErrorState' | 'error'>;
+type ChildrenProps = Omit<ComponentProps, 'children'>;
 
-const ErrorBoundaryComponent: FunctionComponent<ComponentProps> = (props) => (
-  <Fragment>
-    {props.children({
-      error: props.error,
-      errorInfo: props.errorInfo,
-      resetErrorState: props.resetErrorState,
-    })}
-  </Fragment>
-);
+const ErrorBoundaryComponent: FC<ComponentProps> = (props) => {
+  const { children, ...rest } = props;
+  return <>{children(rest)}</>;
+};
 
 ErrorBoundaryComponent.propTypes = {
   children: PropTypes.func.isRequired,
@@ -44,33 +33,22 @@ ErrorBoundaryComponent.propTypes = {
   resetErrorState: PropTypes.func.isRequired,
 };
 
-interface HOCProps {
-  setError: Function;
-  setErrorInfo: Function;
-}
-
-interface HandlerProps {
-  resetErrorState: ResetErrorState;
-}
-
-export const errorBoundaryHoc = compose<ComponentProps, {}>(
+export const errorBoundaryHoc = compose<ComponentProps, Pick<ComponentProps, 'children'>>(
   withState('error', 'setError', null),
   withState('errorInfo', 'setErrorInfo', null),
-  withHandlers<HOCProps, HandlerProps>({
+  withHandlers<Pick<Props, 'setError' | 'setErrorInfo'>, Pick<Props, 'resetErrorState'>>({
     resetErrorState: ({ setError, setErrorInfo }) => () => {
       setError(null);
       setErrorInfo(null);
     },
   }),
-  lifecycle<HOCProps, HOCProps>({
+  lifecycle<Props, Props>({
     componentDidCatch(error, errorInfo) {
       this.props.setError(error);
       this.props.setErrorInfo(errorInfo);
     },
   }),
-  mapProps<HOCProps, Omit<HOCProps, 'setError' | 'setErrorInfo'>>((props) =>
-    omit(props, ['setError', 'setErrorInfo'])
-  )
+  mapProps<ComponentProps, Props>((props) => omit(props, ['setError', 'setErrorInfo']))
 );
 
 export const ErrorBoundary = errorBoundaryHoc(ErrorBoundaryComponent);

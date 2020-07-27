@@ -20,7 +20,7 @@ export function createActionsUsageCollector(
       try {
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
-        const state: ActionsUsage = get(doc, 'state');
+        const state: ActionsUsage = get(doc, 'state') as ActionsUsage;
 
         return {
           ...state,

@@ -1,0 +1,145 @@
+[[development-unit-tests]]
+== Unit testing frameworks
+
+{kib} is migrating unit testing from `Mocha` to `Jest`. Legacy unit tests
+still exist in Mocha but all new unit tests should be written in Jest.
+
+[discrete]
+=== Mocha (legacy)
+
+Mocha tests are contained in `__tests__` directories.
+
+*Running Mocha Unit Tests*
+
+["source","shell"]
+-----------
+yarn test:mocha
+-----------
+
+[discrete]
+== Jest
+Jest tests are stored in the same directory as source code files with the `.test.{js,mjs,ts,tsx}` suffix.
+
+*Running Jest Unit Tests*
+
+["source","shell"]
+-----------
+yarn test:jest
+-----------
+
+[discrete]
+==== Writing Jest Unit Tests
+
+In order to write those tests there are two main things you need to be aware of.
+The first one is the different between `jest.mock` and `jest.doMock` 
+and the second one our `jest mocks file pattern`. As we are running `js` and `ts`
+test files with `babel-jest` both techniques are needed
+specially for the tests implemented on Typescript in order to benefit from the 
+auto-inference types feature.
+
+[discrete]
+==== Jest.mock vs Jest.doMock
+
+Both methods are essentially the same on their roots however the `jest.mock` 
+calls will get hoisted to the top of the file and can only reference variables 
+prefixed with `mock`. On the other hand, `jest.doMock` won't be hoisted and can 
+reference pretty much any variable we want, however we have to assure those referenced 
+variables are instantiated at the time we need them which lead us to the next 
+section where we'll talk about our jest mock files pattern.
+
+[discrete]
+==== Jest Mock Files Pattern 
+
+Specially on typescript it is pretty common to have in unit tests 
+`jest.doMock` calls which reference for example imported types. Any error 
+will thrown from doing that however the test will fail. The reason behind that
+is because despite the `jest.doMock` isn't being hoisted by `babel-jest` the 
+import with the types we are referencing will be hoisted to the top and at the 
+time we'll call the function that variable would not be defined.
+
+In order to prevent that we develop a protocol that should be followed:
+
+- Each module could provide a standard mock in `mymodule.mock.ts` in case 
+there are other tests that could benefit from using definitions here. 
+This file would not have any `jest.mock` calls, just dummy objects.
+
+- Each test defines its mocks in `mymodule.test.mocks.ts`. This file 
+could import relevant mocks from the generalised module's mocks 
+file `(*.mock.ts)` and call `jest.mock` for each of them. If there is 
+any relevant dummy mock objects to generalise (and to be used by 
+other tests), the dummy objects could be defined directly on this file.
+
+- Each test would import its mocks from the test mocks 
+file mymodule.test.mocks.ts. `mymodule.test.ts` has an import 
+like: `import * as Mocks from './mymodule.test.mocks'`, 
+`import { mockX } from './mymodule.test.mocks'` 
+or just `import './mymodule.test.mocks'` if there isn't anything 
+exported to be used.
+
+[discrete]
+[[debugging-unit-tests]]
+=== Debugging Unit Tests
+
+The standard `yarn test` task runs several sub tasks and can take
+several minutes to complete, making debugging failures pretty painful.
+In order to ease the pain specialized tasks provide alternate methods
+for running the tests.
+
+You could also add the `--debug` option so that `node` is run using
+the `--debug-brk` flag. You’ll need to connect a remote debugger such
+as https://github.com/node-inspector/node-inspector[`node-inspector`]
+to proceed in this mode.
+
+[source,bash]
+----
+node scripts/mocha --debug <file>
+----
+
+With `yarn test:karma`, you can run only the browser tests. Coverage
+reports are available for browser tests by running
+`yarn test:coverage`. You can find the results under the `coverage/`
+directory that will be created upon completion.
+
+[source,bash]
+----
+yarn test:karma
+----
+
+Using `yarn test:karma:debug` initializes an environment for debugging
+the browser tests. Includes an dedicated instance of the {kib} server
+for building the test bundle, and a karma server. When running this task
+the build is optimized for the first time and then a karma-owned
+instance of the browser is opened. Click the "`debug`" button to open a
+new tab that executes the unit tests.
+
+[source,bash]
+----
+yarn test:karma:debug
+----
+
+In the screenshot below, you’ll notice the URL is
+`localhost:9876/debug.html`. You can append a `grep` query parameter
+to this URL and set it to a string value which will be used to exclude
+tests which don’t match. For example, if you changed the URL to
+`localhost:9876/debug.html?query=my test` and then refreshed the
+browser, you’d only see tests run which contain "`my test`" in the test
+description.
+
+image:http://i.imgur.com/DwHxgfq.png[Browser test debugging]
+
+[discrete]
+=== Unit Testing Plugins
+
+This should work super if you’re using the
+https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator[Kibana
+plugin generator]. If you’re not using the generator, well, you’re on
+your own. We suggest you look at how the generator works.
+
+To run the tests for just your particular plugin run the following
+command from your plugin:
+
+[source,bash]
+----
+yarn test:mocha
+yarn test:karma:debug # remove the debug flag to run them once and close
+----

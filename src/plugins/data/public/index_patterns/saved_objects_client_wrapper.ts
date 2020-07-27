@@ -27,12 +27,11 @@ import {
 
 type SOClient = Pick<SavedObjectsClient, 'find' | 'get' | 'update' | 'create' | 'delete'>;
 
-const simpleSavedObjectToSavedObject = <T>(
-  simpleSavedObject: SimpleSavedObject
-): SavedObject<T> => ({
-  version: simpleSavedObject._version,
-  ...omit(simpleSavedObject, '_version'),
-});
+const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
+  ({
+    version: simpleSavedObject._version,
+    ...omit(simpleSavedObject, '_version'),
+  } as any);
 
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SOClient;

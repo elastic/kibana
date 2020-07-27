@@ -44,7 +44,7 @@ const mapFilter = (
   comparators: FilterCompareOptions,
   excludedAttributes: string[]
 ) => {
-  const cleaned: FilterMeta = omit(filter, excludedAttributes);
+  const cleaned: FilterMeta = omit(filter, excludedAttributes) as FilterMeta;
 
   if (comparators.index) cleaned.index = filter.meta?.index;
   if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);

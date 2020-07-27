@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexBy } from 'lodash';
+import { keyBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Field } from '../../../lib/merge_capabilities_with_fields';
 import { RouteDependencies } from '../../../types';
@@ -111,7 +111,7 @@ export const registerFieldsForWildcardRoute = ({
         const parsedParams = JSON.parse(params);
         const rollupIndex = parsedParams.rollup_index;
         const rollupFields: Field[] = [];
-        const fieldsFromFieldCapsApi: { [key: string]: any } = indexBy(fields, 'name');
+        const fieldsFromFieldCapsApi: { [key: string]: any } = keyBy(fields, 'name');
         const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
           await context.rollup!.client.callAsCurrentUser('rollup.rollupIndexCapabilities', {
             indexPattern: rollupIndex,

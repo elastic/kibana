@@ -13,8 +13,9 @@ import { mockPolicyResultList } from '../../policy/store/policy_list/mock_policy
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   HostInfo,
-  HostStatus,
   HostPolicyResponseActionStatus,
+  HostPolicyResponseAppliedAction,
+  HostStatus,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppAction } from '../../../../common/store/actions';
@@ -44,7 +45,7 @@ describe('when on the hosts page', () => {
 
   it('should show the empty state when there are no hosts or polices', async () => {
     const renderResult = render();
-    // Initially, there are no endpoints or policies, so we prompt to add policies first.
+    // Initially, there are no hosts or policies, so we prompt to add policies first.
     const table = await renderResult.findByTestId('emptyPolicyTable');
     expect(table).not.toBeNull();
   });
@@ -79,8 +80,8 @@ describe('when on the hosts page', () => {
 
     it('should show the no hosts empty state', async () => {
       const renderResult = render();
-      const emptyEndpointsTable = await renderResult.findByTestId('emptyEndpointsTable');
-      expect(emptyEndpointsTable).not.toBeNull();
+      const emptyHostsTable = await renderResult.findByTestId('emptyHostsTable');
+      expect(emptyHostsTable).not.toBeNull();
     });
 
     it('should display the onboarding steps', async () => {
@@ -111,14 +112,16 @@ describe('when on the hosts page', () => {
       let firstPolicyID: string;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
-          const hostListData = mockHostResultList({ total: 3 });
+          const hostListData = mockHostResultList({ total: 4 });
           firstPolicyID = hostListData.hosts[0].metadata.Endpoint.policy.applied.id;
-          [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE].forEach((status, index) => {
-            hostListData.hosts[index] = {
-              metadata: hostListData.hosts[index].metadata,
-              host_status: status,
-            };
-          });
+          [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE, HostStatus.UNENROLLING].forEach(
+            (status, index) => {
+              hostListData.hosts[index] = {
+                metadata: hostListData.hosts[index].metadata,
+                host_status: status,
+              };
+            }
+          );
           hostListData.hosts.forEach((item, index) => {
             generatedPolicyStatuses[index] = item.metadata.Endpoint.policy.applied.status;
           });
@@ -133,12 +136,12 @@ describe('when on the hosts page', () => {
       it('should display rows in the table', async () => {
         const renderResult = render();
         const rows = await renderResult.findAllByRole('row');
-        expect(rows).toHaveLength(4);
+        expect(rows).toHaveLength(5);
       });
       it('should show total', async () => {
         const renderResult = render();
         const total = await renderResult.findByTestId('hostListTableTotal');
-        expect(total.textContent).toEqual('3 Hosts');
+        expect(total.textContent).toEqual('4 Hosts');
       });
       it('should display correct status', async () => {
         const renderResult = render();
@@ -155,6 +158,11 @@ describe('when on the hosts page', () => {
         expect(hostStatuses[2].textContent).toEqual('Offline');
         expect(
           hostStatuses[2].querySelector('[data-euiicon-type][color="subdued"]')
+        ).not.toBeNull();
+
+        expect(hostStatuses[3].textContent).toEqual('Unenrolling');
+        expect(
+          hostStatuses[3].querySelector('[data-euiicon-type][color="warning"]')
         ).not.toBeNull();
       });
 
@@ -251,6 +259,16 @@ describe('when on the hosts page', () => {
       ) {
         malwareResponseConfigurations.concerned_actions.push(downloadModelAction.name);
       }
+
+      // Add an unknown Action Name - to ensure we handle the format of it on the UI
+      const unknownAction: HostPolicyResponseAppliedAction = {
+        status: HostPolicyResponseActionStatus.success,
+        message: 'test message',
+        name: 'a_new_unknown_action',
+      };
+      policyResponse.Endpoint.policy.applied.actions.push(unknownAction);
+      malwareResponseConfigurations.concerned_actions.push(unknownAction.name);
+
       reactTestingLibrary.act(() => {
         store.dispatch({
           type: 'serverReturnedHostPolicyResponse',
@@ -335,7 +353,7 @@ describe('when on the hosts page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '/hosts?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
 
@@ -549,7 +567,7 @@ describe('when on the hosts page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '/endpoints?page_index=0&page_size=10&selected_host=1'
+          '/hosts?page_index=0&page_size=10&selected_host=1'
         );
       });
 
@@ -563,6 +581,10 @@ describe('when on the hosts page', () => {
         expect(changedUrlAction.payload.search).toEqual(
           '?page_index=0&page_size=10&selected_host=1'
         );
+      });
+
+      it('should format unknown policy action names', async () => {
+        expect(renderResult.getByText('A New Unknown Action')).not.toBeNull();
       });
     });
   });

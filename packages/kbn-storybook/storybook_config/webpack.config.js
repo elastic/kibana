@@ -122,7 +122,7 @@ module.exports = async ({ config }) => {
           prependData(loaderContext) {
             return `@import ${stringifyRequest(
               loaderContext,
-              resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+              resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_globals_v7light.scss')
             )};\n`;
           },
           sassOptions: {

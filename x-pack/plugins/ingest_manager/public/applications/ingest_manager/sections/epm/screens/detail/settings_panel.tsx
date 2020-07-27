@@ -33,7 +33,7 @@ const NoteLabel = () => (
 );
 const UpdatesAvailableMsg = () => (
   <UpdatesAvailableMsgContainer>
-    <UpdateIcon />
+    <UpdateIcon size="l" />
     <FormattedMessage
       id="xpack.ingestManager.integrations.settings.versionInfo.updatesAvailable"
       defaultMessage="Updates are available"

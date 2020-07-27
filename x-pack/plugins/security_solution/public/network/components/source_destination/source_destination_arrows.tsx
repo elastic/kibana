@@ -35,6 +35,10 @@ Percent.displayName = 'Percent';
 
 const SourceDestinationArrowsContainer = styled(EuiFlexGroup)`
   margin: 0 2px;
+
+  .euiToolTipAnchor {
+    white-space: nowrap;
+  }
 `;
 
 SourceDestinationArrowsContainer.displayName = 'SourceDestinationArrowsContainer';

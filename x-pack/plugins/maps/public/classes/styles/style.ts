@@ -13,7 +13,8 @@ import { DataRequest } from '../util/data_request';
 export interface IStyle {
   getDescriptor(): StyleDescriptor | null;
   getDescriptorWithMissingStylePropsRemoved(
-    nextFields: IField[]
+    nextFields: IField[],
+    mapColors: string[]
   ): { hasChanges: boolean; nextStyleDescriptor?: StyleDescriptor };
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): StyleMetaDescriptor;
   renderEditor({
@@ -34,7 +35,8 @@ export class AbstractStyle implements IStyle {
   }
 
   getDescriptorWithMissingStylePropsRemoved(
-    nextFields: IField[]
+    nextFields: IField[],
+    mapColors: string[]
   ): { hasChanges: boolean; nextStyleDescriptor?: StyleDescriptor } {
     return {
       hasChanges: false,

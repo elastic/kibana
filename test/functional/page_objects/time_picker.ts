@@ -98,13 +98,6 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
         const input = await testSubjects.find(dataTestSubj);
         await input.clearValue();
         await input.type(value);
-      } else if (browser.isInternetExplorer) {
-        const input = await testSubjects.find(dataTestSubj);
-        const currentValue = await input.getAttribute('value');
-        await input.type(browser.keys.ARROW_RIGHT.repeat(currentValue.length));
-        await input.type(browser.keys.BACK_SPACE.repeat(currentValue.length));
-        await input.type(value);
-        await input.click();
       } else {
         await testSubjects.setValue(dataTestSubj, value);
       }

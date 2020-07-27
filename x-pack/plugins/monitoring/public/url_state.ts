@@ -6,7 +6,7 @@
 
 import { Subscription } from 'rxjs';
 import { History, createHashHistory } from 'history';
-import { MonitoringPluginDependencies } from './types';
+import { MonitoringStartPluginDependencies } from './types';
 import { Legacy } from './legacy_shims';
 
 import {
@@ -64,13 +64,13 @@ export class GlobalState {
   private readonly stateStorage: IKbnUrlStateStorage;
   private readonly stateContainerChangeSub: Subscription;
   private readonly syncQueryStateWithUrlManager: { stop: () => void };
-  private readonly timefilterRef: MonitoringPluginDependencies['data']['query']['timefilter']['timefilter'];
+  private readonly timefilterRef: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
 
   private lastAssignedState: MonitoringAppState = {};
   private lastKnownGlobalState?: string;
 
   constructor(
-    queryService: MonitoringPluginDependencies['data']['query'],
+    queryService: MonitoringStartPluginDependencies['data']['query'],
     rootScope: ng.IRootScopeService,
     ngLocation: ng.ILocationService,
     externalState: RawObject

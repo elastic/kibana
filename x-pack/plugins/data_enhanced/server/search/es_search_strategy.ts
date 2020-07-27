@@ -8,12 +8,13 @@ import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { LegacyAPICaller, SharedGlobalConfig } from '../../../../../src/core/server';
-import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import {
-  ISearch,
+  LegacyAPICaller,
+  SharedGlobalConfig,
+  RequestHandlerContext,
+} from '../../../../../src/core/server';
+import {
   ISearchOptions,
-  ISearchCancel,
   getDefaultSearchParams,
   getTotalLoaded,
   ISearchStrategy,
@@ -31,11 +32,11 @@ export interface AsyncSearchResponse<T> {
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>
-): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
-  const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (
-    context,
+): ISearchStrategy => {
+  const search = async (
+    context: RequestHandlerContext,
     request: IEnhancedEsSearchRequest,
-    options
+    options?: ISearchOptions
   ) => {
     const config = await config$.pipe(first()).toPromise();
     const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
@@ -47,7 +48,7 @@ export const enhancedEsSearchStrategyProvider = (
       : asyncSearch(caller, { ...request, params }, options, context);
   };
 
-  const cancel: ISearchCancel<typeof ES_SEARCH_STRATEGY> = async (context, id) => {
+  const cancel = async (context: RequestHandlerContext, id: string) => {
     const method = 'DELETE';
     const path = encodeURI(`/_async_search/${id}`);
     await context.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
@@ -126,7 +127,6 @@ async function asyncSearch(
   context?: IEnhancedSearchContext
 ) {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
-    trackTotalHits: true, // Get the exact count of hits
     ...request.params,
   };
 
@@ -149,6 +149,7 @@ async function asyncSearch(
         }),
     ...queryParams,
   });
+  params.trackTotalHits = true; // Get the exact count of hits
 
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
@@ -176,7 +177,7 @@ async function rollupSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
-  const { body, index, ...params } = request.params;
+  const { body, index, ...params } = request.params!;
   const method = 'POST';
   const path = encodeURI(`/${index}/_rollup_search`);
   const query = toSnakeCase(params);

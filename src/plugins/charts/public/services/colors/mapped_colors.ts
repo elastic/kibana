@@ -54,7 +54,7 @@ export class MappedColors {
   }
 
   get(key: string | number) {
-    return this.getConfigColorMapping()[key] || this._mapping[key];
+    return this.getConfigColorMapping()[key as any] || this._mapping[key];
   }
 
   flush() {
@@ -75,10 +75,10 @@ export class MappedColors {
     const keysToMap: Array<string | number> = [];
     _.each(keys, (key) => {
       // If this key is mapped in the config, it's unnecessary to have it mapped here
-      if (configMapping[key]) delete this._mapping[key];
+      if (configMapping[key as any]) delete this._mapping[key];
 
       // If this key is mapped to a color used by the config color mapping, we need to remap it
-      if (_.contains(configColors, this._mapping[key])) keysToMap.push(key);
+      if (_.includes(configColors, this._mapping[key])) keysToMap.push(key);
 
       // if key exist in oldMap, move it to mapping
       if (this._oldMap[key]) this._mapping[key] = this._oldMap[key];
@@ -93,7 +93,7 @@ export class MappedColors {
     let newColors = _.difference(colorPalette, allColors);
 
     while (keysToMap.length > newColors.length) {
-      newColors = newColors.concat(_.sample(allColors, keysToMap.length - newColors.length));
+      newColors = newColors.concat(_.sampleSize(allColors, keysToMap.length - newColors.length));
     }
 
     _.merge(this._mapping, _.zipObject(keysToMap, newColors));

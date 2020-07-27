@@ -35,7 +35,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     };
 
     const response = await this.database.search(user, params);
-    const configs = get<any>(response, 'hits.hits', []);
+    const configs = get(response, 'hits.hits', []);
 
     return configs.map((tag: any) => ({ ...tag._source.tag, config: JSON.parse(tag._source.tag) }));
   }
@@ -71,7 +71,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     } else {
       response = await this.database.search(user, params);
     }
-    const configs = get<any>(response, 'hits.hits', []);
+    const configs = get(response, 'hits.hits', []);
 
     return {
       blocks: configs.map((block: any) => ({

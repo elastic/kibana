@@ -23,13 +23,13 @@ import { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 
 interface Props {
-  defaultValue: { [key: string]: any };
+  defaultValue?: { [key: string]: any };
   onChange: (content: Forms.Content) => void;
   esDocsBase: string;
 }
 
 export const StepAliases: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue, onChange, esDocsBase }) => {
+  ({ defaultValue = {}, onChange, esDocsBase }) => {
     const { jsonContent, setJsonContent, error } = useJsonStep({
       defaultValue,
       onChange,

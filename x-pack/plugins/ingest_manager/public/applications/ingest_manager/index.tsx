@@ -22,7 +22,7 @@ import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
 import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp, DataStreamApp } from './sections';
-import { DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
+import { DepsContext, ConfigContext, useConfig } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { useCore, sendSetup, sendGetPermissionsCheck } from './hooks';
 import { FleetStatusProvider } from './hooks/use_fleet_status';
@@ -59,7 +59,7 @@ const ErrorLayout = ({ children }: { children: JSX.Element }) => (
 
 const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basepath: string }>(
   ({ history, ...rest }) => {
-    const { epm, fleet } = useConfig();
+    const { fleet } = useConfig();
     const { notifications } = useCore();
 
     const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
@@ -186,11 +186,11 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
             <Router {...rest}>
               <PackageInstallProvider notifications={notifications}>
                 <Switch>
-                  <ProtectedRoute path={PAGE_ROUTING_PATHS.integrations} isAllowed={epm.enabled}>
+                  <Route path={PAGE_ROUTING_PATHS.integrations}>
                     <DefaultLayout section="epm">
                       <EPMApp />
                     </DefaultLayout>
-                  </ProtectedRoute>
+                  </Route>
                   <Route path={PAGE_ROUTING_PATHS.configurations}>
                     <DefaultLayout section="agent_config">
                       <AgentConfigApp />
@@ -260,7 +260,6 @@ export function renderApp(
   startDeps: IngestManagerStartDeps,
   config: IngestManagerConfigType
 ) {
-  setHttpClient(coreStart.http);
   ReactDOM.render(
     <IngestManagerApp
       basepath={appBasePath}

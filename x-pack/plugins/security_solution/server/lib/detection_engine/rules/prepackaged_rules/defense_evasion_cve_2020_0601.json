@@ -1,0 +1,39 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A spoofing vulnerability exists in the way Windows CryptoAPI (Crypt32.dll) validates Elliptic Curve Cryptography (ECC) certificates. An attacker could exploit the vulnerability by using a spoofed code-signing certificate to sign a malicious executable, making it appear the file was from a trusted, legitimate source.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Windows CryptoAPI Spoofing Vulnerability (CVE-2020-0601 - CurveBall)",
+  "query": "event.provider:\"Microsoft-Windows-Audit-CVE\" and message:\"[CVE-2020-0601]\"",
+  "risk_score": 21,
+  "rule_id": "56557cde-d923-4b88-adee-c61b3f3b5dc3",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1116",
+          "name": "Code Signing",
+          "reference": "https://attack.mitre.org/techniques/T1116/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

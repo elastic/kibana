@@ -11,10 +11,12 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiFocusTrap,
-  keyCodes,
+  keys,
   EuiSelectable,
 } from '@elastic/eui';
 import { SymbolIcon } from '../legend/symbol_icon';
+import { SYMBOL_OPTIONS } from '../../symbol_utils';
+import { getIsDarkMode } from '../../../../../kibana_services';
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
@@ -41,10 +43,10 @@ export class IconSelect extends Component {
 
   _handleKeyboardActivity = (e) => {
     if (isKeyboardEvent(e)) {
-      if (e.keyCode === keyCodes.ENTER) {
+      if (e.key === keys.ENTER) {
         e.preventDefault();
         this._togglePopover();
-      } else if (e.keyCode === keyCodes.DOWN) {
+      } else if (e.key === keys.ARROW_DOWN) {
         this._openPopover();
       }
     }
@@ -62,7 +64,6 @@ export class IconSelect extends Component {
   };
 
   _renderPopoverButton() {
-    const { isDarkMode, value } = this.props;
     return (
       <EuiFormControlLayout
         icon={{ type: 'arrowDown', side: 'right' }}
@@ -75,16 +76,16 @@ export class IconSelect extends Component {
         <EuiFieldText
           onClick={this._togglePopover}
           onKeyDown={this._handleKeyboardActivity}
-          value={value}
+          value={this.props.value}
           compressed
           readOnly
           fullWidth
           prepend={
             <SymbolIcon
-              key={value}
+              key={this.props.value}
               className="mapIconSelectSymbol__inputButton"
-              symbolId={value}
-              fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+              symbolId={this.props.value}
+              fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
             />
           }
         />
@@ -93,8 +94,7 @@ export class IconSelect extends Component {
   }
 
   _renderIconSelectable() {
-    const { isDarkMode } = this.props;
-    const options = this.props.symbolOptions.map(({ value, label }) => {
+    const options = SYMBOL_OPTIONS.map(({ value, label }) => {
       return {
         value,
         label,
@@ -102,7 +102,7 @@ export class IconSelect extends Component {
           <SymbolIcon
             key={value}
             symbolId={value}
-            fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
           />
         ),
       };

@@ -8,10 +8,10 @@ import { EuiTitleSize } from '@elastic/eui';
 import { ScaleType, Position, TickFormatter } from '@elastic/charts';
 import { ActionCreator } from 'redux';
 import { ESQuery } from '../../../../common/typed_json';
-import { SetQuery } from '../../../hosts/pages/navigation/types';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HistogramType } from '../../../graphql/types';
 import { UpdateDateRange } from '../charts/common';
+import { GlobalTimeArgs } from '../../containers/use_global_time';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -44,18 +44,18 @@ interface MatrixHistogramBasicProps {
   defaultStackByOption: MatrixHistogramOption;
   dispatchSetAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>;
-  endDate: number;
+  endDate: GlobalTimeArgs['to'];
   headerChildren?: React.ReactNode;
   hideHistogramIfEmpty?: boolean;
   id: string;
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   panelHeight?: number;
-  setQuery: SetQuery;
-  startDate: number;
+  setQuery: GlobalTimeArgs['setQuery'];
+  startDate: GlobalTimeArgs['from'];
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
   title?: string | GetTitle;
@@ -63,28 +63,29 @@ interface MatrixHistogramBasicProps {
 }
 
 export interface MatrixHistogramQueryProps {
-  endDate: number;
+  endDate: string;
   errorMessage: string;
   filterQuery?: ESQuery | string | undefined;
   setAbsoluteRangeDatePicker?: ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   stackByField: string;
-  startDate: number;
+  startDate: string;
   indexToAdd?: string[] | null;
   isInspected: boolean;
   histogramType: HistogramType;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
+  legendPosition?: Position;
   scaleType?: ScaleType;
-  yTickFormatter?: (value: number) => string;
   showLegend?: boolean;
   showSpacer?: boolean;
-  legendPosition?: Position;
+  timelineId?: string;
+  yTickFormatter?: (value: number) => string;
 }
 
 export interface HistogramBucket {

@@ -5,4 +5,5 @@
  */
 
 export * from './filter_list_button';
-export * from './template_content_indicator';
+
+export * from './template_type_indicator';

@@ -48,7 +48,7 @@ export const initIpToHostName = ({ framework }: InfraBackendLibs) => {
             body: { message: 'Host with matching IP address not found.' },
           });
         }
-        const hostDoc = first(hits.hits);
+        const hostDoc = first(hits.hits) as any;
         return response.ok({ body: { host: hostDoc._source.host.name } });
       } catch ({ statusCode = 500, message = 'Unknown error occurred' }) {
         return response.customError({

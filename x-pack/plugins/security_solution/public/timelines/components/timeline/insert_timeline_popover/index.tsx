@@ -100,6 +100,7 @@ export const InsertTimelinePopoverComponent: React.FC<Props> = ({
       button={insertTimelineButton}
       isOpen={isPopoverOpen}
       closePopover={handleClosePopover}
+      repositionOnScroll
     >
       <SelectableTimeline
         hideUntitled={hideUntitled}

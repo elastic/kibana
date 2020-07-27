@@ -224,7 +224,7 @@ export class IndexPattern implements IIndexPattern {
     this.sourceFilters = spec.sourceFilters;
 
     // ignoring this because the same thing happens elsewhere but via _.assign
-    // @ts-ignore
+    // @ts-expect-error
     this.fields = spec.fields || [];
     this.typeMeta = spec.typeMeta;
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
@@ -353,9 +353,9 @@ export class IndexPattern implements IIndexPattern {
 
   async addScriptedField(name: string, script: string, fieldType: string = 'string', lang: string) {
     const scriptedFields = this.getScriptedFields();
-    const names = _.pluck(scriptedFields, 'name');
+    const names = _.map(scriptedFields, 'name');
 
-    if (_.contains(names, name)) {
+    if (_.includes(names, name)) {
       throw new DuplicateField(name);
     }
 
@@ -417,11 +417,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getNonScriptedFields() {
-    return _.where(this.fields, { scripted: false });
+    return _.filter(this.fields, { scripted: false });
   }
 
   getScriptedFields() {
-    return _.where(this.fields, { scripted: true });
+    return _.filter(this.fields, { scripted: true });
   }
 
   isTimeBased(): boolean {
@@ -473,21 +473,8 @@ export class IndexPattern implements IIndexPattern {
   async create(allowOverride: boolean = false) {
     const _create = async (duplicateId?: string) => {
       if (duplicateId) {
-        const duplicatePattern = new IndexPattern(duplicateId, {
-          getConfig: this.getConfig,
-          savedObjectsClient: this.savedObjectsClient,
-          apiClient: this.apiClient,
-          patternCache: this.patternCache,
-          fieldFormats: this.fieldFormats,
-          onNotification: this.onNotification,
-          onError: this.onError,
-          uiSettingsValues: {
-            shortDotsEnable: this.shortDotsEnable,
-            metaFields: this.metaFields,
-          },
-        });
-
-        await duplicatePattern.destroy();
+        this.patternCache.clear(duplicateId);
+        await this.savedObjectsClient.delete(savedObjectType, duplicateId);
       }
 
       const body = this.prepBody();
@@ -633,12 +620,5 @@ export class IndexPattern implements IIndexPattern {
 
   toString() {
     return '' + this.toJSON();
-  }
-
-  destroy() {
-    if (this.id) {
-      this.patternCache.clear(this.id);
-      return this.savedObjectsClient.delete(savedObjectType, this.id);
-    }
   }
 }

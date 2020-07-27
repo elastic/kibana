@@ -77,8 +77,8 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
 };
 
 export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
-  indexPatternTitle: string;
-  term: string; // term field name
+  indexPatternTitle?: string;
+  term?: string; // term field name
   whereQuery?: Query;
 };
 
@@ -138,7 +138,7 @@ export type GeojsonFileSourceDescriptor = {
 };
 
 export type JoinDescriptor = {
-  leftField: string;
+  leftField?: string;
   right: ESTermSourceDescriptor;
 };
 
@@ -168,7 +168,9 @@ export type LayerDescriptor = {
   __trackedLayerDescriptor?: LayerDescriptor;
   alpha?: number;
   id: string;
+  joins?: JoinDescriptor[];
   label?: string | null;
+  areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;
   sourceDescriptor: SourceDescriptor | null;
@@ -179,7 +181,6 @@ export type LayerDescriptor = {
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
-  joins?: JoinDescriptor[];
   style?: VectorStyleDescriptor;
 };
 

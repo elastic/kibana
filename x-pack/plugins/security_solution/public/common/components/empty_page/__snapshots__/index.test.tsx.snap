@@ -18,7 +18,7 @@ exports[`renders correctly 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
   }
-  iconType="securityAnalyticsApp"
+  iconType="logoSecurity"
   title={
     <h2>
       My Super Title

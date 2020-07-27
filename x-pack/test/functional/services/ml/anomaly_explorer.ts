@@ -76,7 +76,7 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
       await this.filterWithSearchString(dashboardTitle);
       await testSubjects.isDisplayed('mlDashboardSelectionTable > checkboxSelectAll');
-      await testSubjects.click('mlDashboardSelectionTable > checkboxSelectAll');
+      await testSubjects.clickWhenNotDisabled('mlDashboardSelectionTable > checkboxSelectAll');
       expect(await testSubjects.isChecked('mlDashboardSelectionTable > checkboxSelectAll')).to.be(
         true
       );

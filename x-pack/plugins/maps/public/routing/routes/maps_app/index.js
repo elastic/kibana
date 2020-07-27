@@ -11,6 +11,7 @@ import {
   getFilters,
   getQueryableUniqueIndexPatternIds,
   getRefreshConfig,
+  hasUnsavedChanges,
 } from '../../../selectors/map_selectors';
 import {
   replaceLayerList,
@@ -34,6 +35,9 @@ function mapStateToProps(state = {}) {
     flyoutDisplay: getFlyoutDisplay(state),
     refreshConfig: getRefreshConfig(state),
     filters: getFilters(state),
+    hasUnsavedChanges: (savedMap, initialLayerListConfig) => {
+      return hasUnsavedChanges(state, savedMap, initialLayerListConfig);
+    },
   };
 }
 
