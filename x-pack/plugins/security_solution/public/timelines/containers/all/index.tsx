@@ -55,7 +55,6 @@ export interface AllTimelinesVariables {
   sort: SortTimeline;
   status: TimelineStatusLiteralWithNull;
   timelineType: TimelineTypeLiteralWithNull;
-  templateTimelineType: TemplateTimelineTypeLiteralWithNull;
 }
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
@@ -121,7 +120,6 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
       sort,
       status,
       timelineType,
-      templateTimelineType,
     }: AllTimelinesVariables) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
@@ -138,7 +136,6 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
               sort,
               status,
               timelineType,
-              templateTimelineType,
             };
             const response = await apolloClient.query<
               GetAllTimeline.Query,
