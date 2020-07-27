@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { history } from '../utils/history';
 import { useUrlParams } from '../hooks/useUrlParams';
@@ -17,7 +17,7 @@ const ChartsSyncContext = React.createContext<{
   onSelectionEnd: (range: { start: number; end: number }) => void;
 } | null>(null);
 
-const ChartsSyncContextProvider: React.FC = ({ children }) => {
+function ChartsSyncContextProvider({ children }: { children: ReactNode }) {
   const [time, setTime] = useState<number | null>(null);
   const { urlParams, uiFilters } = useUrlParams();
 
@@ -78,6 +78,6 @@ const ChartsSyncContextProvider: React.FC = ({ children }) => {
   }, [time, data.annotations]);
 
   return <ChartsSyncContext.Provider value={value} children={children} />;
-};
+}
 
 export { ChartsSyncContext, ChartsSyncContextProvider };

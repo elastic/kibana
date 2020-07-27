@@ -34,26 +34,28 @@ interface Props {
   percentageLoaded: number;
 }
 
-export const LoadingOverlay = ({ isLoading, percentageLoaded }: Props) => (
-  <Container>
-    {isLoading && (
-      <Overlay>
-        <ProgressBarContainer>
-          <EuiProgress
-            value={percentageLoaded}
-            max={100}
-            color="primary"
-            size="m"
-          />
-        </ProgressBarContainer>
-        <EuiSpacer size="s" />
-        <EuiText size="s" textAlign="center">
-          {i18n.translate('xpack.apm.loadingServiceMap', {
-            defaultMessage:
-              'Loading service map... This might take a short while.',
-          })}
-        </EuiText>
-      </Overlay>
-    )}
-  </Container>
-);
+export function LoadingOverlay({ isLoading, percentageLoaded }: Props) {
+  return (
+    <Container>
+      {isLoading && (
+        <Overlay>
+          <ProgressBarContainer>
+            <EuiProgress
+              value={percentageLoaded}
+              max={100}
+              color="primary"
+              size="m"
+            />
+          </ProgressBarContainer>
+          <EuiSpacer size="s" />
+          <EuiText size="s" textAlign="center">
+            {i18n.translate('xpack.apm.loadingServiceMap', {
+              defaultMessage:
+                'Loading service map... This might take a short while.',
+            })}
+          </EuiText>
+        </Overlay>
+      )}
+    </Container>
+  );
+}
