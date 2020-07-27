@@ -61,30 +61,35 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen(false);
   }, []);
 
-  const handleOpenPopover = useCallback(() => {
+  const handleOpenPopover = useCallback((e) => {
+    e.preventDefault();
     setIsPopoverOpen(true);
   }, []);
 
   const superSelect = useMemo(
     () => (
-      <EuiSuperSelect
-        disabled={isDisabled}
-        onFocus={handleOpenPopover}
-        options={
-          timelineId == null
-            ? basicSuperSelectOptions
-            : [
-                {
-                  value: timelineId,
-                  inputDisplay: timelineTitle,
-                },
-              ]
-        }
-        valueOfSelected={timelineId == null ? '-1' : timelineId}
-        itemLayoutAlign="top"
-        hasDividers={false}
-        popoverClassName="timeline-search-super-select-popover"
-      />
+      // https://github.com/elastic/siem-team/issues/789
+      // EuiSuperSelect.onFocus cannot be triggered properly in Safari and Firefox
+      <a href="#" onClick={handleOpenPopover}>
+        <EuiSuperSelect
+          disabled={isDisabled}
+          options={
+            timelineId == null
+              ? basicSuperSelectOptions
+              : [
+                  {
+                    value: timelineId,
+                    inputDisplay: timelineTitle,
+                  },
+                ]
+          }
+          valueOfSelected={timelineId == null ? '-1' : timelineId}
+          itemLayoutAlign="top"
+          hasDividers={false}
+          popoverClassName="timeline-search-super-select-popover"
+          style={{ width: 398 }}
+        />
+      </a>
     ),
     [handleOpenPopover, isDisabled, timelineId, timelineTitle]
   );
