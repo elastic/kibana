@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton } from '../react_router_helpers';
 import { KibanaContext, IKibanaContext } from '../../index';
 
+import './error_state_prompt.scss';
+
 export const ErrorStatePrompt: React.FC = () => {
   const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
 
