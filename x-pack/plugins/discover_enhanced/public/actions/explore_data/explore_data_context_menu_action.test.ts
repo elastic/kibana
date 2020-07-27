@@ -28,7 +28,7 @@ afterEach(() => {
   i18nTranslateSpy.mockClear();
 });
 
-const setup = () => {
+const setup = ({ dashboardOnlyMode = false }: { dashboardOnlyMode?: boolean } = {}) => {
   type UrlGenerator = UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
 
   const core = coreMock.createStart();
@@ -47,6 +47,11 @@ const setup = () => {
     },
     embeddable: {
       filtersAndTimeRangeFromContext,
+    },
+    kibanaLegacy: {
+      dashboardConfig: {
+        getHideWriteControls: () => dashboardOnlyMode,
+      },
     },
   };
 
@@ -162,6 +167,26 @@ describe('"Explore underlying data" panel action', () => {
     test('returns false if dashboard is in edit mode', async () => {
       const { action, input, context } = setup();
       input.viewMode = ViewMode.EDIT;
+
+      const isCompatible = await action.isCompatible(context);
+
+      expect(isCompatible).toBe(false);
+    });
+
+    test('return false for dashboard_only mode', async () => {
+      const { action, context } = setup({ dashboardOnlyMode: true });
+      const isCompatible = await action.isCompatible(context);
+
+      expect(isCompatible).toBe(false);
+    });
+
+    test('returns false if Discover app is disabled', async () => {
+      const { action, context, core } = setup();
+
+      core.application.capabilities = { ...core.application.capabilities };
+      (core.application.capabilities as any).discover = {
+        show: false,
+      };
 
       const isCompatible = await action.isCompatible(context);
 

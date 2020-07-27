@@ -31,13 +31,6 @@ describe('unmuteAlertInstanceRoute', () => {
     expect(config.path).toMatchInlineSnapshot(
       `"/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute"`
     );
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-all",
-        ],
-      }
-    `);
 
     alertsClient.unmuteInstance.mockResolvedValueOnce();
 

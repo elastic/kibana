@@ -40,7 +40,14 @@ import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_ICON, SERVER_APP_ID, SecurityPageName } from '../common/constants';
+import {
+  APP_ID,
+  APP_ICON,
+  SERVER_APP_ID,
+  SecurityPageName,
+  SIGNALS_ID,
+  NOTIFICATIONS_ID,
+} from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
@@ -167,23 +174,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
+      alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
       privileges: {
         all: {
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: [
-            'securitySolution',
-            'actions-read',
-            'actions-all',
-            'alerting-read',
-            'alerting-all',
-            'lists-all',
-          ],
+          api: ['securitySolution', 'lists-all'],
           savedObject: {
             all: [
               'alert',
-              'action',
-              'action_task_params',
               'cases',
               'cases-comments',
               'cases-configure',
@@ -192,30 +191,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
             read: ['config'],
           },
-          ui: [
-            'show',
-            'crud',
-            'alerting:show',
-            'actions:show',
-            'alerting:save',
-            'actions:save',
-            'alerting:delete',
-            'actions:delete',
-          ],
+          alerting: {
+            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+          },
+          ui: ['show', 'crud', 'alerting:show'],
         },
         read: {
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
-          api: [
-            'securitySolution',
-            'actions-read',
-            'actions-all',
-            'alerting-read',
-            'alerting-all',
-            'lists-read',
-          ],
+          api: ['securitySolution', 'lists-read'],
           savedObject: {
-            all: ['alert', 'action', 'action_task_params'],
+            all: ['alert'],
             read: [
               'config',
               'cases',
@@ -225,15 +211,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               ...savedObjectTypes,
             ],
           },
-          ui: [
-            'show',
-            'alerting:show',
-            'actions:show',
-            'alerting:save',
-            'actions:save',
-            'alerting:delete',
-            'actions:delete',
-          ],
+          alerting: {
+            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+          },
+          ui: ['show', 'alerting:show'],
         },
       },
     });
