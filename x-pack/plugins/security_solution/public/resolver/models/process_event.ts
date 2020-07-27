@@ -144,7 +144,8 @@ export function processPath(passedEvent: ResolverEvent): string | undefined {
  */
 export function userInfoForProcess(
   passedEvent: ResolverEvent
-): { user?: string; domain?: string } | undefined {
+  // TODO, fix in 7.9
+): { name?: string; domain?: string } | undefined {
   return passedEvent.user;
 }
 

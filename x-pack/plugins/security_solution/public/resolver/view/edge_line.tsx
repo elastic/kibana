@@ -45,7 +45,7 @@ const StyledElapsedTime = styled.div<StyledElapsedTime>`
   left: ${(props) => `${props.leftPct}%`};
   padding: 6px 8px;
   border-radius: 999px; // generate pill shape
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) rotateX(35deg);
   user-select: none;
 `;
 

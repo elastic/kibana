@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-duplicate-imports */
+
 import { Store } from 'redux';
+import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
-import { ResolverEvent, ResolverRelatedEvents, ResolverTree } from '../../common/endpoint/types';
+import {
+  ResolverEvent,
+  ResolverRelatedEvents,
+  ResolverTree,
+  ResolverEntityIndex,
+} from '../../common/endpoint/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -435,4 +443,81 @@ export interface IsometricTaxiLayout {
    * defines the aria levels for nodes.
    */
   ariaLevels: Map<ResolverEvent, number>;
+}
+
+/**
+ * An object with methods that can be used to access data from the Kibana server.
+ * This is injected into Resolver.
+ * This allows tests to provide a mock data access layer.
+ * In the future, other implementations of Resolver could provide different data access layers.
+ */
+export interface DataAccessLayer {
+  /**
+   * Fetch related events for an entity ID
+   */
+  relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
+
+  /**
+   * Fetch a ResolverTree for a entityID
+   */
+  resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
+
+  /**
+   * Get an array of index patterns that contain events.
+   */
+  indexPatterns: () => string[];
+
+  /**
+   * Get entities matching a document.
+   */
+  entities: (parameters: {
+    /** _id of the document to find an entity in. */
+    _id: string;
+    /** indices to search in */
+    indices: string[];
+    /** signal to abort the request */
+    signal: AbortSignal;
+  }) => Promise<ResolverEntityIndex>;
+}
+
+/**
+ * The externally provided React props.
+ */
+export interface ResolverProps {
+  /**
+   * Used by `styled-components`.
+   */
+  className?: string;
+  /**
+   * The `_id` value of an event in ES.
+   * Used as the origin of the Resolver graph.
+   */
+  databaseDocumentID?: string;
+  /**
+   * A string literal describing where in the app resolver is located,
+   * used to prevent collisions in things like query params
+   */
+  resolverComponentInstanceID: string;
+}
+
+export interface SpyMiddlewareStateActionPair {
+  action: ResolverAction;
+  state: ResolverState;
+}
+
+export interface SpyMiddleware {
+  /**
+   * A middleware to use with `applyMiddleware`.
+   */
+  middleware: Middleware<{}, ResolverState, Dispatch<ResolverAction>>;
+  /**
+   * A generator that returns all state and action pairs that pass through the middleware.
+   */
+  actions: () => AsyncGenerator<SpyMiddlewareStateActionPair, never, unknown>;
+
+  /**
+   * Prints actions to the console.
+   * Call the returned function to stop debugging.
+   */
+  debugActions: () => () => void;
 }

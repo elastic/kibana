@@ -27,7 +27,13 @@ const BetaHeader = styled(`header`)`
  * The two query parameters we read/write on to control which view the table presents:
  */
 export interface CrumbInfo {
+  /**
+   * @deprecated
+   */
   crumbId: string;
+  /**
+   * @deprecated
+   */
   crumbEvent: string;
 }
 

@@ -190,7 +190,7 @@ const NodeSubMenuComponents = React.memo(
          * then force the popover to reposition itself.
          */
         popoverRef.current &&
-        projectionMatrixAtLastRender.current &&
+        !projectionMatrixAtLastRender.current &&
         projectionMatrixAtLastRender.current !== projectionMatrix
       ) {
         popoverRef.current.positionPopoverFixed();
