@@ -30,18 +30,16 @@ export function MapsTopNavMenu({
   onQuerySaved,
   onSavedQueryUpdated,
   savedQuery,
-  time,
+  timeFilters,
   refreshConfig,
-  setRefreshConfig,
-  setRefreshStoreConfig,
+  onRefreshConfigChange,
   indexPatterns,
-  updateFiltersAndDispatch,
+  onFiltersChange,
   isSaveDisabled,
   closeFlyout,
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
-  syncAppAndGlobalState,
   setBreadcrumbs,
   isOpenSettingsDisabled,
 }) {
@@ -79,31 +77,20 @@ export function MapsTopNavMenu({
     });
   };
 
-  const onRefreshChange = function ({ isPaused, refreshInterval }) {
-    const newRefreshConfig = {
-      isPaused,
-      interval: isNaN(refreshInterval) ? refreshConfig.interval : refreshInterval,
-    };
-    setRefreshConfig(newRefreshConfig, () => {
-      setRefreshStoreConfig(newRefreshConfig);
-      syncAppAndGlobalState();
-    });
-  };
-
   return (
     <TopNavMenu
       appName="maps"
       config={config}
-      indexPatterns={indexPatterns || []}
+      indexPatterns={indexPatterns}
       filters={filterManager.getFilters()}
       query={query}
       onQuerySubmit={submitQuery}
-      onFiltersUpdated={updateFiltersAndDispatch}
-      dateRangeFrom={time.from}
-      dateRangeTo={time.to}
+      onFiltersUpdated={onFiltersChange}
+      dateRangeFrom={timeFilters.from}
+      dateRangeTo={timeFilters.to}
       isRefreshPaused={refreshConfig.isPaused}
       refreshInterval={refreshConfig.interval}
-      onRefreshChange={onRefreshChange}
+      onRefreshChange={onRefreshConfigChange}
       showSearchBar={true}
       showFilterBar={true}
       showDatePicker={true}
