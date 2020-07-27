@@ -8,32 +8,60 @@ import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
-import { connectEnzymeWrapperAndStore } from '../../test_utilities/connect_enzyme_wrapper_and_store';
-import { spyMiddlewareFactory } from '../../test_utilities/spy_middleware';
-import { resolverMiddlewareFactory } from '../../store/middleware';
-import { resolverReducer } from '../../store/reducer';
-import { MockResolver } from '../../view/mock';
-import { ResolverState, DataAccessLayer, SpyMiddleware } from '../../types';
-import { ResolverAction } from '../../store/actions';
+import { connectEnzymeWrapperAndStore } from './connect_enzyme_wrapper_and_store';
+import { spyMiddlewareFactory } from './spy_middleware';
+import { resolverMiddlewareFactory } from '../store/middleware';
+import { resolverReducer } from '../store/reducer';
+import { MockResolver } from '../view/mock';
+import { ResolverState, DataAccessLayer, SpyMiddleware } from '../types';
+import { ResolverAction } from '../store/actions';
 
+/**
+ * Test a Resolver instance using jest, enzyme, and a mock data layer.
+ */
 export class Simulator {
+  /**
+   * The redux store, creating in the constructor using the `dataAccessLayer`.
+   * This code subscribes to state transitions.
+   */
   private readonly store: Store<ResolverState, ResolverAction>;
+  /**
+   * A fake 'History' API used with `react-router` to simulate a browser history.
+   */
   private readonly history: HistoryPackageHistoryInterface;
+  /**
+   * The 'wrapper' returned by `enzyme` that contains the rendered Resolver react code.
+   */
   private readonly wrapper: ReactWrapper;
+  /**
+   * A `redux` middleware that exposes all actions dispatched (along with the state at that point.)
+   * This is used by `debugActions`.
+   */
   private readonly spyMiddleware: SpyMiddleware;
   constructor(
     dataAccessLayer: DataAccessLayer,
+    /**
+     * A string that uniquely identifies this Resolver instance amoung others mounted in the DOM.
+     */
     private readonly resolverComponentInstanceID: string
   ) {
+    // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
 
+    /**
+     * Create the real resolver middleware with a fake data access layer.
+     * By providing different data access layers, you can simulate different data and server environments.
+     */
     const middlewareEnhancer = applyMiddleware(
       resolverMiddlewareFactory(dataAccessLayer),
+      // install the spyMiddleware
       this.spyMiddleware.middleware
     );
 
+    // Create a redux store w/ the top level Resolver reducer and the enhancer that includes the Resolver middleware and the spyMiddleware
     this.store = createStore(resolverReducer, middlewareEnhancer);
 
+    // Create a fake 'history' instance that Resolver will use to read and write query string values
     this.history = createMemoryHistory();
 
     // Render Resolver via the `MockResolver` component, using `enzyme`.
@@ -49,22 +77,41 @@ export class Simulator {
     connectEnzymeWrapperAndStore(this.store, this.wrapper);
   }
 
-  public debugActions(): () => void {
+  /**
+   * Call this to console.log actions (and state). Use this to debug your tests.
+   * State and actions aren't exposed otherwise because the tests using this simulator should
+   * assert stuff about the DOM instead of internal state. Use selector/middleware/reducer
+   * unit tests to test that stuff.
+   */
+  public debugActions(): /**
+   * Optionally call this to stop debugging actions.
+   */ () => void {
     return this.spyMiddleware.debugActions();
   }
 
   /**
    * Return a promise that resolves after the `store`'s next state transition.
+   * Used by `mapStateTransisions`
    */
-  public stateTransitioned(): Promise<void> {
+  private stateTransitioned(): Promise<void> {
+    // keep track of the resolve function of the promise that has been returned.
     let resolveState: (() => void) | null = null;
+
     const promise: Promise<undefined> = new Promise((resolve) => {
+      // immedatiely expose the resolve function in the outer scope. it will be resolved when the next state transition occurs.
       resolveState = resolve;
     });
+
+    // Subscribe to the store
     const unsubscribe = this.store.subscribe(() => {
+      // Once a state transition occurs, unsubscribe.
       unsubscribe();
+      // Resolve the promise. The null assertion is safe here as Promise initializers run immediately (according to spec and node/browser implementations.)
+      // NB: the state is not resolved here. Code using the simulator should not rely on state or selectors of state.
       resolveState!();
     });
+
+    // Return the promise that will be resolved on the next state transition, allowing code to `await` for the next state transition.
     return promise;
   }
 
@@ -72,29 +119,51 @@ export class Simulator {
    * This will yield the return value of `mapper` after each state transition. If no state transition occurs for 10 event loops in a row, this will give up.
    */
   public async *mapStateTransisions<R>(mapper: () => R): AsyncIterable<R> {
+    // Yield the value before any state transitions have occurred.
     yield mapper();
+
+    /** Increment this each time an event loop completes without a state transition.
+     * If this value hits `10`, end the loop.
+     *
+     * Code will test assertions after each state transition. If the assertion hasn't passed and no further state transitions occur,
+     * then the jest timeout will happen. The timeout doesn't give a useful message about the assertion.
+     * By shortcircuiting this function, code that uses it can short circuit the test timeout and print a useful error message.
+     *
+     * NB: the logic to shortcircuit the loop is here because knowledge of state is a concern of the simulator, not tests.
+     */
     let timeoutCount = 0;
     while (true) {
-      const maybeValue: { value: R; timedOut: false } | { timedOut: true } = await Promise.race([
+      /**
+       * `await` a race between the next state transition and a timeout that happens after `0`ms.
+       * If the timeout wins, no `dispatch` call caused a state transition in the last loop.
+       * If this keeps happening, assume that Resolver isn't going to do anythig else.
+       *
+       * If Resolver adds intentional delay logic (e.g. waiting before making a request), this code might have to change.
+       * In that case, Resolver should use the side effect context to schedule future work. This code could then subscribe to some event published by the side effect context. That way, this code will be aware of Resolver's intention to do work.
+       */
+      const timedOut: boolean = await Promise.race([
         (async (): Promise<{ value: R; timedOut: false }> => {
           await this.stateTransitioned();
-          return {
-            value: mapper(),
-            timedOut: false,
-          };
+          // If a state transition occurs, return false for `timedOut`
+          return false;
         })(),
         new Promise<{ timedOut: true }>((resolve) => {
           setTimeout(() => {
-            return resolve({ timedOut: true });
+            // If a timeout occurs, resolve `timedOut` as true
+            return resolve(true);
           }, 0);
         }),
       ]);
-      if (maybeValue.timedOut) {
+
+      if (timedOut) {
+        // If a timout occurred, note it.
         timeoutCount++;
         if (timeoutCount === 10) {
+          // if 10 timeouts happen in a row, end the loop early
           return;
         }
       } else {
+        // If a state transition occurs, reset the timout count and yield the value
         timeoutCount = 0;
         yield mapper();
       }

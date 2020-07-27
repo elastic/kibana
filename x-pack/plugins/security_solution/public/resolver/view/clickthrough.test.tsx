@@ -5,7 +5,7 @@
  */
 
 import { oneAncestorTwoChildren } from '../data_access_layer/mocks/one_ancestor_two_children';
-import { Simulator } from '../models/simulator';
+import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
 
