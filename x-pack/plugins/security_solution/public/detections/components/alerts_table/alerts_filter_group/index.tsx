@@ -36,7 +36,7 @@ const AlertsTableFilterGroupComponent: React.FC<Props> = ({ onFilterGroupChanged
   }, [setFilterGroup, onFilterGroupChanged]);
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj="alerts-table-filter-group">
       <EuiFilterButton
         data-test-subj="openAlerts"
         hasActiveFilters={filterGroup === FILTER_OPEN}

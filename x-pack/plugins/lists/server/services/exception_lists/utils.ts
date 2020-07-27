@@ -78,6 +78,7 @@ export const transformSavedObjectToExceptionList = ({
       created_at,
       created_by,
       description,
+      immutable,
       list_id,
       meta,
       name,
@@ -85,6 +86,7 @@ export const transformSavedObjectToExceptionList = ({
       tie_breaker_id,
       type,
       updated_by,
+      version,
     },
     id,
     updated_at: updatedAt,
@@ -99,6 +101,7 @@ export const transformSavedObjectToExceptionList = ({
     created_by,
     description,
     id,
+    immutable: immutable ?? false, // This should never be undefined for a list (only a list item)
     list_id,
     meta,
     name,
@@ -108,6 +111,7 @@ export const transformSavedObjectToExceptionList = ({
     type: exceptionListType.is(type) ? type : 'detection',
     updated_at: updatedAt ?? dateNow,
     updated_by,
+    version: version ?? 1, // This should never be undefined for a list (only a list item)
   };
 };
 
@@ -121,7 +125,17 @@ export const transformSavedObjectUpdateToExceptionList = ({
   const dateNow = new Date().toISOString();
   const {
     version: _version,
-    attributes: { _tags, description, meta, name, tags, type, updated_by: updatedBy },
+    attributes: {
+      _tags,
+      description,
+      immutable,
+      meta,
+      name,
+      tags,
+      type,
+      updated_by: updatedBy,
+      version,
+    },
     id,
     updated_at: updatedAt,
   } = savedObject;
@@ -135,6 +149,7 @@ export const transformSavedObjectUpdateToExceptionList = ({
     created_by: exceptionList.created_by,
     description: description ?? exceptionList.description,
     id,
+    immutable: immutable ?? exceptionList.immutable,
     list_id: exceptionList.list_id,
     meta: meta ?? exceptionList.meta,
     name: name ?? exceptionList.name,
@@ -144,6 +159,7 @@ export const transformSavedObjectUpdateToExceptionList = ({
     type: exceptionListType.is(type) ? type : exceptionList.type,
     updated_at: updatedAt ?? dateNow,
     updated_by: updatedBy ?? exceptionList.updated_by,
+    version: version ?? exceptionList.version,
   };
 };
 

@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const { createPipeline, deletePipeline } = registerEsHelpers(getService);
 
-  describe('Pipelines', function () {
+  describe.skip('Pipelines', function () {
     describe('Create', () => {
       const PIPELINE_ID = 'test_create_pipeline';
       const REQUIRED_FIELDS_PIPELINE_ID = 'test_create_required_fields_pipeline';

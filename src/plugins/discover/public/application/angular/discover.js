@@ -874,7 +874,7 @@ function discoverController(
   }
 
   function onResults(resp) {
-    inspectorRequest.stats(getResponseInspectorStats($scope.searchSource, resp)).ok({ json: resp });
+    inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
     if (getTimeField()) {
       const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);

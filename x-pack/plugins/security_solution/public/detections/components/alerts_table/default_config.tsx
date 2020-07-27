@@ -204,6 +204,7 @@ export const requiredFieldsForActions = [
   'file.Ext.code_signature.trusted',
   'file.hash.sha1',
   'host.os.family',
+  'event.code',
 ];
 
 interface AlertActionArgs {

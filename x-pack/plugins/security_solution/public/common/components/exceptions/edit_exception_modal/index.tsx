@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiModal,
@@ -97,9 +97,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const [
     { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : []);
+  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
 
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(ruleIndices);
+  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    ruleIndices,
+    'rules'
+  );
 
   const onError = useCallback(
     (error) => {
@@ -142,6 +145,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       setShouldBulkCloseAlert(false);
     }
   }, [shouldDisableBulkClose]);
+
+  const isSubmitButtonDisabled = useMemo(
+    () => exceptionItemsToAdd.every((item) => item.entries.length === 0),
+    [exceptionItemsToAdd]
+  );
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -216,6 +224,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 ruleName={ruleName}
                 isOrDisabled={false}
                 isAndDisabled={false}
+                isNestedDisabled={false}
                 data-test-subj="edit-exception-modal-builder"
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
@@ -257,7 +266,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
-          <EuiButton onClick={onEditExceptionConfirm} isLoading={addExceptionIsLoading} fill>
+          <EuiButton
+            onClick={onEditExceptionConfirm}
+            isLoading={addExceptionIsLoading}
+            isDisabled={isSubmitButtonDisabled}
+            fill
+          >
             {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
           </EuiButton>
         </EuiModalFooter>
