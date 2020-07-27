@@ -19,6 +19,8 @@
 
 import dedent from 'dedent';
 
+import { TemplateContext } from '../template_context';
+
 function generator({
   artifactTarball,
   versionTag,
@@ -27,7 +29,7 @@ function generator({
   baseOSImage,
   ubiImageFlavor,
   dockerBuildDate,
-}) {
+}: TemplateContext) {
   const copyArtifactTarballInsideDockerOptFolder = () => {
     if (usePublicArtifact) {
       return `RUN cd /opt && curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/${artifactTarball} && cd -`;
