@@ -22,7 +22,6 @@ import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
 import { OverviewEmpty } from '../components/overview_empty';
 import { StatefulSidebar } from '../components/sidebar';
-import { SidebarFlexGroup } from '../components/sidebar/sidebar';
 
 import { SignalsByCategory } from '../components/signals_by_category';
 import { inputsSelectors, State } from '../../common/store';
@@ -69,7 +68,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
     addMessage('management', 'dismissEndpointNotice');
   }, [addMessage]);
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
-  return indicesExist !== false ? (
+  return indicesExist ? (
     <>
       <StickyContainer>
         <FiltersGlobal>
@@ -85,15 +84,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
           )}
           <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
             <SidebarFlexItem grow={false}>
-              {indicesExist !== true ? (
-                <SidebarFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingContent lines={10} data-test-subj="sidebar-loading" />
-                  </EuiFlexItem>
-                </SidebarFlexGroup>
-              ) : (
-                <StatefulSidebar />
-              )}
+              <StatefulSidebar />
             </SidebarFlexItem>
 
             <EuiFlexItem grow={true}>

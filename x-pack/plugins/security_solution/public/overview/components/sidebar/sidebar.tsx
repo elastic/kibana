@@ -23,7 +23,7 @@ import { useApolloClient } from '../../../common/utils/apollo_context';
 
 import * as i18n from '../../pages/translations';
 
-export const SidebarFlexGroup = styled(EuiFlexGroup)`
+const SidebarFlexGroup = styled(EuiFlexGroup)`
   width: 305px;
 `;
 

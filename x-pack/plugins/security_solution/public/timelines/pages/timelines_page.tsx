@@ -46,7 +46,7 @@ export const TimelinesPageComponent: React.FC = () => {
 
   return (
     <>
-      {indicesExist !== false ? (
+      {indicesExist ? (
         <>
           <WrapperPage>
             <HeaderPage border title={i18n.PAGE_TITLE}>

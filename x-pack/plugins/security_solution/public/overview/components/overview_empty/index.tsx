@@ -37,12 +37,14 @@ const OverviewEmptyComponent: React.FC = () => {
         label: i18nCommon.EMPTY_ACTION_BEATS,
         url: `${basePath}${ADD_DATA_PATH}`,
         description: i18nCommon.EMPTY_ACTION_BEATS_DESCRIPTION,
+        fill: false,
       },
       endpoint: {
         label: i18nCommon.EMPTY_ACTION_ENDPOINT,
         url: ingestUrl,
         description: i18nCommon.EMPTY_ACTION_ENDPOINT_DESCRIPTION,
         onClick: handleOnClick,
+        fill: false,
       },
     }),
     [basePath, ingestUrl, handleOnClick]

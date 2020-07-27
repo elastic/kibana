@@ -38,6 +38,7 @@ describe('OverviewEmpty', () => {
         beats: {
           description:
             'Leightweight Beats can send data from hundreds or thousands of machines and systems',
+          fill: false,
           label: 'Add data with Beats',
           url: '/app/home#/tutorial_directory/security',
         },
@@ -51,6 +52,7 @@ describe('OverviewEmpty', () => {
         endpoint: {
           description:
             'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+          fill: false,
           label: 'Add Elastic Endpoint Security',
           onClick: undefined,
           url: 'ingestUrl',
@@ -71,6 +73,7 @@ describe('OverviewEmpty', () => {
         beats: {
           description:
             'Leightweight Beats can send data from hundreds or thousands of machines and systems',
+          fill: false,
           label: 'Add data with Beats',
           url: '/app/home#/tutorial_directory/security',
         },

@@ -363,7 +363,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
-      {indicesExist !== false ? (
+      {indicesExist ? (
         <StickyContainer>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>

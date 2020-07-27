@@ -52,10 +52,10 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
 
 describe('Overview', () => {
   describe('rendering', () => {
-    describe('when indicesExist is null', () => {
+    describe('when indicesExist is true', () => {
       beforeEach(() => {
         (useWithSource as jest.Mock).mockReturnValue({
-          indicesExist: null,
+          indicesExist: true,
         });
         (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: false });
         const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<
