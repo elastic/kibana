@@ -22,6 +22,7 @@ function formatCluster(cluster) {
 }
 
 let once = false;
+let inTransit = false;
 
 export function monitoringClustersProvider($injector) {
   return (clusterUuid, ccs, codePaths) => {
@@ -84,19 +85,19 @@ export function monitoringClustersProvider($injector) {
         });
     }
 
-    if (!once) {
+    if (!once && !inTransit) {
+      inTransit = true;
       return getClusters().then((clusters) => {
         if (clusters.length) {
-          return Promise.all([ensureAlertsEnabled(), ensureMetricbeatEnabled()])
+          Promise.all([ensureAlertsEnabled(), ensureMetricbeatEnabled()])
             .then(([{ data }]) => {
               showSecurityToast(data);
               once = true;
-              return clusters;
             })
             .catch(() => {
               // Intentionally swallow the error as this will retry the next page load
-              return clusters;
-            });
+            })
+            .finally(() => (inTransit = false));
         }
         return clusters;
       });
