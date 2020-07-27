@@ -12,6 +12,7 @@ import {
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
+import { HostState } from '../types';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
@@ -75,6 +76,11 @@ interface ServerReturnedEndpointPackageInfo {
   payload: GetPackagesResponse['response'][0];
 }
 
+interface ServerReturnedHostNonExistingPolicies {
+  type: 'serverReturnedHostNonExistingPolicies';
+  payload: HostState['nonExistingPolicies'];
+}
+
 interface ServerReturnedHostExistValue {
   type: 'serverReturnedHostExistValue';
   payload: boolean;
@@ -93,4 +99,5 @@ export type HostAction =
   | ServerCancelledHostListLoading
   | ServerReturnedHostExistValue
   | ServerCancelledPolicyItemsLoading
-  | ServerReturnedEndpointPackageInfo;
+  | ServerReturnedEndpointPackageInfo
+  | ServerReturnedHostNonExistingPolicies;

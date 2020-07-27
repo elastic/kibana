@@ -14,12 +14,15 @@ import {
   uiQueryParams,
   listData,
   endpointPackageInfo,
+  nonExistingPolicies,
 } from './selectors';
 import { HostState } from '../types';
 import {
   sendGetEndpointSpecificPackageConfigs,
   sendGetEndpointSecurityPackage,
+  sendGetAgentConfigList,
 } from '../../policy/store/policy_list/services/ingest';
+import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
 
 export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (coreStart) => {
   return ({ getState, dispatch }) => (next) => async (action) => {
@@ -59,6 +62,23 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           type: 'serverReturnedHostList',
           payload: hostResponse,
         });
+
+        getNonExistingPoliciesForHostsList(
+          coreStart.http,
+          hostResponse.hosts,
+          nonExistingPolicies(state)
+        )
+          .then((missingPolicies) => {
+            if (missingPolicies !== undefined) {
+              dispatch({
+                type: 'serverReturnedHostNonExistingPolicies',
+                payload: missingPolicies,
+              });
+            }
+          })
+          // Ignore Errors, since this should not hinder the user's ability to use the UI
+          // eslint-disable-next-line no-console
+          .catch((error) => console.error(error));
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnHostList',
@@ -131,6 +151,23 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
             type: 'serverReturnedHostList',
             payload: response,
           });
+
+          getNonExistingPoliciesForHostsList(
+            coreStart.http,
+            response.hosts,
+            nonExistingPolicies(state)
+          )
+            .then((missingPolicies) => {
+              if (missingPolicies !== undefined) {
+                dispatch({
+                  type: 'serverReturnedHostNonExistingPolicies',
+                  payload: missingPolicies,
+                });
+              }
+            })
+            // Ignore Errors, since this should not hinder the user's ability to use the UI
+            // eslint-disable-next-line no-console
+            .catch((error) => console.error(error));
         } catch (error) {
           dispatch({
             type: 'serverFailedToReturnHostList',
@@ -146,11 +183,25 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
       // call the host details api
       const { selected_host: selectedHost } = uiQueryParams(state);
       try {
-        const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
+        const response = await coreStart.http.get<HostInfo>(
+          `/api/endpoint/metadata/${selectedHost}`
+        );
         dispatch({
           type: 'serverReturnedHostDetails',
           payload: response,
         });
+        getNonExistingPoliciesForHostsList(coreStart.http, [response], nonExistingPolicies(state))
+          .then((missingPolicies) => {
+            if (missingPolicies !== undefined) {
+              dispatch({
+                type: 'serverReturnedHostNonExistingPolicies',
+                payload: missingPolicies,
+              });
+            }
+          })
+          // Ignore Errors, since this should not hinder the user's ability to use the UI
+          // eslint-disable-next-line no-console
+          .catch((error) => console.error(error));
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnHostDetails',
@@ -175,6 +226,65 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
       }
     }
   };
+};
+
+const getNonExistingPoliciesForHostsList = async (
+  http: HttpStart,
+  hosts: HostResultList['hosts'],
+  currentNonExistingPolicies: HostState['nonExistingPolicies']
+): Promise<HostState['nonExistingPolicies'] | undefined> => {
+  if (hosts.length === 0) {
+    return;
+  }
+
+  // Create an array of unique policy IDs that are not yet known to be non-existing.
+  const policyIdsToCheck = Array.from(
+    new Set(
+      hosts
+        .filter((host) => !currentNonExistingPolicies[host.metadata.Endpoint.policy.applied.id])
+        .map((host) => host.metadata.Endpoint.policy.applied.id)
+    )
+  );
+
+  if (policyIdsToCheck.length === 0) {
+    return;
+  }
+
+  // We use the Agent Config API here, instead of the Package Config, because we can't use
+  // filter by ID of the Saved Object. Agent Config, however, keeps a reference (array) of
+  // Package Ids that it uses, thus if a reference exists there, then the package config (policy)
+  // exists.
+  const policiesFound = (
+    await sendGetAgentConfigList(http, {
+      query: {
+        kuery: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.package_configs: (${policyIdsToCheck.join(
+          ' or '
+        )})`,
+      },
+    })
+  ).items.reduce<HostState['nonExistingPolicies']>((list, agentConfig) => {
+    (agentConfig.package_configs as string[]).forEach((packageConfig) => {
+      list[packageConfig as string] = true;
+    });
+    return list;
+  }, {});
+
+  const nonExisting = policyIdsToCheck.reduce<HostState['nonExistingPolicies']>(
+    (list, policyId) => {
+      if (policiesFound[policyId]) {
+        return list;
+      }
+      list[policyId] = true;
+      return list;
+    },
+    {}
+  );
+
+  if (Object.keys(nonExisting).length === 0) {
+    return;
+  }
+
+  return nonExisting;
 };
 
 const doHostsExist = async (http: HttpStart): Promise<boolean> => {
