@@ -30,12 +30,4 @@ describe('EngineOverviewHeader', () => {
     button.simulate('click');
     expect(sendTelemetry).toHaveBeenCalled();
   });
-
-  it('renders a disabled button when isButtonDisabled is true', () => {
-    const wrapper = shallow(<EngineOverviewHeader isButtonDisabled />);
-    const button = wrapper.find('[data-test-subj="launchButton"]');
-
-    expect(button.prop('isDisabled')).toBe(true);
-    expect(button.prop('href')).toBeUndefined();
-  });
 });
