@@ -63,8 +63,19 @@ export function useResolverQueryParams() {
     };
   }, [urlSearch, uniqueCrumbIdKey, uniqueCrumbEventKey]);
 
+  const cleanUpQueryParams = () => {
+    const crumbsToPass = {
+      ...querystring.parse(urlSearch.slice(1)),
+    };
+    delete crumbsToPass[uniqueCrumbIdKey];
+    delete crumbsToPass[uniqueCrumbEventKey];
+    const relativeURL = { search: querystring.stringify(crumbsToPass) };
+    history.replace(relativeURL);
+  };
+
   return {
     pushToQueryParams,
     queryParams,
+    cleanUpQueryParams,
   };
 }
