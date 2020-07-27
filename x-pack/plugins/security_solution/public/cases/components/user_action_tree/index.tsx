@@ -233,7 +233,7 @@ export const UserActionTree = React.memo(
       ),
     };
 
-    const commentsToList: EuiCommentProps[] = caseUserActions.reduce<EuiCommentProps[]>(
+    const userActions: EuiCommentProps[] = caseUserActions.reduce<EuiCommentProps[]>(
       // eslint-disable-next-line complexity
       (comments, action, index) => {
         if (action.commentId != null && action.action === 'create') {
@@ -395,120 +395,30 @@ export const UserActionTree = React.memo(
       [descriptionCommentListObj]
     );
 
-    const commentsList = <MyEuiCommentList comments={commentsToList} />;
+    const bottomActions = [
+      {
+        username: (
+          <UserActionUsername
+            username={currentUser != null ? currentUser.username ?? '' : ''}
+            fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
+          />
+        ),
+        'data-test-subj': 'add-comment',
+        timelineIcon: (
+          <UserActionAvatar
+            username={currentUser != null ? currentUser.username ?? '' : ''}
+            fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
+          />
+        ),
+        children: MarkdownNewComment,
+      },
+    ];
+
+    const comments = [...userActions, ...bottomActions];
 
     return (
       <>
-        {commentsList}
-        <UserActionItem
-          createdAt={caseData.createdAt}
-          data-test-subj="description-action"
-          disabled={!userCanCrud}
-          id={DESCRIPTION_ID}
-          isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
-          isLoading={isLoadingDescription}
-          labelEditAction={i18n.EDIT_DESCRIPTION}
-          labelQuoteAction={i18n.QUOTE}
-          labelTitle={<>{i18n.ADDED_DESCRIPTION}</>}
-          fullName={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''}
-          markdown={MarkdownDescription}
-          onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
-          onQuote={handleManageQuote.bind(null, caseData.description)}
-          username={caseData.createdBy.username ?? i18n.UNKNOWN}
-        />
-
-        {caseUserActions.map((action, index) => {
-          if (action.commentId != null && action.action === 'create') {
-            const comment = caseData.comments.find((c) => c.id === action.commentId);
-            if (comment != null) {
-              return (
-                <UserActionItem
-                  key={action.actionId}
-                  createdAt={comment.createdAt}
-                  data-test-subj={`comment-create-action`}
-                  disabled={!userCanCrud}
-                  id={comment.id}
-                  idToOutline={selectedOutlineCommentId}
-                  isEditable={manageMarkdownEditIds.includes(comment.id)}
-                  isLoading={isLoadingIds.includes(comment.id)}
-                  labelEditAction={i18n.EDIT_COMMENT}
-                  labelQuoteAction={i18n.QUOTE}
-                  labelTitle={<>{i18n.ADDED_COMMENT}</>}
-                  fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
-                  markdown={
-                    <UserActionMarkdown
-                      id={comment.id}
-                      content={comment.comment}
-                      isEditable={manageMarkdownEditIds.includes(comment.id)}
-                      onChangeEditable={handleManageMarkdownEditId}
-                      onSaveContent={handleSaveComment.bind(null, {
-                        id: comment.id,
-                        version: comment.version,
-                      })}
-                    />
-                  }
-                  onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-                  onQuote={handleManageQuote.bind(null, comment.comment)}
-                  outlineComment={handleOutlineComment}
-                  username={comment.createdBy.username ?? ''}
-                  updatedAt={comment.updatedAt}
-                />
-              );
-            }
-          }
-          if (action.actionField.length === 1) {
-            const myField = action.actionField[0];
-            const parsedValue = parseString(`${action.newValue}`);
-            const { firstPush, parsedConnectorId, parsedConnectorName } =
-              parsedValue != null
-                ? {
-                    firstPush: caseServices[parsedValue.connector_id].firstPushIndex === index,
-                    parsedConnectorId: parsedValue.connector_id,
-                    parsedConnectorName: parsedValue.connector_name,
-                  }
-                : {
-                    firstPush: false,
-                    parsedConnectorId: 'none',
-                    parsedConnectorName: 'none',
-                  };
-            const labelTitle: string | JSX.Element = getLabelTitle({
-              action,
-              field: myField,
-              firstPush,
-              connectors,
-            });
-
-            return (
-              <UserActionItem
-                key={action.actionId}
-                caseConnectorName={parsedConnectorName}
-                createdAt={action.actionAt}
-                data-test-subj={`${action.actionField[0]}-${action.action}-action`}
-                disabled={!userCanCrud}
-                id={action.actionId}
-                isEditable={false}
-                isLoading={false}
-                labelTitle={<>{labelTitle}</>}
-                linkId={
-                  action.action === 'update' && action.commentId != null ? action.commentId : null
-                }
-                fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
-                outlineComment={handleOutlineComment}
-                showTopFooter={
-                  action.action === 'push-to-service' &&
-                  index === caseServices[parsedConnectorId].lastPushIndex
-                }
-                showBottomFooter={
-                  action.action === 'push-to-service' &&
-                  index === caseServices[parsedConnectorId].lastPushIndex &&
-                  caseServices[parsedConnectorId].hasDataToPush
-                }
-                username={action.actionBy.username ?? ''}
-              />
-            );
-          }
-          return null;
-        })}
+        <MyEuiCommentList comments={comments} />
         {(isLoadingUserActions || isLoadingIds.includes(NEW_ID)) && (
           <MyEuiFlexGroup justifyContent="center" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -516,17 +426,6 @@ export const UserActionTree = React.memo(
             </EuiFlexItem>
           </MyEuiFlexGroup>
         )}
-        <UserActionItem
-          data-test-subj={`add-comment`}
-          createdAt={new Date().toISOString()}
-          disabled={!userCanCrud}
-          id={NEW_ID}
-          isEditable={true}
-          isLoading={isLoadingIds.includes(NEW_ID)}
-          fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
-          markdown={MarkdownNewComment}
-          username={currentUser != null ? currentUser.username ?? '' : ''}
-        />
       </>
     );
   }
