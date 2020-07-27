@@ -58,6 +58,7 @@ export interface OwnProps extends QueryTemplateProps {
   sortField: SortField;
   fields: string[];
   startDate: string;
+  queryDeduplication: string;
 }
 
 type TimelineQueryProps = OwnProps & PropsFromRedux & WithKibanaProps & CustomReduxProps;
@@ -93,6 +94,7 @@ class TimelineQueryComponent extends QueryTemplate<
       sourceId,
       sortField,
       startDate,
+      queryDeduplication,
     } = this.props;
     const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
     const defaultIndex =
@@ -102,7 +104,8 @@ class TimelineQueryComponent extends QueryTemplate<
             ...(['all', 'alert', 'signal'].includes(eventType) ? indexToAdd : []),
           ]
         : indexPattern?.title.split(',') ?? [];
-    const variables: GetTimelineQuery.Variables = {
+    // To support running multiple requests in parallel
+    const variables: GetTimelineQuery.Variables & { queryDeduplication: string } = {
       fieldRequested: fields,
       filterQuery: createFilter(filterQuery),
       sourceId,
@@ -116,6 +119,7 @@ class TimelineQueryComponent extends QueryTemplate<
       defaultIndex,
       docValueFields: docValueFields ?? [],
       inspect: isInspected,
+      queryDeduplication,
     };
 
     return (

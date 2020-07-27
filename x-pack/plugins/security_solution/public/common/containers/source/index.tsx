@@ -123,7 +123,7 @@ export const useWithSource = (
   sourceId = 'default',
   indexToAdd?: string[] | null,
   onlyCheckIndexToAdd?: boolean,
-  queryDeduplication? = 'default'
+  queryDeduplication = 'default'
 ) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
@@ -155,7 +155,10 @@ export const useWithSource = (
       setState((prevState) => ({ ...prevState, loading: true }));
 
       try {
-        const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
+        const result = await apolloClient.query<
+          SourceQuery.Query,
+          SourceQuery.Variables & { queryDeduplication: string }
+        >({
           query: sourceQuery,
           fetchPolicy: 'cache-first',
           variables: {
