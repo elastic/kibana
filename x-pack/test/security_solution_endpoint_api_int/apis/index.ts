@@ -3,19 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { DEFAULT_REGISTRY_URL } from '../../../../plugins/ingest_manager/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  isRegistryEnabled,
-  getRegistryUrl,
-} from '../../../security_solution_endpoint_api_int/registry';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { isRegistryEnabled, getRegistryUrl } from '../registry';
+import { DEFAULT_REGISTRY_URL } from '../../../plugins/ingest_manager/common';
 
-export default function (providerContext: FtrProviderContext) {
+export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  describe('endpoint', function () {
-    this.tags('ciGroup7');
+  describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
+
+    this.tags('ciGroup7');
     const log = getService('log');
 
     if (!isRegistryEnabled()) {
@@ -28,8 +26,9 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await ingestManager.setup();
     });
-    loadTestFile(require.resolve('./endpoint_list'));
-    loadTestFile(require.resolve('./policy_list'));
-    loadTestFile(require.resolve('./policy_details'));
+    loadTestFile(require.resolve('./resolver'));
+    loadTestFile(require.resolve('./metadata'));
+    loadTestFile(require.resolve('./policy'));
+    loadTestFile(require.resolve('./artifacts'));
   });
 }

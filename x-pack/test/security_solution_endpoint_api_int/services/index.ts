@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('./_helpers').runGulpTask('canvas:karma:debug');
+import { services as xPackAPIServices } from '../../api_integration/services';
+import { ResolverGeneratorProvider } from './resolver';
+
+export const services = {
+  ...xPackAPIServices,
+  resolverGenerator: ResolverGeneratorProvider,
+};
