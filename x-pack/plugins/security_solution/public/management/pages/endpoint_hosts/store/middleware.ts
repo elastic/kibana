@@ -136,7 +136,6 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
             type: 'serverFailedToReturnHostList',
             payload: error,
           });
-          return;
         }
       } else {
         dispatch({
