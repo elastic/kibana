@@ -2,6 +2,10 @@ def withPostBuildReporting(Closure closure) {
   try {
     closure()
   } finally {
+    catchErrors {
+      runErrorReporter()
+    }
+
     postBuildReporting()
 
     def parallelWorkspace = "${env.WORKSPACE}/parallel"
@@ -33,10 +37,6 @@ def withPostBuildReporting(Closure closure) {
 }
 
 def postBuildReporting() {
-  catchErrors {
-    runErrorReporter()
-  }
-
   catchErrors {
     runbld.junit()
   }
@@ -182,11 +182,6 @@ def withGcsArtifactUpload(workerName, closure) {
 
 def publishJunit() {
   junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
-
-  // junit() is weird about paths for security reasons, so we need to actually change to an upper directory first
-  dir(env.WORKSPACE) {
-    junit(testResults: 'parallel/*/kibana/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
-  }
 }
 
 def sendMail() {
@@ -275,7 +270,7 @@ def runErrorReporter() {
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun} target/junit/**/*.xml
+      node scripts/report_failed_tests ${dryRun} target/junit/**/*.xml ../parallel/*/kibana/target/junit/**/*.xml
     """,
     "Report failed tests, if necessary"
   )
