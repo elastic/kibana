@@ -24,3 +24,4 @@ export const useToasts = jest.fn(() => notificationServiceMock.createStartContra
 export const useCurrentUser = jest.fn();
 export const withKibana = jest.fn(createWithKibanaMock());
 export const KibanaContextProvider = jest.fn(createKibanaContextProviderMock());
+export const useGetUserSavedObjectPermissions = jest.fn();

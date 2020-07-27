@@ -20,11 +20,11 @@ interface Props {
   onBreakdownChange: (values: BreakdownItem[]) => void;
 }
 
-export const BreakdownFilter = ({
+export function BreakdownFilter({
   id,
   selectedBreakdowns,
   onBreakdownChange,
-}: Props) => {
+}: Props) {
   const categories: BreakdownItem[] = [
     {
       name: 'Browser',
@@ -65,4 +65,4 @@ export const BreakdownFilter = ({
       }}
     />
   );
-};
+}
