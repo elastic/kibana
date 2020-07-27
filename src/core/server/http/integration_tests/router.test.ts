@@ -311,7 +311,6 @@ describe('Options', () => {
       router.post(
         { path: '/a', validate: false, options: { timeout: 1000 } },
         async (context, req, res) => {
-          // Cause a wait of 2 second to cause the 503 Service Unavailable
           await new Promise((resolve) => setTimeout(resolve, 2000));
           return res.ok({});
         }
@@ -329,7 +328,6 @@ describe('Options', () => {
       router.put(
         { path: '/a', validate: false, options: { timeout: 1000 } },
         async (context, req, res) => {
-          // Cause a wait of 2 second to cause the 503 Service Unavailable
           await new Promise((resolve) => setTimeout(resolve, 2000));
           return res.ok({});
         }
@@ -348,7 +346,6 @@ describe('Options', () => {
       router.delete(
         { path: '/a', validate: false, options: { timeout: 1000 } },
         async (context, req, res) => {
-          // Cause a wait of 2 second to cause the 503 Service Unavailable
           await new Promise((resolve) => setTimeout(resolve, 2000));
           return res.ok({});
         }
