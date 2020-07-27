@@ -17,7 +17,7 @@ export const createListItemRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
       validate: {

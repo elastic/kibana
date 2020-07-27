@@ -429,7 +429,7 @@ export function LayerPanel(
               size="xs"
               iconType="trash"
               color="danger"
-              data-test-subj="lns_layer_remove"
+              data-test-subj="lnsLayerRemove"
               onClick={() => {
                 // If we don't blur the remove / clear button, it remains focused
                 // which is a strange UX in this case. e.target.blur doesn't work

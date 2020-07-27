@@ -446,7 +446,7 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
       if (response.regression.hasOwnProperty(statType)) {
         let currentStatValue =
           response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
-        if (currentStatValue) {
+        if (currentStatValue && !isNaN(currentStatValue)) {
           currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
         }
         results[statType as keyof RegressionEvaluateExtractedResponse] = currentStatValue;

@@ -54,8 +54,20 @@ describe('features', () => {
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
-      all: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
-      read: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
+      all: [
+        actions.login,
+        actions.version,
+        actions.ui.get('navLinks', 'kibana:foo'),
+        actions.ui.get('navLinks', 'app-1'),
+        actions.ui.get('navLinks', 'app-2'),
+      ],
+      read: [
+        actions.login,
+        actions.version,
+        actions.ui.get('navLinks', 'kibana:foo'),
+        actions.ui.get('navLinks', 'app-1'),
+        actions.ui.get('navLinks', 'app-2'),
+      ],
     });
   });
 
@@ -635,6 +647,8 @@ describe('reserved', () => {
     expect(actual).toHaveProperty('reserved.foo', [
       actions.version,
       actions.ui.get('navLinks', 'kibana:foo'),
+      actions.ui.get('navLinks', 'app-1'),
+      actions.ui.get('navLinks', 'app-2'),
     ]);
   });
 

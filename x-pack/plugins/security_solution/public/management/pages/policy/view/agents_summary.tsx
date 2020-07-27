@@ -73,7 +73,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
   }, []);
 
   return (
-    <EuiFlexGroup gutterSize="xl" data-test-subj="policyAgentsSummary">
+    <EuiFlexGroup gutterSize="xl" responsive={false} data-test-subj="policyAgentsSummary">
       {stats.map(({ key, title, health }) => {
         return (
           <EuiFlexItem grow={false} key={key}>

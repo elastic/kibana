@@ -16,6 +16,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiLoadingSpinner,
+  EuiHideFor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -182,9 +183,11 @@ export const PolicyDetails = React.memo(() => {
           error={policyAgentStatusSummary?.error ?? 0}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <VerticalDivider spacing="l" />
-      </EuiFlexItem>
+      <EuiHideFor sizes={['xs', 's']}>
+        <EuiFlexItem>
+          <VerticalDivider spacing="l" />
+        </EuiFlexItem>
+      </EuiHideFor>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty onClick={handleCancelOnClick} data-test-subj="policyDetailsCancelButton">
           <FormattedMessage
@@ -303,7 +306,7 @@ const ConfirmUpdate = React.memo<{
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
-                defaultMessage="Saving these changes will apply the updates to all active endpoints assigned to this policy"
+                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this policy"
               />
             </EuiCallOut>
             <EuiSpacer size="xl" />

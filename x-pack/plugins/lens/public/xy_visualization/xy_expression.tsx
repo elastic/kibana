@@ -282,7 +282,11 @@ export function XYChart({
   return (
     <Chart>
       <Settings
-        showLegend={legend.isVisible ? chartHasMoreThanOneSeries : legend.isVisible}
+        showLegend={
+          legend.isVisible && !legend.showSingleSeries
+            ? chartHasMoreThanOneSeries
+            : legend.isVisible
+        }
         legendPosition={legend.position}
         showLegendExtra={false}
         theme={chartTheme}

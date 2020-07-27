@@ -408,7 +408,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.ml.dataframe.analytics.create.hyperParametersSectionTitle', {
-                defaultMessage: 'Hyper parameters',
+                defaultMessage: 'Hyperparameters',
               })}
             </h3>
           </EuiTitle>

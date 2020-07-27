@@ -12,7 +12,7 @@ import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
   detections: DetectionsUsage;
-  endpoints: EndpointUsage;
+  endpoints: EndpointUsage | {};
 }
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {

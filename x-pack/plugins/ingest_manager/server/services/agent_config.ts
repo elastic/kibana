@@ -41,7 +41,8 @@ class AgentConfigService {
     soClient: SavedObjectsClientContract,
     id: string,
     agentConfig: Partial<AgentConfigSOAttributes>,
-    user?: AuthenticatedUser
+    user?: AuthenticatedUser,
+    options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id, false);
 
@@ -60,7 +61,7 @@ class AgentConfigService {
 
     await soClient.update<AgentConfigSOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
-      revision: oldAgentConfig.revision + 1,
+      ...(options.bumpRevision ? { revision: oldAgentConfig.revision + 1 } : {}),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
@@ -265,7 +266,7 @@ class AgentConfigService {
     soClient: SavedObjectsClientContract,
     id: string,
     packageConfigIds: string[],
-    options?: { user?: AuthenticatedUser }
+    options: { user?: AuthenticatedUser; bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id, false);
 
@@ -281,7 +282,8 @@ class AgentConfigService {
           [...((oldAgentConfig.package_configs || []) as string[])].concat(packageConfigIds)
         ),
       },
-      options?.user
+      options?.user,
+      { bumpRevision: options.bumpRevision }
     );
   }
 

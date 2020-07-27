@@ -13,7 +13,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import rison from 'rison-node';
 import React, { Component, Fragment } from 'react';
-
+import memoizeOne from 'memoize-one';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -130,7 +130,7 @@ export class AnnotationsTable extends Component {
     }
   }
 
-  getAnnotationsWithExtraInfo(annotations) {
+  getAnnotationsWithExtraInfo = memoizeOne((annotations) => {
     // if there is a specific view/chart entities that the annotations can be scoped to
     // add a new column called 'current_series'
     if (Array.isArray(this.props.chartDetails?.entityData?.entities)) {
@@ -147,7 +147,7 @@ export class AnnotationsTable extends Component {
       // if not make it return the original annotations
       return annotations;
     }
-  }
+  });
 
   getJob(jobId) {
     // check if the job was supplied via props and matches the supplied jobId
@@ -256,7 +256,7 @@ export class AnnotationsTable extends Component {
     // if the annotation is at the series level
     // then pass the partitioning field(s) and detector index to the Single Metric Viewer
     if (_.has(annotation, 'detector_index')) {
-      mlTimeSeriesExplorer.detector_index = annotation.detector_index;
+      mlTimeSeriesExplorer.detectorIndex = annotation.detector_index;
     }
     if (_.has(annotation, 'partition_field_value')) {
       entityCondition[annotation.partition_field_name] = annotation.partition_field_value;
@@ -438,7 +438,7 @@ export class AnnotationsTable extends Component {
         name: i18n.translate('xpack.ml.annotationsTable.labelColumnName', {
           defaultMessage: 'Label',
         }),
-        sortable: true,
+        sortable: (key) => +key,
         width: '60px',
         render: (key) => {
           return <EuiBadge color="default">{key}</EuiBadge>;
@@ -523,10 +523,26 @@ export class AnnotationsTable extends Component {
     const aggregations = this.props.aggregations ?? this.state.aggregations;
     if (aggregations) {
       const buckets = aggregations.event.buckets;
-      const foundUser = buckets.findIndex((d) => d.key === ANNOTATION_EVENT_USER) > -1;
-      filterOptions = foundUser
-        ? buckets
-        : [{ key: ANNOTATION_EVENT_USER, doc_count: 0 }, ...buckets];
+      let foundUser = false;
+      let foundDelayedData = false;
+
+      buckets.forEach((bucket) => {
+        if (bucket.key === ANNOTATION_EVENT_USER) {
+          foundUser = true;
+        }
+        if (bucket.key === ANNOTATION_EVENT_DELAYED_DATA) {
+          foundDelayedData = true;
+        }
+      });
+      const adjustedBuckets = [];
+      if (!foundUser) {
+        adjustedBuckets.push({ key: ANNOTATION_EVENT_USER, doc_count: 0 });
+      }
+      if (!foundDelayedData) {
+        adjustedBuckets.push({ key: ANNOTATION_EVENT_DELAYED_DATA, doc_count: 0 });
+      }
+
+      filterOptions = [...adjustedBuckets, ...buckets];
     }
     const filters = [
       {
@@ -644,15 +660,18 @@ export class AnnotationsTable extends Component {
         name: CURRENT_SERIES,
         dataType: 'boolean',
         width: '0px',
+        render: () => '',
       }
     );
+
+    const items = this.getAnnotationsWithExtraInfo(annotations);
     return (
       <Fragment>
         <EuiInMemoryTable
           error={searchError}
           className="eui-textOverflowWrap"
           compressed={true}
-          items={this.getAnnotationsWithExtraInfo(annotations)}
+          items={items}
           columns={columns}
           pagination={{
             pageSizeOptions: [5, 10, 25],
