@@ -69,7 +69,7 @@ describe('ClusterClient', () => {
   it('creates a single internal and scoped client during initialization', () => {
     const config = createConfig();
 
-    new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+    new ClusterClient(config, logger, () => auditorFactory, getAuthHeaders);
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
     expect(configureClientMock).toHaveBeenCalledWith(config, { logger });
@@ -81,7 +81,7 @@ describe('ClusterClient', () => {
       const clusterClient = new ClusterClient(
         createConfig(),
         logger,
-        auditorFactory,
+        () => auditorFactory,
         getAuthHeaders
       );
 
@@ -94,7 +94,7 @@ describe('ClusterClient', () => {
       const clusterClient = new ClusterClient(
         createConfig(),
         logger,
-        auditorFactory,
+        () => auditorFactory,
         getAuthHeaders
       );
       const request = httpServerMock.createKibanaRequest();
@@ -102,10 +102,11 @@ describe('ClusterClient', () => {
       const scopedClusterClient = clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: expect.any(Object),
-        name: expect.any(String),
-      });
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: expect.any(Object),
+        })
+      );
 
       expect(scopedClusterClient.asInternalUser).toBe(internalClient.child.mock.results[0].value);
       expect(scopedClusterClient.asCurrentUser).toBe(scopedClient.child.mock.results[0].value);
@@ -115,7 +116,7 @@ describe('ClusterClient', () => {
       const clusterClient = new ClusterClient(
         createConfig(),
         logger,
-        auditorFactory,
+        () => auditorFactory,
         getAuthHeaders
       );
       const request = httpServerMock.createKibanaRequest();
@@ -135,7 +136,7 @@ describe('ClusterClient', () => {
       });
       getAuthHeaders.mockReturnValue({});
 
-      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, () => auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({
         headers: {
           foo: 'bar',
@@ -146,10 +147,11 @@ describe('ClusterClient', () => {
       clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { foo: 'bar' },
-        name: expect.any(String),
-      });
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: { foo: 'bar' },
+        })
+      );
     });
 
     it('creates a scoped facade with filtered auth headers', () => {
@@ -161,16 +163,17 @@ describe('ClusterClient', () => {
         other: 'nope',
       });
 
-      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, () => auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({});
 
       clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { authorization: 'auth' },
-        name: expect.any(String),
-      });
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: { authorization: 'auth' },
+        })
+      );
     });
 
     it('respects auth headers precedence', () => {
@@ -182,7 +185,7 @@ describe('ClusterClient', () => {
         other: 'nope',
       });
 
-      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, () => auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({
         headers: {
           authorization: 'override',
@@ -192,10 +195,11 @@ describe('ClusterClient', () => {
       clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { authorization: 'auth' },
-        name: expect.any(String),
-      });
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: { authorization: 'auth' },
+        })
+      );
     });
 
     it('includes the `customHeaders` from the config without filtering them', () => {
@@ -208,19 +212,20 @@ describe('ClusterClient', () => {
       });
       getAuthHeaders.mockReturnValue({});
 
-      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, () => auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({});
 
       clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: {
-          foo: 'bar',
-          hello: 'dolly',
-        },
-        name: expect.any(String),
-      });
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            foo: 'bar',
+            hello: 'dolly',
+          },
+        })
+      );
     });
 
     it('respect the precedence of auth headers over config headers', () => {
@@ -235,19 +240,20 @@ describe('ClusterClient', () => {
         foo: 'auth',
       });
 
-      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, () => auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({});
 
       clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: {
-          foo: 'auth',
-          hello: 'dolly',
-        },
-        name: expect.any(String),
-      });
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            foo: 'auth',
+            hello: 'dolly',
+          },
+        })
+      );
     });
 
     it('respect the precedence of request headers over config headers', () => {
@@ -260,7 +266,7 @@ describe('ClusterClient', () => {
       });
       getAuthHeaders.mockReturnValue({});
 
-      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, () => auditorFactory, getAuthHeaders);
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
       });
@@ -268,13 +274,14 @@ describe('ClusterClient', () => {
       clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: {
-          foo: 'request',
-          hello: 'dolly',
-        },
-        name: expect.any(String),
-      });
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: {
+            foo: 'request',
+            hello: 'dolly',
+          },
+        })
+      );
     });
 
     it('filter headers when called with a `FakeRequest`', () => {
@@ -283,7 +290,7 @@ describe('ClusterClient', () => {
       });
       getAuthHeaders.mockReturnValue({});
 
-      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, () => auditorFactory, getAuthHeaders);
       const request = {
         headers: {
           authorization: 'auth',
@@ -294,10 +301,11 @@ describe('ClusterClient', () => {
       clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { authorization: 'auth' },
-        name: expect.any(String),
-      });
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: { authorization: 'auth' },
+        })
+      );
     });
 
     it('does not add auth headers when called with a `FakeRequest`', () => {
@@ -308,7 +316,7 @@ describe('ClusterClient', () => {
         authorization: 'auth',
       });
 
-      const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+      const clusterClient = new ClusterClient(config, logger, () => auditorFactory, getAuthHeaders);
       const request = {
         headers: {
           foo: 'bar',
@@ -319,10 +327,11 @@ describe('ClusterClient', () => {
       clusterClient.asScoped(request);
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith({
-        headers: { foo: 'bar' },
-        name: expect.any(String),
-      });
+      expect(scopedClient.child).toHaveBeenCalledWith(
+        expect.objectContaining({
+          headers: { foo: 'bar' },
+        })
+      );
     });
 
     describe('Audit', () => {
@@ -335,15 +344,19 @@ describe('ClusterClient', () => {
         const clusterClient = new ClusterClient(
           config,
           logger,
-          customAuditorFactory,
+          () => customAuditorFactory,
           getAuthHeaders
         );
         const request = httpServerMock.createKibanaRequest();
 
         clusterClient.asScoped(request);
 
-        expect(scopedClientChild.on).toHaveBeenCalledTimes(1);
-        expect(scopedClientChild.on).toHaveBeenCalledWith('request', expect.any(Function));
+        expect(scopedClient.child).toHaveBeenCalledTimes(1);
+        expect(scopedClient.child).toHaveBeenCalledWith(
+          expect.objectContaining({
+            context: { auditor, type: 'currentUser' },
+          })
+        );
       });
 
       it('creates Auditor to listen to internal client requests', () => {
@@ -355,20 +368,29 @@ describe('ClusterClient', () => {
         const clusterClient = new ClusterClient(
           config,
           logger,
-          customAuditorFactory,
+          () => customAuditorFactory,
           getAuthHeaders
         );
         const request = httpServerMock.createKibanaRequest();
 
         clusterClient.asScoped(request);
 
-        expect(internalClientChild.on).toHaveBeenCalledTimes(1);
-        expect(internalClientChild.on).toHaveBeenCalledWith('request', expect.any(Function));
+        expect(internalClient.child).toHaveBeenCalledTimes(1);
+        expect(internalClient.child).toHaveBeenCalledWith(
+          expect.objectContaining({
+            context: { auditor, type: 'internalUser' },
+          })
+        );
       });
 
       it('do not create Auditor if scoped to FakeRequest', () => {
         const config = createConfig();
-        const clusterClient = new ClusterClient(config, logger, auditorFactory, getAuthHeaders);
+        const clusterClient = new ClusterClient(
+          config,
+          logger,
+          () => auditorFactory,
+          getAuthHeaders
+        );
 
         clusterClient.asScoped({ headers: {} });
 
@@ -382,7 +404,7 @@ describe('ClusterClient', () => {
       const clusterClient = new ClusterClient(
         createConfig(),
         logger,
-        auditorFactory,
+        () => auditorFactory,
         getAuthHeaders
       );
 
@@ -398,7 +420,7 @@ describe('ClusterClient', () => {
       const clusterClient = new ClusterClient(
         createConfig(),
         logger,
-        auditorFactory,
+        () => auditorFactory,
         getAuthHeaders
       );
 
@@ -441,7 +463,7 @@ describe('ClusterClient', () => {
       const clusterClient = new ClusterClient(
         createConfig(),
         logger,
-        auditorFactory,
+        () => auditorFactory,
         getAuthHeaders
       );
 
@@ -456,7 +478,7 @@ describe('ClusterClient', () => {
       const clusterClient = new ClusterClient(
         createConfig(),
         logger,
-        auditorFactory,
+        () => auditorFactory,
         getAuthHeaders
       );
 
