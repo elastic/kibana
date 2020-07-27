@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import classNames from 'classnames';
 
 import {
   EuiFlexGroup,
@@ -50,6 +51,16 @@ export interface UserActionTreeProps {
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
+`;
+
+const MyEuiCommentList = styled(EuiCommentList)`
+  ${({ theme }) => `
+    & .userAction__comment.outlined .euiCommentEvent {
+      outline: solid 5px ${theme.eui.euiColorVis1_behindText};
+      margin: 0.5em;
+      transition: 0.8s;
+    }
+  `}
 `;
 
 const DESCRIPTION_ID = 'description';
@@ -193,6 +204,7 @@ export const UserActionTree = React.memo(
         />
       ),
       event: i18n.ADDED_DESCRIPTION,
+      'data-test-subj': 'description-action',
       timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
       children: MarkdownDescription,
       timelineIcon: (
@@ -236,12 +248,16 @@ export const UserActionTree = React.memo(
                     fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
                   />
                 ),
+                'data-test-subj': 'comment-create-action',
                 timestamp: (
                   <UserActionTimestamp
                     createdAt={comment.createdAt}
                     updatedAt={comment.updatedAt}
                   />
                 ),
+                className: classNames('userAction__comment', {
+                  outlined: comment.id === selectedOutlineCommentId,
+                }),
                 children: (
                   <UserActionMarkdown
                     id={comment.id}
@@ -263,7 +279,7 @@ export const UserActionTree = React.memo(
                 actions: (
                   <EuiFlexGroup>
                     <EuiFlexItem>
-                      <UserActionCopyLink id={DESCRIPTION_ID} />
+                      <UserActionCopyLink id={comment.id} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <UserActionPropertyActions
@@ -351,12 +367,13 @@ export const UserActionTree = React.memo(
               ),
               type: 'update',
               event: labelTitle,
+              'data-test-subj': `${action.actionField[0]}-${action.action}-action`,
               timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
               timelineIcon: action.action === 'add' || action.action === 'delete' ? 'tag' : 'dot',
               actions: (
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <UserActionCopyLink id={DESCRIPTION_ID} />
+                    <UserActionCopyLink id={action.actionId} />
                   </EuiFlexItem>
                   {action.action === 'update' && action.commentId != null && (
                     <EuiFlexItem>
@@ -378,7 +395,7 @@ export const UserActionTree = React.memo(
       [descriptionCommentListObj]
     );
 
-    const commentsList = <EuiCommentList comments={commentsToList} />;
+    const commentsList = <MyEuiCommentList comments={commentsToList} />;
 
     return (
       <>
