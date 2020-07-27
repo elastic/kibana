@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
 import { CreateRulePage } from './index';
 import { useUserInfo } from '../../../../components/user_info';

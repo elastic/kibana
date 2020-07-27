@@ -15,6 +15,11 @@ export interface TimeframeMap {
 export type TimeframeMap1d = Pick<TimeframeMap, '1d'>;
 export type TimeframeMapAll = Pick<TimeframeMap, 'all'>;
 
+export interface AggregatedTransactionsCounts {
+  expected_metric_document_count: number;
+  transaction_count: number;
+}
+
 export type APMDataTelemetry = DeepPartial<{
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
@@ -24,6 +29,14 @@ export type APMDataTelemetry = DeepPartial<{
       major: number;
       patch: number;
     };
+  };
+  aggregated_transactions: {
+    current_implementation: AggregatedTransactionsCounts;
+    no_observer_name: AggregatedTransactionsCounts;
+    no_rum: AggregatedTransactionsCounts;
+    no_rum_no_observer_name: AggregatedTransactionsCounts;
+    only_rum: AggregatedTransactionsCounts;
+    only_rum_no_observer_name: AggregatedTransactionsCounts;
   };
   cloud: {
     availability_zone: string[];
@@ -108,6 +121,7 @@ export type APMDataTelemetry = DeepPartial<{
     };
   };
   tasks: Record<
+    | 'aggregated_transactions'
     | 'cloud'
     | 'processor_events'
     | 'agent_configuration'

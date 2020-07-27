@@ -7,6 +7,7 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import {
   apolloClientObservable,

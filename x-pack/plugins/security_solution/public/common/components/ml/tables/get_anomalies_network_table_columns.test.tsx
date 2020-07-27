@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../../mock/match_media';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { NetworkType } from '../../../../network/store/model';
 import * as i18n from './translations';

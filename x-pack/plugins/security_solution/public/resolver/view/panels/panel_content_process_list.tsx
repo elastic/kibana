@@ -146,7 +146,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     [pushToQueryParams, handleBringIntoViewClick, isProcessOrigin, isProcessTerminated]
   );
 
-  const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
+  const { processNodePositions } = useSelector(selectors.layout);
   const processTableView: ProcessTableView[] = useMemo(
     () =>
       [...processNodePositions.keys()].map((processEvent) => {

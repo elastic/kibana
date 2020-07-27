@@ -14,6 +14,7 @@ import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 
 const testAgentId = 'testAgentId';
 const testConfigId = 'testConfigId';
+const testHostId = 'randoHostId';
 
 /** Mock OS Platform for endpoint telemetry */
 export const MockOSPlatform = 'somePlatform';
@@ -30,6 +31,7 @@ export const MockOSFullName = 'somePlatformFullName';
  * @description We request the install and OS related telemetry information from the 'fleet-agents' saved objects in ingest_manager. This mocks that response
  */
 export const mockFleetObjectsResponse = (
+  hasDuplicates = true,
   lastCheckIn = new Date().toISOString()
 ): SavedObjectsFindResponse<Agent> => ({
   page: 1,
@@ -56,7 +58,44 @@ export const mockFleetObjectsResponse = (
           host: {
             hostname: 'testDesktop',
             name: 'testDesktop',
-            id: 'randoHostId',
+            id: testHostId,
+          },
+          os: {
+            platform: MockOSPlatform,
+            version: MockOSVersion,
+            name: MockOSName,
+            full: MockOSFullName,
+          },
+        },
+        packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
+        last_checkin: lastCheckIn,
+      },
+      references: [],
+      updated_at: lastCheckIn,
+      version: 'WzI4MSwxXQ==',
+      score: 0,
+    },
+    {
+      type: AGENT_SAVED_OBJECT_TYPE,
+      id: testAgentId,
+      attributes: {
+        active: true,
+        id: 'oldTestAgentId',
+        config_id: 'randoConfigId',
+        type: 'PERMANENT',
+        user_provided_metadata: {},
+        enrolled_at: lastCheckIn,
+        current_error_events: [],
+        local_metadata: {
+          elastic: {
+            agent: {
+              id: 'oldTestAgentId',
+            },
+          },
+          host: {
+            hostname: 'testDesktop',
+            name: 'testDesktop',
+            id: hasDuplicates ? testHostId : 'oldRandoHostId',
           },
           os: {
             platform: MockOSPlatform,
@@ -76,6 +115,111 @@ export const mockFleetObjectsResponse = (
   ],
 });
 
+const mockPolicyPayload = (
+  policyStatus: 'success' | 'warning' | 'failure',
+  policyMode: 'prevent' | 'detect' | 'off' = 'prevent'
+) =>
+  JSON.stringify({
+    'endpoint-security': {
+      Endpoint: {
+        configuration: {
+          inputs: [
+            {
+              id: '0d466df0-c60f-11ea-a5c5-151665e785c4',
+              policy: {
+                linux: {
+                  events: {
+                    file: true,
+                    network: true,
+                    process: true,
+                  },
+                  logging: {
+                    file: 'info',
+                  },
+                },
+                mac: {
+                  events: {
+                    file: true,
+                    network: true,
+                    process: true,
+                  },
+                  logging: {
+                    file: 'info',
+                  },
+                  malware: {
+                    mode: policyMode,
+                  },
+                },
+                windows: {
+                  events: {
+                    dll_and_driver_load: true,
+                    dns: true,
+                    file: true,
+                    network: true,
+                    process: true,
+                    registry: true,
+                    security: true,
+                  },
+                  logging: {
+                    file: 'info',
+                  },
+                  malware: {
+                    mode: policyMode,
+                  },
+                },
+              },
+            },
+          ],
+        },
+        policy: {
+          applied: {
+            id: '0d466df0-c60f-11ea-a5c5-151665e785c4',
+            response: {
+              configurations: {
+                malware: {
+                  concerned_actions: [
+                    'load_config',
+                    'workflow',
+                    'download_global_artifacts',
+                    'download_user_artifacts',
+                    'configure_malware',
+                    'read_malware_config',
+                    'load_malware_model',
+                    'read_kernel_config',
+                    'configure_kernel',
+                    'detect_process_events',
+                    'detect_file_write_events',
+                    'connect_kernel',
+                    'detect_file_open_events',
+                    'detect_sync_image_load_events',
+                  ],
+                  status: `${policyStatus}`,
+                },
+              },
+            },
+            status: `${policyStatus}`,
+          },
+        },
+      },
+      agent: {
+        id: 'testAgentId',
+        version: '8.0.0-SNAPSHOT',
+      },
+      host: {
+        architecture: 'x86_64',
+        id: 'a4148b63-1758-ab1f-a6d3-f95075cb1a9c',
+        os: {
+          Ext: {
+            variant: 'Windows 10 Pro',
+          },
+          full: 'Windows 10 Pro 2004 (10.0.19041.329)',
+          name: 'Windows',
+          version: '2004 (10.0.19041.329)',
+        },
+      },
+    },
+  });
+
 /**
  *
  * @param running - allows us to set whether the mocked endpoint is in an active or disabled/failed state
@@ -84,7 +228,9 @@ export const mockFleetObjectsResponse = (
  */
 export const mockFleetEventsObjectsResponse = (
   running?: boolean,
-  updatedDate = new Date().toISOString()
+  updatedDate = new Date().toISOString(),
+  policyStatus: 'success' | 'failure' = running ? 'success' : 'failure',
+  policyMode: 'prevent' | 'detect' | 'off' = 'prevent'
 ): SavedObjectsFindResponse<AgentEventSOAttributes> => {
   return {
     page: 1,
@@ -102,6 +248,7 @@ export const mockFleetEventsObjectsResponse = (
           message: `Application: endpoint-security--8.0.0[d8f7f6e8-9375-483c-b456-b479f1d7a4f2]: State changed to ${
             running ? 'RUNNING' : 'FAILED'
           }: `,
+          payload: running ? mockPolicyPayload(policyStatus, policyMode) : undefined,
           config_id: testConfigId,
         },
         references: [],

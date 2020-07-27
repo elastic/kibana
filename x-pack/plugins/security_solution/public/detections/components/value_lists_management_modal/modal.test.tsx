@@ -9,10 +9,8 @@ import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../common/mock';
 import { ValueListsModal } from './modal';
-import { waitForUpdates } from '../../../common/utils/test_utils';
 
-// TODO: These are occasionally timing out
-describe.skip('ValueListsModal', () => {
+describe('ValueListsModal', () => {
   it('renders nothing if showModal is false', () => {
     const container = mount(
       <TestProviders>
@@ -21,20 +19,21 @@ describe.skip('ValueListsModal', () => {
     );
 
     expect(container.find('EuiModal')).toHaveLength(0);
+    container.unmount();
   });
 
-  it('renders modal if showModal is true', async () => {
+  it('renders modal if showModal is true', () => {
     const container = mount(
       <TestProviders>
         <ValueListsModal showModal={true} onClose={jest.fn()} />
       </TestProviders>
     );
-    await waitForUpdates(container);
 
     expect(container.find('EuiModal')).toHaveLength(1);
+    container.unmount();
   });
 
-  it('calls onClose when modal is closed', async () => {
+  it('calls onClose when modal is closed', () => {
     const onClose = jest.fn();
     const container = mount(
       <TestProviders>
@@ -44,21 +43,19 @@ describe.skip('ValueListsModal', () => {
 
     container.find('button[data-test-subj="value-lists-modal-close-action"]').simulate('click');
 
-    await waitForUpdates(container);
-
     expect(onClose).toHaveBeenCalled();
+    container.unmount();
   });
 
-  it('renders ValueListsForm and ValueListsTable', async () => {
+  it('renders ValueListsForm and ValueListsTable', () => {
     const container = mount(
       <TestProviders>
         <ValueListsModal showModal={true} onClose={jest.fn()} />
       </TestProviders>
     );
 
-    await waitForUpdates(container);
-
     expect(container.find('ValueListsForm')).toHaveLength(1);
     expect(container.find('ValueListsTable')).toHaveLength(1);
+    container.unmount();
   });
 });

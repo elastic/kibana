@@ -38,7 +38,10 @@ describe('manifest_client', () => {
       await manifestClient.createManifest(manifest);
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         ManifestConstants.SAVED_OBJECT_TYPE,
-        manifest,
+        {
+          ...manifest,
+          created: expect.any(Number),
+        },
         { id: manifestClient.getManifestId() }
       );
     });

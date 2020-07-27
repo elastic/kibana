@@ -47,7 +47,7 @@ export const AddComment = React.memo<AddCommentProps>(
       options: { stripEmptyFields: false },
       schema,
     });
-
+    const { getFormData, setFieldValue, reset, submit } = form;
     const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CommentRequest>(
       form,
       'comment'
@@ -55,26 +55,23 @@ export const AddComment = React.memo<AddCommentProps>(
 
     useEffect(() => {
       if (insertQuote !== null) {
-        const { comment } = form.getFormData();
-        form.setFieldValue(
-          'comment',
-          `${comment}${comment.length > 0 ? '\n\n' : ''}${insertQuote}`
-        );
+        const { comment } = getFormData();
+        setFieldValue('comment', `${comment}${comment.length > 0 ? '\n\n' : ''}${insertQuote}`);
       }
-    }, [form, insertQuote]);
+    }, [getFormData, insertQuote, setFieldValue]);
 
     const handleTimelineClick = useTimelineClick();
 
     const onSubmit = useCallback(async () => {
-      const { isValid, data } = await form.submit();
+      const { isValid, data } = await submit();
       if (isValid) {
         if (onCommentSaving != null) {
           onCommentSaving();
         }
         postComment(data, onCommentPosted);
-        form.reset();
+        reset();
       }
-    }, [form, onCommentPosted, onCommentSaving, postComment]);
+    }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);
 
     return (
       <span id="add-comment-permLink">

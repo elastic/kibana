@@ -26,7 +26,6 @@ import {
 } from '../../../../../src/plugins/kibana_react/public';
 import { px, units } from '../style/variables';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
-import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { routes } from '../components/app/Main/route_config';
 import { history, resetHistory } from '../utils/history';
@@ -38,7 +37,7 @@ const MainContainer = styled.div`
   height: 100%;
 `;
 
-const App = () => {
+function App() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
@@ -52,19 +51,17 @@ const App = () => {
       <MainContainer data-test-subj="apmMainContainer" role="main">
         <UpdateBreadcrumbs routes={routes} />
         <Route component={ScrollToTopOnPathChange} />
-        <APMIndicesPermission>
-          <Switch>
-            {routes.map((route, i) => (
-              <ApmRoute key={i} {...route} />
-            ))}
-          </Switch>
-        </APMIndicesPermission>
+        <Switch>
+          {routes.map((route, i) => (
+            <ApmRoute key={i} {...route} />
+          ))}
+        </Switch>
       </MainContainer>
     </ThemeProvider>
   );
-};
+}
 
-const ApmAppRoot = ({
+function ApmAppRoot({
   core,
   deps,
   routerHistory,
@@ -74,7 +71,7 @@ const ApmAppRoot = ({
   deps: ApmPluginSetupDeps;
   routerHistory: typeof history;
   config: ConfigSchema;
-}) => {
+}) {
   const i18nCore = core.i18n;
   const plugins = deps;
   const apmPluginContextValue = {
@@ -114,7 +111,7 @@ const ApmAppRoot = ({
       </AlertsContextProvider>
     </ApmPluginContext.Provider>
   );
-};
+}
 
 /**
  * This module is rendered asynchronously in the Kibana platform.

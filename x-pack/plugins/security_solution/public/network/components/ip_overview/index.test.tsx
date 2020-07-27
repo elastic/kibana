@@ -9,6 +9,7 @@ import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowTarget } from '../../../graphql/types';
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,

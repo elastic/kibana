@@ -3,11 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { mean } from 'lodash';
 import {
   PROCESSOR_EVENT,
   HTTP_RESPONSE_STATUS_CODE,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
@@ -39,6 +41,7 @@ export async function getErrorRate({
     : [];
 
   const filter = [
+    { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { range: rangeFilter(start, end) },
     { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
@@ -82,5 +85,11 @@ export async function getErrorRate({
       }
     ) || [];
 
-  return { noHits, erroneousTransactionsRate };
+  const average = mean(
+    erroneousTransactionsRate
+      .map((errorRate) => errorRate.y)
+      .filter((y) => isFinite(y))
+  );
+
+  return { noHits, erroneousTransactionsRate, average };
 }

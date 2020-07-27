@@ -30,12 +30,15 @@ import {
 } from '../../state_syncing/global_sync';
 import { AppStateManager } from '../../state_syncing/app_state_manager';
 import { useAppStateSyncing } from '../../state_syncing/app_sync';
-import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { GisMap } from '../../../connected_components/gis_map';
+import { goToSpecifiedPath } from '../../maps_router';
+
+const unsavedChangesWarning = i18n.translate('xpack.maps.breadCrumbs.unsavedChangesWarning', {
+  defaultMessage: 'Your map has unsaved changes. Are you sure you want to leave?',
+});
 
 export class MapsAppView extends React.Component {
-  _visibleSubscription = null;
   _globalSyncUnsubscribe = null;
   _globalSyncChangeMonitorSubscription = null;
   _appSyncUnsubscribe = null;
@@ -47,20 +50,12 @@ export class MapsAppView extends React.Component {
       indexPatterns: [],
       prevIndexPatternIds: [],
       initialized: false,
-      isVisible: true,
       savedQuery: '',
-      currentPath: '',
       initialLayerListConfig: null,
     };
   }
 
   componentDidMount() {
-    const { savedMap, currentPath } = this.props;
-    this.setState({ currentPath });
-
-    getCoreChrome().docTitle.change(savedMap.title);
-    getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap.id);
-
     // Init sync utils
     // eslint-disable-next-line react-hooks/rules-of-hooks
     this._globalSyncUnsubscribe = useGlobalStateSyncing();
@@ -77,28 +72,71 @@ export class MapsAppView extends React.Component {
       this._updateStateFromSavedQuery(initAppState.savedQuery);
     }
 
-    // Monitor visibility
-    this._visibleSubscription = getCoreChrome()
-      .getIsVisible$()
-      .subscribe((isVisible) => this.setState({ isVisible }));
     this._initMap();
+
+    this._setBreadcrumbs();
+
+    this.props.onAppLeave((actions) => {
+      if (this._hasUnsavedChanges()) {
+        if (!window.confirm(unsavedChangesWarning)) {
+          return;
+        }
+      }
+      return actions.default();
+    });
   }
 
-  _initBreadcrumbUpdater = () => {
-    const { initialLayerListConfig, currentPath } = this.state;
-    updateBreadcrumbs(this.props.savedMap, initialLayerListConfig, currentPath);
-  };
-
-  componentDidUpdate(prevProps, prevState) {
-    const { currentPath: prevCurrentPath } = prevState;
-    const { currentPath, initialLayerListConfig } = this.state;
-    const { savedMap } = this.props;
-    if (savedMap && initialLayerListConfig && currentPath !== prevCurrentPath) {
-      updateBreadcrumbs(savedMap, initialLayerListConfig, currentPath);
-    }
+  componentDidUpdate() {
     // TODO: Handle null when converting to TS
     this._handleStoreChanges();
   }
+
+  componentWillUnmount() {
+    if (this._globalSyncUnsubscribe) {
+      this._globalSyncUnsubscribe();
+    }
+    if (this._appSyncUnsubscribe) {
+      this._appSyncUnsubscribe();
+    }
+    if (this._globalSyncChangeMonitorSubscription) {
+      this._globalSyncChangeMonitorSubscription.unsubscribe();
+    }
+
+    // Clean up app state filters
+    const { filterManager } = getData().query;
+    filterManager.filters.forEach((filter) => {
+      if (filter.$state.store === esFilters.FilterStateStore.APP_STATE) {
+        filterManager.removeFilter(filter);
+      }
+    });
+
+    getCoreChrome().setBreadcrumbs([]);
+  }
+
+  _hasUnsavedChanges() {
+    return this.props.hasUnsavedChanges(this.props.savedMap, this.state.initialLayerListConfig);
+  }
+
+  _setBreadcrumbs = () => {
+    getCoreChrome().setBreadcrumbs([
+      {
+        text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
+          defaultMessage: 'Maps',
+        }),
+        onClick: () => {
+          if (this._hasUnsavedChanges()) {
+            const navigateAway = window.confirm(unsavedChangesWarning);
+            if (navigateAway) {
+              goToSpecifiedPath('/');
+            }
+          } else {
+            goToSpecifiedPath('/');
+          }
+        },
+      },
+      { text: this.props.savedMap.title },
+    ]);
+  };
 
   _updateFromGlobalState = ({ changes, state: globalState }) => {
     if (!changes || !globalState) {
@@ -119,29 +157,6 @@ export class MapsAppView extends React.Component {
       this.props.dispatchSetQuery(refreshInterval, filters, this.state.query, time);
     });
   };
-
-  componentWillUnmount() {
-    if (this._globalSyncUnsubscribe) {
-      this._globalSyncUnsubscribe();
-    }
-    if (this._appSyncUnsubscribe) {
-      this._appSyncUnsubscribe();
-    }
-    if (this._visibleSubscription) {
-      this._visibleSubscription.unsubscribe();
-    }
-    if (this._globalSyncChangeMonitorSubscription) {
-      this._globalSyncChangeMonitorSubscription.unsubscribe();
-    }
-
-    // Clean up app state filters
-    const { filterManager } = getData().query;
-    filterManager.filters.forEach((filter) => {
-      if (filter.$state.store === esFilters.FilterStateStore.APP_STATE) {
-        filterManager.removeFilter(filter);
-      }
-    });
-  }
 
   _getInitialLayersFromUrlParam() {
     const locationSplit = window.location.href.split('?');
@@ -301,13 +316,9 @@ export class MapsAppView extends React.Component {
       this._getInitialLayersFromUrlParam()
     );
     this.props.replaceLayerList(layerList);
-    this.setState(
-      {
-        initialLayerListConfig: copyPersistentState(layerList),
-        savedMap,
-      },
-      this._initBreadcrumbUpdater
-    );
+    this.setState({
+      initialLayerListConfig: copyPersistentState(layerList),
+    });
   }
 
   _updateFiltersAndDispatch = (filters) => {
@@ -407,18 +418,10 @@ export class MapsAppView extends React.Component {
   }
 
   _renderTopNav() {
-    const {
-      query,
-      time,
-      savedQuery,
-      initialLayerListConfig,
-      isVisible,
-      indexPatterns,
-      currentPath,
-    } = this.state;
-    const { savedMap, refreshConfig } = this.props;
+    const { query, time, savedQuery, indexPatterns } = this.state;
+    const { savedMap, refreshConfig, isFullScreen } = this.props;
 
-    return isVisible ? (
+    return !isFullScreen ? (
       <MapsTopNavMenu
         savedMap={savedMap}
         query={query}
@@ -434,7 +437,6 @@ export class MapsAppView extends React.Component {
             callback
           );
         }}
-        initialLayerListConfig={initialLayerListConfig}
         indexPatterns={indexPatterns}
         updateFiltersAndDispatch={this._updateFiltersAndDispatch}
         onQuerySaved={(query) => {
@@ -448,7 +450,7 @@ export class MapsAppView extends React.Component {
           this._updateStateFromSavedQuery(query);
         }}
         syncAppAndGlobalState={this._syncAppAndGlobalState}
-        currentPath={currentPath}
+        setBreadcrumbs={this._setBreadcrumbs}
       />
     ) : null;
   }

@@ -13,6 +13,7 @@ import {
   deleteAllAlerts,
   deleteAllTimelines,
   deleteSignalsIndex,
+  waitFor,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -89,6 +90,16 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
+
+        // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
+        // This is to reduce flakiness where it can for a short period of time try to install the same rule twice.
+        await waitFor(async () => {
+          const { body } = await supertest
+            .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+          return body.rules_not_installed === 0;
+        });
 
         const { body } = await supertest
           .put(DETECTION_ENGINE_PREPACKAGED_URL)

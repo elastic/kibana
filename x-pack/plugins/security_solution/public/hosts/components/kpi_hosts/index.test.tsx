@@ -7,6 +7,7 @@
 import { mockKpiHostsData, mockKpiHostDetailsData } from './mock';
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
+import '../../../common/mock/match_media';
 import { KpiHostsComponentBase } from '.';
 import * as statItems from '../../../common/components/stat_items';
 import { kpiHostsMapping } from './kpi_hosts_mapping';

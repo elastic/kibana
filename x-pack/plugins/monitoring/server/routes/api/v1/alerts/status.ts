@@ -15,7 +15,6 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alert/{clusterUuid}/status',
-      options: { tags: ['access:monitoring'] },
       validate: {
         params: schema.object({
           clusterUuid: schema.string(),

@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-setup(core: CoreSetup, { expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
+setup(core: CoreSetup<DataStartDependencies, DataPublicPluginStart>, { expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  core | <code>CoreSetup</code> |  |
+|  core | <code>CoreSetup&lt;DataStartDependencies, DataPublicPluginStart&gt;</code> |  |
 |  { expressions, uiActions, usageCollection } | <code>DataSetupDependencies</code> |  |
 
 <b>Returns:</b>

@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
 import WatchServer from './watch_server';
 import WatchOptimizer, { STATUS } from './watch_optimizer';
-import { DllCompiler } from '../dynamic_dll_plugin';
-import { WatchCache } from './watch_cache';
 import { getNpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
@@ -36,12 +32,6 @@ export default async (kbnServer, kibanaHapiServer, config) => {
     sourceMaps: config.get('optimize.sourceMaps'),
     workers: config.get('optimize.workers'),
     prebuild: config.get('optimize.watchPrebuild'),
-    watchCache: new WatchCache({
-      logWithMetadata,
-      outputPath: config.get('path.data'),
-      dllsPath: DllCompiler.getRawDllConfig().outputPath,
-      cachePath: resolve(kbnServer.uiBundles.getCacheDirectory(), '../'),
-    }),
   });
 
   const server = new WatchServer(

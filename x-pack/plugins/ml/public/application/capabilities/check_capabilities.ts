@@ -10,7 +10,6 @@ import { hasLicenseExpired } from '../license';
 
 import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
 import { getCapabilities, getManageMlCapabilities } from './get_capabilities';
-import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
@@ -25,12 +24,10 @@ export function checkGetManagementMlJobsResolver() {
         if (isManageML === true && isPlatinumOrTrialLicense === true) {
           return resolve({ mlFeatureEnabledInSpace });
         } else {
-          window.location.href = ACCESS_DENIED_PATH;
           return reject();
         }
       })
       .catch((e) => {
-        window.location.href = ACCESS_DENIED_PATH;
         return reject();
       });
   });

@@ -93,14 +93,14 @@ describe('LayerPanel', () => {
   describe('layer reset and remove', () => {
     it('should show the reset button when single layer', () => {
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
-      expect(component.find('[data-test-subj="lns_layer_remove"]').first().text()).toContain(
+      expect(component.find('[data-test-subj="lnsLayerRemove"]').first().text()).toContain(
         'Reset layer'
       );
     });
 
     it('should show the delete button when multiple layers', () => {
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} isOnlyLayer={false} />);
-      expect(component.find('[data-test-subj="lns_layer_remove"]').first().text()).toContain(
+      expect(component.find('[data-test-subj="lnsLayerRemove"]').first().text()).toContain(
         'Delete layer'
       );
     });
@@ -109,7 +109,7 @@ describe('LayerPanel', () => {
       const cb = jest.fn();
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} onRemoveLayer={cb} />);
       act(() => {
-        component.find('[data-test-subj="lns_layer_remove"]').first().simulate('click');
+        component.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
       });
       expect(cb).toHaveBeenCalled();
     });

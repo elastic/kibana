@@ -12,6 +12,7 @@
 import React from 'react';
 
 import { TestProviders } from '../../../../../../common/mock';
+import '../../../../../../common/mock/match_media';
 
 import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';

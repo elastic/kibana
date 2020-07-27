@@ -322,9 +322,8 @@ export const PolicyList = React.memo(() => {
         }),
         render(pkg: Immutable<PackageData>) {
           return i18n.translate('xpack.securitySolution.endpoint.policyList.versionField', {
-            defaultMessage: '{title} v{version}',
+            defaultMessage: 'v{version}',
             values: {
-              title: pkg.title,
               version: pkg.version,
             },
           });
@@ -396,7 +395,7 @@ export const PolicyList = React.memo(() => {
         data-test-subj="policyListPage"
         headerLeft={
           <>
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
                   <h1 data-test-subj="pageViewHeaderLeftTitle">

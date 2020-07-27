@@ -4,23 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ESFilter } from '../../../typings/elasticsearch';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { UIFilters } from '../../../typings/ui_filters';
 import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeFilter } from '../../../common/utils/range_filter';
+import { ESFilter } from '../../../typings/elasticsearch';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { percentMemoryUsedScript } from '../metrics/by_agent/shared/memory';
 import {
   TRANSACTION_REQUEST,
   TRANSACTION_PAGE_LOAD,
 } from '../../../common/transaction_types';
+import { getErrorRate } from '../transaction_groups/get_error_rate';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 interface Options {
@@ -30,69 +33,72 @@ interface Options {
 }
 
 interface TaskParameters {
-  setup: Setup;
-  minutes: number;
+  environment?: string;
   filter: ESFilter[];
+  minutes: number;
+  serviceName?: string;
+  setup: Setup;
 }
 
 export async function getServiceMapServiceNodeInfo({
   serviceName,
-  environment,
   setup,
-}: Options & { serviceName: string; environment?: string }) {
+  uiFilters,
+}: Options & { serviceName: string; uiFilters: UIFilters }) {
   const { start, end } = setup;
 
   const filter: ESFilter[] = [
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getEnvironmentUiFilterES(environment),
+    ...getEnvironmentUiFilterES(uiFilters.environment),
   ];
 
   const minutes = Math.abs((end - start) / (1000 * 60));
-  const taskParams = { setup, minutes, filter };
+  const taskParams = {
+    environment: uiFilters.environment,
+    filter,
+    minutes,
+    serviceName,
+    setup,
+  };
 
   const [
-    errorMetrics,
+    errorStats,
     transactionStats,
-    cpuMetrics,
-    memoryMetrics,
+    cpuStats,
+    memoryStats,
   ] = await Promise.all([
-    getErrorMetrics(taskParams),
+    getErrorStats(taskParams),
     getTransactionStats(taskParams),
-    getCpuMetrics(taskParams),
-    getMemoryMetrics(taskParams),
+    getCpuStats(taskParams),
+    getMemoryStats(taskParams),
   ]);
-
   return {
-    ...errorMetrics,
+    ...errorStats,
     transactionStats,
-    ...cpuMetrics,
-    ...memoryMetrics,
+    ...cpuStats,
+    ...memoryStats,
   };
 }
 
-async function getErrorMetrics({ setup, minutes, filter }: TaskParameters) {
-  const { client, indices } = setup;
-
-  const response = await client.search({
-    index: indices['apm_oss.errorIndices'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: filter.concat({ term: { [PROCESSOR_EVENT]: 'error' } }),
-        },
-      },
-      track_total_hits: true,
-    },
-  });
-
-  return {
-    avgErrorsPerMinute:
-      response.hits.total.value > 0
-        ? response.hits.total.value / minutes
-        : null,
+async function getErrorStats({
+  setup,
+  serviceName,
+  environment,
+}: {
+  setup: Options['setup'];
+  serviceName: string;
+  environment?: string;
+}) {
+  const setupWithBlankUiFilters = {
+    ...setup,
+    uiFiltersES: getEnvironmentUiFilterES(environment),
   };
+  const { noHits, average } = await getErrorRate({
+    setup: setupWithBlankUiFilters,
+    serviceName,
+  });
+  return { avgErrorRate: noHits ? null : average };
 }
 
 async function getTransactionStats({
@@ -113,7 +119,7 @@ async function getTransactionStats({
         bool: {
           filter: [
             ...filter,
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             {
               terms: {
                 [TRANSACTION_TYPE]: [
@@ -137,7 +143,7 @@ async function getTransactionStats({
   };
 }
 
-async function getCpuMetrics({
+async function getCpuStats({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
@@ -150,7 +156,7 @@ async function getCpuMetrics({
       query: {
         bool: {
           filter: filter.concat([
-            { term: { [PROCESSOR_EVENT]: 'metric' } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
             { exists: { field: METRIC_SYSTEM_CPU_PERCENT } },
           ]),
         },
@@ -162,7 +168,7 @@ async function getCpuMetrics({
   return { avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null };
 }
 
-async function getMemoryMetrics({
+async function getMemoryStats({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {

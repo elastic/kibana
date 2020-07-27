@@ -8,6 +8,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import '../../../common/mock/match_media';
 import { mockIndexPattern } from '../../../common/mock/index_pattern';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { HostDetailsTabs } from './details_tabs';

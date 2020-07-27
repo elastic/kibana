@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useState, useMemo, useCallback } from 'react';
+import React, { ReactNode, useState, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import {
   EuiI18nNumber,
   EuiSelectable,
@@ -15,6 +15,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { Matrix3 } from '../types';
 
 /**
  * i18n-translated titles for submenus and identifiers for display of states:
@@ -133,6 +134,7 @@ const NodeSubMenuComponents = React.memo(
     menuAction,
     optionsWithActions,
     className,
+    projectionMatrix,
   }: {
     menuTitle: string;
     className?: string;
@@ -140,9 +142,16 @@ const NodeSubMenuComponents = React.memo(
     buttonBorderColor: ButtonColor;
     buttonFill: string;
     count?: number;
+    /**
+     * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.
+     */
+    projectionMatrix: Matrix3;
   } & {
     optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
   }) => {
+    // keep a ref to the popover so we can call its reposition method
+    const popoverRef = useRef<EuiPopover>(null);
+
     const [menuIsOpen, setMenuOpen] = useState(false);
     const handleMenuOpenClick = useCallback(
       (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -168,6 +177,28 @@ const NodeSubMenuComponents = React.memo(
     const popoverId = idGenerator('submenu-popover');
 
     const isMenuLoading = optionsWithActions === 'waitingForRelatedEventData';
+
+    // The last projection matrix that was used to position the popover
+    const projectionMatrixAtLastRender = useRef<Matrix3>();
+
+    useLayoutEffect(() => {
+      if (
+        /**
+         * If there is a popover component reference,
+         * and this isn't the first render,
+         * and the projectionMatrix has changed since last render,
+         * then force the popover to reposition itself.
+         */
+        popoverRef.current &&
+        projectionMatrixAtLastRender.current &&
+        projectionMatrixAtLastRender.current !== projectionMatrix
+      ) {
+        popoverRef.current.positionPopoverFixed();
+      }
+
+      // no matter what, keep track of the last project matrix that was used to size the popover
+      projectionMatrixAtLastRender.current = projectionMatrix;
+    }, [projectionMatrixAtLastRender, projectionMatrix]);
 
     if (!optionsWithActions) {
       /**
@@ -216,6 +247,7 @@ const NodeSubMenuComponents = React.memo(
           isOpen={menuIsOpen}
           closePopover={closePopover}
           repositionOnScroll
+          ref={popoverRef}
         >
           {menuIsOpen && typeof optionsWithActions === 'object' && (
             <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />

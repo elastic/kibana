@@ -48,7 +48,7 @@ module.exports = function (grunt) {
     grunt.task.run(['run:karmaTestServer', ...ciShardTasks]);
   });
 
-  grunt.registerTask('test:coverage', ['run:testCoverageServer', 'karma:coverage']);
+  grunt.registerTask('test:coverage', ['run:karmaTestCoverageServer', 'karma:coverage']);
 
   grunt.registerTask('test:quick', [
     'checkPlugins',

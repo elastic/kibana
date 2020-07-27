@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { ENDPOINT_LIST_ID } from '../../../../plugins/lists/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -20,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
         namespace_type: 'agnostic',
         description: 'bad endpoint item for testing',
         name: 'bad endpoint item',
-        list_id: 'endpoint_list',
+        list_id: ENDPOINT_LIST_ID,
         type: 'simple',
         entries: [
           {
@@ -50,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         namespace_type: 'agnostic',
         description: 'bad endpoint item for testing',
         name: 'bad endpoint item',
-        list_id: 'endpoint_list',
+        list_id: ENDPOINT_LIST_ID,
         type: 'simple',
         entries: [
           {

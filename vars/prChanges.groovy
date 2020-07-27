@@ -2,6 +2,8 @@ import groovy.transform.Field
 
 public static @Field PR_CHANGES_CACHE = []
 
+// if all the changed files in a PR match one of these regular
+// expressions then CI will be skipped for that PR
 def getSkippablePaths() {
   return [
     /^docs\//,
@@ -14,6 +16,15 @@ def getSkippablePaths() {
   ]
 }
 
+// exclusion regular expressions that will invalidate paths that
+// match one of the skippable path regular expressions
+def getNotSkippablePaths() {
+  return [
+    // this file is auto-generated and changes to it need to be validated with CI
+    /^docs\/developer\/architecture\/code-exploration.asciidoc$/,
+  ]
+}
+
 def areChangesSkippable() {
   if (!githubPr.isPr()) {
     return false
@@ -21,6 +32,7 @@ def areChangesSkippable() {
 
   try {
     def skippablePaths = getSkippablePaths()
+    def notSkippablePaths = getNotSkippablePaths()
     def files = getChangedFiles()
 
     // 3000 is the max files GH API will return
@@ -29,7 +41,8 @@ def areChangesSkippable() {
     }
 
     files = files.findAll { file ->
-      return !skippablePaths.find { regex -> file =~ regex}
+      def skippable = skippablePaths.find { regex -> file =~ regex} && !notSkippablePaths.find { regex -> file =~ regex }
+      return !skippable
     }
 
     return files.size() < 1

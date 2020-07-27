@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
@@ -143,13 +144,19 @@ export const SettingsPage: React.FC = () => {
     </>
   );
 
+  const history = useHistory();
+
   return (
     <>
-      <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeSettingsToOverviewLink">
-        <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {Translations.settings.returnToOverviewLinkLabel}
-        </EuiButtonEmpty>
-      </Link>
+      <EuiButtonEmpty
+        color="primary"
+        data-test-subj="uptimeSettingsToOverviewLink"
+        iconType="arrowLeft"
+        href={history.createHref({ pathname: OVERVIEW_ROUTE })}
+        size="s"
+      >
+        {Translations.settings.returnToOverviewLinkLabel}
+      </EuiButtonEmpty>
       <EuiSpacer size="s" />
       <EuiPanel>
         <EuiFlexGroup>

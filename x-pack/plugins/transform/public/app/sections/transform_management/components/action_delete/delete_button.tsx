@@ -6,7 +6,7 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { TRANSFORM_STATE } from '../../../../../../common';
 import {
   AuthorizationContext,
@@ -29,7 +29,7 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
   const disabled = items.some(transformCanNotBeDeleted);
   const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
 
-  const buttonDeleteText = i18n.translate('xpack.transform.transformList.deleteActionName', {
+  const buttonText = i18n.translate('xpack.transform.transformList.deleteActionName', {
     defaultMessage: 'Delete',
   });
   const bulkDeleteButtonDisabledText = i18n.translate(
@@ -46,16 +46,20 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
   );
 
   const buttonDisabled = forceDisable === true || disabled || !canDeleteTransform;
-  let deleteButton = (
-    <EuiLink
+
+  const button = (
+    <EuiButtonEmpty
+      aria-label={buttonText}
+      color="text"
       data-test-subj="transformActionDelete"
-      color={buttonDisabled ? 'subdued' : 'text'}
-      disabled={buttonDisabled}
-      onClick={buttonDisabled ? undefined : () => onClick(items)}
-      aria-label={buttonDeleteText}
+      flush="left"
+      iconType="trash"
+      isDisabled={buttonDisabled}
+      onClick={() => onClick(items)}
+      size="s"
     >
-      <EuiIcon type="trash" /> {buttonDeleteText}
-    </EuiLink>
+      {buttonText}
+    </EuiButtonEmpty>
   );
 
   if (disabled || !canDeleteTransform) {
@@ -66,12 +70,12 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
       content = createCapabilityFailureMessage('canDeleteTransform');
     }
 
-    deleteButton = (
+    return (
       <EuiToolTip position="top" content={content}>
-        {deleteButton}
+        {button}
       </EuiToolTip>
     );
   }
 
-  return deleteButton;
+  return button;
 };

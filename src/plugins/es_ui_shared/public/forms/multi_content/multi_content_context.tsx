@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback, createContext, useContext } from 'react';
+import React, { useEffect, useCallback, createContext, useContext, useRef } from 'react';
 
 import { useMultiContent, HookProps, Content, MultiContent } from './use_multi_content';
 
@@ -55,7 +55,14 @@ export function useMultiContentContext<T extends object = { [key: string]: any }
  * @param contentId The content id to be added to the "contents" map
  */
 export function useContent<T extends object, K extends keyof T>(contentId: K) {
-  const { updateContentAt, saveSnapshotAndRemoveContent, getData } = useMultiContentContext<T>();
+  const isMounted = useRef(false);
+  const defaultValue = useRef<T[K] | undefined>(undefined);
+  const {
+    updateContentAt,
+    saveSnapshotAndRemoveContent,
+    getData,
+    getSingleContentData,
+  } = useMultiContentContext<T>();
 
   const updateContent = useCallback(
     (content: Content) => {
@@ -71,12 +78,22 @@ export function useContent<T extends object, K extends keyof T>(contentId: K) {
     };
   }, [contentId, saveSnapshotAndRemoveContent]);
 
-  const data = getData();
-  const defaultValue = data[contentId];
+  useEffect(() => {
+    if (isMounted.current === false) {
+      isMounted.current = true;
+    }
+  }, []);
+
+  if (isMounted.current === false) {
+    // Only read the default value once, on component mount to avoid re-rendering the
+    // consumer each time the multi-content validity ("isValid") changes.
+    defaultValue.current = getSingleContentData(contentId);
+  }
 
   return {
-    defaultValue,
+    defaultValue: defaultValue.current!,
     updateContent,
     getData,
+    getSingleContentData,
   };
 }

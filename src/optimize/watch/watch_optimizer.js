@@ -19,7 +19,6 @@
 
 import BaseOptimizer from '../base_optimizer';
 import { createBundlesRoute } from '../bundles_route';
-import { DllCompiler } from '../dynamic_dll_plugin';
 import { fromRoot } from '../../core/server/utils';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
@@ -35,16 +34,12 @@ export default class WatchOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
     this.prebuild = opts.prebuild || false;
-    this.watchCache = opts.watchCache;
     this.status$ = new Rx.ReplaySubject(1);
   }
 
   async init() {
     this.initializing = true;
     this.initialBuildComplete = false;
-
-    // try reset the watch optimizer cache
-    await this.watchCache.tryReset();
 
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);
@@ -120,7 +115,6 @@ export default class WatchOptimizer extends BaseOptimizer {
         npUiPluginPublicDirs: npUiPluginPublicDirs,
         buildHash,
         regularBundlesPath: this.compiler.outputPath,
-        dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
         basePublicPath: basePath,
         builtCssPath: fromRoot('built_assets/css'),
       })

@@ -42,7 +42,7 @@ class PackageConfigService {
     soClient: SavedObjectsClientContract,
     callCluster: CallESAsCurrentUser,
     packageConfig: NewPackageConfig,
-    options?: { id?: string; user?: AuthenticatedUser }
+    options?: { id?: string; user?: AuthenticatedUser; bumpConfigRevision?: boolean }
   ): Promise<PackageConfig> {
     // Check that its agent config does not have a package config with the same name
     const parentAgentConfig = await agentConfigService.get(soClient, packageConfig.config_id);
@@ -104,6 +104,7 @@ class PackageConfigService {
     // Assign it to the given agent config
     await agentConfigService.assignPackageConfigs(soClient, packageConfig.config_id, [newSo.id], {
       user: options?.user,
+      bumpRevision: options?.bumpConfigRevision ?? true,
     });
 
     return {
@@ -117,7 +118,7 @@ class PackageConfigService {
     soClient: SavedObjectsClientContract,
     packageConfigs: NewPackageConfig[],
     configId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; bumpConfigRevision?: boolean }
   ): Promise<PackageConfig[]> {
     const isoDate = new Date().toISOString();
     const { saved_objects: newSos } = await soClient.bulkCreate<PackageConfigSOAttributes>(
@@ -142,6 +143,7 @@ class PackageConfigService {
       newSos.map((newSo) => newSo.id),
       {
         user: options?.user,
+        bumpRevision: options?.bumpConfigRevision ?? true,
       }
     );
 

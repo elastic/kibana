@@ -13,7 +13,7 @@ the amount of bookkeeping when working with indices. Instead of manually
 setting up your indices, you can create them automatically from a template,
 ensuring that your settings, mappings, and aliases are consistently defined.
 
-To manage your indices, open the menu, then go to *Stack Management > {es} > Index Management*.
+To manage your indices, open the menu, then go to *Stack Management > Data > Index Management*.
 
 [role="screenshot"]
 image::images/management_index_labels.png[Index Management UI]
@@ -130,17 +130,17 @@ Alternatively, you can click the *Load JSON* link and define the mapping as JSON
 
 [source,js]
 ----------------------------------
-{	
+{
   "properties": {
     "geo": {
-      "properties": {	
-        "coordinates": {	
-          "type": "geo_point"	
-        }  	
-      }    	
-    }	
-  }	
-}	
+      "properties": {
+        "coordinates": {
+          "type": "geo_point"
+        }
+      }
+    }
+  }
+}
 ----------------------------------
 
 You can create additional mapping configurations in the *Dynamic templates* and

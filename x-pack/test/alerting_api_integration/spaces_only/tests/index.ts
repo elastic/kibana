@@ -27,7 +27,7 @@ export default function alertingApiIntegrationTests({
       }
     });
 
-    after(() => esArchiver.unload('empty_kibana'));
+    after(async () => await esArchiver.unload('empty_kibana'));
 
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./alerting'));

@@ -51,8 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
     await deleteComposableIndexTemplate(name);
   };
 
-  // Temporarily skipping tests until ES snapshot is updated
-  describe.skip('Data streams', function () {
+  describe('Data streams', function () {
     describe('Get', () => {
       const testDataStreamName = 'test-data-stream';
 
