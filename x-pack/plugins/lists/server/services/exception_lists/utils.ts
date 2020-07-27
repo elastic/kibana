@@ -7,9 +7,7 @@ import uuid from 'uuid';
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
 import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
-import { ErrorWithStatusCode } from '../../error_with_status_code';
 import {
-  Comment,
   CommentsArray,
   CreateComment,
   CreateCommentsArray,
@@ -19,7 +17,6 @@ import {
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   NamespaceType,
-  UpdateComment,
   UpdateCommentsArrayOrUndefined,
   exceptionListItemType,
   exceptionListType,
@@ -304,80 +301,14 @@ export const transformUpdateCommentsToComments = ({
   existingComments: CommentsArray;
   user: string;
 }): CommentsArray => {
-  if (comments == null && existingComments.length > 0) {
-    // cannot delete, only append at the moment
-    // TODO: Add new comments endpoint to fully support CRUD
-    throw new ErrorWithStatusCode(
-      'Empty "[]" passed to "comments" - detected existing comments. Comment cannot be deleted.',
-      401
-    );
-  }
-
-  if (comments != null && comments.length < existingComments.length) {
-    // cannot delete, only append at the moment
-    // TODO: Add new comments endpoint to fully support CRUD
-    throw new ErrorWithStatusCode('Comment cannot be deleted.', 401);
-  }
-
-  if (comments == null && existingComments.length === 0) {
-    return [];
-  }
-
   const incomingComments = comments ?? [];
-
-  return incomingComments.map<Comment>((item, index) => {
-    const matchingCommentByIndex = existingComments[index];
-    const idMatches = matchingCommentByIndex && item.id === matchingCommentByIndex.id;
-
-    // cannot delete, only append at the moment
-    // TODO: Add new comments endpoint to fully support CRUD
-    if (!idMatches && index < existingComments.length) {
-      throw new ErrorWithStatusCode(`Cannot delete comment id: ${matchingCommentByIndex.id}`, 401);
-    } else if (!matchingCommentByIndex && index > existingComments.length - 1) {
-      const [newComment] = transformCreateCommentsToComments({
-        incomingComments: [{ ...item }],
-        user,
-      });
-      return newComment;
-    } else {
-      return transformUpdateComments({
-        existingComment: matchingCommentByIndex,
-        incomingComment: item,
-        user,
-      });
-    }
+  const newComments = incomingComments.filter((comment) => comment.id == null);
+  const newCommentsFormatted = transformCreateCommentsToComments({
+    incomingComments: newComments,
+    user,
   });
-};
 
-export const transformUpdateComments = ({
-  incomingComment,
-  existingComment,
-  user,
-}: {
-  incomingComment: UpdateComment;
-  existingComment: Comment;
-  user: string;
-}): Comment => {
-  if (incomingComment.id == null) {
-    throw new ErrorWithStatusCode(`Unable to update comment, missing "id"`, 401);
-  } else if (
-    incomingComment.comment !== existingComment.comment &&
-    existingComment.created_by !== user
-  ) {
-    // existing comment is being edited, can only be edited by author
-    throw new ErrorWithStatusCode('Not authorized to edit others comments', 401);
-  } else if (incomingComment.comment !== existingComment.comment) {
-    const dateNow = new Date().toISOString();
-
-    return {
-      ...existingComment,
-      comment: incomingComment.comment,
-      updated_at: dateNow,
-      updated_by: user,
-    };
-  } else {
-    return existingComment;
-  }
+  return [...existingComments, ...newCommentsFormatted];
 };
 
 export const transformCreateCommentsToComments = ({

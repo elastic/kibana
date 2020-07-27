@@ -79,6 +79,6 @@ export const VERSION_CONFLICT_ERROR_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.exceptions.editException.versionConflictDescription',
   {
     defaultMessage:
-      "It appears this item was updated since you first selected to edit it. Selecting 'Cancel' and re-entering the modal should remove this error.",
+      "It appears this exception was updated since you first selected to edit it. Try clicking 'Cancel' and editing the exception again.",
   }
 );

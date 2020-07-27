@@ -153,8 +153,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   }, [shouldDisableBulkClose]);
 
   const isSubmitButtonDisabled = useMemo(
-    () => exceptionItemsToAdd.every((item) => item.entries.length === 0),
-    [exceptionItemsToAdd]
+    () => exceptionItemsToAdd.every((item) => item.entries.length === 0) || hasVersionConflict,
+    [exceptionItemsToAdd, hasVersionConflict]
   );
 
   const handleBuilderOnChange = useCallback(
@@ -184,8 +184,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const enrichExceptionItems = useCallback(() => {
     const [exceptionItemToEdit] = exceptionItemsToAdd;
-    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
-    enriched = [
+    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [
       {
         ...enrichExistingExceptionItemWithComments(exceptionItemToEdit, [
           ...exceptionItem.comments,
@@ -228,7 +227,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
               <ExceptionBuilder
-                exceptionListItems={hasVersionConflict ? exceptionItemsToAdd : [exceptionItem]}
+                exceptionListItems={[exceptionItem]}
                 listType={exceptionListType}
                 listId={exceptionItem.list_id}
                 listNamespaceType={exceptionItem.namespace_type}

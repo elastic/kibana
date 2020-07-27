@@ -7,11 +7,7 @@ import sinon from 'sinon';
 import moment from 'moment';
 import uuid from 'uuid';
 
-import {
-  transformCreateCommentsToComments,
-  transformUpdateComments,
-  transformUpdateCommentsToComments,
-} from './utils';
+import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from './utils';
 
 jest.mock('uuid/v4');
 
@@ -37,57 +33,24 @@ describe('utils', () => {
   });
 
   describe('#transformUpdateCommentsToComments', () => {
-    test('it throws if incoming comments is null and comments exist', () => {
-      expect(() =>
-        transformUpdateCommentsToComments({
-          comments: undefined,
-          existingComments: [
-            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily', id: '1' },
-          ],
-          user: 'lily',
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Empty \\"[]\\" passed to \\"comments\\" - detected existing comments. Comments cannot be deleted."`
-      );
-    });
-
-    test('it returns empty array if "comments" is undefined and no comments exist', () => {
+    test('it formats new comments', () => {
       const comments = transformUpdateCommentsToComments({
-        comments: undefined,
+        comments: [{ comment: 'Im a new comment' }],
         existingComments: [],
         user: 'lily',
       });
 
-      expect(comments).toEqual([]);
+      expect(comments).toEqual([
+        {
+          comment: 'Im a new comment',
+          created_at: dateNow,
+          created_by: 'lily',
+          id: '123',
+        },
+      ]);
     });
 
-    test('it throws if incoming comments count is less than existing comments count', () => {
-      expect(() =>
-        transformUpdateCommentsToComments({
-          comments: [{ comment: 'Im an old comment', id: '1' }],
-          existingComments: [
-            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily', id: '1' },
-            { comment: 'Im another old comment', created_at: oldDate, created_by: 'lily', id: '2' },
-          ],
-          user: 'lily',
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"Comments cannot be deleted."`);
-    });
-
-    test('it throws if matching id is not found', () => {
-      expect(() =>
-        transformUpdateCommentsToComments({
-          comments: [{ comment: 'Im an old comment', id: '1' }, { comment: 'Im a new comment' }],
-          existingComments: [
-            { comment: 'Im an old comment', created_at: oldDate, created_by: 'lily', id: '1' },
-            { comment: 'Im another old comment', created_at: oldDate, created_by: 'lily', id: '2' },
-          ],
-          user: 'lily',
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"Cannot delete comment id: 2"`);
-    });
-
-    test('it creates comment if checked that all existing comments are accounted for', () => {
+    test('it formats new comments and preserves existing comments', () => {
       const comments = transformUpdateCommentsToComments({
         comments: [{ comment: 'Im an old comment', id: '1' }, { comment: 'Im a new comment' }],
         existingComments: [
@@ -112,16 +75,11 @@ describe('utils', () => {
       ]);
     });
 
-    test('it updates comments of matching ids if comment text differs and user matches creator', () => {
+    test('it returns existing comments if empty array passed for "comments"', () => {
       const comments = transformUpdateCommentsToComments({
-        comments: [
-          { comment: 'Im an old comment', id: '1' },
-          { comment: 'Im trying to update an old comment', id: '2' },
-          { comment: 'Im a new comment' },
-        ],
+        comments: [],
         existingComments: [
           { comment: 'Im an old comment', created_at: oldDate, created_by: 'bane', id: '1' },
-          { comment: 'Im another old comment', created_at: oldDate, created_by: 'lily', id: '2' },
         ],
         user: 'lily',
       });
@@ -133,59 +91,12 @@ describe('utils', () => {
           created_by: 'bane',
           id: '1',
         },
-        {
-          comment: 'Im trying to update an old comment',
-          created_at: oldDate,
-          created_by: 'lily',
-          id: '2',
-          updated_at: dateNow,
-          updated_by: 'lily',
-        },
-        {
-          comment: 'Im a new comment',
-          created_at: dateNow,
-          created_by: 'lily',
-          id: '123',
-        },
       ]);
     });
 
-    test('it returns existing comment if comment text does not differ', () => {
+    test('it acts as append only, only modifying new comments', () => {
       const comments = transformUpdateCommentsToComments({
-        comments: [
-          { comment: 'Im an old comment', id: '1' },
-          { comment: 'Im another old comment', id: '2' },
-        ],
-        existingComments: [
-          { comment: 'Im an old comment', created_at: oldDate, created_by: 'bane', id: '1' },
-          { comment: 'Im another old comment', created_at: oldDate, created_by: 'lily', id: '2' },
-        ],
-        user: 'lily',
-      });
-
-      expect(comments).toEqual([
-        {
-          comment: 'Im an old comment',
-          created_at: oldDate,
-          created_by: 'bane',
-          id: '1',
-        },
-        {
-          comment: 'Im another old comment',
-          created_at: oldDate,
-          created_by: 'lily',
-          id: '2',
-        },
-      ]);
-    });
-
-    test('it formats multiple newly added comments', () => {
-      const comments = transformUpdateCommentsToComments({
-        comments: [
-          { comment: 'Im an old comment', id: '1' },
-          { comment: 'Im a new comment' },
-          { comment: 'Im another new comment' },
-        ],
+        comments: [{ comment: 'Im a new comment' }],
         existingComments: [
           { comment: 'Im an old comment', created_at: oldDate, created_by: 'bane', id: '1' },
         ],
@@ -204,12 +115,6 @@ describe('utils', () => {
           created_at: dateNow,
           created_by: 'lily',
           id: '123',
-        },
-        {
-          comment: 'Im another new comment',
-          created_at: dateNow,
-          created_by: 'lily',
-          id: '456',
         },
       ]);
     });
@@ -236,91 +141,6 @@ describe('utils', () => {
           id: '456',
         },
       ]);
-    });
-  });
-
-  describe('#transformUpdateComments', () => {
-    test('it throws if incoming comment does not have an id', () => {
-      expect(() =>
-        transformUpdateComments({
-          existingComment: {
-            comment: 'Im an existing comment',
-            created_at: oldDate,
-            created_by: 'lily',
-            id: '1',
-          },
-          incomingComment: {
-            comment: 'Im updating an old comment',
-          },
-          user: 'bane',
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"Unable to update comment, missing \\"id\\""`);
-    });
-
-    test('it throws if user tries to update an existing comment that is not their own', () => {
-      expect(() =>
-        transformUpdateComments({
-          existingComment: {
-            comment: 'Im an existing comment',
-            created_at: oldDate,
-            created_by: 'lily',
-            id: '1',
-          },
-          incomingComment: {
-            comment: 'Im updating an old comment',
-            id: '1',
-          },
-          user: 'bane',
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"Not authorized to edit others comments"`);
-    });
-
-    test('it allows user to update a comment that is their own', () => {
-      const comments = transformUpdateComments({
-        existingComment: {
-          comment: 'Im an existing comment',
-          created_at: oldDate,
-          created_by: 'lily',
-          id: '1',
-        },
-        incomingComment: {
-          comment: 'Im updating an old comment',
-          id: '1',
-        },
-        user: 'lily',
-      });
-
-      expect(comments).toEqual({
-        comment: 'Im updating an old comment',
-        created_at: oldDate,
-        created_by: 'lily',
-        id: '1',
-        updated_at: dateNow,
-        updated_by: 'lily',
-      });
-    });
-
-    test('it returns existing comment without any changes if incoming comment matches existing comment', () => {
-      const comments = transformUpdateComments({
-        existingComment: {
-          comment: 'Im an existing comment',
-          created_at: oldDate,
-          created_by: 'lily',
-          id: '1',
-        },
-        incomingComment: {
-          comment: 'Im an existing comment',
-          id: '1',
-        },
-        user: 'lily',
-      });
-
-      expect(comments).toEqual({
-        comment: 'Im an existing comment',
-        created_at: oldDate,
-        created_by: 'lily',
-        id: '1',
-      });
     });
   });
 });
