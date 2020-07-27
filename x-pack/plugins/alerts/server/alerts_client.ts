@@ -392,7 +392,7 @@ export class AlertsClient {
           console.log(`RESCHEDULING:${updateResult.scheduledTaskId}`);
           // eslint-disable-next-line no-console
           console.log(`:::::::::::::::::::::::::::::::::::::::::::::::::`);
-          return this.taskManager
+          this.taskManager
             .runNow(updateResult.scheduledTaskId)
             .then((res: unknown) => {
               // eslint-disable-next-line no-console
