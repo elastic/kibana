@@ -32,7 +32,7 @@ describe('clearStateFromSavedQuery', () => {
   it('should clear filters and query', async () => {
     dataMock.query.filterManager.removeAll = jest.fn();
     clearStateFromSavedQuery(dataMock.query);
-    expect(dataMock.query.queryString.setQuery).toHaveBeenCalled();
+    expect(dataMock.query.queryString.clearQuery).toHaveBeenCalled();
     expect(dataMock.query.filterManager.removeAll).toHaveBeenCalled();
   });
 });
