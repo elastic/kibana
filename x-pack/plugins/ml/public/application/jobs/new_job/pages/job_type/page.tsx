@@ -87,7 +87,7 @@ export const Page: FC = () => {
 
   const jobTypes = [
     {
-      onClick: () => navigateToPath('/jobs/new_job/single_metric'),
+      onClick: () => navigateToPath(`/jobs/new_job/single_metric${getUrlParams()}`),
       icon: {
         type: 'createSingleMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricAriaLabel', {
@@ -103,7 +103,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkSingleMetricJob',
     },
     {
-      onClick: () => navigateToPath('/jobs/new_job/multi_metric'),
+      onClick: () => navigateToPath(`/jobs/new_job/multi_metric${getUrlParams()}`),
       icon: {
         type: 'createMultiMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel', {
@@ -120,7 +120,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkMultiMetricJob',
     },
     {
-      onClick: () => navigateToPath('/jobs/new_job/population'),
+      onClick: () => navigateToPath(`/jobs/new_job/population${getUrlParams()}`),
       icon: {
         type: 'createPopulationJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.populationAriaLabel', {
@@ -137,7 +137,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkPopulationJob',
     },
     {
-      onClick: () => navigateToPath('/jobs/new_job/advanced'),
+      onClick: () => navigateToPath(`/jobs/new_job/advanced${getUrlParams()}`),
       icon: {
         type: 'createAdvancedJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedAriaLabel', {
@@ -154,7 +154,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkAdvancedJob',
     },
     {
-      onClick: () => navigateToPath('/jobs/new_job/categorization'),
+      onClick: () => navigateToPath(`/jobs/new_job/categorization${getUrlParams()}`),
       icon: {
         type: CategorizationIcon,
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
