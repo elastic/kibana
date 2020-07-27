@@ -435,7 +435,10 @@ export default function ({ getService }) {
         id: originalTask.id,
       });
 
-      expect(failedRunNowResult).to.eql({ id: originalTask.id, error: `Error: error on run now` });
+      expect(failedRunNowResult).to.eql({
+        id: originalTask.id,
+        error: `Error: Failed to run task \"${originalTask.id}\": Error: error on run now`,
+      });
 
       await retry.try(async () => {
         expect(
