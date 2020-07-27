@@ -9,10 +9,9 @@ import { i18n } from '@kbn/i18n';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
-import { getToasts, getData, getUiSettings, getCoreChrome } from '../../../kibana_services';
+import { getData, getUiSettings, getCoreChrome } from '../../../kibana_services';
 import { copyPersistentState } from '../../../reducers/util';
-import { getInitialLayers } from '../../bootstrap/get_initial_layers';
-import rison from 'rison-node';
+import { getInitialLayers, getInitialLayersFromUrlParam } from '../../bootstrap/get_initial_layers';
 import { getInitialTimeFilters } from '../../bootstrap/get_initial_time_filters';
 import { getInitialRefreshConfig } from '../../bootstrap/get_initial_refresh_config';
 import { getInitialQuery } from '../../bootstrap/get_initial_query';
@@ -51,7 +50,6 @@ export class MapsAppView extends React.Component {
   }
 
   componentDidMount() {
-    // Init sync utils
     // eslint-disable-next-line react-hooks/rules-of-hooks
     this._globalSyncUnsubscribe = useGlobalStateSyncing();
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -135,8 +133,8 @@ export class MapsAppView extends React.Component {
       return;
     }
 
-    // Update app state because global state changes may app state
-    // For example, pinning and unpinning a filter moves a filter between global state and app state
+    // App state needs to be updated because global state changes effect app state
+    // Pinning and unpinning filters moves filters between global state and app state
     this._appStateManager.setQueryAndFilters({
       filters: getData().query.filterManager.getAppFilters(),
     });
@@ -148,36 +146,6 @@ export class MapsAppView extends React.Component {
       timeFilters: globalState.time,
     });
   };
-
-  _getInitialLayersFromUrlParam() {
-    const locationSplit = window.location.href.split('?');
-    if (locationSplit.length <= 1) {
-      return [];
-    }
-    const mapAppParams = new URLSearchParams(locationSplit[1]);
-    if (!mapAppParams.has('initialLayers')) {
-      return [];
-    }
-
-    try {
-      let mapInitLayers = mapAppParams.get('initialLayers');
-      if (mapInitLayers[mapInitLayers.length - 1] === '#') {
-        mapInitLayers = mapInitLayers.substr(0, mapInitLayers.length - 1);
-      }
-      return rison.decode_array(mapInitLayers);
-    } catch (e) {
-      getToasts().addWarning({
-        title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {
-          defaultMessage: `Initial layers not added to map`,
-        }),
-        text: i18n.translate('xpack.maps.initialLayers.unableToParseMessage', {
-          defaultMessage: `Unable to parse contents of 'initialLayers' parameter. Error: {errorMsg}`,
-          values: { errorMsg: e.message },
-        }),
-      });
-      return [];
-    }
-  }
 
   async _updateIndexPatterns() {
     const { nextIndexPatternIds } = this.props;
@@ -197,7 +165,7 @@ export class MapsAppView extends React.Component {
     return this._appStateManager.getFilters() || [];
   };
 
-  _onQueryChange = async ({
+  _onQueryChange = ({
     filters,
     query = this.props.query,
     time = this.props.timeFilters,
@@ -270,7 +238,7 @@ export class MapsAppView extends React.Component {
 
     const layerList = getInitialLayers(
       this.props.savedMap.layerListJSON,
-      this._getInitialLayersFromUrlParam()
+      getInitialLayersFromUrlParam()
     );
     this.props.replaceLayerList(layerList);
     this.setState({
@@ -325,7 +293,6 @@ export class MapsAppView extends React.Component {
   _initMap() {
     this._initMapAndLayerSettings();
 
-    // TODO move store initialize logic to LoadMapAndRender
     this.props.clearUi();
 
     if (this.props.savedMap.mapStateJSON) {
