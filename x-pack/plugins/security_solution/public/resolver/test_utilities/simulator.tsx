@@ -186,7 +186,7 @@ export class Simulator {
   }
 
   /**
-   * true if a process node element is found for the entityID and if it has an [aria-selected] attribute.
+   * true if a process node element is found for the entityID and if it *does not have* an [aria-selected] attribute.
    */
   public processNodeElementLooksUnselected(entityID: string): boolean {
     //  find the process node, then exclude it if its selected.
@@ -198,10 +198,7 @@ export class Simulator {
   }
 
   /**
-   * Given a `History` and a `resolverDocumentID`, return any values stored in the query string.
-   * This isn't exactly the same as the query string state, because parsing that from the query string
-   * would be business logic. For example, this doesn't ignore duplicates.
-   * Use this for testing.
+   * Return the selected node query string values.
    */
   public queryStringValues(): { selectedNode: string[] } {
     const urlSearchParams = new URLSearchParams(this.history.location.search);
@@ -234,7 +231,7 @@ export class Simulator {
   /**
    * Like `this.wrapper.find` but only returns DOM nodes.
    */
-  public findInDOM(selector: string): ReactWrapper {
+  private findInDOM(selector: string): ReactWrapper {
     return this.wrapper.find(selector).filterWhere((wrapper) => typeof wrapper.type() === 'string');
   }
 }
@@ -242,10 +239,19 @@ export class Simulator {
 const baseResolverSelector = '[data-test-subj="resolver:node"]';
 
 interface ProcessNodeElementSelectorOptions {
+  /**
+   * Entity ID of the node. If passed, will be used to create an data-attribtue CSS selector that should only get the related node element.
+   */
   entityID?: string;
+  /**
+   * If true, only get nodes with an `[aria-selected="true"]` attribute.
+   */
   selected?: boolean;
 }
 
+/**
+ * An `enzyme` supported CSS selector for process node elements.
+ */
 function processNodeElementSelector({
   entityID,
   selected = false,
