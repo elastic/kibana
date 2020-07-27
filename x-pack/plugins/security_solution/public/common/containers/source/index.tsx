@@ -123,6 +123,10 @@ export const useWithSource = (
   sourceId = 'default',
   indexToAdd?: string[] | null,
   onlyCheckIndexToAdd?: boolean,
+  // Fun fact: When using this hook multiple times within a component (e.g. add_exception_modal & edit_exception_modal),
+  // the apolloClient will perform queryDeduplication and prevent the first query from executing. A deep compare is not
+  // performed on `indices`, so another field must be passed to circumvent this.
+  // For details, see https://github.com/apollographql/react-apollo/issues/2202
   queryDeduplication = 'default'
 ) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
