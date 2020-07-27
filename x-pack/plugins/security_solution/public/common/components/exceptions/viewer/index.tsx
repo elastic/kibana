@@ -188,7 +188,8 @@ const ExceptionsViewerComponent = ({
 
   const handleOnCancelExceptionModal = useCallback((): void => {
     setCurrentModal(null);
-  }, [setCurrentModal]);
+    handleFetchList();
+  }, [setCurrentModal, handleFetchList]);
 
   const handleOnConfirmExceptionModal = useCallback((): void => {
     setCurrentModal(null);
