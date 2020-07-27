@@ -18,6 +18,7 @@ import {
   getDefaultSearchParams,
   getTotalLoaded,
   ISearchStrategy,
+  SearchUsage,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
@@ -30,7 +31,8 @@ export interface AsyncSearchResponse<T> {
 }
 
 export const enhancedEsSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>
+  config$: Observable<SharedGlobalConfig>,
+  usage?: SearchUsage
 ): ISearchStrategy => {
   const search = async (
     context: RequestHandlerContext,
@@ -41,10 +43,21 @@ export const enhancedEsSearchStrategyProvider = (
     const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
+    const startTime = new Date().getTime();
 
-    return request.indexType === 'rollup'
-      ? rollupSearch(caller, { ...request, params }, options)
-      : asyncSearch(caller, { ...request, params }, options);
+    try {
+      const response =
+        request.indexType === 'rollup'
+          ? await rollupSearch(caller, { ...request, params }, options)
+          : await asyncSearch(caller, { ...request, params }, options);
+
+      if (usage) usage.trackSuccess(new Date().getTime() - startTime);
+
+      return response;
+    } catch (e) {
+      if (usage) usage.trackError(new Date().getTime() - startTime);
+      throw e;
+    }
   };
 
   const cancel = async (context: RequestHandlerContext, id: string) => {

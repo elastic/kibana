@@ -20,10 +20,12 @@ import { first } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { SearchUsage } from '../collectors/usage';
 import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
 
 export const esSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>
+  config$: Observable<SharedGlobalConfig>,
+  usage?: SearchUsage
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
@@ -41,15 +43,24 @@ export const esSearchStrategyProvider = (
         ...request.params,
       };
 
-      const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-        'search',
-        params,
-        options
-      )) as SearchResponse<any>;
+      const startTime = new Date().getTime();
 
-      // The above query will either complete or timeout and throw an error.
-      // There is no progress indication on this api.
-      return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
+      try {
+        const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+          'search',
+          params,
+          options
+        )) as SearchResponse<any>;
+
+        if (usage) usage.trackSuccess(new Date().getTime() - startTime);
+
+        // The above query will either complete or timeout and throw an error.
+        // There is no progress indication on this api.
+        return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
+      } catch (e) {
+        if (usage) usage.trackError(new Date().getTime() - startTime);
+        throw e;
+      }
     },
   };
 };

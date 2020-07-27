@@ -123,13 +123,6 @@ export class SearchInterceptor {
       this.pendingCount$.next(++this.pendingCount);
 
       return this.runSearch(request, combinedSignal).pipe(
-        tap({
-          next: (e) => {
-            if (this.deps.usageCollector) {
-              this.deps.usageCollector.trackSuccess(e.rawResponse.took);
-            }
-          },
-        }),
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           cleanup();
