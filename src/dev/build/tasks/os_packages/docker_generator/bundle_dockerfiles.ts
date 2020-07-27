@@ -18,10 +18,14 @@
  */
 
 import { resolve } from 'path';
-import { compressTar, copyAll, mkdirp, write } from '../../../lib';
-import { dockerfileTemplate } from './templates';
 
-export async function bundleDockerFiles(config, log, build, scope) {
+import { ToolingLog } from '@kbn/dev-utils';
+
+import { compressTar, copyAll, mkdirp, write, Config } from '../../../lib';
+import { dockerfileTemplate } from './templates';
+import { TemplateContext } from './template_context';
+
+export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: TemplateContext) {
   log.info(
     `Generating kibana${scope.imageFlavor}${scope.ubiImageFlavor} docker build context bundle`
   );
@@ -50,17 +54,15 @@ export async function bundleDockerFiles(config, log, build, scope) {
   // Compress dockerfiles dir created inside
   // docker build dir as output it as a target
   // on targets folder
-  await compressTar(
-    {
-      archiverOptions: {
-        gzip: true,
-        gzipOptions: {
-          level: 9,
-        },
+  await compressTar({
+    source: dockerFilesBuildDir,
+    destination: dockerFilesOutputDir,
+    archiverOptions: {
+      gzip: true,
+      gzipOptions: {
+        level: 9,
       },
-      createRootDirectory: false,
     },
-    dockerFilesBuildDir,
-    dockerFilesOutputDir
-  );
+    createRootDirectory: false,
+  });
 }
