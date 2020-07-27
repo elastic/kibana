@@ -8,6 +8,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
+import { TIMESTAMP_FIELD, METRICS_INDEX_PATTERN } from '../../../../../common/constants';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
@@ -27,17 +28,24 @@ export function useSnapshot(
   metrics: Array<{ type: SnapshotMetricType }>,
   groupBy: SnapshotGroupBy,
   nodeType: InventoryItemType,
-  sourceId: string,
+  nodeField: string,
+  indexPattern: string = METRICS_INDEX_PATTERN,
+  timestampField: string = TIMESTAMP_FIELD,
   currentTime: number,
   accountId: string,
   region: string,
   sendRequestImmediatly = true
 ) {
   const decodeResponse = (response: any) => {
-    return pipe(
-      SnapshotNodeResponseRT.decode(response),
-      fold(throwErrors(createPlainError), identity)
-    );
+    try {
+      const results = pipe(
+        SnapshotNodeResponseRT.decode(response),
+        fold(throwErrors(createPlainError), identity)
+      );
+      return results;
+    } catch (e) {
+      return Promise.reject(e);
+    }
   };
 
   const timerange: InfraTimerangeInput = {
@@ -45,7 +53,34 @@ export function useSnapshot(
     to: currentTime,
     from: currentTime - 360 * 1000,
     lookbackSize: 20,
+    field: timestampField,
   };
+
+  const filters = [];
+
+  if (filterQuery) {
+    try {
+      filters.push(JSON.parse(filterQuery));
+    } catch (e) {
+      // meh
+    }
+  }
+
+  if (accountId) {
+    filters.push({
+      term: {
+        'cloud.account.id': accountId,
+      },
+    });
+  }
+
+  if (region) {
+    filters.push({
+      term: {
+        'cloud.region': region,
+      },
+    });
+  }
 
   const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
     '/api/metrics/snapshot',
@@ -54,12 +89,11 @@ export function useSnapshot(
       metrics,
       groupBy,
       nodeType,
+      nodeField,
       timerange,
-      filterQuery,
-      sourceId,
-      accountId,
-      region,
+      filters,
       includeTimeseries: true,
+      indexPattern,
     } as SnapshotRequest),
     decodeResponse
   );

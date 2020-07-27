@@ -5,7 +5,6 @@
  */
 import { InfraDatabaseSearchResponse, CallWithRequestParams } from '../adapters/framework';
 
-import { JsonObject } from '../../../common/typed_json';
 import { SNAPSHOT_COMPOSITE_REQUEST_SIZE } from './constants';
 import {
   getGroupedNodesSources,
@@ -24,6 +23,7 @@ import { copyMissingMetrics } from './copy_missing_metrics';
 export type ESSearchClient = <Hit = {}, Aggregation = undefined>(
   options: CallWithRequestParams
 ) => Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
+
 export class InfraSnapshot {
   public async getNodes(
     client: ESSearchClient,
@@ -62,7 +62,7 @@ const requestNodes = async (
   options: InfraSnapshotRequestOptions
 ): Promise<InfraSnapshotNodeGroupByBucket[]> => {
   const inventoryModel = findInventoryModel(options.nodeType);
-  const index = calculateIndexPatterBasedOnMetrics(options);
+  const index = options.indexPattern;
   const query = {
     allowNoIndices: true,
     index,
@@ -83,7 +83,7 @@ const requestNodes = async (
           aggs: {
             ip: {
               top_hits: {
-                sort: [{ [options.sourceConfiguration.fields.timestamp]: { order: 'desc' } }],
+                sort: [{ [options.timerange.field]: { order: 'desc' } }],
                 _source: {
                   includes: inventoryModel.fields.ip ? [inventoryModel.fields.ip] : [],
                 },
@@ -92,7 +92,7 @@ const requestNodes = async (
             },
             histogram: {
               date_histogram: {
-                field: options.sourceConfiguration.fields.timestamp,
+                field: options.timerange.field,
                 interval: options.timerange.interval || '1m',
                 offset: getDateHistogramOffset(options.timerange.from, options.timerange.interval),
                 extended_bounds: {
@@ -113,17 +113,6 @@ const requestNodes = async (
     bucketSelector,
     handleAfterKey
   );
-};
-
-const calculateIndexPatterBasedOnMetrics = (options: InfraSnapshotRequestOptions) => {
-  const { metrics } = options;
-  if (metrics.every((m) => m.type === 'logRate')) {
-    return options.sourceConfiguration.logAlias;
-  }
-  if (metrics.some((m) => m.type === 'logRate')) {
-    return `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`;
-  }
-  return options.sourceConfiguration.metricAlias;
 };
 
 // buckets can be InfraSnapshotNodeGroupByBucket[] or InfraSnapshotNodeMetricsBucket[]
@@ -147,41 +136,19 @@ const mapNodeBuckets = (
   });
 };
 
-const createQueryFilterClauses = (filterQuery: JsonObject | undefined) =>
-  filterQuery ? [filterQuery] : [];
-
-const buildFilters = (options: InfraSnapshotRequestOptions, withQuery = true) => {
-  let filters: any = [
+const buildFilters = (options: InfraSnapshotRequestOptions) => {
+  const filters: object[] = [
     {
       range: {
-        [options.sourceConfiguration.fields.timestamp]: {
+        [options.timerange.field]: {
           gte: options.timerange.from,
           lte: options.timerange.to,
           format: 'epoch_millis',
         },
       },
     },
+    ...(options.filters || []),
   ];
-
-  if (withQuery) {
-    filters = [...createQueryFilterClauses(options.filterQuery), ...filters];
-  }
-
-  if (options.accountId) {
-    filters.push({
-      term: {
-        'cloud.account.id': options.accountId,
-      },
-    });
-  }
-
-  if (options.region) {
-    filters.push({
-      term: {
-        'cloud.region': options.region,
-      },
-    });
-  }
 
   return filters;
 };

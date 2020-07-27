@@ -10,7 +10,6 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
-import { parseFilterQuery } from '../../utils/serialized_query';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
 import { throwErrors } from '../../../common/runtime_types';
 import { createSearchClient } from '../../lib/create_search_client';
@@ -30,41 +29,17 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const {
-          filterQuery,
-          nodeType,
-          groupBy,
-          sourceId,
-          metrics,
-          timerange,
-          accountId,
-          region,
-          includeTimeseries,
-          overrideCompositeSize,
-        } = pipe(
+        const options = pipe(
           SnapshotRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const source = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          sourceId
-        );
-        UsageCollector.countNode(nodeType);
-        const options = {
-          filterQuery: parseFilterQuery(filterQuery),
-          accountId,
-          region,
-          nodeType,
-          groupBy,
-          sourceConfiguration: source.configuration,
-          metrics,
-          timerange,
-          includeTimeseries,
-          overrideCompositeSize,
-        };
+        UsageCollector.countNode(options.nodeType);
+        const searchES = <Hit = {}, Aggregation = undefined>(
+          opts: CallWithRequestParams
+        ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
+          framework.callWithRequest(requestContext, 'search', opts);
 
-        const client = createSearchClient(requestContext, framework);
-        const nodesWithInterval = await libs.snapshot.getNodes(client, options);
+        const nodesWithInterval = await libs.snapshot.getNodes(searchES, options);
         return response.ok({
           body: SnapshotNodeResponseRT.encode(nodesWithInterval),
         });

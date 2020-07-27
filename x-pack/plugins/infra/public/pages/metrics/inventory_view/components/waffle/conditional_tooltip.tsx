@@ -17,6 +17,7 @@ import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/li
 import { useSnapshot } from '../../hooks/use_snaphot';
 import { createInventoryMetricFormatter } from '../../lib/create_inventory_metric_formatter';
 import { SNAPSHOT_METRIC_TRANSLATIONS } from '../../../../../../common/inventory_models/intl_strings';
+import { getFieldByNodeType } from '../../lib/get_field_by_node_type';
 
 export interface Props {
   currentTime: number;
@@ -31,7 +32,7 @@ export interface Props {
 
 export const ConditionalToolTip = withTheme(
   ({ theme, hidden, node, children, nodeType, currentTime }: Props) => {
-    const { sourceId } = useSourceContext();
+    const { source } = useSourceContext();
     const [timer, setTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
     const model = findInventoryModel(nodeType);
     const requestMetrics = model.tooltipMetrics.map((type) => ({ type })) as Array<{
@@ -50,7 +51,9 @@ export const ConditionalToolTip = withTheme(
       requestMetrics,
       [],
       nodeType,
-      sourceId,
+      getFieldByNodeType(nodeType, source),
+      source?.configuration.metricAlias,
+      source?.configuration.fields.timestamp,
       currentTime,
       '',
       '',

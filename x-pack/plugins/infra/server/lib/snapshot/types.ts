@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JsonObject } from '../../../common/typed_json';
-import { InfraSourceConfiguration } from '../../../common/graphql/types';
 import { SnapshotRequest } from '../../../common/http_api/snapshot_api';
 
-export interface InfraSnapshotRequestOptions
-  extends Omit<SnapshotRequest, 'sourceId' | 'filterQuery'> {
-  sourceConfiguration: InfraSourceConfiguration;
-  filterQuery: JsonObject | undefined;
-}
+export type InfraSnapshotRequestOptions = SnapshotRequest;

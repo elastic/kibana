@@ -28,9 +28,11 @@ import { createLegend } from '../lib/create_legend';
 import { useSavedViewContext } from '../../../../containers/saved_view/saved_view';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
+import { calculateIndexPatterBasedOnMetrics } from '../lib/calculate_index_pattern_based_on_metrics';
+import { getFieldByNodeType } from '../lib/get_field_by_node_type';
 
 export const Layout = () => {
-  const { sourceId, source } = useSourceContext();
+  const { source } = useSourceContext();
   const { currentView, shouldLoadDefault } = useSavedViewContext();
   const {
     metric,
@@ -52,7 +54,9 @@ export const Layout = () => {
     [metric],
     groupBy,
     nodeType,
-    sourceId,
+    getFieldByNodeType(nodeType, source),
+    calculateIndexPatterBasedOnMetrics([metric], source), // TODO: if the metric is logRate then we should use logAlias
+    source?.configuration.fields.timestamp,
     currentTime,
     accountId,
     region,

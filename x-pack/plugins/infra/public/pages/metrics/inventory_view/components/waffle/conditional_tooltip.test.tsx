@@ -17,7 +17,16 @@ import {
 } from '../../../../../lib/lib';
 
 jest.mock('../../../../../containers/source', () => ({
-  useSourceContext: () => ({ sourceId: 'default' }),
+  useSourceContext: () => ({
+    source: {
+      configuration: {
+        metricAlias: 'metricbeat-*',
+        fields: {
+          timestamp: '@timestamp',
+        },
+      },
+    },
+  }),
 }));
 
 jest.mock('../../hooks/use_snaphot');
@@ -119,7 +128,8 @@ describe('ConditionalToolTip', () => {
       expectedMetrics,
       [],
       'host',
-      'default',
+      'metricbeat-*',
+      '@timestamp',
       currentTime,
       '',
       '',

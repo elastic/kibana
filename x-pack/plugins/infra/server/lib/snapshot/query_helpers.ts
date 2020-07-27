@@ -28,30 +28,20 @@ interface GroupBySource {
   };
 }
 
-export const getFieldByNodeType = (options: InfraSnapshotRequestOptions) => {
-  const inventoryFields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
-  return inventoryFields.id;
-};
-
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
-  const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
+  const fields = findInventoryFields(options.nodeType);
   const sources: GroupBySource[] = options.groupBy.map((gb) => {
     return { [`${gb.field}`]: { terms: { field: gb.field } } };
   });
   sources.push({
     id: {
-      terms: { field: fields.id },
+      terms: { field: options.nodeField },
     },
   });
   sources.push({
     name: { terms: { field: fields.name, missing_bucket: true } },
   });
   return sources;
-};
-
-export const getMetricsSources = (options: InfraSnapshotRequestOptions) => {
-  const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
-  return [{ id: { terms: { field: fields.id } } }];
 };
 
 export const metricToAggregation = (

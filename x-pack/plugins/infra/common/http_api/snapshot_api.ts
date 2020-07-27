@@ -49,6 +49,7 @@ export const InfraTimerangeInputRT = rt.intersection([
     interval: rt.string,
     to: rt.number,
     from: rt.number,
+    field: rt.string,
   }),
   rt.partial({
     lookbackSize: rt.number,
@@ -101,12 +102,11 @@ export const SnapshotRequestRT = rt.intersection([
     metrics: rt.array(SnapshotMetricInputRT),
     groupBy: SnapshotGroupByRT,
     nodeType: ItemTypeRT,
-    sourceId: rt.string,
+    nodeField: rt.string,
+    indexPattern: rt.string,
   }),
   rt.partial({
-    accountId: rt.string,
-    region: rt.string,
-    filterQuery: rt.union([rt.string, rt.null]),
+    filters: rt.array(rt.object),
     includeTimeseries: rt.boolean,
     overrideCompositeSize: rt.number,
   }),

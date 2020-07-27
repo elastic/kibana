@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
+import { METRICS_INDEX_PATTERN, TIMESTAMP_FIELD } from '../../../../plugins/infra/common/constants';
 import {
   InfraSnapshotMetricInput,
   InfraNodeType,
@@ -41,11 +42,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should basically work', () => {
         const resp = fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
+          nodeField: 'container.id',
           timerange: {
             to: max,
             from: min,
             interval: '1m',
+            field: TIMESTAMP_FIELD,
           },
           metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'container' as InfraNodeType,
@@ -89,11 +92,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       it("should use the id for the label when the name doesn't exist", () => {
         const resp = fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
+          nodeField: 'kubernetes.pod.uid',
           timerange: {
             to: max,
             from: min,
             interval: '1m',
+            field: TIMESTAMP_FIELD,
           },
           metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'pod' as InfraNodeType,
@@ -121,14 +126,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
       it('should have an id and label', () => {
         const resp = fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
           timerange: {
             to: max,
             from: min,
             interval: '1m',
+            field: TIMESTAMP_FIELD,
           },
           metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'container' as InfraNodeType,
+          nodeField: 'container.id',
           groupBy: [],
         });
         return resp.then((data) => {
@@ -160,14 +167,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should basically work', () => {
         const resp = fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
           timerange: {
             to: max,
             from: min,
             interval: '1m',
+            field: TIMESTAMP_FIELD,
           },
           metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
+          nodeField: 'host.name',
           groupBy: [],
         });
         return resp.then((data) => {
@@ -196,16 +205,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should allow for overrides for interval and ignoring lookback', () => {
         const resp = fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
           timerange: {
             to: max,
             from: min,
             interval: '10s',
             forceInterval: true,
+            field: TIMESTAMP_FIELD,
             ignoreLookback: true,
           },
           metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
+          nodeField: 'host.name',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -232,15 +243,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should allow for overrides for lookback', () => {
         const resp = fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
           timerange: {
             to: max,
             from: min,
             interval: '1m',
             lookbackSize: 6,
+            field: TIMESTAMP_FIELD,
           },
           metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
+          nodeField: 'host.name',
           groupBy: [],
           includeTimeseries: true,
         });
@@ -264,11 +277,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should work with custom metrics', async () => {
         const data = await fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
           timerange: {
             to: max,
             from: min,
             interval: '1m',
+            field: TIMESTAMP_FIELD,
           },
           metrics: [
             {
@@ -279,6 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           ] as SnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
+          nodeField: 'host.name',
           groupBy: [],
         });
 
@@ -306,14 +321,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should basically work with 1 grouping', () => {
         const resp = fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
           timerange: {
             to: max,
             from: min,
             interval: '1m',
+            field: TIMESTAMP_FIELD,
           },
           metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
+          nodeField: 'host.name',
           groupBy: [{ field: 'cloud.availability_zone' }],
         });
         return resp.then((data) => {
@@ -333,14 +350,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should basically work with 2 groupings', () => {
         const resp = fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
           timerange: {
             to: max,
             from: min,
             interval: '1m',
+            field: TIMESTAMP_FIELD,
           },
           metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
+          nodeField: 'host.name',
           groupBy: [{ field: 'cloud.provider' }, { field: 'cloud.availability_zone' }],
         });
 
@@ -362,14 +381,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should show metrics for all nodes when grouping by service type', () => {
         const resp = fetchSnapshot({
-          sourceId: 'default',
+          indexPattern: METRICS_INDEX_PATTERN,
           timerange: {
             to: max,
             from: min,
             interval: '1m',
+            field: TIMESTAMP_FIELD,
           },
           metrics: [{ type: 'cpu' }] as InfraSnapshotMetricInput[],
           nodeType: 'host' as InfraNodeType,
+          nodeField: 'host.name',
           groupBy: [{ field: 'service.type' }],
         });
         return resp.then((data) => {

@@ -45,8 +45,8 @@ const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequ
     (await calculateMetricInterval(
       client,
       {
-        indexPattern: options.sourceConfiguration.metricAlias,
-        timestampField: options.sourceConfiguration.fields.timestamp,
+        indexPattern: options.indexPattern,
+        timestampField: options.timerange.field,
         timerange: { from: timerange.from, to: timerange.to },
       },
       modules,
@@ -69,6 +69,7 @@ export const createTimeRangeWithInterval = async (
       interval: `${calculatedInterval}s`,
       from: timerange.from,
       to: timerange.to,
+      field: timerange.field,
     };
   }
   const lookbackSize = Math.max(timerange.lookbackSize || 5, 5);
@@ -76,6 +77,7 @@ export const createTimeRangeWithInterval = async (
     interval: `${calculatedInterval}s`,
     from: timerange.to - calculatedInterval * lookbackSize * 1000, // We need at least 5 buckets worth of data
     to: timerange.to,
+    field: timerange.field,
   };
 };
 
@@ -98,8 +100,7 @@ const aggregationsToModules = async (
   }
   const datasets = await Promise.all(
     uniqueFields.map(
-      async (field) =>
-        await getDatasetForField(client, field as string, options.sourceConfiguration.metricAlias)
+      async (field) => await getDatasetForField(client, field as string, options.indexPattern)
     )
   );
   const modules = datasets.filter((f) => f) as string[];
