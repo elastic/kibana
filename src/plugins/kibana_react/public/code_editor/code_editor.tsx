@@ -154,6 +154,14 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     this._editor = editor;
 
+    editor.addCommand(
+      monaco.KeyCode.Escape,
+      () => {
+        document.activeElement.blur();
+      },
+      '!suggestWidgetVisible'
+    );
+
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor);
     }
