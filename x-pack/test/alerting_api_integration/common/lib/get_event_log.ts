@@ -22,6 +22,7 @@ interface GetEventLogParams {
 export async function getEventLog(params: GetEventLogParams): Promise<IValidatedEvent[]> {
   const { getService, spaceId, type, id, provider, actions } = params;
   const supertest = getService('supertest');
+  const actionsSet = new Set(actions);
 
   const spacePrefix = getUrlPrefix(spaceId);
   const url = `${spacePrefix}/api/event_log/${type}/${id}/_find`;
@@ -31,11 +32,13 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
     throw new Error('no events found yet');
   }
 
-  const events: IValidatedEvent[] = (result.data as IValidatedEvent[]).filter(
-    (event) => event?.event?.provider === provider
-  );
+  // filter events to matching provider and requested actions
+  const events: IValidatedEvent[] = (result.data as IValidatedEvent[])
+    .filter((event) => event?.event?.provider === provider)
+    .filter((event) => event?.event?.action)
+    .filter((event) => actionsSet.has(event?.event?.action!));
   const foundActions = new Set(
-    events.map((event) => event?.event?.action).filter((event) => !!event)
+    events.map((event) => event?.event?.action).filter((action) => !!action)
   );
 
   for (const action of actions) {

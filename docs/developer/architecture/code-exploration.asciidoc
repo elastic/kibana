@@ -186,11 +186,6 @@ WARNING: Missing README.
 Replaces the legacy ui/share module for registering share context menus.
 
 
-- {kib-repo}blob/{branch}/src/plugins/status_page[statusPage]
-
-WARNING: Missing README.
-
-
 - {kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
 
 Telemetry allows Kibana features to have usage tracked in the wild. The general term "telemetry" refers to multiple things:
