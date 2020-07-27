@@ -29,6 +29,11 @@ export const configSchema = schema.object({
     from: schema.string({ defaultValue: 'now-15m' }),
     to: schema.string({ defaultValue: 'now' }),
   }),
+
+  /**
+   * Artifacts Configuration
+   */
+  packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 });
 
 export const createConfig$ = (context: PluginInitializerContext) =>

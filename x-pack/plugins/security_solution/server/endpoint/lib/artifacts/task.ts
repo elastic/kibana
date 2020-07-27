@@ -60,7 +60,7 @@ export class ManifestTask {
         taskType: ManifestTaskConstants.TYPE,
         scope: ['securitySolution'],
         schedule: {
-          interval: '60s',
+          interval: (await this.endpointAppContext.config()).packagerTaskInterval,
         },
         state: {},
         params: { version: ManifestTaskConstants.VERSION },
