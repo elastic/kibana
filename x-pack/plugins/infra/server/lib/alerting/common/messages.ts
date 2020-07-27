@@ -163,3 +163,56 @@ export const buildErrorAlertReason = (metric: string) =>
       metric,
     },
   });
+
+export const groupActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.groupActionVariableDescription',
+  {
+    defaultMessage: 'Name of the group reporting data',
+  }
+);
+
+export const alertStateActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.alertStateActionVariableDescription',
+  {
+    defaultMessage: 'Current state of the alert',
+  }
+);
+
+export const reasonActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.reasonActionVariableDescription',
+  {
+    defaultMessage:
+      'A description of why the alert is in this state, including which metrics have crossed which thresholds',
+  }
+);
+
+export const timestampActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.timestampDescription',
+  {
+    defaultMessage: 'A timestamp of when the alert was detected.',
+  }
+);
+
+export const valueActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.valueActionVariableDescription',
+  {
+    defaultMessage:
+      'The value of the metric in the specified condition. Usage: (ctx.value.condition0, ctx.value.condition1, etc...).',
+  }
+);
+
+export const metricActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.metricActionVariableDescription',
+  {
+    defaultMessage:
+      'The metric name in the specified condition. Usage: (ctx.metric.condition0, ctx.metric.condition1, etc...).',
+  }
+);
+
+export const thresholdActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.thresholdActionVariableDescription',
+  {
+    defaultMessage:
+      'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+  }
+);
