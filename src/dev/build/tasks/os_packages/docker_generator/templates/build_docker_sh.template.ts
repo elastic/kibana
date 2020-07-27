@@ -17,28 +17,37 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
-import fs from 'fs';
-import { Client } from '@elastic/elasticsearch';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
+import dedent from 'dedent';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { TemplateContext } from '../template_context';
 
-export function ElasticsearchProvider({ getService }: FtrProviderContext) {
-  const config = getService('config');
+function generator({
+  imageTag,
+  imageFlavor,
+  versionTag,
+  dockerOutputDir,
+  baseOSImage,
+  ubiImageFlavor,
+}: TemplateContext) {
+  return dedent(`
+  #!/usr/bin/env bash
+  #
+  # ** THIS IS AN AUTO-GENERATED FILE **
+  #
+  set -euo pipefail
 
-  if (process.env.TEST_CLOUD) {
-    return new Client({
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
-    });
-  } else {
-    return new Client({
-      ssl: {
-        ca: fs.readFileSync(CA_CERT_PATH, 'utf-8'),
-      },
-      nodes: [formatUrl(config.get('servers.elasticsearch'))],
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
-    });
-  }
+  docker pull ${baseOSImage}
+
+  echo "Building: kibana${imageFlavor}${ubiImageFlavor}-docker"; \\
+  docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${versionTag} -f Dockerfile . || exit 1;
+
+  docker save ${imageTag}${imageFlavor}${ubiImageFlavor}:${versionTag} | gzip -c > ${dockerOutputDir}
+
+  exit 0
+  `);
 }
+
+export const buildDockerSHTemplate = {
+  name: 'build_docker.sh',
+  generator,
+};
