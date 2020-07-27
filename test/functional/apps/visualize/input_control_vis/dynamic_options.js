@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should fetch new options when string field is filtered', async () => {
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU,US');
+        expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU');
 
         await comboBox.filterOptionsList('listControlSelect0', 'R');
         await PageObjects.header.waitUntilLoadingHasFinished();
