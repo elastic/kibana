@@ -94,7 +94,7 @@ export const SearchExamplesApp = ({
 
     const esQuery = buildEsQuery(
       indexPattern,
-      queryState?.queryString || [],
+      queryState?.query || [],
       queryFilters,
       getEsQueryConfig(uiSettings)
     );
