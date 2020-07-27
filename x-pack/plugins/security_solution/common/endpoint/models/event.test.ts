@@ -57,9 +57,28 @@ describe('Generated documents', () => {
       expect(isStart(event)).toBeTruthy();
     });
 
+    it('is a start event when event.type is an array of strings and contains start', () => {
+      let event: ResolverEvent = generator.generateEvent({
+        eventType: ['bogus', 'start', 'creation'],
+      });
+      expect(isStart(event)).toBeTruthy();
+
+      event = generator.generateEvent({
+        eventType: ['start', 'bogus'],
+      });
+      expect(isStart(event)).toBeTruthy();
+    });
+
     it('is not a start event when event.type is not start', () => {
       const event: ResolverEvent = generator.generateEvent({
         eventType: ['end'],
+      });
+      expect(isStart(event)).toBeFalsy();
+    });
+
+    it('is not a start event when event.type is empty', () => {
+      const event: ResolverEvent = generator.generateEvent({
+        eventType: [],
       });
       expect(isStart(event)).toBeFalsy();
     });

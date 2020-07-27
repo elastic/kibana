@@ -15,7 +15,7 @@ export function isStart(event: ResolverEvent): boolean {
   }
 
   if (Array.isArray(event.event.type)) {
-    return event.event.type.length === 1 && event.event.type[0] === 'start';
+    return event.event.type.includes('start');
   }
 
   return event.event.type === 'start';
