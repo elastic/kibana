@@ -40,7 +40,7 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
          *
          * For example, there might be no loading element at one point, and 1 graph element at one point, but never a single time when there is both 1 graph element and 0 loading elements.
          */
-        simulator.mapStateTransisions(() => ({
+        simulator.mapStateTransitions(() => ({
           graphElements: simulator.graphElement().length,
           graphLoadingElements: simulator.graphLoadingElement().length,
           graphErrorElements: simulator.graphErrorElement().length,
@@ -73,7 +73,7 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
       });
       it('should render the second child node as selected, and the first child not as not selected, and the query string should indicate that the second child is selected', async () => {
         await expect(
-          simulator.mapStateTransisions(function value() {
+          simulator.mapStateTransitions(function value() {
             return {
               // the query string has a key showing that the second child is selected
               queryStringSelectedNode: simulator.queryStringValues().selectedNode,

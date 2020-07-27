@@ -114,7 +114,7 @@ export class Simulator {
 
   /**
    * Return a promise that resolves after the `store`'s next state transition.
-   * Used by `mapStateTransisions`
+   * Used by `mapStateTransitions`
    */
   private stateTransitioned(): Promise<void> {
     // keep track of the resolve function of the promise that has been returned.
@@ -141,7 +141,7 @@ export class Simulator {
   /**
    * This will yield the return value of `mapper` after each state transition. If no state transition occurs for 10 event loops in a row, this will give up.
    */
-  public async *mapStateTransisions<R>(mapper: () => R): AsyncIterable<R> {
+  public async *mapStateTransitions<R>(mapper: () => R): AsyncIterable<R> {
     // Yield the value before any state transitions have occurred.
     yield mapper();
 
