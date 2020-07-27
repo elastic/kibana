@@ -350,7 +350,6 @@ export class MapsAppView extends React.Component {
   }
 
   _renderTopNav() {
-    console.log(this.state.indexPatterns);
     return !this.props.isFullScreen ? (
       <MapsTopNavMenu
         savedMap={this.props.savedMap}
