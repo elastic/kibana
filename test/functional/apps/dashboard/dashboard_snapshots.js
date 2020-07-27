@@ -28,8 +28,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('dashboard snapshots', function describeIndexTests() {
+  describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
