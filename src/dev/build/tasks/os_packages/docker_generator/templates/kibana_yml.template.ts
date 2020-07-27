@@ -19,7 +19,9 @@
 
 import dedent from 'dedent';
 
-function generator({ imageFlavor }) {
+import { TemplateContext } from '../template_context';
+
+function generator({ imageFlavor }: TemplateContext) {
   return dedent(`
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
