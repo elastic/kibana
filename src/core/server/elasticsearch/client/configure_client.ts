@@ -43,7 +43,7 @@ interface ESRequestContext {
 }
 
 const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
-  client.on('response', (err, event) => {
+  client.on('response', (error, event) => {
     const { auditor, type } = event.meta.context as ESRequestContext;
     if (auditor) {
       auditor.add({
