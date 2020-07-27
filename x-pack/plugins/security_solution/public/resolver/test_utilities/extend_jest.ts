@@ -14,9 +14,10 @@ export {};
 declare global {
   /* eslint-disable @typescript-eslint/no-namespace */
   namespace jest {
-    interface Matchers<R> {
-      // Type the custom matcher
-      toSometimesYieldEqualTo<T>(b: T): Promise<R>;
+    interface Matchers<R, T> {
+      toSometimesYieldEqualTo(
+        expectedYield: T extends AsyncIterable<infer E> ? E : never
+      ): Promise<R>;
     }
   }
 }
@@ -24,7 +25,7 @@ declare global {
 expect.extend({
   /**
    * A custom matcher that takes an async generator and compares each value it yields to an expected value.
-   * If any yielded value deep equals the expected value, the matcher will pass.
+   * If any yielded value deep-equals the expected value, the matcher will pass.
    * If the generator ends with none of the yielded values matching, it will fail.
    */
   async toSometimesYieldEqualTo<T>(
