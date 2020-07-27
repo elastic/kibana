@@ -20,6 +20,8 @@
 import * as Either from './either';
 import { fromNullable } from './maybe';
 import { always, id, noop } from './utils';
+import { buildPathsMap } from '@kbn/dev-utils/src/code_owners';
+import { teamName } from '@kbn/dev-utils/src/code_owners/helpers';
 
 const maybeTotal = (x) => (x === 'total' ? Either.left(x) : Either.right(x));
 
@@ -95,6 +97,14 @@ export const coveredFilePath = (obj) => {
   return maybeTotal(staticSiteUrl)
     .map(dropRoot(COVERAGE_INGESTION_KIBANA_ROOT))
     .fold(withoutCoveredFilePath, (coveredFilePath) => ({ ...obj, coveredFilePath }));
+};
+
+export const teams = (obj) => {
+  const { coveredFilePath } = obj;
+
+  const pathsMap = buildPathsMap();
+
+  return obj;
 };
 
 export const ciRunUrl = (obj) =>

@@ -32,6 +32,7 @@ import {
   coveredFilePath,
   ciRunUrl,
   itemizeVcs,
+  teams,
 } from './transforms';
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
@@ -60,6 +61,7 @@ const transform = (jsonSummaryPath) => (log) => (vcsInfo) => {
     .pipe(
       map(preamble),
       map(coveredFilePath),
+      map(teams),
       map(itemizeVcsInfo),
       map(ciRunUrl),
       map(addJsonSummaryPath(jsonSummaryPath)),
