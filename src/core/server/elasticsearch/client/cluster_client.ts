@@ -70,7 +70,7 @@ export class ClusterClient implements ICustomClusterClient {
   constructor(
     private readonly config: ElasticsearchClientConfig,
     logger: Logger,
-    private readonly auditorFactory: AuditorFactory,
+    private readonly getAuditorFactory: () => AuditorFactory,
     private readonly getAuthHeaders: GetAuthHeaders = noop
   ) {
     this.asInternalUser = configureClient(config, { logger });
@@ -122,7 +122,8 @@ export class ClusterClient implements ICustomClusterClient {
     if (isRealRequest(request)) {
       const kibanaRequest =
         request instanceof KibanaRequest ? request : KibanaRequest.from(request);
-      return this.auditorFactory.asScoped(kibanaRequest);
+      const auditorFactory = this.getAuditorFactory();
+      return auditorFactory.asScoped(kibanaRequest);
     }
   }
 }

@@ -44,11 +44,11 @@ interface ESRequestContext {
 
 const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
   client.on('response', (error, event) => {
-    const { auditor, type } = event.meta.context as ESRequestContext;
-    if (auditor) {
-      auditor.add({
+    const context = event.meta.context as ESRequestContext | null;
+    if (context?.auditor) {
+      context.auditor.add({
         message: `${event.meta.request.params.method} ${event.meta.request.params.path}`,
-        type: `elasticsearch.call.${type ?? 'unknown'}`,
+        type: `elasticsearch.call.${context.type ?? 'unknown'}`,
       });
     }
 
