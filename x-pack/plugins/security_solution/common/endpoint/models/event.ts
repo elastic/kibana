@@ -3,7 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LegacyEndpointEvent, ResolverEvent } from '../types';
+import { LegacyEndpointEvent, ResolverEvent, SafeResolverEvent, ECSSafe } from '../types';
+import { firstValue } from './ecs_safety_helpers';
+
+export function isLegacyEventSafeVersion(
+  event: SafeResolverEvent
+): event is ECSSafe<LegacyEndpointEvent> & { endgame: ECSSafe<LegacyEndpointEvent['endgame']> } {
+  return 'endgame' in event && event.endgame !== undefined;
+}
 
 export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEvent {
   return (event as LegacyEndpointEvent).endgame !== undefined;
@@ -31,6 +38,10 @@ export function isProcessRunning(event: ResolverEvent): boolean {
   );
 }
 
+export function eventTimestampSafeVersion(event: SafeResolverEvent): string | undefined | number {
+  return firstValue(event?.['@timestamp'] ?? event.endgame?.timestamp_utc);
+}
+
 export function eventTimestamp(event: ResolverEvent): string | undefined | number {
   if (isLegacyEvent(event)) {
     return event.endgame.timestamp_utc;
@@ -54,6 +65,12 @@ export function eventId(event: ResolverEvent): number | undefined | string {
   return event.event.id;
 }
 
+export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined | string {
+  return firstValue(
+    isLegacyEventSafeVersion(event) ? event.endgame?.serial_event_id : event.event?.id
+  );
+}
+
 export function entityId(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
     return event.endgame.unique_pid ? String(event.endgame.unique_pid) : '';
@@ -61,11 +78,28 @@ export function entityId(event: ResolverEvent): string {
   return event.process.entity_id;
 }
 
+export function entityIDSafeVersion(event: SafeResolverEvent): string | undefined {
+  if (event.endgame) {
+    return event.endgame.unique_pid === undefined
+      ? undefined
+      : String(firstValue(event.endgame.unique_pid));
+  } else {
+    return firstValue(event.process?.entity_id);
+  }
+}
+
 export function parentEntityId(event: ResolverEvent): string | undefined {
   if (isLegacyEvent(event)) {
     return event.endgame.unique_ppid ? String(event.endgame.unique_ppid) : undefined;
   }
   return event.process.parent?.entity_id;
+}
+
+export function parentEntityIDSafeVersion(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return String(firstValue(event.endgame.unique_ppid));
+  }
+  return firstValue(event.process?.parent?.entity_id);
 }
 
 export function ancestryArray(event: ResolverEvent): string[] | undefined {

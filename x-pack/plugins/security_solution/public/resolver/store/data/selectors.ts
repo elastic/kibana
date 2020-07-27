@@ -28,10 +28,11 @@ import {
   ResolverTree,
   ResolverNodeStats,
   ResolverRelatedEvents,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
 import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
-import { allEventCategories } from '../../../../common/endpoint/models/event';
+import * as eventModel from '../../../../common/endpoint/models/event';
 import * as vector2 from '../../models/vector2';
 
 /**
@@ -145,7 +146,9 @@ export const tree = createSelector(graphableProcesses, function indexedTree(
   graphableProcesses
   /* eslint-enable no-shadow */
 ) {
-  return indexedProcessTreeModel.factory(graphableProcesses);
+  return indexedProcessTreeModel.factory(
+    /** TODO remove */ graphableProcesses as SafeResolverEvent[]
+  );
 });
 
 /**
@@ -194,7 +197,9 @@ export const relatedEventsByCategory: (
         }
         return relatedById.events.reduce(
           (eventsByCategory: ResolverEvent[], candidate: ResolverEvent) => {
-            if ([candidate && allEventCategories(candidate)].flat().includes(ecsCategory)) {
+            if (
+              [candidate && eventModel.allEventCategories(candidate)].flat().includes(ecsCategory)
+            ) {
               eventsByCategory.push(candidate);
             }
             return eventsByCategory;
@@ -280,7 +285,7 @@ export const relatedEventInfoByEntityId: (
           return [];
         }
         return eventsResponseForThisEntry.events.filter((resolverEvent) => {
-          for (const category of [allEventCategories(resolverEvent)].flat()) {
+          for (const category of [eventModel.allEventCategories(resolverEvent)].flat()) {
             if (category === eventCategory) {
               return true;
             }
@@ -404,7 +409,8 @@ export const processEventForID: (
 ) => (nodeID: string) => ResolverEvent | null = createSelector(
   tree,
   (indexedProcessTree) => (nodeID: string) =>
-    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID)
+    /** TODO unsafe cast */
+    indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID) as ResolverEvent
 );
 
 /**
@@ -415,7 +421,7 @@ export const ariaLevel: (state: DataState) => (nodeID: string) => number | null 
   processEventForID,
   ({ ariaLevels }, processEventGetter) => (nodeID: string) => {
     const node = processEventGetter(nodeID);
-    return node ? ariaLevels.get(node) ?? null : null;
+    return node ? ariaLevels.get(node as SafeResolverEvent) ?? null : null;
   }
 );
 
@@ -468,10 +474,14 @@ export const ariaFlowtoCandidate: (
       for (const child of children) {
         if (previousChild !== null) {
           // Set the `child` as the following sibling of `previousChild`.
-          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child));
+          memo.set(
+            uniquePidForProcess(previousChild),
+            uniquePidForProcess(/** TODO unsafe cast */ child as ResolverEvent)
+          );
         }
         // Set the child as the previous child.
-        previousChild = child;
+        /** TODO unsafe cast */
+        previousChild = child as ResolverEvent;
       }
 
       if (previousChild) {
@@ -509,7 +519,7 @@ const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = creat
         maxX: nodeX + 0.5 * processNodeViewWidth,
         maxY: nodeY + 0.5 * processNodeViewHeight,
         position,
-        entity: processEvent,
+        entity: processEvent as ResolverEvent,
         type: 'processNode',
       };
       processesToIndex.push(indexedEvent);
@@ -558,7 +568,7 @@ export const nodesAndEdgelines: (
       maxX,
       maxY,
     });
-    const visibleProcessNodePositions = new Map<ResolverEvent, Vector2>(
+    const visibleProcessNodePositions = new Map<SafeResolverEvent, Vector2>(
       entities
         .filter((entity): entity is IndexedProcessNode => entity.type === 'processNode')
         .map((node) => [node.entity, node.position])

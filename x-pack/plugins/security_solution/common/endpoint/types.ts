@@ -469,6 +469,8 @@ export type HostMetadata = Immutable<{
 
 export interface LegacyEndpointEvent {
   '@timestamp': number;
+  // This helps TS distinguish this type from `EndpointEvent`
+  process?: never;
   endgame: {
     pid?: number;
     ppid?: number;
@@ -495,6 +497,7 @@ export interface LegacyEndpointEvent {
     action?: string;
     type?: string;
     category?: string | string[];
+    id?: string;
   };
 }
 
@@ -508,6 +511,8 @@ export interface EndpointEvent {
   ecs: {
     version: string;
   };
+  // This helps TS distinguish this from `LegacyEndpointEvent`
+  endgame?: never;
   event: {
     category: string | string[];
     type: string | string[];
@@ -558,6 +563,30 @@ export interface EndpointEvent {
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
+
+/**
+ * A mapping type that returns a more ES safe version of an underlying type.
+ * This should take type we expect to get from the sensor, and return a similar type.
+ * The type it returns should represent any value that ES could possibly return.
+ * The type from the sensor and the type from ES are different because:
+ * 1. sensor versions
+ * 2. index allows other data and other producers populate it
+ * 3. bugs.
+ */
+export type ECSSafe<T> = T extends unknown[]
+  ? T
+  : T extends object
+  ? { [K in keyof T]?: ECSSafe<T[K]> }
+  : number extends T
+  ? number | number[]
+  : string extends T
+  ? string | string[]
+  : T;
+
+/**
+ * Safer version of ResolverEvent. Please use this going forward.
+ */
+export type SafeResolverEvent = ECSSafe<EndpointEvent> | ECSSafe<LegacyEndpointEvent>;
 
 /**
  * The response body for the resolver '/entity' index API
