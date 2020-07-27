@@ -1,6 +1,9 @@
 [
   {
-    "name": "Process payment",
+    "key": {
+      "transaction.name": "Process payment",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:29.892Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -58,13 +61,15 @@
         "type": "Worker"
       }
     },
-    "p95": 1744896,
     "averageResponseTime": 1745009,
     "transactionsPerMinute": 0.25,
     "impact": 100
   },
   {
-    "name": "GET /api",
+    "key": {
+      "transaction.name": "GET /api",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:41.454Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -170,13 +175,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 81888,
     "averageResponseTime": 49816.15625,
     "transactionsPerMinute": 8,
     "impact": 91.32732325394932
   },
   {
-    "name": "/dashboard",
+    "key": {
+      "transaction.name": "/dashboard",
+      "service.name": "client"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:21.621Z",
       "agent": { "name": "rum-js", "version": "5.2.0" },
@@ -268,13 +275,15 @@
         "version": "79.0.3945"
       }
     },
-    "p95": 341504,
     "averageResponseTime": 208000,
     "transactionsPerMinute": 0.75,
     "impact": 35.56882613781033
   },
   {
-    "name": "DispatcherServlet#doGet",
+    "key": {
+      "transaction.name": "DispatcherServlet#doGet",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:40.104Z",
       "agent": {
@@ -359,13 +368,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 34528,
     "averageResponseTime": 36010.53846153846,
     "transactionsPerMinute": 3.25,
     "impact": 26.61043592713186
   },
   {
-    "name": "POST /api/orders",
+    "key": {
+      "transaction.name": "POST /api/orders",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:39.953Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -476,13 +487,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 270336,
     "averageResponseTime": 270684,
     "transactionsPerMinute": 0.25,
     "impact": 15.261616628971955
   },
   {
-    "name": "ResourceHttpRequestHandler",
+    "key": {
+      "transaction.name": "ResourceHttpRequestHandler",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:44.376Z",
       "agent": {
@@ -567,13 +580,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 4120,
     "averageResponseTime": 14419.42857142857,
     "transactionsPerMinute": 3.5,
     "impact": 11.30657439844125
   },
   {
-    "name": "/orders",
+    "key": {
+      "transaction.name": "/orders",
+      "service.name": "client"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:38.358Z",
       "agent": { "name": "rum-js", "version": "5.2.0" },
@@ -661,13 +676,15 @@
         "version": "79.0.3945"
       }
     },
-    "p95": 140160,
     "averageResponseTime": 81500,
     "transactionsPerMinute": 0.5,
     "impact": 9.072365225837785
   },
   {
-    "name": "APIRestController#customer",
+    "key": {
+      "transaction.name": "APIRestController#customer",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:38.893Z",
       "agent": {
@@ -757,13 +774,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 77280,
     "averageResponseTime": 19370.6,
     "transactionsPerMinute": 1.25,
     "impact": 5.270496679320978
   },
   {
-    "name": "/products",
+    "key": {
+      "transaction.name": "/products",
+      "service.name": "client"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:48.824Z",
       "agent": { "name": "rum-js", "version": "5.2.0" },
@@ -851,13 +870,15 @@
         "version": "79.0.3945"
       }
     },
-    "p95": 76800,
     "averageResponseTime": 77000,
     "transactionsPerMinute": 0.25,
     "impact": 4.129424578484989
   },
   {
-    "name": "/customers",
+    "key": {
+      "transaction.name": "/customers",
+      "service.name": "client"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:48.287Z",
       "agent": { "name": "rum-js", "version": "5.2.0" },
@@ -914,13 +935,15 @@
         "version": "79.0.3945"
       }
     },
-    "p95": 39040,
     "averageResponseTime": 33500,
     "transactionsPerMinute": 0.5,
     "impact": 3.5546640380951287
   },
   {
-    "name": "APIRestController#customers",
+    "key": {
+      "transaction.name": "APIRestController#customers",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:43.765Z",
       "agent": {
@@ -1010,13 +1033,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 26432,
     "averageResponseTime": 16690.75,
     "transactionsPerMinute": 1,
     "impact": 3.541042213287889
   },
   {
-    "name": "GET /log-message",
+    "key": {
+      "transaction.name": "GET /log-message",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:28.944Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1123,13 +1148,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 38528,
     "averageResponseTime": 32667.5,
     "transactionsPerMinute": 0.5,
     "impact": 3.458966408120217
   },
   {
-    "name": "APIRestController#stats",
+    "key": {
+      "transaction.name": "APIRestController#stats",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:42.549Z",
       "agent": {
@@ -1219,13 +1246,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 32064,
     "averageResponseTime": 15535,
     "transactionsPerMinute": 1,
     "impact": 3.275330415465657
   },
   {
-    "name": "GET /api/customers",
+    "key": {
+      "transaction.name": "GET /api/customers",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:37.952Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1332,13 +1361,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 26368,
     "averageResponseTime": 20092,
     "transactionsPerMinute": 0.75,
     "impact": 3.168195050736987
   },
   {
-    "name": "GET /api/products/:id",
+    "key": {
+      "transaction.name": "GET /api/products/:id",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:24.977Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1445,13 +1476,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 37856,
     "averageResponseTime": 13516.5,
     "transactionsPerMinute": 1,
     "impact": 2.8112687551548836
   },
   {
-    "name": "GET /api/types",
+    "key": {
+      "transaction.name": "GET /api/types",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:26.443Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1558,13 +1591,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 45248,
     "averageResponseTime": 26992.5,
     "transactionsPerMinute": 0.5,
     "impact": 2.8066131947777255
   },
   {
-    "name": "GET static file",
+    "key": {
+      "transaction.name": "GET static file",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:40.953Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1666,13 +1701,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 11900,
     "averageResponseTime": 3492.9285714285716,
     "transactionsPerMinute": 3.5,
     "impact": 2.5144049360435208
   },
   {
-    "name": "APIRestController#customerWhoBought",
+    "key": {
+      "transaction.name": "APIRestController#customerWhoBought",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:44.982Z",
       "agent": {
@@ -1762,13 +1799,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 4464,
     "averageResponseTime": 3742.153846153846,
     "transactionsPerMinute": 3.25,
     "impact": 2.4998634943716573
   },
   {
-    "name": "GET /log-error",
+    "key": {
+      "transaction.name": "GET /log-error",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:07.467Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1875,13 +1914,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 35840,
     "averageResponseTime": 35846,
     "transactionsPerMinute": 0.25,
     "impact": 1.7640550505645587
   },
   {
-    "name": "APIRestController#topProducts",
+    "key": {
+      "transaction.name": "APIRestController#topProducts",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:45.587Z",
       "agent": {
@@ -1971,13 +2012,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 7344,
     "averageResponseTime": 4825,
     "transactionsPerMinute": 1.75,
     "impact": 1.6450221426498186
   },
   {
-    "name": "GET /api/products/top",
+    "key": {
+      "transaction.name": "GET /api/products/top",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:01.200Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -2084,13 +2127,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 33024,
     "averageResponseTime": 33097,
     "transactionsPerMinute": 0.25,
     "impact": 1.6060533780113861
   },
   {
-    "name": "GET /api/products",
+    "key": {
+      "transaction.name": "GET /api/products",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:23.477Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -2197,13 +2242,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 8160,
     "averageResponseTime": 6583,
     "transactionsPerMinute": 1,
     "impact": 1.2172278724376455
   },
   {
-    "name": "POST /api",
+    "key": {
+      "transaction.name": "POST /api",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:25.478Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -2314,13 +2361,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 19968,
     "averageResponseTime": 20011,
     "transactionsPerMinute": 0.25,
     "impact": 0.853921734857215
   },
   {
-    "name": "GET /api/types/:id",
+    "key": {
+      "transaction.name": "GET /api/types/:id",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:12.972Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -2427,13 +2476,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 10080,
     "averageResponseTime": 8181,
     "transactionsPerMinute": 0.5,
     "impact": 0.6441916136689552
   },
   {
-    "name": "GET /api/stats",
+    "key": {
+      "transaction.name": "GET /api/stats",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:39.451Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -2540,13 +2591,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 5440,
     "averageResponseTime": 5098,
     "transactionsPerMinute": 0.75,
     "impact": 0.582807187955318
   },
   {
-    "name": "GET /api/orders",
+    "key": {
+      "transaction.name": "GET /api/orders",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:35.450Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -2653,13 +2706,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 8800,
     "averageResponseTime": 7624.5,
     "transactionsPerMinute": 0.5,
     "impact": 0.5802207655235637
   },
   {
-    "name": "GET /api/orders/:id",
+    "key": {
+      "transaction.name": "GET /api/orders/:id",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:35.951Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -2764,13 +2819,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 7184,
     "averageResponseTime": 4749.666666666667,
     "transactionsPerMinute": 0.75,
     "impact": 0.5227447114845778
   },
   {
-    "name": "APIRestController#products",
+    "key": {
+      "transaction.name": "APIRestController#products",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:27.824Z",
       "agent": {
@@ -2860,13 +2917,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 7904,
     "averageResponseTime": 6787,
     "transactionsPerMinute": 0.5,
     "impact": 0.4839483750082622
   },
   {
-    "name": "GET /api/products/:id/customers",
+    "key": {
+      "transaction.name": "GET /api/products/:id/customers",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:41.956Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -2973,13 +3032,15 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 5616,
     "averageResponseTime": 4757,
     "transactionsPerMinute": 0.5,
     "impact": 0.25059559560997896
   },
   {
-    "name": "APIRestController#product",
+    "key": {
+      "transaction.name": "APIRestController#product",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:41.941Z",
       "agent": {
@@ -3069,13 +3130,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 4864,
     "averageResponseTime": 4713.5,
     "transactionsPerMinute": 0.5,
     "impact": 0.24559517890858723
   },
   {
-    "name": "APIRestController#order",
+    "key": {
+      "transaction.name": "APIRestController#order",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:33.314Z",
       "agent": {
@@ -3160,13 +3223,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 4272,
     "averageResponseTime": 3392.5,
     "transactionsPerMinute": 0.5,
     "impact": 0.09374344413758617
   },
   {
-    "name": "APIRestController#orders",
+    "key": {
+      "transaction.name": "APIRestController#orders",
+      "service.name": "opbeans-java"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:39.500Z",
       "agent": {
@@ -3256,13 +3321,15 @@
         "original": "Python/3.7 aiohttp/3.3.2"
       }
     },
-    "p95": 3376,
     "averageResponseTime": 3147,
     "transactionsPerMinute": 0.5,
     "impact": 0.06552270160444405
   },
   {
-    "name": "GET /throw-error",
+    "key": {
+      "transaction.name": "GET /throw-error",
+      "service.name": "opbeans-node"
+    },
     "sample": {
       "@timestamp": "2020-06-29T06:48:42.954Z",
       "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -3370,7 +3437,6 @@
         "original": "workload/2.4.3"
       }
     },
-    "p95": 3224,
     "averageResponseTime": 2577,
     "transactionsPerMinute": 0.5,
     "impact": 0
