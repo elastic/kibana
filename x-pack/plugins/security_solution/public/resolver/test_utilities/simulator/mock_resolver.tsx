@@ -24,23 +24,27 @@ import { sideEffectSimulator } from '../../view/side_effect_simulator';
 
 type MockResolverProps = {
   /**
-   * Used for the KibanaContextProvider. Defaulted if not provided.
-   */
-  coreStart?: CoreStart;
-  /**
-   * Used for `react-router`. Defaulted if not provided.
-   */
-  history?: React.ComponentProps<typeof Router>['history'];
-  /**
    * Used to simulate a raster width. Defaults to 800.
    */
   rasterWidth?: number;
-  // If passed, set the raster height to this value. Defaults to 800
+  /**
+   * Used to simulate a raster height. Defaults to 800.
+   */
   rasterHeight?: number;
+  /**
+   * Used for the KibanaContextProvider
+   */
+  coreStart: CoreStart;
+  /**
+   * Used for `react-router`.
+   */
+  history: React.ComponentProps<typeof Router>['history'];
   /** Pass a resolver store. See `storeFactory` and `mockDataAccessLayer` */
   store: Store<ResolverState, ResolverAction>;
-  // All the props from `ResolverWithoutStore` can be optionally passed.
-} & Partial<ResolverProps>;
+  /**
+   * All the props from `ResolverWithoutStore` can be passed. These aren't defaulted to anything (you might want to test what happens when they aren't present.)
+   */
+} & ResolverProps;
 
 /**
  * This is a mock Resolver component. It has faked versions of various services:
@@ -58,14 +62,6 @@ type MockResolverProps = {
  *  Use this in jest tests. Render it w/ `@testing-library/react` or `enzyme`. Then either interact with the result using fake events, or dispatch actions to the store. You could also pass in a store with initial data.
  */
 export const MockResolver = React.memo((props: MockResolverProps) => {
-  // Get the coreStart services from props, or create them if needed.
-  const coreStart: CoreStart = useMemo(() => props.coreStart ?? coreMock.createStart(), [
-    props.coreStart,
-  ]);
-
-  // Get the history object from props, or create it if needed.
-  const history = useMemo(() => props.history ?? createMemoryHistory(), [props.history]);
-
   const [resolverElement, setResolverElement] = useState<HTMLDivElement | null>(null);
 
   // Get a ref to the underlying Resolver element so we can resize.
@@ -98,14 +94,14 @@ export const MockResolver = React.memo((props: MockResolverProps) => {
 
   return (
     <I18nProvider>
-      <Router history={history}>
-        <KibanaContextProvider services={coreStart}>
+      <Router history={props.history}>
+        <KibanaContextProvider services={props.coreStart}>
           <SideEffectContext.Provider value={simulator.mock}>
             <Provider store={props.store}>
               <ResolverWithoutProviders
                 ref={resolverRef}
-                databaseDocumentID={props.databaseDocumentID ?? 'id'}
-                resolverComponentInstanceID={props.resolverComponentInstanceID ?? 'instanceID'}
+                databaseDocumentID={props.databaseDocumentID}
+                resolverComponentInstanceID={props.resolverComponentInstanceID}
               />
             </Provider>
           </SideEffectContext.Provider>

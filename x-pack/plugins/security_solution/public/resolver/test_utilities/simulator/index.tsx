@@ -8,6 +8,8 @@ import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { connectEnzymeWrapperAndStore } from '../connect_enzyme_wrapper_and_store';
 import { spyMiddlewareFactory } from '../spy_middleware';
 import { resolverMiddlewareFactory } from '../../store/middleware';
@@ -39,6 +41,13 @@ export class Simulator {
    */
   private readonly spyMiddleware: SpyMiddleware;
   constructor(
+    /**
+     * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
+     */
+    databaseDocumentID?: string,
+    /**
+     * A (mock) data access layer that will be used to create the Resolver store.
+     */
     dataAccessLayer: DataAccessLayer,
     /**
      * A string that uniquely identifies this Resolver instance amoung others mounted in the DOM.
@@ -64,12 +73,17 @@ export class Simulator {
     // Create a fake 'history' instance that Resolver will use to read and write query string values
     this.history = createMemoryHistory();
 
+    // Used for KibanaContextProvider
+    const coreStart: CoreStart = coreMock.createStart();
+
     // Render Resolver via the `MockResolver` component, using `enzyme`.
     this.wrapper = mount(
       <MockResolver
         resolverComponentInstanceID={this.resolverComponentInstanceID}
         history={this.history}
         store={this.store}
+        coreStart={coreStart}
+        databaseDocumentID={databaseDocumentID}
       />
     );
 

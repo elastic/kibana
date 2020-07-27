@@ -14,7 +14,27 @@ import { mockTreeWithNoAncestorsAnd2Children } from '../../store/mocks/resolver_
 import { DataAccessLayer } from '../../types';
 
 interface Metadata {
-  entityIDs: { origin: 'origin'; firstChild: 'firstChild'; secondChild: 'secondChild' };
+  /**
+   * The `_id` of the document being analyzed.
+   */
+  databaseDocumentID: string;
+  /**
+   * A record of entityIDs to be used in tests assertions.
+   */
+  entityIDs: {
+    /**
+     * The entityID of the node related to the document being analyzed.
+     */
+    origin: 'origin';
+    /**
+     * The entityID of the first child of the origin.
+     */
+    firstChild: 'firstChild';
+    /**
+     * The entityID of the second child of the origin.
+     */
+    secondChild: 'secondChild';
+  };
 }
 
 /**
@@ -22,6 +42,7 @@ interface Metadata {
  */
 export function oneAncestorTwoChildren(): { dataAccessLayer: DataAccessLayer; metadata: Metadata } {
   const metadata: Metadata = {
+    databaseDocumentID: '_id',
     entityIDs: { origin: 'origin', firstChild: 'firstChild', secondChild: 'secondChild' },
   };
   return {

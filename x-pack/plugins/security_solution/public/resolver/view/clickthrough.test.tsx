@@ -11,6 +11,7 @@ import '../test_utilities/extend_jest';
 
 describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', () => {
   let simulator: Simulator;
+  let databaseDocumentID: string;
   let entityIDs: { origin: string; firstChild: string; secondChild: string };
 
   // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
@@ -23,8 +24,11 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
+    // save a reference to the `_id` supported by the mock data layer
+    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
-    simulator = new Simulator(dataAccessLayer, resolverComponentInstanceID);
+    simulator = new Simulator(databaseDocumentID, dataAccessLayer, resolverComponentInstanceID);
   });
 
   describe('when it has loaded', () => {
