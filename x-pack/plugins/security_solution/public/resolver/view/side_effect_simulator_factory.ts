@@ -11,7 +11,7 @@ import { SideEffectSimulator } from '../types';
  * Create mock `SideEffectors` for `SideEffectContext.Provider`. The `control`
  * object is used to control the mocks.
  */
-export const sideEffectSimulator: () => SideEffectSimulator = () => {
+export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
   // The set of mock `ResizeObserver` instances that currently exist
   const resizeObserverInstances: Set<MockResizeObserver> = new Set();
 
