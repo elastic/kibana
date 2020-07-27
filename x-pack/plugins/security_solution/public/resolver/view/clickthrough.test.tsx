@@ -28,7 +28,7 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
     databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
 
     // create a resolver simulator, using the data access layer and an arbitrary component instance ID
-    simulator = new Simulator(databaseDocumentID, dataAccessLayer, resolverComponentInstanceID);
+    simulator = new Simulator({ databaseDocumentID, dataAccessLayer, resolverComponentInstanceID });
   });
 
   describe('when it has loaded', () => {

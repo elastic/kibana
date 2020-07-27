@@ -23,6 +23,10 @@ import { ResolverAction } from '../../store/actions';
  */
 export class Simulator {
   /**
+   * A string that uniquely identifies this Resolver instance amoung others mounted in the DOM.
+   */
+  private readonly resolverComponentInstanceID: string;
+  /**
    * The redux store, creating in the constructor using the `dataAccessLayer`.
    * This code subscribes to state transitions.
    */
@@ -40,20 +44,25 @@ export class Simulator {
    * This is used by `debugActions`.
    */
   private readonly spyMiddleware: SpyMiddleware;
-  constructor(
-    /**
-     * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
-     */
-    databaseDocumentID?: string,
+  constructor({
+    dataAccessLayer,
+    resolverComponentInstanceID,
+    databaseDocumentID,
+  }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
      */
-    dataAccessLayer: DataAccessLayer,
+    dataAccessLayer: DataAccessLayer;
     /**
      * A string that uniquely identifies this Resolver instance amoung others mounted in the DOM.
      */
-    private readonly resolverComponentInstanceID: string
-  ) {
+    resolverComponentInstanceID: string;
+    /**
+     * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
+     */
+    databaseDocumentID?: string;
+  }) {
+    this.resolverComponentInstanceID = resolverComponentInstanceID;
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
 
@@ -156,12 +165,12 @@ export class Simulator {
        * In that case, Resolver should use the side effect context to schedule future work. This code could then subscribe to some event published by the side effect context. That way, this code will be aware of Resolver's intention to do work.
        */
       const timedOut: boolean = await Promise.race([
-        (async (): Promise<{ value: R; timedOut: false }> => {
+        (async (): Promise<false> => {
           await this.stateTransitioned();
           // If a state transition occurs, return false for `timedOut`
           return false;
         })(),
-        new Promise<{ timedOut: true }>((resolve) => {
+        new Promise<true>((resolve) => {
           setTimeout(() => {
             // If a timeout occurs, resolve `timedOut` as true
             return resolve(true);
