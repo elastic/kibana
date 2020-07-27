@@ -20,8 +20,14 @@
 import { access, link, unlink, chmod } from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
-import { write, copyAll, mkdirp, exec } from '../../../lib';
+
+import { ToolingLog } from '@kbn/dev-utils';
+
 import * as dockerTemplates from './templates';
+import { TemplateContext } from './template_context';
+import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
+
+// @ts-expect-error not ts yet
 import { bundleDockerFiles } from './bundle_dockerfiles';
 
 const accessAsync = promisify(access);
@@ -29,7 +35,12 @@ const linkAsync = promisify(link);
 const unlinkAsync = promisify(unlink);
 const chmodAsync = promisify(chmod);
 
-export async function runDockerGenerator(config, log, build, ubi = false) {
+export async function runDockerGenerator(
+  config: Config,
+  log: ToolingLog,
+  build: Build,
+  ubi: boolean = false
+) {
   // UBI var config
   const baseOSImage = ubi ? 'registry.access.redhat.com/ubi7/ubi-minimal:7.7' : 'centos:7';
   const ubiVersionTag = 'ubi7';
@@ -52,7 +63,7 @@ export async function runDockerGenerator(config, log, build, ubi = false) {
   const dockerOutputDir = config.resolveFromTarget(
     `kibana${imageFlavor}${ubiImageFlavor}-${versionTag}-docker.tar.gz`
   );
-  const scope = {
+  const scope: TemplateContext = {
     artifactTarball,
     imageFlavor,
     versionTag,
@@ -112,10 +123,10 @@ export async function runDockerGenerator(config, log, build, ubi = false) {
   });
 
   // Pack Dockerfiles and create a target for them
-  await bundleDockerFiles(config, log, build, scope);
+  await bundleDockerFiles(config, log, scope);
 }
 
-export async function runDockerGeneratorForUBI(config, log, build) {
+export async function runDockerGeneratorForUBI(config: Config, log: ToolingLog, build: Build) {
   // Only run ubi docker image build for default distribution
   if (build.isOss()) {
     return;
