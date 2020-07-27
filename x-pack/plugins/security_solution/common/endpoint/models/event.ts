@@ -9,7 +9,7 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-export function isProcessStart(event: ResolverEvent): boolean {
+export function isStart(event: ResolverEvent): boolean {
   if (isLegacyEvent(event)) {
     return event.event?.type === 'process_start' || event.event?.action === 'fork_event';
   }
