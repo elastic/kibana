@@ -1,6 +1,6 @@
 [chapter]
 [role="xpack"]
-[[xpack-observability]]
+[[observability]]
 = Observability
 
 Observability in {kib} enables you to add and monitor your logs, system
