@@ -38,7 +38,7 @@ interface Metadata {
 }
 
 /**
- * Simplest mock dataAccessLayer possible.
+ * A simple mock dataAccessLayer possible that returns a tree with 0 ancestors and 2 direct children. 1 related event is returned. The parameter to `entities` is ignored.
  */
 export function oneAncestorTwoChildren(): { dataAccessLayer: DataAccessLayer; metadata: Metadata } {
   const metadata: Metadata = {

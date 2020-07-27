@@ -7,9 +7,13 @@
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
 
+/**
+ * We use the full-DOM emulation mode of `enzyme` via `mount`. Even though we use `react-redux`, `enzyme`
+ * does not update the DOM after state transitions. This subscribes to the `redux` store and after any state
+ * transition it asks `enzyme` to update the DOM to match the React state.
+ */
 export function connectEnzymeWrapperAndStore(store: Store<unknown>, wrapper: ReactWrapper): void {
   store.subscribe(() => {
-    // update the enzyme wrapper after each state transition
     return wrapper.update();
   });
 }
