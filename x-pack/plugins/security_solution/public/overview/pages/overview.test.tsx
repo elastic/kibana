@@ -52,30 +52,6 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
 
 describe('Overview', () => {
   describe('rendering', () => {
-    describe('when indicesExist is true', () => {
-      beforeEach(() => {
-        (useWithSource as jest.Mock).mockReturnValue({
-          indicesExist: true,
-        });
-        (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: false });
-        const mockuseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<
-          UseMessagesStorage
-        >;
-        mockuseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      });
-
-      it('renders loading icon for sidebar', () => {
-        const wrapper = mount(
-          <TestProviders>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="sidebar-loading"]').exists()).toBe(true);
-      });
-    });
-
     describe('when no index is available', () => {
       beforeEach(() => {
         (useWithSource as jest.Mock).mockReturnValue({
