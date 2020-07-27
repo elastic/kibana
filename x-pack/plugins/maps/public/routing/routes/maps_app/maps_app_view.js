@@ -273,6 +273,7 @@ export class MapsAppView extends React.Component {
 
   _initQueryTimeRefresh() {
     const { setRefreshConfig, savedMap } = this.props;
+    const { queryString } = getData().query;
     // TODO: Handle null when converting to TS
     const globalState = getGlobalState();
     const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
@@ -290,6 +291,8 @@ export class MapsAppView extends React.Component {
         globalState,
       }),
     };
+
+    if (newState.query) queryString.setQuery(newState.query);
     this.setState({ query: newState.query, time: newState.time });
     updateGlobalState(
       {
