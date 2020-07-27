@@ -9,6 +9,7 @@ import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
+import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import { RuleAlertAction, RuleType } from '../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
@@ -326,18 +327,23 @@ export const getActionMessageRuleParams = (ruleType: RuleType): string[] => {
   return ruleParamsKeys;
 };
 
-export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined): string[] => {
-  if (!ruleType) {
-    return [];
-  }
-  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+export const getActionMessageParams = memoizeOne(
+  (ruleType: RuleType | undefined): ActionVariable[] => {
+    if (!ruleType) {
+      return [];
+    }
+    const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
 
-  return [
-    'state.signals_count',
-    '{context.results_link}',
-    ...actionMessageRuleParams.map((param) => `context.rule.${param}`),
-  ];
-});
+    return [
+      { name: 'state.signals_count', description: 'state.signals_count' },
+      { name: '{context.results_link}', description: 'context.results_link' },
+      ...actionMessageRuleParams.map((param) => {
+        const extendedParam = `context.rule.${param}`;
+        return { name: extendedParam, description: extendedParam };
+      }),
+    ];
+  }
+);
 
 // typed as null not undefined as the initial state for this value is null.
 export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
