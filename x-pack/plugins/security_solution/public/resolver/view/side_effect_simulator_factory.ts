@@ -16,7 +16,8 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
   const resizeObserverInstances: Set<MockResizeObserver> = new Set();
 
   // A map of `Element`s to their fake `DOMRect`s
-  const contentRects: Map<Element, DOMRect> = new Map();
+  // Use a `WeakMap` since elements can be removed from the DOM.
+  const contentRects: WeakMap<Element, DOMRect> = new Map();
 
   /**
    * Simulate an element's size changing. This will trigger any `ResizeObserverCallback`s which
