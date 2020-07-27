@@ -212,7 +212,6 @@ export const PolicyDetails = React.memo(() => {
             pageId: SecurityPageName.administration,
             dataTestSubj: 'policyDetailsBackLink',
           }}
-          data-test-subj="policyDetailsPageHeader"
         >
           {headerRightContent}
         </HeaderPage>
