@@ -112,15 +112,7 @@ export function DiscoverField({
   };
 
   function togglePopover() {
-    // if (hideDetails) {
-    //   return;
-    // }
-
     setOpen(!infoIsOpen);
-    // if (!infoIsOpen) {
-    //   trackUiEvent('indexpattern_field_info_click');
-    //   fetchData();
-    // }
   }
 
   function wrapOnDot(str?: string) {
@@ -186,15 +178,10 @@ export function DiscoverField({
         display="block"
         button={
           <FieldButton
-            // className={`dscSidebarField dscSidebarItem ${
-            //   showDetails ? 'dscSidebarItem--active' : ''
-            // }`}
             size="s"
             className="dscSidebarItem"
             isOpen={showDetails}
             tabIndex={0}
-            // onClick={() => onShowDetails(!showDetails, field)}
-            // onKeyPress={() => onShowDetails(!showDetails, field)}
             onClick={() => {
               togglePopover();
             }}

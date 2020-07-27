@@ -214,7 +214,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         >
           <EuiKeyboardAccessible>
             <FieldButton
-              // className={`lnsFieldItem__info ${infoIsOpen ? 'lnsFieldItem__info-isOpen' : ''}`}
               className="lnsFieldItem__info"
               isDraggable
               isOpen={infoIsOpen}
@@ -236,7 +235,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               fieldIcon={lensFieldIcon}
               fieldName={wrappableHighlightableFieldName}
             />
-            {/* <div className="lnsFieldItem__info">{lensFieldIcon}</div> */}
           </EuiKeyboardAccessible>
         </DragDrop>
       }
