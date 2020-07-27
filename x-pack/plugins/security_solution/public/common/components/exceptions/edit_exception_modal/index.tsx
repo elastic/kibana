@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiModal,
@@ -146,6 +146,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     }
   }, [shouldDisableBulkClose]);
 
+  const isSubmitButtonDisabled = useMemo(
+    () => exceptionItemsToAdd.every((item) => item.entries.length === 0),
+    [exceptionItemsToAdd]
+  );
+
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
@@ -261,7 +266,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
-          <EuiButton onClick={onEditExceptionConfirm} isLoading={addExceptionIsLoading} fill>
+          <EuiButton
+            onClick={onEditExceptionConfirm}
+            isLoading={addExceptionIsLoading}
+            isDisabled={isSubmitButtonDisabled}
+            fill
+          >
             {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
           </EuiButton>
         </EuiModalFooter>

@@ -24,7 +24,11 @@ import { BuilderButtonOptions } from './builder_button_options';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { State, exceptionsBuilderReducer } from './reducer';
-import { getDefaultEmptyEntry, getDefaultNestedEmptyEntry } from './helpers';
+import {
+  containsValueListEntry,
+  getDefaultEmptyEntry,
+  getDefaultNestedEmptyEntry,
+} from './helpers';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import exceptionableFields from '../exceptionable_fields.json';
 
@@ -44,6 +48,7 @@ const MyButtonsContainer = styled(EuiFlexItem)`
 
 const initialState: State = {
   disableAnd: false,
+  disableNested: false,
   disableOr: false,
   andLogicIncluded: false,
   addNested: false,
@@ -82,12 +87,21 @@ export const ExceptionBuilder = ({
   onChange,
 }: ExceptionBuilderProps) => {
   const [
-    { exceptions, exceptionsToDelete, andLogicIncluded, disableAnd, disableOr, addNested },
+    {
+      exceptions,
+      exceptionsToDelete,
+      andLogicIncluded,
+      disableAnd,
+      disableNested,
+      disableOr,
+      addNested,
+    },
     dispatch,
   ] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
     disableAnd: isAndDisabled,
     disableOr: isOrDisabled,
+    disableNested: isNestedDisabled,
   });
 
   const setUpdateExceptions = useCallback(
@@ -362,6 +376,7 @@ export const ExceptionBuilder = ({
                 isOnlyItem={exceptions.length === 1}
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onChangeExceptionItem={handleExceptionItemChange}
+                onlyShowListOperators={containsValueListEntry(exceptions)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -379,7 +394,7 @@ export const ExceptionBuilder = ({
             <BuilderButtonOptions
               isOrDisabled={disableOr}
               isAndDisabled={disableAnd}
-              isNestedDisabled={isNestedDisabled}
+              isNestedDisabled={disableNested}
               isNested={addNested}
               showNestedButton
               onOrClicked={handleAddNewExceptionItem}
