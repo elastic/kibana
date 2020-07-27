@@ -27,7 +27,8 @@ export default function ({ getService, getPageObjects }) {
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
 
-  describe('Dashboard View Mode', () => {
+  // Skip on 6.8 https://github.com/elastic/kibana/issues/34014
+  describe.skip('Dashboard View Mode', () => {
 
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
