@@ -49,19 +49,21 @@ const getTagsLabelTitle = (action: CaseUserActions) => {
 
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
-      <EuiFlexItem data-test-subj="ua-tags-label">
+      <EuiFlexItem data-test-subj="ua-tags-label" grow={false}>
         {action.action === 'add' && i18n.ADDED_FIELD}
         {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
       </EuiFlexItem>
-      {tags.length > 0 && (
-        <EuiBadgeGroup>
-          {tags.map((tag) => (
-            <EuiBadge data-test-subj={`ua-tag`} color="default" key={tag}>
-              {tag}
-            </EuiBadge>
-          ))}
-        </EuiBadgeGroup>
-      )}
+      <EuiFlexItem grow={false}>
+        {tags.length > 0 && (
+          <EuiBadgeGroup gutterSize="xs">
+            {tags.map((tag) => (
+              <EuiBadge data-test-subj={`ua-tag`} color="default" key={tag}>
+                {tag}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

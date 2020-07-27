@@ -6,6 +6,7 @@
 
 import React, { memo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 
 interface UserActionUsernameProps {
   username: string;
@@ -14,7 +15,7 @@ interface UserActionUsernameProps {
 
 const UserActionUsernameComponent = ({ username, fullName }: UserActionUsernameProps) => {
   return (
-    <EuiToolTip position="top" content={<p>{fullName ?? username}</p>}>
+    <EuiToolTip position="top" content={<p>{isEmpty(fullName) ? username : fullName}</p>}>
       <strong>{username}</strong>
     </EuiToolTip>
   );

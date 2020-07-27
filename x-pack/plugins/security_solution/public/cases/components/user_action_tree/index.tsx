@@ -30,6 +30,7 @@ import { UserActionCopyLink } from './user_action_copy_link';
 import { UserActionPropertyActions } from './user_action_property_actions';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { UserActionUsername } from './user_action_username';
+import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { Connector } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
@@ -359,7 +360,7 @@ export const UserActionTree = React.memo(
             ...comments,
             {
               username: (
-                <UserActionUsername
+                <UserActionUsernameWithAvatar
                   username={action.actionBy.username ?? ''}
                   fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
                 />
