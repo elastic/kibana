@@ -7,10 +7,11 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 
-import { PolicyList } from './index';
+import '../../../../common/mock/match_media.ts';
 import { mockPolicyResultList } from '../store/policy_list/mock_policy_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { AppAction } from '../../../../common/store/actions';
+import { PolicyList } from './index';
 
 jest.mock('../../../../common/components/link_to');
 

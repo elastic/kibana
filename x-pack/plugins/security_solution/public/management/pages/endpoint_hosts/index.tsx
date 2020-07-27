@@ -6,7 +6,7 @@
 
 import { Switch, Route } from 'react-router-dom';
 import React, { memo } from 'react';
-import { HostList } from './view';
+import { HostListPage } from './view';
 import { MANAGEMENT_ROUTING_HOSTS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 
@@ -16,7 +16,7 @@ import { NotFoundPage } from '../../../app/404';
 export const HostsContainer = memo(() => {
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_HOSTS_PATH} exact component={HostList} />
+      <Route path={MANAGEMENT_ROUTING_HOSTS_PATH} exact component={HostListPage} />
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );

@@ -7,11 +7,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { PolicyDetails } from './policy_details';
+import '../../../../common/mock/match_media.ts';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { apiPathMockResponseProviders } from '../store/policy_list/test_mock_utils';
+import { PolicyDetails } from './policy_details';
 
 jest.mock('../../../../common/components/link_to');
 
@@ -121,35 +122,29 @@ describe('Policy Details', () => {
 
     it('should display back to list button and policy title', () => {
       policyView.update();
-      const pageHeaderLeft = policyView.find(
-        'EuiPageHeaderSection[data-test-subj="pageViewHeaderLeft"]'
-      );
 
-      const backToListButton = pageHeaderLeft.find('EuiButtonEmpty');
-      expect(backToListButton.prop('iconType')).toBe('arrowLeft');
-      expect(backToListButton.prop('href')).toBe(policyListPathUrl);
-      expect(backToListButton.text()).toBe('Back to policy list');
+      const backToListLink = policyView.find('LinkIcon[dataTestSubj="policyDetailsBackLink"]');
+      expect(backToListLink.prop('iconType')).toBe('arrowLeft');
+      expect(backToListLink.prop('href')).toBe(policyListPathUrl);
+      expect(backToListLink.text()).toBe('Back to policy list');
 
-      const pageTitle = pageHeaderLeft.find('[data-test-subj="pageViewHeaderLeftTitle"]');
+      const pageTitle = policyView.find('h1[data-test-subj="header-page-title"]');
       expect(pageTitle).toHaveLength(1);
       expect(pageTitle.text()).toEqual(policyPackageConfig.name);
     });
     it('should navigate to list if back to link is clicked', async () => {
       policyView.update();
-      const backToListButton = policyView.find(
-        'EuiPageHeaderSection[data-test-subj="pageViewHeaderLeft"] EuiButtonEmpty'
-      );
+
+      const backToListLink = policyView.find('a[data-test-subj="policyDetailsBackLink"]');
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
-      backToListButton.simulate('click', { button: 0 });
+      backToListLink.simulate('click', { button: 0 });
       expect(history.location.pathname).toEqual(policyListPathUrl);
     });
     it('should display agent stats', async () => {
       await asyncActions;
       policyView.update();
-      const headerRight = policyView.find(
-        'EuiPageHeaderSection[data-test-subj="pageViewHeaderRight"]'
-      );
-      const agentsSummary = headerRight.find('EuiFlexGroup[data-test-subj="policyAgentsSummary"]');
+
+      const agentsSummary = policyView.find('EuiFlexGroup[data-test-subj="policyAgentsSummary"]');
       expect(agentsSummary).toHaveLength(1);
       expect(agentsSummary.text()).toBe('Hosts5Online3Offline1Error1');
     });

@@ -8,16 +8,21 @@ import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
+import { CommonProps } from '@elastic/eui/src/components/common';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
-const Wrapper = styled.div<{ noPadding?: boolean }>`
+const Wrapper = styled.div<{ noPadding?: boolean; noTimeline?: boolean }>`
   padding: ${(props) =>
     props.noPadding
       ? '0'
-      : `${props.theme.eui.paddingSizes.l} ${gutterTimeline} ${props.theme.eui.paddingSizes.l}
-  ${props.theme.eui.paddingSizes.l}`};
+      : `
+        ${props.theme.eui.paddingSizes.l}
+        ${props.noTimeline ? props.theme.eui.paddingSizes.l : gutterTimeline}
+        ${props.theme.eui.paddingSizes.l}
+        ${props.theme.eui.paddingSizes.l}
+      `};
   &.siemWrapperPage--restrictWidthDefault,
   &.siemWrapperPage--restrictWidthCustom {
     box-sizing: content-box;
@@ -31,12 +36,12 @@ const Wrapper = styled.div<{ noPadding?: boolean }>`
 
 Wrapper.displayName = 'Wrapper';
 
-interface WrapperPageProps {
+interface WrapperPageProps extends CommonProps {
   children: React.ReactNode;
-  className?: string;
   restrictWidth?: boolean | number | string;
   style?: Record<string, string>;
   noPadding?: boolean;
+  noTimeline?: boolean;
 }
 
 const WrapperPageComponent: React.FC<WrapperPageProps> = ({
@@ -45,6 +50,8 @@ const WrapperPageComponent: React.FC<WrapperPageProps> = ({
   restrictWidth,
   style,
   noPadding,
+  noTimeline,
+  ...otherProps
 }) => {
   const { setGlobalFullScreen } = useFullScreen();
   useEffect(() => {
@@ -66,7 +73,13 @@ const WrapperPageComponent: React.FC<WrapperPageProps> = ({
   }
 
   return (
-    <Wrapper className={classes} style={customStyle || style} noPadding={noPadding}>
+    <Wrapper
+      className={classes}
+      style={customStyle || style}
+      noPadding={noPadding}
+      noTimeline={noTimeline}
+      {...otherProps}
+    >
       {children}
       <AppGlobalStyle />
     </Wrapper>

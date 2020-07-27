@@ -37,9 +37,6 @@ import { VerticalDivider } from './vertical_divider';
 import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { AppAction } from '../../../../common/store/actions';
-import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page_view';
-import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { getPoliciesPath } from '../../../common/routing';
@@ -47,6 +44,8 @@ import { useFormatUrl } from '../../../../common/components/link_to';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { MANAGEMENT_APP_ID } from '../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import { WrapperPage } from '../../../../common/components/wrapper_page';
+import { HeaderPage } from '../../../../common/components/header_page';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -56,7 +55,7 @@ export const PolicyDetails = React.memo(() => {
       application: { navigateToApp },
     },
   } = useKibana();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
+  const { search } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 
   // Store values
@@ -109,11 +108,9 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [navigateToApp, notifications.toasts, policyName, policyUpdateStatus, routeState]);
 
-  const handleBackToListOnClick = useNavigateByRouterEventHandler(getPoliciesPath());
-
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    return routeState?.onCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: getPoliciesPath() }];
-  }, [routeState?.onCancelNavigateTo]);
+    return routeState?.onCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: getPoliciesPath(search) }];
+  }, [routeState?.onCancelNavigateTo, search]);
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 
   const handleSaveOnClick = useCallback(() => {
@@ -142,7 +139,7 @@ export const PolicyDetails = React.memo(() => {
   // Else, if we have an error, then show error on the page.
   if (!policyItem) {
     return (
-      <ManagementPageView viewType="details">
+      <WrapperPage noTimeline>
         {isPolicyLoading ? (
           <EuiLoadingSpinner size="xl" />
         ) : policyApiError ? (
@@ -151,27 +148,9 @@ export const PolicyDetails = React.memo(() => {
           </EuiCallOut>
         ) : null}
         <SpyRoute pageName={SecurityPageName.administration} />
-      </ManagementPageView>
+      </WrapperPage>
     );
   }
-
-  const headerLeftContent = (
-    <div>
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-      <EuiButtonEmpty
-        iconType="arrowLeft"
-        contentProps={{ style: { paddingLeft: '0' } }}
-        onClick={handleBackToListOnClick}
-        href={formatUrl(getPoliciesPath(search))}
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.details.backToListTitle"
-          defaultMessage="Back to policy list"
-        />
-      </EuiButtonEmpty>
-      <PageViewHeaderTitle className="eui-textTruncate">{policyItem.name}</PageViewHeaderTitle>
-    </div>
-  );
 
   const headerRightContent = (
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -222,12 +201,22 @@ export const PolicyDetails = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
-      <ManagementPageView
-        viewType="details"
-        data-test-subj="policyDetailsPage"
-        headerLeft={headerLeftContent}
-        headerRight={headerRightContent}
-      >
+      <WrapperPage noTimeline data-test-subj="policyDetailsPage">
+        <HeaderPage
+          title={policyItem.name}
+          backOptions={{
+            text: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
+              defaultMessage: 'Back to policy list',
+            }),
+            href: getPoliciesPath(search),
+            pageId: SecurityPageName.administration,
+            dataTestSubj: 'policyDetailsBackLink',
+          }}
+          data-test-subj="policyDetailsPageHeader"
+        >
+          {headerRightContent}
+        </HeaderPage>
+
         <EuiText size="xs" color="subdued">
           <h4>
             <FormattedMessage
@@ -236,9 +225,11 @@ export const PolicyDetails = React.memo(() => {
             />
           </h4>
         </EuiText>
+
         <EuiSpacer size="xs" />
         <MalwareProtections />
         <EuiSpacer size="l" />
+
         <EuiText size="xs" color="subdued">
           <h4>
             <FormattedMessage
@@ -247,13 +238,15 @@ export const PolicyDetails = React.memo(() => {
             />
           </h4>
         </EuiText>
+
         <EuiSpacer size="xs" />
         <WindowsEvents />
         <EuiSpacer size="l" />
         <MacEvents />
         <EuiSpacer size="l" />
         <LinuxEvents />
-      </ManagementPageView>
+      </WrapperPage>
+
       <SpyRoute pageName={SecurityPageName.administration} />
     </>
   );

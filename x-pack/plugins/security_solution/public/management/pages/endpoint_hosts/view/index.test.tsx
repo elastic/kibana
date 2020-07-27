@@ -7,7 +7,7 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 
-import { HostList } from './index';
+import '../../../../common/mock/match_media.ts';
 import { mockHostDetailsApiResult, mockHostResultList } from '../store/mock_host_result_list';
 import { mockPolicyResultList } from '../../policy/store/policy_list/mock_policy_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
@@ -20,6 +20,7 @@ import {
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppAction } from '../../../../common/store/actions';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
+import { HostListPage } from './index';
 
 jest.mock('../../../../common/components/link_to');
 
@@ -34,7 +35,7 @@ describe('when on the hosts page', () => {
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
-    render = () => mockedContext.render(<HostList />);
+    render = () => mockedContext.render(<HostListPage />);
   });
 
   it('should NOT display timeline', async () => {
