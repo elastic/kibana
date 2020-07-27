@@ -160,43 +160,20 @@ export const getExceptions = async ({
     throw new Error('lists plugin unavailable during rule execution');
   }
 
-  if (lists != null) {
+  if (lists != null && lists.length > 0) {
     try {
-      // Gather all exception items of all exception lists linked to rule
-      const exceptions = await Promise.all(
-        lists
-          .map(async (list) => {
-            const { id, namespace_type: namespaceType } = list;
-            try {
-              // TODO update once exceptions client `findExceptionListItem`
-              // accepts an array of list ids
-              const foundList = await client.getExceptionList({
-                id,
-                namespaceType,
-                listId: undefined,
-              });
-
-              if (foundList == null) {
-                return [];
-              } else {
-                const items = await client.findExceptionListItem({
-                  listId: foundList.list_id,
-                  namespaceType,
-                  page: 1,
-                  perPage: 5000,
-                  filter: undefined,
-                  sortOrder: undefined,
-                  sortField: undefined,
-                });
-                return items != null ? items.data : [];
-              }
-            } catch {
-              throw new Error('unable to fetch exception list items');
-            }
-          })
-          .flat()
-      );
-      return exceptions.flat();
+      const listIds = lists.map(({ list_id: listId }) => listId);
+      const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
+      const items = await client.findExceptionListsItem({
+        listId: listIds,
+        namespaceType: namespaceTypes,
+        page: 1,
+        perPage: 5000,
+        filter: [],
+        sortOrder: undefined,
+        sortField: undefined,
+      });
+      return items != null ? items.data : [];
     } catch {
       throw new Error('unable to fetch exception list items');
     }

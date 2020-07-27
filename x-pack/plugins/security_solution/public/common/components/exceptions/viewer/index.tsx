@@ -176,8 +176,6 @@ const ExceptionsViewerComponent = ({
 
   const handleEditException = useCallback(
     (exception: ExceptionListItemSchema): void => {
-      // TODO: Added this just for testing. Update
-      // modal state logic as needed once ready
       dispatch({
         type: 'updateExceptionToEdit',
         exception,
