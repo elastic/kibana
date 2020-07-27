@@ -73,7 +73,7 @@ export const ChangeHomeRoute: FunctionComponent<Props> = ({ defaultRoute }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {/* TODO: Hook up link to app directory */}
-        <EuiButtonEmpty href={''} size="xs" flush="right">
+        <EuiButtonEmpty href={''} size="xs" flush="right" iconType="apps">
           <FormattedMessage
             id="home.appDirectory.appDirectoryButtonLabel"
             defaultMessage="View app directory"

@@ -49,6 +49,10 @@ export class Home extends Component {
       getServices().homeConfig.disableWelcomeScreen ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
+
+    const body = document.querySelector('body');
+    body.classList.add('isHomPage');
+
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering
@@ -157,69 +161,69 @@ export class Home extends Component {
     console.log({ directories });
 
     return (
-      <Fragment>
-        <header className="homPageHeader">
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem className="homPageHeader__title">
-              <EuiTitle size="m">
-                <h1>
-                  <FormattedMessage
-                    id="home.pageHeader.welcomeNoUserTitle"
-                    defaultMessage="Welcome to {ELASTIC}!"
-                    values={{ ELASTIC: 'Elastic' }}
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup className="homPageHeader__menu" alignItems="flexEnd">
-                <EuiFlexItem className="homPageHeader__menuItem">
-                  <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
-                    {i18n.translate('home.pageHeader.addDataButtonLabel', {
-                      defaultMessage: 'Add data',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                {stackManagement ? (
+      <div className="homPageContainer">
+        <div className="homPageHeaderContainer">
+          <header className="homPageHeader">
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem className="homPageHeader__title">
+                <EuiTitle size="m">
+                  <h1>
+                    <FormattedMessage
+                      id="home.pageHeader.welcomeNoUserTitle"
+                      defaultMessage="Welcome to {ELASTIC}!"
+                      values={{ ELASTIC: 'Elastic' }}
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup className="homPageHeader__menu" alignItems="flexEnd">
                   <EuiFlexItem className="homPageHeader__menuItem">
-                    <EuiButtonEmpty
-                      onClick={createAppNavigationHandler(stackManagement.path)}
-                      iconType="gear"
-                    >
-                      {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
-                        defaultMessage: 'Manage stack',
+                    <EuiButtonEmpty href="#/tutorial_directory" iconType="plusInCircle">
+                      {i18n.translate('home.pageHeader.addDataButtonLabel', {
+                        defaultMessage: 'Add data',
                       })}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
-                ) : null}
-                {devTools ? (
-                  <EuiFlexItem className="homPageHeader__menuItem">
-                    <EuiButtonEmpty
-                      onClick={createAppNavigationHandler(devTools.path)}
-                      iconType="wrench"
-                    >
-                      {i18n.translate('home.pageHeader.devToolsButtonLabel', {
-                        defaultMessage: 'Dev tools',
+                  {stackManagement ? (
+                    <EuiFlexItem className="homPageHeader__menuItem">
+                      <EuiButtonEmpty
+                        onClick={createAppNavigationHandler(stackManagement.path)}
+                        iconType="gear"
+                      >
+                        {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
+                          defaultMessage: 'Manage stack',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ) : null}
+                  {devTools ? (
+                    <EuiFlexItem className="homPageHeader__menuItem">
+                      <EuiButtonEmpty
+                        onClick={createAppNavigationHandler(devTools.path)}
+                        iconType="wrench"
+                      >
+                        {i18n.translate('home.pageHeader.devToolsButtonLabel', {
+                          defaultMessage: 'Dev tools',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ) : null}
+                  {/* <EuiFlexItem>
+                    <EuiButtonEmpty href="#/feature_directory" iconType="apps">
+                      {i18n.translate('home.pageHeader.appDirectoryButtonLabel', {
+                        defaultMessage: 'App directory',
                       })}
                     </EuiButtonEmpty>
-                  </EuiFlexItem>
-                ) : null}
-                {/* <EuiFlexItem>
-                  <EuiButtonEmpty href="#/feature_directory" iconType="apps">
-                    {i18n.translate('home.pageHeader.appDirectoryButtonLabel', {
-                      defaultMessage: 'App directory',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem> */}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </header>
-        <div className="homPageContainer">
-          <main className="homPage" data-test-subj="homeApp">
+                  </EuiFlexItem> */}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </header>
+        </div>
+        <div className="homPageMainContainer">
+          <main className="homPageMain" data-test-subj="homeApp">
             <SolutionsPanel addBasePath={addBasePath} findDirectoryById={this.findDirectoryById} />
-
-            <EuiSpacer size="s" />
 
             <div className="homAddData">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
@@ -253,9 +257,7 @@ export class Home extends Component {
 
               <EuiFlexGroup>
                 <EuiFlexItem grow={1}>
-                  <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
-                    {addDataFeatureCards}
-                  </EuiFlexGroup>
+                  <EuiFlexGroup justifyContent="spaceAround">{addDataFeatureCards}</EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>
@@ -279,7 +281,7 @@ export class Home extends Component {
                   <EuiFlexGroup
                     className="homManageData__container"
                     justifyContent="spaceAround"
-                    gutterSize="xl"
+                    wrap
                   >
                     {manageDataFeatureCards}
                   </EuiFlexGroup>
@@ -295,7 +297,7 @@ export class Home extends Component {
             )}
           </main>
         </div>
-      </Fragment>
+      </div>
     );
   }
 

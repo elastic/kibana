@@ -281,11 +281,11 @@ export const SolutionsPanel: FunctionComponent<Props> = ({ addBasePath, findDire
     securitySolution ||
     kibanaActions.length ? (
     <Fragment>
-      <EuiFlexGroup className="homSolutionsPanel" justifyContent="spaceAround" gutterSize="xl">
+      <EuiFlexGroup className="homSolutionsPanel" justifyContent="spaceAround">
         {enterpriseSearchActions.length || observabilityActions.length || securitySolution ? (
           <EuiFlexItem className={halfWidthClass}>
             {/* TODO: once app search is merged, register add to feature catalogue and remove hard coded text here */}
-            <EuiFlexGroup direction="column" gutterSize="xl">
+            <EuiFlexGroup direction="column">
               {enterpriseSearchActions.length ? (
                 <EuiFlexItem className="homSolutionPanel__cardSecondary homSolutionsPanel__enterpriseSearch">
                   <EuiPanel
@@ -435,6 +435,11 @@ export const SolutionsPanel: FunctionComponent<Props> = ({ addBasePath, findDire
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="xl" />
+      <EuiSpacer size="s" />
     </Fragment>
-  ) : null;
+  ) : (
+    <Fragment>
+      <EuiSpacer size="xl" />
+    </Fragment>
+  );
 };
