@@ -122,7 +122,8 @@ interface UseWithSourceState {
 export const useWithSource = (
   sourceId = 'default',
   indexToAdd?: string[] | null,
-  onlyCheckIndexToAdd?: boolean
+  onlyCheckIndexToAdd?: boolean,
+  queryDeduplication? = 'default'
 ) => {
   const [configIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const defaultIndex = useMemo<string[]>(() => {
@@ -160,6 +161,7 @@ export const useWithSource = (
           variables: {
             sourceId,
             defaultIndex,
+            queryDeduplication,
           },
           context: {
             fetchOptions: {
@@ -206,7 +208,7 @@ export const useWithSource = (
       isSubscribed = false;
       return abortCtrl.abort();
     };
-  }, [apolloClient, sourceId, defaultIndex]);
+  }, [apolloClient, sourceId, defaultIndex, queryDeduplication]);
 
   return state;
 };

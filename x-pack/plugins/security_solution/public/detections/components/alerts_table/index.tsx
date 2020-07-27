@@ -117,7 +117,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     addExceptionModalInitialState
   );
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
-    signalsIndex !== '' ? [signalsIndex] : []
+    signalsIndex !== '' ? [signalsIndex] : [],
+    'alerts_table'
   );
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();

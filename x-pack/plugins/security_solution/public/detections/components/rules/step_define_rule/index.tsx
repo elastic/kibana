@@ -117,7 +117,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [myStepData, setMyStepData] = useState<DefineStepRule>(initialState);
   const [
     { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
-  ] = useFetchIndexPatterns(myStepData.index);
+  ] = useFetchIndexPatterns(myStepData.index, 'define_rule_form');
 
   const { form } = useForm({
     defaultValue: initialState,
