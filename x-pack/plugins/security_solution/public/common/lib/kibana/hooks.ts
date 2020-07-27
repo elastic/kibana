@@ -8,11 +8,13 @@ import moment from 'moment-timezone';
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
-import { useUiSetting, useKibana } from './kibana_react';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { AuthenticatedUser } from '../../../../../security/common/model';
 import { convertToCamelCase } from '../../../cases/containers/utils';
+import { StartServices } from '../../../types';
+import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 
@@ -22,6 +24,11 @@ export const useTimeZone = (): string => {
 };
 
 export const useBasePath = (): string => useKibana().services.http.basePath.get();
+
+export const useToasts = (): StartServices['notifications']['toasts'] =>
+  useKibana().services.notifications.toasts;
+
+export const useHttp = (): StartServices['http'] => useKibana().services.http;
 
 interface UserRealm {
   name: string;

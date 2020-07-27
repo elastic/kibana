@@ -7,21 +7,24 @@
 import { AppMountContext } from 'kibana/public';
 import { Alert } from '../../../alerts/common';
 
+const allowedConsumers = ['apm', 'uptime', 'logs', 'metrics', 'alerts'];
+
 export async function getObservabilityAlerts({ core }: { core: AppMountContext['core'] }) {
   try {
-    const { data = [] }: { data: Alert[] } = await core.http.get('/api/alerts/_find', {
-      query: {
-        page: 1,
-        per_page: 20,
-      },
-    });
+    const { data = [] }: { data: Alert[] } = await core.http.get(
+      core.http.basePath.prepend('/api/alerts/_find'),
+      {
+        query: {
+          page: 1,
+          per_page: 20,
+        },
+      }
+    );
 
-    return data.filter(({ consumer }) => {
-      return (
-        consumer === 'apm' || consumer === 'uptime' || consumer === 'logs' || consumer === 'metrics'
-      );
-    });
+    return data.filter(({ consumer }) => allowedConsumers.includes(consumer));
   } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Error while fetching alerts', e);
     return [];
   }
 }

@@ -48,6 +48,17 @@ export const useGetOneAgentConfigFull = (agentConfigId: string) => {
   });
 };
 
+export const sendGetOneAgentConfigFull = (
+  agentConfigId: string,
+  query: { standalone?: boolean } = {}
+) => {
+  return sendRequest<GetFullAgentConfigResponse>({
+    path: agentConfigRouteService.getInfoFullPath(agentConfigId),
+    method: 'get',
+    query,
+  });
+};
+
 export const sendGetOneAgentConfig = (agentConfigId: string) => {
   return sendRequest<GetOneAgentConfigResponse>({
     path: agentConfigRouteService.getInfoPath(agentConfigId),

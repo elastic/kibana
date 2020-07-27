@@ -294,6 +294,7 @@ export class SavedObjectsClient {
       sortField: 'sort_field',
       type: 'type',
       filter: 'filter',
+      namespaces: 'namespaces',
       preference: 'preference',
     };
 

@@ -38,6 +38,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         package_auto_upgrade: { type: 'keyword' },
         kibana_url: { type: 'keyword' },
         kibana_ca_sha256: { type: 'keyword' },
+        has_seen_add_data_notice: { type: 'boolean', index: false },
       },
     },
   },
@@ -66,7 +67,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         last_checkin_status: { type: 'keyword' },
         config_revision: { type: 'integer' },
         default_api_key_id: { type: 'keyword' },
-        default_api_key: { type: 'binary', index: false },
+        default_api_key: { type: 'binary' },
         updated_at: { type: 'date' },
         current_error_events: { type: 'text', index: false },
         packages: { type: 'keyword' },
@@ -84,7 +85,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         agent_id: { type: 'keyword' },
         type: { type: 'keyword' },
-        data: { type: 'binary', index: false },
+        data: { type: 'binary' },
         sent_at: { type: 'date' },
         created_at: { type: 'date' },
       },
@@ -145,7 +146,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       properties: {
         name: { type: 'keyword' },
         type: { type: 'keyword' },
-        api_key: { type: 'binary', index: false },
+        api_key: { type: 'binary' },
         api_key_id: { type: 'keyword' },
         config_id: { type: 'keyword' },
         created_at: { type: 'date' },
@@ -169,8 +170,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         is_default: { type: 'boolean' },
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
-        fleet_enroll_username: { type: 'binary', index: false },
-        fleet_enroll_password: { type: 'binary', index: false },
+        fleet_enroll_username: { type: 'binary' },
+        fleet_enroll_password: { type: 'binary' },
         config: { type: 'flattened' },
       },
     },
@@ -248,7 +249,14 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
           enabled: false,
           type: 'object',
         },
-        installed: {
+        installed_es: {
+          type: 'nested',
+          properties: {
+            id: { type: 'keyword' },
+            type: { type: 'keyword' },
+          },
+        },
+        installed_kibana: {
           type: 'nested',
           properties: {
             id: { type: 'keyword' },

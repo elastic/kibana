@@ -51,6 +51,7 @@ export const buildBulkBody = ({
     enabled,
     createdAt,
     createdBy,
+    doc,
     updatedAt,
     updatedBy,
     interval,

@@ -316,6 +316,83 @@ describe('Terms Agg Other bucket helper', () => {
       }
     });
 
+    test('excludes exists filter for scripted fields', () => {
+      const aggConfigs = getAggConfigs(nestedTerm.aggs);
+      aggConfigs.aggs[1].params.field.scripted = true;
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[1] as IBucketAggConfig,
+        nestedTermResponse
+      );
+      const expectedResponse = {
+        'other-filter': {
+          aggs: undefined,
+          filters: {
+            filters: {
+              '-IN': {
+                bool: {
+                  must: [],
+                  filter: [{ match_phrase: { 'geo.src': 'IN' } }],
+                  should: [],
+                  must_not: [
+                    {
+                      script: {
+                        script: {
+                          lang: undefined,
+                          params: { value: 'ios' },
+                          source: '(undefined) == value',
+                        },
+                      },
+                    },
+                    {
+                      script: {
+                        script: {
+                          lang: undefined,
+                          params: { value: 'win xp' },
+                          source: '(undefined) == value',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              '-US': {
+                bool: {
+                  must: [],
+                  filter: [{ match_phrase: { 'geo.src': 'US' } }],
+                  should: [],
+                  must_not: [
+                    {
+                      script: {
+                        script: {
+                          lang: undefined,
+                          params: { value: 'ios' },
+                          source: '(undefined) == value',
+                        },
+                      },
+                    },
+                    {
+                      script: {
+                        script: {
+                          lang: undefined,
+                          params: { value: 'win xp' },
+                          source: '(undefined) == value',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      };
+      expect(agg).toBeDefined();
+      if (agg) {
+        expect(agg()).toEqual(expectedResponse);
+      }
+    });
+
     test('returns false when nested terms agg has no buckets', () => {
       const aggConfigs = getAggConfigs(nestedTerm.aggs);
       const agg = buildOtherBucketAgg(

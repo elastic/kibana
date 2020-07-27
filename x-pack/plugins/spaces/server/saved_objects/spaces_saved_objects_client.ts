@@ -19,6 +19,7 @@ import {
 } from 'src/core/server';
 import { SpacesServiceSetup } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
+import { SpacesClient } from '../lib/spaces_client';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
@@ -45,12 +46,14 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
   private readonly types: string[];
+  private readonly getSpacesClient: Promise<SpacesClient>;
   public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
     const { baseClient, request, spacesService, typeRegistry } = options;
 
     this.client = baseClient;
+    this.getSpacesClient = spacesService.scopedClient(request);
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
     this.errors = baseClient.errors;
@@ -131,19 +134,40 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
-   * @property {string} [options.namespace]
+   * @property {string} [options.namespaces]
    * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   public async find<T = unknown>(options: SavedObjectsFindOptions) {
     throwErrorIfNamespaceSpecified(options);
 
+    let namespaces = options.namespaces;
+    if (namespaces) {
+      const spacesClient = await this.getSpacesClient;
+      const availableSpaces = await spacesClient.getAll('findSavedObjects');
+      if (namespaces.includes('*')) {
+        namespaces = availableSpaces.map((space) => space.id);
+      } else {
+        namespaces = namespaces.filter((namespace) =>
+          availableSpaces.some((space) => space.id === namespace)
+        );
+      }
+      // This forbidden error allows this scenario to be consistent
+      // with the way the SpacesClient behaves when no spaces are authorized
+      // there.
+      if (namespaces.length === 0) {
+        throw this.errors.decorateForbiddenError(new Error());
+      }
+    } else {
+      namespaces = [this.spaceId];
+    }
+
     return await this.client.find<T>({
       ...options,
       type: (options.type ? coerceToArray(options.type) : this.types).filter(
         (type) => type !== 'space'
       ),
-      namespace: spaceIdToNamespace(this.spaceId),
+      namespaces,
     });
   }
 

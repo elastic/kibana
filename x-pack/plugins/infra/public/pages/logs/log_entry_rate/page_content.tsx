@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { memo, useEffect, useCallback } from 'react';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -14,16 +14,23 @@ import {
   MissingSetupPrivilegesPrompt,
   SubscriptionSplashContent,
 } from '../../../components/logging/log_analysis_setup';
+import {
+  LogAnalysisSetupFlyout,
+  useLogAnalysisSetupFlyoutStateContext,
+} from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
+import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
+import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
-import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
-import { LogEntryRateSetupFlyout } from './setup_flyout';
+import { useInterval } from '../../../hooks/use_interval';
 
-export const LogEntryRatePageContent = () => {
+const JOB_STATUS_POLLING_INTERVAL = 30000;
+
+export const LogEntryRatePageContent = memo(() => {
   const {
     hasFailedLoadingSource,
     isLoading,
@@ -38,24 +45,52 @@ export const LogEntryRatePageContent = () => {
     hasLogAnalysisSetupCapabilities,
   } = useLogAnalysisCapabilitiesContext();
 
-  const { fetchJobStatus, setupStatus, jobStatus } = useLogEntryRateModuleContext();
+  const {
+    fetchJobStatus: fetchLogEntryCategoriesJobStatus,
+    fetchModuleDefinition: fetchLogEntryCategoriesModuleDefinition,
+    jobStatus: logEntryCategoriesJobStatus,
+    setupStatus: logEntryCategoriesSetupStatus,
+  } = useLogEntryCategoriesModuleContext();
+  const {
+    fetchJobStatus: fetchLogEntryRateJobStatus,
+    fetchModuleDefinition: fetchLogEntryRateModuleDefinition,
+    jobStatus: logEntryRateJobStatus,
+    setupStatus: logEntryRateSetupStatus,
+  } = useLogEntryRateModuleContext();
 
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
-  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+  const { showModuleList } = useLogAnalysisSetupFlyoutStateContext();
+
+  const fetchAllJobStatuses = useCallback(
+    () => Promise.all([fetchLogEntryCategoriesJobStatus(), fetchLogEntryRateJobStatus()]),
+    [fetchLogEntryCategoriesJobStatus, fetchLogEntryRateJobStatus]
+  );
 
   useEffect(() => {
     if (hasLogAnalysisReadCapabilities) {
-      fetchJobStatus();
+      fetchAllJobStatuses();
     }
-  }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
+  }, [fetchAllJobStatuses, hasLogAnalysisReadCapabilities]);
 
-  // Open flyout if there are no ML jobs
   useEffect(() => {
-    if (setupStatus.type === 'required' && setupStatus.reason === 'missing') {
-      openFlyout();
+    if (hasLogAnalysisReadCapabilities) {
+      fetchLogEntryCategoriesModuleDefinition();
     }
-  }, [setupStatus, openFlyout]);
+  }, [fetchLogEntryCategoriesModuleDefinition, hasLogAnalysisReadCapabilities]);
+
+  useEffect(() => {
+    if (hasLogAnalysisReadCapabilities) {
+      fetchLogEntryRateModuleDefinition();
+    }
+  }, [fetchLogEntryRateModuleDefinition, hasLogAnalysisReadCapabilities]);
+
+  useInterval(() => {
+    if (logEntryCategoriesSetupStatus.type !== 'pending' && hasLogAnalysisReadCapabilities) {
+      fetchLogEntryCategoriesJobStatus();
+    }
+    if (logEntryRateSetupStatus.type !== 'pending' && hasLogAnalysisReadCapabilities) {
+      fetchLogEntryRateJobStatus();
+    }
+  }, JOB_STATUS_POLLING_INTERVAL);
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
@@ -65,7 +100,10 @@ export const LogEntryRatePageContent = () => {
     return <SubscriptionSplashContent />;
   } else if (!hasLogAnalysisReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
-  } else if (setupStatus.type === 'initializing') {
+  } else if (
+    logEntryCategoriesSetupStatus.type === 'initializing' ||
+    logEntryRateSetupStatus.type === 'initializing'
+  ) {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
@@ -73,13 +111,19 @@ export const LogEntryRatePageContent = () => {
         })}
       />
     );
-  } else if (setupStatus.type === 'unknown') {
-    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
-  } else if (isJobStatusWithResults(jobStatus['log-entry-rate'])) {
+  } else if (
+    logEntryCategoriesSetupStatus.type === 'unknown' ||
+    logEntryRateSetupStatus.type === 'unknown'
+  ) {
+    return <LogAnalysisSetupStatusUnknownPrompt retry={fetchAllJobStatuses} />;
+  } else if (
+    isJobStatusWithResults(logEntryCategoriesJobStatus['log-entry-categories-count']) ||
+    isJobStatusWithResults(logEntryRateJobStatus['log-entry-rate'])
+  ) {
     return (
       <>
-        <LogEntryRateResultsContent onOpenSetup={openFlyout} />
-        <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+        <LogEntryRateResultsContent />
+        <LogAnalysisSetupFlyout />
       </>
     );
   } else if (!hasLogAnalysisSetupCapabilities) {
@@ -87,9 +131,9 @@ export const LogEntryRatePageContent = () => {
   } else {
     return (
       <>
-        <LogEntryRateSetupContent onOpenSetup={openFlyout} />
-        <LogEntryRateSetupFlyout isOpen={isFlyoutOpen} onClose={closeFlyout} />
+        <LogEntryRateSetupContent onOpenSetup={showModuleList} />
+        <LogAnalysisSetupFlyout />
       </>
     );
   }
-};
+});

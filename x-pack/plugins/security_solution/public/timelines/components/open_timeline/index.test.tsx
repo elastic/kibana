@@ -8,7 +8,9 @@ import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
 import React from 'react';
 
-import { wait } from '../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
+import '../../../common/mock/match_media';
 import { TestProviders, apolloClient } from '../../../common/mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../common/mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
@@ -100,7 +102,7 @@ describe('StatefulOpenTimeline', () => {
       );
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
+        .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
       expect(wrapper.find('[data-test-subj="search-row"]').first().prop('query')).toEqual('abcd');
     });
 
@@ -118,15 +120,15 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('[data-test-subj="search-bar"] input')
+          .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
 
-      wrapper
-        .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
-
-      expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
-        'Showing: 11 timelines with'
-      );
+        expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
+          'Showing: 11 timelines with'
+        );
+      });
     });
 
     test('echos (renders) the query when the user enters a query', async () => {
@@ -143,15 +145,15 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('[data-test-subj="search-bar"] input')
+          .simulate('keyup', { key: 'Enter', target: { value: '   abcd   ' } });
 
-      wrapper
-        .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: '   abcd   ' } });
-
-      expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual(
-        'with "abcd"'
-      );
+        expect(wrapper.find('[data-test-subj="selectable-query-text"]').first().text()).toEqual(
+          'with "abcd"'
+        );
+      });
     });
   });
 
@@ -170,12 +172,12 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
-
-      expect(
-        wrapper.find(`.${OPEN_TIMELINE_CLASS_NAME} input`).first().getDOMNode().id ===
-          document.activeElement!.id
-      ).toBe(true);
+      await waitFor(() => {
+        expect(
+          wrapper.find(`.${OPEN_TIMELINE_CLASS_NAME} input`).first().getDOMNode().id ===
+            document.activeElement!.id
+        ).toBe(true);
+      });
     });
   });
 
@@ -197,26 +199,26 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('.euiCheckbox__input')
+          .first()
+          .simulate('change', { target: { checked: true } });
 
-      wrapper
-        .find('.euiCheckbox__input')
-        .first()
-        .simulate('change', { target: { checked: true } });
+        wrapper.find('[data-test-subj="favorite-selected"]').first().simulate('click');
 
-      wrapper.find('[data-test-subj="favorite-selected"]').first().simulate('click');
-
-      expect(addTimelinesToFavorites).toHaveBeenCalledWith([
-        'saved-timeline-11',
-        'saved-timeline-10',
-        'saved-timeline-9',
-        'saved-timeline-8',
-        'saved-timeline-6',
-        'saved-timeline-5',
-        'saved-timeline-4',
-        'saved-timeline-3',
-        'saved-timeline-2',
-      ]);
+        expect(addTimelinesToFavorites).toHaveBeenCalledWith([
+          'saved-timeline-11',
+          'saved-timeline-10',
+          'saved-timeline-9',
+          'saved-timeline-8',
+          'saved-timeline-6',
+          'saved-timeline-5',
+          'saved-timeline-4',
+          'saved-timeline-3',
+          'saved-timeline-2',
+        ]);
+      });
     });
   });
 
@@ -238,26 +240,26 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('.euiCheckbox__input')
+          .first()
+          .simulate('change', { target: { checked: true } });
 
-      wrapper
-        .find('.euiCheckbox__input')
-        .first()
-        .simulate('change', { target: { checked: true } });
+        wrapper.find('[data-test-subj="delete-selected"]').first().simulate('click');
 
-      wrapper.find('[data-test-subj="delete-selected"]').first().simulate('click');
-
-      expect(deleteTimelines).toHaveBeenCalledWith([
-        'saved-timeline-11',
-        'saved-timeline-10',
-        'saved-timeline-9',
-        'saved-timeline-8',
-        'saved-timeline-6',
-        'saved-timeline-5',
-        'saved-timeline-4',
-        'saved-timeline-3',
-        'saved-timeline-2',
-      ]);
+        expect(deleteTimelines).toHaveBeenCalledWith([
+          'saved-timeline-11',
+          'saved-timeline-10',
+          'saved-timeline-9',
+          'saved-timeline-8',
+          'saved-timeline-6',
+          'saved-timeline-5',
+          'saved-timeline-4',
+          'saved-timeline-3',
+          'saved-timeline-2',
+        ]);
+      });
     });
   });
 
@@ -277,19 +279,19 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper
+          .find('.euiCheckbox__input')
+          .first()
+          .simulate('change', { target: { checked: true } });
 
-      wrapper
-        .find('.euiCheckbox__input')
-        .first()
-        .simulate('change', { target: { checked: true } });
+        const selectedItems: [] = wrapper
+          .find('[data-test-subj="open-timeline"]')
+          .last()
+          .prop('selectedItems');
 
-      const selectedItems: [] = wrapper
-        .find('[data-test-subj="open-timeline"]')
-        .last()
-        .prop('selectedItems');
-
-      expect(selectedItems.length).toEqual(13); // 13 because we did mock 13 timelines in the query
+        expect(selectedItems.length).toEqual(13); // 13 because we did mock 13 timelines in the query
+      });
     });
   });
 
@@ -365,29 +367,37 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
-      wrapper.update();
+      await waitFor(() => {
+        wrapper.update();
 
-      expect(
-        wrapper.find('[data-test-subj="open-timeline"]').last().prop('itemIdToExpandedNotesRowMap')
-      ).toEqual({});
+        expect(
+          wrapper
+            .find('[data-test-subj="open-timeline"]')
+            .last()
+            .prop('itemIdToExpandedNotesRowMap')
+        ).toEqual({});
 
-      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
+        wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
 
-      expect(
-        wrapper.find('[data-test-subj="open-timeline"]').last().prop('itemIdToExpandedNotesRowMap')
-      ).toEqual({
-        '10849df0-7b44-11e9-a608-ab3d811609': (
-          <NotePreviews
-            notes={
-              mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes != null
-                ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
-                    (note) => ({ ...note, savedObjectId: note.noteId })
-                  )
-                : []
-            }
-          />
-        ),
+        expect(
+          wrapper
+            .find('[data-test-subj="open-timeline"]')
+            .last()
+            .prop('itemIdToExpandedNotesRowMap')
+        ).toEqual({
+          '10849df0-7b44-11e9-a608-ab3d811609': (
+            <NotePreviews
+              notes={
+                mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes !=
+                null
+                  ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
+                      (note) => ({ ...note, savedObjectId: note.noteId })
+                    )
+                  : []
+              }
+            />
+          ),
+        });
       });
     });
 
@@ -406,21 +416,21 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
+      await waitFor(() => {
+        wrapper.update();
 
-      wrapper.update();
+        wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
+        expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toEqual(true);
+        expect(wrapper.find('[data-test-subj="updated-by"]').exists()).toEqual(true);
 
-      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
-      expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toEqual(true);
-      expect(wrapper.find('[data-test-subj="updated-by"]').exists()).toEqual(true);
-
-      expect(
-        wrapper
-          .find('[data-test-subj="note-previews-container"]')
-          .find('[data-test-subj="updated-by"]')
-          .first()
-          .text()
-      ).toEqual('elastic');
+        expect(
+          wrapper
+            .find('[data-test-subj="note-previews-container"]')
+            .find('[data-test-subj="updated-by"]')
+            .first()
+            .text()
+        ).toEqual('elastic');
+      });
     });
 
     /**
@@ -441,11 +451,11 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await wait();
-
-      expect(wrapper.find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}"]`).exists()).toEqual(
-        true
-      );
+      await waitFor(() => {
+        expect(
+          wrapper.find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}"]`).exists()
+        ).toEqual(true);
+      });
     });
   });
 
@@ -466,13 +476,14 @@ describe('StatefulOpenTimeline', () => {
       );
       const getSelectedItem = (): [] =>
         wrapper.find('[data-test-subj="open-timeline"]').last().prop('selectedItems');
-      await wait();
-      expect(getSelectedItem().length).toEqual(0);
-      wrapper
-        .find('.euiCheckbox__input')
-        .first()
-        .simulate('change', { target: { checked: true } });
-      expect(getSelectedItem().length).toEqual(13);
+      await waitFor(() => {
+        expect(getSelectedItem().length).toEqual(0);
+        wrapper
+          .find('.euiCheckbox__input')
+          .first()
+          .simulate('change', { target: { checked: true } });
+        expect(getSelectedItem().length).toEqual(13);
+      });
     });
   });
 
@@ -491,13 +502,13 @@ describe('StatefulOpenTimeline', () => {
       </TestProviders>
     );
 
-    await wait();
+    await waitFor(() => {
+      wrapper.update();
 
-    wrapper.update();
-
-    expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
-      'Showing: 11 timelines '
-    );
+      expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
+        'Showing: 11 timelines '
+      );
+    });
   });
 
   // TODO - Have been skip because we need to re-implement the test as the component changed
@@ -518,21 +529,21 @@ describe('StatefulOpenTimeline', () => {
       </TestProviders>
     );
 
-    await wait();
+    await waitFor(() => {
+      wrapper
+        .find(
+          `[data-test-subj="title-${
+            mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].savedObjectId
+          }"]`
+        )
+        .first()
+        .simulate('click');
 
-    wrapper
-      .find(
-        `[data-test-subj="title-${
-          mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].savedObjectId
-        }"]`
-      )
-      .first()
-      .simulate('click');
-
-    expect(onOpenTimeline).toHaveBeenCalledWith({
-      duplicate: false,
-      timelineId: mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0]
-        .savedObjectId,
+      expect(onOpenTimeline).toHaveBeenCalledWith({
+        duplicate: false,
+        timelineId: mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0]
+          .savedObjectId,
+      });
     });
   });
 
@@ -554,10 +565,10 @@ describe('StatefulOpenTimeline', () => {
       </TestProviders>
     );
 
-    await wait();
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
 
-    wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
-
-    expect(onOpenTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
+      expect(onOpenTimeline).toBeCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
+    });
   });
 });

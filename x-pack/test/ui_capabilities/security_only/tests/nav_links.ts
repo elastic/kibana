@@ -37,13 +37,19 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.all());
             break;
           case 'all':
-          case 'read':
           case 'dual_privileges_all':
-          case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.except('ml', 'monitoring')
+            );
+            break;
+          case 'read':
+          case 'dual_privileges_read':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except('ml', 'monitoring', 'appSearch', 'workplaceSearch')
             );
             break;
           case 'foo_all':

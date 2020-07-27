@@ -14,6 +14,7 @@ while [ -h "$SCRIPT" ] ; do
 done
 
 DIR="$(dirname "${SCRIPT}")/.."
+CONFIG_DIR=${KIBANA_PATH_CONF:-"$DIR/config"}
 NODE="${DIR}/node/bin/node"
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then
@@ -21,4 +22,8 @@ if [ ! -x "$NODE" ]; then
   exit 1
 fi
 
-NODE_OPTIONS="--no-warnings --max-http-header-size=65536 ${NODE_OPTIONS}" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli" ${@}
+if [ -f "${CONFIG_DIR}/node.options" ]; then
+  KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
+fi
+
+NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli" ${@}

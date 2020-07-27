@@ -6,17 +6,17 @@ exports[`Transform: Transform List Actions <DeleteAction /> Minimal initializati
   delay="regular"
   position="top"
 >
-  <EuiLink
+  <EuiButtonEmpty
     aria-label="Delete"
-    color="subdued"
+    color="text"
     data-test-subj="transformActionDelete"
-    disabled={true}
+    flush="left"
+    iconType="trash"
+    isDisabled={true}
+    onClick={[Function]}
+    size="s"
   >
-    <EuiIcon
-      type="trash"
-    />
-     
     Delete
-  </EuiLink>
+  </EuiButtonEmpty>
 </EuiToolTip>
 `;

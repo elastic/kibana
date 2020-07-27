@@ -60,7 +60,7 @@ describe('SelectableTimeline', () => {
       });
     });
 
-    describe('template timeline', () => {
+    describe('timeline template', () => {
       const templateTimelineProps = { ...props, timelineType: TimelineType.template };
       beforeAll(() => {
         wrapper = shallow(<SelectableTimeline {...templateTimelineProps} />);
@@ -74,7 +74,7 @@ describe('SelectableTimeline', () => {
         const searchProps: SearchProps = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps.placeholder).toEqual('e.g. Template timeline name or description');
+        expect(searchProps.placeholder).toEqual('e.g. Timeline template name or description');
       });
     });
   });

@@ -29,6 +29,9 @@ exports[`Home component should render services 1`] = `
             "addWarning": [Function],
           },
         },
+        "uiSettings": Object {
+          "get": [Function],
+        },
       },
       "plugins": Object {},
     }
@@ -68,6 +71,9 @@ exports[`Home component should render traces 1`] = `
             "addDanger": [Function],
             "addWarning": [Function],
           },
+        },
+        "uiSettings": Object {
+          "get": [Function],
         },
       },
       "plugins": Object {},

@@ -1,12 +1,12 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:user-artifact:v2:endpoint-exceptionlist-linux-v1-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
+    "id": "endpoint:user-artifact:endpoint-exceptionlist-linux-v1-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
     "index": ".kibana",
     "source": {
       "references": [
       ],
-      "endpoint:user-artifact:v2": {
+      "endpoint:user-artifact": {
         "body": "eJylkM8KwjAMxl9Fci59gN29iicvMqR02QjUbiSpKGPvbiw6ETwpuX1/fh9kBszKhALNcQa9TQgNCJ2nhOA+vJ4wdWaGqJSHPY8RRXxPCb3QkJEtP07IQUe2GOWYSoedqU8qXq16ikGqeAmpPNRtCqIU3WbnDx4WN38d/WvhQqmCXzDlIlojP9CsjLC0bqWtHwhaGN/1jHVkae3u+6N6Sg==",
         "created": 1593016187465,
         "compressionAlgorithm": "zlib",
@@ -17,7 +17,7 @@
         "decodedSha256": "d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
         "decodedSize": 358
       },
-      "type": "endpoint:user-artifact:v2",
+      "type": "endpoint:user-artifact",
       "updated_at": "2020-06-24T16:29:47.584Z"
     }
   }
@@ -26,20 +26,70 @@
 {
   "type": "doc",
   "value": {
-    "id": "endpoint:user-artifact-manifest:v2:endpoint-manifest-v1",
+    "id": "endpoint:user-artifact:endpoint-exceptionlist-macos-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
     "index": ".kibana",
     "source": {
       "references": [
       ],
-      "endpoint:user-artifact-manifest:v2": {
+      "endpoint:user-artifact": {
+        "body": "eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==",
+        "created": 1594402653532,
+        "compressionAlgorithm": "zlib",
+        "encryptionAlgorithm": "none",
+        "identifier": "endpoint-exceptionlist-macos-v1",
+        "encodedSha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+        "encodedSize": 14,
+        "decodedSha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+        "decodedSize": 22
+      },
+      "type": "endpoint:user-artifact",
+      "updated_at": "2020-07-10T17:38:47.584Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "endpoint:user-artifact:endpoint-exceptionlist-windows-v1-8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e",
+    "index": ".kibana",
+    "source": {
+      "references": [
+      ],
+      "endpoint:user-artifact": {
+        "body": "eJzFkL0KwjAUhV+lZA55gG4OXcXJRYqE9LZeiElJbotSsvsIbr6ij2AaakVwUqTr+fkOnIGBIYfgWb4bGJ1bYDnzeGw1MP7m1Qi6iqZUhKbZOKvAe1GjBuGxMeBi3rbgJFkXY2iU7iqoojpR4RSreyV9Enupu1EttPSEimdrsRUs8OHj6C8L99v1ksBPGLnOU4p8QYtlYKHkM21+QFLn4FU3kEZCOU4vcOzKWDqAyybGP54tetSLPluGB+Nu8h4=",
+        "created": 1594402653532,
+        "compressionAlgorithm": "zlib",
+        "encryptionAlgorithm": "none",
+        "identifier": "endpoint-exceptionlist-windows-v1",
+        "encodedSha256": "73015ee5131dabd1b48aa4776d3e766d836f8dd8c9fa8999c9b931f60027f07f",
+        "encodedSize": 191,
+        "decodedSha256": "8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e",
+        "decodedSize": 704
+      },
+      "type": "endpoint:user-artifact",
+      "updated_at": "2020-07-10T17:38:47.584Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "endpoint:user-artifact-manifest:endpoint-manifest-v1",
+    "index": ".kibana",
+    "source": {
+      "references": [
+      ],
+      "endpoint:user-artifact-manifest": {
         "created": 1593183699663,
         "ids": [
           "endpoint-exceptionlist-linux-v1-d2a9c760005b08d43394e59a8701ae75c80881934ccf15a006944452b80f7f9f",
           "endpoint-exceptionlist-macos-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
-          "endpoint-exceptionlist-windows-v1-d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658"
+          "endpoint-exceptionlist-windows-v1-8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e"
         ]
       },
-      "type": "endpoint:user-artifact-manifest:v2",
+      "type": "endpoint:user-artifact-manifest",
       "updated_at": "2020-06-26T15:01:39.704Z"
     }
   }

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -14,15 +15,23 @@ import {
   EuiTitle,
   EuiCallOut,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 
 import { ComponentTemplateDeserialized } from '../shared_imports';
+import { useComponentTemplatesContext } from '../component_templates_context';
 
 interface Props {
   componentTemplateDetails: ComponentTemplateDeserialized;
+  showCallToAction?: boolean;
 }
 
-export const TabSummary: React.FunctionComponent<Props> = ({ componentTemplateDetails }) => {
+export const TabSummary: React.FunctionComponent<Props> = ({
+  componentTemplateDetails,
+  showCallToAction,
+}) => {
+  const { getUrlForApp } = useComponentTemplatesContext();
+
   const { version, _meta, _kbnMeta } = componentTemplateDetails;
 
   const { usedBy } = _kbnMeta;
@@ -43,7 +52,42 @@ export const TabSummary: React.FunctionComponent<Props> = ({ componentTemplateDe
             iconType="pin"
             data-test-subj="notInUseCallout"
             size="s"
-          />
+          >
+            {showCallToAction && (
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateDetails.summaryTab.notInUseDescription"
+                  defaultMessage="{createLink} an index template or {editLink} an existing one."
+                  values={{
+                    createLink: (
+                      <EuiLink
+                        href={getUrlForApp('management', {
+                          path: '/data/index_management/create_template',
+                        })}
+                      >
+                        <FormattedMessage
+                          id="xpack.idxMgmt.componentTemplateDetails.summaryTab.createTemplateLink"
+                          defaultMessage="Create"
+                        />
+                      </EuiLink>
+                    ),
+                    editLink: (
+                      <EuiLink
+                        href={getUrlForApp('management', {
+                          path: '/data/index_management/templates',
+                        })}
+                      >
+                        <FormattedMessage
+                          id="xpack.idxMgmt.componentTemplateDetails.summaryTab.updateTemplateLink"
+                          defaultMessage="update"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            )}
+          </EuiCallOut>
           <EuiSpacer />
         </>
       )}

@@ -7,6 +7,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import {
   OverviewFilters,
+  GetMonitorAvailabilityParams,
   MonitorDetails,
   MonitorLocations,
   Snapshot,
@@ -34,6 +35,7 @@ import {
 } from '.';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
 import { IIndexPattern } from '../../../../../../src/plugins/data/server';
+import { GetMonitorAvailabilityResult } from './get_monitor_availability';
 
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
@@ -42,6 +44,7 @@ export interface UptimeRequests {
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
   getIndexPattern: ESQ<{}, IIndexPattern | undefined>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
+  getMonitorAvailability: ESQ<GetMonitorAvailabilityParams, GetMonitorAvailabilityResult[]>;
   getMonitorDurationChart: ESQ<GetMonitorChartsParams, MonitorDurationResult>;
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;

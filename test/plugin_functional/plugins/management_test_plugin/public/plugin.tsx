@@ -21,12 +21,12 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route, Link } from 'react-router-dom';
 import { CoreSetup, Plugin } from 'kibana/public';
-import { ManagementSetup, ManagementSectionId } from '../../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../../src/plugins/management/public';
 
 export class ManagementTestPlugin
   implements Plugin<ManagementTestPluginSetup, ManagementTestPluginStart> {
   public setup(core: CoreSetup, { management }: { management: ManagementSetup }) {
-    const testSection = management.sections.getSection(ManagementSectionId.Data);
+    const testSection = management.sections.section.data;
 
     testSection.registerApp({
       id: 'test-management',

@@ -385,7 +385,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return {
       data: featureCollection,
-      meta: { ...meta, sourceType: SOURCE_TYPES.ES_SEARCH },
+      meta,
     };
   }
 
@@ -550,6 +550,14 @@ export class ESSearchSource extends AbstractESSource {
       id: properties._id,
       path: geoField.name,
     };
+  }
+
+  getJoinsDisabledReason() {
+    return this._descriptor.scalingType === SCALING_TYPES.CLUSTERS
+      ? i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
+          defaultMessage: 'Joins are not supported when scaling by clusters',
+        })
+      : null;
   }
 }
 

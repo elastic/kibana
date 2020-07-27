@@ -36,6 +36,7 @@ export function uwsgiMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.uwsgiMetrics.nameTitle', {
       defaultMessage: 'uWSGI metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.uwsgiMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the uWSGI server.',

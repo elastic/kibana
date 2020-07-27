@@ -54,12 +54,18 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
         if (event?.type === 'worker started') {
           let moduleCount = 0;
+          let workUnits = 0;
           for (const bundle of event.bundles) {
             moduleCount += bundle.cache.getModuleCount() ?? NaN;
+            workUnits += bundle.cache.getWorkUnits() ?? NaN;
           }
-          const mcString = isFinite(moduleCount) ? String(moduleCount) : '?';
-          const bcString = String(event.bundles.length);
-          log.info(`starting worker [${bcString} bundles, ${mcString} modules]`);
+
+          log.info(
+            `starting worker [${event.bundles.length} ${
+              event.bundles.length === 1 ? 'bundle' : 'bundles'
+            }]`
+          );
+          log.debug(`modules [${moduleCount}] work units [${workUnits}]`);
         }
 
         if (state.phase === 'reallocating') {

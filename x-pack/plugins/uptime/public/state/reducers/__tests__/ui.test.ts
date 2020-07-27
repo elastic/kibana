@@ -24,6 +24,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -43,6 +44,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -59,6 +61,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -68,6 +71,7 @@ describe('ui reducer', () => {
         "basePath": "",
         "esKuery": "",
         "integrationsPopoverOpen": null,
+        "monitorId": "test",
         "searchText": "",
       }
     `);
@@ -83,6 +87,7 @@ describe('ui reducer', () => {
           esKuery: '',
           integrationsPopoverOpen: null,
           searchText: '',
+          monitorId: 'test',
         },
         action
       )
@@ -92,6 +97,7 @@ describe('ui reducer', () => {
         "basePath": "",
         "esKuery": "",
         "integrationsPopoverOpen": null,
+        "monitorId": "test",
         "searchText": "lorem ipsum",
       }
     `);

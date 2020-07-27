@@ -19,19 +19,25 @@ import {
 } from '../../../../src/plugins/home/public';
 import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { MonitoringPluginDependencies, MonitoringConfig } from './types';
-import {
-  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-  KIBANA_ALERTING_ENABLED,
-} from '../common/constants';
+import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
+import { createLegacyAlertTypes } from './alerts/legacy_alert';
+
+interface MonitoringSetupPluginDependencies {
+  home?: HomePublicPluginSetup;
+  cloud?: { isCloudEnabled: boolean };
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+}
 
 export class MonitoringPlugin
-  implements Plugin<boolean, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
+  implements
+    Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
   public setup(
-    core: CoreSetup<MonitoringPluginDependencies>,
-    plugins: object & { home?: HomePublicPluginSetup; cloud?: { isCloudEnabled: boolean } }
+    core: CoreSetup<MonitoringStartPluginDependencies>,
+    plugins: MonitoringSetupPluginDependencies
   ) {
     const { home } = plugins;
     const id = 'monitoring';
@@ -59,16 +65,22 @@ export class MonitoringPlugin
       });
     }
 
+    plugins.triggers_actions_ui.alertTypeRegistry.register(createCpuUsageAlertType());
+    const legacyAlertTypes = createLegacyAlertTypes();
+    for (const legacyAlertType of legacyAlertTypes) {
+      plugins.triggers_actions_ui.alertTypeRegistry.register(legacyAlertType);
+    }
+
     const app: App = {
       id,
       title,
-      order: 9002,
+      order: 9030,
       euiIconType: icon,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { AngularApp } = await import('./angular');
-        const deps: MonitoringPluginDependencies = {
+        const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           kibanaLegacy: pluginsStart.kibanaLegacy,
           element: params.element,
@@ -77,11 +89,11 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
+          triggersActionsUi: plugins.triggers_actions_ui,
         };
 
         pluginsStart.kibanaLegacy.loadFontAwesome();
         this.setInitialTimefilter(deps);
-        this.overrideAlertingEmailDefaults(deps);
 
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen((location) => {
@@ -105,7 +117,7 @@ export class MonitoringPlugin
 
   public stop() {}
 
-  private setInitialTimefilter({ core: coreContext, data }: MonitoringPluginDependencies) {
+  private setInitialTimefilter({ core: coreContext, data }: MonitoringStartPluginDependencies) {
     const { timefilter } = data.query.timefilter;
     const { uiSettings } = coreContext;
     const refreshInterval = { value: 10000, pause: false };
@@ -117,25 +129,6 @@ export class MonitoringPlugin
       JSON.stringify(refreshInterval)
     );
     uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify(time));
-  }
-
-  private overrideAlertingEmailDefaults({ core: coreContext }: MonitoringPluginDependencies) {
-    const { uiSettings } = coreContext;
-    if (KIBANA_ALERTING_ENABLED && !uiSettings.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS)) {
-      uiSettings.overrideLocalDefault(
-        MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-        JSON.stringify({
-          name: i18n.translate('xpack.monitoring.alertingEmailAddress.name', {
-            defaultMessage: 'Alerting email address',
-          }),
-          value: '',
-          description: i18n.translate('xpack.monitoring.alertingEmailAddress.description', {
-            defaultMessage: `The default email address to receive alerts from Stack Monitoring`,
-          }),
-          category: ['monitoring'],
-        })
-      );
-    }
   }
 
   private getExternalConfig() {

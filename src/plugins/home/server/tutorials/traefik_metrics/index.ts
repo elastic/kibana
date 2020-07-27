@@ -33,6 +33,7 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.traefikMetrics.nameTitle', {
       defaultMessage: 'Traefik metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.traefikMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from Traefik.',

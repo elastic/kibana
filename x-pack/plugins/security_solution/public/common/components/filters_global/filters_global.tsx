@@ -9,6 +9,7 @@ import React from 'react';
 import { Sticky } from 'react-sticky';
 import styled, { css } from 'styled-components';
 
+import { FILTERS_GLOBAL_HEIGHT } from '../../../../common/constants';
 import { gutterTimeline } from '../../lib/helpers';
 
 const offsetChrome = 49;
@@ -17,6 +18,7 @@ const disableSticky = `screen and (max-width: ${euiLightVars.euiBreakpoints.s})`
 const disableStickyMq = window.matchMedia(disableSticky);
 
 const Wrapper = styled.aside<{ isSticky?: boolean }>`
+  height: ${FILTERS_GLOBAL_HEIGHT}px;
   position: relative;
   z-index: ${({ theme }) => theme.eui.euiZNavigation};
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
@@ -37,16 +39,27 @@ const Wrapper = styled.aside<{ isSticky?: boolean }>`
 `;
 Wrapper.displayName = 'Wrapper';
 
+const FiltersGlobalContainer = styled.header<{ show: boolean }>`
+  ${({ show }) => css`
+    ${show ? '' : 'display: none;'};
+  `}
+`;
+
+FiltersGlobalContainer.displayName = 'FiltersGlobalContainer';
+
 export interface FiltersGlobalProps {
   children: React.ReactNode;
+  show?: boolean;
 }
 
-export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => (
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children, show = true }) => (
   <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
     {({ style, isSticky }) => (
-      <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
-        {children}
-      </Wrapper>
+      <FiltersGlobalContainer show={show}>
+        <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
+          {children}
+        </Wrapper>
+      </FiltersGlobalContainer>
     )}
   </Sticky>
 ));

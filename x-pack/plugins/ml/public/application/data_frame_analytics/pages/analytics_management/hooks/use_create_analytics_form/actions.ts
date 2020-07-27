@@ -17,7 +17,6 @@ export enum ACTION {
   RESET_FORM,
   SET_ADVANCED_EDITOR_RAW_STRING,
   SET_FORM_STATE,
-  SET_INDEX_NAMES,
   SET_INDEX_PATTERN_TITLES,
   SET_IS_JOB_CREATED,
   SET_IS_JOB_STARTED,
@@ -48,7 +47,6 @@ export type Action =
       advancedEditorRawString: State['advancedEditorRawString'];
     }
   | { type: ACTION.SET_FORM_STATE; payload: Partial<State['form']> }
-  | { type: ACTION.SET_INDEX_NAMES; indexNames: State['indexNames'] }
   | {
       type: ACTION.SET_INDEX_PATTERN_TITLES;
       payload: {

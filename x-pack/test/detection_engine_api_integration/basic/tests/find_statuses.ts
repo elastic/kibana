@@ -22,8 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/69632
-  describe.skip('find_statuses', () => {
+  describe('find_statuses', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
     });

@@ -5,6 +5,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import { PLUGIN_ID } from '../constants/app';
 
 export const userMlCapabilities = {
   canAccessML: false,
@@ -69,16 +70,36 @@ export function getDefaultCapabilities(): MlCapabilities {
 export function getPluginPrivileges() {
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
-  const allMlCapabilities = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+  const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+  // TODO: include ML in base privileges for the `8.0` release: https://github.com/elastic/kibana/issues/71422
+  const savedObjects = ['index-pattern', 'dashboard', 'search', 'visualization'];
+  const privilege = {
+    app: [PLUGIN_ID, 'kibana'],
+    excludeFromBasePrivileges: true,
+    management: {
+      insightsAndAlerting: ['jobsListLink'],
+    },
+    catalogue: [PLUGIN_ID],
+  };
 
   return {
-    user: {
-      ui: userMlCapabilitiesKeys,
-      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
-    },
     admin: {
-      ui: allMlCapabilities,
-      api: allMlCapabilities.map((k) => `ml:${k}`),
+      ...privilege,
+      api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      ui: allMlCapabilitiesKeys,
+      savedObject: {
+        all: savedObjects,
+        read: savedObjects,
+      },
+    },
+    user: {
+      ...privilege,
+      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      ui: userMlCapabilitiesKeys,
+      savedObject: {
+        all: [],
+        read: savedObjects,
+      },
     },
   };
 }

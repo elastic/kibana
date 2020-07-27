@@ -1,0 +1,140 @@
+[[development-getting-started]]
+== Getting started
+
+Get started building your own plugins, or contributing directly to the {kib} repo.
+
+[discrete]
+[[get-kibana-code]]
+=== Get the code
+
+https://help.github.com/en/github/getting-started-with-github/fork-a-repo[Fork], then https://help.github.com/en/github/getting-started-with-github/fork-a-repo#step-2-create-a-local-clone-of-your-fork[clone] the {kib-repo}[{kib} repo] and change directory into it:
+
+[source,bash]
+----
+git clone https://github.com/[YOUR_USERNAME]/kibana.git kibana
+cd kibana
+----
+
+[discrete]
+=== Install dependencies
+
+Install the version of Node.js listed in the `.node-version` file. This
+can be automated with tools such as
+https://github.com/creationix/nvm[nvm],
+https://github.com/coreybutler/nvm-windows[nvm-windows] or
+https://github.com/wbyoung/avn[avn]. As we also include a `.nvmrc` file
+you can switch to the correct version when using nvm by running:
+
+[source,bash]
+----
+nvm use
+----
+
+Install the latest version of https://yarnpkg.com[yarn].
+
+Bootstrap {kib} and install all the dependencies:
+
+[source,bash]
+----
+yarn kbn bootstrap
+----
+
+____
+Node.js native modules could be in use and node-gyp is the tool used to
+build them. There are tools you need to install per platform and python
+versions you need to be using. Please see
+https://github.com/nodejs/node-gyp#installation[https://github.com/nodejs/node-gyp#installation]
+and follow the guide according your platform.
+____
+
+(You can also run `yarn kbn` to see the other available commands. For
+more info about this tool, see
+{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}packages/kbn-pm].)
+
+When switching branches which use different versions of npm packages you
+may need to run:
+
+[source,bash]
+----
+yarn kbn clean
+----
+
+If you have failures during `yarn kbn bootstrap` you may have some
+corrupted packages in your yarn cache which you can clean with:
+
+[source,bash]
+----
+yarn cache clean
+----
+
+[discrete]
+=== Configure environmental settings
+
+[[increase-nodejs-heap-size]]
+[discrete]
+==== Increase node.js heap size
+
+{kib} is a big project and for some commands it can happen that the
+process hits the default heap limit and crashes with an out-of-memory
+error. If you run into this problem, you can increase maximum heap size
+by setting the `--max_old_space_size` option on the command line. To set
+the limit for all commands, simply add the following line to your shell
+config: `export NODE_OPTIONS="--max_old_space_size=2048"`.
+
+[discrete]
+=== Run {es}
+
+Run the latest {es} snapshot. Specify an optional license with the `--license` flag.
+
+[source,bash]
+----
+yarn es snapshot --license trial
+----
+
+`trial` will give you access to all capabilities.
+
+Read about more options for <<running-elasticsearch>>, like connecting to a remote host, running from source,
+preserving data inbetween runs, running remote cluster, etc.
+
+[discrete]
+=== Run {kib}
+
+In another terminal window, start up {kib}. Include developer examples by adding an optional `--run-examples` flag.
+
+[source,bash]
+----
+yarn start --run-examples
+----
+
+View all available options by running `yarn start --help`
+
+Read about more advanced options for <<running-kibana-advanced>>.
+
+[discrete]
+=== Code away!
+
+You are now ready to start developing. Changes to your files should be picked up automatically. Server side changes will
+cause the {kib} server to reboot.
+
+[discrete]
+=== More information
+
+* <<running-kibana-advanced>>
+
+* <<sample-data>>
+
+* <<kibana-debugging>>
+
+* <<building-kibana>>
+
+* <<development-plugin-resources>>
+
+include::running-kibana-advanced.asciidoc[leveloffset=+1]
+
+include::sample-data.asciidoc[leveloffset=+1]
+
+include::debugging.asciidoc[leveloffset=+1]
+
+include::building-kibana.asciidoc[leveloffset=+1]
+
+include::development-plugin-resources.asciidoc[leveloffset=+1]

@@ -5,8 +5,8 @@
  */
 
 import { get } from 'lodash';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
-import { callWithRequestType } from '../../../../common/types/kibana';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 type DtrIndex = number;
@@ -23,7 +23,7 @@ interface ProcessedResults {
   totalResults: number;
 }
 
-export function newJobLineChartProvider(callWithRequest: callWithRequestType) {
+export function newJobLineChartProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
   async function newJobLineChart(
     indexPatternTitle: string,
     timeField: string,
@@ -47,7 +47,7 @@ export function newJobLineChartProvider(callWithRequest: callWithRequestType) {
       splitFieldValue
     );
 
-    const results = await callWithRequest('search', json);
+    const results = await callAsCurrentUser('search', json);
     return processSearchResults(
       results,
       aggFieldNamePairs.map((af) => af.field)

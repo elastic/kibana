@@ -30,8 +30,6 @@ import webpackMerge from 'webpack-merge';
 import WrapperPlugin from 'wrapper-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { DynamicDllPlugin } from './dynamic_dll_plugin';
-
 import { IS_KIBANA_DISTRIBUTABLE } from '../legacy/utils';
 import { fromRoot } from '../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
@@ -286,12 +284,6 @@ export default class BaseOptimizer {
       },
 
       plugins: [
-        new DynamicDllPlugin({
-          uiBundles: this.uiBundles,
-          threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
-          logWithMetadata: this.logWithMetadata,
-        }),
-
         new MiniCssExtractPlugin({
           filename: '[name].style.css',
         }),

@@ -109,6 +109,7 @@ export {
   LegacyAPICaller,
   FakeRequest,
   ScopeableRequest,
+  ElasticsearchClient,
 } from './elasticsearch';
 export * from './elasticsearch/legacy/api_types';
 export {
@@ -148,6 +149,8 @@ export {
   LegacyRequest,
   OnPreAuthHandler,
   OnPreAuthToolkit,
+  OnPreRoutingHandler,
+  OnPreRoutingToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
   OnPreResponseHandler,

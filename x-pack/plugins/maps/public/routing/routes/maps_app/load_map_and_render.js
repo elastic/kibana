@@ -7,7 +7,7 @@
 import React from 'react';
 import { MapsAppView } from '.';
 import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
-import { getToasts } from '../../../kibana_services';
+import { getCoreChrome, getToasts } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 
@@ -27,10 +27,13 @@ export const LoadMapAndRender = class extends React.Component {
   }
 
   async _loadSavedMap() {
-    const { savedMapId } = this.props.match.params;
     try {
-      const savedMap = await getMapsSavedObjectLoader().get(savedMapId);
+      const savedMap = await getMapsSavedObjectLoader().get(this.props.savedMapId);
       if (this._isMounted) {
+        getCoreChrome().docTitle.change(savedMap.title);
+        if (this.props.savedMapId) {
+          getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap.id);
+        }
         this.setState({ savedMap });
       }
     } catch (err) {
@@ -48,11 +51,11 @@ export const LoadMapAndRender = class extends React.Component {
 
   render() {
     const { savedMap, failedToLoad } = this.state;
+
     if (failedToLoad) {
       return <Redirect to="/" />;
     }
 
-    const currentPath = this.props.match.url;
-    return savedMap ? <MapsAppView savedMap={savedMap} currentPath={currentPath} /> : null;
+    return savedMap ? <MapsAppView savedMap={savedMap} onAppLeave={this.props.onAppLeave} /> : null;
   }
 };

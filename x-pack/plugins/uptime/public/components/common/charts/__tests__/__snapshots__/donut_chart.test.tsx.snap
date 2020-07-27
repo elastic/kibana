@@ -262,6 +262,9 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "visible": false,
             },
           },
+          "background": Object {
+            "color": "rgba(255, 255, 255, 1)",
+          },
           "barSeriesStyle": Object {
             "displayValue": Object {
               "fill": "rgba(105, 112, 125, 1)",

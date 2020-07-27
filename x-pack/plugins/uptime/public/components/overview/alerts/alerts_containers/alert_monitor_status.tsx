@@ -22,7 +22,10 @@ import {
   setEsKueryString,
   getSnapshotCountAction,
 } from '../../../../state/actions';
-import { AtomicStatusCheckParamsType } from '../../../../../common/runtime_types';
+import {
+  AtomicStatusCheckParamsType,
+  GetMonitorAvailabilityParamsType,
+} from '../../../../../common/runtime_types';
 import { useIndexPattern } from '../../kuery_bar/use_index_pattern';
 import { useUpdateKueryString } from '../../../../hooks';
 
@@ -82,7 +85,10 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   }, [dispatch, esFilters]);
 
   const isOldAlert = React.useMemo(
-    () => !isRight(AtomicStatusCheckParamsType.decode(alertParams)),
+    () =>
+      Object.entries(alertParams).length > 0 &&
+      !isRight(AtomicStatusCheckParamsType.decode(alertParams)) &&
+      !isRight(GetMonitorAvailabilityParamsType.decode(alertParams)),
     [alertParams]
   );
   useEffect(() => {

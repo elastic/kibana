@@ -41,6 +41,7 @@ export class DataEnhancedPlugin
         application: core.application,
         http: core.http,
         uiSettings: core.uiSettings,
+        usageCollector: plugins.data.search.usageCollector,
       },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );

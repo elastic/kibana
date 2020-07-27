@@ -26,8 +26,15 @@ interface Filters {
   [key: string]: { name: string; checked: 'on' | 'off' };
 }
 
+/**
+ * Copied from https://stackoverflow.com/a/9310752
+ */
+function escapeRegExp(text: string) {
+  return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 function fuzzyMatch(searchValue: string, text: string) {
-  const pattern = `.*${searchValue.split('').join('.*')}.*`;
+  const pattern = `.*${searchValue.split('').map(escapeRegExp).join('.*')}.*`;
   const regex = new RegExp(pattern);
   return regex.test(text);
 }
@@ -48,7 +55,7 @@ const i18nTexts = {
   searchBoxPlaceholder: i18n.translate(
     'xpack.idxMgmt.componentTemplatesSelector.searchBox.placeholder',
     {
-      defaultMessage: 'Search components',
+      defaultMessage: 'Search component templates',
     }
   ),
 };
@@ -78,24 +85,33 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
       return [];
     }
 
-    return components.filter((component) => {
-      if (filters.settings.checked === 'on' && !component.hasSettings) {
-        return false;
-      }
-      if (filters.mappings.checked === 'on' && !component.hasMappings) {
-        return false;
-      }
-      if (filters.aliases.checked === 'on' && !component.hasAliases) {
-        return false;
-      }
+    return components
+      .filter((component) => {
+        if (filters.settings.checked === 'on' && !component.hasSettings) {
+          return false;
+        }
+        if (filters.mappings.checked === 'on' && !component.hasMappings) {
+          return false;
+        }
+        if (filters.aliases.checked === 'on' && !component.hasAliases) {
+          return false;
+        }
 
-      if (searchValue.trim() === '') {
-        return true;
-      }
+        if (searchValue.trim() === '') {
+          return true;
+        }
 
-      const match = fuzzyMatch(searchValue, component.name);
-      return match;
-    });
+        const match = fuzzyMatch(searchValue, component.name);
+        return match;
+      })
+      .sort((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        } else if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
   }, [isLoading, components, searchValue, filters]);
 
   const isSearchResultEmpty = filteredComponents.length === 0 && components.length > 0;

@@ -44,6 +44,18 @@ export function sendDeleteOneEnrollmentAPIKey(keyId: string, options?: RequestOp
   });
 }
 
+export function sendGetEnrollmentAPIKeys(
+  query: GetEnrollmentAPIKeysRequest['query'],
+  options?: RequestOptions
+) {
+  return sendRequest<GetEnrollmentAPIKeysResponse>({
+    method: 'get',
+    path: enrollmentAPIKeyRouteService.getListPath(),
+    query,
+    ...options,
+  });
+}
+
 export function useGetEnrollmentAPIKeys(
   query: GetEnrollmentAPIKeysRequest['query'],
   options?: RequestOptions

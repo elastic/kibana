@@ -29,6 +29,7 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
+import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -64,6 +65,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
     setDismissMessage(true);
     addMessage('management', 'dismissEndpointNotice');
   }, [addMessage]);
+  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
 
   return (
     <>
@@ -74,7 +76,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
           </FiltersGlobal>
 
           <WrapperPage>
-            {!dismissMessage && !metadataIndexExists && (
+            {!dismissMessage && !metadataIndexExists && isIngestEnabled && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
                 <EuiSpacer size="l" />

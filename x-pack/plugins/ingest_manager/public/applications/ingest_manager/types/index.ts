@@ -18,6 +18,7 @@ export {
   UpdatePackageConfig,
   PackageConfigInput,
   PackageConfigInputStream,
+  PackageConfigConfigRecord,
   PackageConfigConfigRecordEntry,
   Output,
   DataStream,

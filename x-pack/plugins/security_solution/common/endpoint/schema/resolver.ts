@@ -12,10 +12,10 @@ import { schema } from '@kbn/config-schema';
 export const validateTree = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    children: schema.number({ defaultValue: 10, min: 0, max: 100 }),
-    ancestors: schema.number({ defaultValue: 3, min: 0, max: 5 }),
-    events: schema.number({ defaultValue: 100, min: 0, max: 1000 }),
-    alerts: schema.number({ defaultValue: 100, min: 0, max: 1000 }),
+    children: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
+    ancestors: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
+    events: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
+    alerts: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
     afterEvent: schema.maybe(schema.string()),
     afterAlert: schema.maybe(schema.string()),
     afterChild: schema.maybe(schema.string()),
@@ -29,7 +29,7 @@ export const validateTree = {
 export const validateEvents = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    events: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+    events: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
     afterEvent: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
   }),
@@ -41,7 +41,7 @@ export const validateEvents = {
 export const validateAlerts = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    alerts: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+    alerts: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
     afterAlert: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
   }),
@@ -53,7 +53,7 @@ export const validateAlerts = {
 export const validateAncestry = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    ancestors: schema.number({ defaultValue: 0, min: 0, max: 10 }),
+    ancestors: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
     legacyEndpointID: schema.maybe(schema.string()),
   }),
 };
@@ -64,7 +64,7 @@ export const validateAncestry = {
 export const validateChildren = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
-    children: schema.number({ defaultValue: 10, min: 1, max: 100 }),
+    children: schema.number({ defaultValue: 200, min: 1, max: 10000 }),
     afterChild: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string()),
   }),

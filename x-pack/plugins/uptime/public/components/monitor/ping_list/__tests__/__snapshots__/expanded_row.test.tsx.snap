@@ -133,13 +133,6 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
       class="euiCallOut euiCallOut--primary"
     >
       <div
-        class="euiCallOutHeader"
-      >
-        <span
-          class="euiCallOutHeader__title"
-        />
-      </div>
-      <div
         class="euiText euiText--small"
       >
         <dl

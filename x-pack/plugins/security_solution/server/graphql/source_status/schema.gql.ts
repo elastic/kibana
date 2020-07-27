@@ -7,6 +7,8 @@
 import gql from 'graphql-tag';
 
 export const sourceStatusSchema = gql`
+  scalar ToIFieldSubTypeNonNullable
+
   "A descriptor of a field in an index"
   type IndexField {
     "Where the field belong"
@@ -26,6 +28,9 @@ export const sourceStatusSchema = gql`
     "Description of the field"
     description: String
     format: String
+    "the elastic type as mapped in the index"
+    esTypes: ToStringArrayNoNullable
+    subType: ToIFieldSubTypeNonNullable
   }
 
   extend type SourceStatus {

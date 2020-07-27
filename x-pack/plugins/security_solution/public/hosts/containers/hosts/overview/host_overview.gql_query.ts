@@ -46,6 +46,11 @@ export const HostOverviewQuery = gql`
           dsl
           response
         }
+        endpoint {
+          endpointPolicy
+          policyStatus
+          sensorVersion
+        }
       }
     }
   }

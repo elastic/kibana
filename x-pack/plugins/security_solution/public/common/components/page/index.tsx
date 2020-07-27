@@ -7,11 +7,13 @@
 import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
 import styled, { createGlobalStyle } from 'styled-components';
 
+import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
+
 /*
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
-export const AppGlobalStyle = createGlobalStyle`
+export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
   /* dirty hack to fix draggables with tooltip on FF */
   body#siem-app {
     position: static;
@@ -57,6 +59,10 @@ export const AppGlobalStyle = createGlobalStyle`
     z-index: 9950;
   }
 
+  /** applies a "toggled" button style to the Full Screen button */
+  .${FULL_SCREEN_TOGGLED_CLASS_NAME} {
+    ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
+  }
 `;
 
 export const DescriptionListStyled = styled(EuiDescriptionList)`

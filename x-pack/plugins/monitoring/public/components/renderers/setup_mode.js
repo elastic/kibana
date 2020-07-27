@@ -116,7 +116,7 @@ export class SetupModeRenderer extends React.Component {
   }
 
   getBottomBar(setupModeState) {
-    if (!setupModeState.enabled) {
+    if (!setupModeState.enabled || setupModeState.hideBottomBar) {
       return null;
     }
 

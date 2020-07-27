@@ -7,8 +7,8 @@
 import { IRouter, Logger, RequestHandlerContext } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-
 import Boom from 'boom';
+
 import { metadataIndexPattern } from '../../../../common/endpoint/constants';
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
 import {
@@ -35,7 +35,18 @@ interface MetadataRequestContext {
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
   ['online', HostStatus.ONLINE],
   ['offline', HostStatus.OFFLINE],
+  ['unenrolling', HostStatus.UNENROLLING],
 ]);
+
+/**
+ * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
+ * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
+ */
+
+const IGNORED_ELASTIC_AGENT_IDS = [
+  '00000000-0000-0000-0000-000000000000',
+  '11111111-1111-1111-1111-111111111111',
+];
 
 const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
@@ -97,7 +108,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           endpointAppContext,
           metadataIndexPattern,
           {
-            unenrolledAgentIds,
+            unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
           }
         );
 
@@ -190,7 +201,11 @@ async function findAgent(
       hostMetadata.elastic.agent.id
     );
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
+        e
+      )
+    ) {
       metadataRequestContext.logger.warn(
         `agent with id ${hostMetadata.elastic.agent.id} not found`
       );
@@ -253,7 +268,11 @@ async function enrichHostMetadata(
     );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
+        e
+      )
+    ) {
       log.warn(`agent with id ${elasticAgentId} not found`);
     } else {
       log.error(e);

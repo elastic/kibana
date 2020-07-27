@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { SPAN_ID } from '../../../../../common/elasticsearch_fieldnames';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { DiscoverLink } from './DiscoverLink';
@@ -22,8 +22,12 @@ function getDiscoverQuery(span: Span) {
   };
 }
 
-export const DiscoverSpanLink: React.FC<{
+export function DiscoverSpanLink({
+  span,
+  children,
+}: {
   readonly span: Span;
-}> = ({ span, children }) => {
+  children?: ReactNode;
+}) {
   return <DiscoverLink query={getDiscoverQuery(span)} children={children} />;
-};
+}

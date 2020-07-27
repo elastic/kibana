@@ -9,6 +9,7 @@ import {
   ResolverEvent,
   ResolverNodeStats,
   ResolverLifecycleNode,
+  ResolverChildNode,
 } from '../../../common/endpoint/types';
 import { uniquePidForProcess } from './process_event';
 
@@ -60,11 +61,13 @@ export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNode
 export function mock({
   events,
   cursors = { childrenNextChild: null, ancestryNextAncestor: null },
+  children = [],
 }: {
   /**
    * Events represented by the ResolverTree.
    */
   events: ResolverEvent[];
+  children?: ResolverChildNode[];
   /**
    * Optionally provide cursors for the 'children' and 'ancestry' edges.
    */
@@ -78,7 +81,7 @@ export function mock({
     entityID: uniquePidForProcess(first),
     // Required
     children: {
-      childNodes: [],
+      childNodes: children,
       nextChild: cursors.childrenNextChild,
     },
     // Required

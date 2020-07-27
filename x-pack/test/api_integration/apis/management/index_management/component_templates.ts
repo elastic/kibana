@@ -78,6 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(testComponentTemplate).to.eql({
             name: COMPONENT_NAME,
             usedBy: [],
+            isManaged: false,
             hasSettings: true,
             hasMappings: true,
             hasAliases: false,
@@ -96,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...COMPONENT,
             _kbnMeta: {
               usedBy: [],
+              isManaged: false,
             },
           });
         });
@@ -148,6 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             _kbnMeta: {
               usedBy: [],
+              isManaged: false,
             },
           })
           .expect(200);
@@ -167,6 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
             template: {},
             _kbnMeta: {
               usedBy: [],
+              isManaged: false,
             },
           })
           .expect(200);
@@ -185,6 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
             template: {},
             _kbnMeta: {
               usedBy: [],
+              isManaged: false,
             },
           })
           .expect(409);
@@ -246,6 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
             version: 1,
             _kbnMeta: {
               usedBy: [],
+              isManaged: false,
             },
           })
           .expect(200);
@@ -267,6 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
             version: 1,
             _kbnMeta: {
               usedBy: [],
+              isManaged: false,
             },
           })
           .expect(404);
