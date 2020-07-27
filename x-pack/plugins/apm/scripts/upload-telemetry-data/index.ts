@@ -87,13 +87,15 @@ async function uploadData() {
         return client.search(body as any).then((res) => res.body);
       },
       indicesStats: (body) => {
-        return client.indices.stats(body as any);
+        return client.indices.stats(body as any).then((res) => res.body);
       },
       transportRequest: ((params) => {
-        return client.transport.request({
-          method: params.method,
-          path: params.path,
-        });
+        return client.transport
+          .request({
+            method: params.method,
+            path: params.path,
+          })
+          .then((res) => res.body);
       }) as CollectTelemetryParams['transportRequest'],
     },
   });
