@@ -99,15 +99,15 @@ export const TagList = React.memo(
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="xs" data-test-subj="case-tags">
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-          <EuiBadgeGroup>
-            {tags.length > 0 &&
-              !isEditTags &&
-              tags.map((tag) => (
+          {tags.length > 0 && !isEditTags && (
+            <EuiBadgeGroup>
+              {tags.map((tag) => (
                 <EuiBadge data-test-subj={`case-tag-${tag}`} color="hollow" key={tag}>
                   {tag}
                 </EuiBadge>
               ))}
-          </EuiBadgeGroup>
+            </EuiBadgeGroup>
+          )}
           {isEditTags && (
             <EuiFlexGroup data-test-subj="edit-tags" direction="column">
               <EuiFlexItem>

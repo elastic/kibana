@@ -44,22 +44,27 @@ export const getLabelTitle = ({ action, connectors, field, firstPush }: LabelTit
   return '';
 };
 
-const getTagsLabelTitle = (action: CaseUserActions) => (
-  <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
-    <EuiFlexItem data-test-subj="ua-tags-label">
-      {action.action === 'add' && i18n.ADDED_FIELD}
-      {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
-    </EuiFlexItem>
-    <EuiBadgeGroup>
-      {action.newValue != null &&
-        action.newValue.split(',').map((tag) => (
-          <EuiBadge data-test-subj={`ua-tag`} color="default" key={tag}>
-            {tag}
-          </EuiBadge>
-        ))}
-    </EuiBadgeGroup>
-  </EuiFlexGroup>
-);
+const getTagsLabelTitle = (action: CaseUserActions) => {
+  const tags = action.newValue != null ? action.newValue.split(',') : [];
+
+  return (
+    <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
+      <EuiFlexItem data-test-subj="ua-tags-label">
+        {action.action === 'add' && i18n.ADDED_FIELD}
+        {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
+      </EuiFlexItem>
+      {tags.length > 0 && (
+        <EuiBadgeGroup>
+          {tags.map((tag) => (
+            <EuiBadge data-test-subj={`ua-tag`} color="default" key={tag}>
+              {tag}
+            </EuiBadge>
+          ))}
+        </EuiBadgeGroup>
+      )}
+    </EuiFlexGroup>
+  );
+};
 
 const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
   const pushedVal = JSON.parse(action.newValue ?? '') as CaseFullExternalService;
