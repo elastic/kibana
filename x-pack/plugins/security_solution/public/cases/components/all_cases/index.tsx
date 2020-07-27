@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBasicTable,
@@ -16,7 +15,7 @@ import {
   EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
@@ -137,7 +136,7 @@ export const AllCases = React.memo<AllCasesProps>(
       (refetchFilter: () => void) => {
         filterRefetch.current = refetchFilter;
       },
-      [filterRefetch.current]
+      [filterRefetch]
     );
     const refreshCases = useCallback(
       (dataRefresh = true) => {
@@ -149,7 +148,7 @@ export const AllCases = React.memo<AllCasesProps>(
           filterRefetch.current();
         }
       },
-      [filterOptions, queryParams, filterRefetch.current]
+      [filterRefetch, refetchCases, setSelectedCases, fetchCasesStatus]
     );
 
     useEffect(() => {
@@ -161,7 +160,7 @@ export const AllCases = React.memo<AllCasesProps>(
         refreshCases();
         dispatchResetIsUpdated();
       }
-    }, [isDeleted, isUpdated]);
+    }, [isDeleted, isUpdated, refreshCases, dispatchResetIsDeleted, dispatchResetIsUpdated]);
     const confirmDeleteModal = useMemo(
       () => (
         <ConfirmDeleteCaseModal
@@ -175,13 +174,22 @@ export const AllCases = React.memo<AllCasesProps>(
           )}
         />
       ),
-      [deleteBulk, deleteThisCase, isDisplayConfirmDeleteModal]
+      [
+        deleteBulk,
+        deleteThisCase,
+        isDisplayConfirmDeleteModal,
+        handleToggleModal,
+        handleOnDeleteConfirm,
+      ]
     );
 
-    const toggleDeleteModal = useCallback((deleteCase: Case) => {
-      handleToggleModal();
-      setDeleteThisCase(deleteCase);
-    }, []);
+    const toggleDeleteModal = useCallback(
+      (deleteCase: Case) => {
+        handleToggleModal();
+        setDeleteThisCase(deleteCase);
+      },
+      [handleToggleModal]
+    );
 
     const toggleBulkDeleteModal = useCallback(
       (caseIds: string[]) => {
@@ -195,14 +203,14 @@ export const AllCases = React.memo<AllCasesProps>(
         const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({ id }));
         setDeleteBulk(convertToDeleteCases);
       },
-      [selectedCases]
+      [selectedCases, setDeleteBulk, handleToggleModal]
     );
 
     const handleUpdateCaseStatus = useCallback(
       (status: string) => {
         updateBulkStatus(selectedCases, status);
       },
-      [selectedCases]
+      [selectedCases, updateBulkStatus]
     );
 
     const selectedCaseIds = useMemo(
@@ -223,7 +231,7 @@ export const AllCases = React.memo<AllCasesProps>(
           })}
         />
       ),
-      [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal]
+      [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
     );
     const handleDispatchUpdate = useCallback(
       (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
@@ -278,7 +286,7 @@ export const AllCases = React.memo<AllCasesProps>(
         setQueryParams(newQueryParams);
         refreshCases(false);
       },
-      [queryParams]
+      [queryParams, refreshCases, setQueryParams]
     );
 
     const onFilterChangedCallback = useCallback(
@@ -291,7 +299,7 @@ export const AllCases = React.memo<AllCasesProps>(
         setFilters(newFilterOptions);
         refreshCases(false);
       },
-      [filterOptions, queryParams]
+      [refreshCases, setQueryParams, setFilters]
     );
 
     const memoizedGetCasesColumns = useMemo(
@@ -311,9 +319,10 @@ export const AllCases = React.memo<AllCasesProps>(
     const sorting: EuiTableSortingType<Case> = {
       sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
     };
+
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({ onSelectionChange: setSelectedCases }),
-      [selectedCases]
+      [setSelectedCases]
     );
     const isCasesLoading = useMemo(
       () => loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1,
@@ -323,24 +332,33 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const TableWrap = useMemo(() => (isModal ? 'span' : Panel), [isModal]);
 
-    const tableRowProps = useCallback((item) => {
-      const rowProps = {
-        'data-test-subj': `cases-table-row-${item.id}`,
-      };
+    const onTableRowClick = useMemo(
+      () =>
+        memoize<(id: string) => () => void>((id) => () => {
+          if (onRowClick) {
+            onRowClick(id);
+          }
+        }),
+      [onRowClick]
+    );
 
-      if (isModal) {
-        return {
-          ...rowProps,
-          onClick: () => {
-            if (onRowClick != null) {
-              onRowClick(item.id);
-            }
-          },
+    const tableRowProps = useCallback(
+      (item) => {
+        const rowProps = {
+          'data-test-subj': `cases-table-row-${item.id}`,
         };
-      }
 
-      return rowProps;
-    }, []);
+        if (isModal) {
+          return {
+            ...rowProps,
+            onClick: onTableRowClick(item.id),
+          };
+        }
+
+        return rowProps;
+      },
+      [isModal, onTableRowClick]
+    );
 
     return (
       <>
