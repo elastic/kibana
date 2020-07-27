@@ -53,17 +53,21 @@ const initialState: State = {
 interface ExceptionsViewerProps {
   ruleId: string;
   ruleName: string;
+  ruleIndices: string[];
   exceptionListsMeta: ExceptionIdentifiers[];
   availableListTypes: ExceptionListTypeEnum[];
   commentsAccordionId: string;
+  onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
   ruleId,
   ruleName,
+  ruleIndices,
   exceptionListsMeta,
   availableListTypes,
   commentsAccordionId,
+  onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const [, dispatchToaster] = useStateToaster();
@@ -104,7 +108,7 @@ const ExceptionsViewerComponent = ({
       lists: newLists,
       exceptions: newExceptions,
       pagination: newPagination,
-    }: UseExceptionListSuccess) => {
+    }: UseExceptionListSuccess): void => {
       dispatch({
         type: 'setExceptions',
         lists: newLists,
@@ -253,10 +257,11 @@ const ExceptionsViewerComponent = ({
   return (
     <>
       {currentModal === 'editModal' &&
-        exceptionToEdit !== null &&
-        exceptionListTypeToEdit !== null && (
+        exceptionToEdit != null &&
+        exceptionListTypeToEdit != null && (
           <EditExceptionModal
             ruleName={ruleName}
+            ruleIndices={ruleIndices}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
@@ -267,10 +272,12 @@ const ExceptionsViewerComponent = ({
       {currentModal === 'addModal' && exceptionListTypeToEdit != null && (
         <AddExceptionModal
           ruleName={ruleName}
+          ruleIndices={ruleIndices}
           ruleId={ruleId}
           exceptionListType={exceptionListTypeToEdit}
           onCancel={handleOnCancelExceptionModal}
           onConfirm={handleOnConfirmExceptionModal}
+          onRuleChange={onRuleChange}
         />
       )}
 

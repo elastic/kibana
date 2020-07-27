@@ -72,11 +72,13 @@ export const transformSavedObjectToExceptionList = ({
 }): ExceptionListSchema => {
   const dateNow = new Date().toISOString();
   const {
+    version: _version,
     attributes: {
       _tags,
       created_at,
       created_by,
       description,
+      immutable,
       list_id,
       meta,
       name,
@@ -84,6 +86,7 @@ export const transformSavedObjectToExceptionList = ({
       tie_breaker_id,
       type,
       updated_by,
+      version,
     },
     id,
     updated_at: updatedAt,
@@ -93,10 +96,12 @@ export const transformSavedObjectToExceptionList = ({
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
     _tags,
+    _version,
     created_at,
     created_by,
     description,
     id,
+    immutable: immutable ?? false, // This should never be undefined for a list (only a list item)
     list_id,
     meta,
     name,
@@ -106,6 +111,7 @@ export const transformSavedObjectToExceptionList = ({
     type: exceptionListType.is(type) ? type : 'detection',
     updated_at: updatedAt ?? dateNow,
     updated_by,
+    version: version ?? 1, // This should never be undefined for a list (only a list item)
   };
 };
 
@@ -118,7 +124,18 @@ export const transformSavedObjectUpdateToExceptionList = ({
 }): ExceptionListSchema => {
   const dateNow = new Date().toISOString();
   const {
-    attributes: { _tags, description, meta, name, tags, type, updated_by: updatedBy },
+    version: _version,
+    attributes: {
+      _tags,
+      description,
+      immutable,
+      meta,
+      name,
+      tags,
+      type,
+      updated_by: updatedBy,
+      version,
+    },
     id,
     updated_at: updatedAt,
   } = savedObject;
@@ -127,10 +144,12 @@ export const transformSavedObjectUpdateToExceptionList = ({
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
     _tags: _tags ?? exceptionList._tags,
+    _version,
     created_at: exceptionList.created_at,
     created_by: exceptionList.created_by,
     description: description ?? exceptionList.description,
     id,
+    immutable: immutable ?? exceptionList.immutable,
     list_id: exceptionList.list_id,
     meta: meta ?? exceptionList.meta,
     name: name ?? exceptionList.name,
@@ -140,6 +159,7 @@ export const transformSavedObjectUpdateToExceptionList = ({
     type: exceptionListType.is(type) ? type : exceptionList.type,
     updated_at: updatedAt ?? dateNow,
     updated_by: updatedBy ?? exceptionList.updated_by,
+    version: version ?? exceptionList.version,
   };
 };
 
@@ -150,6 +170,7 @@ export const transformSavedObjectToExceptionListItem = ({
 }): ExceptionListItemSchema => {
   const dateNow = new Date().toISOString();
   const {
+    version: _version,
     attributes: {
       _tags,
       comments,
@@ -174,6 +195,7 @@ export const transformSavedObjectToExceptionListItem = ({
   // TODO: Do a throw if item_id or entries is not defined.
   return {
     _tags,
+    _version,
     comments: comments ?? [],
     created_at,
     created_by,
@@ -202,6 +224,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
 }): ExceptionListItemSchema => {
   const dateNow = new Date().toISOString();
   const {
+    version: _version,
     attributes: {
       _tags,
       comments,
@@ -223,6 +246,7 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
   // defaulting
   return {
     _tags: _tags ?? exceptionListItem._tags,
+    _version,
     comments: comments ?? exceptionListItem.comments,
     created_at: exceptionListItem.created_at,
     created_by: exceptionListItem.created_by,

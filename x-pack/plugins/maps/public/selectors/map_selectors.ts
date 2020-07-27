@@ -52,6 +52,7 @@ import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ILayer } from '../classes/layers/layer';
+import { ISavedGisMap } from '../routing/bootstrap/services/saved_gis_map';
 
 function createLayerInstance(
   layerDescriptor: LayerDescriptor,
@@ -419,12 +420,11 @@ export const areLayersLoaded = createSelector(
 
 export function hasUnsavedChanges(
   state: MapStoreState,
-  savedMap: unknown,
+  savedMap: ISavedGisMap,
   initialLayerListConfig: LayerDescriptor[]
 ) {
   const layerListConfigOnly = copyPersistentState(getLayerListRaw(state));
 
-  // @ts-expect-error
   const savedLayerList = savedMap.getLayerList();
 
   return !savedLayerList

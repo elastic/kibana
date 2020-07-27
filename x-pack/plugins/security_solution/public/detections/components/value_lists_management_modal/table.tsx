@@ -5,74 +5,23 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiBasicTableProps, EuiText, EuiPanel } from '@elastic/eui';
+import { EuiBasicTable, EuiText, EuiPanel } from '@elastic/eui';
 
-import { ListSchema } from '../../../../../lists/common/schemas/response';
-import { FormattedDate } from '../../../common/components/formatted_date';
 import * as i18n from './translations';
-
-type TableProps = EuiBasicTableProps<ListSchema>;
-type ActionCallback = (item: ListSchema) => void;
+import { buildColumns } from './table_helpers';
+import { TableProps, TableItemCallback } from './types';
 
 export interface ValueListsTableProps {
-  lists: TableProps['items'];
+  items: TableProps['items'];
   loading: boolean;
   onChange: TableProps['onChange'];
-  onExport: ActionCallback;
-  onDelete: ActionCallback;
+  onExport: TableItemCallback;
+  onDelete: TableItemCallback;
   pagination: Exclude<TableProps['pagination'], undefined>;
 }
 
-const buildColumns = (
-  onExport: ActionCallback,
-  onDelete: ActionCallback
-): TableProps['columns'] => [
-  {
-    field: 'name',
-    name: i18n.COLUMN_FILE_NAME,
-    truncateText: true,
-  },
-  {
-    field: 'created_at',
-    name: i18n.COLUMN_UPLOAD_DATE,
-    /* eslint-disable-next-line react/display-name */
-    render: (value: ListSchema['created_at']) => (
-      <FormattedDate value={value} fieldName="created_at" />
-    ),
-    width: '30%',
-  },
-  {
-    field: 'created_by',
-    name: i18n.COLUMN_CREATED_BY,
-    truncateText: true,
-    width: '20%',
-  },
-  {
-    name: i18n.COLUMN_ACTIONS,
-    actions: [
-      {
-        name: i18n.ACTION_EXPORT_NAME,
-        description: i18n.ACTION_EXPORT_DESCRIPTION,
-        icon: 'exportAction',
-        type: 'icon',
-        onClick: onExport,
-        'data-test-subj': 'action-export-value-list',
-      },
-      {
-        name: i18n.ACTION_DELETE_NAME,
-        description: i18n.ACTION_DELETE_DESCRIPTION,
-        icon: 'trash',
-        type: 'icon',
-        onClick: onDelete,
-        'data-test-subj': 'action-delete-value-list',
-      },
-    ],
-    width: '15%',
-  },
-];
-
 export const ValueListsTableComponent: React.FC<ValueListsTableProps> = ({
-  lists,
+  items,
   loading,
   onChange,
   onExport,
@@ -87,7 +36,7 @@ export const ValueListsTableComponent: React.FC<ValueListsTableProps> = ({
       </EuiText>
       <EuiBasicTable
         columns={columns}
-        items={lists}
+        items={items}
         loading={loading}
         onChange={onChange}
         pagination={pagination}

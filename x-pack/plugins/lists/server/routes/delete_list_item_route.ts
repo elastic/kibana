@@ -17,7 +17,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
   router.delete(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
       validate: {

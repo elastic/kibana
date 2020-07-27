@@ -11,7 +11,8 @@
     "kibanaLegacy",
     "triggers_actions_ui",
     "alerts",
-    "actions"
+    "actions",
+    "encryptedSavedObjects"
   ],
   "optionalPlugins": ["infra", "telemetryCollectionManager", "usageCollection", "home", "cloud"],
   "server": true,

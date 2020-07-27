@@ -35,6 +35,7 @@ interface MetadataRequestContext {
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
   ['online', HostStatus.ONLINE],
   ['offline', HostStatus.OFFLINE],
+  ['unenrolling', HostStatus.UNENROLLING],
 ]);
 
 /**
@@ -200,7 +201,11 @@ async function findAgent(
       hostMetadata.elastic.agent.id
     );
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
+        e
+      )
+    ) {
       metadataRequestContext.logger.warn(
         `agent with id ${hostMetadata.elastic.agent.id} not found`
       );
@@ -263,7 +268,11 @@ async function enrichHostMetadata(
     );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (
+      metadataRequestContext.requestHandlerContext.core.savedObjects.client.errors.isNotFoundError(
+        e
+      )
+    ) {
       log.warn(`agent with id ${elasticAgentId} not found`);
     } else {
       log.error(e);

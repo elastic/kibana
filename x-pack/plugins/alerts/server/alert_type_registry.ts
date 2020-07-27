@@ -6,6 +6,8 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import typeDetect from 'type-detect';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { TaskRunnerFactory } from './task_runner';
 import { AlertType } from './types';
@@ -14,6 +16,34 @@ interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
 }
+
+export interface RegistryAlertType
+  extends Pick<
+    AlertType,
+    'name' | 'actionGroups' | 'defaultActionGroupId' | 'actionVariables' | 'producer'
+  > {
+  id: string;
+}
+
+/**
+ * AlertType IDs are used as part of the authorization strings used to
+ * grant users privileged operations. There is a limited range of characters
+ * we can use in these auth strings, so we apply these same limitations to
+ * the AlertType Ids.
+ * If you wish to change this, please confer with the Kibana security team.
+ */
+const alertIdSchema = schema.string({
+  validate(value: string): string | void {
+    if (typeof value !== 'string') {
+      return `expected AlertType Id of type [string] but got [${typeDetect(value)}]`;
+    } else if (!value.match(/^[a-zA-Z0-9_\-\.]*$/)) {
+      const invalid = value.match(/[^a-zA-Z0-9_\-\.]+/g)!;
+      return `expected AlertType Id not to include invalid character${
+        invalid.length > 1 ? `s` : ``
+      }: ${invalid?.join(`, `)}`;
+    }
+  },
+});
 
 export class AlertTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
@@ -41,7 +71,7 @@ export class AlertTypeRegistry {
       );
     }
     alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
-    this.alertTypes.set(alertType.id, { ...alertType });
+    this.alertTypes.set(alertIdSchema.validate(alertType.id), { ...alertType });
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
@@ -66,15 +96,22 @@ export class AlertTypeRegistry {
     return this.alertTypes.get(id)!;
   }
 
-  public list() {
-    return Array.from(this.alertTypes).map(([alertTypeId, alertType]) => ({
-      id: alertTypeId,
-      name: alertType.name,
-      actionGroups: alertType.actionGroups,
-      defaultActionGroupId: alertType.defaultActionGroupId,
-      actionVariables: alertType.actionVariables,
-      producer: alertType.producer,
-    }));
+  public list(): Set<RegistryAlertType> {
+    return new Set(
+      Array.from(this.alertTypes).map(
+        ([id, { name, actionGroups, defaultActionGroupId, actionVariables, producer }]: [
+          string,
+          AlertType
+        ]) => ({
+          id,
+          name,
+          actionGroups,
+          defaultActionGroupId,
+          actionVariables,
+          producer,
+        })
+      )
+    );
   }
 }
 
@@ -82,5 +119,6 @@ function normalizedActionVariables(actionVariables: AlertType['actionVariables']
   return {
     context: actionVariables?.context ?? [],
     state: actionVariables?.state ?? [],
+    params: actionVariables?.params ?? [],
   };
 }

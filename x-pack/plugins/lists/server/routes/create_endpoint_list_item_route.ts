@@ -21,7 +21,7 @@ export const createEndpointListItemRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {
