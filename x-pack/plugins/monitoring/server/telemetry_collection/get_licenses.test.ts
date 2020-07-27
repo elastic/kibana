@@ -48,7 +48,8 @@ describe('get_licenses', () => {
         await fetchLicenses(
           callWith,
           clusterUuids.map(({ clusterUuid }) => clusterUuid),
-          { maxBucketSize: 1 } as any
+          { maxBucketSize: 1 } as any,
+          'metricbeat-*'
         )
       ).toStrictEqual(response);
     });

@@ -41,9 +41,13 @@ describe('get_cluster_uuids', () => {
     it('searches for clusters', async () => {
       callCluster.returns(Promise.resolve(response));
       expect(
-        await fetchClusterUuids({ callCluster, start, end, usageCollection: {} as any }, {
-          maxBucketSize: 1,
-        } as any)
+        await fetchClusterUuids(
+          { callCluster, start, end, usageCollection: {} as any },
+          {
+            maxBucketSize: 1,
+          } as any,
+          'metricbeat-*'
+        )
       ).toStrictEqual(response);
     });
   });
