@@ -7,23 +7,19 @@
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 import uuid from 'uuid';
 import { KibanaRequest } from 'src/core/server';
-import { savedObjectsClientMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 describe('SavedObjectProviderRegistry', () => {
   beforeEach(() => jest.resetAllMocks());
 
   describe('registerProvider()', () => {
     test('should register providers', () => {
-      const registry = new SavedObjectProviderRegistry(
-        savedObjectsServiceMock.createStartContract()
-      );
+      const registry = new SavedObjectProviderRegistry();
       registry.registerProvider('alert', jest.fn());
     });
 
     test('should throw an error if type is already registered', () => {
-      const registry = new SavedObjectProviderRegistry(
-        savedObjectsServiceMock.createStartContract()
-      );
+      const registry = new SavedObjectProviderRegistry();
       registry.registerProvider('alert', jest.fn());
       expect(() =>
         registry.registerProvider('alert', jest.fn())
@@ -33,13 +29,13 @@ describe('SavedObjectProviderRegistry', () => {
     });
   });
 
-  describe('getSavedObject()', () => {
+  describe('getProvidersClient()', () => {
     test('should get SavedObject using the registered provider by type', async () => {
-      const registry = new SavedObjectProviderRegistry(
-        savedObjectsServiceMock.createStartContract()
-      );
+      const registry = new SavedObjectProviderRegistry();
+      registry.registerDefaultProvider(jest.fn());
 
-      const provider = jest.fn();
+      const getter = jest.fn();
+      const provider = jest.fn().mockReturnValue(getter);
       registry.registerProvider('alert', provider);
 
       const request = fakeRequest();
@@ -47,19 +43,20 @@ describe('SavedObjectProviderRegistry', () => {
         id: uuid.v4(),
       };
 
-      provider.mockResolvedValue(alert);
+      getter.mockResolvedValue(alert);
 
-      expect(await registry.getSavedObject(request, 'alert', alert.id)).toMatchObject(alert);
+      expect(await registry.getProvidersClient(request)('alert', alert.id)).toMatchObject(alert);
 
-      expect(provider).toHaveBeenCalledWith(request, alert.id);
+      expect(provider).toHaveBeenCalledWith(request);
+      expect(getter).toHaveBeenCalledWith('alert', alert.id);
     });
 
-    test('should get SavedObject using the savedObjectsClient for unregistered types', async () => {
-      const savedObjectsService = savedObjectsServiceMock.createStartContract();
-      const registry = new SavedObjectProviderRegistry(savedObjectsService);
+    test('should get SavedObject using the default provider for unregistered types', async () => {
+      const registry = new SavedObjectProviderRegistry();
+      const defaultProvider = jest.fn();
+      registry.registerDefaultProvider(defaultProvider);
 
-      const provider = jest.fn();
-      registry.registerProvider('alert', provider);
+      registry.registerProvider('alert', jest.fn().mockReturnValue(jest.fn()));
 
       const request = fakeRequest();
       const action = {
@@ -69,14 +66,14 @@ describe('SavedObjectProviderRegistry', () => {
         references: [],
       };
 
-      const savedObjectsClient = savedObjectsClientMock.create();
-      savedObjectsClient.get.mockResolvedValue(action);
-      savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+      const getter = jest.fn();
+      defaultProvider.mockReturnValue(getter);
+      getter.mockResolvedValue(action);
 
-      expect(await registry.getSavedObject(request, 'action', action.id)).toMatchObject(action);
+      expect(await registry.getProvidersClient(request)('action', action.id)).toMatchObject(action);
 
-      expect(savedObjectsClient.get).toHaveBeenCalledWith('action', action.id);
-      expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request);
+      expect(getter).toHaveBeenCalledWith('action', action.id);
+      expect(defaultProvider).toHaveBeenCalledWith(request);
     });
   });
 });

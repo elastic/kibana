@@ -5,14 +5,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, SavedObjectsServiceStart } from 'src/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 
-export type SavedObjectProvider = (request: KibanaRequest, id: string) => Promise<unknown>;
+import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+
+export type SavedObjectGetter = (
+  ...params: Parameters<SavedObjectsClientContract['get']>
+) => Promise<unknown>;
+export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectGetter;
 
 export class SavedObjectProviderRegistry {
   private providers = new Map<string, SavedObjectProvider>();
+  private defaultProvider?: SavedObjectProvider;
 
-  constructor(private savedObjectsService: SavedObjectsServiceStart) {}
+  constructor() {}
+
+  public registerDefaultProvider(provider: SavedObjectProvider) {
+    this.defaultProvider = provider;
+  }
 
   public registerProvider(type: string, provider: SavedObjectProvider) {
     if (this.providers.has(type)) {
@@ -32,9 +43,32 @@ export class SavedObjectProviderRegistry {
     this.providers.set(type, provider);
   }
 
-  public async getSavedObject(request: KibanaRequest, type: string, id: string): Promise<unknown> {
-    return this.providers.has(type)
-      ? this.providers.get(type)!(request, id)
-      : this.savedObjectsService.getScopedClient(request).get(type, id);
+  public getProvidersClient(request: KibanaRequest): SavedObjectGetter {
+    if (!this.defaultProvider) {
+      throw new Error(
+        i18n.translate(
+          'xpack.eventLog.savedObjectProviderRegistry.getProvidersClient.noDefaultProvider',
+          {
+            defaultMessage: 'The Event Log requires a default Provider.',
+          }
+        )
+      );
+    }
+
+    const scopedProviders = new Map<string, SavedObjectGetter>();
+    const defaultGetter = this.defaultProvider(request);
+    return (type: string, id: string) => {
+      const getter = pipe(
+        fromNullable(scopedProviders.get(type)),
+        getOrElse(() => {
+          const client = this.providers.has(type)
+            ? this.providers.get(type)!(request)
+            : defaultGetter;
+          scopedProviders.set(type, client);
+          return client;
+        })
+      );
+      return getter(type, id);
+    };
   }
 }

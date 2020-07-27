@@ -11,7 +11,8 @@ type Schema = PublicMethodsOf<SavedObjectProviderRegistry>;
 const createSavedObjectProviderRegistryMock = () => {
   const mocked: jest.Mocked<Schema> = {
     registerProvider: jest.fn(),
-    getSavedObject: jest.fn(),
+    registerDefaultProvider: jest.fn(),
+    getProvidersClient: jest.fn(),
   };
   return mocked;
 };

@@ -110,6 +110,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private licenseState: ILicenseState | null = null;
   private spaces?: SpacesServiceSetup;
   private security?: SecurityPluginSetup;
+  private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private readonly telemetryLogger: Logger;
@@ -147,6 +148,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     plugins.features.registerFeature(ACTIONS_FEATURE);
     setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
+    this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
@@ -275,6 +277,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         }),
       });
     };
+
+    this.eventLogService!.registerSavedObjectProvider('action', (request) => {
+      const client = getActionsClientWithRequest(request);
+      return async (type: string, id: string) => (await client).get({ id });
+    });
 
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
       core.savedObjects.getScopedClient(request);

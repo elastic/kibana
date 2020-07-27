@@ -8,9 +8,11 @@ import { IEventLogConfig } from './types';
 import { EventLogService } from './event_log_service';
 import { contextMock } from './es/context.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
+import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
 
 const loggingService = loggingSystemMock.create();
 const systemLogger = loggingService.get();
+const savedObjectProviderRegistry = savedObjectProviderRegistryMock.create();
 
 describe('EventLogService', () => {
   const esContext = contextMock.create();
@@ -21,6 +23,7 @@ describe('EventLogService', () => {
       esContext,
       systemLogger,
       kibanaUUID: '42',
+      savedObjectProviderRegistry,
       config: {
         enabled,
         logEntries,
@@ -65,6 +68,7 @@ describe('EventLogService', () => {
       esContext,
       systemLogger,
       kibanaUUID: '42',
+      savedObjectProviderRegistry,
       config: {
         enabled: true,
         logEntries: true,
@@ -102,6 +106,7 @@ describe('EventLogService', () => {
       esContext,
       systemLogger,
       kibanaUUID: '42',
+      savedObjectProviderRegistry,
       config: {
         enabled: true,
         logEntries: true,
