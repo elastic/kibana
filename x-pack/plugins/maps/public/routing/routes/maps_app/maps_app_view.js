@@ -133,18 +133,7 @@ export class MapsAppView extends React.Component {
       return;
     }
 
-    // App state needs to be updated because global state changes effect app state
-    // Pinning and unpinning filters moves filters between global state and app state
-    this._appStateManager.setQueryAndFilters({
-      filters: getData().query.filterManager.getAppFilters(),
-    });
-
-    this.props.dispatchSetQuery({
-      refresh: true,
-      filters: getData().query.filterManager.getFilters(),
-      query: this.props.query,
-      timeFilters: globalState.time,
-    });
+    this._onQueryChange({ time: globalState.time, refresh: true });
   };
 
   async _updateIndexPatterns() {
