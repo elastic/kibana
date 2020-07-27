@@ -13,6 +13,11 @@ export function isProcessStart(event: ResolverEvent): boolean {
   if (isLegacyEvent(event)) {
     return event.event?.type === 'process_start' || event.event?.action === 'fork_event';
   }
+
+  if (Array.isArray(event.event.type)) {
+    return event.event.type.length === 1 && event.event.type[0] === 'start';
+  }
+
   return event.event.type === 'start';
 }
 
