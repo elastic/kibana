@@ -14,7 +14,7 @@ import { getEntryMatchAnyMock } from './entry_match_any.mock';
 import { getEntryListMock } from './entry_list.mock';
 import { getEntryExistsMock } from './entry_exists.mock';
 import { getEntryNestedMock } from './entry_nested.mock';
-import { getEntriesArrayMock } from './entries.mock';
+import { getEntriesArrayMock, getListEntriesArrayMock } from './entries.mock';
 import { entriesArray, entriesArrayOrUndefined, entry } from './entries';
 
 describe('Entries', () => {
@@ -130,6 +130,39 @@ describe('Entries', () => {
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
+    });
+
+    test('it should NOT validate an array with list and non-list types of entries', () => {
+      const payload = [...getEntriesArrayMock(), ...getListEntriesArrayMock()];
+      const decoded = entriesArray.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "undefined" supplied to "value"',
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "undefined" supplied to "value"',
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "undefined" supplied to "entries"',
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "undefined" supplied to "value"',
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "undefined" supplied to "value"',
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "undefined" supplied to "entries"',
+        'Invalid value "list" supplied to "type"',
+        'Invalid value "undefined" supplied to "list"',
+        'Invalid value "match" supplied to "type"',
+        'Invalid value "undefined" supplied to "list"',
+        'Invalid value "match_any" supplied to "type"',
+        'Invalid value "undefined" supplied to "list"',
+        'Invalid value "exists" supplied to "type"',
+        'Invalid value "undefined" supplied to "list"',
+        'Invalid value "undefined" supplied to "operator"',
+        'Invalid value "nested" supplied to "type"',
+      ]);
+      expect(message.schema).toEqual({});
     });
   });
 

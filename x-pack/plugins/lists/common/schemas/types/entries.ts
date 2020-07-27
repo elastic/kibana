@@ -17,9 +17,13 @@ import { entriesNested } from './entry_nested';
 export const entry = t.union([entriesMatch, entriesMatchAny, entriesList, entriesExists]);
 export type Entry = t.TypeOf<typeof entry>;
 
-export const entriesArray = t.array(
-  t.union([entriesMatch, entriesMatchAny, entriesList, entriesExists, entriesNested])
+export const nonListEntriesArray = t.array(
+  t.union([entriesMatch, entriesMatchAny, entriesExists, entriesNested])
 );
+export const listEntriesArray = t.array(entriesList);
+
+export const entriesArray = t.union([nonListEntriesArray, listEntriesArray]);
+
 export type EntriesArray = t.TypeOf<typeof entriesArray>;
 
 export const entriesArrayOrUndefined = t.union([entriesArray, t.undefined]);
