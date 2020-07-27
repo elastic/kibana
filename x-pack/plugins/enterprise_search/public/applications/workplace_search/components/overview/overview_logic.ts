@@ -9,13 +9,7 @@ import { HttpSetup } from 'src/core/public';
 import { kea } from 'kea';
 
 import { IAccount, IOrganization, IUser } from '../../types';
-import {
-  IFlashMessagesProps,
-  IKeaLogic,
-  TKeaReducers,
-  TKeaSelectors,
-  IKeaParams,
-} from '../../../shared/types';
+import { IFlashMessagesProps, IKeaLogic, TKeaReducers, IKeaParams } from '../../../shared/types';
 
 import { IFeedActivity } from './recent_activity';
 
@@ -161,22 +155,6 @@ export const OverviewLogic = kea({
       {
         setHasErrorConnecting: (_, { hasErrorConnecting }) => hasErrorConnecting,
       },
-    ],
-  }),
-  selectors: ({ selectors }): TKeaSelectors<IOverviewValues> => ({
-    hideOnboarding: [
-      () => [
-        selectors.hasUsers,
-        selectors.hasOrgSources,
-        selectors.isOldAccount,
-        selectors.organization,
-      ],
-      (hasUsers: boolean, hasOrgSources: boolean, isOldAccount: boolean, org: IOrganization) =>
-        hasUsers && hasOrgSources && org.name !== org.defaultOrgName && isOldAccount,
-    ],
-    statsColumns: [
-      () => [selectors.isFederatedAuth],
-      (isFederatedAuth: boolean) => (isFederatedAuth ? 'halves' : 'fourths'),
     ],
   }),
   listeners: ({ actions }): Partial<IOverviewActions> => ({

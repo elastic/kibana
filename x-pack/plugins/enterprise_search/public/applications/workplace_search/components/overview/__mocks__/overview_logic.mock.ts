@@ -23,9 +23,7 @@ export const mockLogicValues = {
   personalSourcesCount: 0,
   sourcesCount: 0,
   dataLoading: true,
-  hideOnboarding: false,
   hasErrorConnecting: false,
-  statsColumns: 'halves',
   flashMessages: {},
 } as IOverviewValues;
 

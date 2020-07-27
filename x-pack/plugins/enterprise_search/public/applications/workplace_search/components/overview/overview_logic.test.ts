@@ -78,6 +78,10 @@ describe('OverviewLogic', () => {
       expect(OverviewLogic.values.canCreateContentSources).toEqual(true);
       expect(OverviewLogic.values.isOldAccount).toEqual(true);
       expect(OverviewLogic.values.sourcesCount).toEqual(1);
+      expect(OverviewLogic.values.pendingInvitationsCount).toEqual(1);
+      expect(OverviewLogic.values.accountsCount).toEqual(1);
+      expect(OverviewLogic.values.personalSourcesCount).toEqual(1);
+      expect(OverviewLogic.values.activityFeed).toEqual(feed);
     });
   });
 
@@ -95,29 +99,7 @@ describe('OverviewLogic', () => {
       OverviewLogic.actions.setHasErrorConnecting(true);
 
       expect(OverviewLogic.values.hasErrorConnecting).toEqual(true);
-    });
-  });
-
-  describe('selectors', () => {
-    it('will set `hideOnboarding`', () => {
-      OverviewLogic.actions.setServerData({
-        ...mockLogicValues,
-        hasUsers: true,
-        hasOrgSources: true,
-        isOldAccount: true,
-        organization: {
-          name: 'foo',
-          defaultOrgName: 'bar',
-        },
-      });
-
-      expect(OverviewLogic.values.hideOnboarding).toEqual(true);
-    });
-
-    it('will set `statsColumns`', () => {
-      OverviewLogic.actions.setServerData({ ...mockLogicValues, isFederatedAuth: false });
-
-      expect(OverviewLogic.values.statsColumns).toEqual('fourths');
+      expect(OverviewLogic.values.dataLoading).toEqual(false);
     });
   });
 
