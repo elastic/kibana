@@ -287,6 +287,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       filterManager.getUpdates$(),
       {
         next: () => {
+          $scope.state.filters = filterManager.getAppFilters();
           $scope.updateDataSource();
         },
       },
