@@ -56,7 +56,7 @@ export const PolicyDetails = React.memo(() => {
       application: { navigateToApp },
     },
   } = useKibana();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
+  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 
   // Store values
