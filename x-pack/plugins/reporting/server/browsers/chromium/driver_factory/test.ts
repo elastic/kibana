@@ -7,6 +7,8 @@ import { spawn } from 'child_process';
 import { createInterface } from 'readline';
 import { uniq } from 'lodash';
 
+const maxTimeToWait = 10000;
+
 // Default args used by pptr
 // https://github.com/puppeteer/puppeteer/blob/main/src/node/Launcher.ts#L168
 const defaultArgs = [
@@ -79,7 +81,7 @@ export const start = (executablePath: string, args: string[] = []): Promise<stri
     const rl = createInterface({ input: browserProcess.stderr });
     const timer = setTimeout(
       () => cleanup(new Error(`Browser didn't start successfully in 10 seconds`)),
-      10000
+      maxTimeToWait
     );
 
     rl.on('line', (data) => {
