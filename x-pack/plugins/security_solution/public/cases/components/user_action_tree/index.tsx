@@ -15,7 +15,7 @@ import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import * as i18n from '../case_view/translations';
+import * as i18n from './translations';
 
 import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
@@ -29,6 +29,7 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionCopyLink } from './user_action_copy_link';
 import { UserActionPropertyActions } from './user_action_property_actions';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
+import { UserActionUsername } from './user_action_username';
 import { Connector } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
@@ -185,7 +186,12 @@ export const UserActionTree = React.memo(
     }, [commentId, initLoading, isLoadingUserActions, isLoadingIds, handleOutlineComment]);
 
     const descriptionCommentListObj: EuiCommentProps = {
-      username: caseData.createdBy.username ?? i18n.UNKNOWN,
+      username: (
+        <UserActionUsername
+          username={caseData.createdBy.username ?? i18n.UNKNOWN}
+          fullName={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''}
+        />
+      ),
       event: i18n.ADDED_DESCRIPTION,
       timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
       children: MarkdownDescription,
@@ -203,6 +209,7 @@ export const UserActionTree = React.memo(
               editLabel={i18n.EDIT_DESCRIPTION}
               quoteLabel={i18n.QUOTE}
               disabled={!userCanCrud}
+              isLoading={isLoadingDescription}
               onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
               onQuote={handleManageQuote.bind(null, caseData.description)}
             />
@@ -212,6 +219,7 @@ export const UserActionTree = React.memo(
     };
 
     const commentsToList: EuiCommentProps[] = caseUserActions.reduce<EuiCommentProps[]>(
+      // eslint-disable-next-line complexity
       (comments, action, index) => {
         if (action.commentId != null && action.action === 'create') {
           const comment = caseData.comments.find((c) => c.id === action.commentId);
@@ -219,7 +227,12 @@ export const UserActionTree = React.memo(
             return [
               ...comments,
               {
-                username: comment.createdBy.username ?? '',
+                username: (
+                  <UserActionUsername
+                    username={comment.createdBy.username ?? ''}
+                    fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
+                  />
+                ),
                 timestamp: (
                   <UserActionTimestamp
                     createdAt={comment.createdAt}
@@ -254,6 +267,7 @@ export const UserActionTree = React.memo(
                         editLabel={i18n.EDIT_COMMENT}
                         quoteLabel={i18n.QUOTE}
                         disabled={!userCanCrud}
+                        isLoading={isLoadingIds.includes(comment.id)}
                         onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
                         onQuote={handleManageQuote.bind(null, comment.comment)}
                       />
@@ -304,8 +318,7 @@ export const UserActionTree = React.memo(
               {
                 username: '',
                 type: 'update',
-
-                event: 'Already pushed to',
+                event: i18n.ALREADY_PUSHED_TO_SERVICE(`${parsedConnectorName}`),
                 timelineIcon: 'sortUp',
               },
             ];
@@ -317,8 +330,7 @@ export const UserActionTree = React.memo(
               {
                 username: '',
                 type: 'update',
-
-                event: 'Requires update to',
+                event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${parsedConnectorName}`),
                 timelineIcon: 'sortDown',
               },
             ];
@@ -327,7 +339,12 @@ export const UserActionTree = React.memo(
           return [
             ...comments,
             {
-              username: action.actionBy.username ?? '',
+              username: (
+                <UserActionUsername
+                  username={action.actionBy.username ?? ''}
+                  fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
+                />
+              ),
               type: 'update',
               event: labelTitle,
               timestamp: <UserActionTimestamp createdAt={action.actionAt} />,

@@ -5,16 +5,16 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiToolTip, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { PropertyActions } from '../property_actions';
-import * as i18n from './translations';
 
 interface UserActionPropertyActionsProps {
   id: string;
   editLabel: string;
   quoteLabel: string;
   disabled: boolean;
+  isLoading: boolean;
   onEdit: (id: string) => void;
   onQuote: (id: string) => void;
 }
@@ -24,6 +24,7 @@ const UserActionPropertyActionsComponent = ({
   editLabel,
   quoteLabel,
   disabled,
+  isLoading,
   onEdit,
   onQuote,
 }: UserActionPropertyActionsProps) => {
@@ -43,8 +44,12 @@ const UserActionPropertyActionsComponent = ({
       },
     ];
   }, [disabled, id, editLabel, onEdit, quoteLabel, onQuote]);
-
-  return <PropertyActions propertyActions={propertyActions} />;
+  return (
+    <>
+      {isLoading && <EuiLoadingSpinner data-test-subj="user-action-title-loading" />}
+      {!isLoading && <PropertyActions propertyActions={propertyActions} />}
+    </>
+  );
 };
 
 export const UserActionPropertyActions = memo(UserActionPropertyActionsComponent);
