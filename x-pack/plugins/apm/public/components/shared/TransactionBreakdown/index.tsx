@@ -21,7 +21,7 @@ const emptyMessage = i18n.translate('xpack.apm.transactionBreakdown.noData', {
   defaultMessage: 'No data within this time range.',
 });
 
-const TransactionBreakdown = () => {
+function TransactionBreakdown() {
   const { data, status } = useTransactionBreakdown();
   const { kpis, timeseries } = data;
   const noHits = data.kpis.length === 0 && status === FETCH_STATUS.SUCCESS;
@@ -51,6 +51,6 @@ const TransactionBreakdown = () => {
       </EuiFlexGroup>
     </EuiPanel>
   );
-};
+}
 
 export { TransactionBreakdown };

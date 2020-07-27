@@ -85,3 +85,81 @@ export function mockTreeWithNoAncestorsAnd2Children({
     lifecycle: [origin],
   } as unknown) as ResolverTree;
 }
+
+/**
+ * Creates a mock tree w/ 2 'graphable' events per node. This simulates the scenario where data has been duplicated in the response from the server.
+ */
+export function mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents({
+  ancestorID,
+  originID,
+  firstChildID,
+  secondChildID,
+}: {
+  ancestorID: string;
+  originID: string;
+  firstChildID: string;
+  secondChildID: string;
+}): ResolverTree {
+  const ancestor: ResolverEvent = mockEndpointEvent({
+    entityID: ancestorID,
+    name: ancestorID,
+    timestamp: 1,
+    parentEntityId: undefined,
+  });
+  const ancestorClone: ResolverEvent = mockEndpointEvent({
+    entityID: ancestorID,
+    name: ancestorID,
+    timestamp: 1,
+    parentEntityId: undefined,
+  });
+  const origin: ResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    name: originID,
+    parentEntityId: ancestorID,
+    timestamp: 0,
+  });
+  const originClone: ResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    name: originID,
+    parentEntityId: ancestorID,
+    timestamp: 0,
+  });
+  const firstChild: ResolverEvent = mockEndpointEvent({
+    entityID: firstChildID,
+    name: firstChildID,
+    parentEntityId: originID,
+    timestamp: 1,
+  });
+  const firstChildClone: ResolverEvent = mockEndpointEvent({
+    entityID: firstChildID,
+    name: firstChildID,
+    parentEntityId: originID,
+    timestamp: 1,
+  });
+  const secondChild: ResolverEvent = mockEndpointEvent({
+    entityID: secondChildID,
+    name: secondChildID,
+    parentEntityId: originID,
+    timestamp: 2,
+  });
+  const secondChildClone: ResolverEvent = mockEndpointEvent({
+    entityID: secondChildID,
+    name: secondChildID,
+    parentEntityId: originID,
+    timestamp: 2,
+  });
+
+  return ({
+    entityID: originID,
+    children: {
+      childNodes: [
+        { lifecycle: [firstChild, firstChildClone] },
+        { lifecycle: [secondChild, secondChildClone] },
+      ],
+    },
+    ancestry: {
+      ancestors: [{ lifecycle: [ancestor, ancestorClone] }],
+    },
+    lifecycle: [origin, originClone],
+  } as unknown) as ResolverTree;
+}
