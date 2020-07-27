@@ -61,7 +61,7 @@ interface Props {
   status: FETCH_STATUS;
   onAddEnvironments: () => void;
 }
-export const JobsList = ({ data, status, onAddEnvironments }: Props) => {
+export function JobsList({ data, status, onAddEnvironments }: Props) {
   const { jobs, hasLegacyJobs } = data;
 
   return (
@@ -120,7 +120,7 @@ export const JobsList = ({ data, status, onAddEnvironments }: Props) => {
       {hasLegacyJobs && <LegacyJobsCallout />}
     </EuiPanel>
   );
-};
+}
 
 function getNoItemsMessage({ status }: { status: FETCH_STATUS }) {
   // loading state

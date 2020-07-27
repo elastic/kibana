@@ -27,7 +27,7 @@ const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   hasLegacyJobs: false,
 };
 
-export const AnomalyDetection = () => {
+export function AnomalyDetection() {
   const plugin = useApmPluginContext();
   const canGetJobs = !!plugin.core.application.capabilities.ml.canGetJobs;
   const license = useLicense();
@@ -103,4 +103,4 @@ export const AnomalyDetection = () => {
       )}
     </>
   );
-};
+}
