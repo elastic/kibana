@@ -8,7 +8,6 @@ import path from 'path';
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { defineDockerServersConfig } from '@kbn/test';
-import { services } from '../api_integration/services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
@@ -49,9 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     }),
     esArchiver: xPackAPITestsConfig.get('esArchiver'),
     services: {
-      ...services,
-      supertest: xPackAPITestsConfig.get('services.supertest'),
-      es: xPackAPITestsConfig.get('services.es'),
+      ...xPackAPITestsConfig.get('services'),
     },
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',

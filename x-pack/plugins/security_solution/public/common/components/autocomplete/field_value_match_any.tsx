@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
-import { getGenericComboBoxProps, validateParams } from './helpers';
+import { getGenericComboBoxProps, paramIsValid } from './helpers';
 import { OperatorTypeEnum } from '../../../lists_plugin_deps';
 import { GetGenericComboBoxPropsReturn } from './types';
 import * as i18n from './translations';
@@ -78,16 +78,29 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   const onCreateOption = (option: string) => onChange([...(selectedValue || []), option]);
 
   const isValid = useMemo((): boolean => {
-    const areAnyInvalid = selectedComboOptions.filter(
-      ({ label }) => !validateParams(label, selectedField)
-    );
-    return areAnyInvalid.length === 0;
-  }, [selectedComboOptions, selectedField]);
+    const areAnyInvalid =
+      selectedComboOptions.filter(
+        ({ label }) => !paramIsValid(label, selectedField, isRequired, touched)
+      ).length > 0;
+    return !areAnyInvalid;
+  }, [selectedComboOptions, selectedField, isRequired, touched]);
+
+  const setIsTouchedValue = useCallback((): void => setIsTouched(true), [setIsTouched]);
+
+  const inputPlaceholder = useMemo(
+    (): string => (isLoading || isLoadingSuggestions ? i18n.LOADING : placeholder),
+    [isLoading, isLoadingSuggestions, placeholder]
+  );
+
+  const isLoadingState = useMemo((): boolean => isLoading || isLoadingSuggestions, [
+    isLoading,
+    isLoadingSuggestions,
+  ]);
 
   return (
     <EuiComboBox
-      placeholder={isLoading || isLoadingSuggestions ? i18n.LOADING : placeholder}
-      isLoading={isLoading || isLoadingSuggestions}
+      placeholder={inputPlaceholder}
+      isLoading={isLoadingState}
       isClearable={isClearable}
       isDisabled={isDisabled}
       options={comboOptions}
@@ -95,8 +108,8 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       onChange={handleValuesChange}
       onSearchChange={onSearchChange}
       onCreateOption={onCreateOption}
-      isInvalid={isRequired ? touched && (selectedValue.length === 0 || !isValid) : !isValid}
-      onFocus={() => setIsTouched(true)}
+      isInvalid={!isValid}
+      onFocus={setIsTouchedValue}
       delimiter=", "
       data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"
       fullWidth
