@@ -35,11 +35,15 @@ const AgentConfigWrapper = styled(EuiFormRow)`
   }
 `;
 
+// Custom styling for drop down list items due to:
+//  1) the max-width and overflow properties is added to prevent long config
+//     names/descriptions from overflowing the flex items
+//  2) max-width is built from the grow property on the flex items because the value
+//     changes based on if Fleet is enabled/setup or not
 const AgentConfigNameColumn = styled(EuiFlexItem)`
   max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
   overflow: hidden;
 `;
-
 const AgentConfigDescriptionColumn = styled(EuiFlexItem)`
   max-width: ${(props) => `${((props.grow as number) / 9) * 100}%`};
   overflow: hidden;
