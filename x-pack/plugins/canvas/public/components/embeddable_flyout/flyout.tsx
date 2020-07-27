@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import {
   SavedObjectFinderUi,
   SavedObjectMetaData,
 } from '../../../../../../src/plugins/saved_objects/public/';
 import { ComponentStrings } from '../../../i18n';
-import { CoreStart } from '../../../../../../src/core/public';
-import { CanvasStartDeps } from '../../plugin';
+import { useServices } from '../../services';
 
 const { AddEmbeddableFlyout: strings } = ComponentStrings;
 
@@ -20,14 +19,16 @@ export interface Props {
   onClose: () => void;
   onSelect: (id: string, embeddableType: string) => void;
   availableEmbeddables: string[];
-  savedObjects: CoreStart['savedObjects'];
-  uiSettings: CoreStart['uiSettings'];
-  getEmbeddableFactories: CanvasStartDeps['embeddable']['getEmbeddableFactories'];
 }
 
-export class AddEmbeddableFlyout extends React.Component<Props> {
-  onAddPanel = (id: string, savedObjectType: string, name: string) => {
-    const embeddableFactories = this.props.getEmbeddableFactories();
+export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables, onClose }) => {
+  const services = useServices();
+  const { embeddables, platform } = services;
+  const { getEmbeddableFactories } = embeddables;
+  const { getSavedObjects, getUISettings } = platform;
+
+  const onAddPanel = (id: string, savedObjectType: string, name: string) => {
+    const embeddableFactories = getEmbeddableFactories();
 
     // Find the embeddable type from the saved object type
     const found = Array.from(embeddableFactories).find((embeddableFactory) => {
@@ -39,41 +40,39 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
 
     const foundEmbeddableType = found ? found.type : 'unknown';
 
-    this.props.onSelect(id, foundEmbeddableType);
+    onSelect(id, foundEmbeddableType);
   };
 
-  render() {
-    const embeddableFactories = this.props.getEmbeddableFactories();
+  const embeddableFactories = getEmbeddableFactories();
 
-    const availableSavedObjects = Array.from(embeddableFactories)
-      .filter((factory) => {
-        return this.props.availableEmbeddables.includes(factory.type);
-      })
-      .map((factory) => factory.savedObjectMetaData)
-      .filter<SavedObjectMetaData<{}>>(function (
-        maybeSavedObjectMetaData
-      ): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
-        return maybeSavedObjectMetaData !== undefined;
-      });
+  const availableSavedObjects = Array.from(embeddableFactories)
+    .filter((factory) => {
+      return availableEmbeddables.includes(factory.type);
+    })
+    .map((factory) => factory.savedObjectMetaData)
+    .filter<SavedObjectMetaData<{}>>(function (
+      maybeSavedObjectMetaData
+    ): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
+      return maybeSavedObjectMetaData !== undefined;
+    });
 
-    return (
-      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>{strings.getTitleText()}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <SavedObjectFinderUi
-            onChoose={this.onAddPanel}
-            savedObjectMetaData={availableSavedObjects}
-            showFilter={true}
-            noItemsMessage={strings.getNoItemsText()}
-            savedObjects={this.props.savedObjects}
-            uiSettings={this.props.uiSettings}
-          />
-        </EuiFlyoutBody>
-      </EuiFlyout>
-    );
-  }
-}
+  return (
+    <EuiFlyout ownFocus onClose={onClose} data-test-subj="dashboardAddPanel">
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>{strings.getTitleText()}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <SavedObjectFinderUi
+          onChoose={onAddPanel}
+          savedObjectMetaData={availableSavedObjects}
+          showFilter={true}
+          noItemsMessage={strings.getNoItemsText()}
+          savedObjects={getSavedObjects()}
+          uiSettings={getUISettings()}
+        />
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};

@@ -22,7 +22,7 @@ describe('KibanaVersionMismatchAlert', () => {
     const alert = new KibanaVersionMismatchAlert();
     expect(alert.type).toBe(ALERT_KIBANA_VERSION_MISMATCH);
     expect(alert.label).toBe('Kibana version mismatch');
-    expect(alert.defaultThrottle).toBe('1m');
+    expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       {

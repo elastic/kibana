@@ -59,7 +59,7 @@ export function ServiceStatsList({
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
-        defaultMessage: 'Error rate (avg.)',
+        defaultMessage: 'Trans. error rate (avg.)',
       }),
       description: isNumber(avgErrorRate) ? asPercent(avgErrorRate, 1) : null,
     },

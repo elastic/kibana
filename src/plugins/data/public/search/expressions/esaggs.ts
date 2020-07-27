@@ -160,7 +160,7 @@ const handleCourierRequest = async ({
 
       (searchSource as any).lastQuery = queryHash;
 
-      request.stats(getResponseInspectorStats(searchSource, response)).ok({ json: response });
+      request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
 
       (searchSource as any).rawResponse = response;
     } catch (e) {

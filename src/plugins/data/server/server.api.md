@@ -39,7 +39,6 @@ import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { ErrorToastOptions } from 'src/core/public/notifications';
-import { EventEmitter } from 'events';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';

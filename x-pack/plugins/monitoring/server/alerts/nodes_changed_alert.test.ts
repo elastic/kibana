@@ -29,7 +29,7 @@ describe('NodesChangedAlert', () => {
     const alert = new NodesChangedAlert();
     expect(alert.type).toBe(ALERT_NODES_CHANGED);
     expect(alert.label).toBe('Nodes changed');
-    expect(alert.defaultThrottle).toBe('1m');
+    expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       {

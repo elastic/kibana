@@ -9,13 +9,11 @@ import { Either } from 'fp-ts/lib/Either';
 
 import { CreateCommentsArray, createComments } from './create_comments';
 
-export type DefaultCreateCommentsArrayC = t.Type<CreateCommentsArray, CreateCommentsArray, unknown>;
-
 /**
  * Types the DefaultCreateComments as:
  *   - If null or undefined, then a default array of type entry will be set
  */
-export const DefaultCreateCommentsArray: DefaultCreateCommentsArrayC = new t.Type<
+export const DefaultCreateCommentsArray = new t.Type<
   CreateCommentsArray,
   CreateCommentsArray,
   unknown

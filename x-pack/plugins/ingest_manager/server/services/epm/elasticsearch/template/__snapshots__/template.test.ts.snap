@@ -87,6 +87,13 @@ exports[`tests loading base.yml: base.yml 1`] = `
         "validarray": {
           "type": "integer"
         }
+      },
+      "_meta": {
+        "package": {
+          "name": "nginx"
+        },
+        "managed_by": "ingest-manager",
+        "managed": true
       }
     },
     "aliases": {}
@@ -190,6 +197,13 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
             }
           }
         }
+      },
+      "_meta": {
+        "package": {
+          "name": "coredns"
+        },
+        "managed_by": "ingest-manager",
+        "managed": true
       }
     },
     "aliases": {}
@@ -1677,6 +1691,13 @@ exports[`tests loading system.yml: system.yml 1`] = `
             }
           }
         }
+      },
+      "_meta": {
+        "package": {
+          "name": "system"
+        },
+        "managed_by": "ingest-manager",
+        "managed": true
       }
     },
     "aliases": {}

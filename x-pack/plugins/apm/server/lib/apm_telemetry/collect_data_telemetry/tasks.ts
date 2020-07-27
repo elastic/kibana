@@ -5,7 +5,7 @@
  */
 import { flatten, merge, sortBy, sum } from 'lodash';
 import { TelemetryTask } from '.';
-import { AGENT_NAMES } from '../../../../common/agent_name';
+import { AGENT_NAMES, RUM_AGENTS } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -13,9 +13,14 @@ import {
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_PROVIDER,
   CLOUD_REGION,
+  CONTAINER_ID,
   ERROR_GROUP_ID,
+  HOST_NAME,
+  OBSERVER_NAME,
   PARENT_ID,
+  POD_NAME,
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
   SERVICE_FRAMEWORK_VERSION,
   SERVICE_LANGUAGE_NAME,
@@ -23,9 +28,14 @@ import {
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
+  SERVICE_VERSION,
   TRANSACTION_NAME,
+  TRANSACTION_RESULT,
+  TRANSACTION_TYPE,
+  USER_AGENT_NAME,
   USER_AGENT_ORIGINAL,
 } from '../../../../common/elasticsearch_fieldnames';
+import { ESFilter } from '../../../../typings/elasticsearch';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
@@ -39,6 +49,166 @@ const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
 
 export const tasks: TelemetryTask[] = [
+  {
+    name: 'aggregated_transactions',
+    // Record the number of metric documents we can expect in different scenarios. We simulate this by requesting data for 1m,
+    // adding a composite aggregation on a number of fields and counting the number of buckets. The resulting count is an
+    // approximation of the amount of metric documents that will be created. We record both the expected metric document count plus
+    // the transaction count for that time range.
+    executor: async ({ indices, search }) => {
+      async function getBucketCountFromPaginatedQuery(
+        key: string,
+        filter: ESFilter[],
+        count: number = 0,
+        after?: any
+      ) {
+        const params = {
+          index: [indices['apm_oss.transactionIndices']],
+          body: {
+            size: 0,
+            timeout,
+            query: { bool: { filter } },
+            aggs: {
+              [key]: {
+                composite: {
+                  ...(after ? { after } : {}),
+                  size: 10000,
+                  sources: fieldMap[key].map((field) => ({
+                    [field]: { terms: { field, missing_bucket: true } },
+                  })),
+                },
+              },
+            },
+          },
+        };
+        const result = await search(params);
+        let nextAfter: any;
+
+        if (result.aggregations) {
+          nextAfter = result.aggregations[key].after_key;
+          count += result.aggregations[key].buckets.length;
+        }
+
+        if (nextAfter) {
+          count = await getBucketCountFromPaginatedQuery(
+            key,
+            filter,
+            count,
+            nextAfter
+          );
+        }
+
+        return count;
+      }
+
+      async function totalSearch(filter: ESFilter[]) {
+        const result = await search({
+          index: [indices['apm_oss.transactionIndices']],
+          body: {
+            size: 0,
+            timeout,
+            query: { bool: { filter } },
+            track_total_hits: true,
+          },
+        });
+
+        return result.hits.total.value;
+      }
+
+      const nonRumAgentNames = AGENT_NAMES.filter(
+        (name) => !RUM_AGENTS.includes(name)
+      );
+
+      const filter: ESFilter[] = [
+        { term: { [PROCESSOR_EVENT]: 'transaction' } },
+        { range: { '@timestamp': { gte: 'now-1m' } } },
+      ];
+      const noRumFilter = [
+        ...filter,
+        { terms: { [AGENT_NAME]: nonRumAgentNames } },
+      ];
+      const rumFilter = [...filter, { terms: { [AGENT_NAME]: RUM_AGENTS } }];
+
+      const baseFields = [
+        TRANSACTION_NAME,
+        TRANSACTION_RESULT,
+        TRANSACTION_TYPE,
+        AGENT_NAME,
+        SERVICE_ENVIRONMENT,
+        SERVICE_VERSION,
+        HOST_NAME,
+        CONTAINER_ID,
+        POD_NAME,
+      ];
+
+      const fieldMap: Record<string, string[]> = {
+        current_implementation: [OBSERVER_NAME, ...baseFields, USER_AGENT_NAME],
+        no_observer_name: [...baseFields, USER_AGENT_NAME],
+        no_rum: [OBSERVER_NAME, ...baseFields],
+        no_rum_no_observer_name: baseFields,
+        only_rum: [OBSERVER_NAME, ...baseFields, USER_AGENT_NAME],
+        only_rum_no_observer_name: [...baseFields, USER_AGENT_NAME],
+      };
+
+      // It would be more performant to do these in parallel, but we have different filters and keys and it's easier to
+      // understand if we make the code slower and longer
+      const countMap: Record<string, number> = {
+        current_implementation: await getBucketCountFromPaginatedQuery(
+          'current_implementation',
+          filter
+        ),
+        no_observer_name: await getBucketCountFromPaginatedQuery(
+          'no_observer_name',
+          filter
+        ),
+        no_rum: await getBucketCountFromPaginatedQuery('no_rum', noRumFilter),
+        no_rum_no_observer_name: await getBucketCountFromPaginatedQuery(
+          'no_rum_no_observer_name',
+          noRumFilter
+        ),
+        only_rum: await getBucketCountFromPaginatedQuery('only_rum', rumFilter),
+        only_rum_no_observer_name: await getBucketCountFromPaginatedQuery(
+          'only_rum_no_observer_name',
+          rumFilter
+        ),
+      };
+
+      const [allCount, noRumCount, rumCount] = await Promise.all([
+        totalSearch(filter),
+        totalSearch(noRumFilter),
+        totalSearch(rumFilter),
+      ]);
+
+      return {
+        aggregated_transactions: {
+          current_implementation: {
+            transaction_count: allCount,
+            expected_metric_document_count: countMap.current_implementation,
+          },
+          no_observer_name: {
+            transaction_count: allCount,
+            expected_metric_document_count: countMap.no_observer_name,
+          },
+          no_rum: {
+            transaction_count: noRumCount,
+            expected_metric_document_count: countMap.no_rum,
+          },
+          no_rum_no_observer_name: {
+            transaction_count: noRumCount,
+            expected_metric_document_count: countMap.no_rum_no_observer_name,
+          },
+          only_rum: {
+            transaction_count: rumCount,
+            expected_metric_document_count: countMap.only_rum,
+          },
+          only_rum_no_observer_name: {
+            transaction_count: rumCount,
+            expected_metric_document_count: countMap.only_rum_no_observer_name,
+          },
+        },
+      };
+    },
+  },
   {
     name: 'cloud',
     executor: async ({ indices, search }) => {
@@ -742,10 +912,7 @@ export const tasks: TelemetryTask[] = [
           timeout,
           query: {
             bool: {
-              filter: [
-                range1d,
-                { terms: { [AGENT_NAME]: ['rum-js', 'js-base'] } },
-              ],
+              filter: [range1d, { terms: { [AGENT_NAME]: RUM_AGENTS } }],
             },
           },
           aggs: {

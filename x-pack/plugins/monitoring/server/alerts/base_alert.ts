@@ -40,7 +40,7 @@ import { MonitoringLicenseService } from '../types';
 export class BaseAlert {
   public type!: string;
   public label!: string;
-  public defaultThrottle: string = '1m';
+  public defaultThrottle: string = '1d';
   public defaultInterval: string = '1m';
   public rawAlert: Alert | undefined;
   public isLegacy: boolean = false;

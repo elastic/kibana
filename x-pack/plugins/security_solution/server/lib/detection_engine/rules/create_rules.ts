@@ -6,7 +6,7 @@
 
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Alert } from '../../../../../alerts/common';
-import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
 
@@ -57,7 +57,7 @@ export const createRules = async ({
       name,
       tags: addTags(tags, ruleId, immutable),
       alertTypeId: SIGNALS_ID,
-      consumer: APP_ID,
+      consumer: SERVER_APP_ID,
       params: {
         anomalyThreshold,
         author,

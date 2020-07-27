@@ -14,5 +14,5 @@ registerOnPreAuth: (handler: OnPreAuthHandler) => void;
 
 ## Remarks
 
-Can register any number of registerOnPostAuth, which are called in sequence (from the first registered to the last). See [OnPreRoutingHandler](./kibana-plugin-core-server.onpreroutinghandler.md)<!-- -->.
+Can register any number of registerOnPreAuth, which are called in sequence (from the first registered to the last). See [OnPreAuthHandler](./kibana-plugin-core-server.onpreauthhandler.md)<!-- -->.
 
