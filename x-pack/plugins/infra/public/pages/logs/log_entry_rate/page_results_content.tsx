@@ -15,7 +15,9 @@ import {
   CategoryJobNoticesSection,
   LogAnalysisJobProblemIndicator,
 } from '../../../components/logging/log_analysis_job_status';
+import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 import { useLogAnalysisSetupFlyoutStateContext } from '../../../components/logging/log_analysis_setup/setup_flyout';
+import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
@@ -27,7 +29,6 @@ import {
   StringTimeRange,
   useLogAnalysisResultsUrlState,
 } from './use_log_entry_rate_results_url_state';
-import { DatasetsSelector } from '../../../components/logging/log_analysis_results/datasets_selector';
 
 export const SORT_DEFAULTS = {
   direction: 'desc' as const,
@@ -43,6 +44,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 
   const { sourceId } = useLogSourceContext();
+
+  const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
   const {
     hasOutdatedJobConfigurations: hasOutdatedLogEntryRateJobConfigurations,
@@ -223,6 +226,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           <LogAnalysisJobProblemIndicator
             hasOutdatedJobConfigurations={hasOutdatedLogEntryRateJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedLogEntryRateJobDefinitions}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             hasStoppedJobs={hasStoppedLogEntryRateJobs}
             isFirstUse={false /* the first use message is already shown by the section below */}
             moduleName={logEntryRateModuleDescriptor.moduleName}
@@ -232,6 +236,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
           <CategoryJobNoticesSection
             hasOutdatedJobConfigurations={hasOutdatedLogEntryCategoriesJobConfigurations}
             hasOutdatedJobDefinitions={hasOutdatedLogEntryCategoriesJobDefinitions}
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             hasStoppedJobs={hasStoppedLogEntryCategoriesJobs}
             isFirstUse={isFirstUse}
             moduleName={logEntryCategoriesModuleDescriptor.moduleName}
