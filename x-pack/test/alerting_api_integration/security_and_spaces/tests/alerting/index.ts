@@ -9,11 +9,11 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('Alerts', () => {
+    loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./disable'));
     loadTestFile(require.resolve('./enable'));
-    loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./get_alert_state'));
     loadTestFile(require.resolve('./list_alert_types'));

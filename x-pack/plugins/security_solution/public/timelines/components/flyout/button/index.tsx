@@ -39,6 +39,7 @@ const Container = styled.div`
   }
 
   .${FLYOUT_BUTTON_CLASS_NAME} {
+    background: ${({ theme }) => rgba(theme.eui.euiPageBackgroundColor, 1)};
     border-radius: 4px 4px 0 0;
     box-shadow: none;
     height: 46px;

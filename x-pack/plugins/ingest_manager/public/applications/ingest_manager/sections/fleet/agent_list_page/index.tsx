@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
-import { CSSProperties } from 'styled-components';
 import { AgentEnrollmentFlyout } from '../components';
 import { Agent, AgentConfig } from '../../../types';
 import {
@@ -40,11 +39,6 @@ import { AgentStatusKueryHelper } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import { AgentReassignConfigFlyout, AgentHealth, AgentUnenrollProvider } from '../components';
 
-const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-});
 const REFRESH_INTERVAL_MS = 5000;
 
 const statusFilters = [
@@ -74,8 +68,12 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
     const { getHref } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
 
+    const isUnenrolling = agent.status === 'unenrolling';
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     return (
       <ContextMenuActions
+        isOpen={isMenuOpen}
+        onChange={(isOpen) => setIsMenuOpen(isOpen)}
         items={[
           <EuiContextMenuItem
             icon="inspect"
@@ -100,7 +98,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
             />
           </EuiContextMenuItem>,
 
-          <AgentUnenrollProvider>
+          <AgentUnenrollProvider forceUnenroll={isUnenrolling}>
             {(unenrollAgentsPrompt) => (
               <EuiContextMenuItem
                 disabled={!hasWriteCapabilites}
@@ -108,13 +106,21 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
                 onClick={() => {
                   unenrollAgentsPrompt([agent.id], 1, () => {
                     refresh();
+                    setIsMenuOpen(false);
                   });
                 }}
               >
-                <FormattedMessage
-                  id="xpack.ingestManager.agentList.unenrollOneButton"
-                  defaultMessage="Unenroll"
-                />
+                {isUnenrolling ? (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+                    defaultMessage="Force unenroll"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.unenrollOneButton"
+                    defaultMessage="Unenroll"
+                  />
+                )}
               </EuiContextMenuItem>
             )}
           </AgentUnenrollProvider>,
@@ -267,10 +273,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         const configName = agentConfigs.find((p) => p.id === configId)?.name;
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
-            <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
+            <EuiFlexItem grow={false} className="eui-textTruncate">
               <EuiLink
                 href={getHref('configuration_details', { configId })}
-                style={NO_WRAP_TRUNCATE_STYLE}
+                className="eui-textTruncate"
                 title={configName || configId}
               >
                 {configName || configId}

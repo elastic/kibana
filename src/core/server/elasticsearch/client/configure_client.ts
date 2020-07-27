@@ -23,6 +23,7 @@ import { Auditor } from 'src/core/server';
 
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
+import { isResponseError } from './errors';
 
 export const configureClient = (
   config: ElasticsearchClientConfig,
@@ -51,9 +52,16 @@ const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
       });
     }
 
-    if (err) {
-      logger.error(`${err.name}: ${err.message}`);
+    if (error) {
+      const errorMessage =
+        // error details for response errors provided by elasticsearch
+        isResponseError(error)
+          ? `[${event.body.error.type}]: ${event.body.error.reason}`
+          : `[${error.name}]: ${error.message}`;
+
+      logger.error(errorMessage);
     }
+
     if (event && logQueries) {
       const params = event.meta.request.params;
 
