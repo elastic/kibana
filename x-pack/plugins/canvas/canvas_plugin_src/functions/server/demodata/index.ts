@@ -38,7 +38,7 @@ export function demodata(): ExpressionFunctionDefinition<
         types: ['string'],
         aliases: ['_'],
         help: argHelp.type,
-        default: '"ci"',
+        default: 'ci',
         options: ['ci', 'shirts'],
       },
     },

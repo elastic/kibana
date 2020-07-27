@@ -6,7 +6,6 @@
 
 import React, { FunctionComponent } from 'react';
 import { AnyExpressionFunctionDefinition } from 'src/plugins/expressions';
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { EuiButtonEmpty } from '@elastic/eui';
 // @ts-ignore untyped lib
 import pluralize from 'pluralize';
@@ -18,24 +17,24 @@ import { notifyService } from '../../services';
 import { isValidDataUrl, DATATABLE_COLUMN_TYPES } from '../../../common/lib';
 import { getFunctionExamples, FunctionExample } from './examples';
 
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const REQUIRED_ARG_ANNOTATION = '***';
+const MULTI_ARG_ANNOTATION = '†';
+const UNNAMED_ARG = '_Unnamed_';
+const ANY_TYPE = '`any`';
+
 const examplesDict = getFunctionExamples();
 
-const requiredArgAnnotation = '***';
-const multiArgAnnotation = '†';
-const unnamedArg = '_Unnamed_';
-const anyType = '`any`';
 const fnList = [
-  ...browserFunctions.map(fn => fn().name),
-  ...serverFunctions.map(fn => fn().name),
+  ...browserFunctions.map((fn) => fn().name),
+  ...serverFunctions.map((fn) => fn().name),
   'asset',
   'filters',
   'font',
   'timelion',
   'to',
   // ignore embeddables functions for now
-].filter(fn => !['savedSearch'].includes(fn));
-
-const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
+].filter((fn) => !['savedSearch'].includes(fn));
 
 interface FunctionDictionary {
   [key: string]: AnyExpressionFunctionDefinition[];
@@ -70,20 +69,20 @@ const addFunctionLinks = (help: string, options?: { blacklist?: string[] }) => {
   return help;
 };
 
-const createDocs = () => {
-  const functionDefs = functionsRegistry
-    .toArray()
-    .filter((fn: AnyExpressionFunctionDefinition) => fnList.includes(fn.name));
+const createDocs = (functionDefinitions: AnyExpressionFunctionDefinition[]) => {
+  const functionDefs = functionDefinitions.filter((fn: AnyExpressionFunctionDefinition) =>
+    fnList.includes(fn.name)
+  );
 
-  const functionDict: FunctionDictionary = {};
+  const functionDictionary: FunctionDictionary = {};
   functionDefs.forEach((fn: AnyExpressionFunctionDefinition) => {
     const firstLetter = fn.name[0];
 
-    if (!functionDict[firstLetter]) {
-      functionDict[firstLetter] = [];
+    if (!functionDictionary[firstLetter]) {
+      functionDictionary[firstLetter] = [];
     }
 
-    functionDict[firstLetter].push(fn);
+    functionDictionary[firstLetter].push(fn);
   });
   return `[role="xpack"]
 [[canvas-function-reference]]
@@ -96,38 +95,38 @@ type casting, and sub-expressions.
 The Canvas expression language also supports <<canvas-tinymath-functions>>, which
 perform complex math calculations.
 
-A ${requiredArgAnnotation} denotes a required argument.
+A ${REQUIRED_ARG_ANNOTATION} denotes a required argument.
 
-A ${multiArgAnnotation} denotes an argument can be passed multiple times.
+A ${MULTI_ARG_ANNOTATION} denotes an argument can be passed multiple times.
 
-${createAlphabetLinks(functionDict)}
+${createAlphabetLinks(functionDictionary)}
 
-${createFunctionDocs(functionDict)}`;
+${createFunctionDocs(functionDictionary)}`;
 };
 
-const createAlphabetLinks = (functionDict: FunctionDictionary) => {
-  return ALPHABET.map(letter =>
-    functionDict[letter] ? `<<${letter}_fns>>` : letter.toUpperCase()
+const createAlphabetLinks = (functionDictionary: FunctionDictionary) => {
+  return ALPHABET.map((letter: string) =>
+    functionDictionary[letter] ? `<<${letter}_fns>>` : letter.toUpperCase()
   ).join(' | ');
 };
 
-const createFunctionDocs = (functionDict: FunctionDictionary) => {
-  return Object.keys(functionDict)
+const createFunctionDocs = (functionDictionary: FunctionDictionary) => {
+  return Object.keys(functionDictionary)
     .sort()
     .map(
       (letter: string) => `[float]
 [[${letter}_fns]]
 == ${letter.toUpperCase()}
 
-${functionDict[letter]
+${functionDictionary[letter]
   .sort((a, b) => stringSorter(a.name, b.name))
-  .map(toDocBlock)
+  .map(getDocBlock)
   .join('\n')}`
     )
     .join('');
 };
 
-const toDocBlock = (fn: AnyExpressionFunctionDefinition) => {
+const getDocBlock = (fn: AnyExpressionFunctionDefinition) => {
   const header = `[float]
 [[${fn.name}_fn]]
 === \`${fn.name}\``;
@@ -153,11 +152,11 @@ ${getArgsTable(args)}
   return `${header}\n
 ${help}
 ${examplesBlock}
-*Accepts:* ${input ? input.map(wrapInBackTicks).join(', ') : anyType}\n${argBlock}
+*Accepts:* ${input ? input.map(wrapInBackTicks).join(', ') : ANY_TYPE}\n${argBlock}
 *Returns:* ${output ? wrapInBackTicks(output) : 'Depends on your input and arguments'}\n\n`;
 };
 
-const getArgsTable = (args: Array<ArgumentType<any>>) => {
+const getArgsTable = (args: { [key: string]: ArgumentType<any> }) => {
   if (!args || Object.keys(args).length === 0) {
     return 'None';
   }
@@ -170,31 +169,31 @@ const getArgsTable = (args: Array<ArgumentType<any>>) => {
       const argB = args[b];
 
       // sorts unnamed arg to the front
-      if (argA.name === '_' || (argA.aliases && argA.aliases.includes('_'))) {
+      if (a === '_' || (argA.aliases && argA.aliases.includes('_'))) {
         return -1;
       }
-      if (argB.name === '_' || (argB.aliases && argB.aliases.includes('_'))) {
+      if (b === '_' || (argB.aliases && argB.aliases.includes('_'))) {
         return 1;
       }
-      return stringSorter(argA.name, argB.name);
+      return stringSorter(a, b);
     })
     .map((argName: string) => {
       const arg = args[argName];
       const types = arg.types;
-      const aliases = [...arg.aliases];
+      const aliases = arg.aliases ? [...arg.aliases] : [];
       const defaultValue =
         typeof arg.default === 'string'
           ? arg.default.replace('{', '${').replace(/[\r\n/]+/g, '')
           : arg.default;
-      const requiredAnnotation = arg.required === true ? ` ${requiredArgAnnotation}` : '';
-      const multiAnnotation = arg.multi === true ? ` ${multiArgAnnotation}` : '';
+      const requiredAnnotation = arg.required === true ? ` ${REQUIRED_ARG_ANNOTATION}` : '';
+      const multiAnnotation = arg.multi === true ? ` ${MULTI_ARG_ANNOTATION}` : '';
 
       let displayName = '';
 
       if (argName === '_') {
-        displayName = unnamedArg;
+        displayName = UNNAMED_ARG;
       } else if (aliases && aliases.includes('_')) {
-        displayName = unnamedArg;
+        displayName = UNNAMED_ARG;
         aliases[aliases.indexOf('_')] = argName;
       } else {
         displayName = wrapInBackTicks(argName);
@@ -222,7 +221,7 @@ ${arg.default}
       }
 
       return `|${displayName}${requiredAnnotation}${multiAnnotation}${aliasList}
-|${types && types.length ? types.map(wrapInBackTicks).join(', ') : anyType}
+|${types && types.length ? types.map(wrapInBackTicks).join(', ') : ANY_TYPE}
 |${arg.help ? addFunctionLinks(arg.help, { blacklist: argNames }) : ''}${defaultBlock}`;
     })
     .join('\n\n');
@@ -252,18 +251,26 @@ ${expression}
   return `${syntaxBlock}${codeBlock}${codeHelp}`;
 };
 
-const copyDocs = () => {
-  copy(createDocs());
-  notifyService
-    .getService()
-    .success(
-      `Please paste updated docs into '/kibana/docs/canvas/canvas-function-reference.asciidoc' and commit your changes.`,
-      { title: 'Copied function docs to clipboard' }
-    );
-};
+interface Props {
+  functionDefinitions: AnyExpressionFunctionDefinition[];
+}
 
-export const FunctionReferenceGenerator: FunctionComponent = () => (
-  <EuiButtonEmpty color="danger" flush="left" size="xs" iconType="beaker" onClick={copyDocs}>
-    Generate function ref docs
-  </EuiButtonEmpty>
-);
+export const FunctionReferenceGenerator: FunctionComponent<Props> = ({
+  functionDefinitions = [],
+}) => {
+  const copyDocs = () => {
+    copy(createDocs(functionDefinitions));
+    notifyService
+      .getService()
+      .success(
+        `Please paste updated docs into '/kibana/docs/canvas/canvas-function-reference.asciidoc' and commit your changes.`,
+        { title: 'Copied function docs to clipboard' }
+      );
+  };
+
+  return (
+    <EuiButtonEmpty color="danger" flush="left" size="xs" iconType="beaker" onClick={copyDocs}>
+      Generate function reference
+    </EuiButtonEmpty>
+  );
+};

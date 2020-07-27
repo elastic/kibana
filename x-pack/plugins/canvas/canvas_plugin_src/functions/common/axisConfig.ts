@@ -49,7 +49,7 @@ export function axisConfig(): ExpressionFunctionDefinition<
         types: ['string'],
         help: argHelp.position,
         options: Object.values(Position),
-        default: '"left"',
+        default: 'left',
       },
       show: {
         types: ['boolean'],

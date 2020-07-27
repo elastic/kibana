@@ -30,7 +30,7 @@ export function replace(): ExpressionFunctionDefinition<'replace', string, Argum
         aliases: ['modifiers'],
         types: ['string'],
         help: argHelp.flags,
-        default: '"g"',
+        default: 'g',
       },
       replacement: {
         types: ['string'],

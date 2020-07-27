@@ -46,13 +46,13 @@ export function joinRows(): ExpressionFunctionDefinition<'joinRows', Datatable, 
       quote: {
         types: ['string'],
         help: argHelp.quote,
-        default: `"'"`,
+        default: `'`,
       },
       separator: {
         aliases: ['sep', 'delimiter'],
         types: ['string'],
         help: argHelp.separator,
-        default: '","',
+        default: ',',
       },
     },
     fn: (input, { column, separator, quote, distinct }) => {

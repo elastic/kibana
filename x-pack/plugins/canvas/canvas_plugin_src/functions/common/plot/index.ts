@@ -52,7 +52,7 @@ export function plot(): ExpressionFunctionDefinition<'plot', PointSeries, Argume
       legend: {
         types: ['string', 'boolean'],
         help: argHelp.legend,
-        default: '"ne"',
+        default: 'ne',
         options: [...Object.values(Legend), false],
       },
       palette: {

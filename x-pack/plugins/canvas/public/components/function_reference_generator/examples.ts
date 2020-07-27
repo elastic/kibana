@@ -4,39 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-import { UnionToIntersection } from '@kbn/utility-types';
-import { CanvasFunction } from '../../../types';
-
-/**
- * This type defines an entry in the `FunctionExampleMap`.  It uses 
- * an `ExpressionFunction` to infer its `Arguments` in order to strongly-type that 
- * entry.
- * 
- * For example:
- * 
-```
-   interface Arguments {
-     bar: string;
-     baz: number;
-   }
-
-   function foo(): ExpressionFunction<'foo', Context, Arguments, Return> {
-     // ...
-   }
-
-   const help: FunctionExample<typeof foo> = {
-     help: 'Some help for foo',
-     args: {
-       bar: 'Help for bar.',   // pass; error if missing
-       baz: 'Help for baz.',   // pass; error if missing
-       zap: 'Help for zap.`,   // error: zap doesn't exist
-     }
-   };
-```
- * This allows one to ensure each argument is present, and no extraneous arguments
- * remain.
- */
 export interface FunctionExample {
   syntax: string;
   usage: {
@@ -44,49 +11,10 @@ export interface FunctionExample {
     help?: string;
   };
 }
-// This internal type infers a Function name and uses `FunctionExample` above to build
-// a dictionary entry.  This can be used to ensure every Function is defined and all
-// Arguments have help strings.
-//
-// For example:
-//
-// function foo(): ExpressionFunction<'foo', Context, Arguments, Return> {
-//   // ...
-// }
-//
-// const map: FunctionExampleMap<typeof foo> = {
-//   foo: FunctionExample<typeof foo>,
-// }
-//
-// Given a collection of functions, the map would contain each entry.
-//
-type FunctionExampleMap<T> = T extends ExpressionFunctionDefinition<
-  infer Name,
-  infer Input,
-  infer Arguments,
-  infer Output
->
-  ? { [key in Name]: FunctionExample }
-  : never;
 
-// This internal type represents an exhaustive dictionary of `FunctionExample` types,
-// organized by Function Name and then Function Argument.
-//
-// This type indexes the existing function factories, reverses the union to an
-// intersection, and produces the dictionary of strings.
-// type FunctionExampleDict = UnionToIntersection<FunctionExampleMap<CanvasFunction>>;
 interface FunctionExampleDict {
   [key: string]: FunctionExample;
 }
-
-/**
- * Help text for Canvas Functions should be properly localized. This function will
- * return a dictionary of help strings, organized by `ExpressionFunctionDefinition`
- * specification and then by available arguments within each `ExpressionFunctionDefinition`.
- *
- * This a function, rather than an object, to future-proof string initialization,
- * if ever necessary.
- */
 
 export const getFunctionExamples = (): FunctionExampleDict => ({
   all: {

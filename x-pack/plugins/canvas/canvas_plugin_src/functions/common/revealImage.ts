@@ -53,7 +53,7 @@ export function revealImage(): ExpressionFunctionDefinition<
       origin: {
         types: ['string'],
         help: argHelp.origin,
-        default: '"bottom"',
+        default: 'bottom',
         options: Object.values(Origin),
       },
     },

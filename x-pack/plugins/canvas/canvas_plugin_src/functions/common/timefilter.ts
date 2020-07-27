@@ -34,7 +34,7 @@ export function timefilter(): ExpressionFunctionDefinition<
       column: {
         types: ['string'],
         aliases: ['field', 'c'],
-        default: '"@timestamp"',
+        default: '@timestamp',
         help: argHelp.column,
       },
       from: {

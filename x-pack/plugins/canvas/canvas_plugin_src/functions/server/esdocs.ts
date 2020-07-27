@@ -41,7 +41,7 @@ export function esdocs(): ExpressionFunctionDefinition<
         types: ['string'],
         aliases: ['_', 'q'],
         help: argHelp.query,
-        default: '"-_index:.kibana"',
+        default: '-_index:.kibana',
       },
       count: {
         types: ['number'],

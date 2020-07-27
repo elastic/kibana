@@ -40,13 +40,13 @@ export function containerStyle(): ExpressionFunctionDefinition<
       backgroundRepeat: {
         types: ['string'],
         help: argHelp.backgroundRepeat,
-        default: '"no-repeat"',
+        default: 'no-repeat',
         options: Object.values(BackgroundRepeat),
       },
       backgroundSize: {
         types: ['string'],
         help: argHelp.backgroundSize,
-        default: '"contain"',
+        default: 'contain',
         options: Object.values(BackgroundSize),
       },
       border: {
@@ -65,7 +65,7 @@ export function containerStyle(): ExpressionFunctionDefinition<
         types: ['string'],
         help: argHelp.overflow,
         options: Object.values(Overflow),
-        default: '"hidden"',
+        default: 'hidden',
       },
       padding: {
         types: ['string'],
