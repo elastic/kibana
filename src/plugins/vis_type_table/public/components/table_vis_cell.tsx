@@ -56,6 +56,7 @@ export const createTableVisCell = (
        * which we want to do if possible.
        */
       dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
+      data-test-subj="tbvChartCellContent"
     />
   );
 

@@ -36,6 +36,7 @@ import {
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
 } from './dashboard';
+import { DataGridProvider } from './data_grid';
 import { DocTableProvider } from './doc_table';
 import { EmbeddingProvider } from './embedding';
 import { FilterBarProvider } from './filter_bar';
@@ -65,6 +66,7 @@ export const services = {
   snapshots: SnapshotsProvider,
   dashboardVisualizations: DashboardVisualizationProvider,
   dashboardExpect: DashboardExpectProvider,
+  dataGrid: DataGridProvider,
   failureDebugging: FailureDebuggingProvider,
   listingTable: ListingTableProvider,
   dashboardAddPanel: DashboardAddPanelProvider,

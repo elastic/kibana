@@ -26,6 +26,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
   const log = getService('log');
   const retry = getService('retry');
   const table = getService('table');
+  const dataGrid = getService('dataGrid');
   const defaultFindTimeout = config.get('timeouts.find');
   const { common } = getPageObjects(['common']);
 
@@ -307,25 +308,14 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
-      const tableVis = await testSubjects.find('tableVis');
-      const $ = await tableVis.parseDomContent();
-      const headers = $('span[ng-bind="::col.title"]')
-        .toArray()
-        .map((header: any) => $(header).text());
+      const headers = await dataGrid.getHeaders();
       const fieldColumnIndex = headers.indexOf(fieldName);
-      return await find.byCssSelector(
-        `[data-test-subj="paginated-table-body"] tr:nth-of-type(${rowIndex}) td:nth-of-type(${
-          fieldColumnIndex + 1
-        }) a`
-      );
+      const cell = await dataGrid.getCellElement(rowIndex, fieldColumnIndex + 1);
+      return await cell.findByTagName('a');
     }
 
-    /**
-     * If you are writing new tests, you should rather look into getTableVisContent method instead.
-     * @deprecated Use getTableVisContent instead.
-     */
     public async getTableVisData() {
-      return await testSubjects.getVisibleText('paginated-table-body');
+      return await dataGrid.getDataFromTestSubj();
     }
 
     /**
