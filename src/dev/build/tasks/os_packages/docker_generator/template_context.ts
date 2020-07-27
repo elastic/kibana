@@ -17,35 +17,17 @@
  * under the License.
  */
 
-import dedent from 'dedent';
-
-function generator({
-  imageTag,
-  imageFlavor,
-  versionTag,
-  dockerOutputDir,
-  baseOSImage,
-  ubiImageFlavor,
-}) {
-  return dedent(`
-  #!/usr/bin/env bash
-  #
-  # ** THIS IS AN AUTO-GENERATED FILE **
-  #
-  set -euo pipefail
-
-  docker pull ${baseOSImage}
-
-  echo "Building: kibana${imageFlavor}${ubiImageFlavor}-docker"; \\
-  docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${versionTag} -f Dockerfile . || exit 1;
-
-  docker save ${imageTag}${imageFlavor}${ubiImageFlavor}:${versionTag} | gzip -c > ${dockerOutputDir}
-
-  exit 0
-  `);
+export interface TemplateContext {
+  artifactTarball: string;
+  imageFlavor: string;
+  versionTag: string;
+  license: string;
+  artifactsDir: string;
+  imageTag: string;
+  dockerBuildDir: string;
+  dockerOutputDir: string;
+  baseOSImage: string;
+  ubiImageFlavor: string;
+  dockerBuildDate: string;
+  usePublicArtifact?: boolean;
 }
-
-export const buildDockerSHTemplate = {
-  name: 'build_docker.sh',
-  generator,
-};
