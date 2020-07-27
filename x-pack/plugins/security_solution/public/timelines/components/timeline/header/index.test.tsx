@@ -176,9 +176,7 @@ describe('Header', () => {
 
       expect(
         wrapper.find('[data-test-subj="timelineImmutableCallOut"]').first().prop('title')
-      ).toEqual(
-        'This timeline is immutable, therefore not allowed to save it within the security application, though you may continue to use the timeline to search and filter security events'
-      );
+      ).toEqual('This is a prebuilt timeline template - changes will not be saved.');
     });
   });
 });
