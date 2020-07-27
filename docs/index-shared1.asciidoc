@@ -1,4 +1,6 @@
 
+include::{docs-root}/shared/legacy-attrs.asciidoc[]
+
 :ref: http://www.elastic.co/guide/en/elasticsearch/reference/1.7
 :shield: https://www.elastic.co/guide/en/shield/shield-1.3
 
