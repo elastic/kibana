@@ -14,6 +14,7 @@ import { ReactWrapper } from 'enzyme';
  */
 export function connectEnzymeWrapperAndStore(store: Store<unknown>, wrapper: ReactWrapper): void {
   store.subscribe(() => {
+    // See https://enzymejs.github.io/enzyme/docs/api/ReactWrapper/update.html
     return wrapper.update();
   });
 }
