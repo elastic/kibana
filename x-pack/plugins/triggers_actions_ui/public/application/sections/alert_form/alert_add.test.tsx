@@ -68,6 +68,7 @@ describe('alert_add', () => {
         actionVariables: {
           context: [],
           state: [],
+          params: [],
         },
       },
     ];

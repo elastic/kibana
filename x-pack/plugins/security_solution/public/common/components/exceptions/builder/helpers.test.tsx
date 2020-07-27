@@ -14,32 +14,33 @@ import { getEntryExistsMock } from '../../../../../../lists/common/schemas/types
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getListResponseMock } from '../../../../../../lists/common/schemas/response/list_schema.mock';
 import {
-  isOperator,
-  isOneOfOperator,
-  isNotOperator,
-  isNotOneOfOperator,
-  existsOperator,
   doesNotExistOperator,
-  isInListOperator,
   EXCEPTION_OPERATORS,
+  EXCEPTION_OPERATORS_SANS_LISTS,
+  existsOperator,
+  isInListOperator,
+  isNotOneOfOperator,
+  isNotOperator,
+  isOneOfOperator,
+  isOperator,
 } from '../../autocomplete/operators';
-import { FormattedBuilderEntry, BuilderEntry, ExceptionsBuilderExceptionItem } from '../types';
-import { IIndexPattern, IFieldType } from '../../../../../../../../src/plugins/data/common';
-import { EntryNested, Entry } from '../../../../lists_plugin_deps';
+import { BuilderEntry, ExceptionsBuilderExceptionItem, FormattedBuilderEntry } from '../types';
+import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { Entry, EntryNested } from '../../../../lists_plugin_deps';
 
 import {
-  getFilteredIndexPatterns,
-  getFormattedBuilderEntry,
-  isEntryNested,
-  getFormattedBuilderEntries,
-  getUpdatedEntriesOnDelete,
   getEntryFromOperator,
-  getOperatorOptions,
   getEntryOnFieldChange,
-  getEntryOnOperatorChange,
-  getEntryOnMatchChange,
-  getEntryOnMatchAnyChange,
   getEntryOnListChange,
+  getEntryOnMatchAnyChange,
+  getEntryOnMatchChange,
+  getEntryOnOperatorChange,
+  getFilteredIndexPatterns,
+  getFormattedBuilderEntries,
+  getFormattedBuilderEntry,
+  getOperatorOptions,
+  getUpdatedEntriesOnDelete,
+  isEntryNested,
 } from './helpers';
 import { OperatorOption } from '../../autocomplete/types';
 
@@ -671,6 +672,18 @@ describe('Exception builder helpers', () => {
       const output = getOperatorOptions(payloadItem, 'detection', true);
       const expected: OperatorOption[] = [isOperator, existsOperator];
       expect(output).toEqual(expected);
+    });
+
+    test('it returns list operators if specified to', () => {
+      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const output = getOperatorOptions(payloadItem, 'detection', false, true);
+      expect(output).toEqual(EXCEPTION_OPERATORS);
+    });
+
+    test('it does not return list operators if specified not to', () => {
+      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+      const output = getOperatorOptions(payloadItem, 'detection', false, false);
+      expect(output).toEqual(EXCEPTION_OPERATORS_SANS_LISTS);
     });
   });
 

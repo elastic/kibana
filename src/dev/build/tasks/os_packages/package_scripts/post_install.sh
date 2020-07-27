@@ -3,7 +3,22 @@ set -e
 
 export KBN_PATH_CONF=${KBN_PATH_CONF:-<%= configDir %>}
 
-IS_UPGRADE=false
+=======
+set_chmod() {
+  chmod -f 660 ${KBN_PATH_CONF}/kibana.yml || true
+  chmod -f 2750 <%= dataDir %> || true
+  chmod -f 2750 ${KBN_PATH_CONF} || true
+}
+
+set_chown() {
+  chown -R <%= user %>:<%= group %> <%= dataDir %>
+  chown -R root:<%= group %> ${KBN_PATH_CONF}
+}
+
+set_access() {
+  set_chmod
+  set_chown
+}
 
 case $1 in
   # Debian
@@ -20,6 +35,8 @@ case $1 in
     if [ -n "$2" ]; then
       IS_UPGRADE=true
     fi
+
+    set_access
   ;;
   abort-deconfigure|abort-upgrade|abort-remove)
   ;;
@@ -38,6 +55,8 @@ case $1 in
     if [ "$1" = "2" ]; then
       IS_UPGRADE=true
     fi
+
+    set_access
   ;;
 
   *)
@@ -45,15 +64,6 @@ case $1 in
       exit 1
   ;;
 esac
-
-chown -R <%= user %>:<%= group %> <%= dataDir %>
-chmod 2750 <%= dataDir %>
-chmod -R 2755 <%= dataDir %>/*
-
-chown :<%= group %> ${KBN_PATH_CONF}
-chown :<%= group %> ${KBN_PATH_CONF}/kibana.yml
-chmod 2750 ${KBN_PATH_CONF}
-chmod 660 ${KBN_PATH_CONF}/kibana.yml
 
 if [ "$IS_UPGRADE" = "true" ]; then
   if command -v systemctl >/dev/null; then
