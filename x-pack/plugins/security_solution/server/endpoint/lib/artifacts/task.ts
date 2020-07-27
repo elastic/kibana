@@ -44,7 +44,23 @@ export class ManifestTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
+              const taskInterval = (await this.endpointAppContext.config()).packagerTaskInterval;
               await this.runTask(taskInstance.id);
+              const nextRun = new Date();
+              if (taskInterval.endsWith('s')) {
+                const seconds = parseInt(taskInterval.slice(0, -1), 10);
+                nextRun.setSeconds(nextRun.getSeconds() + seconds);
+              } else if (taskInterval.endsWith('m')) {
+                const minutes = parseInt(taskInterval.slice(0, -1), 10);
+                nextRun.setMinutes(nextRun.getMinutes() + minutes);
+              } else {
+                this.logger.error(`Invalid task interval: ${taskInterval}`);
+                return;
+              }
+              return {
+                state: {},
+                runAt: nextRun,
+              };
             },
             cancel: async () => {},
           };
