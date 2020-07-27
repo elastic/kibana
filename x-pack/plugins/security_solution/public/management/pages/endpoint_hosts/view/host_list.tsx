@@ -28,6 +28,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { getHostListPath, getHostDetailsPath, getPolicyDetailPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { HostIndexUIQueryParams } from '../types';
+import { HostPolicyLink } from './components/host_policy_link';
 
 const HostListNavLink = memo<{
   name: string;
@@ -157,15 +158,14 @@ export const HostList: React.FC<HostListProps> = ({
         }),
         truncateText: true,
         render(policy: HostInfo['metadata']['Endpoint']['policy']['applied']) {
-          const toRoutePath = getPolicyDetailPath(policy.id);
-
           return (
-            <HostListNavLink
-              name={policy.name}
-              href={formatUrl(toRoutePath)}
-              route={toRoutePath}
-              dataTestSubj="policyNameCellLink"
-            />
+            <HostPolicyLink
+              policyId={policy.id}
+              className="eui-textTruncate"
+              data-test-subj="policyNameCellLink"
+            >
+              {policy.name}
+            </HostPolicyLink>
           );
         },
       },
