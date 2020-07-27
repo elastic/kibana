@@ -1082,7 +1082,7 @@ const { body } = await client.asInternalUser.get<GetResponse>({ id: 'id' });
 const { body } = await client.asInternalUser.get({ id: 'id' });
 ```
 
-- the returned error types changed 
+- the returned error types changed
 
 There are no longer specific errors for every HTTP status code (such as `BadRequest` or `NotFound`). A generic
 `ResponseError` with the specific `statusCode` is thrown instead.
@@ -1097,6 +1097,7 @@ try {
   if(e instanceof errors.NotFound) {
     // do something
   }
+  if(e.status === 401) {}
 }
 ``` 
 
@@ -1115,6 +1116,7 @@ try {
   if(e.name === 'ResponseError' && e.statusCode === 404) {
     // do something
   }
+  if(e.statusCode === 401) {...}
 }
 ```
 
@@ -1176,6 +1178,17 @@ const request = client.asCurrentUser.ping({}, {
     custom: 'bar',
   }
 });
+```
+
+- Functional tests are subject to migration to the new client as well.
+before:
+```ts
+const client = getService('legacyEs');
+```
+
+after:
+```ts
+const client = getService('es');
 ```
 
 Please refer to the  [Breaking changes list](https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/breaking-changes.html)
