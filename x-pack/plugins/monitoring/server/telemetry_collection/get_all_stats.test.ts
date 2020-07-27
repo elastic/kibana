@@ -184,6 +184,7 @@ describe('get_all_stats', () => {
             logger: coreMock.createPluginInitializerContext().logger.get('test'),
             version: 'version',
             maxBucketSize: 1,
+            metricbeatIndex: 'metricbeat-*',
           }
         )
       ).toStrictEqual(allClusters);
@@ -209,6 +210,7 @@ describe('get_all_stats', () => {
             logger: coreMock.createPluginInitializerContext().logger.get('test'),
             version: 'version',
             maxBucketSize: 1,
+            metricbeatIndex: 'metricbeat-*',
           }
         )
       ).toStrictEqual([]);

@@ -25,14 +25,15 @@ describe('get_es_stats', () => {
   const expectedClusters = response.hits.hits.map((hit) => hit._source);
   const clusterUuids = expectedClusters.map((cluster) => cluster.cluster_uuid);
   const maxBucketSize = 1;
+  const metricbeatIndex = 'metricbeat-*';
 
   describe('getElasticsearchStats', () => {
     it('returns clusters', async () => {
       callWith.withArgs('search').returns(Promise.resolve(response));
 
-      expect(await getElasticsearchStats(callWith, clusterUuids, maxBucketSize)).toStrictEqual(
-        expectedClusters
-      );
+      expect(
+        await getElasticsearchStats(callWith, clusterUuids, maxBucketSize, metricbeatIndex)
+      ).toStrictEqual(expectedClusters);
     });
   });
 
@@ -40,9 +41,9 @@ describe('get_es_stats', () => {
     it('searches for clusters', async () => {
       callWith.returns(response);
 
-      expect(await fetchElasticsearchStats(callWith, clusterUuids, maxBucketSize)).toStrictEqual(
-        response
-      );
+      expect(
+        await fetchElasticsearchStats(callWith, clusterUuids, maxBucketSize, metricbeatIndex)
+      ).toStrictEqual(response);
     });
   });
 
