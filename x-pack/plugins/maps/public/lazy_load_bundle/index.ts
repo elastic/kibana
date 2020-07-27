@@ -44,8 +44,9 @@ interface LazyLoadedMapModules {
     indexPatternId: string,
     indexPatternTitle: string
   ) => LayerDescriptor[];
-  registerLayerWizard(layerWizard: LayerWizard): void;
+  registerLayerWizard: (layerWizard: LayerWizard) => void;
   registerSource(entry: SourceRegistryEntry): void;
+  getIndexPatternsFromIds: (indexPatternIds: string[]) => Promise<IndexPattern[]>;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -71,6 +72,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       createSecurityLayerDescriptors,
       registerLayerWizard,
       registerSource,
+      getIndexPatternsFromIds,
     } = await import('./lazy');
 
     resolve({
@@ -88,6 +90,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       createSecurityLayerDescriptors,
       registerLayerWizard,
       registerSource,
+      getIndexPatternsFromIds,
     });
   });
   return loadModulesPromise;

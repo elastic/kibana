@@ -9,13 +9,7 @@ import { i18n } from '@kbn/i18n';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
-import {
-  getIndexPatternService,
-  getToasts,
-  getData,
-  getUiSettings,
-  getCoreChrome,
-} from '../../../kibana_services';
+import { getToasts, getData, getUiSettings, getCoreChrome } from '../../../kibana_services';
 import { copyPersistentState } from '../../../reducers/util';
 import { getInitialLayers } from '../../bootstrap/get_initial_layers';
 import rison from 'rison-node';
@@ -33,6 +27,7 @@ import { useAppStateSyncing } from '../../state_syncing/app_sync';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { GisMap } from '../../../connected_components/gis_map';
 import { goToSpecifiedPath } from '../../maps_router';
+import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 
 const unsavedChangesWarning = i18n.translate('xpack.maps.breadCrumbs.unsavedChangesWarning', {
   defaultMessage: 'Your map has unsaved changes. Are you sure you want to leave?',
@@ -43,12 +38,12 @@ export class MapsAppView extends React.Component {
   _globalSyncChangeMonitorSubscription = null;
   _appSyncUnsubscribe = null;
   _appStateManager = new AppStateManager();
+  _prevIndexPatternIds = null;
 
   constructor(props) {
     super(props);
     this.state = {
       indexPatterns: [],
-      prevIndexPatternIds: [],
       initialized: false,
       savedQuery: '',
       initialLayerListConfig: null,
@@ -87,8 +82,7 @@ export class MapsAppView extends React.Component {
   }
 
   componentDidUpdate() {
-    // TODO: Handle null when converting to TS
-    this._handleStoreChanges();
+    this._updateIndexPatterns();
   }
 
   componentWillUnmount() {
@@ -188,32 +182,19 @@ export class MapsAppView extends React.Component {
     }
   }
 
-  async _updateIndexPatterns(nextIndexPatternIds) {
-    const indexPatterns = [];
-    const getIndexPatternPromises = nextIndexPatternIds.map(async (indexPatternId) => {
-      try {
-        const indexPattern = await getIndexPatternService().get(indexPatternId);
-        indexPatterns.push(indexPattern);
-      } catch (err) {
-        // unable to fetch index pattern
-      }
-    });
-
-    await Promise.all(getIndexPatternPromises);
-    this.setState({
-      indexPatterns,
-    });
-  }
-
-  _handleStoreChanges = () => {
-    const { prevIndexPatternIds } = this.state;
+  async _updateIndexPatterns() {
     const { nextIndexPatternIds } = this.props;
 
-    if (nextIndexPatternIds !== prevIndexPatternIds) {
-      this.setState({ prevIndexPatternIds: nextIndexPatternIds });
-      this._updateIndexPatterns(nextIndexPatternIds);
+    if (nextIndexPatternIds === this._prevIndexPatternIds) {
+      return;
     }
-  };
+
+    this._prevIndexPatternIds = nextIndexPatternIds;
+
+    this.setState({
+      indexPatterns: await getIndexPatternsFromIds(nextIndexPatternIds),
+    });
+  }
 
   _getAppStateFilters = () => {
     return this._appStateManager.getFilters() || [];
