@@ -142,7 +142,7 @@ describe('create_endpoint_list_item_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should validate an undefined for "entries" but return an array', () => {
+  test('it should NOT validate an undefined for "entries"', () => {
     const inputPayload = getCreateEndpointListItemSchemaMock();
     const outputPayload = getCreateEndpointListItemSchemaMock();
     delete inputPayload.entries;
@@ -151,8 +151,10 @@ describe('create_endpoint_list_item_schema', () => {
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
     delete (message.schema as CreateEndpointListItemSchema).item_id;
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "entries"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('it should validate an undefined for "tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
