@@ -496,6 +496,7 @@ export function XYChart({
             case 'bar_horizontal_percentage_stacked':
               return <BarSeries key={index} {...seriesProps} />;
             case 'area_stacked':
+            case 'area_percentage_stacked':
               return <AreaSeries key={index} {...seriesProps} />;
             case 'area':
               return (
