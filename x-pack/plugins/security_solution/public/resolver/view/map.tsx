@@ -8,7 +8,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useEffectOnce } from 'react-use';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -68,10 +68,21 @@ export const ResolverMap = React.memo(function ({
   const hasError = useSelector(selectors.hasError);
   const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
   const { colorMap } = useResolverTheme();
-  const { cleanUpQueryParams } = useResolverQueryParams();
+  const {
+    cleanUpQueryParams,
+    queryParams: { crumbId },
+    pushToQueryParams,
+  } = useResolverQueryParams();
+
   useEffectOnce(() => {
     return () => cleanUpQueryParams();
   });
+
+  useEffect(() => {
+    if (activeDescendantId && crumbId !== activeDescendantId) {
+      pushToQueryParams({ crumbId: activeDescendantId, crumbEvent: '' });
+    }
+  }, [crumbId, activeDescendantId, pushToQueryParams]);
 
   return (
     <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
