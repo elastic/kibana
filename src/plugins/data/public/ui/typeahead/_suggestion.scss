@@ -10,12 +10,13 @@ $kbnTypeaheadTypes: (
   position: relative;
 
   .kbnTypeahead__popover {
+    max-height: 20vh;
     @include euiBottomShadow($adjustBorders: true);
     border: 1px solid;
     border-color: $euiBorderColor;
     color: $euiTextColor;
     background-color: $euiColorEmptyShade;
-    position: absolute;
+    position: relative;
     top: -2px;
     z-index: $euiZContentMenu;
     width: 100%;
@@ -25,7 +26,7 @@ $kbnTypeaheadTypes: (
     .kbnTypeahead__items {
       @include euiScrollBar;
 
-      max-height: 60vh;
+      max-height: inherit;
       overflow-y: auto;
     }
 

@@ -18,7 +18,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, createRef, RefObject } from 'react';
 import { QuerySuggestion } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 
@@ -29,11 +29,55 @@ interface Props {
   show: boolean;
   suggestions: QuerySuggestion[];
   loadMore: () => void;
+  queryBarRect?: DOMRect;
+  dropdownHeight?: string;
 }
 
 export class SuggestionsComponent extends Component<Props> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
+
+  kbnTypeaheadDivRefInstance: RefObject<HTMLDivElement> = createRef();
+  kbnTypeaheadPopoverDivRefInstance: RefObject<HTMLDivElement> = createRef();
+
+  updatePosition = () => {
+    let suggestionsListHeight;
+    const kbnTypeaheadPopoverDiv = this.kbnTypeaheadPopoverDivRefInstance.current;
+    if (kbnTypeaheadPopoverDiv) {
+      kbnTypeaheadPopoverDiv.style.maxHeight = this.props.dropdownHeight
+        ? this.props.dropdownHeight
+        : '60vh';
+      suggestionsListHeight = kbnTypeaheadPopoverDiv.clientHeight;
+    }
+
+    const documentHeight = document.documentElement.clientHeight || window.innerHeight;
+    const kbnTypeaheadDiv = this.kbnTypeaheadDivRefInstance.current;
+
+    if (this.props.queryBarRect) {
+      const {
+        top: queryBarPositionTop,
+        left: queryBarPositionLeft,
+        width: queryBarWidth,
+        height: queryBarHeight,
+      } = this.props.queryBarRect;
+
+      const suggestionsListOffsetBottom = 20;
+      if (kbnTypeaheadDiv && suggestionsListHeight) {
+        kbnTypeaheadDiv.style.position = 'absolute';
+        kbnTypeaheadDiv.style.left = `${queryBarPositionLeft}px`;
+        kbnTypeaheadDiv.style.width = `${queryBarWidth}px`;
+        kbnTypeaheadDiv.style.top =
+          documentHeight -
+            (suggestionsListHeight +
+              queryBarPositionTop +
+              queryBarHeight +
+              suggestionsListOffsetBottom) >
+          0
+            ? `${queryBarPositionTop + queryBarHeight + 0.5}px`
+            : `${queryBarPositionTop - suggestionsListHeight}px`;
+      }
+    }
+  };
 
   public render() {
     if (!this.props.show || isEmpty(this.props.suggestions)) {
@@ -56,8 +100,8 @@ export class SuggestionsComponent extends Component<Props> {
 
     return (
       <div className="reactSuggestionTypeahead">
-        <div className="kbnTypeahead">
-          <div className="kbnTypeahead__popover">
+        <div className="kbnTypeahead" ref={this.kbnTypeaheadDivRefInstance}>
+          <div className="kbnTypeahead__popover" ref={this.kbnTypeaheadPopoverDivRefInstance}>
             <div
               id="kbnTypeahead__items"
               className="kbnTypeahead__items"
@@ -74,6 +118,8 @@ export class SuggestionsComponent extends Component<Props> {
   }
 
   public componentDidUpdate(prevProps: Props) {
+    this.updatePosition();
+
     if (prevProps.index !== this.props.index) {
       this.scrollIntoView();
     }

@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { Component } from 'react';
-import React from 'react';
+import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -30,6 +29,7 @@ import {
   EuiButton,
   EuiLink,
   htmlIdGenerator,
+  EuiPortal,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -60,6 +60,7 @@ interface Props {
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
+  dropdownHeight?: string;
 }
 
 interface State {
@@ -70,6 +71,7 @@ interface State {
   selectionStart: number | null;
   selectionEnd: number | null;
   indexPatterns: IIndexPattern[];
+  queryBarDivRefInstance: RefObject<HTMLDivElement>;
 }
 
 const KEY_CODES = {
@@ -93,6 +95,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     selectionStart: null,
     selectionEnd: null,
     indexPatterns: [],
+    queryBarDivRefInstance: createRef(),
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -568,7 +571,10 @@ export class QueryStringInputUI extends Component<Props, State> {
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
 
     return (
-      <div className="euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap">
+      <div
+        className="euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap"
+        ref={this.state.queryBarDivRefInstance}
+      >
         {this.props.prepend}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
@@ -630,17 +636,21 @@ export class QueryStringInputUI extends Component<Props, State> {
                 {this.getQueryString()}
               </EuiTextArea>
             </div>
-
-            <SuggestionsComponent
-              show={this.state.isSuggestionsVisible}
-              suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
-              index={this.state.index}
-              onClick={this.onClickSuggestion}
-              onMouseEnter={this.onMouseEnterSuggestion}
-              loadMore={this.increaseLimit}
-            />
           </div>
         </EuiOutsideClickDetector>
+
+        <EuiPortal>
+          <SuggestionsComponent
+            show={this.state.isSuggestionsVisible}
+            suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
+            index={this.state.index}
+            onClick={this.onClickSuggestion}
+            onMouseEnter={this.onMouseEnterSuggestion}
+            loadMore={this.increaseLimit}
+            queryBarRect={this.state.queryBarDivRefInstance.current?.getBoundingClientRect()}
+            dropdownHeight={this.props.dropdownHeight}
+          />
+        </EuiPortal>
 
         <QueryLanguageSwitcher
           language={this.props.query.language}
