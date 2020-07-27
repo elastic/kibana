@@ -25,6 +25,7 @@ import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
 import { AuthenticationHandler } from './lifecycle/auth';
+import { OnPreRoutingHandler } from './lifecycle/on_pre_routing';
 import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
@@ -145,15 +146,26 @@ export interface HttpServiceSetup {
   ) => Promise<SessionStorageFactory<T>>;
 
   /**
-   * To define custom logic to perform for incoming requests.
+   * To define custom logic to perform for incoming requests before server performs a route lookup.
    *
    * @remarks
-   * Runs the handler before Auth interceptor performs a check that user has access to requested resources, so it's the
-   * only place when you can forward a request to another URL right on the server.
-   * Can register any number of registerOnPostAuth, which are called in sequence
+   * It's the only place when you can forward a request to another URL right on the server.
+   * Can register any number of registerOnPreRouting, which are called in sequence
+   * (from the first registered to the last). See {@link OnPreRoutingHandler}.
+   *
+   * @param handler {@link OnPreRoutingHandler} - function to call.
+   */
+  registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
+
+  /**
+   * To define custom logic to perform for incoming requests before
+   * the Auth interceptor performs a check that user has access to requested resources.
+   *
+   * @remarks
+   * Can register any number of registerOnPreAuth, which are called in sequence
    * (from the first registered to the last). See {@link OnPreAuthHandler}.
    *
-   * @param handler {@link OnPreAuthHandler} - function to call.
+   * @param handler {@link OnPreRoutingHandler} - function to call.
    */
   registerOnPreAuth: (handler: OnPreAuthHandler) => void;
 
@@ -170,13 +182,11 @@ export interface HttpServiceSetup {
   registerAuth: (handler: AuthenticationHandler) => void;
 
   /**
-   * To define custom logic to perform for incoming requests.
+   * To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
    *
    * @remarks
-   * Runs the handler after Auth interceptor
-   * did make sure a user has access to the requested resource.
    * The auth state is available at stage via http.auth.get(..)
-   * Can register any number of registerOnPreAuth, which are called in sequence
+   * Can register any number of registerOnPostAuth, which are called in sequence
    * (from the first registered to the last). See {@link OnPostAuthHandler}.
    *
    * @param handler {@link OnPostAuthHandler} - function to call.

@@ -99,7 +99,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async find<T = unknown>(options: SavedObjectsFindOptions) {
-    await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
+    if (
+      this.getSpacesService() == null &&
+      Array.isArray(options.namespaces) &&
+      options.namespaces.length > 0
+    ) {
+      throw this.errors.createBadRequestError(
+        `_find across namespaces is not permitted when the Spaces plugin is disabled.`
+      );
+    }
+    await this.ensureAuthorized(options.type, 'find', options.namespaces, { options });
 
     const response = await this.baseClient.find<T>(options);
     return await this.redactSavedObjectsNamespaces(response);
@@ -293,7 +302,11 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
     savedObject: T
   ): Promise<T> {
-    if (this.getSpacesService() === undefined || savedObject.namespaces == null) {
+    if (
+      this.getSpacesService() === undefined ||
+      savedObject.namespaces == null ||
+      savedObject.namespaces.length === 0
+    ) {
       return savedObject;
     }
 

@@ -8,15 +8,15 @@ import React from 'react';
 import { AbstractStyle } from '../style';
 import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
-import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './components/heatmap_constants';
+import { DEFAULT_HEATMAP_COLOR_RAMP_NAME, getOrdinalMbColorRampStops } from '../color_palettes';
 import { LAYER_STYLE_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
-import { getOrdinalMbColorRampStops, GRADIENT_INTERVALS } from '../color_utils';
+
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
 //The heatmap range chosen hear runs from 0 to 1. It is arbitrary.
 //Weighting is on the raw count/sum values.
-const MIN_RANGE = 0;
+const MIN_RANGE = 0.1; // 0 to 0.1 is displayed as transparent color stop
 const MAX_RANGE = 1;
 
 export class HeatmapStyle extends AbstractStyle {
@@ -83,40 +83,19 @@ export class HeatmapStyle extends AbstractStyle {
       property: propertyName,
     });
 
-    const { colorRampName } = this._descriptor;
-    if (colorRampName && colorRampName !== DEFAULT_HEATMAP_COLOR_RAMP_NAME) {
-      const colorStops = getOrdinalMbColorRampStops(
-        colorRampName,
-        MIN_RANGE,
-        MAX_RANGE,
-        GRADIENT_INTERVALS
-      );
-      // TODO handle null
+    const colorStops = getOrdinalMbColorRampStops(
+      this._descriptor.colorRampName,
+      MIN_RANGE,
+      MAX_RANGE
+    );
+    if (colorStops) {
       mbMap.setPaintProperty(layerId, 'heatmap-color', [
         'interpolate',
         ['linear'],
         ['heatmap-density'],
         0,
         'rgba(0, 0, 255, 0)',
-        ...colorStops.slice(2), // remove first stop from colorStops to avoid conflict with transparent stop at zero
-      ]);
-    } else {
-      mbMap.setPaintProperty(layerId, 'heatmap-color', [
-        'interpolate',
-        ['linear'],
-        ['heatmap-density'],
-        0,
-        'rgba(0, 0, 255, 0)',
-        0.1,
-        'royalblue',
-        0.3,
-        'cyan',
-        0.5,
-        'lime',
-        0.7,
-        'yellow',
-        1,
-        'red',
+        ...colorStops,
       ]);
     }
   }

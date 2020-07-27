@@ -21,6 +21,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { encode as encodeRison } from 'rison-node';
+import uiRoutes from 'ui/routes';
 import '../../private';
 import { toastNotifications } from '../../notify';
 import * as FatalErrorNS from '../../notify/fatal_error';
@@ -37,6 +38,8 @@ import { EventsProvider } from '../../events';
 describe('State Management', () => {
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
+
+  uiRoutes.enable();
 
   describe('Enabled', () => {
     let $rootScope;

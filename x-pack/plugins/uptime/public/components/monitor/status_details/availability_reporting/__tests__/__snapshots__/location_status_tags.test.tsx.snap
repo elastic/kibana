@@ -64,6 +64,8 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
     <div>
       <table
         class="euiTable euiTable--compressed"
+        id="generated-id"
+        tabindex="-1"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"
@@ -312,6 +314,8 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
     <div>
       <table
         class="euiTable euiTable--compressed"
+        id="generated-id"
+        tabindex="-1"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"
@@ -560,6 +564,8 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
     <div>
       <table
         class="euiTable euiTable--compressed"
+        id="generated-id"
+        tabindex="-1"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"
@@ -1018,9 +1024,8 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
+          <nav
             class="euiPagination"
-            role="group"
           >
             <button
               aria-label="Previous page"
@@ -1035,51 +1040,70 @@ exports[`LocationStatusTags component renders when there are many location 1`] =
                 data-euiicon-type="arrowLeft"
               />
             </button>
-            <button
-              aria-label="Page 1 of 2"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
-              data-test-subj="pagination-button-0"
-              type="button"
+            <ul
+              class="euiPagination__list"
             >
-              <span
-                class="euiButtonEmpty__content"
+              <li
+                class="euiPagination__item"
               >
-                <span
-                  class="euiButtonEmpty__text"
+                <button
+                  aria-controls="generated-id"
+                  aria-current="true"
+                  aria-label="Page 1 of 2"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                  data-test-subj="pagination-button-0"
+                  disabled=""
+                  type="button"
                 >
-                  1
-                </span>
-              </span>
-            </button>
-            <button
-              aria-label="Page 2 of 2"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
-              data-test-subj="pagination-button-1"
-              type="button"
-            >
-              <span
-                class="euiButtonEmpty__content"
+                  <span
+                    class="euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      1
+                    </span>
+                  </span>
+                </button>
+              </li>
+              <li
+                class="euiPagination__item"
               >
-                <span
-                  class="euiButtonEmpty__text"
+                <a
+                  aria-controls="generated-id"
+                  aria-label="Page 2 of 2"
+                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton--hideOnMobile"
+                  data-test-subj="pagination-button-1"
+                  href="#generated-id"
+                  rel="noreferrer"
                 >
-                  2
-                </span>
-              </span>
-            </button>
-            <button
-              aria-label="Next page"
+                  <span
+                    class="euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      2
+                    </span>
+                  </span>
+                </a>
+              </li>
+            </ul>
+            <a
+              aria-controls="generated-id"
+              aria-label="Next page, 2"
               class="euiButtonIcon euiButtonIcon--text"
               data-test-subj="pagination-button-next"
-              type="button"
+              href="#generated-id"
+              rel="noreferrer"
             >
               <div
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 data-euiicon-type="arrowRight"
               />
-            </button>
-          </div>
+            </a>
+          </nav>
         </div>
       </div>
     </div>

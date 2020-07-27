@@ -88,6 +88,7 @@ export const BreakdownGroup = ({
               data-cy={`filter-breakdown-item_${name}`}
               key={name + count}
               onClick={onFilterItemClick(name)}
+              disabled={!selected && getSelItems().length > 0}
             >
               {name}
             </EuiFilterSelectItem>

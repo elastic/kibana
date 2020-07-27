@@ -25,8 +25,8 @@ import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 
 interface Props {
-  startTime?: string;
-  endTime?: string;
+  absoluteTime: { start?: number; end?: number };
+  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
@@ -45,21 +45,26 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
   return colorsPerItem;
 }
 
-export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
+export const LogsSection = ({ absoluteTime, relativeTime, bucketSize }: Props) => {
   const history = useHistory();
 
+  const { start, end } = absoluteTime;
   const { data, status } = useFetcher(() => {
-    if (startTime && endTime && bucketSize) {
-      return getDataHandler('infra_logs')?.fetchData({ startTime, endTime, bucketSize });
+    if (start && end && bucketSize) {
+      return getDataHandler('infra_logs')?.fetchData({
+        absoluteTime: { start, end },
+        relativeTime,
+        bucketSize,
+      });
     }
-  }, [startTime, endTime, bucketSize]);
+  }, [start, end, bucketSize]);
 
-  const min = moment.utc(startTime).valueOf();
-  const max = moment.utc(endTime).valueOf();
+  const min = moment.utc(absoluteTime.start).valueOf();
+  const max = moment.utc(absoluteTime.end).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 
-  const { title, appLink, stats, series } = data || {};
+  const { appLink, stats, series } = data || {};
 
   const colorsPerItem = getColorPerItem(series);
 
@@ -67,8 +72,15 @@ export const LogsSection = ({ startTime, endTime, bucketSize }: Props) => {
 
   return (
     <SectionContainer
-      title={title || 'Logs'}
-      appLink={appLink}
+      title={i18n.translate('xpack.observability.overview.logs.title', {
+        defaultMessage: 'Logs',
+      })}
+      appLink={{
+        href: appLink,
+        label: i18n.translate('xpack.observability.overview.logs.appLink', {
+          defaultMessage: 'View in app',
+        }),
+      }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
       <EuiTitle size="xs">

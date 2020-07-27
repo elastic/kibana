@@ -125,6 +125,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     if (jobCreator.type === JOB_TYPE.SINGLE_METRIC) {
       jobCreator.modelPlot = true;
+      jobCreator.modelChangeAnnotations = true;
     }
 
     if (mlContext.currentSavedSearch !== null) {
@@ -209,6 +210,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
                     : {jobCreatorTitle}
                   </h1>
                 </EuiTitle>
+
+                <FormattedMessage
+                  id="xpack.ml.newJob.page.createJob.indexPatternTitle"
+                  defaultMessage="Using index pattern {index}"
+                  values={{ index: jobCreator.indexPatternTitle }}
+                />
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
 

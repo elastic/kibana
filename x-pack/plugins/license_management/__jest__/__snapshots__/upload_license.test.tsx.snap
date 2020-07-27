@@ -294,7 +294,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                     <Portal
                       containerInfo={
                         <div
-                          class="euiOverlayMask"
+                          class="euiOverlayMask euiOverlayMask--aboveHeader"
                         >
                           <div
                             data-focus-guard="true"
@@ -1559,13 +1559,13 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                       className="euiForm"
                     >
                       <EuiI18n
-                        default="Please address the errors in your form."
+                        default="Please address the highlighted errors."
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
                           className="euiForm__errors"
                           color="danger"
-                          title="Please address the errors in your form."
+                          title="Please address the highlighted errors."
                         >
                           <div
                             className="euiCallOut euiCallOut--danger euiForm__errors"
@@ -1576,7 +1576,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               <span
                                 className="euiCallOutHeader__title"
                               >
-                                Please address the errors in your form.
+                                Please address the highlighted errors.
                               </span>
                             </div>
                             <EuiText
@@ -2217,13 +2217,13 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                       className="euiForm"
                     >
                       <EuiI18n
-                        default="Please address the errors in your form."
+                        default="Please address the highlighted errors."
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
                           className="euiForm__errors"
                           color="danger"
-                          title="Please address the errors in your form."
+                          title="Please address the highlighted errors."
                         >
                           <div
                             className="euiCallOut euiCallOut--danger euiForm__errors"
@@ -2234,7 +2234,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               <span
                                 className="euiCallOutHeader__title"
                               >
-                                Please address the errors in your form.
+                                Please address the highlighted errors.
                               </span>
                             </div>
                             <EuiText
@@ -2875,13 +2875,13 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                       className="euiForm"
                     >
                       <EuiI18n
-                        default="Please address the errors in your form."
+                        default="Please address the highlighted errors."
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
                           className="euiForm__errors"
                           color="danger"
-                          title="Please address the errors in your form."
+                          title="Please address the highlighted errors."
                         >
                           <div
                             className="euiCallOut euiCallOut--danger euiForm__errors"
@@ -2892,7 +2892,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               <span
                                 className="euiCallOutHeader__title"
                               >
-                                Please address the errors in your form.
+                                Please address the highlighted errors.
                               </span>
                             </div>
                             <EuiText
@@ -3533,13 +3533,13 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                       className="euiForm"
                     >
                       <EuiI18n
-                        default="Please address the errors in your form."
+                        default="Please address the highlighted errors."
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
                           className="euiForm__errors"
                           color="danger"
-                          title="Please address the errors in your form."
+                          title="Please address the highlighted errors."
                         >
                           <div
                             className="euiCallOut euiCallOut--danger euiForm__errors"
@@ -3550,7 +3550,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               <span
                                 className="euiCallOutHeader__title"
                               >
-                                Please address the errors in your form.
+                                Please address the highlighted errors.
                               </span>
                             </div>
                             <EuiText

@@ -273,7 +273,6 @@ export const cursorOrUndefined = t.union([cursor, t.undefined]);
 export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
 
 export const namespace_type = DefaultNamespace;
-export type NamespaceType = t.TypeOf<typeof namespace_type>;
 
 export const operator = t.keyof({ excluded: null, included: null });
 export type Operator = t.TypeOf<typeof operator>;
@@ -308,3 +307,19 @@ export type Deserializer = t.TypeOf<typeof deserializer>;
 
 export const deserializerOrUndefined = t.union([deserializer, t.undefined]);
 export type DeserializerOrUndefined = t.TypeOf<typeof deserializerOrUndefined>;
+
+export const _version = t.string;
+export const _versionOrUndefined = t.union([_version, t.undefined]);
+export type _VersionOrUndefined = t.TypeOf<typeof _versionOrUndefined>;
+
+export const version = t.number;
+export type Version = t.TypeOf<typeof version>;
+
+export const versionOrUndefined = t.union([version, t.undefined]);
+export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
+
+export const immutable = t.boolean;
+export type Immutable = t.TypeOf<typeof immutable>;
+
+export const immutableOrUndefined = t.union([immutable, t.undefined]);
+export type ImmutableOrUndefined = t.TypeOf<typeof immutableOrUndefined>;

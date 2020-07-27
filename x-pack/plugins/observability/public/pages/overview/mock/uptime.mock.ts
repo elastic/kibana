@@ -10,7 +10,6 @@ export const fetchUptimeData: FetchData<UptimeFetchDataResponse> = () => {
 };
 
 const response: UptimeFetchDataResponse = {
-  title: 'Uptime',
   appLink: '/app/uptime#/',
   stats: {
     monitors: {
@@ -1191,7 +1190,6 @@ const response: UptimeFetchDataResponse = {
 };
 
 export const emptyResponse: UptimeFetchDataResponse = {
-  title: 'Uptime',
   appLink: '/app/uptime#/',
   stats: {
     monitors: {

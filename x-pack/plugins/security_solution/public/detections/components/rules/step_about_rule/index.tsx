@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import {
   RuleStepProps,
   RuleStep,
@@ -35,15 +36,16 @@ import * as I18n from './translations';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/form';
-import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
+import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
+import { AutocompleteField } from '../autocomplete_field';
 
 const CommonUseField = getUseField({ component: Field });
 
 interface StepAboutRuleProps extends RuleStepProps {
-  defaultValues?: AboutStepRule | null;
-  defineRuleData?: DefineStepRule | null;
+  defaultValues?: AboutStepRule;
+  defineRuleData?: DefineStepRule;
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -58,26 +60,6 @@ const TagContainer = styled.div`
 
 TagContainer.displayName = 'TagContainer';
 
-const AdvancedSettingsAccordion = styled(EuiAccordion)`
-  .euiAccordion__iconWrapper {
-    display: none;
-  }
-
-  .euiAccordion__childWrapper {
-    transition-duration: 1ms; /* hack to fire Step accordion to set proper content's height */
-  }
-
-  &.euiAccordion-isOpen .euiButtonEmpty__content > svg {
-    transform: rotate(90deg);
-  }
-`;
-
-const AdvancedSettingsAccordionButton = (
-  <EuiButtonEmpty flush="left" size="s" iconType="arrowRight">
-    {I18n.ADVANCED_SETTINGS}
-  </EuiButtonEmpty>
-);
-
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   addPadding = false,
   defaultValues,
@@ -89,45 +71,39 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   setForm,
   setStepData,
 }) => {
-  const [myStepData, setMyStepData] = useState<AboutStepRule>(stepAboutDefaultValue);
+  const initialState = defaultValues ?? stepAboutDefaultValue;
+  const [myStepData, setMyStepData] = useState<AboutStepRule>(initialState);
+  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    defineRuleData?.index ?? []
+  );
+  const canUseExceptions =
+    defineRuleData?.ruleType &&
+    !isMlRule(defineRuleData.ruleType) &&
+    !isThresholdRule(defineRuleData.ruleType);
 
   const { form } = useForm({
-    defaultValue: myStepData,
+    defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
+  const { getFields, submit } = form;
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
       setStepData(RuleStep.aboutRule, null, false);
-      const { isValid, data } = await form.submit();
+      const { isValid, data } = await submit();
       if (isValid) {
         setStepData(RuleStep.aboutRule, data, isValid);
         setMyStepData({ ...data, isNew: false } as AboutStepRule);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [setStepData, submit]);
 
   useEffect(() => {
-    const { isNew, ...initDefaultValue } = myStepData;
-    if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
-      const myDefaultValues = {
-        ...defaultValues,
-        isNew: false,
-      };
-      setMyStepData(myDefaultValues);
-      setFieldValue(form, schema, myDefaultValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValues]);
-
-  useEffect(() => {
-    if (setForm != null) {
+    if (setForm) {
       setForm(RuleStep.aboutRule, form);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [setForm, form]);
 
   return isReadOnlyView && myStepData.name != null ? (
     <StepContentWrapper data-test-subj="aboutStep" addPadding={addPadding}>
@@ -149,7 +125,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             }}
           />
           <EuiSpacer size="l" />
-
           <CommonUseField
             path="description"
             componentProps={{
@@ -170,9 +145,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 'data-test-subj': 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
-                isDisabled: isLoading,
+                isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
-                indices: defineRuleData?.index ?? [],
+                indices: indexPatterns,
               }}
             />
           </EuiFlexItem>
@@ -184,7 +159,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               componentProps={{
                 'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
-                isDisabled: isLoading,
+                isDisabled: isLoading || indexPatternLoading,
+                indices: indexPatterns,
               }}
             />
           </EuiFlexItem>
@@ -196,17 +172,17 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleTags',
                 euiFieldProps: {
                   fullWidth: true,
-                  isDisabled: isLoading,
+                  isDisabled: isLoading || indexPatternLoading,
                   placeholder: '',
                 },
               }}
             />
           </TagContainer>
           <EuiSpacer size="l" />
-          <AdvancedSettingsAccordion
+          <EuiAccordion
             data-test-subj="advancedSettings"
             id="advancedSettingsAccordion"
-            buttonContent={AdvancedSettingsAccordionButton}
+            buttonContent={I18n.ADVANCED_SETTINGS}
           >
             <EuiSpacer size="l" />
             <UseField
@@ -277,56 +253,62 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               }}
             />
             <EuiSpacer size="l" />
-            <EuiFormRow label={'Building block'} error={'errorMessage'} isInvalid={false} fullWidth>
+            <EuiFormRow label={I18n.GLOBAL_ENDPOINT_EXCEPTION_LIST} fullWidth>
+              <CommonUseField
+                path="isAssociatedToEndpointList"
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
+                  'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
+                  euiFieldProps: {
+                    disabled: isLoading || !canUseExceptions,
+                  },
+                }}
+              />
+            </EuiFormRow>
+            <EuiFormRow label={I18n.BUILDING_BLOCK} fullWidth>
               <CommonUseField
                 path="isBuildingBlock"
                 componentProps={{
                   idAria: 'detectionEngineStepAboutRuleBuildingBlock',
                   'data-test-subj': 'detectionEngineStepAboutRuleBuildingBlock',
                   euiFieldProps: {
-                    fullWidth: true,
-                    isDisabled: isLoading,
-                    placeholder: '',
+                    disabled: isLoading,
                   },
                 }}
               />
             </EuiFormRow>
             <EuiSpacer size="l" />
-            <EuiFlexItem>
-              <CommonUseField
-                path="ruleNameOverride"
-                componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                  'data-test-subj': 'detectionEngineStepAboutRuleRuleNameOverride',
-                  euiFieldProps: {
-                    fullWidth: false,
-                    isDisabled: isLoading,
-                    placeholder: '',
-                  },
-                }}
-              />
-            </EuiFlexItem>
+            <UseField
+              path="ruleNameOverride"
+              component={AutocompleteField}
+              componentProps={{
+                dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
+                fieldType: 'string',
+                idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
+                indices: indexPatterns,
+                isDisabled: isLoading || indexPatternLoading,
+                placeholder: '',
+              }}
+            />
             <EuiSpacer size="l" />
-            <EuiFlexItem>
-              <CommonUseField
-                path="timestampOverride"
-                componentProps={{
-                  idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                  'data-test-subj': 'detectionEngineStepAboutRuleLicense',
-                  euiFieldProps: {
-                    fullWidth: false,
-                    isDisabled: isLoading,
-                    placeholder: '',
-                  },
-                }}
-              />
-            </EuiFlexItem>
-          </AdvancedSettingsAccordion>
+            <UseField
+              path="timestampOverride"
+              component={AutocompleteField}
+              componentProps={{
+                dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
+                fieldType: 'date',
+                idAria: 'detectionEngineStepAboutRuleTimestampOverride',
+                indices: indexPatterns,
+                isDisabled: isLoading || indexPatternLoading,
+                placeholder: '',
+              }}
+            />
+          </EuiAccordion>
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {
               const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-              const severityField = form.getFields().severity;
-              const riskScoreField = form.getFields().riskScore;
+              const severityField = getFields().severity;
+              const riskScoreField = getFields().riskScore;
               if (
                 severityField.value !== severity &&
                 newRiskScore != null &&

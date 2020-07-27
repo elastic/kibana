@@ -172,7 +172,7 @@ describe('Policy Details', () => {
       cancelbutton.simulate('click', { button: 0 });
       const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
       expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
-        'securitySolution:management',
+        'securitySolution:administration',
         { path: policyListPathUrl },
       ]);
     });
@@ -232,7 +232,7 @@ describe('Policy Details', () => {
         );
         expect(warningCallout).toHaveLength(1);
         expect(warningCallout.text()).toEqual(
-          'This action will update 5 hostsSaving these changes will apply the updates to all active endpoints assigned to this policy'
+          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this policy'
         );
       });
       it('should close dialog if cancel button is clicked', () => {

@@ -46,9 +46,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         waitForLogLine: 'package manifests loaded',
       },
     }),
+    esArchiver: xPackAPITestsConfig.get('esArchiver'),
     services: {
-      supertest: xPackAPITestsConfig.get('services.supertest'),
-      es: xPackAPITestsConfig.get('services.es'),
+      ...xPackAPITestsConfig.get('services'),
     },
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',
@@ -63,7 +63,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         ...(registryPort
-          ? [`--xpack.ingestManager.epm.registryUrl=http://localhost:${registryPort}`]
+          ? [`--xpack.ingestManager.registryUrl=http://localhost:${registryPort}`]
           : []),
       ],
     },

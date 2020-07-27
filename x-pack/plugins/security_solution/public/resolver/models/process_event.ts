@@ -29,6 +29,19 @@ export function isTerminatedProcess(passedEvent: ResolverEvent) {
 }
 
 /**
+ * ms since unix epoc, based on timestamp.
+ * may return NaN if the timestamp wasn't present or was invalid.
+ */
+export function datetime(passedEvent: ResolverEvent): number | null {
+  const timestamp = event.eventTimestamp(passedEvent);
+
+  const time = timestamp === undefined ? 0 : new Date(timestamp).getTime();
+
+  // if the date could not be parsed, return null
+  return isNaN(time) ? null : time;
+}
+
+/**
  * Returns a custom event type for a process event based on the event's metadata.
  */
 export function eventType(passedEvent: ResolverEvent): ResolverProcessType {
@@ -160,4 +173,23 @@ export function argsForProcess(passedEvent: ResolverEvent): string | undefined {
     return undefined;
   }
   return passedEvent?.process?.args;
+}
+
+/**
+ * used to sort events
+ */
+export function orderByTime(first: ResolverEvent, second: ResolverEvent): number {
+  const firstDatetime: number | null = datetime(first);
+  const secondDatetime: number | null = datetime(second);
+
+  if (firstDatetime === secondDatetime) {
+    // break ties using an arbitrary (stable) comparison of `eventId` (which should be unique)
+    return String(event.eventId(first)).localeCompare(String(event.eventId(second)));
+  } else if (firstDatetime === null || secondDatetime === null) {
+    // sort `null`'s as higher than numbers
+    return (firstDatetime === null ? 1 : 0) - (secondDatetime === null ? 1 : 0);
+  } else {
+    // sort in ascending order.
+    return firstDatetime - secondDatetime;
+  }
 }

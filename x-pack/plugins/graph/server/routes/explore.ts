@@ -42,6 +42,7 @@ export function registerExploreRoute({
         response
       ) => {
         verifyApiAccess(licenseState);
+        licenseState.notifyUsage('Graph');
         try {
           return response.ok({
             body: {

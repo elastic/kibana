@@ -7,7 +7,9 @@
 import React, { useState } from 'react';
 import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
+import { MLErrorMessages } from '../../../../../common/anomaly_detection';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
 import { useFetcher } from '../../../../hooks/useFetcher';
@@ -15,21 +17,32 @@ import { LicensePrompt } from '../../../shared/LicensePrompt';
 import { useLicense } from '../../../../hooks/useLicense';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-const DEFAULT_VALUE: APIReturnType<'/api/apm/settings/anomaly-detection'> = {
+export type AnomalyDetectionApiResponse = APIReturnType<
+  '/api/apm/settings/anomaly-detection',
+  'GET'
+>;
+
+const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],
   hasLegacyJobs: false,
+  errorCode: undefined,
 };
 
 export const AnomalyDetection = () => {
+  const plugin = useApmPluginContext();
+  const canGetJobs = !!plugin.core.application.capabilities.ml.canGetJobs;
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 
   const [viewAddEnvironments, setViewAddEnvironments] = useState(false);
 
   const { refetch, data = DEFAULT_VALUE, status } = useFetcher(
-    (callApmApi) =>
-      callApmApi({ pathname: `/api/apm/settings/anomaly-detection` }),
-    [],
+    (callApmApi) => {
+      if (canGetJobs) {
+        return callApmApi({ pathname: `/api/apm/settings/anomaly-detection` });
+      }
+    },
+    [canGetJobs],
     { preservePreviousData: false, showToastOnError: false }
   );
 
@@ -49,6 +62,17 @@ export const AnomalyDetection = () => {
     );
   }
 
+  if (!canGetJobs) {
+    return (
+      <EuiPanel>
+        <EuiEmptyPrompt
+          iconType="warning"
+          body={<>{MLErrorMessages.MISSING_READ_PRIVILEGES}</>}
+        />
+      </EuiPanel>
+    );
+  }
+
   return (
     <>
       <EuiTitle size="l">
@@ -62,7 +86,7 @@ export const AnomalyDetection = () => {
       <EuiText>
         {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
           defaultMessage:
-            'The Machine Learning anomaly detection integration enables application health status indicators in the Service map by identifying transaction duration anomalies.',
+            'The Machine Learning anomaly detection integration enables application health status indicators for each configured environment in the Service map by identifying transaction duration anomalies.',
         })}
       </EuiText>
       <EuiSpacer size="l" />
@@ -79,9 +103,8 @@ export const AnomalyDetection = () => {
         />
       ) : (
         <JobsList
+          data={data}
           status={status}
-          anomalyDetectionJobsByEnv={data.jobs}
-          hasLegacyJobs={data.hasLegacyJobs}
           onAddEnvironments={() => {
             setViewAddEnvironments(true);
           }}

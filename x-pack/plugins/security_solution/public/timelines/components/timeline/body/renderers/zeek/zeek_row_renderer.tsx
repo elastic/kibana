@@ -9,10 +9,13 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import { RowRendererId } from '../../../../../../../common/types/timeline';
+
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
 import { ZeekDetails } from './zeek_details';
 
 export const zeekRowRenderer: RowRenderer = {
+  id: RowRendererId.zeek,
   isInstance: (ecs) => {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'zeek';

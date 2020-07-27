@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { IpOverviewRequestOptions } from './index';
 
 const getAggs = (type: string, ip: string) => {
@@ -95,12 +96,17 @@ const getHostAggs = (ip: string) => {
   };
 };
 
-export const buildOverviewQuery = ({ defaultIndex, ip }: IpOverviewRequestOptions) => {
+export const buildOverviewQuery = ({
+  defaultIndex,
+  docValueFields,
+  ip,
+}: IpOverviewRequestOptions) => {
   const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
+      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggs: {
         ...getAggs('source', ip),
         ...getAggs('destination', ip),
@@ -115,5 +121,6 @@ export const buildOverviewQuery = ({ defaultIndex, ip }: IpOverviewRequestOption
       track_total_hits: false,
     },
   };
+
   return dslQuery;
 };

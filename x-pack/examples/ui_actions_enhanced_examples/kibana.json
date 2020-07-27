@@ -6,5 +6,9 @@
   "server": false,
   "ui": true,
   "requiredPlugins": ["uiActionsEnhanced", "data", "discover"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact"
+  ]
 }

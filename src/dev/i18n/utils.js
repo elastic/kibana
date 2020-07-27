@@ -209,28 +209,6 @@ export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageI
 }
 
 /**
- * Verifies valid ICU message.
- * @param message ICU message.
- * @param messageId ICU message id
- * @returns {undefined}
- */
-export function verifyICUMessage(message) {
-  try {
-    parser.parse(message);
-  } catch (error) {
-    if (error.name === 'SyntaxError') {
-      const errorWithContext = createParserErrorMessage(message, {
-        loc: {
-          line: error.location.start.line,
-          column: error.location.start.column - 1,
-        },
-        message: error.message,
-      });
-      throw errorWithContext;
-    }
-  }
-}
-/**
  * Extracts value references from the ICU message.
  * @param message ICU message.
  * @param messageId ICU message id

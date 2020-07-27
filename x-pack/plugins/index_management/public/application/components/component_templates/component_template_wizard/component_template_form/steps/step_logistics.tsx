@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,26 +44,28 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       options: { stripEmptyFields: false },
     });
 
+    const { isValid: isFormValid, submit, getFormData, subscribe } = form;
+
     const { documentation } = useComponentTemplatesContext();
 
     const [isMetaVisible, setIsMetaVisible] = useState<boolean>(
       Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)
     );
 
-    const validate = async () => {
-      return (await form.submit()).isValid;
-    };
+    const validate = useCallback(async () => {
+      return (await submit()).isValid;
+    }, [submit]);
 
     useEffect(() => {
       onChange({
-        isValid: form.isValid,
+        isValid: isFormValid,
         validate,
-        getData: form.getFormData,
+        getData: getFormData,
       });
-    }, [form.isValid, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [isFormValid, getFormData, validate, onChange]);
 
     useEffect(() => {
-      const subscription = form.subscribe(({ data, isValid }) => {
+      const subscription = subscribe(({ data, isValid }) => {
         onChange({
           isValid,
           validate,
@@ -71,7 +73,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         });
       });
       return subscription.unsubscribe;
-    }, [onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [subscribe, validate, onChange]);
 
     return (
       <Form form={form} data-test-subj="stepLogistics">
@@ -117,7 +119,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           description={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateForm.stepLogistics.nameDescription"
-              defaultMessage="A unique identifier for this component template."
+              defaultMessage="Unique name for this component template."
             />
           }
         >
@@ -141,7 +143,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           description={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription"
-              defaultMessage="A number that identifies the component template to external management systems."
+              defaultMessage="Number used by external management systems to identify the component template."
             />
           }
         >
@@ -165,7 +167,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             <>
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDescription"
-                defaultMessage="Arbitrary metadata that is stored in cluster state. {learnMoreLink}"
+                defaultMessage="Arbitrary information about the template, stored in the cluster state. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
                     <EuiLink
@@ -176,7 +178,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                       {i18n.translate(
                         'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaDocumentionLink',
                         {
-                          defaultMessage: 'Learn more',
+                          defaultMessage: 'Learn more.',
                         }
                       )}
                     </EuiLink>
@@ -200,7 +202,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             </>
           }
         >
-          {isMetaVisible ? (
+          {isMetaVisible && (
             <UseField
               path="_meta"
               component={JsonEditorField}
@@ -211,16 +213,12 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                   'aria-label': i18n.translate(
                     'xpack.idxMgmt.componentTemplateForm.stepLogistics.metaAriaLabel',
                     {
-                      defaultMessage: 'Metadata JSON editor',
+                      defaultMessage: '_meta field data editor',
                     }
                   ),
                 },
               }}
             />
-          ) : (
-            // <FormRow/> requires children or a field
-            // For now, we return an empty <div> if the editor is not visible
-            <div />
           )}
         </FormRow>
       </Form>

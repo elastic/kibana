@@ -64,7 +64,14 @@ export const WithHoverActions = React.memo<Props>(
       setShowHoverContent(false);
     }, []);
 
-    const content = useMemo(() => <>{render(showHoverContent)}</>, [render, showHoverContent]);
+    const content = useMemo(
+      () => (
+        <div data-test-subj="withHoverActionsButton" onMouseEnter={onMouseEnter}>
+          {render(showHoverContent)}
+        </div>
+      ),
+      [onMouseEnter, render, showHoverContent]
+    );
 
     useEffect(() => {
       setIsOpen(hoverContent != null && (showHoverContent || alwaysShow));
@@ -75,7 +82,7 @@ export const WithHoverActions = React.memo<Props>(
     }, [closePopOverTrigger]);
 
     return (
-      <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      <div onMouseLeave={onMouseLeave}>
         <WithHoverActionsPopover
           anchorPosition={'downCenter'}
           button={content}

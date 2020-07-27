@@ -25,17 +25,8 @@ import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline } from '../../../store/timeline/actions';
 import { useKibana } from '../../../../common/lib/kibana';
 import { APP_ID } from '../../../../../common/constants';
-import { getCaseDetailsUrl } from '../../../../common/components/link_to';
+import { getCaseDetailsUrl, getCreateCaseUrl } from '../../../../common/components/link_to';
 
-type CreateTimeline = ({
-  id,
-  show,
-  timelineType,
-}: {
-  id: string;
-  show?: boolean;
-  timelineType?: TimelineTypeLiteral;
-}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -43,7 +34,6 @@ type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
 
 interface Props {
   associateNote: AssociateNote;
-  createTimeline: CreateTimeline;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
@@ -78,7 +68,6 @@ const settingsWidth = 55;
 export const Properties = React.memo<Props>(
   ({
     associateNote,
-    createTimeline,
     description,
     getNotesByIds,
     graphEventId,
@@ -122,11 +111,11 @@ export const Properties = React.memo<Props>(
     );
 
     const onRowClick = useCallback(
-      (id: string) => {
+      (id?: string) => {
         onCloseCaseModal();
 
         navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-          path: getCaseDetailsUrl({ id }),
+          path: id != null ? getCaseDetailsUrl({ id }) : getCreateCaseUrl(),
         }).then(() =>
           dispatch(
             setInsertTimeline({

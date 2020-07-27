@@ -33,7 +33,7 @@ import chrome from 'ui/chrome';
 
 import { ExitFullScreenButton } from './exit_full_screen_button';
 
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 
 test('is rendered', () => {
   const component = renderWithIntl(<ExitFullScreenButton onExitFullScreenMode={() => {}} />);
@@ -57,7 +57,7 @@ describe('onExitFullScreenMode', () => {
 
     mountWithIntl(<ExitFullScreenButton onExitFullScreenMode={onExitHandler} />);
 
-    const escapeKeyEvent = new KeyboardEvent('keydown', { keyCode: keyCodes.ESCAPE });
+    const escapeKeyEvent = new KeyboardEvent('keydown', { key: keys.ESCAPE });
     document.dispatchEvent(escapeKeyEvent);
 
     sinon.assert.calledOnce(onExitHandler);

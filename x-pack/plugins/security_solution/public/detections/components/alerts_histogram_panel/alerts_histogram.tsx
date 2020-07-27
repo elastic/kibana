@@ -26,11 +26,11 @@ const DEFAULT_CHART_HEIGHT = 174;
 
 interface AlertsHistogramProps {
   chartHeight?: number;
-  from: number;
+  from: string;
   legendItems: LegendItem[];
   legendPosition?: Position;
   loading: boolean;
-  to: number;
+  to: string;
   data: HistogramData[];
   updateDateRange: UpdateDateRange;
 }

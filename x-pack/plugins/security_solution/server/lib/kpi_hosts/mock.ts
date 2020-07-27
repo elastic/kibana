@@ -7,8 +7,8 @@
 import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import { RequestBasicOptions } from '../framework/types';
 
-const FROM = new Date('2019-05-03T13:24:00.660Z').valueOf();
-const TO = new Date('2019-05-04T13:24:00.660Z').valueOf();
+const FROM = '2019-05-03T13:24:00.660Z';
+const TO = '2019-05-04T13:24:00.660Z';
 
 export const mockKpiHostsOptions: RequestBasicOptions = {
   defaultIndex: DEFAULT_INDEX_PATTERN,

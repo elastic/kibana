@@ -32,8 +32,8 @@ export interface OverviewHostArgs {
 export interface OverviewHostProps extends QueryTemplateProps {
   children: (args: OverviewHostArgs) => React.ReactNode;
   sourceId: string;
-  endDate: number;
-  startDate: number;
+  endDate: string;
+  startDate: string;
 }
 
 const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux>(

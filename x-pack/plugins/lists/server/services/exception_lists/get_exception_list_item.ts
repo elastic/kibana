@@ -35,7 +35,7 @@ export const getExceptionListItem = async ({
   if (id != null) {
     try {
       const savedObject = await savedObjectsClient.get<ExceptionListSoSchema>(savedObjectType, id);
-      return transformSavedObjectToExceptionListItem({ namespaceType, savedObject });
+      return transformSavedObjectToExceptionListItem({ savedObject });
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         return null;
@@ -55,7 +55,6 @@ export const getExceptionListItem = async ({
     });
     if (savedObject.saved_objects[0] != null) {
       return transformSavedObjectToExceptionListItem({
-        namespaceType,
         savedObject: savedObject.saved_objects[0],
       });
     } else {

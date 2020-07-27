@@ -1089,6 +1089,16 @@ describe('setup contract', () => {
     });
   });
 
+  describe('#registerOnPreRouting', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreRouting } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreRouting((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
   describe('#registerOnPreAuth', () => {
     test('does not throw if called after stop', async () => {
       const { registerOnPreAuth } = await server.setup(config);

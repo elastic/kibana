@@ -19,6 +19,7 @@ import {
 } from '../../common/schemas';
 
 import {
+  addEndpointExceptionList,
   addExceptionList,
   addExceptionListItem,
   deleteExceptionListById,
@@ -507,7 +508,7 @@ describe('Exceptions Lists API', () => {
     test('it returns expected format when call succeeds', async () => {
       const exceptionResponse = await fetchExceptionListItemsByListId({
         http: mockKibanaHttpService(),
-        listId: 'endpoint_list',
+        listId: 'endpoint_list_id',
         namespaceType: 'single',
         pagination: {
           page: 1,
@@ -736,6 +737,41 @@ describe('Exceptions Lists API', () => {
           signal: abortCtrl.signal,
         })
       ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+    });
+  });
+
+  describe('#addEndpointExceptionList', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getExceptionListSchemaMock());
+    });
+
+    test('it invokes "addEndpointExceptionList" with expected url and body values', async () => {
+      await addEndpointExceptionList({
+        http: mockKibanaHttpService(),
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/endpoint_list', {
+        method: 'POST',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it returns expected exception list on success', async () => {
+      const exceptionResponse = await addEndpointExceptionList({
+        http: mockKibanaHttpService(),
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
+    });
+
+    test('it returns an empty object when list already exists', async () => {
+      fetchMock.mockResolvedValue({});
+      const exceptionResponse = await addEndpointExceptionList({
+        http: mockKibanaHttpService(),
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual({});
     });
   });
 });

@@ -6,7 +6,6 @@
 
 import { Action } from 'history';
 import Boom from 'boom';
-import { Breadcrumb } from '@elastic/eui';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
@@ -37,6 +36,7 @@ import { DeleteDocumentByQueryParams } from 'elasticsearch';
 import { DeleteDocumentParams } from 'elasticsearch';
 import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
@@ -334,7 +334,7 @@ export interface ChromeBrand {
 }
 
 // @public (undocumented)
-export type ChromeBreadcrumb = Breadcrumb;
+export type ChromeBreadcrumb = EuiBreadcrumb;
 
 // @public
 export interface ChromeDocTitle {
@@ -581,6 +581,12 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
         label: string;
         euiIconType: string;
         order: number;
+    };
+    enterpriseSearch: {
+        id: string;
+        label: string;
+        order: number;
+        euiIconType: string;
     };
     observability: {
         id: string;
@@ -1276,7 +1282,7 @@ export interface SavedObjectsCreateOptions {
 }
 
 // @public (undocumented)
-export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsFindOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
@@ -1287,6 +1293,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
         type: string;
         id: string;
     };
+    // (undocumented)
+    namespaces?: string[];
     // (undocumented)
     page?: number;
     // (undocumented)

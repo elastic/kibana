@@ -14,7 +14,7 @@ export const HOSTS = '[data-test-subj="navigation-hosts"]';
 
 export const KQL_INPUT = '[data-test-subj="queryInput"]';
 
-export const MANAGEMENT = '[data-test-subj="navigation-management"]';
+export const ADMINISTRATION = '[data-test-subj="navigation-administration"]';
 
 export const NETWORK = '[data-test-subj="navigation-network"]';
 

@@ -10,15 +10,111 @@ import dateMath from '@elastic/datemath';
 import { Logger, SavedObjectsClientContract } from '../../../../../../../src/core/server';
 import { AlertServices, parseDuration } from '../../../../../alerts/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
-import { EntriesArray, ExceptionListItemSchema } from '../../../../../lists/common/schemas';
+import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
-import { BulkResponse, BulkResponseErrorAggregation } from './types';
+import { BulkResponse, BulkResponseErrorAggregation, isValidUnit } from './types';
 import { BuildRuleMessage } from './rule_messages';
+import { hasLargeValueList } from '../../../../common/detection_engine/utils';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
   exceptionsWithoutValueLists: ExceptionListItemSchema[];
 }
+
+export const MAX_RULE_GAP_RATIO = 4;
+
+export const shorthandMap = {
+  s: {
+    momentString: 'seconds',
+    asFn: (duration: moment.Duration) => duration.asSeconds(),
+  },
+  m: {
+    momentString: 'minutes',
+    asFn: (duration: moment.Duration) => duration.asMinutes(),
+  },
+  h: {
+    momentString: 'hours',
+    asFn: (duration: moment.Duration) => duration.asHours(),
+  },
+};
+
+export const getGapMaxCatchupRatio = ({
+  logger,
+  previousStartedAt,
+  unit,
+  buildRuleMessage,
+  ruleParamsFrom,
+  interval,
+}: {
+  logger: Logger;
+  ruleParamsFrom: string;
+  previousStartedAt: Date | null | undefined;
+  interval: string;
+  buildRuleMessage: BuildRuleMessage;
+  unit: string;
+}): {
+  maxCatchup: number | null;
+  ratio: number | null;
+  gapDiffInUnits: number | null;
+} => {
+  if (previousStartedAt == null) {
+    return {
+      maxCatchup: null,
+      ratio: null,
+      gapDiffInUnits: null,
+    };
+  }
+  if (!isValidUnit(unit)) {
+    logger.error(buildRuleMessage(`unit: ${unit} failed isValidUnit check`));
+    return {
+      maxCatchup: null,
+      ratio: null,
+      gapDiffInUnits: null,
+    };
+  }
+  /*
+      we need the total duration from now until the last time the rule ran.
+      the next few lines can be summed up as calculating
+      "how many second | minutes | hours have passed since the last time this ran?"
+      */
+  const nowToGapDiff = moment.duration(moment().diff(previousStartedAt));
+  // rule ran early, no gap
+  if (shorthandMap[unit].asFn(nowToGapDiff) < 0) {
+    // rule ran early, no gap
+    return {
+      maxCatchup: null,
+      ratio: null,
+      gapDiffInUnits: null,
+    };
+  }
+  const calculatedFrom = `now-${
+    parseInt(shorthandMap[unit].asFn(nowToGapDiff).toString(), 10) + unit
+  }`;
+  logger.debug(buildRuleMessage(`calculatedFrom: ${calculatedFrom}`));
+
+  const intervalMoment = moment.duration(parseInt(interval, 10), unit);
+  logger.debug(buildRuleMessage(`intervalMoment: ${shorthandMap[unit].asFn(intervalMoment)}`));
+  const calculatedFromAsMoment = dateMath.parse(calculatedFrom);
+  const dateMathRuleParamsFrom = dateMath.parse(ruleParamsFrom);
+  if (dateMathRuleParamsFrom != null && intervalMoment != null) {
+    const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
+    const gapDiffInUnits = dateMathRuleParamsFrom.diff(calculatedFromAsMoment, momentUnit);
+
+    const ratio = gapDiffInUnits / shorthandMap[unit].asFn(intervalMoment);
+
+    // maxCatchup is to ensure we are not trying to catch up too far back.
+    // This allows for a maximum of 4 consecutive rule execution misses
+    // to be included in the number of signals generated.
+    const maxCatchup = ratio < MAX_RULE_GAP_RATIO ? ratio : MAX_RULE_GAP_RATIO;
+    return { maxCatchup, ratio, gapDiffInUnits };
+  }
+  logger.error(buildRuleMessage('failed to parse calculatedFrom and intervalMoment'));
+  return {
+    maxCatchup: null,
+    ratio: null,
+    gapDiffInUnits: null,
+  };
+};
 
 export const getListsClient = async ({
   lists,
@@ -51,11 +147,6 @@ export const getListsClient = async ({
   );
 
   return { listClient, exceptionsClient };
-};
-
-export const hasLargeValueList = (entries: EntriesArray): boolean => {
-  const found = entries.filter(({ type }) => type === 'list');
-  return found.length > 0;
 };
 
 export const getExceptions = async ({
@@ -294,8 +385,6 @@ export const getSignalTimeTuples = ({
   from: moment.Moment | undefined;
   maxSignals: number;
 }> => {
-  type unitType = 's' | 'm' | 'h';
-  const isValidUnit = (unit: string): unit is unitType => ['s', 'm', 'h'].includes(unit);
   let totalToFromTuples: Array<{
     to: moment.Moment | undefined;
     from: moment.Moment | undefined;
@@ -305,20 +394,6 @@ export const getSignalTimeTuples = ({
     const fromUnit = ruleParamsFrom[ruleParamsFrom.length - 1];
     if (isValidUnit(fromUnit)) {
       const unit = fromUnit; // only seconds (s), minutes (m) or hours (h)
-      const shorthandMap = {
-        s: {
-          momentString: 'seconds',
-          asFn: (duration: moment.Duration) => duration.asSeconds(),
-        },
-        m: {
-          momentString: 'minutes',
-          asFn: (duration: moment.Duration) => duration.asMinutes(),
-        },
-        h: {
-          momentString: 'hours',
-          asFn: (duration: moment.Duration) => duration.asHours(),
-        },
-      };
 
       /*
       we need the total duration from now until the last time the rule ran.
@@ -333,62 +408,63 @@ export const getSignalTimeTuples = ({
 
       const intervalMoment = moment.duration(parseInt(interval, 10), unit);
       logger.debug(buildRuleMessage(`intervalMoment: ${shorthandMap[unit].asFn(intervalMoment)}`));
-      const calculatedFromAsMoment = dateMath.parse(calculatedFrom);
-      if (calculatedFromAsMoment != null && intervalMoment != null) {
-        const dateMathRuleParamsFrom = dateMath.parse(ruleParamsFrom);
-        const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
-        const gapDiffInUnits = calculatedFromAsMoment.diff(dateMathRuleParamsFrom, momentUnit);
-
-        const ratio = Math.abs(gapDiffInUnits / shorthandMap[unit].asFn(intervalMoment));
-
-        // maxCatchup is to ensure we are not trying to catch up too far back.
-        // This allows for a maximum of 4 consecutive rule execution misses
-        // to be included in the number of signals generated.
-        const maxCatchup = ratio < 4 ? ratio : 4;
-        logger.debug(buildRuleMessage(`maxCatchup: ${ratio}`));
-
-        let tempTo = dateMath.parse(ruleParamsFrom);
-        if (tempTo == null) {
-          // return an error
-          throw new Error('dateMath parse failed');
-        }
-
-        let beforeMutatedFrom: moment.Moment | undefined;
-        while (totalToFromTuples.length < maxCatchup) {
-          // if maxCatchup is less than 1, we calculate the 'from' differently
-          // and maxSignals becomes some less amount of maxSignals
-          // in order to maintain maxSignals per full rule interval.
-          if (maxCatchup > 0 && maxCatchup < 1) {
-            totalToFromTuples.push({
-              to: tempTo.clone(),
-              from: tempTo.clone().subtract(Math.abs(gapDiffInUnits), momentUnit),
-              maxSignals: ruleParamsMaxSignals * maxCatchup,
-            });
-            break;
-          }
-          const beforeMutatedTo = tempTo.clone();
-
-          // moment.subtract mutates the moment so we need to clone again..
-          beforeMutatedFrom = tempTo.clone().subtract(intervalMoment, momentUnit);
-          const tuple = {
-            to: beforeMutatedTo,
-            from: beforeMutatedFrom,
-            maxSignals: ruleParamsMaxSignals,
-          };
-          totalToFromTuples = [...totalToFromTuples, tuple];
-          tempTo = beforeMutatedFrom;
-        }
-        totalToFromTuples = [
-          {
-            to: dateMath.parse(ruleParamsTo),
-            from: dateMath.parse(ruleParamsFrom),
-            maxSignals: ruleParamsMaxSignals,
-          },
-          ...totalToFromTuples,
-        ];
-      } else {
-        logger.debug(buildRuleMessage('calculatedFromMoment was null or intervalMoment was null'));
+      const momentUnit = shorthandMap[unit].momentString as moment.DurationInputArg2;
+      // maxCatchup is to ensure we are not trying to catch up too far back.
+      // This allows for a maximum of 4 consecutive rule execution misses
+      // to be included in the number of signals generated.
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger,
+        buildRuleMessage,
+        previousStartedAt,
+        unit,
+        ruleParamsFrom,
+        interval,
+      });
+      logger.debug(buildRuleMessage(`maxCatchup: ${maxCatchup}, ratio: ${ratio}`));
+      if (maxCatchup == null || ratio == null || gapDiffInUnits == null) {
+        throw new Error(
+          buildRuleMessage('failed to calculate maxCatchup, ratio, or gapDiffInUnits')
+        );
       }
+      let tempTo = dateMath.parse(ruleParamsFrom);
+      if (tempTo == null) {
+        // return an error
+        throw new Error(buildRuleMessage('dateMath parse failed'));
+      }
+
+      let beforeMutatedFrom: moment.Moment | undefined;
+      while (totalToFromTuples.length < maxCatchup) {
+        // if maxCatchup is less than 1, we calculate the 'from' differently
+        // and maxSignals becomes some less amount of maxSignals
+        // in order to maintain maxSignals per full rule interval.
+        if (maxCatchup > 0 && maxCatchup < 1) {
+          totalToFromTuples.push({
+            to: tempTo.clone(),
+            from: tempTo.clone().subtract(gapDiffInUnits, momentUnit),
+            maxSignals: ruleParamsMaxSignals * maxCatchup,
+          });
+          break;
+        }
+        const beforeMutatedTo = tempTo.clone();
+
+        // moment.subtract mutates the moment so we need to clone again..
+        beforeMutatedFrom = tempTo.clone().subtract(intervalMoment, momentUnit);
+        const tuple = {
+          to: beforeMutatedTo,
+          from: beforeMutatedFrom,
+          maxSignals: ruleParamsMaxSignals,
+        };
+        totalToFromTuples = [...totalToFromTuples, tuple];
+        tempTo = beforeMutatedFrom;
+      }
+      totalToFromTuples = [
+        {
+          to: dateMath.parse(ruleParamsTo),
+          from: dateMath.parse(ruleParamsFrom),
+          maxSignals: ruleParamsMaxSignals,
+        },
+        ...totalToFromTuples,
+      ];
     }
   } else {
     totalToFromTuples = [

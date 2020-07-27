@@ -9,13 +9,13 @@ require('../src/setup_node_env');
 const { buildTask } = require('./tasks/build');
 const { devTask } = require('./tasks/dev');
 const { testTask, testKarmaTask, testKarmaDebugTask } = require('./tasks/test');
-const { prepareTask } = require('./tasks/prepare');
+const { downloadChromium } = require('./tasks/download_chromium');
 
 // export the tasks that are runnable from the CLI
 module.exports = {
   build: buildTask,
   dev: devTask,
-  prepare: prepareTask,
+  downloadChromium,
   test: testTask,
   'test:karma': testKarmaTask,
   'test:karma:debug': testKarmaDebugTask,

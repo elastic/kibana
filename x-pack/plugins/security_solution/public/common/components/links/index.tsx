@@ -78,7 +78,7 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
 };
 export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
 
-const whitelistUrlSchemes = ['http://', 'https://'];
+const allowedUrlSchemes = ['http://', 'https://'];
 export const ExternalLink = React.memo<{
   url: string;
   children?: React.ReactNode;
@@ -96,8 +96,8 @@ export const ExternalLink = React.memo<{
     const lastVisibleItemIndex = overflowIndexStart - 1;
     const lastItemIndex = allItemsLimit - 1;
     const lastIndexToShow = Math.max(0, Math.min(lastVisibleItemIndex, lastItemIndex));
-    const inWhitelist = whitelistUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
-    return url && inWhitelist && !isUrlInvalid(url) && children ? (
+    const inAllowlist = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
+    return url && inAllowlist && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
         <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
           {children}

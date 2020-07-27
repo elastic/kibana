@@ -8,7 +8,7 @@ import React from 'react';
 import url from 'url';
 import { EuiButtonEmpty } from '@elastic/eui';
 import rison, { RisonValue } from 'rison-node';
-import { getMLJobId } from '../../../state/api/ml_anomaly';
+import { getMLJobId } from '../../../../common/lib';
 
 interface Props {
   monitorId: string;

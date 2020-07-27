@@ -9,7 +9,6 @@ import sinon from 'sinon';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
-import { EntriesArray } from '../../../../common/detection_engine/lists_common_deps';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
@@ -21,9 +20,9 @@ import {
   parseScheduleDates,
   getDriftTolerance,
   getGapBetweenRuns,
+  getGapMaxCatchupRatio,
   errorAggregator,
   getListsClient,
-  hasLargeValueList,
   getSignalTimeTuples,
   getExceptions,
 } from './utils';
@@ -584,53 +583,6 @@ describe('utils', () => {
     });
   });
 
-  describe('#hasLargeValueList', () => {
-    test('it returns false if empty array', () => {
-      const hasLists = hasLargeValueList([]);
-
-      expect(hasLists).toBeFalsy();
-    });
-
-    test('it returns true if item of type EntryList exists', () => {
-      const entries: EntriesArray = [
-        {
-          field: 'actingProcess.file.signer',
-          type: 'list',
-          operator: 'included',
-          list: { id: 'some id', type: 'ip' },
-        },
-        {
-          field: 'file.signature.signer',
-          type: 'match',
-          operator: 'excluded',
-          value: 'Global Signer',
-        },
-      ];
-      const hasLists = hasLargeValueList(entries);
-
-      expect(hasLists).toBeTruthy();
-    });
-
-    test('it returns false if item of type EntryList does not exist', () => {
-      const entries: EntriesArray = [
-        {
-          field: 'actingProcess.file.signer',
-          type: 'match',
-          operator: 'included',
-          value: 'Elastic, N.V.',
-        },
-        {
-          field: 'file.signature.signer',
-          type: 'match',
-          operator: 'excluded',
-          value: 'Global Signer',
-        },
-      ];
-      const hasLists = hasLargeValueList(entries);
-
-      expect(hasLists).toBeFalsy();
-    });
-  });
   describe('getSignalTimeTuples', () => {
     test('should return a single tuple if no gap', () => {
       const someTuples = getSignalTimeTuples({
@@ -713,6 +665,52 @@ describe('utils', () => {
       expect(someTuples.length).toEqual(1);
       const someTuple = someTuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
+    });
+  });
+
+  describe('getMaxCatchupRatio', () => {
+    test('should return null if rule has never run before', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: null,
+        interval: '30s',
+        ruleParamsFrom: 'now-30s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
+    });
+
+    test('should should have non-null values when gap is present', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(65, 's').toDate(),
+        interval: '50s',
+        ruleParamsFrom: 'now-55s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toEqual(0.2);
+      expect(ratio).toEqual(0.2);
+      expect(gapDiffInUnits).toEqual(10);
+    });
+
+    // when a rule runs sooner than expected we don't
+    // consider that a gap as that is a very rare circumstance
+    test('should return null when given a negative gap (rule ran sooner than expected)', () => {
+      const { maxCatchup, ratio, gapDiffInUnits } = getGapMaxCatchupRatio({
+        logger: mockLogger,
+        previousStartedAt: moment().subtract(-15, 's').toDate(),
+        interval: '10s',
+        ruleParamsFrom: 'now-13s',
+        buildRuleMessage,
+        unit: 's',
+      });
+      expect(maxCatchup).toBeNull();
+      expect(ratio).toBeNull();
+      expect(gapDiffInUnits).toBeNull();
     });
   });
 

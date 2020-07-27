@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { UptimeDatePicker } from '../components/common/uptime_date_picker';
 import { SETTINGS_ROUTE } from '../../common/constants';
@@ -58,6 +58,7 @@ export const PageHeader = React.memo(
       ) : null;
 
     const kibana = useKibana();
+    const history = useHistory();
 
     const extraLinkComponents = !extraLinks ? null : (
       <EuiFlexGroup alignItems="flexEnd" responsive={false}>
@@ -65,11 +66,13 @@ export const PageHeader = React.memo(
           <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <Link to={SETTINGS_ROUTE}>
-            <EuiButtonEmpty data-test-subj="settings-page-link" iconType="gear">
-              {SETTINGS_LINK_TEXT}
-            </EuiButtonEmpty>
-          </Link>
+          <EuiButtonEmpty
+            data-test-subj="settings-page-link"
+            iconType="gear"
+            href={history.createHref({ pathname: SETTINGS_ROUTE })}
+          >
+            {SETTINGS_LINK_TEXT}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

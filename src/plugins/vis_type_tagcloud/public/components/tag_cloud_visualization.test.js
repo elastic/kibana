@@ -122,8 +122,6 @@ describe('TagCloudVisualizationTest', () => {
         uiState: false,
       });
 
-      domNode.style.width = '256px';
-      domNode.style.height = '368px';
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: true,
         params: false,

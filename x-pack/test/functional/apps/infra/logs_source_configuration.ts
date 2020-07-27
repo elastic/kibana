@@ -5,9 +5,14 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 import { DATES } from './constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+const COMMON_REQUEST_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+};
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -15,6 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'infraLogs']);
   const retry = getService('retry');
+  const supertest = getService('supertest');
 
   describe('Logs Source Configuration', function () {
     before(async () => {
@@ -95,6 +101,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         expect(logStreamEntryColumns).to.have.length(3);
+      });
+
+      it('records telemetry for logs', async () => {
+        await logsUi.logStreamPage.navigateTo({
+          logPosition: {
+            start: DATES.metricsAndLogs.stream.startWithData,
+            end: DATES.metricsAndLogs.stream.endWithData,
+          },
+        });
+
+        await logsUi.logStreamPage.getStreamEntries();
+
+        const resp = await supertest
+          .post(`/api/telemetry/v2/clusters/_stats`)
+          .set(COMMON_REQUEST_HEADERS)
+          .set('Accept', 'application/json')
+          .send({
+            timeRange: {
+              min: moment().subtract(1, 'hour').toISOString(),
+              max: moment().toISOString(),
+            },
+            unencrypted: true,
+          })
+          .expect(200)
+          .then((res: any) => res.body);
+
+        expect(
+          resp[0].stack_stats.kibana.plugins.infraops.last_24_hours.hits.logs
+        ).to.be.greaterThan(0);
       });
 
       it('can change the log columns', async () => {

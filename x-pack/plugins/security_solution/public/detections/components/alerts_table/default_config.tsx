@@ -11,6 +11,8 @@ import ApolloClient from 'apollo-client';
 import { Dispatch } from 'redux';
 
 import { EuiText } from '@elastic/eui';
+import { RowRendererId } from '../../../../common/types/timeline';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 import {
@@ -36,8 +38,8 @@ import {
   SetEventsLoadingProps,
   UpdateTimelineLoading,
 } from './types';
-import { Ecs } from '../../../graphql/types';
-import { AddExceptionOnClick } from '../../../common/components/exceptions/add_exception_modal';
+import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
+import { AddExceptionModalBaseProps } from '../../../common/components/exceptions/add_exception_modal';
 import { getMappedNonEcsValue } from '../../../common/components/exceptions/helpers';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
@@ -78,6 +80,25 @@ export const buildAlertsRuleIdFilter = (ruleId: string): Filter[] => [
       },
     },
   },
+];
+
+export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] => [
+  ...(showBuildingBlockAlerts
+    ? []
+    : [
+        {
+          meta: {
+            alias: null,
+            negate: true,
+            disabled: false,
+            type: 'exists',
+            key: 'signal.rule.building_block_type',
+            value: 'exists',
+          },
+          // @ts-ignore TODO: Rework parent typings to support ExistsFilter[]
+          exists: { field: 'signal.rule.building_block_type' },
+        },
+      ]),
 ];
 
 export const alertsHeaders: ColumnHeaderOptions[] = [
@@ -162,7 +183,7 @@ export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
   columns: alertsHeaders,
   showCheckboxes: true,
-  showRowRenderers: false,
+  excludedRowRendererIds: Object.values(RowRendererId),
 };
 
 export const requiredFieldsForActions = [
@@ -174,6 +195,8 @@ export const requiredFieldsForActions = [
   'signal.rule.query',
   'signal.rule.to',
   'signal.rule.id',
+  'signal.original_event.kind',
+  'signal.original_event.module',
 
   // Endpoint exception fields
   'file.path',
@@ -181,6 +204,7 @@ export const requiredFieldsForActions = [
   'file.Ext.code_signature.trusted',
   'file.hash.sha1',
   'host.os.family',
+  'event.code',
 ];
 
 interface AlertActionArgs {
@@ -189,6 +213,7 @@ interface AlertActionArgs {
   createTimeline: CreateTimeline;
   dispatch: Dispatch;
   ecsRowData: Ecs;
+  nonEcsRowData: TimelineNonEcsData[];
   hasIndexWrite: boolean;
   onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
   onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
@@ -202,7 +227,7 @@ interface AlertActionArgs {
     alertData,
     ruleName,
     ruleId,
-  }: AddExceptionOnClick) => void;
+  }: AddExceptionModalBaseProps) => void;
 }
 
 export const getAlertActions = ({
@@ -211,6 +236,7 @@ export const getAlertActions = ({
   createTimeline,
   dispatch,
   ecsRowData,
+  nonEcsRowData,
   hasIndexWrite,
   onAlertStatusUpdateFailure,
   onAlertStatusUpdateSuccess,
@@ -281,6 +307,18 @@ export const getAlertActions = ({
     width: DEFAULT_ICON_BUTTON_WIDTH,
   };
 
+  const isEndpointAlert = () => {
+    const [module] = getMappedNonEcsValue({
+      data: nonEcsRowData,
+      fieldName: 'signal.original_event.module',
+    });
+    const [kind] = getMappedNonEcsValue({
+      data: nonEcsRowData,
+      fieldName: 'signal.original_event.kind',
+    });
+    return module === 'endpoint' && kind === 'alert';
+  };
+
   return [
     {
       ...getInvestigateInResolverAction({ dispatch, timelineId }),
@@ -292,11 +330,12 @@ export const getAlertActions = ({
       displayType: 'icon',
       iconType: 'timeline',
       id: 'sendAlertToTimeline',
-      onClick: ({ ecsData }: TimelineRowActionOnClick) =>
+      onClick: ({ ecsData, data }: TimelineRowActionOnClick) =>
         sendAlertToTimelineAction({
           apolloClient,
           createTimeline,
           ecsData,
+          nonEcsData: data,
           updateTimelineIsLoading,
         }),
       width: DEFAULT_ICON_BUTTON_WIDTH,
@@ -305,15 +344,16 @@ export const getAlertActions = ({
     ...(FILTER_OPEN !== status ? [openAlertActionComponent] : []),
     ...(FILTER_CLOSED !== status ? [closeAlertActionComponent] : []),
     ...(FILTER_IN_PROGRESS !== status ? [inProgressAlertActionComponent] : []),
-    // TODO: disable this option if the alert is not an Endpoint alert
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
-        const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
-        const ruleId = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
-        if (ruleId !== undefined && ruleId.length > 0) {
+        const [ruleName] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
+        const [ruleId] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        const ruleIndices = getMappedNonEcsValue({ data, fieldName: 'signal.rule.index' });
+        if (ruleId !== undefined) {
           openAddExceptionModal({
-            ruleName: ruleNameValue ? ruleNameValue[0] : '',
-            ruleId: ruleId[0],
+            ruleName: ruleName ?? '',
+            ruleId,
+            ruleIndices: ruleIndices.length > 0 ? ruleIndices : DEFAULT_INDEX_PATTERN,
             exceptionListType: 'endpoint',
             alertData: {
               ecsData,
@@ -323,7 +363,7 @@ export const getAlertActions = ({
         }
       },
       id: 'addEndpointException',
-      isActionDisabled: () => !canUserCRUD || !hasIndexWrite,
+      isActionDisabled: () => !canUserCRUD || !hasIndexWrite || !isEndpointAlert(),
       dataTestSubj: 'add-endpoint-exception-menu-item',
       ariaLabel: 'Add Endpoint Exception',
       content: <EuiText size="m">{i18n.ACTION_ADD_ENDPOINT_EXCEPTION}</EuiText>,
@@ -331,12 +371,14 @@ export const getAlertActions = ({
     },
     {
       onClick: ({ ecsData, data }: TimelineRowActionOnClick) => {
-        const ruleNameValue = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
-        const ruleId = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
-        if (ruleId !== undefined && ruleId.length > 0) {
+        const [ruleName] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.name' });
+        const [ruleId] = getMappedNonEcsValue({ data, fieldName: 'signal.rule.id' });
+        const ruleIndices = getMappedNonEcsValue({ data, fieldName: 'signal.rule.index' });
+        if (ruleId !== undefined) {
           openAddExceptionModal({
-            ruleName: ruleNameValue ? ruleNameValue[0] : '',
-            ruleId: ruleId[0],
+            ruleName: ruleName ?? '',
+            ruleId,
+            ruleIndices: ruleIndices.length > 0 ? ruleIndices : DEFAULT_INDEX_PATTERN,
             exceptionListType: 'detection',
             alertData: {
               ecsData,

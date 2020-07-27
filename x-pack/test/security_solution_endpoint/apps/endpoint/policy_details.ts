@@ -116,6 +116,52 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                   version: policyInfo.packageInfo.version,
                 },
               },
+              artifact_manifest: {
+                artifacts: {
+                  'endpoint-exceptionlist-linux-v1': {
+                    compression_algorithm: 'zlib',
+                    decoded_sha256:
+                      'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    decoded_size: 14,
+                    encoded_sha256:
+                      'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                    encoded_size: 22,
+                    encryption_algorithm: 'none',
+                    relative_url:
+                      '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  },
+                  'endpoint-exceptionlist-macos-v1': {
+                    compression_algorithm: 'zlib',
+                    decoded_sha256:
+                      'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    decoded_size: 14,
+                    encoded_sha256:
+                      'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                    encoded_size: 22,
+                    encryption_algorithm: 'none',
+                    relative_url:
+                      '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  },
+                  'endpoint-exceptionlist-windows-v1': {
+                    compression_algorithm: 'zlib',
+                    decoded_sha256:
+                      'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                    decoded_size: 14,
+                    encoded_sha256:
+                      'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
+                    encoded_size: 22,
+                    encryption_algorithm: 'none',
+                    relative_url:
+                      '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+                  },
+                },
+                // The manifest version could have changed when the Policy was updated because the
+                // policy details page ensures that a save action applies the udpated policy on top
+                // of the latest Package Config. So we just ignore the check against this value by
+                // forcing it to be the same as the value returned in the full agent config.
+                manifest_version: agentFullConfig.inputs[0].artifact_manifest.manifest_version,
+                schema_version: 'v1',
+              },
               policy: {
                 linux: {
                   events: { file: false, network: true, process: true },
@@ -153,7 +199,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             },
           },
           revision: 3,
-          settings: {
+          agent: {
             monitoring: {
               enabled: false,
               logs: false,

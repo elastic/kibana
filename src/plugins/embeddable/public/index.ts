@@ -28,6 +28,7 @@ export {
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
+  AttributeService,
   ChartActionContext,
   Container,
   ContainerInput,

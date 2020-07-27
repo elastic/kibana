@@ -61,7 +61,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const policyStatus = useHostSelector(
     policyResponseStatus
   ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
-  const { formatUrl } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
 
   const detailsResultsUpper = useMemo(() => {
     return [
@@ -106,7 +106,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     path: agentDetailsWithFlyoutPath,
     state: {
       onDoneNavigateTo: [
-        'securitySolution:management',
+        'securitySolution:administration',
         {
           path: getHostDetailsPath({ name: 'hostDetails', selected_host: details.host.id }),
         },

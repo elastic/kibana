@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
@@ -132,7 +133,7 @@ describe('DocumentMigrator', () => {
         name: 'user',
         migrations: {
           '1.2.3': (doc) => {
-            _.set(doc, 'attributes.name', 'Mike');
+            set(doc, 'attributes.name', 'Mike');
             return doc;
           },
         },
@@ -639,7 +640,7 @@ describe('DocumentMigrator', () => {
       typeRegistry: createRegistry({
         name: 'aaa',
         migrations: {
-          '2.3.4': (d) => _.set(d, 'attributes.counter', 42),
+          '2.3.4': (d) => set(d, 'attributes.counter', 42),
         },
       }),
       validateDoc: (d) => {
@@ -657,12 +658,12 @@ describe('DocumentMigrator', () => {
 
 function renameAttr(path: string, newPath: string) {
   return (doc: SavedObjectUnsanitizedDoc) =>
-    _.omit(_.set(doc, newPath, _.get(doc, path)) as {}, path) as SavedObjectUnsanitizedDoc;
+    _.omit(set(doc, newPath, _.get(doc, path)) as {}, path) as SavedObjectUnsanitizedDoc;
 }
 
 function setAttr(path: string, value: any) {
   return (doc: SavedObjectUnsanitizedDoc) =>
-    _.set(
+    set(
       doc,
       path,
       _.isFunction(value) ? value(_.get(doc, path)) : value

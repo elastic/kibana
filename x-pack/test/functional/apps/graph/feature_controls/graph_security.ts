@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.contain('Graph');
+        expect(navLinks.map((link) => link.text)).to.eql(['Graph', 'Stack Management']);
       });
 
       it('landing page shows "Create new graph" button', async () => {
@@ -127,7 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Graph');
+        expect(navLinks).to.eql(['Graph', 'Stack Management']);
       });
 
       it('does not show a "Create new Workspace" button', async () => {

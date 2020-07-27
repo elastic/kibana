@@ -18,6 +18,7 @@ import {
   Type,
 } from '../../../common/schemas';
 import { transformListItemToElasticQuery } from '../utils';
+import { encodeHitVersion } from '../utils/encode_hit_version';
 
 export interface CreateListItemOptions {
   deserializer: DeserializerOrUndefined;
@@ -71,9 +72,11 @@ export const createListItem = async ({
       body,
       id,
       index: listItemIndex,
+      refresh: 'wait_for',
     });
 
     return {
+      _version: encodeHitVersion(response),
       id: response._id,
       type,
       value,

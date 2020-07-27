@@ -15,6 +15,7 @@ export const HostsTableQuery = gql`
     $filterQuery: String
     $defaultIndex: [String!]!
     $inspect: Boolean!
+    $docValueFields: [docValueFieldsInput!]!
   ) {
     source(id: $sourceId) {
       id
@@ -24,6 +25,7 @@ export const HostsTableQuery = gql`
         sort: $sort
         filterQuery: $filterQuery
         defaultIndex: $defaultIndex
+        docValueFields: $docValueFields
       ) {
         totalCount
         edges {

@@ -1,0 +1,39 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies attempts to create new local users. This is sometimes done by attackers to increase access to a system or domain.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "User Account Creation",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:(net.exe or net1.exe) and not process.parent.name:net.exe and process.args:(user and (/ad or /add))",
+  "risk_score": 21,
+  "rule_id": "1aa9181a-492b-4c01-8b16-fa0735786b2b",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1136",
+          "name": "Create Account",
+          "reference": "https://attack.mitre.org/techniques/T1136/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 3
+}

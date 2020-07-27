@@ -33,6 +33,7 @@ export interface ITpmBucket {
 export interface ITransactionChartData {
   tpmSeries: ITpmBucket[];
   responseTimeSeries: TimeSeries[];
+  mlJobId: string | undefined;
 }
 
 const INITIAL_DATA = {
@@ -62,6 +63,7 @@ export function getTransactionCharts(
   return {
     tpmSeries,
     responseTimeSeries,
+    mlJobId: anomalyTimeseries?.jobId,
   };
 }
 

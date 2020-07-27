@@ -10,8 +10,15 @@ export const CANCEL = i18n.translate('xpack.securitySolution.exceptions.editExce
   defaultMessage: 'Cancel',
 });
 
-export const EDIT_EXCEPTION = i18n.translate(
-  'xpack.securitySolution.exceptions.editException.editException',
+export const EDIT_EXCEPTION_SAVE_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.editExceptionSaveButton',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const EDIT_EXCEPTION_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.editExceptionTitle',
   {
     defaultMessage: 'Edit Exception',
   }
@@ -38,6 +45,14 @@ export const BULK_CLOSE_LABEL = i18n.translate(
   }
 );
 
+export const BULK_CLOSE_LABEL_DISABLED = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.bulkCloseLabel.disabled',
+  {
+    defaultMessage:
+      'Close all alerts that match attributes in this exception (Lists and non-ECS fields are not supported)',
+  }
+);
+
 export const ENDPOINT_QUARANTINE_TEXT = i18n.translate(
   'xpack.securitySolution.exceptions.editException.endpointQuarantineText',
   {
@@ -47,7 +62,7 @@ export const ENDPOINT_QUARANTINE_TEXT = i18n.translate(
 );
 
 export const EXCEPTION_BUILDER_INFO = i18n.translate(
-  'xpack.securitySolution.exceptions.addException.infoLabel',
+  'xpack.securitySolution.exceptions.editException.infoLabel',
   {
     defaultMessage: "Alerts are generated when the rule's conditions are met, except when:",
   }

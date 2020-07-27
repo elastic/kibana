@@ -302,6 +302,7 @@ test('set defaults for all missing optional fields', async () => {
     kibanaVersion: '7.0.0',
     optionalPlugins: [],
     requiredPlugins: [],
+    requiredBundles: [],
     server: true,
     ui: false,
   });
@@ -331,6 +332,7 @@ test('return all set optional fields as they are in manifest', async () => {
     version: 'some-version',
     kibanaVersion: '7.0.0',
     optionalPlugins: ['some-optional-plugin'],
+    requiredBundles: [],
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
     server: false,
     ui: true,
@@ -361,6 +363,7 @@ test('return manifest when plugin expected Kibana version matches actual version
     kibanaVersion: '7.0.0-alpha2',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
+    requiredBundles: [],
     server: true,
     ui: false,
   });
@@ -390,6 +393,7 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
     kibanaVersion: 'kibana',
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
+    requiredBundles: [],
     server: true,
     ui: true,
   });

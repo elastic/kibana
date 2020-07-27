@@ -352,9 +352,9 @@ describe('useFetchIndexPatterns', () => {
                     'auditbeat-*',
                     'endgame-*',
                     'filebeat-*',
+                    'logs-*',
                     'packetbeat-*',
                     'winlogbeat-*',
-                    'logs-*',
                   ],
                   name: 'event.end',
                   searchable: true,
@@ -369,11 +369,21 @@ describe('useFetchIndexPatterns', () => {
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
+            'logs-*',
             'packetbeat-*',
             'winlogbeat-*',
-            'logs-*',
           ],
           indicesExists: true,
+          docValueFields: [
+            {
+              field: '@timestamp',
+              format: 'date_time',
+            },
+            {
+              field: 'event.end',
+              format: 'date_time',
+            },
+          ],
           indexPatterns: {
             fields: [
               { name: '@timestamp', searchable: true, type: 'date', aggregatable: true },
@@ -418,7 +428,7 @@ describe('useFetchIndexPatterns', () => {
               { name: 'event.end', searchable: true, type: 'date', aggregatable: true },
             ],
             title:
-              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*,logs-*',
+              'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
           },
         },
         result.current[1],
@@ -441,6 +451,7 @@ describe('useFetchIndexPatterns', () => {
       expect(result.current).toEqual([
         {
           browserFields: {},
+          docValueFields: [],
           indexPatterns: {
             fields: [],
             title: '',
@@ -450,9 +461,9 @@ describe('useFetchIndexPatterns', () => {
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
+            'logs-*',
             'packetbeat-*',
             'winlogbeat-*',
-            'logs-*',
           ],
           indicesExists: false,
           isLoading: false,

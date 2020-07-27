@@ -33,6 +33,7 @@ describe('crete_list_item_bulk', () => {
         secondRecord,
       ],
       index: LIST_ITEM_INDEX,
+      refresh: 'wait_for',
     });
   });
 
@@ -70,6 +71,7 @@ describe('crete_list_item_bulk', () => {
         },
       ],
       index: '.items',
+      refresh: 'wait_for',
     });
   });
 });

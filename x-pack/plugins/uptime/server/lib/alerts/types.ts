@@ -5,7 +5,11 @@
  */
 
 import { AlertType } from '../../../../alerts/server';
-import { UptimeCoreSetup } from '../adapters';
+import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
 
-export type UptimeAlertTypeFactory = (server: UptimeCoreSetup, libs: UMServerLibs) => AlertType;
+export type UptimeAlertTypeFactory = (
+  server: UptimeCoreSetup,
+  libs: UMServerLibs,
+  plugins: UptimeCorePlugins
+) => AlertType;

@@ -37,13 +37,14 @@ describe('DataProviders', () => {
           <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
             <DataProviders
               browserFields={{}}
-              id="foo"
               data-test-subj="dataProviders-container"
               dataProviders={mockDataProviders}
+              timelineId="foo"
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
+              onToggleDataProviderType={jest.fn()}
             />
           </ManageGlobalTimeline>
         </TestProviders>
@@ -58,12 +59,13 @@ describe('DataProviders', () => {
         <TestProviders>
           <DataProviders
             browserFields={{}}
-            id="foo"
+            timelineId="foo"
             dataProviders={dataProviders}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
+            onToggleDataProviderType={jest.fn()}
           />
         </TestProviders>
       );
@@ -76,12 +78,13 @@ describe('DataProviders', () => {
         <TestProviders>
           <DataProviders
             browserFields={{}}
-            id="foo"
+            timelineId="foo"
             dataProviders={mockDataProviders}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
             onToggleDataProviderExcluded={jest.fn()}
+            onToggleDataProviderType={jest.fn()}
           />
         </TestProviders>
       );

@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const BREADCRUMB_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.detectionsBreadcrumbTitle',
+  {
+    defaultMessage: 'Detections',
+  }
+);
+
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.detectionsPageTitle',
   {
@@ -29,7 +36,7 @@ export const SIGNAL = i18n.translate('xpack.securitySolution.detectionEngine.sig
 });
 
 export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
-  defaultMessage: 'External alerts',
+  defaultMessage: 'Detection alerts',
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate(

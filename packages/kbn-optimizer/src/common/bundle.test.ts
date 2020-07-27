@@ -50,6 +50,7 @@ it('creates cache keys', () => {
       "spec": Object {
         "contextDir": "/foo/bar",
         "id": "bar",
+        "manifestPath": undefined,
         "outputDir": "/foo/bar/target",
         "publicDirNames": Array [
           "public",
@@ -85,6 +86,7 @@ it('parses bundles from JSON specs', () => {
         },
         "contextDir": "/foo/bar",
         "id": "bar",
+        "manifestPath": undefined,
         "outputDir": "/foo/bar/target",
         "publicDirNames": Array [
           "public",

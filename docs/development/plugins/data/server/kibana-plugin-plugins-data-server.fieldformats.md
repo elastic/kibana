@@ -13,7 +13,6 @@ fieldFormats: {
     BoolFormat: typeof BoolFormat;
     BytesFormat: typeof BytesFormat;
     ColorFormat: typeof ColorFormat;
-    DateNanosFormat: typeof DateNanosFormat;
     DurationFormat: typeof DurationFormat;
     IpFormat: typeof IpFormat;
     NumberFormat: typeof NumberFormat;

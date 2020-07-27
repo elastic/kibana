@@ -398,7 +398,7 @@ include::api.asciidoc[tag=using-the-APIs]
 [%collapsible%open]
 ======
 `version` :::
-  (required, string) Name of service.
+  (required, string) Version of service.
 
 `environment` :::
   (optional, string) Environment of service.
