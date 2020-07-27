@@ -8113,7 +8113,6 @@
     "xpack.ingestManager.createPackageConfig.StepSelectConfig.errorLoadingAgentConfigsTitle": "加载代理配置时出错",
     "xpack.ingestManager.createPackageConfig.StepSelectConfig.errorLoadingPackageTitle": "加载软件包信息时出错",
     "xpack.ingestManager.createPackageConfig.StepSelectConfig.errorLoadingSelectedAgentConfigTitle": "加载选定代理配置时出错",
-    "xpack.ingestManager.createPackageConfig.StepSelectConfig.filterAgentConfigsInputPlaceholder": "搜索代理配置",
     "xpack.ingestManager.createPackageConfig.stepSelectPackage.errorLoadingConfigTitle": "加载代理配置信息时出错",
     "xpack.ingestManager.createPackageConfig.stepSelectPackage.errorLoadingPackagesTitle": "加载集成时出错",
     "xpack.ingestManager.createPackageConfig.stepSelectPackage.errorLoadingSelectedPackageTitle": "加载选定集成时出错",
