@@ -1,7 +1,7 @@
 {
   "items": [
     {
-      "name": "GET /api",
+      "key": "GET /api",
       "sample": {
         "@timestamp": "2020-06-29T06:48:41.454Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -106,7 +106,7 @@
       "impact": 100
     },
     {
-      "name": "POST /api/orders",
+      "key": "POST /api/orders",
       "sample": {
         "@timestamp": "2020-06-29T06:48:39.953Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -216,7 +216,7 @@
       "impact": 12.686265169840583
     },
     {
-      "name": "GET /api/customers",
+      "key": "GET /api/customers",
       "sample": {
         "@timestamp": "2020-06-29T06:48:37.952Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -322,7 +322,7 @@
       "impact": 3.790160870423129
     },
     {
-      "name": "GET /log-message",
+      "key": "GET /log-message",
       "sample": {
         "@timestamp": "2020-06-29T06:48:28.944Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -428,7 +428,7 @@
       "impact": 2.875276331059301
     },
     {
-      "name": "GET /*",
+      "key": "GET /*",
       "sample": {
         "@timestamp": "2020-06-29T06:48:42.454Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -534,7 +534,7 @@
       "impact": 2.8716452680799467
     },
     {
-      "name": "GET /api/orders",
+      "key": "GET /api/orders",
       "sample": {
         "@timestamp": "2020-06-29T06:48:40.106Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -649,7 +649,7 @@
       "impact": 2.6645791239678345
     },
     {
-      "name": "GET /api/products",
+      "key": "GET /api/products",
       "sample": {
         "@timestamp": "2020-06-29T06:48:27.452Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -764,7 +764,7 @@
       "impact": 2.624924094061731
     },
     {
-      "name": "GET /api/products/:id",
+      "key": "GET /api/products/:id",
       "sample": {
         "@timestamp": "2020-06-29T06:48:24.977Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -870,7 +870,7 @@
       "impact": 2.3368756900811305
     },
     {
-      "name": "GET /api/types",
+      "key": "GET /api/types",
       "sample": {
         "@timestamp": "2020-06-29T06:48:26.443Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -976,7 +976,7 @@
       "impact": 2.3330057413794503
     },
     {
-      "name": "GET static file",
+      "key": "GET static file",
       "sample": {
         "@timestamp": "2020-06-29T06:48:40.953Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1077,7 +1077,7 @@
       "impact": 2.0901067389184496
     },
     {
-      "name": "GET /api/products/top",
+      "key": "GET /api/products/top",
       "sample": {
         "@timestamp": "2020-06-29T06:48:18.211Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1192,7 +1192,7 @@
       "impact": 1.9475397398343375
     },
     {
-      "name": "GET /api/stats",
+      "key": "GET /api/stats",
       "sample": {
         "@timestamp": "2020-06-29T06:48:39.451Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1298,7 +1298,7 @@
       "impact": 1.7905918202662048
     },
     {
-      "name": "GET /log-error",
+      "key": "GET /log-error",
       "sample": {
         "@timestamp": "2020-06-29T06:48:07.467Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1404,7 +1404,7 @@
       "impact": 1.466376117925459
     },
     {
-      "name": "POST /api",
+      "key": "POST /api",
       "sample": {
         "@timestamp": "2020-06-29T06:48:25.478Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1514,7 +1514,7 @@
       "impact": 0.7098250353192541
     },
     {
-      "name": "GET /api/types/:id",
+      "key": "GET /api/types/:id",
       "sample": {
         "@timestamp": "2020-06-29T06:48:12.972Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1620,7 +1620,7 @@
       "impact": 0.5354862351657939
     },
     {
-      "name": "GET /api/orders/:id",
+      "key": "GET /api/orders/:id",
       "sample": {
         "@timestamp": "2020-06-29T06:48:35.951Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1724,7 +1724,7 @@
       "impact": 0.43453312891085794
     },
     {
-      "name": "GET /api/products/:id/customers",
+      "key": "GET /api/products/:id/customers",
       "sample": {
         "@timestamp": "2020-06-29T06:48:41.956Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
@@ -1830,7 +1830,7 @@
       "impact": 0.20830834986820673
     },
     {
-      "name": "GET /throw-error",
+      "key": "GET /throw-error",
       "sample": {
         "@timestamp": "2020-06-29T06:48:42.954Z",
         "agent": { "name": "nodejs", "version": "3.6.1" },
