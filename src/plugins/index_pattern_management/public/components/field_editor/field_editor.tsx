@@ -246,18 +246,20 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onFormatChange = (formatId: string, params?: any) => {
-    const { spec, format, fieldTypeFormats } = this.state;
+    const { spec, fieldTypeFormats } = this.state;
     const { uiSettings, data } = this.context.services;
 
     const FieldFormat = data.fieldFormats.getType(
       formatId || (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.id
     ) as FieldFormatInstanceType;
 
-    spec.format = new FieldFormat(params, (key) => uiSettings.get(key));
+    const newFormat = new FieldFormat(params, (key) => uiSettings.get(key));
+    spec.format = newFormat;
 
     this.setState({
       fieldFormatId: FieldFormat.id,
-      fieldFormatParams: format.params(),
+      fieldFormatParams: newFormat.params(),
+      format: newFormat,
     });
   };
 

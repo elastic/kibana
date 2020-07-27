@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPatternField, IIndexPattern } from 'src/plugins/data/public';
+import { IndexPatternField, IIndexPattern, IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 
 jest.mock('@elastic/eui', () => ({
@@ -41,6 +41,19 @@ const helpers = {
   getFieldInfo: () => [],
 };
 
+const indexPattern = ({
+  getNonScriptedFields: () => fields,
+} as unknown) as IIndexPattern;
+
+const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
+  return new IndexPatternField(
+    indexPattern as IndexPattern,
+    (spec as unknown) as IndexPatternField['spec'],
+    spec.displayName as string,
+    () => {}
+  );
+};
+
 const fields = [
   {
     name: 'Elastic',
@@ -50,11 +63,7 @@ const fields = [
   },
   { name: 'timestamp', displayName: 'timestamp', type: 'date' },
   { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
-] as IndexPatternField[];
-
-const indexPattern = ({
-  getNonScriptedFields: () => fields,
-} as unknown) as IIndexPattern;
+].map(mockFieldToIndexPatternField);
 
 describe('IndexedFieldsTable', () => {
   test('should render normally', async () => {
