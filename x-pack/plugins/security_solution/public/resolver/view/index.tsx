@@ -15,7 +15,7 @@ import { dataAccessLayerFactory } from '../data_access_layer/factory';
 import { ResolverWithoutProviders } from './resolver_without_providers';
 
 /**
- * The `Resolver` component to use. This sets up the DataAccessLayer provider. Use `ResolverWithoutStore` in tests or in other scenarios where you want to provide a different (or fake) data access layer.
+ * The `Resolver` component to use. This sets up the DataAccessLayer provider. Use `ResolverWithoutProviders` in tests or in other scenarios where you want to provide a different (or fake) data access layer.
  */
 export const Resolver = React.memo((props: ResolverProps) => {
   const context = useKibana<StartServices>();
