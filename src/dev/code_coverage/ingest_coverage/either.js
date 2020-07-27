@@ -20,11 +20,14 @@
 /* eslint new-cap: 0 */
 /* eslint no-unused-vars: 0 */
 
+import { pretty } from './utils';
+
 export const Right = (x) => ({
   chain: (f) => f(x),
   map: (f) => Right(f(x)),
   fold: (leftFn, rightFn) => rightFn(x),
   inspect: () => `Right(${x})`,
+  inspectPretty: () => `Right(${pretty(x)})`,
 });
 
 Right.of = function of(x) {
@@ -40,6 +43,7 @@ export const Left = (x) => ({
   map: (f) => Left(x),
   fold: (leftFn, rightFn) => leftFn(x),
   inspect: () => `Left(${x})`,
+  inspectPretty: () => `Left(${pretty(x)})`,
 });
 
 Left.of = function of(x) {
