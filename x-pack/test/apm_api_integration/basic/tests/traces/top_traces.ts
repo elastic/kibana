@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { sortBy, omit, map } from 'lodash';
+import { sortBy, omit } from 'lodash';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import expectTopTraces from './expectation/top_traces.expectation.json';
 
