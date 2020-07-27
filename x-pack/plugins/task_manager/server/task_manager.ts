@@ -456,7 +456,7 @@ export async function awaitTaskRunResult(
                 )
               );
             } else if (isTaskClaimEvent(taskEvent)) {
-              reject(
+              return reject(
                 map(
                   // if the error happened in the Claim phase - we try to provide better insight
                   // into why we failed to claim by getting the task's current lifecycle status
@@ -470,13 +470,21 @@ export async function awaitTaskRunResult(
                     ) {
                       return new Error(`Failed to run task "${taskId}" as it is currently running`);
                     }
-                    return error;
+                    return new Error(
+                      `Failed to run task "${taskId}" for unknown reason (Current Task Lifecycle is "${taskLifecycleStatus}")`
+                    );
                   },
-                  () => error
+                  (getLifecycleError: Error) =>
+                    new Error(
+                      `Failed to run task "${taskId}" and failed to get current Status:${[
+                        error,
+                        getLifecycleError,
+                      ].join('\n')}`
+                    )
                 )
               );
             }
-            return reject(error);
+            return reject(new Error(`Failed to run task "${taskId}": ${error}`));
           }
         );
       });
