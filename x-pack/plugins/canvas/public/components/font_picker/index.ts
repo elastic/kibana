@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ShapePickerPopover } from './shape_picker_popover';
+export { FontPicker } from './font_picker';

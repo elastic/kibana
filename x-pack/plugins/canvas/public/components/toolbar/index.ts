@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ShapePickerPopover } from './shape_picker_popover';
+export { Toolbar } from './toolbar';
+export { Toolbar as ToolbarComponent } from './toolbar.component';
