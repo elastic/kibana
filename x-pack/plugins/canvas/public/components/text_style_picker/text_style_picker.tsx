@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { FontValue } from 'src/plugins/expressions';
 import { ComponentStrings } from '../../../i18n';
 import { FontPicker } from '../font_picker';
 import { ColorPickerPopover } from '../color_picker_popover';
@@ -14,16 +15,31 @@ import { fontSizes } from './font_sizes';
 
 const { TextStylePicker: strings } = ComponentStrings;
 
-export const TextStylePicker = ({
-  family,
-  size,
-  align,
+interface BaseProps {
+  family?: FontValue;
+  size?: number;
+  align?: 'left' | 'center' | 'right';
+  color?: string;
+  weight?: 'bold' | 'normal';
+  underline?: boolean;
+  italic?: boolean;
+}
+
+interface Props extends BaseProps {
+  colors?: string[];
+  onChange: (props: BaseProps) => void;
+}
+
+export const TextStylePicker: FC<Props> = ({
+  align = 'left',
   color,
-  weight,
-  underline,
-  italic,
-  onChange,
   colors,
+  family = '',
+  italic = false,
+  onChange,
+  size = 14,
+  underline = false,
+  weight = 'normal',
 }) => {
   const alignmentButtons = [
     {
@@ -61,7 +77,7 @@ export const TextStylePicker = ({
     },
   ];
 
-  const stylesSelectedMap = {
+  const stylesSelectedMap: Record<string, boolean> = {
     ['bold']: weight === 'bold',
     ['italic']: Boolean(italic),
     ['underline']: Boolean(underline),
@@ -72,7 +88,7 @@ export const TextStylePicker = ({
     fontSizes.sort((a, b) => a - b);
   }
 
-  const doChange = (propName, value) => {
+  const doChange = (propName: string, value: string | boolean | number) => {
     onChange({
       family,
       size,
@@ -85,9 +101,9 @@ export const TextStylePicker = ({
     });
   };
 
-  const onAlignmentChange = (optionId) => doChange('align', optionId);
+  const onAlignmentChange = (optionId: string) => doChange('align', optionId);
 
-  const onStyleChange = (optionId) => {
+  const onStyleChange = (optionId: string) => {
     let prop;
     let value;
 
@@ -113,7 +129,7 @@ export const TextStylePicker = ({
             compressed
             value={size}
             onChange={(e) => doChange('size', Number(e.target.value))}
-            options={fontSizes.map((size) => ({ text: String(size), value: size }))}
+            options={fontSizes.map((fontSize) => ({ text: String(fontSize), value: fontSize }))}
             prepend="Size"
           />
         </EuiFlexItem>
