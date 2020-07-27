@@ -47,45 +47,53 @@ async function renderTooltipAnchor({
 }
 
 describe('MissingJobsAlert', () => {
-  it('when no jobs exists - it should show warning', async () => {
-    const { toolTipText, toolTipAnchor } = await renderTooltipAnchor({
-      jobs: [],
-    });
+  describe('when no jobs exist', () => {
+    it('shows a warning', async () => {
+      const { toolTipText, toolTipAnchor } = await renderTooltipAnchor({
+        jobs: [],
+      });
 
-    expect(toolTipAnchor).toBeInTheDocument();
-    expect(toolTipText).toBe(
-      'Anomaly detection is not yet enabled. Click to continue setup.'
-    );
+      expect(toolTipAnchor).toBeInTheDocument();
+      expect(toolTipText).toBe(
+        'Anomaly detection is not yet enabled. Click to continue setup.'
+      );
+    });
   });
 
-  it('when no jobs exists for the selected environment - it should show warning', async () => {
-    const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
-      jobs: [{ environment: 'production', job_id: 'my_job_id' }],
-      environment: 'staging',
-    });
+  describe('when no jobs exists for the selected environment', () => {
+    it('shows a warning', async () => {
+      const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
+        jobs: [{ environment: 'production', job_id: 'my_job_id' }],
+        environment: 'staging',
+      });
 
-    expect(toolTipAnchor).toBeInTheDocument();
-    expect(toolTipText).toBe(
-      'Anomaly detection is not yet enabled for the environment "staging". Click to continue setup.'
-    );
+      expect(toolTipAnchor).toBeInTheDocument();
+      expect(toolTipText).toBe(
+        'Anomaly detection is not yet enabled for the environment "staging". Click to continue setup.'
+      );
+    });
   });
 
-  it('when a job exists for the selected environment - it should not show warning', async () => {
-    const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
-      jobs: [{ environment: 'production', job_id: 'my_job_id' }],
-      environment: 'production',
-    });
+  describe('when a job exists for the selected environment', () => {
+    it('does not show a warning', async () => {
+      const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
+        jobs: [{ environment: 'production', job_id: 'my_job_id' }],
+        environment: 'production',
+      });
 
-    expect(toolTipAnchor).not.toBeInTheDocument();
-    expect(toolTipText).toBe(undefined);
+      expect(toolTipAnchor).not.toBeInTheDocument();
+      expect(toolTipText).toBe(undefined);
+    });
   });
 
-  it('when at least one job exists and no environment is selected - it should not show warning', async () => {
-    const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
-      jobs: [{ environment: 'production', job_id: 'my_job_id' }],
-    });
+  describe('when at least one job exists and no environment is selected', () => {
+    it('does not show a warning', async () => {
+      const { toolTipAnchor, toolTipText } = await renderTooltipAnchor({
+        jobs: [{ environment: 'production', job_id: 'my_job_id' }],
+      });
 
-    expect(toolTipAnchor).not.toBeInTheDocument();
-    expect(toolTipText).toBe(undefined);
+      expect(toolTipAnchor).not.toBeInTheDocument();
+      expect(toolTipText).toBe(undefined);
+    });
   });
 });
