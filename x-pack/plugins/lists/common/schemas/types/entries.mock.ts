@@ -14,6 +14,7 @@ import { getEntryNestedMock } from './entry_nested.mock';
 export const getListAndNonListEntriesArrayMock = (): EntriesArray => [
   { ...getEntryMatchMock() },
   { ...getEntryMatchAnyMock() },
+  { ...getEntryListMock() },
   { ...getEntryExistsMock() },
   { ...getEntryNestedMock() },
 ];
