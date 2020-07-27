@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiTextColor } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 
 import { LocalizedDateTooltip } from '../../../common/components/localized_date_tooltip';
@@ -26,8 +26,9 @@ const UserActionTimestampComponent = ({ createdAt, updatedAt }: UserActionAvatar
         />
       </LocalizedDateTooltip>
       {updatedAt && (
-        <EuiText size="s" color="subdued">
-          {'('}
+        <EuiTextColor color="subdued">
+          {/* be careful of the extra space at the beginning of the parenthesis */}
+          {' ('}
           {i18n.EDITED_FIELD}{' '}
           <LocalizedDateTooltip date={new Date(updatedAt)}>
             <FormattedRelative
@@ -36,7 +37,7 @@ const UserActionTimestampComponent = ({ createdAt, updatedAt }: UserActionAvatar
             />
           </LocalizedDateTooltip>
           {')'}
-        </EuiText>
+        </EuiTextColor>
       )}
     </>
   );
