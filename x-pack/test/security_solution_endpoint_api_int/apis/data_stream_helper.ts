@@ -10,7 +10,7 @@ import {
   eventsIndexPattern,
   alertsIndexPattern,
   policyIndexPattern,
-} from '../../../../plugins/security_solution/common/endpoint/constants';
+} from '../../../plugins/security_solution/common/endpoint/constants';
 
 export async function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
   const client = getService('es');
