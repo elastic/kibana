@@ -40,7 +40,7 @@ import {
   esQuery,
   IIndexPattern,
 } from '../../../../../src/plugins/data/public';
-import { FieldButton, FieldButtonProps } from '../../../../../src/plugins/kibana_react/public';
+import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';

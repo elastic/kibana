@@ -185,7 +185,7 @@ export function DiscoverField({
             onClick={() => {
               togglePopover();
             }}
-            onKeyPress={(event) => {
+            onKeyPress={(event: any) => {
               if (event.key === 'ENTER') {
                 togglePopover();
               }

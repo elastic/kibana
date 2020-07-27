@@ -28,6 +28,7 @@ export interface FieldButtonProps {
   fieldAction?: ReactNode;
   isDraggable?: boolean;
   size?: ButtonSize;
+  className?: string;
 }
 
 /**
