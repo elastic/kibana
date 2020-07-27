@@ -253,20 +253,23 @@ export class DashboardAppController {
       navActions[TopNavIds.VISUALIZE]();
     };
 
+    function getDashboardIndexPatterns(container: DashboardContainer): IndexPattern[] {
+      let panelIndexPatterns: IndexPattern[] = [];
+      Object.values(container.getChildIds()).forEach((id) => {
+        const embeddableInstance = container.getChild(id);
+        if (isErrorEmbeddable(embeddableInstance)) return;
+        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
+        if (!embeddableIndexPatterns) return;
+        panelIndexPatterns.push(...embeddableIndexPatterns);
+      });
+      panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+      return panelIndexPatterns;
+    }
+
     const updateIndexPatternsOperator = pipe(
       filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
-      map((container: DashboardContainer) => {
-        let panelIndexPatterns: IndexPattern[] = [];
-        Object.values(container!.getChildIds()).forEach((id) => {
-          const embeddableInstance = container!.getChild(id);
-          if (isErrorEmbeddable(embeddableInstance)) return;
-          const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
-          if (!embeddableIndexPatterns) return;
-          panelIndexPatterns.push(...embeddableIndexPatterns);
-        });
-        panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
-        return panelIndexPatterns;
-      }),
+      map(getDashboardIndexPatterns),
+      // using switchMap for previous task cancellation
       switchMap((panelIndexPatterns: IndexPattern[]) => {
         return new Observable((observer) => {
           if (panelIndexPatterns && panelIndexPatterns.length > 0) {
@@ -281,6 +284,7 @@ export class DashboardAppController {
               $scope.$evalAsync(() => {
                 if (observer.closed) return;
                 $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
+                observer.complete();
               });
             });
           }
