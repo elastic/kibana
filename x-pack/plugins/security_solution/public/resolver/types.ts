@@ -500,11 +500,22 @@ export interface ResolverProps {
   resolverComponentInstanceID: string;
 }
 
+/**
+ * Used by `SpyMiddleware`.
+ */
 export interface SpyMiddlewareStateActionPair {
+  /** An action dispatched, `state` is the state that the reducer returned when handling this action.
+   */
   action: ResolverAction;
+  /**
+   * A resolver state that was returned by the reducer when handling `action`.
+   */
   state: ResolverState;
 }
 
+/**
+ * A wrapper object that has a middleware along with an async generator that returns the actions dispatched to the store (along with state.)
+ */
 export interface SpyMiddleware {
   /**
    * A middleware to use with `applyMiddleware`.
