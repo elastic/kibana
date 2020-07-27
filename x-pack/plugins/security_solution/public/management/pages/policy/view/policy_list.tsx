@@ -322,9 +322,8 @@ export const PolicyList = React.memo(() => {
         }),
         render(pkg: Immutable<PackageData>) {
           return i18n.translate('xpack.securitySolution.endpoint.policyList.versionField', {
-            defaultMessage: '{title} v{version}',
+            defaultMessage: 'v{version}',
             values: {
-              title: pkg.title,
               version: pkg.version,
             },
           });

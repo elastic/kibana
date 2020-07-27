@@ -26,7 +26,7 @@ const Item = styled(EuiFlexItem)`
   }
 `;
 
-const Summary = ({ items }: Props) => {
+function Summary({ items }: Props) {
   const filteredItems = items.filter(Boolean) as React.ReactElement[];
 
   return (
@@ -38,6 +38,6 @@ const Summary = ({ items }: Props) => {
       ))}
     </EuiFlexGrid>
   );
-};
+}
 
 export { Summary };

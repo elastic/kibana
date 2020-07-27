@@ -85,5 +85,100 @@ describe('Header', () => {
 
       expect(wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').exists()).toEqual(true);
     });
+
+    test('it renders the unauthorized call out with correct icon', () => {
+      const testProps = {
+        ...props,
+        filterManager: new FilterManager(mockUiSettingsForFilterManager),
+        showCallOutUnauthorizedMsg: true,
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <TimelineHeader {...testProps} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').first().prop('iconType')
+      ).toEqual('alert');
+    });
+
+    test('it renders the unauthorized call out with correct message', () => {
+      const testProps = {
+        ...props,
+        filterManager: new FilterManager(mockUiSettingsForFilterManager),
+        showCallOutUnauthorizedMsg: true,
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <TimelineHeader {...testProps} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').first().prop('title')
+      ).toEqual(
+        'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.'
+      );
+    });
+
+    test('it renders the immutable timeline call out providers', () => {
+      const testProps = {
+        ...props,
+        filterManager: new FilterManager(mockUiSettingsForFilterManager),
+        showCallOutUnauthorizedMsg: false,
+        status: TimelineStatus.immutable,
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <TimelineHeader {...testProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="timelineImmutableCallOut"]').exists()).toEqual(true);
+    });
+
+    test('it renders the immutable timeline call out with correct icon', () => {
+      const testProps = {
+        ...props,
+        filterManager: new FilterManager(mockUiSettingsForFilterManager),
+        showCallOutUnauthorizedMsg: false,
+        status: TimelineStatus.immutable,
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <TimelineHeader {...testProps} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timelineImmutableCallOut"]').first().prop('iconType')
+      ).toEqual('alert');
+    });
+
+    test('it renders the immutable timeline call out with correct message', () => {
+      const testProps = {
+        ...props,
+        filterManager: new FilterManager(mockUiSettingsForFilterManager),
+        showCallOutUnauthorizedMsg: false,
+        status: TimelineStatus.immutable,
+      };
+
+      const wrapper = mount(
+        <TestProviders>
+          <TimelineHeader {...testProps} />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="timelineImmutableCallOut"]').first().prop('title')
+      ).toEqual(
+        'This timeline is immutable, therefore not allowed to save it within the security application, though you may continue to use the timeline to search and filter security events'
+      );
+    });
   });
 });
