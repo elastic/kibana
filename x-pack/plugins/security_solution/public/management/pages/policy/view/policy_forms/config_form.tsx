@@ -34,17 +34,10 @@ export const ConfigForm: React.FC<{
    */
   supportedOss: React.ReactNode;
   children: React.ReactNode;
-  /**
-   * A description for the component.
-   */
-  description: string;
-  /**
-   * The `data-test-subj` attribute to append to a certain child element.
-   */
   dataTestSubj: string;
   /** React Node to be put on the right corner of the card */
   rightCorner: React.ReactNode;
-}> = React.memo(({ type, supportedOss, children, dataTestSubj, rightCorner, description }) => {
+}> = React.memo(({ type, supportedOss, children, dataTestSubj, rightCorner }) => {
   const typeTitle = useMemo(() => {
     return (
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
@@ -85,12 +78,7 @@ export const ConfigForm: React.FC<{
 
   return (
     <PolicyDetailCard>
-      <EuiCard
-        description={description}
-        data-test-subj={dataTestSubj}
-        textAlign="left"
-        title={typeTitle}
-      >
+      <EuiCard description data-test-subj={dataTestSubj} textAlign="left" title={typeTitle}>
         <EuiHorizontalRule margin="m" />
         {children}
       </EuiCard>

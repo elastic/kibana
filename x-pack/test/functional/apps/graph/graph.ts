@@ -13,8 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/53749
-  describe.skip('graph', function () {
+  describe('graph', function () {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('load graph/secrepo data');
@@ -132,14 +131,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await buildGraph();
       const { edges } = await PageObjects.graph.getGraphObjects();
 
-      const blogAdminBlogEdge = edges.find(
+      await PageObjects.graph.isolateEdge('test', '/test/wp-admin/');
+
+      await PageObjects.graph.stopLayout();
+      await PageObjects.common.sleep(1000);
+      const testTestWpAdminBlogEdge = edges.find(
         ({ sourceNode, targetNode }) =>
-          sourceNode.label === '/blog/wp-admin/' && targetNode.label === 'blog'
+          targetNode.label === '/test/wp-admin/' && sourceNode.label === 'test'
       )!;
-
-      await PageObjects.graph.isolateEdge(blogAdminBlogEdge);
-
-      await PageObjects.graph.clickEdge(blogAdminBlogEdge);
+      await testTestWpAdminBlogEdge.element.click();
+      await PageObjects.common.sleep(1000);
+      await PageObjects.graph.startLayout();
 
       const vennTerm1 = await PageObjects.graph.getVennTerm1();
       log.debug('vennTerm1 = ' + vennTerm1);
@@ -156,11 +158,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const smallVennTerm2 = await PageObjects.graph.getSmallVennTerm2();
       log.debug('smallVennTerm2 = ' + smallVennTerm2);
 
-      expect(vennTerm1).to.be('/blog/wp-admin/');
-      expect(vennTerm2).to.be('blog');
-      expect(smallVennTerm1).to.be('5');
-      expect(smallVennTerm12).to.be(' (5) ');
-      expect(smallVennTerm2).to.be('8');
+      expect(vennTerm1).to.be('/test/wp-admin/');
+      expect(vennTerm2).to.be('test');
+      expect(smallVennTerm1).to.be('4');
+      expect(smallVennTerm12).to.be(' (4) ');
+      expect(smallVennTerm2).to.be('4');
     });
 
     it('should delete graph', async function () {
