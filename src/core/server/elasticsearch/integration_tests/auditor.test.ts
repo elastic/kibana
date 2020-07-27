@@ -24,7 +24,7 @@ import {
 } from '../../../../test_utils/kbn_server';
 import { httpServerMock } from '../../http/http_server.mocks';
 
-describe('Elasticsearch', () => {
+describe('Elasticsearch integration with Auditor', () => {
   let servers: TestUtils;
   let esServer: TestElasticsearchUtils;
   let root: ReturnType<typeof createRootWithCorePlugins>;
@@ -48,7 +48,7 @@ describe('Elasticsearch', () => {
     await esServer.stop();
   });
 
-  describe('Auditor', () => {
+  describe('Legacy client', () => {
     it('logs elasticsearch requests done on behalf on the current & internal user', async () => {
       const internalSetup = await root.setup();
       const auditor = { add: jest.fn(), withAuditScope: jest.fn() };
