@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { InternalCoreStart } from '../../internal_types';
 import {
   createRootWithCorePlugins,
   createTestServers,
@@ -28,50 +29,115 @@ describe('Elasticsearch integration with Auditor', () => {
   let servers: TestUtils;
   let esServer: TestElasticsearchUtils;
   let root: ReturnType<typeof createRootWithCorePlugins>;
+  let internalStart: InternalCoreStart;
+  const auditor = { add: jest.fn(), withAuditScope: jest.fn() };
+  const auditorFactory = jest.fn().mockReturnValue(auditor);
 
   beforeAll(async () => {
     servers = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
     });
     esServer = await servers.startES();
-  });
-
-  beforeEach(async () => {
     root = createRootWithCorePlugins();
-  });
+    const internalSetup = await root.setup();
 
-  afterEach(async () => {
-    await root.shutdown();
+    internalSetup.auditTrail.register({ asScoped: auditorFactory });
+    internalStart = await root.start();
   });
 
   afterAll(async () => {
+    await root.shutdown();
     await esServer.stop();
   });
 
-  describe('Legacy client', () => {
-    it('logs elasticsearch requests done on behalf on the current & internal user', async () => {
-      const internalSetup = await root.setup();
-      const auditor = { add: jest.fn(), withAuditScope: jest.fn() };
-      const auditorFactory = jest.fn().mockReturnValueOnce(auditor);
+  afterEach(() => {
+    auditor.add.mockClear();
+    auditorFactory.mockClear();
+  });
 
-      internalSetup.auditTrail.register({ asScoped: auditorFactory });
-      const internalStart = await root.start();
+  describe('Legacy', () => {
+    describe('client', () => {
+      it('do not logs requests performed with un-scoped client', async () => {
+        await internalStart.elasticsearch.legacy.client.callAsInternalUser('ping');
+        expect(auditorFactory).toHaveBeenCalledTimes(0);
+        expect(auditor.add).toHaveBeenCalledTimes(0);
+      });
+
+      it('ScopedClusterClient.callAsInternalUser() writes into auditor', async () => {
+        const client = internalStart.elasticsearch.legacy.client.asScoped(
+          httpServerMock.createKibanaRequest()
+        );
+
+        await client.callAsInternalUser('ping');
+        expect(auditor.add).toHaveBeenCalledTimes(1);
+        expect(auditor.add).toHaveBeenCalledWith({
+          message: 'ping',
+          type: 'legacy.elasticsearch.call.internalUser',
+        });
+      });
+
+      it('ScopedClusterClient.callAsCurrentUser() writes into auditor', async () => {
+        const client = internalStart.elasticsearch.legacy.client.asScoped(
+          httpServerMock.createKibanaRequest()
+        );
+
+        await client.callAsCurrentUser('ping');
+        expect(auditor.add).toHaveBeenCalledTimes(1);
+        expect(auditor.add).toHaveBeenCalledWith({
+          message: 'ping',
+          type: 'legacy.elasticsearch.call.currentUser',
+        });
+      });
+    });
+
+    describe('custom client', () => {
+      it('do not logs requests performed with un-scoped client', async () => {
+        const customClient = internalStart.elasticsearch.legacy.createClient('custom');
+
+        await customClient.callAsInternalUser('ping');
+        expect(auditorFactory).toHaveBeenCalledTimes(0);
+        expect(auditor.add).toHaveBeenCalledTimes(0);
+      });
+
+      it('ScopedClusterClient.callAsInternalUser() writes into auditor', async () => {
+        const customClient = internalStart.elasticsearch.legacy.createClient('custom');
+        const client = customClient.asScoped(httpServerMock.createKibanaRequest());
+
+        await client.callAsInternalUser('ping');
+        expect(auditor.add).toHaveBeenCalledTimes(1);
+        expect(auditor.add).toHaveBeenCalledWith({
+          message: 'ping',
+          type: 'legacy.elasticsearch.call.internalUser',
+        });
+      });
+
+      it('ScopedClusterClient.callAsCurrentUser() writes into auditor', async () => {
+        const customClient = internalStart.elasticsearch.legacy.createClient('custom');
+        const client = customClient.asScoped(httpServerMock.createKibanaRequest());
+
+        await client.callAsCurrentUser('ping');
+        expect(auditor.add).toHaveBeenCalledTimes(1);
+        expect(auditor.add).toHaveBeenCalledWith({
+          message: 'ping',
+          type: 'legacy.elasticsearch.call.currentUser',
+        });
+      });
+    });
+  });
+
+  describe('client', () => {
+    it('do not logs requests performed with un-scoped client', async () => {
+      await internalStart.elasticsearch.client.asInternalUser.ping();
+      expect(auditorFactory).toHaveBeenCalledTimes(0);
+      expect(auditor.add).toHaveBeenCalledTimes(0);
+    });
+
+    it('ScopedClusterClient.asInternalUser writes into auditor', async () => {
       const client = internalStart.elasticsearch.client.asScoped(
         httpServerMock.createKibanaRequest()
       );
-      expect(auditorFactory).toHaveBeenCalledTimes(1);
-      expect(auditor.add).toHaveBeenCalledTimes(0);
 
-      await client.asCurrentUser.ping();
-      expect(auditor.add).toHaveBeenCalledTimes(1);
-      expect(auditor.add).toHaveBeenCalledWith({
-        message: 'HEAD /',
-        type: 'elasticsearch.call.currentUser',
-      });
-
-      auditor.add.mockReset();
       await client.asInternalUser.ping();
-
       expect(auditor.add).toHaveBeenCalledTimes(1);
       expect(auditor.add).toHaveBeenCalledWith({
         message: 'HEAD /',
@@ -79,62 +145,51 @@ describe('Elasticsearch integration with Auditor', () => {
       });
     });
 
-    it('ScopedClusterClient.asInternalUser() writes into auditor', async () => {
-      const internalSetup = await root.setup();
-      const firstAuditor = { add: jest.fn(), withAuditScope: jest.fn() };
-      const secondAuditor = { add: jest.fn(), withAuditScope: jest.fn() };
-      const auditorFactory = jest
-        .fn()
-        .mockReturnValueOnce(firstAuditor)
-        .mockReturnValueOnce(secondAuditor);
-
-      internalSetup.auditTrail.register({ asScoped: auditorFactory });
-      const internalStart = await root.start();
-      const firstClient = internalStart.elasticsearch.client.asScoped(
+    it('ScopedClusterClient.asCurrentUser writes into auditor', async () => {
+      const client = internalStart.elasticsearch.client.asScoped(
         httpServerMock.createKibanaRequest()
       );
 
-      const secondClient = internalStart.elasticsearch.client.asScoped(
-        httpServerMock.createKibanaRequest()
-      );
+      await client.asCurrentUser.ping();
+      expect(auditor.add).toHaveBeenCalledTimes(1);
+      expect(auditor.add).toHaveBeenCalledWith({
+        message: 'HEAD /',
+        type: 'elasticsearch.call.currentUser',
+      });
+    });
+  });
 
-      await firstClient.asInternalUser.ping();
-      expect(firstAuditor.add).toHaveBeenCalledTimes(1);
-      expect(secondAuditor.add).toHaveBeenCalledTimes(0);
+  describe('custom client', () => {
+    it('do not logs requests performed with un-scoped client', async () => {
+      const customClient = internalStart.elasticsearch.createClient('custom');
 
-      await secondClient.asInternalUser.ping();
+      await customClient.asInternalUser.ping();
+      expect(auditorFactory).toHaveBeenCalledTimes(0);
+      expect(auditor.add).toHaveBeenCalledTimes(0);
+    });
 
-      expect(firstAuditor.add).toHaveBeenCalledTimes(1);
-      expect(secondAuditor.add).toHaveBeenCalledTimes(1);
+    it('ScopedClusterClient writes into auditor', async () => {
+      const customClient = internalStart.elasticsearch.createClient('custom');
+      const client = customClient.asScoped(httpServerMock.createKibanaRequest());
+
+      await client.asInternalUser.ping();
+      expect(auditor.add).toHaveBeenCalledTimes(1);
+      expect(auditor.add).toHaveBeenCalledWith({
+        message: 'HEAD /',
+        type: 'elasticsearch.call.internalUser',
+      });
     });
 
     it('ScopedClusterClient.asCurrentUser() writes into auditor', async () => {
-      const internalSetup = await root.setup();
-      const firstAuditor = { add: jest.fn(), withAuditScope: jest.fn() };
-      const secondAuditor = { add: jest.fn(), withAuditScope: jest.fn() };
-      const auditorFactory = jest
-        .fn()
-        .mockReturnValueOnce(firstAuditor)
-        .mockReturnValueOnce(secondAuditor);
+      const customClient = internalStart.elasticsearch.createClient('custom');
+      const client = customClient.asScoped(httpServerMock.createKibanaRequest());
 
-      internalSetup.auditTrail.register({ asScoped: auditorFactory });
-      const internalStart = await root.start();
-      const firstClient = internalStart.elasticsearch.client.asScoped(
-        httpServerMock.createKibanaRequest()
-      );
-
-      const secondClient = internalStart.elasticsearch.client.asScoped(
-        httpServerMock.createKibanaRequest()
-      );
-
-      await firstClient.asCurrentUser.ping();
-      expect(firstAuditor.add).toHaveBeenCalledTimes(1);
-      expect(secondAuditor.add).toHaveBeenCalledTimes(0);
-
-      await secondClient.asCurrentUser.ping();
-
-      expect(firstAuditor.add).toHaveBeenCalledTimes(1);
-      expect(secondAuditor.add).toHaveBeenCalledTimes(1);
+      await client.asCurrentUser.ping();
+      expect(auditor.add).toHaveBeenCalledTimes(1);
+      expect(auditor.add).toHaveBeenCalledWith({
+        message: 'HEAD /',
+        type: 'elasticsearch.call.currentUser',
+      });
     });
   });
 });
