@@ -28,7 +28,7 @@ const dockerRegistryPort: string | undefined = process.env.INGEST_MANAGEMENT_PAC
  *
  * This variable will not and should not be used by CI. CI should always use the pinned docker image below.
  */
-const packageRegistryOverride: string | undefined = process.env.PACKAGE_REGISTRY_OVERRIDE;
+const packageRegistryOverride: string | undefined = process.env.PACKAGE_REGISTRY_URL_OVERRIDE;
 
 const defaultRegistryConfigPath = path.join(
   __dirname,

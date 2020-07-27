@@ -72,13 +72,13 @@ Make sure you're in the Kibana root directory.
 In one terminal, run:
 
 ```bash
-PACKAGE_REGISTRY_OVERRIDE=<url to your package registry like http://localhost:8080> yarn test:ftr:server --config x-pack/test/security_solution_endpoint_api_int/config.ts
+PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhost:8080> yarn test:ftr:server --config x-pack/test/security_solution_endpoint_api_int/config.ts
 ```
 
 In another terminal, run:
 
 ```bash
-PACKAGE_REGISTRY_OVERRIDE=<url to your package registry like http://localhost:8080>  yarn test:ftr:runner --config x-pack/test/security_solution_endpoint_api_int/config.ts
+PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhost:8080>  yarn test:ftr:runner --config x-pack/test/security_solution_endpoint_api_int/config.ts
 ```
 
 #### Endpoint Functional Tests
@@ -86,13 +86,13 @@ PACKAGE_REGISTRY_OVERRIDE=<url to your package registry like http://localhost:80
 In one terminal, run:
 
 ```bash
-PACKAGE_REGISTRY_OVERRIDE=<url to your package registry like http://localhost:8080> yarn test:ftr:server --config x-pack/test/security_solution_endpoint/config.ts
+PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhost:8080> yarn test:ftr:server --config x-pack/test/security_solution_endpoint/config.ts
 ```
 
 In another terminal, run:
 
 ```bash
-PACKAGE_REGISTRY_OVERRIDE=<url to your package registry like http://localhost:8080>  yarn test:ftr:runner --config x-pack/test/security_solution_endpoint/config.ts
+PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhost:8080>  yarn test:ftr:runner --config x-pack/test/security_solution_endpoint/config.ts
 ```
 
 ### Using the default public registry
