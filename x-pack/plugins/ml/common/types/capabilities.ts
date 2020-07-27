@@ -72,6 +72,7 @@ export function getPluginPrivileges() {
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
   const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
   // TODO: include ML in base privileges for the `8.0` release: https://github.com/elastic/kibana/issues/71422
+  const savedObjects = ['index-pattern', 'dashboard', 'search', 'visualization'];
   const privilege = {
     app: [PLUGIN_ID, 'kibana'],
     excludeFromBasePrivileges: true,
@@ -79,10 +80,6 @@ export function getPluginPrivileges() {
       insightsAndAlerting: ['jobsListLink'],
     },
     catalogue: [PLUGIN_ID],
-    savedObject: {
-      all: [],
-      read: ['index-pattern', 'dashboard', 'search', 'visualization'],
-    },
   };
 
   return {
@@ -90,11 +87,19 @@ export function getPluginPrivileges() {
       ...privilege,
       api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: allMlCapabilitiesKeys,
+      savedObject: {
+        all: savedObjects,
+        read: savedObjects,
+      },
     },
     user: {
       ...privilege,
       api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: userMlCapabilitiesKeys,
+      savedObject: {
+        all: [],
+        read: savedObjects,
+      },
     },
   };
 }

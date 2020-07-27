@@ -28,6 +28,7 @@ export type TestSubjects =
   | 'legacyTemplateTable'
   | 'manageTemplateButton'
   | 'mappingsTabContent'
+  | 'previewTabContent'
   | 'noAliasesCallout'
   | 'noMappingsCallout'
   | 'noSettingsCallout'
@@ -48,4 +49,5 @@ export type TestSubjects =
   | 'templateList'
   | 'templatesTab'
   | 'templateTable'
-  | 'viewButton';
+  | 'viewButton'
+  | 'simulateTemplatePreview';

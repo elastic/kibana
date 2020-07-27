@@ -84,6 +84,67 @@ foo: bar
     });
   });
 
+  describe('contains blocks', () => {
+    const streamTemplate = `
+input: log
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+exclude_files: [".gz$"]
+tags:
+{{#each tags}}
+  - {{this}}
+{{/each}}
+{{#contains "forwarded" tags}}
+publisher_pipeline.disable_host: true
+{{/contains}}
+processors:
+  - add_locale: ~
+password: {{password}}
+{{#if password}}
+hidden_password: {{password}}
+{{/if}}
+      `;
+
+    it('should support when a value is not contained in the array', () => {
+      const vars = {
+        paths: { value: ['/usr/local/var/log/nginx/access.log'] },
+        password: { type: 'password', value: '' },
+        tags: { value: ['foo', 'bar', 'forwarded'] },
+      };
+
+      const output = createStream(vars, streamTemplate);
+      expect(output).toEqual({
+        input: 'log',
+        paths: ['/usr/local/var/log/nginx/access.log'],
+        exclude_files: ['.gz$'],
+        processors: [{ add_locale: null }],
+        password: '',
+        'publisher_pipeline.disable_host': true,
+        tags: ['foo', 'bar', 'forwarded'],
+      });
+    });
+
+    it('should support when a value is contained in the array', () => {
+      const vars = {
+        paths: { value: ['/usr/local/var/log/nginx/access.log'] },
+        password: { type: 'password', value: '' },
+        tags: { value: ['foo', 'bar'] },
+      };
+
+      const output = createStream(vars, streamTemplate);
+      expect(output).toEqual({
+        input: 'log',
+        paths: ['/usr/local/var/log/nginx/access.log'],
+        exclude_files: ['.gz$'],
+        processors: [{ add_locale: null }],
+        password: '',
+        tags: ['foo', 'bar'],
+      });
+    });
+  });
+
   it('should support optional yaml values at root level', () => {
     const streamTemplate = `
 input: logs
