@@ -112,7 +112,7 @@ export class ManifestManager {
       // Cache the compressed body of the artifact
       this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
     } catch (err) {
-      if (err.status === 409) {
+      if (this.savedObjectsClient.errors.isConflictError(err)) {
         this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
       } else {
         return err;

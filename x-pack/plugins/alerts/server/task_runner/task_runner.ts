@@ -110,7 +110,8 @@ export class TaskRunner {
     tags: string[] | undefined,
     spaceId: string,
     apiKey: string | null,
-    actions: Alert['actions']
+    actions: Alert['actions'],
+    alertParams: RawAlert['params']
   ) {
     return createExecutionHandler({
       alertId,
@@ -124,6 +125,7 @@ export class TaskRunner {
       alertType: this.alertType,
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
+      alertParams,
     });
   }
 
@@ -261,7 +263,8 @@ export class TaskRunner {
       alert.tags,
       spaceId,
       apiKey,
-      alert.actions
+      alert.actions,
+      alert.params
     );
     return this.executeAlertInstances(services, alert, validatedParams, executionHandler, spaceId);
   }
