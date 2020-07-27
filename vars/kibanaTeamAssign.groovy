@@ -22,4 +22,14 @@ def load(ingestionPipelineName, title) {
   loadWithVault(ingestionPipelineName, title)
 }
 
+def defineCodeOwners(title) {
+  kibanaPipeline.bash("""
+    source src/dev/ci_setup/setup_env.sh
+    yarn kbn bootstrap --prefer-offline
+
+    . src/dev/code_owners/shell_scripts/define_code_owners.sh
+    cat .github/draft_CODEOWNERS
+  """, title)
+}
+
 return this
