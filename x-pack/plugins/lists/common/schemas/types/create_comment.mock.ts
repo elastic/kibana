@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CreateComments, CreateCommentsArray } from './create_comments';
+import { CreateComment, CreateCommentsArray } from './create_comment';
 
-export const getCreateCommentsMock = (): CreateComments => ({
+export const getCreateCommentsMock = (): CreateComment => ({
   comment: 'some comments',
 });
 
