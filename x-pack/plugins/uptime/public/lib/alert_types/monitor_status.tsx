@@ -33,9 +33,9 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   alertParamsExpression: (params: any) => (
     <MonitorStatusAlert core={core} plugins={plugins} params={params} />
   ),
-  validate: (alertParams: any) => {
+  validate: async (alertParams: any) => {
     if (!validateFunc) {
-      (async function loadValidate() {
+      await (async function loadValidate() {
         const { validateMonitorStatusParams } = await import(
           './lazy_wrapper/validate_monitor_status'
         );
