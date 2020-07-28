@@ -161,7 +161,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={`${option.checked === 'on' ? 'check' : 'none'}`} color="primary" />
+          <EuiIcon type={`${option.checked === 'on' ? 'check' : 'empty'}`} color="primary" />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="none" direction="column">
