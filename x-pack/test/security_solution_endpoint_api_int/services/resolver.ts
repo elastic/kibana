@@ -33,8 +33,7 @@ export interface GeneratedTrees {
 }
 
 /**
- *
- * @param
+ * Structure containing the events inserted into ES and the index they live in
  */
 export interface GeneratedEvents {
   events: Event[];
