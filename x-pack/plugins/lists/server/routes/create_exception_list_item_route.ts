@@ -140,8 +140,8 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
                   statusCode: 500,
                 });
               }
-              // Unnecessary since validatedItems comes from exceptionListItems which is already checked for null, but
-              // typescript fails to detect that
+              // Unnecessary since validatedItems comes from exceptionListItems which is already
+              // checked for null, but typescript fails to detect that
               if (validatedItems == null) {
                 await exceptionLists.deleteExceptionListItemById({
                   id: createdList.id,
