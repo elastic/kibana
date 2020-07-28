@@ -29,11 +29,10 @@ export const stateToAlertMessage = {
   }),
 };
 
-const comparatorToI18n = (
-  comparator: Comparator,
-  threshold: Array<number | string>,
-  currentValue: number | string
-) => {
+const toNumber = (value: number | string) =>
+  typeof value === 'string' ? parseFloat(value) : value;
+
+const comparatorToI18n = (comparator: Comparator, threshold: number[], currentValue: number) => {
   const gtText = i18n.translate('xpack.infra.metrics.alerting.threshold.gtComparator', {
     defaultMessage: 'greater than',
   });
@@ -59,12 +58,8 @@ const comparatorToI18n = (
       return ltText;
     case Comparator.GT_OR_EQ:
     case Comparator.LT_OR_EQ: {
-      const currentValueAsNumber =
-        typeof currentValue === 'string' ? parseFloat(currentValue) : currentValue;
-      const threshold0AsNumber =
-        typeof threshold[0] === 'string' ? parseFloat(threshold[0]) : threshold[0];
-      if (threshold0AsNumber === currentValueAsNumber) return eqText;
-      else if (threshold0AsNumber < currentValueAsNumber) return ltText;
+      if (threshold[0] === currentValue) return eqText;
+      else if (threshold[0] < currentValue) return ltText;
       return gtText;
     }
   }
@@ -72,8 +67,8 @@ const comparatorToI18n = (
 
 const recoveredComparatorToI18n = (
   comparator: Comparator,
-  threshold: Array<number | string>,
-  currentValue: number | string
+  threshold: number[],
+  currentValue: number
 ) => {
   const belowText = i18n.translate('xpack.infra.metrics.alerting.threshold.belowRecovery', {
     defaultMessage: 'below',
@@ -81,13 +76,9 @@ const recoveredComparatorToI18n = (
   const aboveText = i18n.translate('xpack.infra.metrics.alerting.threshold.aboveRecovery', {
     defaultMessage: 'above',
   });
-  const currentValueAsNumber =
-    typeof currentValue === 'string' ? parseFloat(currentValue) : currentValue;
-  const threshold0AsNumber =
-    typeof threshold[0] === 'string' ? parseFloat(threshold[0]) : threshold[0];
   switch (comparator) {
     case Comparator.BETWEEN:
-      return currentValueAsNumber < threshold0AsNumber ? belowText : aboveText;
+      return currentValue < threshold[0] ? belowText : aboveText;
     case Comparator.OUTSIDE_RANGE:
       return i18n.translate('xpack.infra.metrics.alerting.threshold.betweenRecovery', {
         defaultMessage: 'between',
@@ -120,7 +111,7 @@ export const buildFiredAlertReason: (alertResult: {
       '{metric} is {comparator} a threshold of {threshold} (current value is {currentValue})',
     values: {
       metric,
-      comparator: comparatorToI18n(comparator, threshold, currentValue),
+      comparator: comparatorToI18n(comparator, threshold.map(toNumber), toNumber(currentValue)),
       threshold: thresholdToI18n(threshold),
       currentValue,
     },
@@ -137,7 +128,11 @@ export const buildRecoveredAlertReason: (alertResult: {
       '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue})',
     values: {
       metric,
-      comparator: recoveredComparatorToI18n(comparator, threshold, currentValue),
+      comparator: recoveredComparatorToI18n(
+        comparator,
+        threshold.map(toNumber),
+        toNumber(currentValue)
+      ),
       threshold: thresholdToI18n(threshold),
       currentValue,
     },
