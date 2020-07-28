@@ -212,13 +212,13 @@ const HostsEmptyState = React.memo<{
       headerComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.hostList.noEndpointsPrompt"
-          defaultMessage="Enable Elastic Endpoint Security on your agents"
+          defaultMessage="Next step: Enroll an Agent with Elastic Endpoint Security"
         />
       }
       bodyComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.hostList.noEndpointsInstructions"
-          defaultMessage="Enable the Elastic Endpoint Security capabilities on your agents following the steps below."
+          defaultMessage="You’ve added the Endpoint Security integration. Now enroll your agents using the steps below."
         />
       }
     />
