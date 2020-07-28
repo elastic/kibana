@@ -16,13 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { shallow } from 'enzyme';
-import { ChangeHomeRoute } from './change_home_route';
 
-describe('ChangeHomeRoute', () => {
-  test('render', () => {
-    const component = shallow(<ChangeHomeRoute />);
-    expect(component).toMatchSnapshot();
-  });
-});
+export * from './add_data';
