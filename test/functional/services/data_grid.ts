@@ -28,14 +28,16 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
     /**
      * Finds data grid and returns data in the nested array format
      * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-     * @param dataTestSubj data-test-subj selector
+     * @param gridDataTestSubj data-test-subj selector of your grid component wrapper
+     * @param cellDataTestSubj data-test-subj selector of your grid grid cell
      */
 
     public async getDataFromTestSubj(
-      dataTestSubj: string = 'dataGridWrapper'
+      gridDataTestSubj: string,
+      cellDataTestSubj: string
     ): Promise<string[][]> {
-      const table = await testSubjects.find(dataTestSubj);
-      return await this.getDataFromElement(table);
+      const table = await testSubjects.find(`${gridDataTestSubj}>dataGridWrapper`);
+      return await this.getDataFromElement(table, cellDataTestSubj);
     }
 
     /**
@@ -43,17 +45,20 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
      * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
      * @param element table
      */
-    public async getDataFromElement(element: WebElementWrapper): Promise<string[][]> {
+    public async getDataFromElement(
+      element: WebElementWrapper,
+      cellDataTestSubj: string
+    ): Promise<string[][]> {
       const $ = await element.parseDomContent();
       return $('[data-test-subj="dataGridRow"]')
         .toArray()
         .map((row) =>
           $(row)
-            .find('[data-test-subj="dataGridRowCell"]')
+            .findTestSubject('dataGridRowCell')
             .toArray()
             .map((cell) =>
               $(cell)
-                .findTestSubject('tbvChartCellContent')
+                .findTestSubject(cellDataTestSubj)
                 .text()
                 .replace(/&nbsp;/g, '')
                 .trim()

@@ -22,7 +22,7 @@ import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const TableVisNoResults = () => (
-  <div className="visError">
+  <div className="visError" data-test-subj="tbvChartNoResult">
     <EuiText size="xs" color="subdued">
       <EuiIcon type="alert" size="m" color="danger" aria-hidden="true" />
 

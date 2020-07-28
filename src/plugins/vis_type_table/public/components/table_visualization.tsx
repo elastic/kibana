@@ -45,7 +45,7 @@ export const createTableVisualizationComponent = (core: CoreSetup) => ({
 
   return (
     <KibanaContextProvider services={core}>
-      <div className={className} data-test-subj="tableVis">
+      <div className={className} data-test-subj="tbvChart">
         {table ? (
           <TableVisBasic table={table} vis={vis} visParams={visParams} />
         ) : (

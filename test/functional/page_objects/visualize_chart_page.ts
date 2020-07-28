@@ -315,7 +315,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async getTableVisData() {
-      return await dataGrid.getDataFromTestSubj();
+      return await dataGrid.getDataFromTestSubj('tbvChart', 'tbvChartCellContent');
+    }
+
+    public async getTableVisNoResult() {
+      return await testSubjects.find('tbvChart>tbvChartNoResult');
     }
 
     /**
