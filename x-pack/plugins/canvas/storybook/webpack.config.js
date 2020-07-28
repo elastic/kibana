@@ -6,34 +6,16 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const webpackMerge = require('webpack-merge');
 const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { DLL_OUTPUT, KIBANA_ROOT } = require('./constants');
 
 // Extend the Storybook Webpack config with some customizations
-module.exports = async ({ config }) => {
-  const { module, plugins, resolve } = config;
-  const { rules } = module;
-  const { extensions, alias } = resolve;
-
-  // Find and alter the CSS rule to replace the Kibana public path string with a path
-  // to the route we've added in middleware.js
-  const cssRule = config.module.rules.find((rule) => rule.test.source.includes('.css$'));
-  cssRule.use.push({
-    loader: 'string-replace-loader',
-    options: {
-      search: '__REPLACE_WITH_PUBLIC_PATH__',
-      replace: '/',
-      flags: 'g',
-    },
-  });
-
-  return {
-    ...config,
+module.exports = async ({ config: storybookConfig }) => {
+  const config = {
     module: {
-      ...module,
       rules: [
-        ...rules,
         // Include the React preset from Kibana for JS(X) and TS(X)
         {
           test: /\.(j|t)sx?$/,
@@ -128,7 +110,6 @@ module.exports = async ({ config }) => {
       ],
     },
     plugins: [
-      ...plugins,
       // Reference the built DLL file of static(ish) dependencies, which are removed
       // during kbn:bootstrap and rebuilt if missing.
       new webpack.DllReferencePlugin({
@@ -194,10 +175,8 @@ module.exports = async ({ config }) => {
       ),
     ],
     resolve: {
-      ...resolve,
-      extensions: [...extensions, '.ts', '.tsx', '.scss', '.mjs', '.html'],
+      extensions: ['.ts', '.tsx', '.scss', '.mjs', '.html'],
       alias: {
-        ...alias,
         'ui/url/absolute_to_parsed_url': path.resolve(
           __dirname,
           '../tasks/mocks/uiAbsoluteToParsedUrl'
@@ -207,4 +186,18 @@ module.exports = async ({ config }) => {
       },
     },
   };
+
+  // Find and alter the CSS rule to replace the Kibana public path string with a path
+  // to the route we've added in middleware.js
+  const cssRule = storybookConfig.module.rules.find((rule) => rule.test.source.includes('.css$'));
+  cssRule.use.push({
+    loader: 'string-replace-loader',
+    options: {
+      search: '__REPLACE_WITH_PUBLIC_PATH__',
+      replace: '/',
+      flags: 'g',
+    },
+  });
+
+  return webpackMerge(storybookConfig, config);
 };
