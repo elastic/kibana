@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 
 import { useMlKibana } from './kibana_context';
@@ -17,5 +19,16 @@ export const useNavigateToPath = () => {
     },
   } = useMlKibana();
 
-  return (path: string | undefined) => navigateToUrl(getUrlForApp(PLUGIN_ID, { path }));
+  const location = useLocation();
+
+  return useMemo(
+    () => (path: string | undefined, preserveSearch = false) => {
+      navigateToUrl(
+        getUrlForApp(PLUGIN_ID, {
+          path: `${path}${preserveSearch === true ? location.search : ''}`,
+        })
+      );
+    },
+    [location]
+  );
 };

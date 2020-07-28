@@ -68,6 +68,38 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
 };
 
 /**
+ * `MlRoutes` creates a React Router Route for every routeFactory
+ * and passes on the `navigateToPath` helper.
+ */
+const MlRoutes: FC<{
+  pageDeps: PageDependencies;
+}> = ({ pageDeps }) => {
+  const navigateToPath = useNavigateToPath();
+
+  return (
+    <>
+      {Object.entries(routes).map(([name, routeFactory]) => {
+        const route = routeFactory(navigateToPath);
+
+        return (
+          <Route
+            key={name}
+            path={route.path}
+            exact
+            render={(props) => {
+              window.setTimeout(() => {
+                pageDeps.setBreadcrumbs(route.breadcrumbs);
+              });
+              return route.render(props, pageDeps);
+            }}
+          />
+        );
+      })}
+    </>
+  );
+};
+
+/**
  * `MlRouter` is based on `BrowserRouter` and takes in `ScopedHistory` provided
  * by Kibana. `LegacyHashUrlRedirect` provides compatibility with legacy hash based URLs.
  * `UrlStateProvider` manages state stored in `_g/_a` URL parameters which can be
@@ -75,34 +107,14 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
  */
 export const MlRouter: FC<{
   pageDeps: PageDependencies;
-}> = ({ pageDeps }) => {
-  const navigateToPath = useNavigateToPath();
-
-  return (
-    <Router history={pageDeps.history}>
-      <LegacyHashUrlRedirect>
-        <UrlStateProvider>
-          <div className="ml-app">
-            {Object.entries(routes).map(([name, routeFactory]) => {
-              const route = routeFactory(navigateToPath);
-
-              return (
-                <Route
-                  key={name}
-                  path={route.path}
-                  exact
-                  render={(props) => {
-                    window.setTimeout(() => {
-                      pageDeps.setBreadcrumbs(route.breadcrumbs);
-                    });
-                    return route.render(props, pageDeps);
-                  }}
-                />
-              );
-            })}
-          </div>
-        </UrlStateProvider>
-      </LegacyHashUrlRedirect>
-    </Router>
-  );
-};
+}> = ({ pageDeps }) => (
+  <Router history={pageDeps.history}>
+    <LegacyHashUrlRedirect>
+      <UrlStateProvider>
+        <div className="ml-app">
+          <MlRoutes pageDeps={pageDeps} />
+        </div>
+      </UrlStateProvider>
+    </LegacyHashUrlRedirect>
+  </Router>
+);

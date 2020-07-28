@@ -249,15 +249,15 @@ function stashCombinedJob(
   mlJobService.tempJobCloningObjects.calendars = jobCreator.calendars;
 }
 
-export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
+export function convertToMultiMetricJob(
+  jobCreator: JobCreatorType,
+  navigateToPath: NavigateToPath
+) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
   stashCombinedJob(jobCreator, true, true);
 
-  window.location.href = window.location.href.replace(
-    JOB_TYPE.SINGLE_METRIC,
-    JOB_TYPE.MULTI_METRIC
-  );
+  navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
@@ -273,7 +273,7 @@ export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath:
     jobType = JOB_TYPE.CATEGORIZATION;
   }
 
-  navigateToPath(window.location.href.replace(jobType, JOB_TYPE.ADVANCED));
+  navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
 }
 
 export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
