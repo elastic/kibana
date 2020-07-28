@@ -40,6 +40,7 @@ export const mockEventViewerResponse = [
           { field: 'event.end', format: 'date_time' },
         ],
         inspect: false,
+        queryDeduplication: 'events_viewer',
       },
     },
     result: {
