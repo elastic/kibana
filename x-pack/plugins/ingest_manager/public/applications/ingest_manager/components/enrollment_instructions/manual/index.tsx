@@ -57,7 +57,7 @@ systemctl start elastic-agent`;
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m" whiteSpace="pre">
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
         <CommandCode>{windowsCommand}</CommandCode>
       </EuiCodeBlock>
       <EuiSpacer size="l" />
