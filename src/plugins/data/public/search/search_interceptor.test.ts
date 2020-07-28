@@ -22,6 +22,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { IEsSearchRequest } from '../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '../../common';
+import { searchServiceMock } from './mocks';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreStart: MockedKeys<CoreStart>;
@@ -32,8 +33,10 @@ jest.useFakeTimers();
 describe('SearchInterceptor', () => {
   beforeEach(() => {
     mockCoreStart = coreMock.createStart();
+    const mockSearch = searchServiceMock.createStartContract();
     searchInterceptor = new SearchInterceptor(
       {
+        session: mockSearch.session,
         toasts: mockCoreStart.notifications.toasts,
         application: mockCoreStart.application,
         uiSettings: mockCoreStart.uiSettings,

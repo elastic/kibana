@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SessionService } from './session_service';
+export { EnhancedSessionService } from './session_service';

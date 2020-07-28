@@ -34,7 +34,7 @@ import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
 import { ISearchOptions } from './types';
 import { getLongQueryNotification } from './long_query_notification';
 import { SearchUsageCollector } from './collectors';
-import { SessionService } from './session_service';
+import { ISessionService } from './session_service';
 
 const LONG_QUERY_NOTIFICATION_DELAY = 5000;
 
@@ -44,7 +44,7 @@ export interface SearchEventInfo {
 }
 
 export interface SearchInterceptorDeps {
-  session: SessionService;
+  session: ISessionService;
   toasts: ToastsStart;
   application: ApplicationStart;
   http: CoreStart['http'];

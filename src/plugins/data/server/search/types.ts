@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RequestHandlerContext } from '../../../../core/server';
+import { RequestHandlerContext, KibanaRequest } from '../../../../core/server';
 import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 import { SearchUsage } from './collectors/usage';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
@@ -28,6 +28,7 @@ export interface ISearchOptions {
    */
   signal?: AbortSignal;
   strategy?: string;
+  rawRequest?: KibanaRequest;
 }
 
 export interface ISearchSetup {

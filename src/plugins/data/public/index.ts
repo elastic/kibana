@@ -364,6 +364,9 @@ export {
   SearchInterceptor,
   SearchInterceptorDeps,
   RequestTimeoutError,
+  // sessions
+  SessionService,
+  ISessionService,
 } from './search';
 
 // Search namespace

@@ -10,7 +10,7 @@ import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
 
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
-import { SessionService } from './session';
+import { EnhancedSessionService } from './session';
 
 export interface DataEnhancedSetupDependencies {
   data: DataPublicPluginSetup;
@@ -22,14 +22,14 @@ export interface DataEnhancedStartDependencies {
 export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
 export interface DataEnhancedStart {
   search: {
-    session: SessionService;
+    session: EnhancedSessionService;
   };
 }
 
 export class DataEnhancedPlugin
   implements
     Plugin<void, DataEnhancedStart, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
-  private sessionService!: SessionService;
+  private sessionService!: EnhancedSessionService;
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
@@ -43,11 +43,11 @@ export class DataEnhancedPlugin
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies): DataEnhancedStart {
     setAutocompleteService(plugins.data.autocomplete);
-    this.sessionService = new SessionService(core.http, plugins.data.search);
+    this.sessionService = new EnhancedSessionService(core.http, plugins.data.search);
 
-    const enhancedSearchInterceptor = new EnhancedSearchInterceptor({
+    const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
+      {
         session: this.sessionService,
-        data: plugins.data
         toasts: core.notifications.toasts,
         application: core.application,
         http: core.http,

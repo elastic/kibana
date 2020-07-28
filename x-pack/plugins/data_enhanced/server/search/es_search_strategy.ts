@@ -74,7 +74,7 @@ async function getBackgroundSession(
     return await context.backgroundSearchService.getId(
       options?.rawRequest,
       request.sessionId,
-      request.params.body
+      request.params?.body
     );
   }
 }
@@ -96,7 +96,7 @@ function trackBackgroundSearch(
     context.backgroundSearchService.trackId(
       options.rawRequest,
       request.sessionId,
-      request.params.body,
+      request.params?.body,
       asyncId
     );
   }

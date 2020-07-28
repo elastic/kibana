@@ -7,8 +7,8 @@
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreStart } from 'kibana/public';
-import { SessionService } from '../session';
 import { AbortError } from '../../../../../src/plugins/data/common';
+import { EnhancedSessionService } from '../session';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -20,8 +20,8 @@ const error = jest.fn();
 const complete = jest.fn();
 
 let searchInterceptor: EnhancedSearchInterceptor;
+let mockSessionService: EnhancedSessionService;
 let mockCoreStart: MockedKeys<CoreStart>;
-let mockSessionService: MockedKeys<SessionService>;
 
 jest.useFakeTimers();
 

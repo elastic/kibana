@@ -45,8 +45,8 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
 
       try {
         const response = await selfStart.search.search(context, searchRequest, {
-          signal,
           rawRequest: request,
+          signal,
           strategy,
         });
         return res.ok({ body: response });

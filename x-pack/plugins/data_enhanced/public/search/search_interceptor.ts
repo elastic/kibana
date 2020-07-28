@@ -8,13 +8,11 @@ import { Observable, throwError, EMPTY, timer, from } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
 import { getLongQueryNotification } from './long_query_notification';
 import { getBackgroundRunningNotification } from './background_running_notification';
-import {
-  SearchInterceptor,
-  SearchInterceptorDeps,
-  UI_SETTINGS,
-} from '../../../../../src/plugins/data/public';
+import { SearchInterceptor, UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
+import { EnhancedSearchInterceptorDeps } from './types';
+import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common/search';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private isRestoreCache: Map<string, boolean> = new Map();
@@ -27,7 +25,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    * @param sessionService Used to submit sessions to background upon request
    */
-  constructor(deps: SearchInterceptorDeps, requestTimeout?: number) {
+  constructor(protected readonly deps: EnhancedSearchInterceptorDeps, requestTimeout?: number) {
     super(deps, requestTimeout);
   }
 
@@ -90,7 +88,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   private showToastIfNewSession = async () => {
     if (await this.shouldNotifyLongRunning()) {
       if (this.longRunningToast) this.hideToast();
-      this.longRunningToast = this.toasts.addInfo(
+      this.longRunningToast = this.deps.toasts.addInfo(
         {
           title: 'Your query is taking awhile',
           text: getLongQueryNotification({
