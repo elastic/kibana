@@ -9,7 +9,7 @@ import { appContextService, licenseService } from '../../';
 // the unused variables cause a TS warning about unused values
 // chose to comment them out vs @ts-ignore or @ts-expect-error on each line
 
-// const PRODUCTION_REGISTRY_URL_CDN = 'https://epr.elastic.co';
+const PRODUCTION_REGISTRY_URL_CDN = 'https://epr.elastic.co';
 // const STAGING_REGISTRY_URL_CDN = 'https://epr-staging.elastic.co';
 // const EXPERIMENTAL_REGISTRY_URL_CDN = 'https://epr-experimental.elastic.co/';
 const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co';
@@ -19,7 +19,14 @@ const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co';
 // const EXPERIMENTAL_REGISTRY_URL_NO_CDN = 'https://epr-experimental.ea-web.elastic.dev/';
 // const SNAPSHOT_REGISTRY_URL_NO_CDN = 'https://epr-snapshot.ea-web.elastic.dev';
 
-const DEFAULT_REGISTRY_URL = SNAPSHOT_REGISTRY_URL_CDN;
+const getDefaultRegistryUrl = (): string => {
+  const branch = appContextService.getKibanaBranch();
+  if (branch === 'master') {
+    return SNAPSHOT_REGISTRY_URL_CDN;
+  } else {
+    return PRODUCTION_REGISTRY_URL_CDN;
+  }
+};
 
 export const getRegistryUrl = (): string => {
   const license = licenseService.getLicenseInformation();
@@ -34,5 +41,5 @@ export const getRegistryUrl = (): string => {
     appContextService.getLogger().warn('Gold license is required to use a custom registry url.');
   }
 
-  return DEFAULT_REGISTRY_URL;
+  return getDefaultRegistryUrl();
 };
