@@ -216,7 +216,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
           <FormattedMessage
             id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
-            defaultMessage="Reassign Policy"
+            defaultMessage="Reassign Configuration"
           />
           <EuiIcon type="popout" className="linkToAppPopoutIcon" />
         </LinkToApp>

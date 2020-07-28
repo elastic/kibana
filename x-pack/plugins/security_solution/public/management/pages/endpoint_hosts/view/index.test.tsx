@@ -431,7 +431,7 @@ describe('when on the hosts page', () => {
       const renderResult = render();
       const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
-      expect(linkToReassign.textContent).toEqual('Reassign Policy');
+      expect(linkToReassign.textContent).toEqual('Reassign Configuration');
       expect(linkToReassign.getAttribute('href')).toEqual(
         `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
       );
