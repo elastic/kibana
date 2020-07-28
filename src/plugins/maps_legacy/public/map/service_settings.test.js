@@ -156,13 +156,8 @@ describe('service_settings (FKA tile_map test)', function () {
         serviceSettings = makeServiceSettings(
           {},
           {
-            deprecated: {
-              isOverridden: true,
-              config: {
-                url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                options: { minZoom: 0, maxZoom: 20 },
-              },
-            },
+            url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            options: { minZoom: 0, maxZoom: 20 },
           }
         );
 
@@ -247,13 +242,8 @@ describe('service_settings (FKA tile_map test)', function () {
             includeElasticMapsService: false,
           },
           {
-            deprecated: {
-              isOverridden: true,
-              config: {
-                url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                options: { minZoom: 0, maxZoom: 20 },
-              },
-            },
+            url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            options: { minZoom: 0, maxZoom: 20 },
           }
         );
         const tilemapServices = await serviceSettings.getTMSServices();
