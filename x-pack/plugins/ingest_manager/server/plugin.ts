@@ -15,6 +15,7 @@ import {
   HttpServiceSetup,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import packageJSON from '../../../../package.json';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -85,6 +86,7 @@ export interface IngestManagerAppContext {
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: boolean;
   kibanaVersion: string;
+  kibanaBranch: string;
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -145,6 +147,7 @@ export class IngestManagerPlugin
 
   private isProductionMode: boolean;
   private kibanaVersion: string;
+  private kibanaBranch: string;
   private httpSetup: HttpServiceSetup | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
 
@@ -152,6 +155,7 @@ export class IngestManagerPlugin
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+    this.kibanaBranch = packageJSON.branch;
     this.logger = this.initializerContext.logger.get();
   }
 
@@ -257,6 +261,7 @@ export class IngestManagerPlugin
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
+      kibanaBranch: this.kibanaBranch,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
