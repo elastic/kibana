@@ -50,9 +50,20 @@ export class MapsAppView extends React.Component {
   }
 
   componentDidMount() {
-    this._initMap();
+    this._isMounted = true;
 
-    this._initSubscriptions();
+    this._globalSyncUnsubscribe = startGlobalStateSyncing();
+    this._appSyncUnsubscribe = startAppStateSyncing(this._appStateManager);
+    this._globalSyncChangeMonitorSubscription = getData().query.state$.subscribe(
+      this._updateFromGlobalState
+    );
+
+    const initAppState = this._appStateManager.getAppState();
+    if (initAppState.savedQuery) {
+      this._updateStateFromSavedQuery(initAppState.savedQuery);
+    }
+
+    this._initMap();
 
     this._setBreadcrumbs();
 
@@ -71,6 +82,8 @@ export class MapsAppView extends React.Component {
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
+
     if (this._globalSyncUnsubscribe) {
       this._globalSyncUnsubscribe();
     }
@@ -90,19 +103,6 @@ export class MapsAppView extends React.Component {
     });
 
     getCoreChrome().setBreadcrumbs([]);
-  }
-
-  async _initSubscriptions() {
-    this._globalSyncUnsubscribe = startGlobalStateSyncing();
-    this._appSyncUnsubscribe = startAppStateSyncing(this._appStateManager);
-    this._globalSyncChangeMonitorSubscription = getData().query.state$.subscribe(
-      this._updateFromGlobalState
-    );
-
-    const initAppState = this._appStateManager.getAppState();
-    if (initAppState.savedQuery) {
-      this._updateStateFromSavedQuery(initAppState.savedQuery);
-    }
   }
 
   _hasUnsavedChanges() {
@@ -131,7 +131,7 @@ export class MapsAppView extends React.Component {
   };
 
   _updateFromGlobalState = ({ changes, state: globalState }) => {
-    if (!changes || !globalState) {
+    if (!this.state.initialized || !changes || !globalState) {
       return;
     }
 
@@ -147,9 +147,10 @@ export class MapsAppView extends React.Component {
 
     this._prevIndexPatternIds = nextIndexPatternIds;
 
-    this.setState({
-      indexPatterns: await getIndexPatternsFromIds(nextIndexPatternIds),
-    });
+    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
+    if (this._isMounted) {
+      this.setState({ indexPatterns });
+    }
   }
 
   _onQueryChange = ({
