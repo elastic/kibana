@@ -6,6 +6,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  EuiBasicTable,
   EuiButton,
   EuiModal,
   EuiModalBody,
@@ -13,7 +14,9 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
+  EuiPanel,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import {
@@ -27,7 +30,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { GenericDownloader } from '../../../common/components/generic_downloader';
 import * as i18n from './translations';
-import { ValueListsTable } from './table';
+import { buildColumns } from './table_helpers';
 import { ValueListsForm } from './form';
 
 interface ValueListsModalProps {
@@ -131,6 +134,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     totalItemCount: lists.result?.total ?? 0,
     hidePerPageOptions: true,
   };
+  const columns = buildColumns(handleExportClick, handleDelete);
 
   return (
     <EuiOverlayMask onClick={onClose}>
@@ -141,14 +145,18 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         <EuiModalBody>
           <ValueListsForm onSuccess={handleUploadSuccess} onError={handleUploadError} />
           <EuiSpacer />
-          <ValueListsTable
-            items={tableItems}
-            loading={lists.loading}
-            onDelete={handleDelete}
-            onExport={handleExportClick}
-            onChange={handleTableChange}
-            pagination={pagination}
-          />
+          <EuiPanel>
+            <EuiText size="s">
+              <h2>{i18n.TABLE_TITLE}</h2>
+            </EuiText>
+            <EuiBasicTable
+              columns={columns}
+              items={tableItems}
+              loading={lists.loading}
+              onChange={handleTableChange}
+              pagination={pagination}
+            />
+          </EuiPanel>
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButton data-test-subj="value-lists-modal-close-action" onClick={onClose}>
