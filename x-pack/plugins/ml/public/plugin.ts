@@ -33,7 +33,8 @@ import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actio
 import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { MlUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
-import { isMlEnabled } from '../common/license';
+import { isMlEnabled, isFullLicense } from '../common/license';
+import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -66,69 +67,68 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   async setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
-    // const license = pluginsSetup.licensing.license$.pipe(take(1));
-    const license = await pluginsSetup.licensing.license$.pipe(take(1)).toPromise();
-    // licensing.subscribe((license) => {
-    // console.dir(license.getFeature('ml'));
-    // console.dir(license.getFeature('graph'));
-    if (isMlEnabled(license) === false) {
-      return {};
-    }
-    const baseUrl = core.http.basePath.prepend('/app/ml');
+    const licensing = pluginsSetup.licensing.license$.pipe(take(1));
+    licensing.subscribe((license) => {
+      if (isMlEnabled(license) === false) {
+        return;
+      }
 
-    pluginsSetup.share.urlGenerators.registerUrlGenerator(
-      new MlUrlGenerator({
-        appBasePath: baseUrl,
-        useHash: core.uiSettings.get('state:storeInSessionStorage'),
-      })
-    );
+      const baseUrl = core.http.basePath.prepend('/app/ml');
 
-    core.application.register({
-      id: PLUGIN_ID,
-      title: i18n.translate('xpack.ml.plugin.title', {
-        defaultMessage: 'Machine Learning',
-      }),
-      order: 5000,
-      euiIconType: PLUGIN_ICON,
-      appRoute: '/app/ml',
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        const kibanaVersion = this.initializerContext.env.packageInfo.version;
-        const { renderApp } = await import('./application/app');
-        return renderApp(
-          coreStart,
-          {
-            data: pluginsStart.data,
-            share: pluginsStart.share,
-            kibanaLegacy: pluginsStart.kibanaLegacy,
-            security: pluginsSetup.security,
-            licensing: pluginsSetup.licensing,
-            management: pluginsSetup.management,
-            usageCollection: pluginsSetup.usageCollection,
-            licenseManagement: pluginsSetup.licenseManagement,
-            home: pluginsSetup.home,
-            embeddable: pluginsSetup.embeddable,
-            uiActions: pluginsStart.uiActions,
-            kibanaVersion,
-          },
-          {
-            element: params.element,
-            appBasePath: params.appBasePath,
-            onAppLeave: params.onAppLeave,
-            history: params.history,
-          }
-        );
-      },
+      pluginsSetup.share.urlGenerators.registerUrlGenerator(
+        new MlUrlGenerator({
+          appBasePath: baseUrl,
+          useHash: core.uiSettings.get('state:storeInSessionStorage'),
+        })
+      );
+
+      core.application.register({
+        id: PLUGIN_ID,
+        title: i18n.translate('xpack.ml.plugin.title', {
+          defaultMessage: 'Machine Learning',
+        }),
+        order: 5000,
+        euiIconType: PLUGIN_ICON,
+        appRoute: '/app/ml',
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        mount: async (params: AppMountParameters) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          const kibanaVersion = this.initializerContext.env.packageInfo.version;
+          const { renderApp } = await import('./application/app');
+          return renderApp(
+            coreStart,
+            {
+              data: pluginsStart.data,
+              share: pluginsStart.share,
+              kibanaLegacy: pluginsStart.kibanaLegacy,
+              security: pluginsSetup.security,
+              licensing: pluginsSetup.licensing,
+              management: pluginsSetup.management,
+              usageCollection: pluginsSetup.usageCollection,
+              licenseManagement: pluginsSetup.licenseManagement,
+              home: pluginsSetup.home,
+              embeddable: pluginsSetup.embeddable,
+              uiActions: pluginsStart.uiActions,
+              kibanaVersion,
+            },
+            {
+              element: params.element,
+              appBasePath: params.appBasePath,
+              onAppLeave: params.onAppLeave,
+              history: params.history,
+            }
+          );
+        },
+      });
+
+      registerFeature(pluginsSetup.home);
+
+      if (isFullLicense(license)) {
+        initManagementSection(pluginsSetup.management, core);
+      }
+      registerEmbeddables(pluginsSetup.embeddable, core);
+      registerMlUiActions(pluginsSetup.uiActions, core);
     });
-
-    registerFeature(pluginsSetup.home);
-
-    initManagementSection(pluginsSetup, core);
-    registerEmbeddables(pluginsSetup.embeddable, core);
-    registerMlUiActions(pluginsSetup.uiActions, core);
-    // });
-
     return {};
   }
 

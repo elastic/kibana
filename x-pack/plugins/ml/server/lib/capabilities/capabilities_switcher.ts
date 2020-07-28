@@ -31,8 +31,6 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
     try {
       const license = await license$.pipe(take(1)).toPromise();
       const mlCaps = capabilities.ml as MlCapabilities;
-      // console.dir(license.getFeature('ml'));
-      // console.dir(license.getFeature('graph'));
       if (isMlEnabled(license) === false) {
         disableAllCapabilities(mlCaps);
         return capabilities;
