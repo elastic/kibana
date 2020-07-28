@@ -28,6 +28,10 @@ const defaultProps = {
 };
 
 describe('FieldName', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   test('it renders the field name', () => {
     const wrapper = mount(
       <TestProviders>
@@ -47,6 +51,8 @@ describe('FieldName', () => {
       </TestProviders>
     );
     wrapper.find('[data-test-subj="withHoverActionsButton"]').at(0).simulate('mouseenter');
+    wrapper.update();
+    jest.runAllTimers();
     wrapper.update();
     expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
   });
