@@ -62,7 +62,7 @@ export const sendRequest = async <D = any, E = Error>(
   } catch (e) {
     return {
       data: null,
-      error: e.response && e.response.data ? e.response.data : e.body,
+      error: e.response?.data ?? e.body,
     };
   }
 };
@@ -107,6 +107,10 @@ export const useRequest = <D = any, E = Error>(
     // Set new interval
     if (pollIntervalMsRef.current) {
       pollIntervalIdRef.current = setTimeout(sendRequestRef.current!, pollIntervalMsRef.current);
+
+      // pollIntervalIdRef.current = setTimeout(() => {
+      //   sendRequestRef.current();
+      // }, pollIntervalMsRef.current);
     }
   };
 
