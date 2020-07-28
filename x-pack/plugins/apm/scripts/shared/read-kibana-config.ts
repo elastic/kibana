@@ -6,7 +6,7 @@
 import path from 'path';
 import fs from 'fs';
 import yaml from 'js-yaml';
-import { identity, pick } from 'lodash';
+import { identity, pickBy } from 'lodash';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 
@@ -22,7 +22,7 @@ export const readKibanaConfig = () => {
     )
   ) || {}) as {};
 
-  const cliEsCredentials = pick(
+  const cliEsCredentials = pickBy(
     {
       'elasticsearch.username': process.env.ELASTICSEARCH_USERNAME,
       'elasticsearch.password': process.env.ELASTICSEARCH_PASSWORD,

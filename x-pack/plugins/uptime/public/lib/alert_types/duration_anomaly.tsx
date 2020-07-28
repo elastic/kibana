@@ -5,30 +5,22 @@
  */
 
 import React from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
-import { CLIENT_ALERT_TYPES } from '../../../common/constants';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { DurationAnomalyTranslations } from './translations';
 import { AlertTypeInitializer } from '.';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { store } from '../../state';
 
 const { name, defaultActionMessage } = DurationAnomalyTranslations;
-const AnomalyAlertExpression = React.lazy(() =>
-  import('../../components/overview/alerts/anomaly_alert/anomaly_alert')
-);
+const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_anomaly'));
+
 export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   core,
   plugins,
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   iconClass: 'uptimeApp',
-  alertParamsExpression: (params: any) => (
-    <ReduxProvider store={store}>
-      <KibanaContextProvider services={{ ...core, ...plugins }}>
-        <AnomalyAlertExpression {...params} />
-      </KibanaContextProvider>
-    </ReduxProvider>
+  alertParamsExpression: (params: unknown) => (
+    <DurationAnomalyAlert core={core} plugins={plugins} params={params} />
   ),
   name,
   validate: () => ({ errors: {} }),

@@ -6,7 +6,7 @@
 
 import React, { useRef, useCallback } from 'react';
 
-import { useDispatch } from '../../mappings_state';
+import { useDispatch } from '../../mappings_state_context';
 import { JsonEditor } from '../../shared_imports';
 
 export interface Props {
