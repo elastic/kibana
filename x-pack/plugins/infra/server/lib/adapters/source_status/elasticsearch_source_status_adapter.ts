@@ -5,7 +5,7 @@
  */
 
 import { RequestHandlerContext } from 'src/core/server';
-import { InfraSourceStatusAdapter } from '../../source_status';
+import { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_status';
 import { InfraDatabaseGetIndicesResponse } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 
@@ -40,7 +40,10 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
     });
   }
 
-  public async getIndexStatus(requestContext: RequestHandlerContext, indexNames: string) {
+  public async getIndexStatus(
+    requestContext: RequestHandlerContext,
+    indexNames: string
+  ): Promise<SourceIndexStatus> {
     return await this.framework
       .callWithRequest(requestContext, 'search', {
         ignore_unavailable: true,
@@ -53,18 +56,18 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
       .then(
         (response) => {
           if (response._shards.total <= 0) {
-            return 'missing' as const;
+            return 'missing';
           }
 
           if (response.hits.total.value > 0) {
-            return 'available' as const;
+            return 'available';
           }
 
-          return 'empty' as const;
+          return 'empty';
         },
         (err) => {
           if (err.status === 404) {
-            return 'missing' as const;
+            return 'missing';
           }
           throw err;
         }
