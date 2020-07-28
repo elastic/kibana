@@ -33,7 +33,7 @@ describe('date', () => {
     });
 
     it('should return NaN if an invalid time is provided', () => {
-      expect(getUnixTime(notATime)).toBe(NaN);
+      expect(getUnixTime(notATime)).toBeNaN();
     });
   });
 
