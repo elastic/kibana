@@ -6,8 +6,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiText, /* EuiTitle,*/ EuiSpacer } from '@elastic/eui';
-// import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import {
   CustomConfigurePackageConfigContent,
@@ -50,28 +49,10 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
 
     return (
       <>
-        {/*
-        <EuiTitle size="xs">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.ingestManager.policyConfiguration"
-              defaultMessage="Policy Configuration"
-            />
-          </h4>
-        </EuiTitle>
-        */}
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj={`endpointPackageConfig_${from === 'edit' ? 'edit' : 'create'}`}
           iconType="iInCircle"
-          /*
-          title={i18n.translate(
-            'xpack.securitySolution.endpoint.ingestManager.policyConfiguration.calloutTitle',
-            {
-              defaultMessage: 'Manage Policy configuration in the Security app',
-            }
-          )}
-          */
         >
           <EuiText size="s">
             <p>

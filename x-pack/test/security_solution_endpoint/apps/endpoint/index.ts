@@ -29,8 +29,6 @@ export default function (providerContext: FtrProviderContext) {
       await ingestManager.setup();
     });
     loadTestFile(require.resolve('./endpoint_list'));
-    // Skip running the Policy List test since tab is hidden now
-    // loadTestFile(require.resolve('./policy_list'));
     loadTestFile(require.resolve('./policy_details'));
   });
 }

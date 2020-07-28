@@ -77,59 +77,6 @@ const PolicyEmptyState = React.memo<{
               />
             </EuiText>
             <EuiSpacer size="m" />
-            {/*
-            <EuiFlexGroup alignItems="center" style={{ maxWidth: '90%' }}>
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
-                    <EuiIcon type="grid" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
-                    <EuiText>
-                      <h4>
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policyList.onboardingHostTitle"
-                          defaultMessage="Hosts"
-                        />
-                      </h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.onboardingHostInfo"
-                    defaultMessage="Hosts running Elastic Endpoint Security"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
-                    <EuiIcon type="controlsHorizontal" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
-                    <EuiText>
-                      <h4>
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policyList.onboardingPolicyTitle"
-                          defaultMessage="Policies"
-                        />
-                      </h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.onboardingPolicyInfo"
-                    defaultMessage="View and configure protections"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            */}
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
