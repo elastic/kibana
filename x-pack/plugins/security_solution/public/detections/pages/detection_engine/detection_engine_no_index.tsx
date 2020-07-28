@@ -10,19 +10,24 @@ import { EmptyPage } from '../../../common/components/empty_page';
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 
+const buildMessage = (needsListsIndex: boolean, needsSignalsIndex: boolean): string => {
+  if (needsSignalsIndex && needsListsIndex) {
+    return i18n.NEEDS_INDEX_PERMISSIONS(i18n.NEEDS_SIGNALS_AND_LISTS_INDEXES);
+  } else if (needsSignalsIndex) {
+    return i18n.NEEDS_INDEX_PERMISSIONS(i18n.NEEDS_SIGNALS_INDEX);
+  } else if (needsListsIndex) {
+    return i18n.NEEDS_INDEX_PERMISSIONS(i18n.NEEDS_LISTS_INDEXES);
+  } else {
+    return i18n.NEEDS_INDEX_PERMISSIONS('');
+  }
+};
+
 const DetectionEngineNoIndexComponent: React.FC<{
   needsListsIndex: boolean;
   needsSignalsIndex: boolean;
 }> = ({ needsListsIndex, needsSignalsIndex }) => {
   const docLinks = useKibana().services.docLinks;
-  let context: string = '';
-  if (needsSignalsIndex && needsListsIndex) {
-    context = i18n.NEEDS_SIGNALS_AND_LISTS_INDEXES;
-  } else if (needsSignalsIndex) {
-    context = i18n.NEEDS_SIGNALS_INDEX;
-  } else if (needsListsIndex) {
-    context = i18n.NEEDS_LISTS_INDEXES;
-  }
+  const message = buildMessage(needsListsIndex, needsSignalsIndex);
 
   return (
     <EmptyPage
@@ -30,7 +35,7 @@ const DetectionEngineNoIndexComponent: React.FC<{
       actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
       actionPrimaryUrl={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/detection-engine-overview.html#detections-permissions`}
       actionPrimaryTarget="_blank"
-      message={i18n.NEEDS_INDEX_PERMISSIONS(context)}
+      message={message}
       data-test-subj="no_index"
       title={i18n.NO_INDEX_TITLE}
     />
