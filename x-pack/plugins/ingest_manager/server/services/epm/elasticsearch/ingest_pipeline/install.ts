@@ -21,9 +21,6 @@ interface RewriteSubstitution {
   templateFunction: string;
 }
 
-interface DatasetByKey {
-  [key: string]: Dataset;
-}
 export const installPipelines = async (
   registryPackage: RegistryPackage,
   paths: string[],
@@ -35,24 +32,23 @@ export const installPipelines = async (
   // so do not remove the currently installed pipelines here
   const datasets = registryPackage.datasets;
   if (!datasets?.length) return [];
-  const datasetsByKey = datasets.reduce<DatasetByKey>((acc, dataset) => {
-    acc[dataset.name] = dataset;
-    return acc;
-  }, {});
   const pipelinePaths = paths.filter((path) => isPipeline(path));
-  const pipelineParts = pipelinePaths.map((path) => Registry.pathParts(path));
-  const pipelineRefs = pipelineParts.reduce<EsAssetReference[]>((acc, parts) => {
-    if (!parts.dataset) return acc;
-    const dataset = datasetsByKey[`${registryPackage.name}.${parts.dataset}`];
-    acc.push({
-      id: `${dataset.type}-${dataset.name}-${registryPackage.version}`,
-      type: ElasticsearchAssetType.ingestPipeline,
+  // get and save pipeline refs before installing pipelines
+  const pipelineRefs = datasets.reduce<EsAssetReference[]>((acc, dataset) => {
+    const filteredPaths = pipelinePaths.filter((path) => isDatasetPipeline(path, dataset.path));
+    const pipelineObjectRefs = filteredPaths.map((path) => {
+      const { name } = getNameAndExtension(path);
+      const nameForInstallation = getPipelineNameForInstallation({
+        pipelineName: name,
+        dataset,
+        packageVersion: registryPackage.version,
+      });
+      return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
     });
+    acc.push(...pipelineObjectRefs);
     return acc;
   }, []);
   await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, pipelineRefs);
-
-  // TODO: refactor, no need to loop through every pipeline path per dataset
   const pipelines = datasets.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataset) => {
     if (dataset.ingest_pipeline) {
       acc.push(
