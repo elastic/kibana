@@ -401,11 +401,12 @@ describe('rules_notification_alert_type', () => {
         bulkCreateTimes: [],
         lastLookBackDate: null,
         createdSignalsCount: 0,
+        errorMessage: 'my test failure error message',
       });
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
-      expect(logger.error.mock.calls[0][0]).toContain(
-        'Bulk Indexing of signals failed. Check logs for further details.'
+      expect(logger.error.mock.calls[0][0]).toMatch(
+        /Bulk Indexing of signals failed. my test failure error message Check logs for further details./
       );
       expect(ruleStatusService.error).toHaveBeenCalled();
     });
