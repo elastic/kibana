@@ -19,6 +19,21 @@ const StyledEuiFieldText = styled(EuiFieldText)`
 
   &[readonly] {
     cursor: pointer;
+    background-size: 0 100%;
+    background-repeat: no-repeat;
+
+    // To match EuiFieldText focus state
+    &:focus {
+      background-color: #fff;
+      background-image: linear-gradient(
+        to top,
+        #006bb4,
+        #006bb4 2px,
+        transparent 2px,
+        transparent 100%
+      );
+      background-size: 100% 100%;
+    }
   }
 
   & + .euiFormControlLayoutIcons {
@@ -71,7 +86,6 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         readOnly
         disabled={isDisabled}
         onFocus={handleOpenPopover}
-        onClick={handleOpenPopover}
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
         icon="arrowDown"
       />
