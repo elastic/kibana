@@ -199,7 +199,7 @@ export const requiredFieldsForActions = [
   'signal.original_event.module',
 
   // Endpoint exception fields
-  'file.path',
+  'file.path.text',
   'file.Ext.code_signature.subject_name',
   'file.Ext.code_signature.trusted',
   'file.hash.sha1',

@@ -404,7 +404,7 @@ export const defaultEndpointExceptionItems = (
   ruleName: string,
   alertData: TimelineNonEcsData[]
 ): ExceptionsBuilderExceptionItem[] => {
-  const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path' });
+  const [filePath] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.path.text' });
   const [signatureSigner] = getMappedNonEcsValue({
     data: alertData,
     fieldName: 'file.Ext.code_signature.subject_name',
@@ -440,7 +440,7 @@ export const defaultEndpointExceptionItems = (
           ],
         },
         {
-          field: 'file.path',
+          field: 'file.path.text',
           operator: 'included',
           type: 'match',
           value: filePath ?? '',
