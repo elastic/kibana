@@ -38,8 +38,6 @@ const initialState: State = {
     totalItemCount: 0,
     pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
   },
-  endpointList: null,
-  detectionsList: null,
   allExceptions: [],
   exceptions: [],
   exceptionToEdit: null,
@@ -48,6 +46,8 @@ const initialState: State = {
   isInitLoading: true,
   currentModal: null,
   exceptionListTypeToEdit: null,
+  totalEndpointItems: 0,
+  totalDetectionsItems: 0,
 };
 
 interface ExceptionsViewerProps {
@@ -87,8 +87,6 @@ const ExceptionsViewerComponent = ({
   );
   const [
     {
-      endpointList,
-      detectionsList,
       exceptions,
       filterOptions,
       pagination,
@@ -98,6 +96,8 @@ const ExceptionsViewerComponent = ({
       currentModal,
       exceptionToEdit,
       exceptionListTypeToEdit,
+      totalEndpointItems,
+      totalDetectionsItems,
     },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
@@ -107,13 +107,14 @@ const ExceptionsViewerComponent = ({
     ({ exceptions: newExceptions, pagination: newPagination }: UseExceptionListSuccess): void => {
       dispatch({
         type: 'setExceptions',
+        lists: exceptionListsMeta,
         exceptions: newExceptions,
         pagination: newPagination,
       });
     },
-    [dispatch]
+    [dispatch, exceptionListsMeta]
   );
-  const [loadingList, , , , fetchList] = useExceptionList({
+  const [loadingList, , , fetchListItems] = useExceptionList({
     http: services.http,
     lists: loadingLists,
     filterOptions: [filterOptions],
@@ -141,10 +142,10 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleFetchList = useCallback((): void => {
-    if (fetchList != null) {
-      fetchList();
+    if (fetchListItems != null) {
+      fetchListItems();
     }
-  }, [fetchList]);
+  }, [fetchListItems]);
 
   const handleFilterChange = useCallback(
     ({ filter, pagination: pag }: Filter): void => {
@@ -285,8 +286,8 @@ const ExceptionsViewerComponent = ({
         <ExceptionsViewerHeader
           isInitLoading={isInitLoading}
           supportedListTypes={availableListTypes}
-          detectionsListItems={detectionsList != null ? detectionsList.totalItems : 0}
-          endpointListItems={endpointList != null ? endpointList.totalItems : 0}
+          detectionsListItems={totalDetectionsItems}
+          endpointListItems={totalEndpointItems}
           onFilterChange={handleFilterChange}
           onAddExceptionClick={handleAddException}
         />

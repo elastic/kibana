@@ -5,7 +5,6 @@
  */
 import { FilterOptions, ExceptionsPagination, ExceptionListItemIdentifiers } from '../types';
 import {
-  ExceptionList,
   ExceptionListType,
   ExceptionListItemSchema,
   ExceptionIdentifiers,
@@ -17,8 +16,6 @@ export type ViewerModalName = 'addModal' | 'editModal' | null;
 export interface State {
   filterOptions: FilterOptions;
   pagination: ExceptionsPagination;
-  endpointList: ExceptionList | null;
-  detectionsList: ExceptionList | null;
   allExceptions: ExceptionListItemSchema[];
   exceptions: ExceptionListItemSchema[];
   exceptionToEdit: ExceptionListItemSchema | null;
@@ -27,12 +24,14 @@ export interface State {
   isInitLoading: boolean;
   currentModal: ViewerModalName;
   exceptionListTypeToEdit: ExceptionListType | null;
+  totalEndpointItems: number;
+  totalDetectionsItems: number;
 }
 
 export type Action =
   | {
       type: 'setExceptions';
-      lists: ExceptionList[];
+      lists: ExceptionIdentifiers[];
       exceptions: ExceptionListItemSchema[];
       pagination: Pagination;
     }
@@ -51,17 +50,21 @@ export type Action =
 export const allExceptionItemsReducer = () => (state: State, action: Action): State => {
   switch (action.type) {
     case 'setExceptions': {
-      const endpointList = action.lists.filter((t) => t.type === 'endpoint');
-      const detectionsList = action.lists.filter((t) => t.type === 'detection');
+      const endpointListIds: string[] = action.lists
+        .filter(({ type }) => type === 'endpoint')
+        .map(({ listId }) => listId);
+      const detectionListIds: string[] = action.lists
+        .filter(({ type }) => type === 'detection')
+        .map(({ listId }) => listId);
+      const endpointItems = action.exceptions.filter(({ list_id: listId }) =>
+        endpointListIds.includes(listId)
+      );
+      const detectionItems = action.exceptions.filter(({ list_id: listId }) =>
+        detectionListIds.includes(listId)
+      );
 
       return {
         ...state,
-        endpointList: state.filterOptions.showDetectionsList
-          ? state.endpointList
-          : endpointList[0] ?? null,
-        detectionsList: state.filterOptions.showEndpointList
-          ? state.detectionsList
-          : detectionsList[0] ?? null,
         pagination: {
           ...state.pagination,
           pageIndex: action.pagination.page - 1,
@@ -70,6 +73,8 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
         },
         allExceptions: action.exceptions,
         exceptions: action.exceptions,
+        totalEndpointItems: endpointItems.length,
+        totalDetectionsItems: detectionItems.length,
       };
     }
     case 'updateFilterOptions': {
