@@ -25,6 +25,7 @@ import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http'
 import { LegacyNavLink, LegacyServiceDiscoverPlugins } from '../legacy';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
+import type { InternalStatusServiceSetup } from '../status';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -42,6 +43,7 @@ export interface RenderingMetadata {
     serverBasePath: string;
     env: Env;
     legacyMode: boolean;
+    anonymousStatusPage: boolean;
     i18n: {
       translationsUrl: string;
     };
@@ -75,6 +77,7 @@ export interface RenderingMetadata {
 export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   legacyPlugins: LegacyServiceDiscoverPlugins;
+  status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
 }
 

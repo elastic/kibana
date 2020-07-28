@@ -106,11 +106,32 @@ export const terminatedProcesses = createSelector(resolverTreeResponse, function
 });
 
 /**
+ * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.
+ */
+export const isProcessTerminated = createSelector(terminatedProcesses, function (
+  /* eslint-disable no-shadow */
+  terminatedProcesses
+  /* eslint-enable no-shadow */
+) {
+  return (entityId: string) => {
+    return terminatedProcesses.has(entityId);
+  };
+});
+
+/**
  * Process events that will be graphed.
  */
 export const graphableProcesses = createSelector(resolverTreeResponse, function (tree?) {
+  // Keep track of the last process event (in array order) for each entity ID
+  const events: Map<string, ResolverEvent> = new Map();
   if (tree) {
-    return resolverTreeModel.lifecycleEvents(tree).filter(isGraphableProcess);
+    for (const event of resolverTreeModel.lifecycleEvents(tree)) {
+      if (isGraphableProcess(event)) {
+        const entityID = uniquePidForProcess(event);
+        events.set(entityID, event);
+      }
+    }
+    return [...events.values()];
   } else {
     return [];
   }

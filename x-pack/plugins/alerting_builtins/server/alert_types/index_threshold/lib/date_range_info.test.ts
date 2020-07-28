@@ -132,10 +132,11 @@ describe('getRangeInfo', () => {
   it('should handle no dateStart, dateEnd or interval specified', async () => {
     const nowM0 = Date.now();
     const nowM5 = nowM0 - 1000 * 60 * 5;
+    const digitPrecision = 1;
 
     const info = getDateRangeInfo(BaseRangeQuery);
-    expect(sloppyMilliDiff(nowM5, Date.parse(info.dateStart))).toBeCloseTo(0);
-    expect(sloppyMilliDiff(nowM0, Date.parse(info.dateEnd))).toBeCloseTo(0);
+    expect(sloppyMilliDiff(nowM5, Date.parse(info.dateStart))).toBeCloseTo(0, digitPrecision);
+    expect(sloppyMilliDiff(nowM0, Date.parse(info.dateEnd))).toBeCloseTo(0, digitPrecision);
     expect(info.dateRanges.length).toEqual(1);
     expect(info.dateRanges[0].from).toEqual(info.dateStart);
     expect(info.dateRanges[0].to).toEqual(info.dateEnd);

@@ -197,9 +197,11 @@ export function mountWithTheme(
   tree: React.ReactElement<any>,
   { darkMode = false } = {}
 ) {
-  const WrappingThemeProvider = (props: any) => (
-    <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>
-  );
+  function WrappingThemeProvider(props: any) {
+    return (
+      <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>
+    );
+  }
 
   return mount(tree, {
     wrappingComponent: WrappingThemeProvider,

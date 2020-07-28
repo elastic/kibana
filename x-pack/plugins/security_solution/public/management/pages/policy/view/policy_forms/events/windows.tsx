@@ -142,9 +142,6 @@ export const WindowsEvents = React.memo(() => {
       type={i18n.translate('xpack.securitySolution.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      description={i18n.translate('xpack.securitySolution.endpoint.policy.details.windowsLabel', {
-        defaultMessage: 'Windows',
-      })}
       supportedOss={i18n.translate('xpack.securitySolution.endpoint.policy.details.windows', {
         defaultMessage: 'Windows',
       })}
