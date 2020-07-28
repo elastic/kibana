@@ -4,19 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
+import { TransformMatrix3d } from '../../lib/aeroelastic';
 
-export const RotationHandle = ({ transformMatrix, zoomScale }) => (
+interface Props {
+  transformMatrix: TransformMatrix3d;
+  zoomScale?: number;
+}
+
+export const RotationHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => (
   <div
-    className="canvasRotationHandle canvasRotationHandle--connector canvasLayoutAnnotation"
+    className="canvasRotationHandle canvasLayoutAnnotation"
     style={{
       transform: matrixToCSS(transformMatrix),
     }}
   >
     <div
-      className="canvasRotationHandle--handle"
+      className="canvasRotationHandle__handle"
       style={{ transform: `scale3d(${1 / zoomScale},${1 / zoomScale},1)` }}
     />
   </div>
@@ -24,4 +30,5 @@ export const RotationHandle = ({ transformMatrix, zoomScale }) => (
 
 RotationHandle.propTypes = {
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
+  zoomScale: PropTypes.number,
 };
