@@ -142,11 +142,6 @@ export const timelineSchema = gql`
     immutable
   }
 
-  enum TemplateTimelineType {
-    elastic
-    custom
-  }
-
   enum RowRendererId {
     auditd
     auditd_file

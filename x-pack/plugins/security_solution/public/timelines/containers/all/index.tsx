@@ -26,7 +26,6 @@ import {
   TimelineType,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
-  TemplateTimelineTypeLiteralWithNull,
 } from '../../../../common/types/timeline';
 
 export interface AllTimelinesArgs {

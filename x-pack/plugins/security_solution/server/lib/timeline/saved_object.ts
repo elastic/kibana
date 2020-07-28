@@ -16,7 +16,6 @@ import {
   TimelineTypeLiteralWithNull,
   ExportTimelineNotFoundError,
   TimelineStatusLiteralWithNull,
-  TemplateTimelineTypeLiteralWithNull,
 } from '../../../common/types/timeline';
 import {
   ResponseTimeline,
