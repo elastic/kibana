@@ -24,25 +24,21 @@
 
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { BehaviorSubject } from 'rxjs';
+
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
-import {
-  buildActiveMappings,
-  CallCluster,
-  IndexMigrator,
-  MigrationResult,
-  MigrationStatus,
-} from '../core';
+import { buildActiveMappings, IndexMigrator, MigrationResult, MigrationStatus } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
+import { MigrationEsClient } from '../core/';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 
 export interface KibanaMigratorOptions {
-  callCluster: CallCluster;
+  client: MigrationEsClient;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectsMigrationConfigType;
   kibanaConfig: KibanaConfigType;
@@ -62,7 +58,7 @@ export interface KibanaMigratorStatus {
  * Manages the shape of mappings and documents in the Kibana index.
  */
 export class KibanaMigrator {
-  private readonly callCluster: CallCluster;
+  private readonly client: MigrationEsClient;
   private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
@@ -80,7 +76,7 @@ export class KibanaMigrator {
    * Creates an instance of KibanaMigrator.
    */
   constructor({
-    callCluster,
+    client,
     typeRegistry,
     kibanaConfig,
     savedObjectsConfig,
@@ -88,7 +84,7 @@ export class KibanaMigrator {
     kibanaVersion,
     logger,
   }: KibanaMigratorOptions) {
-    this.callCluster = callCluster;
+    this.client = client;
     this.kibanaConfig = kibanaConfig;
     this.savedObjectsConfig = savedObjectsConfig;
     this.typeRegistry = typeRegistry;
@@ -153,7 +149,7 @@ export class KibanaMigrator {
     const migrators = Object.keys(indexMap).map((index) => {
       return new IndexMigrator({
         batchSize: this.savedObjectsConfig.batchSize,
-        callCluster: this.callCluster,
+        client: this.client,
         documentMigrator: this.documentMigrator,
         index,
         log: this.log,

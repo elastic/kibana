@@ -66,7 +66,7 @@ const getMin = (items: ChoroplethItem[]) =>
 const getMax = (items: ChoroplethItem[]) =>
   Math.max(...items.map((item) => item.value));
 
-export const ChoroplethMap: React.FC<Props> = (props) => {
+export function ChoroplethMap(props: Props) {
   const theme = useTheme();
   const { items } = props;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -267,4 +267,4 @@ export const ChoroplethMap: React.FC<Props> = (props) => {
       </div>
     </div>
   );
-};
+}

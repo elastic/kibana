@@ -408,7 +408,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async getViewTable(): Promise<string> {
-      const tableView = await testSubjects.find('tableView');
+      const tableView = await testSubjects.find('tableView', 20000);
       return await tableView.getVisibleText();
     }
 
