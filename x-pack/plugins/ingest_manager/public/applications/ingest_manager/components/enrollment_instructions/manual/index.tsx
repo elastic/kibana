@@ -5,7 +5,15 @@
  */
 
 import React from 'react';
-import { EuiText, EuiSpacer, EuiCode, EuiCodeBlock, EuiCopy, EuiButton } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiCode,
+  EuiTitle,
+  EuiCodeBlock,
+  EuiCopy,
+  EuiButton,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EnrollmentAPIKey } from '../../../types';
 
@@ -20,37 +28,89 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
   apiKey,
   kibanaCASha256,
 }) => {
-  const command = `
-./elastic-agent enroll ${kibanaUrl} ${apiKey.api_key}${
+  const enrollArgs = `${kibanaUrl} ${apiKey.api_key}${
     kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
-  }
+  }`;
+  const macOsLinuxTarCommand = `
+./elastic-agent enroll ${enrollArgs}
 ./elastic-agent run`;
+
+  const linuxDebRpmCommand = `
+./elastic-agent enroll ${enrollArgs}
+systemctl enable elastic-agent
+systemctl start elastic-agent`;
+
+  const windowsCommand = `
+./elastic-agent enroll ${enrollArgs}
+./install-service-elastic-agent.ps1`;
+
   return (
     <>
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.descriptionText"
-          defaultMessage="From the agent’s directory, run these commands to enroll and start the Elastic Agent. {enrollCommand} will write to your agent’s configuration file so that it has the correct settings. You can use this command to setup agents on more than one host."
+          defaultMessage="From the agent’s directory, run the appropriate commands to enroll and start an Elastic Agent. You can reuse these commands to setup agents on more than one machine."
+        />
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.ingestManager.enrollmentInstructions.windowsTitle"
+            defaultMessage="Windows"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+        <pre style={{ overflow: 'scroll' }}>{windowsCommand}</pre>
+      </EuiCodeBlock>
+      <EuiSpacer size="m" />
+      <EuiText>
+        <FormattedMessage
+          id="xpack.ingestManager.enrollmentInstructions.windowsInstructions"
+          defaultMessage="Alternatively, you can use {command} to start the agent; however, the resulting process will not persist after a system reboot."
           values={{
-            enrollCommand: <EuiCode>agent enroll</EuiCode>,
+            command: <EuiCode>./elastic-agent run</EuiCode>,
           }}
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiCodeBlock fontSize="m">
-        <pre>{command}</pre>
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.ingestManager.enrollmentInstructions.linuxDebRpmTitle"
+            defaultMessage="Linux (.deb and .rpm)"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+        <pre style={{ overflow: 'scroll' }}>{linuxDebRpmCommand}</pre>
       </EuiCodeBlock>
       <EuiSpacer size="m" />
-      <EuiCopy textToCopy={command}>
-        {(copy) => (
-          <EuiButton iconType="copy" fill onClick={copy}>
-            <FormattedMessage
-              id="xpack.ingestManager.enrollmentInstructions.copyButton"
-              defaultMessage="Copy command"
-            />
-          </EuiButton>
-        )}
-      </EuiCopy>
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.ingestManager.enrollmentInstructions.macLinuxTarTitle"
+            defaultMessage="macOS / Linux (.tar.gz)"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+        <pre style={{ overflow: 'scroll' }}>{macOsLinuxTarCommand}</pre>
+      </EuiCodeBlock>
+      <EuiSpacer size="m" />
+      <EuiText>
+        <FormattedMessage
+          id="xpack.ingestManager.enrollmentInstructions.macLinuxTarInstructions"
+          defaultMessage="You will need to run {command} if the agent’s system reboots. This is a known limitiation in 7.9."
+          values={{
+            command: <EuiCode>./elastic-agent run</EuiCode>,
+          }}
+        />
+      </EuiText>
     </>
   );
 };
