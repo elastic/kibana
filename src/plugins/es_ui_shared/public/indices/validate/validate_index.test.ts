@@ -39,7 +39,7 @@ describe('Index name validation', () => {
   });
 
   it('should not allow illegal characters', () => {
-    INDEX_ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
+    INDEX_ILLEGAL_CHARACTERS_VISIBLE.forEach((char) => {
       const illegalCharacters = findIllegalCharactersInIndexName(`name${char}`);
       expect(illegalCharacters).toEqual([char]);
     });

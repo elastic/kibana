@@ -24,7 +24,7 @@ import { toastNotifications } from 'ui/notify';
 import { SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
 import { uiModules } from '../modules';
 
-uiModules.get('kibana/url').service('redirectWhenMissing', function(Private) {
+uiModules.get('kibana/url').service('redirectWhenMissing', function (Private) {
   return Private(RedirectWhenMissingProvider);
 });
 
@@ -37,12 +37,12 @@ export function RedirectWhenMissingProvider(kbnUrl, Promise) {
    *                                 couldn't be found, or just a string that will be used for all types
    * @return {function} - the handler to pass to .catch()
    */
-  return function(mapping) {
+  return function (mapping) {
     if (typeof mapping === 'string') {
       mapping = { '*': mapping };
     }
 
-    return function(error) {
+    return function (error) {
       // if this error is not "404", rethrow
       const savedObjectNotFound = error instanceof SavedObjectNotFound;
       const unknownVisType = error.message.indexOf('Invalid type') === 0;

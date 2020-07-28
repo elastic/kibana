@@ -30,7 +30,7 @@ export const PageConfig = ({
 }) => {
   return (
     <Fragment>
-      <EuiTitle size="xxxs" className="canvasSidebar__panelTitleHeading">
+      <EuiTitle size="xs" className="canvasSidebar__panelTitleHeading">
         <h4>{strings.getTitle()}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -57,7 +57,7 @@ export const PageConfig = ({
               value={transition ? transition.name : ''}
               options={transitions}
               compressed
-              onChange={e => setTransition(e.target.value)}
+              onChange={(e) => setTransition(e.target.value)}
             />
           </EuiFormRow>
           {transition ? (

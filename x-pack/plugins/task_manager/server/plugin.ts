@@ -46,10 +46,10 @@ export class TaskManagerPlugin
 
     return {
       addMiddleware: (middleware: Middleware) => {
-        this.taskManager.then(tm => tm.addMiddleware(middleware));
+        this.taskManager.then((tm) => tm.addMiddleware(middleware));
       },
       registerTaskDefinitions: (taskDefinition: TaskDictionary<TaskDefinition>) => {
-        this.taskManager.then(tm => tm.registerTaskDefinitions(taskDefinition));
+        this.taskManager.then((tm) => tm.registerTaskDefinitions(taskDefinition));
       },
     };
   }
@@ -75,19 +75,19 @@ export class TaskManagerPlugin
     // of the old API that should be resolved once we split
     // Task manager into two services, setup and start, instead
     // of the single instance of TaskManager
-    this.taskManager.then(tm => tm.start());
+    this.taskManager.then((tm) => tm.start());
 
     return {
-      fetch: (...args) => this.taskManager.then(tm => tm.fetch(...args)),
-      get: (...args) => this.taskManager.then(tm => tm.get(...args)),
-      remove: (...args) => this.taskManager.then(tm => tm.remove(...args)),
-      schedule: (...args) => this.taskManager.then(tm => tm.schedule(...args)),
-      runNow: (...args) => this.taskManager.then(tm => tm.runNow(...args)),
-      ensureScheduled: (...args) => this.taskManager.then(tm => tm.ensureScheduled(...args)),
+      fetch: (...args) => this.taskManager.then((tm) => tm.fetch(...args)),
+      get: (...args) => this.taskManager.then((tm) => tm.get(...args)),
+      remove: (...args) => this.taskManager.then((tm) => tm.remove(...args)),
+      schedule: (...args) => this.taskManager.then((tm) => tm.schedule(...args)),
+      runNow: (...args) => this.taskManager.then((tm) => tm.runNow(...args)),
+      ensureScheduled: (...args) => this.taskManager.then((tm) => tm.ensureScheduled(...args)),
     };
   }
   public stop() {
-    this.taskManager.then(tm => {
+    this.taskManager.then((tm) => {
       tm.stop();
     });
   }

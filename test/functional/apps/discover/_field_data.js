@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -29,7 +29,7 @@ export default function({ getService, getPageObjects }) {
 
   describe('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
-    before(async function() {
+    before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');
       // delete .kibana index and update configDoc
@@ -41,10 +41,10 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('field data', function() {
-      it('search php should show the correct hit count', async function() {
+    describe('field data', function () {
+      it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
-        await retry.try(async function() {
+        await retry.try(async function () {
           await queryBar.setQuery('php');
           await queryBar.submitQuery();
           const hitCount = await PageObjects.discover.getHitCount();
@@ -52,14 +52,14 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      it('the search term should be highlighted in the field data', async function() {
+      it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
         const marks = await PageObjects.discover.getMarks();
         expect(marks.length).to.be(50);
         expect(marks.indexOf('php')).to.be(0);
       });
 
-      it('search type:apache should show the correct hit count', async function() {
+      it('search type:apache should show the correct hit count', async function () {
         const expectedHitCount = '11,156';
         await queryBar.setQuery('type:apache');
         await queryBar.submitQuery();
@@ -69,13 +69,13 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      it('doc view should show Time and _source columns', async function() {
+      it('doc view should show Time and _source columns', async function () {
         const expectedHeader = 'Time _source';
         const Docheader = await PageObjects.discover.getDocHeader();
         expect(Docheader).to.be(expectedHeader);
       });
 
-      it('doc view should sort ascending', async function() {
+      it('doc view should sort ascending', async function () {
         const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
         await PageObjects.discover.clickDocSortDown();
 
@@ -90,7 +90,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      it('a bad syntax query should show an error message', async function() {
+      it('a bad syntax query should show an error message', async function () {
         const expectedError =
           'Expected ":", "<", "<=", ">", ">=", AND, OR, end of input, ' +
           'whitespace but "(" found.';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,6 +26,7 @@ import { getTickFormat } from './get_tick_format';
 import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
+import { UptimeThemeContext } from '../../../contexts';
 
 interface DurationChartProps {
   /**
@@ -59,6 +60,8 @@ export const DurationChartComponent = ({
 
   const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
 
+  const { chartTheme } = useContext(UptimeThemeContext);
+
   const onBrushEnd: BrushEndListener = ({ x }) => {
     if (!x) {
       return;
@@ -72,9 +75,9 @@ export const DurationChartComponent = ({
 
   const legendToggleVisibility = (legendItem: SeriesIdentifier | null) => {
     if (legendItem) {
-      setHiddenLegends(prevState => {
+      setHiddenLegends((prevState) => {
         if (prevState.includes(legendItem.specId)) {
-          return [...prevState.filter(item => item !== legendItem.specId)];
+          return [...prevState.filter((item) => item !== legendItem.specId)];
         } else {
           return [...prevState, legendItem.specId];
         }
@@ -90,26 +93,24 @@ export const DurationChartComponent = ({
             xDomain={{ min, max }}
             showLegend
             showLegendExtra
-            legendPosition={Position.Bottom}
+            legendPosition={Position.Right}
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}
+            {...chartTheme}
           />
           <Axis
             id="bottom"
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={timeFormatter(getChartDateLabel(min, max))}
-            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.bottomAxis.title', {
-              defaultMessage: 'Timestamp',
-            })}
           />
           <Axis
             domain={{ min: 0 }}
             id="left"
             position={Position.Left}
-            tickFormat={d => getTickFormat(d)}
+            tickFormat={(d) => getTickFormat(d)}
             title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
-              defaultMessage: 'Duration ms',
+              defaultMessage: 'Duration in ms',
             })}
           />
           <DurationLineSeriesList lines={locationDurationLines} />

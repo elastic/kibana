@@ -19,11 +19,11 @@
 
 import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
-import { getFormatService, getQueryService } from './services';
+import { getFormatService, getQueryService, getKibanaLegacy } from './services';
 import { scaleBounds, geoContains, mapTooltipProvider } from '../../maps_legacy/public';
 import { tooltipFormatter } from './tooltip_formatter';
 
-export const createTileMapVisualization = dependencies => {
+export const createTileMapVisualization = (dependencies) => {
   const { getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {
@@ -60,6 +60,11 @@ export const createTileMapVisualization = dependencies => {
       this.vis.eventsSubject.next(updateVarsObject);
     };
 
+    async render(esResponse, visParams) {
+      getKibanaLegacy().loadFontAwesome();
+      await super.render(esResponse, visParams);
+    }
+
     async _makeKibanaMap() {
       await super._makeKibanaMap();
 
@@ -67,7 +72,7 @@ export const createTileMapVisualization = dependencies => {
       let precisionChange = false;
 
       const uiState = this.vis.getUiState();
-      uiState.on('change', prop => {
+      uiState.on('change', (prop) => {
         if (prop === 'mapZoom' || prop === 'mapCenter') {
           this.updateGeohashAgg();
         }
@@ -98,11 +103,11 @@ export const createTileMapVisualization = dependencies => {
       });
 
       this._kibanaMap.addDrawControl();
-      this._kibanaMap.on('drawCreated:rectangle', event => {
+      this._kibanaMap.on('drawCreated:rectangle', (event) => {
         const geohashAgg = this._getGeoHashAgg();
         this.addSpatialFilter(geohashAgg, 'geo_bounding_box', event.bounds);
       });
-      this._kibanaMap.on('drawCreated:polygon', event => {
+      this._kibanaMap.on('drawCreated:polygon', (event) => {
         const geohashAgg = this._getGeoHashAgg();
         this.addSpatialFilter(geohashAgg, 'geo_polygon', { points: event.points });
       });

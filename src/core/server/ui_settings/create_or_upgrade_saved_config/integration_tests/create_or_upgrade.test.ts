@@ -26,10 +26,10 @@ import {
   TestUtils,
 } from '../../../../../test_utils/kbn_server';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { httpServerMock } from '../../../http/http_server.mocks';
 
-const logger = loggingServiceMock.create().get();
+const logger = loggingSystemMock.create().get();
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient: SavedObjectsClientContract;
   let servers: TestUtils;
@@ -38,9 +38,9 @@ describe('createOrUpgradeSavedConfig()', () => {
 
   let kbnServer: TestKibanaUtils['kbnServer'];
 
-  beforeAll(async function() {
+  beforeAll(async function () {
     servers = createTestServers({
-      adjustTimeout: t => {
+      adjustTimeout: (t) => {
         jest.setTimeout(t);
       },
     });
@@ -86,8 +86,7 @@ describe('createOrUpgradeSavedConfig()', () => {
     await kbn.stop();
   }, 30000);
 
-  it('upgrades the previous version on each increment', async function() {
-    jest.setTimeout(30000);
+  it('upgrades the previous version on each increment', async function () {
     // ------------------------------------
     // upgrade to 5.4.0
     await createOrUpgradeSavedConfig({
@@ -211,5 +210,5 @@ describe('createOrUpgradeSavedConfig()', () => {
       '5.4.0': true,
       '5.4.0-rc1': true,
     });
-  });
+  }, 30000);
 });

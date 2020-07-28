@@ -166,7 +166,7 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
                 />
               </p>
               <ul>
-                {repositoryNames.map(name => (
+                {repositoryNames.map((name) => (
                   <li key={name}>{name}</li>
                 ))}
               </ul>

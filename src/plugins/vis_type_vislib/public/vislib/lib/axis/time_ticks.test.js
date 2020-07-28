@@ -40,7 +40,7 @@ describe('timeTicks', () => {
     moment.tz.setDefault();
   });
 
-  timezonesToTest.map(tz => {
+  timezonesToTest.map((tz) => {
     describe(`standard tests in ${tz}`, () => {
       beforeEach(() => {
         moment.tz.setDefault(tz);

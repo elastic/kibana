@@ -102,9 +102,7 @@ export class LensReportManager {
   }
 
   private trackTo(target: Record<string, Record<string, number>>, name: string) {
-    const date = moment()
-      .utc()
-      .format('YYYY-MM-DD');
+    const date = moment().utc().format('YYYY-MM-DD');
     if (!target[date]) {
       target[date] = {
         [name]: 1,

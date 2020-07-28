@@ -4,60 +4,51 @@
 
 beta[]
 
-*Lens* provides you with a simple and fast way to create visualizations from your {es} data. With Lens, you can:
+*Lens* is a simple and fast way to create visualizations of your {es} data. With *Lens*, 
+you drag and drop your data fields onto the visualization builder pane, and *Lens* automatically generates 
+a visualization that best displays your data.
 
-* Quickly build visualizations by dragging and dropping data fields.
+With Lens, you can:
 
-* Understand your data with a summary view on each field.
+* Explore your data in just a few clicks.
 
-* Easily change the visualization type by selecting the automatically generated visualization suggestions.
+* Create visualizations with multiple layers and indices.
 
-* Save your visualization for use in a dashboard.
+* Use the automatically generated visualization suggestions to change the visualization type.
 
-[float]
-[[drag-drop]]
-=== Drag and drop
+* Add your visualizations to dashboards and Canvas workpads.
 
-The panel shows the data fields for the selected time period. When
-you drag a field from the data panel, Lens highlights where you can drop that field. The first time you drag a data field,
-you'll see two places highlighted in green:
-
-* The visualization builder pane
-
-* The *X-axis* or *Y-axis* fields
-
-You can incorporate many fields into your visualization, and Lens uses heuristics to decide how
-to apply each one to the visualization.
+To get started with *Lens*, click a field in the data panel, then drag and drop the field on a highlighted area.
 
 [role="screenshot"]
 image::images/lens_drag_drop.gif[]
 
-TIP: Drag-and-drop capabilities are available only when Lens knows how to use the data. You can still customize
-your visualization if Lens is unable to make a suggestion.
+You can incorporate many fields into your visualization, and Lens uses heuristics to decide how to apply each one to the visualization.
+
+TIP: Drag-and-drop capabilities are available only when Lens knows how to use the data. If *Lens* is unable to automatically generate a visualization,
+you can still configure the customization options for your visualization.
 
 [float]
 [[apply-lens-filters]]
-==== Find the right data
+==== Filter the data panel fields
 
-Lens shows you fields based on the <<index-patterns, index patterns>> you have defined in
-{kib}, and the current time range. When you change the index pattern or time filter,
-the list of fields are updated.
+The fields in the data panel based on your selected <<index-patterns, index pattern>>, and the <<set-time-filter,time filter>>. 
 
-To narrow the list of fields, you can:
+To change the index pattern, click it, then select a new one. The fields in the data panel automatically update.
 
-* Enter the field name in *Search field names*.
+To filter the fields in the data panel:
 
-* Click *Filter by type*, then select the filter. You can also select *Only show fields with data*
-to show the full list of fields from the index pattern.
+* Enter the name in *Search field names*.
+
+* Click *Filter by type*, then select the filter. To show all of the fields in the index pattern, deselect *Only show fields with data*.
 
 [float]
 [[view-data-summaries]]
 ==== Data summaries
 
-To help you decide exactly the data you want to display, get a quick summary of each data field.
-The summary shows the distribution of values in the time range.
+To help you decide exactly the data you want to display, get a quick summary of each field. The summary shows the distribution of values in the time range.
 
-To view the data information, navigate to a data field, then click *i*.
+To view the field summary information, navigate to the field, then click *i*.
 
 [role="screenshot"]
 image::images/lens_data_info.png[]
@@ -66,46 +57,40 @@ image::images/lens_data_info.png[]
 [[change-the-visualization-type]]
 ==== Change the visualization type
 
-With Lens, you are no longer required to build each visualization from scratch. Lens allows
-you to switch between any supported chart type at any time. Lens also provides
-suggestions, which are shortcuts to alternate visualizations based on the data you have.
+*Lens* enables you to switch between any supported visualization type at any time.
 
-You can switch between suggestions without losing your previous state:
+*Suggestions* are shortcuts to alternate visualizations that *Lens* generates for you.
 
 [role="screenshot"]
 image::images/lens_suggestions.gif[]
 
-If you want to switch to a chart type that is not suggested, click the chart type,
-then select a chart type. When there is an exclamation point (!)
-next to a chart type, Lens is unable to transfer your current data, but
+If you'd like to use a visualization type that is not suggested, click the visualization type,
+then select a new one. 
+
+[role="screenshot"]
+image::images/lens_viz_types.png[]
+
+When there is an exclamation point (!)
+next to a visualization type, Lens is unable to transfer your data, but
 still allows you to make the change.
 
 [float]
 [[customize-operation]]
-==== Customize the data for your visualization
+==== Change the aggregation and labels
 
 Lens allows some customizations of the data for each visualization.
 
-. Click the index pattern name, then select the new index pattern.
-+
-If there is a match, Lens displays the new data. All fields that do not match the index pattern are removed.
+. Click *Drop a field here* or the field name in the column.
 
-. Change the data field options, such as the aggregation or label.
-
-.. Click *Drop a field here* or the field name in the column.
-
-.. Change the options that appear depending on the type of field.
+. Change the options that appear depending on the type of field.
 
 [float]
 [[layers]]
-==== Layers in bar, line, and area charts
+==== Add layers and indices
 
-The bar, line, and area charts allow you to layer two different series. To add a layer, click *+*.
+Bar, line, and area charts allow you to visualize multiple data layers and indices so that you can compare and analyze data from multiple sources.
 
-To remove a layer, click the chart icon next to the index name:
-
-[role="screenshot"]
-image::images/lens_remove_layer.png[]
+To add a layer, click *+*, then drag and drop the fields for the new layer. To view a different index, click it, then select a new one.
 
 [float]
 [[lens-tutorial]]
@@ -125,50 +110,46 @@ To start, you'll need to add the <<add-sample-data, sample ecommerce data>>.
 
 Drag and drop your data onto the visualization builder pane.
 
-. Open *Visualize*, then click *Create visualization*.
+. Open *Lens*.
 
-. On the *New Visualization* window, click *Lens*.
+. Select the *kibana_sample_data_ecommerce* index pattern.
 
-. Select the *kibana_sample_data_ecommerce* index.
-
-. Click image:images/time-filter-calendar.png[], then click *Last 7 days*. The list of data fields are updated.
+. Click image:images/time-filter-calendar.png[], then click *Last 7 days*. 
++
+The fields in the data panel update.
 
 . Drag and drop the *taxful_total_price* data field to the visualization builder pane.
 +
 [role="screenshot"]
 image::images/lens_tutorial_1.png[Lens tutorial]
 
-Lens has taken your intent to see *taxful_total_price* and added in the *order_date* field to show
-average order prices over time.
+To display the average order prices over time, *Lens* automatically added in *order_date* field.
 
 To break down your data, drag the *category.keyword* field to the visualization builder pane. Lens
-understands that you want to show the top categories and compare them across the dates,
-and creates a chart that compares the sales for each of the top 3 categories:
+knows that you want to show the top categories and compare them across the dates,
+and creates a chart that compares the sales for each of the top three categories:
 
 [role="screenshot"]
 image::images/lens_tutorial_2.png[Lens tutorial]
 
 [float]
 [[customize-lens-visualization]]
-==== Further customization
+==== Customize your visualization
 
-Customize your visualization to look exactly how you want.
+Make your visualization look exactly how you want with the customization options.
 
 . Click *Average of taxful_total_price*.
 
-.. Change the *Label* to `Sales`, or a name that you prefer for the data.
+.. Change the *Label* to `Sales`.
 
 . Click *Top values of category.keyword*.
 
-.. Increase *Number of values* to `10`. The visualization updates in the background to show there are only
+.. Change *Number of values* to `10`. The visualization updates to show there are only
 six available categories.
++
+Look at the *Suggestions*. An area chart is not an option, but for sales data, a stacked area chart might be the best option.
 
-. Look at the suggestions. None of them show an area chart, but for sales data, a stacked area chart
-might make sense. To switch the chart type:
-
-.. Click *Stacked bar chart* in the column.
-
-.. Click *Stacked area*.
+. To switch the chart type, click *Stacked bar chart* in the column, then click *Stacked area* from the *Select a visualizations* window.
 +
 [role="screenshot"]
 image::images/lens_tutorial_3.png[Lens tutorial]
@@ -177,6 +158,6 @@ image::images/lens_tutorial_3.png[Lens tutorial]
 [[lens-tutorial-next-steps]]
 ==== Next steps
 
-Now that you've created your visualization in Lens, you can add it to a Dashboard.
+Now that you've created your visualization, you can add it to a dashboard or Canvas workpad.
 
-For more information, see <<dashboard,Dashboard>>.
+For more information, refer to <<dashboard,Dashboard>> or <<canvas,Canvas>>.

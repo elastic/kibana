@@ -20,7 +20,7 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import { callIndexAliasApi, IndicesAliasResponse } from './es_api';
@@ -36,7 +36,7 @@ import { callIndexAliasApi, IndicesAliasResponse } from './es_api';
  *                            and the indices that actually match the time
  *                            pattern (matches);
  */
-export async function resolveTimePattern(callCluster: APICaller, timePattern: string) {
+export async function resolveTimePattern(callCluster: LegacyAPICaller, timePattern: string) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
   const allIndexDetails = chain<IndicesAliasResponse>(aliases)
@@ -46,8 +46,8 @@ export async function resolveTimePattern(callCluster: APICaller, timePattern: st
       []
     )
     .sortBy((indexName: string) => indexName)
-    .uniq(true)
-    .map(indexName => {
+    .sortedUniq()
+    .map((indexName) => {
       const parsed = moment(indexName, timePattern, true);
       if (!parsed.isValid()) {
         return {
@@ -65,12 +65,14 @@ export async function resolveTimePattern(callCluster: APICaller, timePattern: st
         isMatch: indexName === parsed.format(timePattern),
       };
     })
-    .sortByOrder(['valid', 'order'], ['desc', 'desc'])
+    .orderBy(['valid', 'order'], ['desc', 'desc'])
     .value();
 
   return {
-    all: allIndexDetails.map(details => details.indexName),
+    all: allIndexDetails.map((details) => details.indexName),
 
-    matches: allIndexDetails.filter(details => details.isMatch).map(details => details.indexName),
+    matches: allIndexDetails
+      .filter((details) => details.isMatch)
+      .map((details) => details.indexName),
   };
 }

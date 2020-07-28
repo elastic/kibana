@@ -19,7 +19,7 @@ exports[`Render <DocViewer/> with 3 different tabs 1`] = `
             }
             title="Render function"
           />,
-          "id": "Render function",
+          "id": "kbn_doc_viewer_tab_0",
           "name": "Render function",
         },
         Object {
@@ -33,7 +33,7 @@ exports[`Render <DocViewer/> with 3 different tabs 1`] = `
             }
             title="React component"
           />,
-          "id": "React component",
+          "id": "kbn_doc_viewer_tab_1",
           "name": "React component",
         },
         Object {
@@ -46,7 +46,7 @@ exports[`Render <DocViewer/> with 3 different tabs 1`] = `
             }
             title="Invalid doc view"
           />,
-          "id": "Invalid doc view",
+          "id": "kbn_doc_viewer_tab_2",
           "name": "Invalid doc view",
         },
       ]

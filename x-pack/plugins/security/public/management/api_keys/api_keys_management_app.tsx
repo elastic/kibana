@@ -25,18 +25,18 @@ export const apiKeysManagementApp = Object.freeze({
       title: i18n.translate('xpack.security.management.apiKeysTitle', {
         defaultMessage: 'API Keys',
       }),
-      async mount({ basePath, element, setBreadcrumbs }) {
+      async mount({ element, setBreadcrumbs }) {
         setBreadcrumbs([
           {
             text: i18n.translate('xpack.security.apiKeys.breadcrumb', {
               defaultMessage: 'API Keys',
             }),
-            href: `#${basePath}`,
+            href: `/`,
           },
         ]);
 
         const [
-          [{ docLinks, http, notifications, i18n: i18nStart }],
+          [{ docLinks, http, notifications, i18n: i18nStart, application }],
           { APIKeysGridPage },
           { APIKeysAPIClient },
         ] = await Promise.all([
@@ -48,6 +48,7 @@ export const apiKeysManagementApp = Object.freeze({
         render(
           <i18nStart.Context>
             <APIKeysGridPage
+              navigateToApp={application.navigateToApp}
               notifications={notifications}
               docLinks={new DocumentationLinksService(docLinks)}
               apiKeysAPIClient={new APIKeysAPIClient(http)}

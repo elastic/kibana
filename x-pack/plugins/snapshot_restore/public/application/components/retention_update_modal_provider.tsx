@@ -203,7 +203,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                   <EuiFieldText
                     defaultValue={retentionSchedule}
                     fullWidth
-                    onChange={e => setRetentionSchedule(e.target.value)}
+                    onChange={(e) => setRetentionSchedule(e.target.value)}
                   />
                 </EuiFormRow>
 

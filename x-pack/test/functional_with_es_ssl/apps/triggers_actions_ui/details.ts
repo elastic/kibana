@@ -19,8 +19,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const find = getService('find');
 
-  describe('Alert Details', function() {
-    describe('Header', function() {
+  describe('Alert Details', function () {
+    describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
@@ -46,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const alert = await alerting.alerts.createAlwaysFiringWithActions(
           `test-alert-${testRunUuid}`,
-          actions.map(action => ({
+          actions.map((action) => ({
             id: action.id,
             group: 'default',
             params: {
@@ -152,7 +152,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Edit alert button', function() {
+    describe('Edit alert button', function () {
       const testRunUuid = uuid.v4();
 
       it('should open edit alert flyout', async () => {
@@ -257,7 +257,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('View In App', function() {
+    describe('View In App', function () {
       const testRunUuid = uuid.v4();
 
       beforeEach(async () => {
@@ -306,7 +306,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Alert Instances', function() {
+    describe('Alert Instances', function () {
       const testRunUuid = uuid.v4();
       let alert: any;
 
@@ -335,7 +335,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const instances = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
         alert = await alerting.alerts.createAlwaysFiringWithActions(
           `test-alert-${testRunUuid}`,
-          actions.map(action => ({
+          actions.map((action) => ({
             id: action.id,
             group: 'default',
             params: {
@@ -375,7 +375,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
 
-        const dateOnAllInstancesFromApiResponse = mapValues<Record<string, number>>(
+        const dateOnAllInstancesFromApiResponse = mapValues(
           alertInstances,
           ({
             meta: {
@@ -391,7 +391,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
-        expect(instancesList.map(instance => omit(instance, 'duration'))).to.eql([
+        expect(instancesList.map((instance) => omit(instance, 'duration'))).to.eql([
           {
             instance: 'us-central',
             status: 'Active',
@@ -424,7 +424,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const durationFromInstanceInApiUntilPageLoad = mapValues(
           dateOnAllInstancesFromApiResponse,
           // time from Alert Instance until pageload (AKA durationEpoch)
-          date => {
+          (date) => {
             const durationFromApiResuiltToEpoch = moment.duration(
               durationEpoch.diff(moment(date).utc())
             );
@@ -438,7 +438,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         instancesList
-          .map(alertInstance => ({
+          .map((alertInstance) => ({
             id: alertInstance.instance,
             // time from Alert Instance used to render the list until pageload (AKA durationEpoch)
             duration: moment.duration(alertInstance.duration),
@@ -466,7 +466,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await browser.refresh();
 
         const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
-        expect(instancesList.filter(alertInstance => alertInstance.instance === 'eu-east')).to.eql([
+        expect(
+          instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
+        ).to.eql([
           {
             instance: 'eu-east',
             status: 'Inactive',
@@ -522,7 +524,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Alert Instance Pagination', function() {
+    describe('Alert Instance Pagination', function () {
       const testRunUuid = uuid.v4();
       let alert: any;
 
@@ -549,7 +551,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ]);
 
         const instances = flatten(
-          range(10).map(index => [
+          range(10).map((index) => [
             { id: `us-central-${index}` },
             { id: `us-east-${index}` },
             { id: `us-west-${index}` },
@@ -557,7 +559,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         alert = await alerting.alerts.createAlwaysFiringWithActions(
           `test-alert-${testRunUuid}`,
-          actions.map(action => ({
+          actions.map((action) => ({
             id: action.id,
             group: 'default',
             params: {

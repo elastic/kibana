@@ -27,7 +27,7 @@ const noop = () => {};
 export const RoutedTabs = ({ tabs }: RoutedTabsProps) => {
   return (
     <EuiTabs display="condensed">
-      {tabs.map(tab => {
+      {tabs.map((tab) => {
         return <Tab key={`${tab.pathname}-${tab.title}`} {...tab} />;
       })}
     </EuiTabs>

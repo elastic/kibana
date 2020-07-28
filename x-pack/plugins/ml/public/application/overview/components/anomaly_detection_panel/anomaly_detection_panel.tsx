@@ -43,7 +43,7 @@ const createJobLink = '#/jobs/new_job/step/index_or_search';
 
 function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
   const anomalyScores: MaxScoresByGroup = {};
-  groups.forEach(group => {
+  groups.forEach((group) => {
     anomalyScores[group.id] = { maxScore: 0 };
   });
 
@@ -96,7 +96,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
 
     try {
       const promises = groupsList
-        .filter(group => group.jobIds.length > 0)
+        .filter((group) => group.jobIds.length > 0)
         .map((group, i) => {
           scores[group.id].index = i;
           const latestTimestamp = group.latest_timestamp;
@@ -108,7 +108,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
       const results = await Promise.all(promises);
       const tempGroups = { ...groupsObject };
       // Check results for each group's promise index and update state
-      Object.keys(scores).forEach(groupId => {
+      Object.keys(scores).forEach((groupId) => {
         const resultsIndex = scores[groupId] && scores[groupId].index;
         // maxScore will be null if it was not loaded correctly
         const { maxScore } = resultsIndex !== undefined && results[resultsIndex];

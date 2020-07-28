@@ -41,7 +41,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
   );
 
   const handleChange = useCallback(
-    selectedOptions => {
+    (selectedOptions) => {
       onChange(
         selectedOptions.map((opt: SelectedOption, index: number) => ({
           aggregation: options.aggregation,
@@ -53,10 +53,10 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
     [onChange, options.aggregation, colors]
   );
 
-  const comboOptions = fields.map(field => ({ label: field.name, value: field.name }));
+  const comboOptions = fields.map((field) => ({ label: field.name, value: field.name }));
   const selectedOptions = options.metrics
-    .filter(m => m.aggregation !== 'count')
-    .map(metric => ({
+    .filter((m) => m.aggregation !== 'count')
+    .map((metric) => ({
       label: metric.field || '',
       value: metric.field || '',
       color: colorTransformer(metric.color || MetricsExplorerColor.color0),

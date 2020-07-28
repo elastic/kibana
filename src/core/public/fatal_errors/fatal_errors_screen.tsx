@@ -63,8 +63,8 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
 
       // consume error notifications and set them to the component state
       this.props.errorInfo$.pipe(
-        tap(error => {
-          this.setState(state => ({
+        tap((error) => {
+          this.setState((state) => ({
             ...state,
             errors: [...state.errors, error],
           }));

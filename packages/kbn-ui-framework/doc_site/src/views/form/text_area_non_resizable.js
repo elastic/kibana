@@ -33,7 +33,7 @@ class KuiTextAreaNonResizableExample extends Component {
     return (
       <KuiTextArea
         value={this.state.value1}
-        onChange={event => this.handleChange(event, 'value1')}
+        onChange={(event) => this.handleChange(event, 'value1')}
         isNonResizable
       />
     );

@@ -14,15 +14,15 @@ import {
 } from '../../../state/actions';
 import {
   anomaliesSelector,
-  hasMLFeatureAvailable,
+  hasMLFeatureSelector,
   hasMLJobSelector,
   selectDurationLines,
 } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
-import { getMLJobId } from '../../../state/api/ml_anomaly';
 import { JobStat } from '../../../../../ml/public';
 import { MonitorDurationComponent } from './monitor_duration';
 import { MonitorIdParam } from '../../../../common/types';
+import { getMLJobId } from '../../../../common/lib';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const {
@@ -34,7 +34,7 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
 
   const { durationLines, loading } = useSelector(selectDurationLines);
 
-  const isMLAvailable = useSelector(hasMLFeatureAvailable);
+  const isMLAvailable = useSelector(hasMLFeatureSelector);
 
   const { data: mlJobs, loading: jobsLoading } = useSelector(hasMLJobSelector);
 

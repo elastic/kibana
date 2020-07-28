@@ -49,18 +49,18 @@ export const DoubleIntegers: React.FC<Props> = ({ double }) => {
     setShowingResults(true);
     const nums = numbers
       .split('\n')
-      .map(num => num.trim())
+      .map((num) => num.trim())
       .filter(Boolean)
       .map(Number);
     counter.set(nums.length);
-    nums.forEach(num => {
+    nums.forEach((num) => {
       double({ num }).then(
-        result => {
+        (result) => {
           if (!isMounted()) return;
           counter.dec();
           pushResult({ num, result });
         },
-        error => {
+        (error) => {
           if (!isMounted()) return;
           counter.dec();
           pushResult({ num, error });
@@ -94,7 +94,7 @@ export const DoubleIntegers: React.FC<Props> = ({ double }) => {
           fullWidth
           placeholder="Enter numbers in milliseconds separated by new line"
           value={numbers}
-          onChange={e => setNumbers(e.target.value)}
+          onChange={(e) => setNumbers(e.target.value)}
         />
       </EuiFormRow>
       <EuiButton type="submit" fill onClick={handleSubmit}>

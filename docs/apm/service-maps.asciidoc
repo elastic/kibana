@@ -62,9 +62,9 @@ Machine learning jobs can be created to calculate anomaly scores on APM transact
 When these jobs are active, service maps will display a color-coded anomaly indicator based on the detected anomaly score:
 
 [horizontal]
-image:apm/images/green-service.png[APM green service]:: Max anomaly score **<=25**. Service is healthy.
+image:apm/images/green-service.png[APM green service]:: Max anomaly score **≤25**. Service is healthy.
 image:apm/images/yellow-service.png[APM yellow service]:: Max anomaly score **26-74**. Anomalous activity detected. Service may be degraded.
-image:apm/images/red-service.png[APM red service]:: Max anomaly score **>=75**. Anomalous activity detected. Service is unhealthy.
+image:apm/images/red-service.png[APM red service]:: Max anomaly score **≥75**. Anomalous activity detected. Service is unhealthy.
 
 [role="screenshot"]
 image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on service maps in the APM app]
@@ -92,10 +92,10 @@ Type and subtype are based on `span.type`, and `span.subtype`.
 Service maps are supported for the following Agent versions:
 
 [horizontal]
-Go Agent:: >= v1.7.0
-Java Agent:: >= v1.13.0
-.NET Agent:: >= v1.3.0
-Node.js Agent:: >= v3.6.0
-Python Agent:: >= v5.5.0
-Ruby Agent:: >= v3.6.0
-Real User Monitoring (RUM) Agent:: >= v4.7.0
+Go Agent:: ≥ v1.7.0
+Java Agent:: ≥ v1.13.0
+.NET Agent:: ≥ v1.3.0
+Node.js Agent:: ≥ v3.6.0
+Python Agent:: ≥ v5.5.0
+Ruby Agent:: ≥ v3.6.0
+Real User Monitoring (RUM) Agent:: ≥ v4.7.0

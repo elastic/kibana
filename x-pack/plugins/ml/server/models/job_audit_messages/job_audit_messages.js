@@ -34,14 +34,14 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
-export function jobAuditMessagesProvider(callAsCurrentUser) {
+export function jobAuditMessagesProvider({ callAsInternalUser }) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
   async function getJobAuditMessages(jobId, from) {
     let gte = null;
     if (jobId !== undefined && from === undefined) {
-      const jobs = await callAsCurrentUser('ml.jobs', { jobId });
+      const jobs = await callAsInternalUser('ml.jobs', { jobId });
       if (jobs.count > 0 && jobs.jobs !== undefined) {
         gte = moment(jobs.jobs[0].create_time).valueOf();
       }
@@ -100,7 +100,7 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
     }
 
     try {
-      const resp = await callAsCurrentUser('search', {
+      const resp = await callAsInternalUser('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
@@ -113,7 +113,7 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
 
       let messages = [];
       if (resp.hits.total !== 0) {
-        messages = resp.hits.hits.map(hit => hit._source);
+        messages = resp.hits.hits.map((hit) => hit._source);
       }
       return messages;
     } catch (e) {
@@ -155,7 +155,7 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
         levelsPerJobAggSize = jobIds.length;
       }
 
-      const resp = await callAsCurrentUser('search', {
+      const resp = await callAsInternalUser('search', {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
@@ -210,14 +210,14 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
         messagesPerJob = resp.aggregations.levelsPerJob.buckets;
       }
 
-      messagesPerJob.forEach(job => {
+      messagesPerJob.forEach((job) => {
         // ignore system messages (id==='')
         if (job.key !== '' && job.levels && job.levels.buckets && job.levels.buckets.length) {
           let highestLevel = 0;
           let highestLevelText = '';
           let msgTime = 0;
 
-          job.levels.buckets.forEach(level => {
+          job.levels.buckets.forEach((level) => {
             const label = level.key;
             // note the highest message level
             if (LEVEL[label] > highestLevel) {
@@ -227,7 +227,7 @@ export function jobAuditMessagesProvider(callAsCurrentUser) {
                 level.latestMessage.buckets &&
                 level.latestMessage.buckets.length
               ) {
-                level.latestMessage.buckets.forEach(msg => {
+                level.latestMessage.buckets.forEach((msg) => {
                   // there should only be one result here.
                   highestLevelText = msg.key;
 

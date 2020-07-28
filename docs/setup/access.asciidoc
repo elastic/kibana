@@ -1,5 +1,5 @@
 [[access]]
-== Accessing Kibana
+== Access {kib}
 
 Kibana is a web application that you access through port 5601. All you need to do is point your web browser at the
 machine where Kibana is running and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
@@ -13,7 +13,7 @@ If you still don't see any results, it's possible that you don't *have* any docu
 
 [float]
 [[status]]
-=== Checking Kibana Status
+=== Check {kib} status
 
 You can reach the Kibana server's status page by navigating to the status endpoint, for example, `localhost:5601/status`. The status page displays
 information about the server's resource usage and lists the installed plugins.

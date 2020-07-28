@@ -31,7 +31,7 @@ export class MlLicense {
     license$: Observable<ILicense>,
     postInitFunctions?: Array<(lic: MlLicense) => void>
   ) {
-    this._licenseSubscription = license$.subscribe(async license => {
+    this._licenseSubscription = license$.subscribe(async (license) => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
 
       this._license = license;
@@ -42,7 +42,7 @@ export class MlLicense {
       this._isFullLicense = isFullLicense(this._license);
 
       if (this._initialized === false && postInitFunctions !== undefined) {
-        postInitFunctions.forEach(f => f(this));
+        postInitFunctions.forEach((f) => f(this));
       }
       this._initialized = true;
     });

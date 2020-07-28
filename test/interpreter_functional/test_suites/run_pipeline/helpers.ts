@@ -110,13 +110,13 @@ export function expectExpressionProvider({
         stepContext: ExpressionValue = context
       ): Promise<ExpressionResult> => {
         log.debug(`running expression ${step || expression}`);
-        return browser.executeAsync<ExpressionResult>(
-          (
-            _expression: string,
-            _currentContext: ExpressionValue & { type: string },
-            _initialContext: ExpressionValue,
-            done: (expressionResult: ExpressionResult) => void
-          ) => {
+        return browser.executeAsync<
+          ExpressionResult,
+          string,
+          ExpressionValue & { type: string },
+          ExpressionValue
+        >(
+          (_expression, _currentContext, _initialContext, done) => {
             if (!_currentContext) _currentContext = { type: 'null' };
             if (!_currentContext.type) _currentContext.type = 'null';
             return window

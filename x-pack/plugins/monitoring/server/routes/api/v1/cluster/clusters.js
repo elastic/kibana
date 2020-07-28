@@ -30,7 +30,7 @@ export function clustersRoute(server) {
         }),
       },
     },
-    handler: async req => {
+    handler: async (req) => {
       let clusters = [];
       const config = server.config();
 

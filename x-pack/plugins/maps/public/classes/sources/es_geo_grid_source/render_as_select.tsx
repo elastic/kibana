@@ -41,7 +41,7 @@ export function RenderAsSelect(props: {
   }
 
   const selectedOptions = [];
-  const selectedOption = options.find(option => option.value === props.renderAs);
+  const selectedOption = options.find((option) => option.value === props.renderAs);
   if (selectedOption) {
     selectedOptions.push(selectedOption);
   }

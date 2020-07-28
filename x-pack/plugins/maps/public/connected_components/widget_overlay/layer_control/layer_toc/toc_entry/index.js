@@ -7,7 +7,6 @@
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
 import { FLYOUT_STATE } from '../../../../../reducers/ui';
-import { updateFlyout, hideTOCDetails, showTOCDetails } from '../../../../../actions/ui_actions';
 import {
   getMapZoom,
   hasDirtyState,
@@ -18,7 +17,12 @@ import {
   getOpenTOCDetails,
   getFlyoutDisplay,
 } from '../../../../../selectors/ui_selectors';
-import { setSelectedLayer, removeTransientLayer } from '../../../../../actions/map_actions';
+import {
+  setSelectedLayer,
+  updateFlyout,
+  hideTOCDetails,
+  showTOCDetails,
+} from '../../../../../actions';
 
 function mapStateToProps(state = {}, ownProps) {
   const flyoutDisplay = getFlyoutDisplay(state);
@@ -35,15 +39,14 @@ function mapStateToProps(state = {}, ownProps) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    openLayerPanel: async layerId => {
-      await dispatch(removeTransientLayer());
+    openLayerPanel: async (layerId) => {
       await dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
-    hideTOCDetails: layerId => {
+    hideTOCDetails: (layerId) => {
       dispatch(hideTOCDetails(layerId));
     },
-    showTOCDetails: layerId => {
+    showTOCDetails: (layerId) => {
       dispatch(showTOCDetails(layerId));
     },
   };

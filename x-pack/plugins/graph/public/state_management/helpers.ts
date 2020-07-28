@@ -25,4 +25,4 @@ export type InferActionType<X> = X extends ActionCreator<infer T> ? T : never;
  * @param actionCreators The action creators to create a unified matcher for
  */
 export const matchesOne = (...actionCreators: Array<ActionCreator<any>>) => (action: AnyAction) =>
-  actionCreators.some(actionCreator => actionCreator.match(action));
+  actionCreators.some((actionCreator) => actionCreator.match(action));

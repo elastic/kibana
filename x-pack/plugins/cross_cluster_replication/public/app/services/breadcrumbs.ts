@@ -9,8 +9,6 @@ import { ChromeBreadcrumb } from 'src/core/public';
 
 import { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
 
-import { BASE_PATH } from '../../../common/constants';
-
 export type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
 let setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -19,11 +17,13 @@ export const init = (_setBreadcrumbs: SetBreadcrumbs): void => {
   setBreadcrumbs = _setBreadcrumbs;
 };
 
-export const listBreadcrumb = {
-  text: i18n.translate('xpack.crossClusterReplication.homeBreadcrumbTitle', {
-    defaultMessage: 'Cross-Cluster Replication',
-  }),
-  href: `#${BASE_PATH}`,
+export const listBreadcrumb = (section?: string) => {
+  return {
+    text: i18n.translate('xpack.crossClusterReplication.homeBreadcrumbTitle', {
+      defaultMessage: 'Cross-Cluster Replication',
+    }),
+    href: section || '/',
+  };
 };
 
 export const addBreadcrumb = {

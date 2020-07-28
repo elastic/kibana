@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiSelect, EuiFormRow } from '@elastic/eui';
+import { EuiSelect, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 
@@ -31,19 +31,21 @@ export function CreateSourceEditor({ onSourceConfigChange }) {
       : null;
 
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
-        defaultMessage: 'Vector layer',
-      })}
-      helpText={helpText}
-    >
-      <EuiSelect
-        hasNoInitialSelection
-        options={regionmapOptions}
-        onChange={onChange}
-        disabled={regionmapOptions.length === 0}
-      />
-    </EuiFormRow>
+    <EuiPanel>
+      <EuiFormRow
+        label={i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
+          defaultMessage: 'Vector layer',
+        })}
+        helpText={helpText}
+      >
+        <EuiSelect
+          hasNoInitialSelection
+          options={regionmapOptions}
+          onChange={onChange}
+          disabled={regionmapOptions.length === 0}
+        />
+      </EuiFormRow>
+    </EuiPanel>
   );
 }
 

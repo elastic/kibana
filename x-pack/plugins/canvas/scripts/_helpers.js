@@ -6,19 +6,19 @@
 
 const { resolve } = require('path');
 
-exports.runGulpTask = function(name) {
+exports.runGulpTask = function (name) {
   process.chdir(resolve(__dirname, '../../..'));
   process.argv.splice(1, 1, require.resolve('gulp/bin/gulp'), name);
   require('gulp/bin/gulp');
 };
 
-exports.runKibanaScript = function(name, args = []) {
+exports.runKibanaScript = function (name, args = []) {
   process.chdir(resolve(__dirname, '../../../..'));
   process.argv.splice(2, 0, ...args);
   require('../../../../scripts/' + name); // eslint-disable-line import/no-dynamic-require
 };
 
-exports.runXPackScript = function(name, args = []) {
+exports.runXPackScript = function (name, args = []) {
   process.chdir(resolve(__dirname, '../../..'));
   process.argv.splice(2, 0, ...args);
   require('../../../scripts/' + name); // eslint-disable-line import/no-dynamic-require

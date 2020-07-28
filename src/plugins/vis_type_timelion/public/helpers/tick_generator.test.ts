@@ -19,20 +19,20 @@
 
 import { generateTicksProvider } from './tick_generator';
 
-describe('Tick Generator', function() {
+describe('Tick Generator', function () {
   let generateTicks: any;
 
-  beforeEach(function() {
+  beforeEach(function () {
     generateTicks = generateTicksProvider();
   });
 
-  describe('generateTicksProvider()', function() {
-    it('should return a function', function() {
+  describe('generateTicksProvider()', function () {
+    it('should return a function', function () {
       expect(generateTicks).toEqual(expect.any(Function));
     });
   });
 
-  describe('generateTicks()', function() {
+  describe('generateTicks()', function () {
     const axes = [
       {
         min: 0,
@@ -51,8 +51,8 @@ describe('Tick Generator', function() {
       },
     ];
 
-    axes.forEach(axis => {
-      it(`generates ticks from ${axis.min} to ${axis.max}`, function() {
+    axes.forEach((axis) => {
+      it(`generates ticks from ${axis.min} to ${axis.max}`, function () {
         const ticks = generateTicks(axis);
         let n = 1;
         while (Math.pow(2, n) < axis.delta) n++;

@@ -13,7 +13,7 @@ const expressionTypes = ['view', 'model', 'transform', 'datasource'];
 
 export function findExpressionType(name, type) {
   const checkTypes = expressionTypes.filter(
-    expressionType => type == null || expressionType === type
+    (expressionType) => type == null || expressionType === type
   );
 
   const matches = checkTypes.reduce((acc, checkType) => {

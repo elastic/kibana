@@ -21,13 +21,13 @@ import Chance from 'chance';
 
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { getUpgradeableConfigMock } from './get_upgradeable_config.test.mock';
 
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 const chance = new Chance();
-describe('uiSettings/createOrUpgradeSavedConfig', function() {
+describe('uiSettings/createOrUpgradeSavedConfig', function () {
   afterEach(() => jest.resetAllMocks());
 
   const version = '4.0.1';
@@ -35,7 +35,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
   const buildNum = chance.integer({ min: 1000, max: 5000 });
 
   function setup() {
-    const logger = loggingServiceMock.create();
+    const logger = loggingSystemMock.create();
     const getUpgradeableConfig = getUpgradeableConfigMock;
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.create.mockImplementation(
@@ -73,7 +73,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
     };
   }
 
-  describe('nothing is upgradeable', function() {
+  describe('nothing is upgradeable', function () {
     it('should create config with current version and buildNum', async () => {
       const { run, savedObjectsClient } = setup();
 
@@ -137,7 +137,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
       });
 
       await run();
-      expect(loggingServiceMock.collect(logger).debug).toMatchInlineSnapshot(`
+      expect(loggingSystemMock.collect(logger).debug).toMatchInlineSnapshot(`
         Array [
           Array [
             "Upgrade config from 4.0.0 to 4.0.1",
@@ -169,7 +169,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function() {
         expect(error.message).toBe('foo');
       }
 
-      expect(loggingServiceMock.collect(logger).debug).toHaveLength(0);
+      expect(loggingSystemMock.collect(logger).debug).toHaveLength(0);
     });
   });
 

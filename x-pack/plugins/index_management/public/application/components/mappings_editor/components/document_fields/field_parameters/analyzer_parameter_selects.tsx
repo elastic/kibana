@@ -51,7 +51,7 @@ export const AnalyzerParameterSelects = ({
   const { form } = useForm({ defaultValue: { main: mainDefaultValue, sub: subDefaultValue } });
 
   useEffect(() => {
-    const subscription = form.subscribe(updateData => {
+    const subscription = form.subscribe((updateData) => {
       const formData = updateData.data.raw;
       const value = formData.sub ? formData.sub : formData.main;
       onChange(value);
@@ -102,7 +102,7 @@ export const AnalyzerParameterSelects = ({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <UseField path="main" config={config} onChange={onMainValueChange}>
-                  {field => renderSelect(field, options)}
+                  {(field) => renderSelect(field, options)}
                 </UseField>
               </EuiFlexItem>
               {subOptions && (
@@ -115,7 +115,7 @@ export const AnalyzerParameterSelects = ({
                       label: subOptions.label,
                     }}
                   >
-                    {field => renderSelect(field, subOptions.options)}
+                    {(field) => renderSelect(field, subOptions.options)}
                   </UseField>
                 </EuiFlexItem>
               )}

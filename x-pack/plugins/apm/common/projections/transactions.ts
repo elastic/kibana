@@ -7,23 +7,23 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   PROCESSOR_EVENT,
-  TRANSACTION_NAME
+  TRANSACTION_NAME,
 } from '../elasticsearch_fieldnames';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { rangeFilter } from '../../server/lib/helpers/range_filter';
+import { rangeFilter } from '../utils/range_filter';
 
 export function getTransactionsProjection({
   setup,
   serviceName,
   transactionName,
-  transactionType
+  transactionType,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName?: string;
@@ -49,16 +49,16 @@ export function getTransactionsProjection({
       ...transactionNameFilter,
       ...transactionTypeFilter,
       ...serviceNameFilter,
-      ...uiFiltersES
-    ]
+      ...uiFiltersES,
+    ],
   };
 
   return {
     index: indices['apm_oss.transactionIndices'],
     body: {
       query: {
-        bool
-      }
-    }
+        bool,
+      },
+    },
   };
 }

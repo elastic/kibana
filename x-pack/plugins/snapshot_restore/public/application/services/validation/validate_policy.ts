@@ -48,6 +48,7 @@ export const validatePolicy = (
       snapshotName: [],
       schedule: [],
       repository: [],
+      dataStreams: [],
       indices: [],
       expireAfterValue: [],
       minCount: [],
@@ -106,7 +107,7 @@ export const validatePolicy = (
   if (config && Array.isArray(config.indices) && config.indices.length === 0) {
     validation.errors.indices.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage', {
-        defaultMessage: 'You must select at least one index.',
+        defaultMessage: 'You must select at least one data stream or index.',
       })
     );
   }

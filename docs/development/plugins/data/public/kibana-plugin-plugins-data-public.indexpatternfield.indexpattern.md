@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-indexPattern?: IndexPattern;
+indexPattern?: IIndexPattern;
 ```

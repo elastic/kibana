@@ -43,17 +43,6 @@ describe('#checkSavedObjectsPrivileges', () => {
   describe('when checking multiple namespaces', () => {
     const namespaces = [namespace1, namespace2];
 
-    test(`throws an error when Spaces is disabled`, async () => {
-      mockSpacesService = undefined;
-      const checkSavedObjectsPrivileges = createFactory();
-
-      await expect(
-        checkSavedObjectsPrivileges(actions, namespaces)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Can't check saved object privileges for multiple namespaces if Spaces is disabled"`
-      );
-    });
-
     test(`throws an error when using an empty namespaces array`, async () => {
       const checkSavedObjectsPrivileges = createFactory();
 
@@ -78,7 +67,7 @@ describe('#checkSavedObjectsPrivileges', () => {
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledTimes(1);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledTimes(1);
-      const spaceIds = mockSpacesService!.namespaceToSpaceId.mock.results.map(x => x.value);
+      const spaceIds = mockSpacesService!.namespaceToSpaceId.mock.results.map((x) => x.value);
       expect(mockCheckPrivileges.atSpaces).toHaveBeenCalledWith(spaceIds, actions);
     });
   });

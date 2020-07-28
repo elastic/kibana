@@ -23,24 +23,24 @@ import ngMock from 'ng_mock';
 import '..';
 import { EventsProvider } from '../../../events';
 
-describe('listen component', function() {
+describe('listen component', function () {
   let $rootScope;
   let Events;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject(function($injector, Private) {
+    ngMock.inject(function ($injector, Private) {
       $rootScope = $injector.get('$rootScope');
       Events = Private(EventsProvider);
     })
   );
 
-  it('exposes the $listen method on all scopes', function() {
+  it('exposes the $listen method on all scopes', function () {
     expect($rootScope.$listen).to.be.a('function');
     expect($rootScope.$new().$listen).to.be.a('function');
   });
 
-  it('binds to an event emitter', function() {
+  it('binds to an event emitter', function () {
     const emitter = new Events();
     const $scope = $rootScope.$new();
 
@@ -51,7 +51,7 @@ describe('listen component', function() {
     expect(emitter._listeners.hello[0].handler).to.be(handler);
   });
 
-  it('binds to $scope, waiting for the destroy event', function() {
+  it('binds to $scope, waiting for the destroy event', function () {
     const emitter = new Events();
     const $scope = $rootScope.$new();
 
@@ -69,7 +69,7 @@ describe('listen component', function() {
     expect(call.args[1]).to.be.a('function');
   });
 
-  it('unbinds the event handler when $destroy is triggered', function() {
+  it('unbinds the event handler when $destroy is triggered', function () {
     const emitter = new Events();
     const $scope = $rootScope.$new();
 

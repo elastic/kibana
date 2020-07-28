@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -33,10 +34,12 @@ import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes, deleteAlerts } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
-import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
+import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
+import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import { hasAllPrivilege } from '../../../lib/capabilities';
 
 const ENTER_KEY = 13;
 
@@ -64,8 +67,7 @@ export const AlertsList: React.FunctionComponent = () => {
     charts,
     dataPlugin,
   } = useAppDependencies();
-  const canDelete = hasDeleteAlertsCapability(capabilities);
-  const canSave = hasSaveAlertsCapability(capabilities);
+  const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -79,7 +81,7 @@ export const AlertsList: React.FunctionComponent = () => {
   const [alertTypesState, setAlertTypesState] = useState<AlertTypeState>({
     isLoading: false,
     isInitialized: false,
-    data: {},
+    data: new Map(),
   });
   const [alertsState, setAlertsState] = useState<AlertState>({
     isLoading: false,
@@ -98,9 +100,9 @@ export const AlertsList: React.FunctionComponent = () => {
       try {
         setAlertTypesState({ ...alertTypesState, isLoading: true });
         const alertTypes = await loadAlertTypes({ http });
-        const index: AlertTypeIndex = {};
+        const index: AlertTypeIndex = new Map();
         for (const alertType of alertTypes) {
-          index[alertType.id] = alertType;
+          index.set(alertType.id, alertType);
         }
         setAlertTypesState({ isLoading: false, data: index, isInitialized: true });
       } catch (e) {
@@ -120,7 +122,7 @@ export const AlertsList: React.FunctionComponent = () => {
     (async () => {
       try {
         const result = await loadActionTypes({ http });
-        setActionTypes(result.filter(actionType => actionTypeRegistry.has(actionType.id)));
+        setActionTypes(result.filter((actionType) => actionTypeRegistry.has(actionType.id)));
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -245,12 +247,17 @@ export const AlertsList: React.FunctionComponent = () => {
     },
   ];
 
+  const authorizedAlertTypes = [...alertTypesState.data.values()];
+  const authorizedToCreateAnyAlerts = authorizedAlertTypes.some(
+    (alertType) => alertType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+  );
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
-      options={Object.values(alertTypesState.data)
-        .map(alertType => ({
+      options={authorizedAlertTypes
+        .map((alertType) => ({
           value: alertType.id,
           name: alertType.name,
         }))
@@ -263,7 +270,7 @@ export const AlertsList: React.FunctionComponent = () => {
     />,
   ];
 
-  if (canSave) {
+  if (authorizedToCreateAnyAlerts) {
     toolsRight.push(
       <EuiButton
         key="create-alert"
@@ -279,16 +286,23 @@ export const AlertsList: React.FunctionComponent = () => {
     );
   }
 
+  const authorizedToModifySelectedAlerts = selectedIds.length
+    ? filterAlertsById(alertsState.data, selectedIds).every((selectedAlert) =>
+        hasAllPrivilege(selectedAlert, alertTypesState.data.get(selectedAlert.alertTypeId))
+      )
+    : false;
+
   const table = (
     <Fragment>
       <EuiFlexGroup gutterSize="s">
-        {selectedIds.length > 0 && canDelete && (
+        {selectedIds.length > 0 && authorizedToModifySelectedAlerts && (
           <EuiFlexItem grow={false}>
             <BulkOperationPopover>
               <AlertQuickEditButtons
                 selectedItems={convertAlertsToTableItems(
                   filterAlertsById(alertsState.data, selectedIds),
-                  alertTypesState.data
+                  alertTypesState.data,
+                  canExecuteActions
                 )}
                 onPerformingAction={() => setIsPerformingAction(true)}
                 onActionPerformed={() => {
@@ -305,8 +319,8 @@ export const AlertsList: React.FunctionComponent = () => {
             fullWidth
             data-test-subj="alertSearchField"
             prepend={<EuiIcon type="search" />}
-            onChange={e => setInputText(e.target.value)}
-            onKeyUp={e => {
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyUp={(e) => {
               if (e.keyCode === ENTER_KEY) {
                 setSearchText(inputText);
               }
@@ -337,7 +351,7 @@ export const AlertsList: React.FunctionComponent = () => {
         items={
           alertTypesState.isInitialized === false
             ? []
-            : convertAlertsToTableItems(alertsState.data, alertTypesState.data)
+            : convertAlertsToTableItems(alertsState.data, alertTypesState.data, canExecuteActions)
         }
         itemId="id"
         columns={alertsTableColumns}
@@ -354,15 +368,12 @@ export const AlertsList: React.FunctionComponent = () => {
           /* Don't display alert count until we have the alert types initialized */
           totalItemCount: alertTypesState.isInitialized === false ? 0 : alertsState.totalItemCount,
         }}
-        selection={
-          canDelete
-            ? {
-                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
-                },
-              }
-            : undefined
-        }
+        selection={{
+          selectable: (alert: AlertTableItem) => alert.isEditable,
+          onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+            setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
+          },
+        }}
         onChange={({ page: changedPage }: { page: Pagination }) => {
           setPage(changedPage);
         }}
@@ -370,7 +381,11 @@ export const AlertsList: React.FunctionComponent = () => {
     </Fragment>
   );
 
-  const loadedItems = convertAlertsToTableItems(alertsState.data, alertTypesState.data);
+  const loadedItems = convertAlertsToTableItems(
+    alertsState.data,
+    alertTypesState.data,
+    canExecuteActions
+  );
 
   const isFilterApplied = !(
     isEmpty(searchText) &&
@@ -384,7 +399,7 @@ export const AlertsList: React.FunctionComponent = () => {
         onDeleted={(deleted: string[]) => {
           if (selectedIds.length === 0 || selectedIds.length === deleted.length) {
             const updatedAlerts = alertsState.data.filter(
-              alert => alert.id && !alertsToDelete.includes(alert.id)
+              (alert) => alert.id && !alertsToDelete.includes(alert.id)
             );
             setAlertsState({
               isLoading: false,
@@ -421,8 +436,10 @@ export const AlertsList: React.FunctionComponent = () => {
             <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
-      ) : (
+      ) : authorizedToCreateAnyAlerts ? (
         <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
+      ) : (
+        noPermissionPrompt
       )}
       <AlertsContextProvider
         value={{
@@ -439,7 +456,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       >
         <AlertAdd
-          consumer={'alerting'}
+          consumer={ALERTS_FEATURE_ID}
           addFlyoutVisible={alertFlyoutVisible}
           setAddFlyoutVisibility={setAlertFlyoutVisibility}
         />
@@ -448,15 +465,44 @@ export const AlertsList: React.FunctionComponent = () => {
   );
 };
 
+const noPermissionPrompt = (
+  <EuiEmptyPrompt
+    iconType="securityApp"
+    title={
+      <h1>
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.alertsList.noPermissionToCreateTitle"
+          defaultMessage="No permissions to create alerts"
+        />
+      </h1>
+    }
+    body={
+      <p data-test-subj="permissionDeniedMessage">
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.alertsList.noPermissionToCreateDescription"
+          defaultMessage="Contact your system administrator."
+        />
+      </p>
+    }
+  />
+);
+
 function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
-  return alerts.filter(alert => ids.includes(alert.id));
+  return alerts.filter((alert) => ids.includes(alert.id));
 }
 
-function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
-  return alerts.map(alert => ({
+function convertAlertsToTableItems(
+  alerts: Alert[],
+  alertTypesIndex: AlertTypeIndex,
+  canExecuteActions: boolean
+) {
+  return alerts.map((alert) => ({
     ...alert,
     actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
-    alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
+    alertType: alertTypesIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
+    isEditable:
+      hasAllPrivilege(alert, alertTypesIndex.get(alert.alertTypeId)) &&
+      (canExecuteActions || (!canExecuteActions && !alert.actions.length)),
   }));
 }

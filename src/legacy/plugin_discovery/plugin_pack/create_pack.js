@@ -33,7 +33,7 @@ function createPack(packageJson) {
   return new PluginPack({ path: packageJson.directoryPath, pkg: packageJson.contents, provider });
 }
 
-export const createPack$ = packageJson$ =>
+export const createPack$ = (packageJson$) =>
   packageJson$.pipe(
     map(({ error, packageJson }) => {
       if (error) {
@@ -50,5 +50,5 @@ export const createPack$ = packageJson$ =>
     }),
     // createPack can throw errors, and we want them to be represented
     // like the errors we consume from createPackageJsonAtPath/Directory
-    catchError(error => [{ error }])
+    catchError((error) => [{ error }])
   );

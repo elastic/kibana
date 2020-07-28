@@ -49,13 +49,13 @@ export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = 
         }
       >
         <div className="euiFilterSelect__items">
-          {actionTypes.map(item => (
+          {actionTypes.map((item) => (
             <EuiFilterSelectItem
               key={item.id}
               onClick={() => {
                 const isPreviouslyChecked = selectedValues.includes(item.id);
                 if (isPreviouslyChecked) {
-                  setSelectedValues(selectedValues.filter(val => val !== item.id));
+                  setSelectedValues(selectedValues.filter((val) => val !== item.id));
                 } else {
                   setSelectedValues(selectedValues.concat(item.id));
                 }

@@ -22,10 +22,17 @@ import { IAggConfig } from '../aggs';
 import { TabbedAggColumn } from './types';
 
 const getColumn = (agg: IAggConfig, i: number): TabbedAggColumn => {
+  let name = '';
+  try {
+    name = agg.makeLabel();
+  } catch (e) {
+    // skip the case when makeLabel throws an error (e.x. no appropriate field for an aggregation)
+  }
+
   return {
     aggConfig: agg,
     id: `col-${i}-${agg.id}`,
-    name: agg.makeLabel(),
+    name,
   };
 };
 
@@ -45,7 +52,7 @@ export function tabifyGetColumns(aggs: IAggConfig[], minimalColumns: boolean): T
   const columns: TabbedAggColumn[] = [];
 
   // separate the metrics
-  const grouped = groupBy(aggs, agg => {
+  const grouped = groupBy(aggs, (agg) => {
     return agg.type.type;
   });
 
@@ -56,9 +63,9 @@ export function tabifyGetColumns(aggs: IAggConfig[], minimalColumns: boolean): T
 
   let columnIndex = 0;
   // return the buckets, and after each place all of the metrics
-  grouped.buckets.forEach(agg => {
+  grouped.buckets.forEach((agg) => {
     columns.push(getColumn(agg, columnIndex++));
-    grouped.metrics.forEach(metric => {
+    grouped.metrics.forEach((metric) => {
       columns.push(getColumn(metric, columnIndex++));
     });
   });

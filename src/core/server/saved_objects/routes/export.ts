@@ -61,7 +61,7 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
       // need to access the registry for type validation, can't use the schema for this
       const supportedTypes = context.core.savedObjects.typeRegistry
         .getImportableAndExportableTypes()
-        .map(t => t.name);
+        .map((t) => t.name);
       if (types) {
         const validationError = validateTypes(types, supportedTypes);
         if (validationError) {

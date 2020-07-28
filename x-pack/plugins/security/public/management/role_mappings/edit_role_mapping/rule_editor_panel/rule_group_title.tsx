@@ -42,7 +42,7 @@ export const RuleGroupTitle = (props: Props) => {
     const areSubRulesValid = newRule.canContainRules(currentSubRules);
     if (areSubRulesValid) {
       const clone = newRule.clone() as RuleGroup;
-      currentSubRules.forEach(subRule => clone.addRule(subRule));
+      currentSubRules.forEach((subRule) => clone.addRule(subRule));
 
       props.onChange(clone);
       setIsMenuOpen(false);

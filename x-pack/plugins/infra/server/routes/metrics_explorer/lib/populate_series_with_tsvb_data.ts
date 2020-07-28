@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { union, uniq } from 'lodash';
+import { union, uniq, isArray, isString } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import {
@@ -38,9 +38,21 @@ export const populateSeriesWithTSVBData = (
   }
 
   // Set the filter for the group by or match everything
-  const filters: JsonObject[] = options.groupBy
-    ? [{ match: { [options.groupBy]: series.id } }]
+  const isGroupBySet =
+    Array.isArray(options.groupBy) && options.groupBy.length
+      ? true
+      : isString(options.groupBy)
+      ? true
+      : false;
+
+  const filters: JsonObject[] = isGroupBySet
+    ? isArray(options.groupBy)
+      ? options.groupBy
+          .filter((f) => f)
+          .map((field, index) => ({ match: { [field as string]: series.keys?.[index] || '' } }))
+      : [{ match: { [options.groupBy as string]: series.id } }]
     : [];
+
   if (options.filterQuery) {
     try {
       const filterQuery = JSON.parse(options.filterQuery);
@@ -64,8 +76,8 @@ export const populateSeriesWithTSVBData = (
   // Create the TSVB model based on the request options
   const model = createMetricModel(options);
   const modules = await Promise.all(
-    uniq(options.metrics.filter(m => m.field)).map(
-      async m => await getDatasetForField(client, m.field as string, options.indexPattern)
+    uniq(options.metrics.filter((m) => m.field)).map(
+      async (m) => await getDatasetForField(client, m.field as string, options.indexPattern)
     )
   );
 
@@ -76,7 +88,7 @@ export const populateSeriesWithTSVBData = (
       timestampField: options.timerange.field,
       timerange: options.timerange,
     },
-    modules.filter(m => m) as string[]
+    modules.filter((m) => m) as string[]
   );
 
   if (calculatedInterval) {
@@ -121,15 +133,15 @@ export const populateSeriesWithTSVBData = (
     (currentTimestamps, tsvbSeries) =>
       union(
         currentTimestamps,
-        tsvbSeries.data.map(row => row[0])
+        tsvbSeries.data.map((row) => row[0])
       ).sort(),
     [] as number[]
   );
   // Combine the TSVB series for multiple metrics.
-  const rows = timestamps.map(timestamp => {
+  const rows = timestamps.map((timestamp) => {
     return tsvbResults.custom.series.reduce(
       (currentRow, tsvbSeries) => {
-        const matches = tsvbSeries.data.find(d => d[0] === timestamp);
+        const matches = tsvbSeries.data.find((d) => d[0] === timestamp);
         if (matches) {
           return { ...currentRow, [tsvbSeries.id]: matches[1] };
         }

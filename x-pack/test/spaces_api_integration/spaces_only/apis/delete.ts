@@ -29,7 +29,7 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
       {
         spaceId: SPACES.SPACE_1.spaceId,
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       deleteTest(`from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
         tests: {

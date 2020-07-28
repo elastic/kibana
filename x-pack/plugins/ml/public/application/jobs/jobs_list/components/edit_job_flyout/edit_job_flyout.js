@@ -26,7 +26,7 @@ import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
-import { mlMessageBarService } from '../../../../components/messagebar';
+import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -48,6 +48,8 @@ export class EditJobFlyoutUI extends Component {
       jobDescription: '',
       jobGroups: [],
       jobModelMemoryLimit: '',
+      jobModelSnapshotRetentionDays: 10,
+      jobDailyModelSnapshotRetentionAfterDays: 10,
       jobDetectors: [],
       jobDetectorDescriptions: [],
       jobCustomUrls: [],
@@ -96,6 +98,8 @@ export class EditJobFlyoutUI extends Component {
         'jobDescription',
         'jobGroups',
         'jobModelMemoryLimit',
+        'jobModelSnapshotRetentionDays',
+        'jobDailyModelSnapshotRetentionAfterDays',
         'jobCustomUrls',
         'jobDetectors',
         'jobDetectorDescriptions',
@@ -108,17 +112,17 @@ export class EditJobFlyoutUI extends Component {
     );
   }
 
-  showFlyout = jobLite => {
+  showFlyout = (jobLite) => {
     const hasDatafeed = jobLite.hasDatafeed;
     loadFullJob(jobLite.id)
-      .then(job => {
+      .then((job) => {
         this.extractJob(job, hasDatafeed);
         this.setState({
           job,
           isFlyoutVisible: true,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
       });
   };
@@ -128,6 +132,15 @@ export class EditJobFlyoutUI extends Component {
       job.analysis_limits && job.analysis_limits.model_memory_limit
         ? job.analysis_limits.model_memory_limit
         : '';
+
+    const modelSnapshotRetentionDays =
+      job.model_snapshot_retention_days !== undefined ? job.model_snapshot_retention_days : 10;
+
+    const dailyModelSnapshotRetentionAfterDays =
+      job.daily_model_snapshot_retention_after_days !== undefined
+        ? job.daily_model_snapshot_retention_after_days
+        : modelSnapshotRetentionDays;
+
     const detectors =
       job.analysis_config && job.analysis_config.detectors
         ? [...job.analysis_config.detectors]
@@ -146,8 +159,10 @@ export class EditJobFlyoutUI extends Component {
       jobDescription: job.description,
       jobGroups: job.groups !== undefined ? job.groups : [],
       jobModelMemoryLimit: mml,
+      jobModelSnapshotRetentionDays: modelSnapshotRetentionDays,
+      jobDailyModelSnapshotRetentionAfterDays: dailyModelSnapshotRetentionAfterDays,
       jobDetectors: detectors,
-      jobDetectorDescriptions: detectors.map(d => d.detector_description),
+      jobDetectorDescriptions: detectors.map((d) => d.detector_description),
       jobBucketSpan: bucketSpan,
       jobCustomUrls: customUrls,
       datafeedQuery: hasDatafeed ? JSON.stringify(datafeedConfig.query, null, 2) : '',
@@ -171,7 +186,7 @@ export class EditJobFlyoutUI extends Component {
     });
   }
 
-  setJobDetails = jobDetails => {
+  setJobDetails = (jobDetails) => {
     let { jobModelMemoryLimitValidationError, jobGroupsValidationError } = this.state;
 
     if (jobDetails.jobModelMemoryLimit !== undefined) {
@@ -180,7 +195,7 @@ export class EditJobFlyoutUI extends Component {
     }
 
     if (jobDetails.jobGroups !== undefined) {
-      if (jobDetails.jobGroups.some(j => this.props.allJobIds.includes(j))) {
+      if (jobDetails.jobGroups.some((j) => this.props.allJobIds.includes(j))) {
         jobGroupsValidationError = i18n.translate(
           'xpack.ml.jobsList.editJobFlyout.groupsAndJobsHasSameIdErrorMessage',
           {
@@ -204,19 +219,19 @@ export class EditJobFlyoutUI extends Component {
     });
   };
 
-  setDetectorDescriptions = jobDetectorDescriptions => {
+  setDetectorDescriptions = (jobDetectorDescriptions) => {
     this.setState({
       ...jobDetectorDescriptions,
     });
   };
 
-  setDatafeed = datafeed => {
+  setDatafeed = (datafeed) => {
     this.setState({
       ...datafeed,
     });
   };
 
-  setCustomUrls = jobCustomUrls => {
+  setCustomUrls = (jobCustomUrls) => {
     const isValidJobCustomUrls = isValidCustomUrls(jobCustomUrls);
     this.setState({
       jobCustomUrls,
@@ -229,6 +244,8 @@ export class EditJobFlyoutUI extends Component {
       description: this.state.jobDescription,
       groups: this.state.jobGroups,
       mml: this.state.jobModelMemoryLimit,
+      modelSnapshotRetentionDays: this.state.jobModelSnapshotRetentionDays,
+      dailyModelSnapshotRetentionAfterDays: this.state.jobDailyModelSnapshotRetentionAfterDays,
       detectorDescriptions: this.state.jobDetectorDescriptions,
       datafeedQuery: collapseLiteralStrings(this.state.datafeedQuery),
       datafeedQueryDelay: this.state.datafeedQueryDelay,
@@ -238,6 +255,8 @@ export class EditJobFlyoutUI extends Component {
     };
 
     const { toasts } = this.props.kibana.services.notifications;
+    const toastNotificationService = toastNotificationServiceProvider(toasts);
+
     saveJob(this.state.job, newJobData)
       .then(() => {
         toasts.addSuccess(
@@ -251,9 +270,10 @@ export class EditJobFlyoutUI extends Component {
         this.refreshJobs();
         this.closeFlyout(true);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
-        toasts.addDanger(
+        toastNotificationService.displayErrorToast(
+          error,
           i18n.translate('xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage', {
             defaultMessage: 'Could not save changes to {jobId}',
             values: {
@@ -261,7 +281,6 @@ export class EditJobFlyoutUI extends Component {
             },
           })
         );
-        mlMessageBarService.notify.error(error);
       });
   };
 
@@ -275,6 +294,8 @@ export class EditJobFlyoutUI extends Component {
         jobDescription,
         jobGroups,
         jobModelMemoryLimit,
+        jobModelSnapshotRetentionDays,
+        jobDailyModelSnapshotRetentionAfterDays,
         jobDetectors,
         jobDetectorDescriptions,
         jobBucketSpan,
@@ -302,6 +323,8 @@ export class EditJobFlyoutUI extends Component {
               jobDescription={jobDescription}
               jobGroups={jobGroups}
               jobModelMemoryLimit={jobModelMemoryLimit}
+              jobModelSnapshotRetentionDays={jobModelSnapshotRetentionDays}
+              jobDailyModelSnapshotRetentionAfterDays={jobDailyModelSnapshotRetentionAfterDays}
               setJobDetails={this.setJobDetails}
               jobGroupsValidationError={jobGroupsValidationError}
               jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}

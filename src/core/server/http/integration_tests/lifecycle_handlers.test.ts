@@ -94,9 +94,7 @@ describe('core lifecycle handlers', () => {
     });
 
     it('accepts requests that do not include a version header', async () => {
-      await supertest(innerServer.listener)
-        .get(testRoute)
-        .expect(200, 'ok');
+      await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
     });
 
     it('rejects requests with an incorrect version passed in the version header', async () => {
@@ -122,9 +120,7 @@ describe('core lifecycle handlers', () => {
     });
 
     it('adds the kbn-name header', async () => {
-      const result = await supertest(innerServer.listener)
-        .get(testRoute)
-        .expect(200, 'ok');
+      const result = await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(
         expect.objectContaining({
@@ -134,9 +130,7 @@ describe('core lifecycle handlers', () => {
     });
 
     it('adds the kbn-name header in case of error', async () => {
-      const result = await supertest(innerServer.listener)
-        .get(testErrorRoute)
-        .expect(400);
+      const result = await supertest(innerServer.listener).get(testErrorRoute).expect(400);
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(
         expect.objectContaining({
@@ -146,17 +140,13 @@ describe('core lifecycle handlers', () => {
     });
 
     it('adds the custom headers', async () => {
-      const result = await supertest(innerServer.listener)
-        .get(testRoute)
-        .expect(200, 'ok');
+      const result = await supertest(innerServer.listener).get(testRoute).expect(200, 'ok');
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(expect.objectContaining({ 'some-header': 'some-value' }));
     });
 
     it('adds the custom headers in case of error', async () => {
-      const result = await supertest(innerServer.listener)
-        .get(testErrorRoute)
-        .expect(400);
+      const result = await supertest(innerServer.listener).get(testErrorRoute).expect(400);
       const headers = result.header as Record<string, string>;
       expect(headers).toEqual(expect.objectContaining({ 'some-header': 'some-value' }));
     });
@@ -176,7 +166,7 @@ describe('core lifecycle handlers', () => {
         return res.ok({ body: 'ok' });
       });
 
-      destructiveMethods.forEach(method => {
+      destructiveMethods.forEach((method) => {
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
           { path: testPath, validate: false },
           (context, req, res) => {
@@ -200,7 +190,7 @@ describe('core lifecycle handlers', () => {
       await server.start();
     });
 
-    nonDestructiveMethods.forEach(method => {
+    nonDestructiveMethods.forEach((method) => {
       describe(`When using non-destructive ${method} method`, () => {
         it('accepts requests without a token', async () => {
           await getSupertest(method.toLowerCase(), testPath).expect(
@@ -217,7 +207,7 @@ describe('core lifecycle handlers', () => {
       });
     });
 
-    destructiveMethods.forEach(method => {
+    destructiveMethods.forEach((method) => {
       describe(`When using destructive ${method} method`, () => {
         it('accepts requests with the xsrf header', async () => {
           await getSupertest(method.toLowerCase(), testPath)

@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { App } from 'kibana/public';
+
+import { AppMount } from 'src/core/public';
 
 /**
  * Descriptor for a dev tool. A dev tool works similar to an application
@@ -38,7 +39,7 @@ export class DevToolApp {
    * This will be used as a label in the tab above the actual tool.
    */
   public readonly title: string;
-  public readonly mount: App['mount'];
+  public readonly mount: AppMount;
 
   /**
    * Flag indicating to disable the tab of this dev tool. Navigating to a
@@ -66,7 +67,7 @@ export class DevToolApp {
   constructor(
     id: string,
     title: string,
-    mount: App['mount'],
+    mount: AppMount,
     enableRouting: boolean,
     order: number,
     toolTipContent = '',

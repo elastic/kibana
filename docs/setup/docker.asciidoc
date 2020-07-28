@@ -1,5 +1,9 @@
 [[docker]]
-== Running Kibana on Docker
+=== Install {kib} with Docker
+++++
+<titleabbrev>Install with Docker </titleabbrev>
+++++
+
 Docker images for Kibana are available from the Elastic Docker registry. The
 base image is https://hub.docker.com/_/centos/[centos:7].
 
@@ -9,14 +13,14 @@ https://github.com/elastic/dockerfiles/tree/{branch}/kibana[GitHub].
 
 These images are free to use under the Elastic license. They contain open source
 and free commercial features and access to paid commercial features.
-{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the
+<<managing-licenses,Start a 30-day trial>> to try out all of the
 paid commercial features. See the
 https://www.elastic.co/subscriptions[Subscriptions] page for information about
 Elastic license levels.
 
 [float]
 [[pull-image]]
-=== Pulling the image
+=== Pull the image
 
 Obtaining Kibana for Docker is as simple as issuing a +docker pull+ command
 against the Elastic Docker registry.
@@ -40,7 +44,7 @@ available under the Apache 2.0 license. To download the images, go to
 https://www.docker.elastic.co[www.docker.elastic.co].
 
 [float]
-=== Running Kibana on Docker for development
+=== Run Kibana on Docker for development
 Kibana can be quickly started and connected to a local Elasticsearch container for development
 or testing use with the following command:
 --------------------------------------------
@@ -50,7 +54,7 @@ endif::[]
 
 [float]
 [[configuring-kibana-docker]]
-=== Configuring Kibana on Docker
+=== Configure Kibana on Docker
 
 The Docker images provide several methods for configuring Kibana. The
 conventional approach is to provide a `kibana.yml` file as described in
@@ -78,14 +82,16 @@ services:
 [[environment-variable-config]]
 ==== Environment variable configuration
 
-Under Docker, Kibana can be configured via environment variables. When
+Under Docker, {kib} can be configured via environment variables. When
 the container starts, a helper process checks the environment for variables that
 can be mapped to Kibana command-line arguments.
 
 For compatibility with container orchestration systems, these
 environment variables are written in all capitals, with underscores as
 word separators. The helper translates these names to valid
-Kibana setting names.
+{kib} setting names.
+
+WARNING: All information that you include in environment variables is visible through the `ps` command, including sensitive information.
 
 Some example translations are shown here:
 
@@ -93,7 +99,7 @@ Some example translations are shown here:
 [horizontal]
 **Environment Variable**:: **Kibana Setting**
 `SERVER_NAME`:: `server.name`
-`KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
+`SERVER_BASEPATH`:: `server.basePath`
 `MONITORING_ENABLED`:: `monitoring.enabled`
 
 In general, any setting listed in <<settings>> can be

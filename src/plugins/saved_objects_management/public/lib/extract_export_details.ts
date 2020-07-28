@@ -22,15 +22,15 @@ export async function extractExportDetails(
 ): Promise<SavedObjectsExportResultDetails | undefined> {
   const reader = new FileReader();
   const content = await new Promise<string>((resolve, reject) => {
-    reader.addEventListener('loadend', e => {
+    reader.addEventListener('loadend', (e) => {
       resolve((e as any).target.result);
     });
-    reader.addEventListener('error', e => {
+    reader.addEventListener('error', (e) => {
       reject(e);
     });
     reader.readAsText(blob, 'utf-8');
   });
-  const lines = content.split('\n').filter(l => l.length > 0);
+  const lines = content.split('\n').filter((l) => l.length > 0);
   const maybeDetails = JSON.parse(lines[lines.length - 1]);
   if (isExportDetails(maybeDetails)) {
     return maybeDetails;

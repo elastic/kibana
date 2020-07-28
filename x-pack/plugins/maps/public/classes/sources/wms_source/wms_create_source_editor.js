@@ -13,7 +13,7 @@ import {
   EuiComboBox,
   EuiFieldText,
   EuiFormRow,
-  EuiForm,
+  EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import { WmsClient } from './wms_client';
@@ -102,7 +102,7 @@ export class WMSCreateSourceEditor extends Component {
     });
   };
 
-  _handleServiceUrlChange = e => {
+  _handleServiceUrlChange = (e) => {
     this.setState(
       {
         serviceUrl: e.target.value,
@@ -118,16 +118,16 @@ export class WMSCreateSourceEditor extends Component {
     );
   };
 
-  _handleLayersChange = e => {
+  _handleLayersChange = (e) => {
     this.setState({ layers: e.target.value }, this._previewIfPossible);
   };
 
-  _handleLayerOptionsChange = selectedOptions => {
+  _handleLayerOptionsChange = (selectedOptions) => {
     this.setState(
       {
         selectedLayerOptions: selectedOptions,
         layers: selectedOptions
-          .map(selectedOption => {
+          .map((selectedOption) => {
             return selectedOption.value;
           })
           .join(','),
@@ -136,16 +136,16 @@ export class WMSCreateSourceEditor extends Component {
     );
   };
 
-  _handleStylesChange = e => {
+  _handleStylesChange = (e) => {
     this.setState({ styles: e.target.value }, this._previewIfPossible);
   };
 
-  _handleStyleOptionsChange = selectedOptions => {
+  _handleStyleOptionsChange = (selectedOptions) => {
     this.setState(
       {
         selectedStyleOptions: selectedOptions,
         styles: selectedOptions
-          .map(selectedOption => {
+          .map((selectedOption) => {
             return selectedOption.value;
           })
           .join(','),
@@ -289,7 +289,7 @@ export class WMSCreateSourceEditor extends Component {
 
   render() {
     return (
-      <EuiForm>
+      <EuiPanel>
         <EuiFormRow
           label={i18n.translate('xpack.maps.source.wms.urlLabel', {
             defaultMessage: 'Url',
@@ -303,7 +303,7 @@ export class WMSCreateSourceEditor extends Component {
         {this._renderLayerAndStyleInputs()}
 
         {this._renderAttributionInputs()}
-      </EuiForm>
+      </EuiPanel>
     );
   }
 }

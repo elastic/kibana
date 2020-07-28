@@ -42,7 +42,7 @@ export const useLogIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.name),
         name: 'name',
-        onChange: name => setFormStateChanges(changes => ({ ...changes, name })),
+        onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
         value: formState.name,
       }),
     [formState.name]
@@ -52,7 +52,7 @@ export const useLogIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.logAlias),
         name: 'logAlias',
-        onChange: logAlias => setFormStateChanges(changes => ({ ...changes, logAlias })),
+        onChange: (logAlias) => setFormStateChanges((changes) => ({ ...changes, logAlias })),
         value: formState.logAlias,
       }),
     [formState.logAlias]
@@ -62,8 +62,8 @@ export const useLogIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.tiebreakerField),
         name: `tiebreakerField`,
-        onChange: tiebreakerField =>
-          setFormStateChanges(changes => ({ ...changes, tiebreakerField })),
+        onChange: (tiebreakerField) =>
+          setFormStateChanges((changes) => ({ ...changes, tiebreakerField })),
         value: formState.tiebreakerField,
       }),
     [formState.tiebreakerField]
@@ -73,8 +73,8 @@ export const useLogIndicesConfigurationFormState = ({
       createInputFieldProps({
         errors: validateInputFieldNotEmpty(formState.timestampField),
         name: `timestampField`,
-        onChange: timestampField =>
-          setFormStateChanges(changes => ({ ...changes, timestampField })),
+        onChange: (timestampField) =>
+          setFormStateChanges((changes) => ({ ...changes, timestampField })),
         value: formState.timestampField,
       }),
     [formState.timestampField]

@@ -27,7 +27,7 @@ export const injectReferences = (
   const searchSourceReturnFields: SearchSourceFields = { ...searchSourceFields };
   // Inject index id if a reference is saved
   if (searchSourceFields.indexRefName) {
-    const reference = references.find(ref => ref.name === searchSourceFields.indexRefName);
+    const reference = references.find((ref) => ref.name === searchSourceFields.indexRefName);
     if (!reference) {
       throw new Error(`Could not find reference for ${searchSourceFields.indexRefName}`);
     }

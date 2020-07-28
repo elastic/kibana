@@ -11,7 +11,7 @@ export const arrify = (val: any): any[] => (Array.isArray(val) ? val : [val]);
  * @param {number} time Time in millisecond to wait
  */
 export const wait = (time = 1000) => (data: any): Promise<any> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => resolve(data), time);
   });
 };

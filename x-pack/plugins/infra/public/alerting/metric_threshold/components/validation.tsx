@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isNumber } from 'lodash';
 import {
   MetricExpressionParams,
   Comparator,
@@ -51,7 +50,7 @@ export function validateMetricThreshold({
     if (!c.aggType) {
       errors[id].aggField.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.aggregationRequired', {
-          defaultMessage: 'Aggreation is required.',
+          defaultMessage: 'Aggregation is required.',
         })
       );
     }
@@ -106,3 +105,5 @@ export function validateMetricThreshold({
 
   return validationResult;
 }
+
+const isNumber = (value: unknown): value is number => typeof value === 'number';

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
-
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
 import { validateJobObject } from './validate_job_object';
@@ -14,14 +12,14 @@ const INFLUENCER_LOW_THRESHOLD = 0;
 const INFLUENCER_HIGH_THRESHOLD = 4;
 const DETECTOR_FIELD_NAMES_THRESHOLD = 1;
 
-export async function validateInfluencers(callWithRequest: APICaller, job: CombinedJob) {
+export async function validateInfluencers(job: CombinedJob) {
   validateJobObject(job);
 
   const messages = [];
   const influencers = job.analysis_config.influencers;
 
   const detectorFieldNames: string[] = [];
-  job.analysis_config.detectors.forEach(d => {
+  job.analysis_config.detectors.forEach((d) => {
     if (d.by_field_name) {
       detectorFieldNames.push(d.by_field_name);
     }
@@ -56,7 +54,7 @@ export async function validateInfluencers(callWithRequest: APICaller, job: Combi
     if (detectorFieldNames.length > 1) {
       id = 'influencer_low_suggestions';
       const uniqueInfluencers = [...new Set(detectorFieldNames)];
-      influencerSuggestion = `[${uniqueInfluencers.map(i => `"${i}"`).join(',')}]`;
+      influencerSuggestion = `[${uniqueInfluencers.map((i) => `"${i}"`).join(',')}]`;
     }
 
     messages.push({ id, influencerSuggestion });

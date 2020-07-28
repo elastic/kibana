@@ -25,13 +25,17 @@ export function initPlugin(router: IRouter, path: string) {
           short_description: schema.string(),
           description: schema.maybe(schema.string()),
           comments: schema.maybe(schema.string()),
+          caller_id: schema.string(),
+          severity: schema.string({ defaultValue: '1' }),
+          urgency: schema.string({ defaultValue: '1' }),
+          impact: schema.string({ defaultValue: '1' }),
         }),
       },
     },
     // ServiceNow simulator: create a servicenow action pointing here, and you can get
     // different responses based on the message posted. See the README.md for
     // more info.
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -50,7 +54,7 @@ export function initPlugin(router: IRouter, path: string) {
       },
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -69,7 +73,7 @@ export function initPlugin(router: IRouter, path: string) {
       },
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory

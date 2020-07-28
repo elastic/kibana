@@ -108,7 +108,7 @@ export function IconView({ value: icon, label }) {
 }
 
 export function IconSelect({ value, onChange }) {
-  const selectedIcon = ICONS.find(option => value === option.value) || ICONS[0];
+  const selectedIcon = ICONS.find((option) => value === option.value) || ICONS[0];
 
   return (
     <EuiComboBox

@@ -96,7 +96,7 @@ export class ApiService {
 
   public async deletePipelines(names: string[]) {
     const result = this.sendRequest({
-      path: `${API_BASE_PATH}/${names.map(name => encodeURIComponent(name)).join(',')}`,
+      path: `${API_BASE_PATH}/${names.map((name) => encodeURIComponent(name)).join(',')}`,
       method: 'delete',
     });
 

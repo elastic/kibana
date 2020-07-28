@@ -7,14 +7,14 @@
 import { PrivilegeSerializer } from './privilege_serializer';
 
 describe(`#isSerializedGlobalBasePrivilege`, () => {
-  ['all', 'read'].forEach(validValue => {
+  ['all', 'read'].forEach((validValue) => {
     test(`returns true for '${validValue}'`, () => {
       expect(PrivilegeSerializer.isSerializedGlobalBasePrivilege(validValue)).toBe(true);
     });
   });
 
   ['space_all', 'space_read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach(
-    invalidValue => {
+    (invalidValue) => {
       test(`returns false for '${invalidValue}'`, () => {
         expect(PrivilegeSerializer.isSerializedGlobalBasePrivilege(invalidValue)).toBe(false);
       });
@@ -23,13 +23,13 @@ describe(`#isSerializedGlobalBasePrivilege`, () => {
 });
 
 describe(`#isSerializedSpaceBasePrivilege`, () => {
-  ['space_all', 'space_read'].forEach(validValue => {
+  ['space_all', 'space_read'].forEach((validValue) => {
     test(`returns true for '${validValue}'`, () => {
       expect(PrivilegeSerializer.isSerializedSpaceBasePrivilege(validValue)).toBe(true);
     });
   });
 
-  ['all', 'read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach(invalid => {
+  ['all', 'read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach((invalid) => {
     test(`returns false for '${invalid}'`, () => {
       expect(PrivilegeSerializer.isSerializedSpaceBasePrivilege(invalid)).toBe(false);
     });
@@ -37,7 +37,7 @@ describe(`#isSerializedSpaceBasePrivilege`, () => {
 });
 
 describe(`#isSerializedReservedPrivilege`, () => {
-  ['reserved_foo', 'reserved_bar'].forEach(validValue => {
+  ['reserved_foo', 'reserved_bar'].forEach((validValue) => {
     test(`returns true for '${validValue}'`, () => {
       expect(PrivilegeSerializer.isSerializedReservedPrivilege(validValue)).toBe(true);
     });
@@ -52,7 +52,7 @@ describe(`#isSerializedReservedPrivilege`, () => {
     'bar',
     'feature_foo',
     'feature_foo.privilege1',
-  ].forEach(invalidValue => {
+  ].forEach((invalidValue) => {
     test(`returns false for '${invalidValue}'`, () => {
       expect(PrivilegeSerializer.isSerializedReservedPrivilege(invalidValue)).toBe(false);
     });
@@ -60,14 +60,14 @@ describe(`#isSerializedReservedPrivilege`, () => {
 });
 
 describe(`#isSerializedFeaturePrivilege`, () => {
-  ['feature_foo.privilege1', 'feature_bar.privilege2'].forEach(validValue => {
+  ['feature_foo.privilege1', 'feature_bar.privilege2'].forEach((validValue) => {
     test(`returns true for '${validValue}'`, () => {
       expect(PrivilegeSerializer.isSerializedFeaturePrivilege(validValue)).toBe(true);
     });
   });
 
   ['all', 'read', 'space_all', 'space_read', 'reserved_foo', 'reserved_bar'].forEach(
-    invalidValue => {
+    (invalidValue) => {
       test(`returns false for '${invalidValue}'`, () => {
         expect(PrivilegeSerializer.isSerializedFeaturePrivilege(invalidValue)).toBe(false);
       });
@@ -154,7 +154,7 @@ describe('#deserializeFeaturePrivilege', () => {
     'feature_foo_privilege-1', // no '.'
     'feature_foo.', // has a '.' but nothing after it
     'feature_.privilege-1', // nothing before the '.'
-  ].forEach(privilege => {
+  ].forEach((privilege) => {
     test(`throws error when deserializing ${privilege}`, () => {
       expect(() =>
         PrivilegeSerializer.deserializeFeaturePrivilege(privilege)

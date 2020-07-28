@@ -25,7 +25,7 @@ export const capabilitiesProvider = () => ({
      */
     kibana: {
       settings: true,
-      index_patterns: true,
+      indexPatterns: true,
       objects: true,
     },
   },

@@ -18,14 +18,14 @@ export const transientReducer = handleActions(
   {
     // clear all the resolved args when restoring the history
     // TODO: we shouldn't need to reset the resolved args for history
-    [restoreHistory]: transientState => set(transientState, 'resolvedArgs', {}),
+    [restoreHistory]: (transientState) => set(transientState, 'resolvedArgs', {}),
 
     [removeElements]: (transientState, { payload: { elementIds } }) => {
       const { selectedToplevelNodes } = transientState;
       return del(
         {
           ...transientState,
-          selectedToplevelNodes: selectedToplevelNodes.filter(n => elementIds.indexOf(n) < 0),
+          selectedToplevelNodes: selectedToplevelNodes.filter((n) => elementIds.indexOf(n) < 0),
         },
         ['resolvedArgs', elementIds]
       );
@@ -57,15 +57,15 @@ export const transientReducer = handleActions(
       };
     },
 
-    [pageActions.setPage]: transientState => {
+    [pageActions.setPage]: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [pageActions.addPage]: transientState => {
+    [pageActions.addPage]: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 
-    [pageActions.duplicatePage]: transientState => {
+    [pageActions.duplicatePage]: (transientState) => {
       return { ...transientState, selectedToplevelNodes: [] };
     },
 

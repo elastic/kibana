@@ -9,11 +9,11 @@ import { useApmPluginContext } from './useApmPluginContext';
 
 export function useKibanaUrl(
   /** The path to the plugin */ path: string,
-  /** The hash path */ hash: string
+  /** The hash path */ hash?: string
 ) {
   const { core } = useApmPluginContext();
   return url.format({
     pathname: core.http.basePath.prepend(path),
-    hash
+    hash,
   });
 }

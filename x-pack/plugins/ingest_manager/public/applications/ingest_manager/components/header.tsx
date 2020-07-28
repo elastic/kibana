@@ -10,17 +10,17 @@ import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 
 const Container = styled.div`
-  border-bottom: ${props => props.theme.eui.euiBorderThin};
-  background-color: ${props => props.theme.eui.euiPageBackgroundColor};
+  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
 `;
 
 const Wrapper = styled.div<{ maxWidth?: number }>`
-  max-width: ${props => props.maxWidth || 1200}px;
+  max-width: ${(props) => props.maxWidth || 1200}px;
   margin-left: auto;
   margin-right: auto;
-  padding-top: ${props => props.theme.eui.paddingSizes.xl};
-  padding-left: ${props => props.theme.eui.paddingSizes.m};
-  padding-right: ${props => props.theme.eui.paddingSizes.m};
+  padding-top: ${(props) => props.theme.eui.paddingSizes.xl};
+  padding-left: ${(props) => props.theme.eui.paddingSizes.m};
+  padding-right: ${(props) => props.theme.eui.paddingSizes.m};
 `;
 
 const Tabs = styled(EuiTabs)`
@@ -36,6 +36,7 @@ export interface HeaderProps {
   rightColumn?: JSX.Element;
   rightColumnGrow?: EuiFlexItemProps['grow'];
   tabs?: EuiTabProps[];
+  'data-test-subj'?: string;
 }
 
 const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(
@@ -53,8 +54,9 @@ export const Header: React.FC<HeaderProps> = ({
   rightColumnGrow,
   tabs,
   maxWidth,
+  'data-test-subj': dataTestSubj,
 }) => (
-  <Container>
+  <Container data-test-subj={dataTestSubj}>
     <Wrapper maxWidth={maxWidth}>
       <HeaderColumns
         leftColumn={leftColumn}
@@ -66,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
           <EuiFlexItem>
             <EuiSpacer size="s" />
             <Tabs>
-              {tabs.map(props => (
+              {tabs.map((props) => (
                 <EuiTab {...props} key={props.id}>
                   {props.name}
                 </EuiTab>

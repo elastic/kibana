@@ -11,19 +11,29 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/ingest_pipelines';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  const { createPipeline, deletePipeline } = registerEsHelpers(getService);
+  const { createPipeline, deletePipeline, cleanupPipelines } = registerEsHelpers(getService);
 
-  describe('Pipelines', function() {
+  describe('Pipelines', function () {
+    after(async () => {
+      await cleanupPipelines();
+    });
+
     describe('Create', () => {
       const PIPELINE_ID = 'test_create_pipeline';
       const REQUIRED_FIELDS_PIPELINE_ID = 'test_create_required_fields_pipeline';
 
-      after(() => {
-        deletePipeline(PIPELINE_ID);
-        deletePipeline(REQUIRED_FIELDS_PIPELINE_ID);
+      after(async () => {
+        // Clean up any pipelines created in test cases
+        await Promise.all([PIPELINE_ID, REQUIRED_FIELDS_PIPELINE_ID].map(deletePipeline)).catch(
+          (err) => {
+            // eslint-disable-next-line no-console
+            console.log(`[Cleanup error] Error deleting pipelines: ${err.message}`);
+            throw err;
+          }
+        );
       });
 
       it('should create a pipeline', async () => {
@@ -117,10 +127,26 @@ export default function({ getService }: FtrProviderContext) {
           },
         ],
         version: 1,
+        on_failure: [
+          {
+            set: {
+              field: '_index',
+              value: 'failed-{{ _index }}',
+            },
+          },
+        ],
       };
 
-      before(() => createPipeline({ body: PIPELINE, id: PIPELINE_ID }));
-      after(() => deletePipeline(PIPELINE_ID));
+      before(async () => {
+        // Create pipeline that can be used to test PUT request
+        try {
+          await createPipeline({ body: PIPELINE, id: PIPELINE_ID }, true);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error creating ingest node pipeline');
+          throw err;
+        }
+      });
 
       it('should allow an existing pipeline to be updated', async () => {
         const uri = `${API_BASE_PATH}/${PIPELINE_ID}`;
@@ -131,6 +157,23 @@ export default function({ getService }: FtrProviderContext) {
           .send({
             ...PIPELINE,
             description: 'updated test pipeline description',
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
+        });
+      });
+
+      it('should allow optional fields to be removed', async () => {
+        const uri = `${API_BASE_PATH}/${PIPELINE_ID}`;
+
+        const { body } = await supertest
+          .put(uri)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            processors: PIPELINE.processors,
+            // removes description, version and on_failure
           })
           .expect(200);
 
@@ -160,7 +203,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('Get', () => {
-      const PIPELINE_ID = 'test_pipeline';
+      const PIPELINE_ID = 'test_get_pipeline';
       const PIPELINE = {
         description: 'test pipeline description',
         processors: [
@@ -173,15 +216,20 @@ export default function({ getService }: FtrProviderContext) {
         version: 1,
       };
 
-      before(() => createPipeline({ body: PIPELINE, id: PIPELINE_ID }));
-      after(() => deletePipeline(PIPELINE_ID));
+      before(async () => {
+        // Create pipeline that can be used to test GET request
+        try {
+          await createPipeline({ body: PIPELINE, id: PIPELINE_ID }, true);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log('[Setup error] Error creating ingest node pipeline');
+          throw err;
+        }
+      });
 
       describe('all pipelines', () => {
         it('should return an array of pipelines', async () => {
-          const { body } = await supertest
-            .get(API_BASE_PATH)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
+          const { body } = await supertest.get(API_BASE_PATH).set('kbn-xsrf', 'xxx').expect(200);
 
           expect(Array.isArray(body)).to.be(true);
 
@@ -200,10 +248,7 @@ export default function({ getService }: FtrProviderContext) {
         it('should return a single pipeline', async () => {
           const uri = `${API_BASE_PATH}/${PIPELINE_ID}`;
 
-          const { body } = await supertest
-            .get(uri)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
+          const { body } = await supertest.get(uri).set('kbn-xsrf', 'xxx').expect(200);
 
           expect(body).to.eql({
             ...PIPELINE,
@@ -226,64 +271,63 @@ export default function({ getService }: FtrProviderContext) {
         version: 1,
       };
 
+      const pipelineA = { body: PIPELINE, id: 'test_delete_pipeline_a' };
+      const pipelineB = { body: PIPELINE, id: 'test_delete_pipeline_b' };
+      const pipelineC = { body: PIPELINE, id: 'test_delete_pipeline_c' };
+      const pipelineD = { body: PIPELINE, id: 'test_delete_pipeline_d' };
+
+      before(async () => {
+        // Create several pipelines that can be used to test deletion
+        await Promise.all(
+          [pipelineA, pipelineB, pipelineC, pipelineD].map((pipeline) => createPipeline(pipeline))
+        ).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.log(`[Setup error] Error creating pipelines: ${err.message}`);
+          throw err;
+        });
+      });
+
       it('should delete a pipeline', async () => {
-        // Create pipeline to be deleted
-        const PIPELINE_ID = 'test_delete_pipeline';
-        createPipeline({ body: PIPELINE, id: PIPELINE_ID });
+        const { id } = pipelineA;
 
-        const uri = `${API_BASE_PATH}/${PIPELINE_ID}`;
+        const uri = `${API_BASE_PATH}/${id}`;
 
-        const { body } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
-          itemsDeleted: [PIPELINE_ID],
+          itemsDeleted: [id],
           errors: [],
         });
       });
 
       it('should delete multiple pipelines', async () => {
-        // Create pipelines to be deleted
-        const PIPELINE_ONE_ID = 'test_delete_pipeline_1';
-        const PIPELINE_TWO_ID = 'test_delete_pipeline_2';
-        createPipeline({ body: PIPELINE, id: PIPELINE_ONE_ID });
-        createPipeline({ body: PIPELINE, id: PIPELINE_TWO_ID });
+        const { id: pipelineBId } = pipelineB;
+        const { id: pipelineCId } = pipelineC;
 
-        const uri = `${API_BASE_PATH}/${PIPELINE_ONE_ID},${PIPELINE_TWO_ID}`;
+        const uri = `${API_BASE_PATH}/${pipelineBId},${pipelineCId}`;
 
         const {
           body: { itemsDeleted, errors },
-        } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(errors).to.eql([]);
 
         // The itemsDeleted array order isn't guaranteed, so we assert against each pipeline name instead
-        [PIPELINE_ONE_ID, PIPELINE_TWO_ID].forEach(pipelineName => {
+        [pipelineBId, pipelineCId].forEach((pipelineName) => {
           expect(itemsDeleted.includes(pipelineName)).to.be(true);
         });
       });
 
       it('should return an error for any pipelines not sucessfully deleted', async () => {
         const PIPELINE_DOES_NOT_EXIST = 'pipeline_does_not_exist';
+        const { id: existingPipelineId } = pipelineD;
 
-        // Create pipeline to be deleted
-        const PIPELINE_ONE_ID = 'test_delete_pipeline_1';
-        createPipeline({ body: PIPELINE, id: PIPELINE_ONE_ID });
+        const uri = `${API_BASE_PATH}/${existingPipelineId},${PIPELINE_DOES_NOT_EXIST}`;
 
-        const uri = `${API_BASE_PATH}/${PIPELINE_ONE_ID},${PIPELINE_DOES_NOT_EXIST}`;
-
-        const { body } = await supertest
-          .delete(uri)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.delete(uri).set('kbn-xsrf', 'xxx').expect(200);
 
         expect(body).to.eql({
-          itemsDeleted: [PIPELINE_ONE_ID],
+          itemsDeleted: [existingPipelineId],
           errors: [
             {
               name: PIPELINE_DOES_NOT_EXIST,
@@ -320,6 +364,54 @@ export default function({ getService }: FtrProviderContext) {
           .send({
             pipeline: {
               description: 'test simulate pipeline description',
+              processors: [
+                {
+                  set: {
+                    field: 'field2',
+                    value: '_value',
+                  },
+                },
+              ],
+              version: 1,
+              on_failure: [
+                {
+                  set: {
+                    field: '_index',
+                    value: 'failed-{{ _index }}',
+                  },
+                },
+              ],
+            },
+            documents: [
+              {
+                _index: 'index',
+                _id: 'id',
+                _source: {
+                  foo: 'bar',
+                },
+              },
+              {
+                _index: 'index',
+                _id: 'id',
+                _source: {
+                  foo: 'rab',
+                },
+              },
+            ],
+          })
+          .expect(200);
+
+        // The simulate ES response is quite long and includes timestamps
+        // so for now, we just confirm the docs array is returned with the correct length
+        expect(body.docs?.length).to.eql(2);
+      });
+
+      it('should successfully simulate a pipeline with only required pipeline fields', async () => {
+        const { body } = await supertest
+          .post(`${API_BASE_PATH}/simulate`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            pipeline: {
               processors: [
                 {
                   set: {

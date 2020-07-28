@@ -14,20 +14,22 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getTransactionAvgDurationByBrowser } from '../lib/transactions/avg_duration_by_browser';
 import { getTransactionAvgDurationByCountry } from '../lib/transactions/avg_duration_by_country';
+import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
+import { getParsedUiFilters } from '../lib/helpers/convert_ui_filters/get_parsed_ui_filters';
 
 export const transactionGroupsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       t.type({
-        transactionType: t.string
+        transactionType: t.string,
       }),
       uiFiltersRt,
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -38,60 +40,69 @@ export const transactionGroupsRoute = createRoute(() => ({
       {
         type: 'top_transactions',
         serviceName,
-        transactionType
+        transactionType,
       },
       setup
     );
-  }
+  },
 }));
 
 export const transactionGroupsChartsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups/charts',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       t.partial({
         transactionType: t.string,
-        transactionName: t.string
+        transactionName: t.string,
       }),
       uiFiltersRt,
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
+    const logger = context.logger;
     const { serviceName } = context.params.path;
-    const { transactionType, transactionName } = context.params.query;
+    const {
+      transactionType,
+      transactionName,
+      uiFilters: uiFiltersJson,
+    } = context.params.query;
+
+    const uiFilters = getParsedUiFilters({ uiFilters: uiFiltersJson, logger });
 
     return getTransactionCharts({
       serviceName,
       transactionType,
       transactionName,
-      setup
+      setup,
+      logger,
+      uiFilters,
     });
-  }
+  },
 }));
 
 export const transactionGroupsDistributionRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups/distribution',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       t.type({
         transactionType: t.string,
-        transactionName: t.string
+        transactionName: t.string,
       }),
       t.partial({
         transactionId: t.string,
-        traceId: t.string
+        traceId: t.string,
       }),
       uiFiltersRt,
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -100,7 +111,7 @@ export const transactionGroupsDistributionRoute = createRoute(() => ({
       transactionType,
       transactionName,
       transactionId = '',
-      traceId = ''
+      traceId = '',
     } = context.params.query;
 
     return getTransactionDistribution({
@@ -109,27 +120,27 @@ export const transactionGroupsDistributionRoute = createRoute(() => ({
       transactionName,
       transactionId,
       traceId,
-      setup
+      setup,
     });
-  }
+  },
 }));
 
 export const transactionGroupsBreakdownRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups/breakdown',
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       t.type({
-        transactionType: t.string
+        transactionType: t.string,
       }),
       t.partial({
-        transactionName: t.string
+        transactionName: t.string,
       }),
       uiFiltersRt,
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -140,48 +151,49 @@ export const transactionGroupsBreakdownRoute = createRoute(() => ({
       serviceName,
       transactionName,
       transactionType,
-      setup
+      setup,
     });
-  }
+  },
 }));
 
 export const transactionGroupsAvgDurationByBrowser = createRoute(() => ({
   path: `/api/apm/services/{serviceName}/transaction_groups/avg_duration_by_browser`,
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       t.partial({
-        transactionType: t.string,
-        transactionName: t.string
+        transactionName: t.string,
       }),
       uiFiltersRt,
-      rangeRt
-    ])
+      rangeRt,
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
+    const { transactionName } = context.params.query;
 
     return getTransactionAvgDurationByBrowser({
       serviceName,
-      setup
+      setup,
+      transactionName,
     });
-  }
+  },
 }));
 
 export const transactionGroupsAvgDurationByCountry = createRoute(() => ({
   path: `/api/apm/services/{serviceName}/transaction_groups/avg_duration_by_country`,
   params: {
     path: t.type({
-      serviceName: t.string
+      serviceName: t.string,
     }),
     query: t.intersection([
       uiFiltersRt,
       rangeRt,
-      t.partial({ transactionName: t.string })
-    ])
+      t.partial({ transactionName: t.string }),
+    ]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
@@ -191,7 +203,36 @@ export const transactionGroupsAvgDurationByCountry = createRoute(() => ({
     return getTransactionAvgDurationByCountry({
       serviceName,
       transactionName,
-      setup
+      setup,
     });
-  }
+  },
+}));
+
+export const transactionGroupsErrorRateRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/transaction_groups/error_rate',
+  params: {
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      uiFiltersRt,
+      rangeRt,
+      t.partial({
+        transactionType: t.string,
+        transactionName: t.string,
+      }),
+    ]),
+  },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { params } = context;
+    const { serviceName } = params.path;
+    const { transactionType, transactionName } = params.query;
+    return getErrorRate({
+      serviceName,
+      transactionType,
+      transactionName,
+      setup,
+    });
+  },
 }));

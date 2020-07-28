@@ -90,11 +90,11 @@ class SavedObjectsInstallerUi extends React.Component {
       return;
     }
 
-    const errors = resp.savedObjects.filter(savedObject => {
+    const errors = resp.savedObjects.filter((savedObject) => {
       return Boolean(savedObject.error);
     });
 
-    const overwriteErrors = errors.filter(savedObject => {
+    const overwriteErrors = errors.filter((savedObject) => {
       return savedObject.error.statusCode === 409;
     });
     if (overwriteErrors.length > 0) {

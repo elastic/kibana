@@ -9,6 +9,7 @@ import maki from '@elastic/maki';
 import xml2js from 'xml2js';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
+import { getIsDarkMode } from '../../../kibana_services';
 
 export const LARGE_MAKI_ICON_SIZE = 15;
 const LARGE_MAKI_ICON_SIZE_AS_STRING = LARGE_MAKI_ICON_SIZE.toString();
@@ -16,7 +17,7 @@ export const SMALL_MAKI_ICON_SIZE = 11;
 export const HALF_LARGE_MAKI_ICON_SIZE = Math.ceil(LARGE_MAKI_ICON_SIZE);
 
 export const SYMBOLS = {};
-maki.svgArray.forEach(svgString => {
+maki.svgArray.forEach((svgString) => {
   const ID_FRAG = 'id="';
   const index = svgString.indexOf(ID_FRAG);
   if (index !== -1) {
@@ -32,7 +33,7 @@ maki.svgArray.forEach(svgString => {
   }
 });
 
-export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map(symbolId => {
+export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map((symbolId) => {
   return {
     value: symbolId,
     label: symbolId,
@@ -103,17 +104,18 @@ const ICON_PALETTES = [
 
 // PREFERRED_ICONS is used to provide less random default icon values for forms that need default icon values
 export const PREFERRED_ICONS = [];
-ICON_PALETTES.forEach(iconPalette => {
-  iconPalette.icons.forEach(iconId => {
+ICON_PALETTES.forEach((iconPalette) => {
+  iconPalette.icons.forEach((iconId) => {
     if (!PREFERRED_ICONS.includes(iconId)) {
       PREFERRED_ICONS.push(iconId);
     }
   });
 });
 
-export function getIconPaletteOptions(isDarkMode) {
+export function getIconPaletteOptions() {
+  const isDarkMode = getIsDarkMode();
   return ICON_PALETTES.map(({ id, icons }) => {
-    const iconsDisplay = icons.map(iconId => {
+    const iconsDisplay = icons.map((iconId) => {
       const style = {
         width: '10%',
         position: 'relative',
@@ -140,5 +142,5 @@ export function getIconPaletteOptions(isDarkMode) {
 
 export function getIconPalette(paletteId) {
   const palette = ICON_PALETTES.find(({ id }) => id === paletteId);
-  return palette ? [...palette.icons] : null;
+  return palette ? [...palette.icons] : [];
 }

@@ -6,21 +6,14 @@
 
 import axios from 'axios';
 
-import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
-import { addTimeZoneToDate, patch, request, getErrorMessage } from '../case/utils';
+import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
 
 import * as i18n from './translations';
-import {
-  ServiceNowPublicConfigurationType,
-  ServiceNowSecretConfigurationType,
-  CreateIncidentRequest,
-  UpdateIncidentRequest,
-  CreateCommentRequest,
-} from './types';
+import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
+import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
 
 const API_VERSION = 'v2';
 const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
-const COMMENT_URL = `api/now/${API_VERSION}/table/incident`;
 
 // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
 const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
@@ -37,7 +30,6 @@ export const createExternalService = ({
   }
 
   const incidentUrl = `${url}/${INCIDENT_URL}`;
-  const commentUrl = `${url}/${COMMENT_URL}`;
   const axiosInstance = axios.create({
     auth: { username, password },
   });
@@ -61,13 +53,29 @@ export const createExternalService = ({
     }
   };
 
+  const findIncidents = async (params?: Record<string, string>) => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: incidentUrl,
+        params,
+      });
+
+      return res.data.result.length > 0 ? { ...res.data.result } : undefined;
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to find incidents by query. Error: ${error.message}`)
+      );
+    }
+  };
+
   const createIncident = async ({ incident }: ExternalServiceParams) => {
     try {
-      const res = await request<CreateIncidentRequest>({
+      const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}`,
         method: 'post',
-        data: { ...incident },
+        data: { ...(incident as Record<string, unknown>) },
       });
 
       return {
@@ -85,10 +93,10 @@ export const createExternalService = ({
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
     try {
-      const res = await patch<UpdateIncidentRequest>({
+      const res = await patch({
         axios: axiosInstance,
         url: `${incidentUrl}/${incidentId}`,
-        data: { ...incident },
+        data: { ...(incident as Record<string, unknown>) },
       });
 
       return {
@@ -107,32 +115,10 @@ export const createExternalService = ({
     }
   };
 
-  const createComment = async ({ incidentId, comment, field }: ExternalServiceParams) => {
-    try {
-      const res = await patch<CreateCommentRequest>({
-        axios: axiosInstance,
-        url: `${commentUrl}/${incidentId}`,
-        data: { [field]: comment.comment },
-      });
-
-      return {
-        commentId: comment.commentId,
-        pushedDate: new Date(addTimeZoneToDate(res.data.result.sys_updated_on)).toISOString(),
-      };
-    } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}`
-        )
-      );
-    }
-  };
-
   return {
     getIncident,
     createIncident,
     updateIncident,
-    createComment,
+    findIncidents,
   };
 };

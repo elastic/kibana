@@ -19,7 +19,7 @@
 
 import { PluginInitializerContext } from 'kibana/server';
 import { first } from 'rxjs/operators';
-import { fetchProvider } from './collector_fetch';
+import { fetchProvider, TelemetryResponse } from './collector_fetch';
 import { UsageCollectionSetup } from '../../../../../usage_collection/server';
 
 export async function makeSampleDataUsageCollector(
@@ -33,10 +33,18 @@ export async function makeSampleDataUsageCollector(
   } catch (err) {
     return; // kibana plugin is not enabled (test environment)
   }
-  const collector = usageCollection.makeUsageCollector({
+  const collector = usageCollection.makeUsageCollector<TelemetryResponse>({
     type: 'sample-data',
     fetch: fetchProvider(index),
     isReady: () => true,
+    schema: {
+      installed: { type: 'keyword' },
+      last_install_date: { type: 'date' },
+      last_install_set: { type: 'keyword' },
+      last_uninstall_date: { type: 'date' },
+      last_uninstall_set: { type: 'keyword' },
+      uninstalled: { type: 'keyword' },
+    },
   });
 
   usageCollection.registerCollector(collector);

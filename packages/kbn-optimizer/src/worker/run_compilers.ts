@@ -35,7 +35,9 @@ import {
   WorkerConfig,
   ascending,
   parseFilePath,
+  BundleRefs,
 } from '../common';
+import { BundleRefModule } from './bundle_ref_module';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {
@@ -43,11 +45,19 @@ import {
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
-  WebpackNormalModule,
   getModulePath,
 } from './webpack_helpers';
 
 const PLUGIN_NAME = '@kbn/optimizer';
+
+/**
+ * sass-loader creates about a 40% overhead on the overall optimizer runtime, and
+ * so this constant is used to indicate to assignBundlesToWorkers() that there is
+ * extra work done in a bundle that has a lot of scss imports. The value is
+ * arbitrary and just intended to weigh the bundles so that they are distributed
+ * across mulitple workers on machines with lots of cores.
+ */
+const EXTRA_SCSS_WORK_UNITS = 100;
 
 /**
  * Create an Observable<CompilerMsg> for a specific child compiler + bundle
@@ -65,8 +75,8 @@ const observeCompiler = (
    * Called by webpack as a single run compilation is starting
    */
   const started$ = Rx.merge(
-    Rx.fromEventPattern(cb => beforeRun.tap(PLUGIN_NAME, cb)),
-    Rx.fromEventPattern(cb => watchRun.tap(PLUGIN_NAME, cb))
+    Rx.fromEventPattern((cb) => beforeRun.tap(PLUGIN_NAME, cb)),
+    Rx.fromEventPattern((cb) => watchRun.tap(PLUGIN_NAME, cb))
   ).pipe(mapTo(compilerMsgs.running()));
 
   /**
@@ -74,9 +84,9 @@ const observeCompiler = (
    * needAdditionalPass property is set then another compilation
    * is about to be started, so we shouldn't send complete quite yet
    */
-  const complete$ = Rx.fromEventPattern<Stats>(cb => done.tap(PLUGIN_NAME, cb)).pipe(
-    maybeMap(stats => {
-      // @ts-ignore not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
+  const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
+    maybeMap((stats) => {
+      // @ts-expect-error not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
       if (stats.compilation.needAdditionalPass) {
         return undefined;
       }
@@ -98,43 +108,60 @@ const observeCompiler = (
         });
       }
 
-      const normalModules = stats.compilation.modules.filter(
-        (module): module is WebpackNormalModule => {
-          if (isNormalModule(module)) {
-            return true;
-          }
-
-          if (isExternalModule(module) || isIgnoredModule(module) || isConcatenatedModule(module)) {
-            return false;
-          }
-
-          throw new Error(`Unexpected module type: ${inspect(module)}`);
-        }
-      );
-
+      const bundleRefExportIds: string[] = [];
       const referencedFiles = new Set<string>();
+      let normalModuleCount = 0;
+      let workUnits = stats.compilation.fileDependencies.size;
 
-      for (const module of normalModules) {
-        const path = getModulePath(module);
-        const parsedPath = parseFilePath(path);
+      if (bundle.manifestPath) {
+        referencedFiles.add(bundle.manifestPath);
+      }
 
-        if (!parsedPath.dirs.includes('node_modules')) {
-          referencedFiles.add(path);
+      for (const module of stats.compilation.modules) {
+        if (isNormalModule(module)) {
+          normalModuleCount += 1;
+          const path = getModulePath(module);
+          const parsedPath = parseFilePath(path);
+
+          if (!parsedPath.dirs.includes('node_modules')) {
+            referencedFiles.add(path);
+
+            if (path.endsWith('.scss')) {
+              workUnits += EXTRA_SCSS_WORK_UNITS;
+
+              for (const depPath of module.buildInfo.fileDependencies) {
+                referencedFiles.add(depPath);
+              }
+            }
+
+            continue;
+          }
+
+          const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
+          const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
+          referencedFiles.add(
+            Path.join(
+              parsedPath.root,
+              ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
+              'package.json'
+            )
+          );
           continue;
         }
 
-        const nmIndex = parsedPath.dirs.lastIndexOf('node_modules');
-        const isScoped = parsedPath.dirs[nmIndex + 1].startsWith('@');
-        referencedFiles.add(
-          Path.join(
-            parsedPath.root,
-            ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
-            'package.json'
-          )
-        );
+        if (module instanceof BundleRefModule) {
+          bundleRefExportIds.push(module.ref.exportId);
+          continue;
+        }
+
+        if (isExternalModule(module) || isIgnoredModule(module) || isConcatenatedModule(module)) {
+          continue;
+        }
+
+        throw new Error(`Unexpected module type: ${inspect(module)}`);
       }
 
-      const files = Array.from(referencedFiles).sort(ascending(p => p));
+      const files = Array.from(referencedFiles).sort(ascending((p) => p));
       const mtimes = new Map(
         files.map((path): [string, number | undefined] => {
           try {
@@ -150,14 +177,16 @@ const observeCompiler = (
       );
 
       bundle.cache.set({
+        bundleRefExportIds,
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
-        moduleCount: normalModules.length,
+        moduleCount: normalModuleCount,
+        workUnits,
         files,
       });
 
       return compilerMsgs.compilerSuccess({
-        moduleCount: normalModules.length,
+        moduleCount: normalModuleCount,
       });
     })
   );
@@ -167,8 +196,10 @@ const observeCompiler = (
    * prevets assets from being emitted, and prevents watching
    * from continuing.
    */
-  const error$ = Rx.fromEventPattern<Error>(cb => compiler.hooks.failed.tap(PLUGIN_NAME, cb)).pipe(
-    map(error => {
+  const error$ = Rx.fromEventPattern<Error>((cb) =>
+    compiler.hooks.failed.tap(PLUGIN_NAME, cb)
+  ).pipe(
+    map((error) => {
       throw compilerMsgs.error(error);
     })
   );
@@ -183,8 +214,14 @@ const observeCompiler = (
 /**
  * Run webpack compilers
  */
-export const runCompilers = (workerConfig: WorkerConfig, bundles: Bundle[]) => {
-  const multiCompiler = webpack(bundles.map(def => getWebpackConfig(def, workerConfig)));
+export const runCompilers = (
+  workerConfig: WorkerConfig,
+  bundles: Bundle[],
+  bundleRefs: BundleRefs
+) => {
+  const multiCompiler = webpack(
+    bundles.map((def) => getWebpackConfig(def, bundleRefs, workerConfig))
+  );
 
   return Rx.merge(
     /**

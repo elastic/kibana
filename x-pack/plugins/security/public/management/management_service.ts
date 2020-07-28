@@ -5,12 +5,11 @@
  */
 
 import { Subscription } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import {
   ManagementApp,
   ManagementSetup,
-  ManagementStart,
+  ManagementSection,
 } from '../../../../../src/plugins/management/public';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticationServiceSetup } from '../authentication';
@@ -28,37 +27,26 @@ interface SetupParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
-interface StartParams {
-  management: ManagementStart;
-}
-
 export class ManagementService {
   private license!: SecurityLicense;
   private licenseFeaturesSubscription?: Subscription;
+  private securitySection?: ManagementSection;
 
   setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
     this.license = license;
+    this.securitySection = management.sections.section.security;
 
-    const securitySection = management.sections.register({
-      id: 'security',
-      title: i18n.translate('xpack.security.management.securityTitle', {
-        defaultMessage: 'Security',
-      }),
-      order: 100,
-      euiIconType: 'securityApp',
-    });
-
-    securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
-    securitySection.registerApp(
+    this.securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
+    this.securitySection.registerApp(
       rolesManagementApp.create({ fatalErrors, license, getStartServices })
     );
-    securitySection.registerApp(apiKeysManagementApp.create({ getStartServices }));
-    securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
+    this.securitySection.registerApp(apiKeysManagementApp.create({ getStartServices }));
+    this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
   }
 
-  start({ management }: StartParams) {
-    this.licenseFeaturesSubscription = this.license.features$.subscribe(async features => {
-      const securitySection = management.sections.getSection('security')!;
+  start() {
+    this.licenseFeaturesSubscription = this.license.features$.subscribe(async (features) => {
+      const securitySection = this.securitySection!;
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
         [securitySection.getApp(usersManagementApp.id)!, features.showLinks],

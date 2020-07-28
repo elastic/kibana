@@ -5,15 +5,23 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { getTelemetry, initTelemetry } from './telemetry';
-
-const TELEMETRY_TYPE = 'fileUploadTelemetry';
+import { getTelemetry, initTelemetry, Telemetry } from './telemetry';
 
 export function registerFileUploadUsageCollector(usageCollection: UsageCollectionSetup): void {
-  const fileUploadUsageCollector = usageCollection.makeUsageCollector({
-    type: TELEMETRY_TYPE,
+  const fileUploadUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
+    type: 'fileUploadTelemetry',
     isReady: () => true,
-    fetch: async () => (await getTelemetry()) || initTelemetry(),
+    fetch: async () => {
+      const fileUploadUsage = await getTelemetry();
+      if (!fileUploadUsage) {
+        return initTelemetry();
+      }
+
+      return fileUploadUsage;
+    },
+    schema: {
+      filesUploadedTotalCount: { type: 'long' },
+    },
   });
 
   usageCollection.registerCollector(fileUploadUsageCollector);

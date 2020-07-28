@@ -42,11 +42,11 @@ export class FilterListsUI extends Component {
     this.refreshFilterLists();
   }
 
-  setFilterLists = filterLists => {
+  setFilterLists = (filterLists) => {
     // Check selected filter lists still exist.
-    this.setState(prevState => {
-      const loadedFilterIds = filterLists.map(filterList => filterList.filter_id);
-      const selectedFilterLists = prevState.selectedFilterLists.filter(filterList => {
+    this.setState((prevState) => {
+      const loadedFilterIds = filterLists.map((filterList) => filterList.filter_id);
+      const selectedFilterLists = prevState.selectedFilterLists.filter((filterList) => {
         return loadedFilterIds.indexOf(filterList.filter_id) !== -1;
       });
 
@@ -57,7 +57,7 @@ export class FilterListsUI extends Component {
     });
   };
 
-  setSelectedFilterLists = selectedFilterLists => {
+  setSelectedFilterLists = (selectedFilterLists) => {
     this.setState({ selectedFilterLists });
   };
 
@@ -65,10 +65,10 @@ export class FilterListsUI extends Component {
     // Load the list of filters.
     ml.filters
       .filtersStats()
-      .then(filterLists => {
+      .then((filterLists) => {
         this.setFilterLists(filterLists);
       })
-      .catch(resp => {
+      .catch((resp) => {
         console.log('Error loading list of filters:', resp);
         const { toasts } = this.props.kibana.services.notifications;
         toasts.addDanger(

@@ -69,18 +69,18 @@ export class Data {
   }
 
   copyDataObj(data) {
-    const copyChart = data => {
+    const copyChart = (data) => {
       const newData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (key === 'xAxisOrderedValues') {
-          newData[key] = data[key].map(val => {
+          newData[key] = data[key].map((val) => {
             if (typeof val === 'object') {
               return new D3MappableObject(val);
             }
             return val;
           });
         } else if (key === 'series') {
-          newData[key] = data[key].map(seri => {
+          newData[key] = data[key].map((seri) => {
             const converter = getFormatService().deserialize(seri.format);
             const zConverter = getFormatService().deserialize(seri.zFormat);
             return {
@@ -88,7 +88,7 @@ export class Data {
               rawId: seri.rawId,
               label: seri.label,
               zLabel: seri.zLabel,
-              values: seri.values.map(val => {
+              values: seri.values.map((val) => {
                 const newVal = _.clone(val);
                 newVal.extraMetrics = val.extraMetrics;
                 newVal.series = val.series || seri.label;
@@ -97,8 +97,8 @@ export class Data {
                 }
                 return newVal;
               }),
-              yAxisFormatter: val => converter.convert(val),
-              zAxisFormatter: val => zConverter.convert(val),
+              yAxisFormatter: (val) => converter.convert(val),
+              zAxisFormatter: (val) => zConverter.convert(val),
             };
           });
         } else {
@@ -109,20 +109,20 @@ export class Data {
       const xConverter = getFormatService().deserialize(newData.xAxisFormat);
       const yConverter = getFormatService().deserialize(newData.yAxisFormat);
       const zConverter = getFormatService().deserialize(newData.zAxisFormat);
-      newData.xAxisFormatter = val => xConverter.convert(val);
-      newData.yAxisFormatter = val => yConverter.convert(val);
-      newData.zAxisFormatter = val => zConverter.convert(val);
+      newData.xAxisFormatter = (val) => xConverter.convert(val);
+      newData.yAxisFormatter = (val) => yConverter.convert(val);
+      newData.zAxisFormatter = (val) => zConverter.convert(val);
 
       return newData;
     };
 
     if (!data.series) {
       const newData = {};
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (!['rows', 'columns'].includes(key)) {
           newData[key] = data[key];
         } else {
-          newData[key] = data[key].map(chart => {
+          newData[key] = data[key].map((chart) => {
             return copyChart(chart);
           });
         }
@@ -143,7 +143,7 @@ export class Data {
     const data = this.getVisData();
     let type;
 
-    data.forEach(function(obj) {
+    data.forEach(function (obj) {
       if (obj.series) {
         type = 'series';
       } else if (obj.slices) {
@@ -248,8 +248,8 @@ export class Data {
     const visData = this.getVisData();
 
     return _.reduce(
-      _.pluck(visData, 'geoJson.properties'),
-      function(minMax, props) {
+      _.map(visData, 'geoJson.properties'),
+      function (minMax, props) {
         return {
           min: Math.min(props.min, minMax.min),
           max: Math.max(props.max, minMax.max),
@@ -294,9 +294,9 @@ export class Data {
   hasNullValues() {
     const chartData = this.chartData();
 
-    return chartData.some(function(chart) {
-      return chart.series.some(function(obj) {
-        return obj.values.some(function(d) {
+    return chartData.some(function (chart) {
+      return chart.series.some(function (obj) {
+        return obj.values.some(function (d) {
           return d.y === null;
         });
       });
@@ -312,12 +312,7 @@ export class Data {
    * @returns {Array} Value objects
    */
   flatten() {
-    return _(this.chartData())
-      .pluck('series')
-      .flattenDeep()
-      .pluck('values')
-      .flattenDeep()
-      .value();
+    return _(this.chartData()).map('series').flattenDeep().map('values').flattenDeep().value();
   }
 
   /**
@@ -349,7 +344,7 @@ export class Data {
     const names = [];
     const self = this;
 
-    _.forEach(array, function(obj) {
+    _.forEach(array, function (obj) {
       names.push({
         label: obj.name,
         values: [obj.rawData],
@@ -359,7 +354,7 @@ export class Data {
       if (obj.children) {
         const plusIndex = index + 1;
 
-        _.forEach(self.returnNames(obj.children, plusIndex, columns), function(namedObj) {
+        _.forEach(self.returnNames(obj.children, plusIndex, columns), function (namedObj) {
           names.push(namedObj);
         });
       }
@@ -385,10 +380,10 @@ export class Data {
       const namedObj = this.returnNames(slices.children, 0, columns);
 
       return _(namedObj)
-        .sortBy(function(obj) {
+        .sortBy(function (obj) {
           return obj.index;
         })
-        .unique(function(d) {
+        .uniqBy(function (d) {
           return d.label;
         })
         .value();
@@ -413,7 +408,7 @@ export class Data {
    * @param {Array} data
    */
   _cleanPieChartData(data) {
-    _.forEach(data, obj => {
+    _.forEach(data, (obj) => {
       obj.slices = this._removeZeroSlices(obj.slices);
     });
   }
@@ -450,14 +445,14 @@ export class Data {
     const self = this;
     const names = [];
 
-    _.forEach(data, function(obj) {
+    _.forEach(data, function (obj) {
       const columns = obj.raw ? obj.raw.columns : undefined;
-      _.forEach(self.getNames(obj, columns), function(name) {
+      _.forEach(self.getNames(obj, columns), function (name) {
         names.push(name);
       });
     });
 
-    return _.uniq(names, 'label');
+    return _.uniqBy(names, 'label');
   }
 
   /**
@@ -516,7 +511,7 @@ export class Data {
    */
   getPieColorFunc() {
     return this.createColorLookupFunction(
-      this.pieNames(this.getVisData()).map(function(d) {
+      this.pieNames(this.getVisData()).map(function (d) {
         return d.label;
       }),
       this.uiState.get('vis.colors')
@@ -533,7 +528,7 @@ export class Data {
     const data = this.getVisData();
     const self = this;
 
-    data.forEach(function(d) {
+    data.forEach(function (d) {
       if (!d.ordered || !d.ordered.date) return;
 
       const missingMin = d.ordered.min == null;
@@ -558,7 +553,7 @@ export class Data {
    * @returns {Array} min and max values
    */
   mapDataExtents(series) {
-    const values = _.map(series.rows, function(row) {
+    const values = _.map(series.rows, function (row) {
       return row[row.length - 1];
     });
     return [_.min(values), _.max(values)];
@@ -571,7 +566,7 @@ export class Data {
    * @return {number} - the largest number of series from all charts
    */
   maxNumberOfSeries() {
-    return this.chartData().reduce(function(max, chart) {
+    return this.chartData().reduce(function (max, chart) {
       return Math.max(max, chart.series.length);
     }, 0);
   }

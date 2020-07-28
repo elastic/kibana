@@ -11,7 +11,7 @@ import { getInternalRepository } from './internal_repository';
 
 export const TELEMETRY_DOC_ID = 'ml-telemetry';
 
-interface Telemetry {
+export interface Telemetry {
   file_data_visualizer: {
     index_creation_count: number;
   };

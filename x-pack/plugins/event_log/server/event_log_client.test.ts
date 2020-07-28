@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'src/core/server';
 import { EventLogClient } from './event_log_client';
 import { contextMock } from './es/context.mock';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
@@ -18,6 +19,7 @@ describe('EventLogStart', () => {
       const eventLogClient = new EventLogClient({
         esContext,
         savedObjectsClient,
+        request: FakeRequest(),
       });
 
       savedObjectsClient.get.mockResolvedValueOnce({
@@ -38,6 +40,7 @@ describe('EventLogStart', () => {
       const eventLogClient = new EventLogClient({
         esContext,
         savedObjectsClient,
+        request: FakeRequest(),
       });
 
       savedObjectsClient.get.mockRejectedValue(new Error('Fail'));
@@ -53,6 +56,7 @@ describe('EventLogStart', () => {
       const eventLogClient = new EventLogClient({
         esContext,
         savedObjectsClient,
+        request: FakeRequest(),
       });
 
       savedObjectsClient.get.mockResolvedValueOnce({
@@ -107,6 +111,7 @@ describe('EventLogStart', () => {
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
         esContext.esNames.alias,
+        undefined,
         'saved-object-type',
         'saved-object-id',
         {
@@ -124,6 +129,7 @@ describe('EventLogStart', () => {
       const eventLogClient = new EventLogClient({
         esContext,
         savedObjectsClient,
+        request: FakeRequest(),
       });
 
       savedObjectsClient.get.mockResolvedValueOnce({
@@ -172,12 +178,8 @@ describe('EventLogStart', () => {
       };
       esContext.esAdapter.queryEventsBySavedObject.mockResolvedValue(result);
 
-      const start = moment()
-        .subtract(1, 'days')
-        .toISOString();
-      const end = moment()
-        .add(1, 'days')
-        .toISOString();
+      const start = moment().subtract(1, 'days').toISOString();
+      const end = moment().add(1, 'days').toISOString();
 
       expect(
         await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id', {
@@ -188,6 +190,7 @@ describe('EventLogStart', () => {
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
         esContext.esNames.alias,
+        undefined,
         'saved-object-type',
         'saved-object-id',
         {
@@ -207,6 +210,7 @@ describe('EventLogStart', () => {
       const eventLogClient = new EventLogClient({
         esContext,
         savedObjectsClient,
+        request: FakeRequest(),
       });
 
       savedObjectsClient.get.mockResolvedValueOnce({
@@ -236,6 +240,7 @@ describe('EventLogStart', () => {
       const eventLogClient = new EventLogClient({
         esContext,
         savedObjectsClient,
+        request: FakeRequest(),
       });
 
       savedObjectsClient.get.mockResolvedValueOnce({
@@ -289,4 +294,23 @@ function fakeEvent(overrides = {}) {
     },
     overrides
   );
+}
+
+function FakeRequest(): KibanaRequest {
+  const savedObjectsClient = savedObjectsClientMock.create();
+  return ({
+    headers: {},
+    getBasePath: () => '',
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
+    getSavedObjectsClient: () => savedObjectsClient,
+  } as unknown) as KibanaRequest;
 }

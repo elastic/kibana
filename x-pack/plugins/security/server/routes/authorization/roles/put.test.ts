@@ -15,6 +15,8 @@ import {
   httpServerMock,
 } from '../../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { Feature } from '../../../../../features/server';
+import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 
 const application = 'kibana-.kibana';
 const privilegeMap = {
@@ -47,7 +49,12 @@ interface TestOptions {
   licenseCheckResult?: LicenseCheck;
   apiResponses?: Array<() => Promise<unknown>>;
   payload?: Record<string, any>;
-  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[][] };
+  asserts: {
+    statusCode: number;
+    result?: Record<string, any>;
+    apiArguments?: unknown[][];
+    recordSubFeaturePrivilegeUsage?: boolean;
+  };
 }
 
 const putRoleTest = (
@@ -65,11 +72,52 @@ const putRoleTest = (
     mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
     for (const apiResponse of apiResponses) {
       mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
     }
+
+    mockRouteDefinitionParams.getFeatureUsageService.mockReturnValue(
+      securityFeatureUsageServiceMock.createStartContract()
+    );
+
+    mockRouteDefinitionParams.getFeatures.mockResolvedValue([
+      new Feature({
+        id: 'feature_1',
+        name: 'feature 1',
+        app: [],
+        privileges: {
+          all: {
+            ui: [],
+            savedObject: { all: [], read: [] },
+          },
+          read: {
+            ui: [],
+            savedObject: { all: [], read: [] },
+          },
+        },
+        subFeatures: [
+          {
+            name: 'sub feature 1',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub_feature_privilege_1',
+                    name: 'first sub-feature privilege',
+                    includeIn: 'none',
+                    ui: [],
+                    savedObject: { all: [], read: [] },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ]);
 
     definePutRolesRoutes(mockRouteDefinitionParams);
     const [[{ validate }, handler]] = mockRouteDefinitionParams.router.put.mock.calls;
@@ -99,6 +147,16 @@ const putRoleTest = (
       expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
     }
     expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+
+    if (asserts.recordSubFeaturePrivilegeUsage) {
+      expect(
+        mockRouteDefinitionParams.getFeatureUsageService().recordSubFeaturePrivilegeUsage
+      ).toHaveBeenCalledTimes(1);
+    } else {
+      expect(
+        mockRouteDefinitionParams.getFeatureUsageService().recordSubFeaturePrivilegeUsage
+      ).not.toHaveBeenCalled();
+    }
   });
 };
 
@@ -590,6 +648,132 @@ describe('PUT role', () => {
                 ],
                 metadata: { foo: 'test-metadata' },
                 run_as: ['test-run-as-1', 'test-run-as-2'],
+              },
+            },
+          ],
+        ],
+        statusCode: 204,
+        result: undefined,
+      },
+    });
+
+    putRoleTest(`notifies when sub-feature privileges are included`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            spaces: ['*'],
+            feature: {
+              feature_1: ['sub_feature_privilege_1'],
+            },
+          },
+        ],
+      },
+      apiResponses: [async () => ({}), async () => {}],
+      asserts: {
+        recordSubFeaturePrivilegeUsage: true,
+        apiArguments: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application: 'kibana-.kibana',
+                    privileges: ['feature_feature_1.sub_feature_privilege_1'],
+                    resources: ['*'],
+                  },
+                ],
+                metadata: undefined,
+              },
+            },
+          ],
+        ],
+        statusCode: 204,
+        result: undefined,
+      },
+    });
+
+    putRoleTest(`does not record sub-feature privilege usage for unknown privileges`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            spaces: ['*'],
+            feature: {
+              feature_1: ['unknown_sub_feature_privilege_1'],
+            },
+          },
+        ],
+      },
+      apiResponses: [async () => ({}), async () => {}],
+      asserts: {
+        recordSubFeaturePrivilegeUsage: false,
+        apiArguments: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application: 'kibana-.kibana',
+                    privileges: ['feature_feature_1.unknown_sub_feature_privilege_1'],
+                    resources: ['*'],
+                  },
+                ],
+                metadata: undefined,
+              },
+            },
+          ],
+        ],
+        statusCode: 204,
+        result: undefined,
+      },
+    });
+
+    putRoleTest(`does not record sub-feature privilege usage for unknown features`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            spaces: ['*'],
+            feature: {
+              unknown_feature: ['sub_feature_privilege_1'],
+            },
+          },
+        ],
+      },
+      apiResponses: [async () => ({}), async () => {}],
+      asserts: {
+        recordSubFeaturePrivilegeUsage: false,
+        apiArguments: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application: 'kibana-.kibana',
+                    privileges: ['feature_unknown_feature.sub_feature_privilege_1'],
+                    resources: ['*'],
+                  },
+                ],
+                metadata: undefined,
               },
             },
           ],

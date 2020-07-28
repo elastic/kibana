@@ -16,10 +16,21 @@ import chartBarHorizontalStackedSVG from '../assets/chart_bar_horizontal_stacked
 import chartLineSVG from '../assets/chart_line.svg';
 
 import { VisualizationType } from '../index';
+import { FittingFunction } from './fitting_functions';
 
 export interface LegendConfig {
+  /**
+   * Flag whether the legend should be shown. If there is just a single series, it will be hidden
+   */
   isVisible: boolean;
+  /**
+   * Position of the legend relative to the chart
+   */
   position: Position;
+  /**
+   * Flag whether the legend should be shown even with just a single series
+   */
+  showSingleSeries?: boolean;
 }
 
 type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
@@ -47,6 +58,12 @@ export const legendConfig: ExpressionFunctionDefinition<
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
       help: i18n.translate('xpack.lens.xyChart.position.help', {
         defaultMessage: 'Specifies the legend position.',
+      }),
+    },
+    showSingleSeries: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.xyChart.showSingleSeries.help', {
+        defaultMessage: 'Specifies whether a legend with just a single entry should be shown',
       }),
     },
   },
@@ -77,37 +94,37 @@ const axisConfig: { [key in keyof AxisConfig]: ArgumentType<AxisConfig[key]> } =
   },
 };
 
-export interface YState extends AxisConfig {
-  accessors: string[];
-}
+type YConfigResult = YConfig & { type: 'lens_xy_yConfig' };
 
-export interface XConfig extends AxisConfig {
-  accessor: string;
-}
-
-type XConfigResult = XConfig & { type: 'lens_xy_xConfig' };
-
-export const xConfig: ExpressionFunctionDefinition<
-  'lens_xy_xConfig',
+export const yAxisConfig: ExpressionFunctionDefinition<
+  'lens_xy_yConfig',
   null,
-  XConfig,
-  XConfigResult
+  YConfig,
+  YConfigResult
 > = {
-  name: 'lens_xy_xConfig',
+  name: 'lens_xy_yConfig',
   aliases: [],
-  type: 'lens_xy_xConfig',
-  help: `Configure the xy chart's x axis`,
+  type: 'lens_xy_yConfig',
+  help: `Configure the behavior of a xy chart's y axis metric`,
   inputTypes: ['null'],
   args: {
-    ...axisConfig,
-    accessor: {
+    forAccessor: {
       types: ['string'],
-      help: 'The column to display on the x axis.',
+      help: 'The accessor this configuration is for',
+    },
+    axisMode: {
+      types: ['string'],
+      options: ['auto', 'left', 'right'],
+      help: 'The axis mode of the metric',
+    },
+    color: {
+      types: ['string'],
+      help: 'The color of the series',
     },
   },
-  fn: function fn(input: unknown, args: XConfig) {
+  fn: function fn(input: unknown, args: YConfig) {
     return {
-      type: 'lens_xy_xConfig',
+      type: 'lens_xy_yConfig',
       ...args,
     };
   },
@@ -166,6 +183,12 @@ export const layerConfig: ExpressionFunctionDefinition<
       help: 'The columns to display on the y axis.',
       multi: true,
     },
+    yConfig: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      types: ['lens_xy_yConfig' as any],
+      help: 'Additional configuration for y axes',
+      multi: true,
+    },
     columnToLabel: {
       types: ['string'],
       help: 'JSON key-value pairs of column ID to label',
@@ -188,11 +211,20 @@ export type SeriesType =
   | 'bar_horizontal_stacked'
   | 'area_stacked';
 
+export type YAxisMode = 'auto' | 'left' | 'right';
+
+export interface YConfig {
+  forAccessor: string;
+  axisMode?: YAxisMode;
+  color?: string;
+}
+
 export interface LayerConfig {
   hide?: boolean;
   layerId: string;
   xAccessor?: string;
   accessors: string[];
+  yConfig?: YConfig[];
   seriesType: SeriesType;
   splitAccessor?: string;
 }
@@ -210,12 +242,14 @@ export interface XYArgs {
   yTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
+  fittingFunction?: FittingFunction;
 }
 
 // Persisted parts of the state
 export interface XYState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;
+  fittingFunction?: FittingFunction;
   layers: LayerConfig[];
 }
 

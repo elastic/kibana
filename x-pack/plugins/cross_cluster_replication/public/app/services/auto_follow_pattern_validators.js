@@ -8,8 +8,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { indices } from '../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { indices } from '../../shared_imports';
 
 const {
   indexNameBeginsWithPeriod,
@@ -52,7 +52,7 @@ export const validateName = (name = '') => {
   return errorMsg;
 };
 
-export const validateLeaderIndexPattern = indexPattern => {
+export const validateLeaderIndexPattern = (indexPattern) => {
   if (indexPattern) {
     const errors = indexPatterns.validate(indexPattern);
 
@@ -100,7 +100,7 @@ export const validateLeaderIndexPattern = indexPattern => {
   return null;
 };
 
-export const validateLeaderIndexPatterns = indexPatterns => {
+export const validateLeaderIndexPatterns = (indexPatterns) => {
   // We only need to check if a value has been provided, because validation for this field
   // has already been executed as the user has entered input into it.
   if (!indexPatterns.length) {
@@ -117,7 +117,7 @@ export const validateLeaderIndexPatterns = indexPatterns => {
   return null;
 };
 
-export const validatePrefix = prefix => {
+export const validatePrefix = (prefix) => {
   // If it's empty, it is valid
   if (!prefix || !prefix.trim()) {
     return null;
@@ -161,7 +161,7 @@ export const validatePrefix = prefix => {
   return null;
 };
 
-export const validateSuffix = suffix => {
+export const validateSuffix = (suffix) => {
   // If it's empty, it is valid
   if (!suffix || !suffix.trim()) {
     return null;
@@ -200,7 +200,7 @@ export const validateAutoFollowPattern = (autoFollowPattern = {}) => {
   let error = null;
   let fieldValue;
 
-  Object.keys(autoFollowPattern).forEach(fieldName => {
+  Object.keys(autoFollowPattern).forEach((fieldName) => {
     fieldValue = autoFollowPattern[fieldName];
     error = null;
 

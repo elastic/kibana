@@ -39,7 +39,9 @@ const createStartContract = (): VisualizationsStart => ({
   get: jest.fn(),
   all: jest.fn(),
   getAliases: jest.fn(),
-  savedVisualizationsLoader: {} as any,
+  savedVisualizationsLoader: {
+    get: jest.fn(),
+  } as any,
   showNewVisModal: jest.fn(),
   createVis: jest.fn(),
   convertFromSerializedVis: jest.fn(),
@@ -66,6 +68,7 @@ const createInstance = async () => {
       inspector: inspectorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
       application: applicationServiceMock.createStartContract(),
+      embeddable: embeddablePluginMock.createStartContract(),
     });
 
   return {

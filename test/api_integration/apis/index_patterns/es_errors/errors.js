@@ -30,7 +30,7 @@ import {
 
 import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 

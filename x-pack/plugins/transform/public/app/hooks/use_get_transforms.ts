@@ -72,7 +72,7 @@ export const useGetTransforms = (
 
         const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
           const stats = isGetTransformsStatsResponseOk(transformStats)
-            ? transformStats.transforms.find(d => config.id === d.id)
+            ? transformStats.transforms.find((d) => config.id === d.id)
             : undefined;
 
           // A newly created transform might not have corresponding stats yet.

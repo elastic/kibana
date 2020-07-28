@@ -6,12 +6,11 @@
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useApmPluginContext } from '../../hooks/useApmPluginContext';
+import { useKibanaUrl } from '../../hooks/useKibanaUrl';
 
 export function InvalidLicenseNotification() {
-  const { core } = useApmPluginContext();
-  const manageLicenseURL = core.http.basePath.prepend(
-    '/app/kibana#/management/elasticsearch/license_management'
+  const manageLicenseURL = useKibanaUrl(
+    '/app/management/stack/license_management'
   );
 
   return (
@@ -21,7 +20,7 @@ export function InvalidLicenseNotification() {
       title={
         <h1>
           {i18n.translate('xpack.apm.invalidLicense.title', {
-            defaultMessage: 'Invalid License'
+            defaultMessage: 'Invalid License',
           })}
         </h1>
       }
@@ -29,16 +28,16 @@ export function InvalidLicenseNotification() {
         <p>
           {i18n.translate('xpack.apm.invalidLicense.message', {
             defaultMessage:
-              'The APM UI is not available because your current license has expired or is no longer valid.'
+              'The APM UI is not available because your current license has expired or is no longer valid.',
           })}
         </p>
       }
       actions={[
         <EuiButton href={manageLicenseURL}>
           {i18n.translate('xpack.apm.invalidLicense.licenseManagementLink', {
-            defaultMessage: 'Manage your license'
+            defaultMessage: 'Manage your license',
           })}
-        </EuiButton>
+        </EuiButton>,
       ]}
     />
   );

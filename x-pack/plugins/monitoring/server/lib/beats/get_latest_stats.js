@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize, get } from 'lodash';
+import { upperFirst, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createBeatsQuery } from './create_beats_query';
 
 export function handleResponse(response) {
   const aggs = get(response, 'aggregations');
 
-  const getTimeRangeCount = name => {
+  const getTimeRangeCount = (name) => {
     const lastActiveBuckets = get(aggs, 'active_counts.buckets', []);
-    const rangeBucket = lastActiveBuckets.find(bucket => bucket.key === name);
+    const rangeBucket = lastActiveBuckets.find((bucket) => bucket.key === name);
     return get(rangeBucket, 'uuids.buckets.length');
   };
 
@@ -47,7 +47,7 @@ export function handleResponse(response) {
     return [
       ...accum,
       {
-        type: capitalize(current.key),
+        type: upperFirst(current.key),
         count: get(current, 'uuids.buckets.length'),
       },
     ];

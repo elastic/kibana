@@ -19,12 +19,14 @@ import {
   createExtentFilter,
   roundCoordinates,
   extractFeaturesFromFilters,
+  makeESBbox,
+  scaleBounds,
 } from './elasticsearch_geo_utils';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 
 const geoFieldName = 'location';
 
-const flattenHitMock = hit => {
+const flattenHitMock = (hit) => {
   const properties = {};
   for (const fieldName in hit._source) {
     if (hit._source.hasOwnProperty(fieldName)) {
@@ -173,7 +175,7 @@ describe('hitsToGeoJson', () => {
   describe('dot in geoFieldName', () => {
     const indexPatternMock = {
       fields: {
-        getByName: name => {
+        getByName: (name) => {
           const fields = {
             ['my.location']: {
               type: 'geo_point',
@@ -420,7 +422,7 @@ describe('createExtentFilter', () => {
       });
     });
 
-    it('should not clamp longitudes to -180 to 180', () => {
+    it('should clamp longitudes to -180 to 180 when lonitude wraps globe', () => {
       const mapExtent = {
         maxLat: 39,
         maxLon: 209,
@@ -435,11 +437,11 @@ describe('createExtentFilter', () => {
             shape: {
               coordinates: [
                 [
-                  [-191, 39],
-                  [-191, 35],
-                  [209, 35],
-                  [209, 39],
-                  [-191, 39],
+                  [-180, 39],
+                  [-180, 35],
+                  [180, 35],
+                  [180, 39],
+                  [-180, 39],
                 ],
               ],
               type: 'Polygon',
@@ -592,5 +594,114 @@ describe('extractFeaturesFromFilters', () => {
     };
 
     expect(extractFeaturesFromFilters([spatialFilter])).toEqual([]);
+  });
+});
+
+describe('makeESBbox', () => {
+  it('Should invert Y-axis', () => {
+    const bbox = makeESBbox({
+      minLon: 10,
+      maxLon: 20,
+      minLat: 0,
+      maxLat: 1,
+    });
+    expect(bbox).toEqual({ bottom_right: [20, 0], top_left: [10, 1] });
+  });
+
+  it('Should snap to 360 width', () => {
+    const bbox = makeESBbox({
+      minLon: 10,
+      maxLon: 400,
+      minLat: 0,
+      maxLat: 1,
+    });
+    expect(bbox).toEqual({ bottom_right: [180, 0], top_left: [-180, 1] });
+  });
+
+  it('Should clamp latitudes', () => {
+    const bbox = makeESBbox({
+      minLon: 10,
+      maxLon: 400,
+      minLat: -100,
+      maxLat: 100,
+    });
+    expect(bbox).toEqual({ bottom_right: [180, -89], top_left: [-180, 89] });
+  });
+
+  it('Should swap West->East orientation to East->West orientation when crossing dateline (West extension)', () => {
+    const bbox = makeESBbox({
+      minLon: -190,
+      maxLon: 20,
+      minLat: -100,
+      maxLat: 100,
+    });
+    expect(bbox).toEqual({ bottom_right: [20, -89], top_left: [170, 89] });
+  });
+
+  it('Should swap West->East orientation to East->West orientation when crossing dateline (West extension) (overrated)', () => {
+    const bbox = makeESBbox({
+      minLon: -190 + 360 + 360,
+      maxLon: 20 + 360 + 360,
+      minLat: -100,
+      maxLat: 100,
+    });
+    expect(bbox).toEqual({ bottom_right: [20, -89], top_left: [170, 89] });
+  });
+
+  it('Should swap West->East orientation to East->West orientation when crossing dateline (east extension)', () => {
+    const bbox = makeESBbox({
+      minLon: 175,
+      maxLon: 190,
+      minLat: -100,
+      maxLat: 100,
+    });
+    expect(bbox).toEqual({ bottom_right: [-170, -89], top_left: [175, 89] });
+  });
+
+  it('Should preserve West->East orientation when _not_ crossing dateline', () => {
+    const bbox = makeESBbox({
+      minLon: 20,
+      maxLon: 170,
+      minLat: -100,
+      maxLat: 100,
+    });
+    expect(bbox).toEqual({ bottom_right: [170, -89], top_left: [20, 89] });
+  });
+
+  it('Should preserve West->East orientation when _not_ crossing dateline _and_ snap longitudes (west extension)', () => {
+    const bbox = makeESBbox({
+      minLon: -190,
+      maxLon: -185,
+      minLat: -100,
+      maxLat: 100,
+    });
+    expect(bbox).toEqual({ bottom_right: [175, -89], top_left: [170, 89] });
+  });
+
+  it('Should preserve West->East orientation when _not_ crossing dateline _and_ snap longitudes (east extension)', () => {
+    const bbox = makeESBbox({
+      minLon: 185,
+      maxLon: 190,
+      minLat: -100,
+      maxLat: 100,
+    });
+    expect(bbox).toEqual({ bottom_right: [-170, -89], top_left: [-175, 89] });
+  });
+});
+
+describe('scaleBounds', () => {
+  it('Should scale bounds', () => {
+    const bounds = {
+      maxLat: 10,
+      maxLon: 100,
+      minLat: 5,
+      minLon: 95,
+    };
+    expect(scaleBounds(bounds, 0.5)).toEqual({
+      maxLat: 12.5,
+      maxLon: 102.5,
+      minLat: 2.5,
+      minLon: 92.5,
+    });
   });
 });

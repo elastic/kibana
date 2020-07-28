@@ -59,7 +59,7 @@ describe('dateHistogram(req, panel, series)', () => {
   });
 
   test('returns valid date histogram', () => {
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
       {}
     );
@@ -93,7 +93,7 @@ describe('dateHistogram(req, panel, series)', () => {
 
   test('returns valid date histogram (offset by 1h)', () => {
     series.offset_time = '1h';
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
       {}
     );
@@ -130,7 +130,7 @@ describe('dateHistogram(req, panel, series)', () => {
     series.series_index_pattern = '*';
     series.series_time_field = 'timestamp';
     series.series_interval = '20s';
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
       {}
     );
@@ -167,7 +167,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel.time_range_mode = 'entire_time_range';
       panel.type = 'timeseries';
 
-      const next = doc => doc;
+      const next = (doc) => doc;
       const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
         {}
       );
@@ -179,7 +179,7 @@ describe('dateHistogram(req, panel, series)', () => {
     test('should returns valid date histogram for entire range mode', () => {
       panel.time_range_mode = 'entire_time_range';
 
-      const next = doc => doc;
+      const next = (doc) => doc;
       const doc = dateHistogram(req, panel, series, config, indexPatternObject, capabilities)(next)(
         {}
       );

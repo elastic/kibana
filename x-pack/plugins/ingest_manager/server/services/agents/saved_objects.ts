@@ -23,6 +23,7 @@ export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
     user_provided_metadata: so.attributes.user_provided_metadata,
     access_api_key: undefined,
     status: undefined,
+    packages: so.attributes.packages ?? [],
   };
 }
 

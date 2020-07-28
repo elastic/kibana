@@ -24,7 +24,7 @@ const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' }
 export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
 
 export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('get');
+  const expectForbidden = expectResponses.forbiddenTypes('get');
   const expectResponseBody = (testCase: GetTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {
@@ -47,9 +47,9 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
-      cases = cases.map(x => ({ ...x, failure: 403 }));
+      cases = cases.map((x) => ({ ...x, failure: 403 }));
     }
-    return cases.map(x => ({
+    return cases.map((x) => ({
       title: getTestTitle(x),
       responseStatusCode: x.failure ?? 200,
       request: createRequest(x),

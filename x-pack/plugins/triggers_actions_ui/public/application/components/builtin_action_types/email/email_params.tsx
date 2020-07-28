@@ -5,11 +5,12 @@
  */
 import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFieldText, EuiComboBox, EuiTextArea, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { EmailActionParams } from '../types';
-import { AddMessageVariables } from '../../add_message_variables';
+import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 
 export const EmailParamsFields = ({
   actionParams,
@@ -32,14 +33,6 @@ export const EmailParamsFields = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
-    editAction(
-      paramsProperty,
-      ((actionParams as any)[paramsProperty] ?? '').concat(` {{${variable}}}`),
-      index
-    );
-  };
 
   return (
     <Fragment>
@@ -87,14 +80,14 @@ export const EmailParamsFields = ({
             const newOptions = [...toOptions, { label: searchValue }];
             editAction(
               'to',
-              newOptions.map(newOption => newOption.label),
+              newOptions.map((newOption) => newOption.label),
               index
             );
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
             editAction(
               'to',
-              selectedOptions.map(selectedOption => selectedOption.label),
+              selectedOptions.map((selectedOption) => selectedOption.label),
               index
             );
           }}
@@ -127,14 +120,14 @@ export const EmailParamsFields = ({
               const newOptions = [...ccOptions, { label: searchValue }];
               editAction(
                 'cc',
-                newOptions.map(newOption => newOption.label),
+                newOptions.map((newOption) => newOption.label),
                 index
               );
             }}
             onChange={(selectedOptions: Array<{ label: string }>) => {
               editAction(
                 'cc',
-                selectedOptions.map(selectedOption => selectedOption.label),
+                selectedOptions.map((selectedOption) => selectedOption.label),
                 index
               );
             }}
@@ -168,14 +161,14 @@ export const EmailParamsFields = ({
               const newOptions = [...bccOptions, { label: searchValue }];
               editAction(
                 'bcc',
-                newOptions.map(newOption => newOption.label),
+                newOptions.map((newOption) => newOption.label),
                 index
               );
             }}
             onChange={(selectedOptions: Array<{ label: string }>) => {
               editAction(
                 'bcc',
-                selectedOptions.map(selectedOption => selectedOption.label),
+                selectedOptions.map((selectedOption) => selectedOption.label),
                 index
               );
             }}
@@ -197,68 +190,30 @@ export const EmailParamsFields = ({
             defaultMessage: 'Subject',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('subject', variable)
-            }
-            paramsProperty="subject"
-          />
-        }
       >
-        <EuiFieldText
-          fullWidth
-          isInvalid={errors.subject.length > 0 && subject !== undefined}
-          name="subject"
-          data-test-subj="emailSubjectInput"
-          value={subject || ''}
-          onChange={e => {
-            editAction('subject', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!subject) {
-              editAction('subject', '', index);
-            }
-          }}
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editAction}
+          messageVariables={messageVariables}
+          paramsProperty={'subject'}
+          inputTargetValue={subject}
+          errors={errors.subject as string[]}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        error={errors.message}
-        isInvalid={errors.message.length > 0 && message !== undefined}
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editAction}
+        messageVariables={messageVariables}
+        paramsProperty={'message'}
+        inputTargetValue={message}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
           {
             defaultMessage: 'Message',
           }
         )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) =>
-              onSelectMessageVariable('message', variable)
-            }
-            paramsProperty="message"
-          />
-        }
-      >
-        <EuiTextArea
-          fullWidth
-          isInvalid={errors.message.length > 0 && message !== undefined}
-          value={message || ''}
-          name="message"
-          data-test-subj="emailMessageInput"
-          onChange={e => {
-            editAction('message', e.target.value, index);
-          }}
-          onBlur={() => {
-            if (!message) {
-              editAction('message', '', index);
-            }
-          }}
-        />
-      </EuiFormRow>
+        errors={errors.message as string[]}
+      />
     </Fragment>
   );
 };

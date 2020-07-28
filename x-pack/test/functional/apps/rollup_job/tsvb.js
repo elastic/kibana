@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import mockRolledUpData from './hybrid_index_helper';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
@@ -19,7 +19,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('tsvb integration', function() {
+  describe('tsvb integration', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `tsvb-test-rollup-job-${Date.now()}`;
@@ -67,7 +67,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      await pastDates.map(async day => {
+      await pastDates.map(async (day) => {
         await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
       });
 

@@ -16,7 +16,7 @@ import { SECTIONS } from '../../../../../constants';
 
 const scope = SECTIONS.FOLLOWER_INDEX;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   followerIndexId: getSelectedFollowerIndexId('detail')(state),
   followerIndex: getSelectedFollowerIndex('detail')(state),
   apiStatus: getApiStatus(scope)(state),

@@ -17,27 +17,28 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 let values = {};
 export default {
-  get: function(path, def) {
+  get: function (path, def) {
     return _.get(values, path, def);
   },
-  set: function(path, val) {
-    _.set(values, path, val);
+  set: function (path, val) {
+    set(values, path, val);
     return val;
   },
-  setSilent: function(path, val) {
-    _.set(values, path, val);
+  setSilent: function (path, val) {
+    set(values, path, val);
     return val;
   },
   emit: _.noop,
   on: _.noop,
   off: _.noop,
-  clearAllKeys: function() {
+  clearAllKeys: function () {
     values = {};
   },
-  _reset: function() {
+  _reset: function () {
     values = {};
   },
 };

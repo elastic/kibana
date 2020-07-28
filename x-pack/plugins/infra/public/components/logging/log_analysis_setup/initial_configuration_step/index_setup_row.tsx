@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { DatasetFilter } from '../../../../../common/log_analysis';
 import { IndexSetupDatasetFilter } from './index_setup_dataset_filter';
-import { AvailableIndex, ValidationIndicesUIError } from './validation';
+import { AvailableIndex, ValidationUIError } from './validation';
 
 export const IndexSetupRow: React.FC<{
   index: AvailableIndex;
@@ -61,8 +61,8 @@ export const IndexSetupRow: React.FC<{
   );
 };
 
-const formatValidationError = (errors: ValidationIndicesUIError[]): React.ReactNode => {
-  return errors.map(error => {
+const formatValidationError = (errors: ValidationUIError[]): React.ReactNode => {
+  return errors.map((error) => {
     switch (error.error) {
       case 'INDEX_NOT_FOUND':
         return (

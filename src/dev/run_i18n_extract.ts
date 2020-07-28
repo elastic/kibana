@@ -60,8 +60,8 @@ run(
       },
       {
         title: 'Writing to file',
-        enabled: ctx => outputDir && ctx.messages.size,
-        task: async ctx => {
+        enabled: (ctx) => outputDir && ctx.messages.size,
+        task: async (ctx) => {
           const sortedMessages = [...ctx.messages].sort(([key1], [key2]) =>
             key1.localeCompare(key2)
           );

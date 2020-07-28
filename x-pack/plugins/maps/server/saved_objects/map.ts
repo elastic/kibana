@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsType } from 'src/core/server';
-import { APP_ICON, createMapPath } from '../../common/constants';
+import { APP_ICON, getExistingMapPath } from '../../common/constants';
 // @ts-ignore
 import { migrations } from './migrations';
 
@@ -17,7 +17,6 @@ export const mapSavedObjects: SavedObjectsType = {
       description: { type: 'text' },
       title: { type: 'text' },
       version: { type: 'integer' },
-      bounds: { type: 'geo_shape' },
       mapStateJSON: { type: 'text' },
       layerListJSON: { type: 'text' },
       uiStateJSON: { type: 'text' },
@@ -32,7 +31,7 @@ export const mapSavedObjects: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: createMapPath(obj.id),
+        path: getExistingMapPath(obj.id),
         uiCapabilitiesPath: 'maps.show',
       };
     },

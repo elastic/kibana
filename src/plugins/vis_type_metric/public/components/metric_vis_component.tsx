@@ -28,6 +28,7 @@ import { getHeatmapColors } from '../../../charts/public';
 import { VisParams, MetricVisMetric } from '../types';
 import { getFormatService } from '../services';
 import { SchemaConfig, ExprVis } from '../../../visualizations/public';
+import { Range } from '../../../expressions/public';
 
 export interface MetricVisComponentProps {
   visParams: VisParams;
@@ -41,7 +42,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
-    const max = last(colorsRange).to;
+    const max = (last(colorsRange) as Range).to;
     const labels: string[] = [];
 
     colorsRange.forEach((range: any) => {
@@ -93,7 +94,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
       return false;
     }
 
-    const [red, green, blue] = colors.slice(1).map(parseInt);
+    const [red, green, blue] = colors.slice(1).map((c) => parseInt(c, 10));
     return isColorDark(red, green, blue);
   }
 
@@ -111,7 +112,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     const dimensions = this.props.visParams.dimensions;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
-    const max = last(config.colorsRange).to;
+    const max = (last(config.colorsRange) as Range).to;
     const colors = this.getColors();
     const labels = this.getLabels();
     const metrics: MetricVisMetric[] = [];

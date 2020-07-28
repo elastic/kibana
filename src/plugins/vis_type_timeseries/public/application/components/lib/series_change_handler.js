@@ -22,7 +22,7 @@ import { newMetricAggFn } from './new_metric_agg_fn';
 import { isBasicAgg } from '../../../../../../plugins/vis_type_timeseries/common/agg_lookup';
 import { handleAdd, handleChange } from './collection_actions';
 
-export const seriesChangeHandler = (props, items) => doc => {
+export const seriesChangeHandler = (props, items) => (doc) => {
   // If we only have one sibling and the user changes to a pipeline
   // agg we are going to add the pipeline instead of changing the
   // current item.
@@ -31,7 +31,7 @@ export const seriesChangeHandler = (props, items) => doc => {
       const metric = newMetricAggFn();
       metric.type = doc.type;
       const incompatPipelines = ['calculation', 'series_agg'];
-      if (!_.contains(incompatPipelines, doc.type)) metric.field = doc.id;
+      if (!_.includes(incompatPipelines, doc.type)) metric.field = doc.id;
       return metric;
     });
   } else {

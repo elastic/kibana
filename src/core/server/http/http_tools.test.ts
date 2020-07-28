@@ -17,11 +17,14 @@
  * under the License.
  */
 
-jest.mock('fs', () => ({
-  // Hapi Inert patches native methods
-  ...jest.requireActual('fs'),
-  readFileSync: jest.fn(),
-}));
+jest.mock('fs', () => {
+  const original = jest.requireActual('fs');
+  return {
+    // Hapi Inert patches native methods
+    ...original,
+    readFileSync: jest.fn(),
+  };
+});
 
 import supertest from 'supertest';
 import { Request, ResponseToolkit } from 'hapi';
@@ -31,7 +34,7 @@ import { defaultValidationErrorHandler, HapiValidationError, getServerOptions } 
 import { HttpServer } from './http_server';
 import { HttpConfig, config } from './http_config';
 import { Router } from './router';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { ByteSizeValue } from '@kbn/config-schema';
 
 const emptyOutput = {
@@ -74,14 +77,14 @@ describe('defaultValidationErrorHandler', () => {
 });
 
 describe('timeouts', () => {
-  const logger = loggingServiceMock.create();
+  const logger = loggingSystemMock.create();
   const server = new HttpServer(logger, 'foo');
   const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
   test('closes sockets on timeout', async () => {
     const router = new Router('', logger.get(), enhanceWithContext);
     router.get({ path: '/a', validate: false }, async (context, req, res) => {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       return res.ok({});
     });
     router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
@@ -98,9 +101,7 @@ describe('timeouts', () => {
 
     expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
 
-    await supertest(innerServer.listener)
-      .get('/b')
-      .expect(200);
+    await supertest(innerServer.listener).get('/b').expect(200);
   });
 
   afterAll(async () => {

@@ -22,6 +22,8 @@ jest.mock('../utils/link_project_executables');
 
 import { resolve } from 'path';
 
+import { ToolingLogCollectingWriter } from '@kbn/dev-utils/tooling_log';
+
 import { absolutePathSnapshotSerializer, stripAnsiSnapshotSerializer } from '../test_helpers';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { IPackageJson } from '../utils/package_json';
@@ -30,11 +32,19 @@ import { buildProjectGraph } from '../utils/projects';
 import { installInDir, runScriptInPackageStreaming, yarnWorkspacesInfo } from '../utils/scripts';
 import { BootstrapCommand } from './bootstrap';
 import { Kibana } from '../utils/kibana';
+import { log } from '../utils/log';
 
 const mockInstallInDir = installInDir as jest.Mock;
 const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;
 const mockLinkProjectExecutables = linkProjectExecutables as jest.Mock;
 const mockYarnWorkspacesInfo = yarnWorkspacesInfo as jest.Mock;
+
+const logWriter = new ToolingLogCollectingWriter('debug');
+log.setLogLevel('silent');
+log.setWriters([logWriter]);
+beforeEach(() => {
+  logWriter.messages.length = 0;
+});
 
 const createProject = (packageJson: IPackageJson, path = '.') => {
   const project = new Project(
@@ -54,10 +64,6 @@ const createProject = (packageJson: IPackageJson, path = '.') => {
 };
 expect.addSnapshotSerializer(absolutePathSnapshotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
-
-const noop = () => {
-  // noop
-};
 
 beforeEach(() => {
   mockYarnWorkspacesInfo.mockResolvedValue({});
@@ -111,8 +117,6 @@ test('handles dependencies of dependencies', async () => {
   const kbn = new Kibana(projects);
   const projectGraph = buildProjectGraph(projects);
 
-  const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
-
   await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
     options: {},
@@ -121,7 +125,19 @@ test('handles dependencies of dependencies', async () => {
   });
 
   expect(mockInstallInDir.mock.calls).toMatchSnapshot('install in dir');
-  expect(logMock.mock.calls).toMatchSnapshot('logs');
+  expect(logWriter.messages).toMatchInlineSnapshot(`
+    Array [
+       info [kibana] running yarn,
+      "",
+      "",
+       info [bar] running yarn,
+      "",
+      "",
+       info [foo] running yarn,
+      "",
+      "",
+    ]
+  `);
 });
 
 test('does not run installer if no deps in package', async () => {
@@ -148,8 +164,6 @@ test('does not run installer if no deps in package', async () => {
   const kbn = new Kibana(projects);
   const projectGraph = buildProjectGraph(projects);
 
-  const logMock = jest.spyOn(console, 'log').mockImplementation(noop);
-
   await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
     options: {},
@@ -158,7 +172,13 @@ test('does not run installer if no deps in package', async () => {
   });
 
   expect(mockInstallInDir.mock.calls).toMatchSnapshot('install in dir');
-  expect(logMock.mock.calls).toMatchSnapshot('logs');
+  expect(logWriter.messages).toMatchInlineSnapshot(`
+    Array [
+       info [kibana] running yarn,
+      "",
+      "",
+    ]
+  `);
 });
 
 test('handles "frozen-lockfile"', async () => {
@@ -174,8 +194,6 @@ test('handles "frozen-lockfile"', async () => {
   const projects = new Map([['kibana', kibana]]);
   const kbn = new Kibana(projects);
   const projectGraph = buildProjectGraph(projects);
-
-  jest.spyOn(console, 'log').mockImplementation(noop);
 
   await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],
@@ -214,8 +232,6 @@ test('calls "kbn:bootstrap" scripts and links executables after installing deps'
   ]);
   const kbn = new Kibana(projects);
   const projectGraph = buildProjectGraph(projects);
-
-  jest.spyOn(console, 'log').mockImplementation(noop);
 
   await BootstrapCommand.run(projects, projectGraph, {
     extraArgs: [],

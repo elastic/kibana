@@ -15,9 +15,13 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
   describe('list_alert_types', () => {
     it('should return 200 with list of alert types', async () => {
-      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+      );
       expect(response.status).to.eql(200);
-      const fixtureAlertType = response.body.find((alertType: any) => alertType.id === 'test.noop');
+      const { authorizedConsumers, ...fixtureAlertType } = response.body.find(
+        (alertType: any) => alertType.id === 'test.noop'
+      );
       expect(fixtureAlertType).to.eql({
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
@@ -25,14 +29,18 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         name: 'Test: Noop',
         actionVariables: {
           state: [],
+          params: [],
           context: [],
         },
-        producer: 'alerting',
+        producer: 'alertsFixture',
       });
+      expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });
 
     it('should return actionVariables with both context and state', async () => {
-      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+      );
       expect(response.status).to.eql(200);
 
       const fixtureAlertType = response.body.find(
@@ -41,12 +49,15 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
       expect(fixtureAlertType.actionVariables).to.eql({
         state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
+        params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
         context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
       });
     });
 
     it('should return actionVariables with just context', async () => {
-      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+      );
       expect(response.status).to.eql(200);
 
       const fixtureAlertType = response.body.find(
@@ -55,12 +66,15 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
       expect(fixtureAlertType.actionVariables).to.eql({
         state: [],
+        params: [],
         context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
       });
     });
 
     it('should return actionVariables with just state', async () => {
-      const response = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alert/types`);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+      );
       expect(response.status).to.eql(200);
 
       const fixtureAlertType = response.body.find(
@@ -70,6 +84,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       expect(fixtureAlertType.actionVariables).to.eql({
         state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
         context: [],
+        params: [],
       });
     });
   });

@@ -8,6 +8,8 @@ import { Feature } from '../../../../features/server';
 import { Actions } from '../actions';
 import { privilegesFactory } from './privileges';
 
+import { featuresPluginMock } from '../../../../features/server/mocks';
+
 const actions = new Actions('1.0.0-zeta1');
 
 describe('features', () => {
@@ -42,7 +44,9 @@ describe('features', () => {
       }),
     ];
 
-    const mockFeaturesService = { getFeatures: jest.fn().mockReturnValue(features) };
+    const mockFeaturesService = featuresPluginMock.createSetup();
+    mockFeaturesService.getFeatures.mockReturnValue(features);
+
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
     };
@@ -50,8 +54,8 @@ describe('features', () => {
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
-      all: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
-      read: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
+      all: [actions.login, actions.version],
+      read: [actions.login, actions.version],
     });
   });
 
@@ -185,13 +189,15 @@ describe('features', () => {
     group: 'global',
     expectManageSpaces: true,
     expectGetFeatures: true,
+    expectEnterpriseSearch: true,
   },
   {
     group: 'space',
     expectManageSpaces: false,
     expectGetFeatures: false,
+    expectEnterpriseSearch: false,
   },
-].forEach(({ group, expectManageSpaces, expectGetFeatures }) => {
+].forEach(({ group, expectManageSpaces, expectGetFeatures, expectEnterpriseSearch }) => {
   describe(`${group}`, () => {
     test('actions defined in any feature privilege are included in `all`', () => {
       const features: Feature[] = [
@@ -252,11 +258,11 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
+        ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
         actions.ui.get('catalogue', 'all-catalogue-1'),
         actions.ui.get('catalogue', 'all-catalogue-2'),
         actions.ui.get('management', 'all-management', 'all-management-1'),
         actions.ui.get('management', 'all-management', 'all-management-2'),
-        actions.ui.get('navLinks', 'kibana:foo'),
         actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
         actions.savedObject.get('all-savedObject-all-1', 'get'),
         actions.savedObject.get('all-savedObject-all-1', 'find'),
@@ -367,7 +373,6 @@ describe('features', () => {
         actions.ui.get('catalogue', 'read-catalogue-2'),
         actions.ui.get('management', 'read-management', 'read-management-1'),
         actions.ui.get('management', 'read-management', 'read-management-2'),
-        actions.ui.get('navLinks', 'kibana:foo'),
         actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
         actions.savedObject.get('read-savedObject-all-1', 'get'),
         actions.savedObject.get('read-savedObject-all-1', 'find'),
@@ -446,6 +451,7 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
+        ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -510,6 +516,7 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
+        ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -575,6 +582,7 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
+        ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -622,10 +630,7 @@ describe('reserved', () => {
     const privileges = privilegesFactory(actions, mockXPackMainPlugin as any, mockLicenseService);
 
     const actual = privileges.get();
-    expect(actual).toHaveProperty('reserved.foo', [
-      actions.version,
-      actions.ui.get('navLinks', 'kibana:foo'),
-    ]);
+    expect(actual).toHaveProperty('reserved.foo', [actions.version]);
   });
 
   test(`actions only specified at the privilege are alright too`, () => {
@@ -836,6 +841,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('foo', 'foo'),
       ]);
       expect(actual).toHaveProperty('global.read', [
@@ -987,6 +993,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1185,6 +1192,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
       ]);
       expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
 
@@ -1311,6 +1319,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1473,6 +1482,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
       ]);
       expect(actual).toHaveProperty('global.read', [actions.login, actions.version]);
 
@@ -1588,6 +1598,7 @@ describe('subFeatures', () => {
         actions.space.manage,
         actions.ui.get('spaces', 'manage'),
         actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),

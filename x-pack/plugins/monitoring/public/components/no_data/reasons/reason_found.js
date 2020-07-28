@@ -16,7 +16,7 @@ import {
 } from '../explanations';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-const ExplainWhyNoData = props => {
+const ExplainWhyNoData = (props) => {
   const { reason } = props;
   const { property, data, context } = reason;
   switch (property) {

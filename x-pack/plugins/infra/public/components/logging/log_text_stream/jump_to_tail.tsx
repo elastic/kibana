@@ -44,11 +44,11 @@ export class LogTextStreamJumpToTail extends React.PureComponent<LogTextStreamJu
 const JumpToTailWrapper = euiStyled.div<{ width: number }>`
   align-items: center;
   display: flex;
-  min-height: ${props => props.theme.eui.euiSizeXXL};
-  width: ${props => props.width}px;
+  min-height: ${(props) => props.theme.eui.euiSizeXXL};
+  width: ${(props) => props.width}px;
   position: fixed;
   bottom: 0;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
 `;
 
 const MessageWrapper = euiStyled.div`

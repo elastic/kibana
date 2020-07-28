@@ -92,7 +92,7 @@ function createRuleForType(
 
       const [field, value] = entries[0] as [string, FieldRuleValue];
       const values = Array.isArray(value) ? value : [value];
-      values.forEach(fieldValue => {
+      values.forEach((fieldValue) => {
         const valueType = typeof fieldValue;
         if (fieldValue !== null && !['string', 'number', 'boolean'].includes(valueType)) {
           throw new RuleBuilderError(

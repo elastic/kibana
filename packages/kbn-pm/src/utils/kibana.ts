@@ -103,11 +103,11 @@ export class Kibana {
     const allProjects = this.getAllProjects();
     const filteredProjects: ProjectMap = new Map();
 
-    const pkgJsonPaths = Array.from(allProjects.values()).map(p => p.packageJsonLocation);
+    const pkgJsonPaths = Array.from(allProjects.values()).map((p) => p.packageJsonLocation);
     const filteredPkgJsonGlobs = getProjectPaths({
       ...options,
       rootPath: this.kibanaProject.path,
-    }).map(g => Path.resolve(g, 'package.json'));
+    }).map((g) => Path.resolve(g, 'package.json'));
     const matchingPkgJsonPaths = multimatch(pkgJsonPaths, filteredPkgJsonGlobs);
 
     for (const project of allProjects.values()) {

@@ -39,7 +39,7 @@ export const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
  * supporting TypeScript
  */
 export const maybe = <T1>(): Operator<T1 | undefined, T1> => {
-  return mergeMap(item => (item === undefined ? Rx.EMPTY : [item]));
+  return mergeMap((item) => (item === undefined ? Rx.EMPTY : [item]));
 };
 
 /**
@@ -64,7 +64,7 @@ export const debounceTimeBuffer = <T>(ms: number) =>
   pipeClosure((source$: Rx.Observable<T>) => {
     const buffer: T[] = [];
     return source$.pipe(
-      tap(item => buffer.push(item)),
+      tap((item) => buffer.push(item)),
       debounceTime(ms),
       map(() => {
         const items = Array.from(buffer);

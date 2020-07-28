@@ -12,7 +12,7 @@ import {
   toggleLayerVisible,
   cloneLayer,
   removeLayer,
-} from '../../../../../../actions/map_actions';
+} from '../../../../../../actions';
 import { getMapZoom, isUsingSearch } from '../../../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
@@ -28,16 +28,16 @@ function mapStateToProps(state: MapStoreState) {
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     cloneLayer: (layerId: string) => {
-      dispatch(cloneLayer(layerId));
+      dispatch<any>(cloneLayer(layerId));
     },
     fitToBounds: (layerId: string) => {
-      dispatch(fitToLayerExtent(layerId));
+      dispatch<any>(fitToLayerExtent(layerId));
     },
     removeLayer: (layerId: string) => {
-      dispatch(removeLayer(layerId));
+      dispatch<any>(removeLayer(layerId));
     },
     toggleVisible: (layerId: string) => {
-      dispatch(toggleLayerVisible(layerId));
+      dispatch<any>(toggleLayerVisible(layerId));
     },
   };
 }

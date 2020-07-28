@@ -33,8 +33,12 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
 
     async fillOutCustomElementForm(name: string, description: string) {
       // Fill out the custom element form and submit it
-      await testSubjects.setValue('canvasCustomElementForm-name', name);
-      await testSubjects.setValue('canvasCustomElementForm-description', description);
+      await testSubjects.setValue('canvasCustomElementForm-name', name, {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.setValue('canvasCustomElementForm-description', description, {
+        clearWithKeyboard: true,
+      });
 
       await testSubjects.click('canvasCustomElementForm-submit');
     },

@@ -49,7 +49,7 @@ export class MultiMetricJobCreator extends JobCreator {
   }
 
   public removeSplitField() {
-    this._detectors.forEach(d => {
+    this._detectors.forEach((d) => {
       delete d.partition_field_name;
     });
   }

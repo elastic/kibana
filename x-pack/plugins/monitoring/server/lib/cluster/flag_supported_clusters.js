@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, find } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get, find } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 
@@ -72,9 +73,9 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in cluster/flagSupportedClusters');
 
   const config = req.server.config();
-  const serverLog = msg => req.getLogger('supported-clusters').debug(msg);
-  const flagAllSupported = clusters => {
-    clusters.forEach(cluster => {
+  const serverLog = (msg) => req.getLogger('supported-clusters').debug(msg);
+  const flagAllSupported = (clusters) => {
+    clusters.forEach((cluster) => {
       if (cluster.license) {
         cluster.isSupported = true;
       }
@@ -82,7 +83,7 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
     return clusters;
   };
 
-  return async function(clusters) {
+  return async function (clusters) {
     // Standalone clusters are automatically supported in the UI so ignore those for
     // our calculations here
     let linkedClusterCount = 0;
@@ -123,7 +124,7 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
       serverLog(
         'Found some basic license clusters in monitoring data. Only non-basic will be supported.'
       );
-      clusters.forEach(cluster => {
+      clusters.forEach((cluster) => {
         if (cluster.license && cluster.license.type !== 'basic') {
           cluster.isSupported = true;
         }

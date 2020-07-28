@@ -11,19 +11,20 @@ import { AlertType, ActionVariable } from '../../types';
 export function actionVariablesFromAlertType(alertType: AlertType): ActionVariable[] {
   const alwaysProvidedVars = getAlwaysProvidedActionVariables();
   const contextVars = prefixKeys(alertType.actionVariables.context, 'context.');
+  const paramsVars = prefixKeys(alertType.actionVariables.params, 'params.');
   const stateVars = prefixKeys(alertType.actionVariables.state, 'state.');
 
-  return alwaysProvidedVars.concat(contextVars, stateVars);
+  return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars);
 }
 
 function prefixKeys(actionVariables: ActionVariable[], prefix: string): ActionVariable[] {
-  return actionVariables.map(actionVariable => {
+  return actionVariables.map((actionVariable) => {
     return { name: `${prefix}${actionVariable.name}`, description: actionVariable.description };
   });
 }
 
 // this list should be the same as in:
-//   x-pack/plugins/alerting/server/task_runner/transform_action_params.ts
+//   x-pack/plugins/alerts/server/task_runner/transform_action_params.ts
 function getAlwaysProvidedActionVariables(): ActionVariable[] {
   const result: ActionVariable[] = [];
 

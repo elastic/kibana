@@ -184,7 +184,7 @@ describe('state_sync', () => {
     let history: History;
     let urlSyncStrategy: IKbnUrlStateStorage;
     const getCurrentUrl = () => history.createHref(history.location);
-    const tick = () => new Promise(resolve => setTimeout(resolve));
+    const tick = () => new Promise((resolve) => setTimeout(resolve));
 
     beforeEach(() => {
       container.set(defaultState);

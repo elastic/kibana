@@ -51,7 +51,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
   };
 
   public componentDidMount() {
-    isCurrentSpace(this.props.space, this.props.spacesManager).then(result => {
+    isCurrentSpace(this.props.space, this.props.spacesManager).then((result) => {
       this.setState({
         isDeletingCurrentSpace: result,
       });

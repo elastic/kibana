@@ -25,7 +25,7 @@ export const expectFixtureEql = <T>(data: T, fixtureName: string, excluder?: (d:
 
   const fixturePath = join(fixturesDir, `${fixtureName}.json`);
 
-  excluder = excluder || (d => d);
+  excluder = excluder || ((d) => d);
   const dataExcluded = excludeFieldsFrom(data, excluder);
   expect(dataExcluded).not.to.be(undefined);
   const fixtureExists = () => fs.existsSync(dataExcluded);

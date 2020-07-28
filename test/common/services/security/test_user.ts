@@ -19,8 +19,8 @@
 import { Role } from './role';
 import { User } from './user';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { Browser } from '../../../functional/services/browser';
-import { TestSubjects } from '../../../functional/services/test_subjects';
+import { Browser } from '../../../functional/services/common';
+import { TestSubjects } from '../../../functional/services/common';
 
 export async function createTestUserService(
   role: Role,
@@ -31,9 +31,9 @@ export async function createTestUserService(
   const config = getService('config');
   // @ts-ignore browser service is not normally available in common.
   const browser: Browser | void = hasService('browser') && getService('browser');
-  const testSubjects: TestSubjects | void =
-    // @ts-ignore testSubject service is not normally available in common.
-    hasService('testSubjects') && getService('testSubjects');
+  const testSubjects: TestSubjects | undefined =
+    // testSubject service is not normally available in common.
+    hasService('testSubjects') ? (getService('testSubjects' as any) as TestSubjects) : undefined;
   const kibanaServer = getService('kibanaServer');
 
   const enabledPlugins = config.get('security.disableTestUser')
@@ -71,7 +71,7 @@ export async function createTestUserService(
       }
     }
 
-    async setRoles(roles: string[]) {
+    async setRoles(roles: string[], shouldRefreshBrowser: boolean = true) {
       if (isEnabled()) {
         log.debug(`set roles = ${roles}`);
         await user.create('test_user', {
@@ -80,7 +80,7 @@ export async function createTestUserService(
           full_name: 'test user',
         });
 
-        if (browser && testSubjects) {
+        if (browser && testSubjects && shouldRefreshBrowser) {
           if (await testSubjects.exists('kibanaChrome', { allowHidden: true })) {
             await browser.refresh();
             await testSubjects.find('kibanaChrome', config.get('timeouts.find') * 10);

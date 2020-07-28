@@ -7,15 +7,15 @@
 import { flatten } from 'lodash';
 import { TimeSeries } from '../../typings/timeseries';
 
-export const getRangeFromTimeSeries = (timeseries: TimeSeries[]) => {
-  const dataPoints = flatten(timeseries.map(series => series.data));
+export function getRangeFromTimeSeries(timeseries: TimeSeries[]) {
+  const dataPoints = flatten(timeseries.map((series) => series.data));
 
   if (dataPoints.length) {
     return {
       start: dataPoints[0].x,
-      end: dataPoints[dataPoints.length - 1].x
+      end: dataPoints[dataPoints.length - 1].x,
     };
   }
 
   return null;
-};
+}

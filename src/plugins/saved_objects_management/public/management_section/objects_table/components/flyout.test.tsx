@@ -78,7 +78,7 @@ describe('Flyout', () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -89,7 +89,7 @@ describe('Flyout', () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -102,7 +102,7 @@ describe('Flyout', () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -130,7 +130,7 @@ describe('Flyout', () => {
     const component = shallowRender(defaultProps);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -184,7 +184,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -219,7 +219,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -239,7 +239,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       expect(resolveImportErrorsMock).toMatchSnapshot();
     });
 
@@ -247,7 +247,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -278,7 +278,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
 
       expect(component.state('failedImports')).toEqual([
         {
@@ -422,7 +422,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -432,9 +432,9 @@ describe('Flyout', () => {
       expect(importLegacyFileMock).toHaveBeenCalledWith(legacyMockFile);
       // Remove the last element from data since it should be filtered out
       expect(resolveSavedObjectsMock).toHaveBeenCalledWith(
-        mockData.slice(0, 2).map(doc => ({ ...doc, _migrationVersion: {} })),
+        mockData.slice(0, 2).map((doc) => ({ ...doc, _migrationVersion: {} })),
         true,
-        defaultProps.serviceRegistry.all().map(s => s.service),
+        defaultProps.serviceRegistry.all().map((s) => s.service),
         defaultProps.indexPatterns,
         defaultProps.overlays.openConfirm
       );
@@ -477,7 +477,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -497,7 +497,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       expect(resolveIndexPatternConflictsMock).toHaveBeenCalledWith(
         component.instance().resolutions,
         mockConflictedIndexPatterns,
@@ -513,7 +513,7 @@ describe('Flyout', () => {
       );
       expect(resolveSavedSearchesMock).toHaveBeenCalledWith(
         mockConflictedSearchDocs,
-        defaultProps.serviceRegistry.all().map(s => s.service),
+        defaultProps.serviceRegistry.all().map((s) => s.service),
         defaultProps.indexPatterns,
         true
       );
@@ -523,7 +523,7 @@ describe('Flyout', () => {
       const component = shallowRender(defaultProps);
 
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
 
@@ -542,7 +542,7 @@ describe('Flyout', () => {
         .find('EuiButton[data-test-subj="importSavedObjectsConfirmBtn"]')
         .simulate('click');
       // Ensure all promises resolve
-      await new Promise(resolve => process.nextTick(resolve));
+      await new Promise((resolve) => process.nextTick(resolve));
 
       expect(component.state('error')).toEqual('foobar');
       expect(component.find('EuiFlyoutBody EuiCallOut')).toMatchSnapshot();

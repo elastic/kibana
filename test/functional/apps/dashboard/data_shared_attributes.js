@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -59,7 +59,7 @@ export default function({ getService, getPageObjects }) {
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         originalPanelTitles = await PageObjects.dashboard.getPanelTitles();
-        expect(sharedData.map(item => item.title)).to.eql(originalPanelTitles);
+        expect(sharedData.map((item) => item.title)).to.eql(originalPanelTitles);
       });
     });
 
@@ -77,7 +77,7 @@ export default function({ getService, getPageObjects }) {
       await dashboardPanelActions.setCustomPanelTitle(CUSTOM_VIS_TITLE);
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
-        const foundSharedItemTitle = !!sharedData.find(item => {
+        const foundSharedItemTitle = !!sharedData.find((item) => {
           return item.title === CUSTOM_VIS_TITLE;
         });
         expect(foundSharedItemTitle).to.be(true);
@@ -88,7 +88,7 @@ export default function({ getService, getPageObjects }) {
       await dashboardPanelActions.toggleHidePanelTitle();
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
-        const foundSharedItemTitle = !!sharedData.find(item => {
+        const foundSharedItemTitle = !!sharedData.find((item) => {
           return item.title === '';
         });
         expect(foundSharedItemTitle).to.be(true);
@@ -100,7 +100,7 @@ export default function({ getService, getPageObjects }) {
       await dashboardPanelActions.resetCustomPanelTitle();
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
-        const foundOriginalSharedItemTitle = !!sharedData.find(item => {
+        const foundOriginalSharedItemTitle = !!sharedData.find((item) => {
           return item.title === originalPanelTitles[0];
         });
         expect(foundOriginalSharedItemTitle).to.be(true);
@@ -115,7 +115,7 @@ export default function({ getService, getPageObjects }) {
       );
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
-        const foundSharedItemTitle = !!sharedData.find(item => {
+        const foundSharedItemTitle = !!sharedData.find((item) => {
           return item.title === CUSTOM_SEARCH_TITLE;
         });
         expect(foundSharedItemTitle).to.be(true);

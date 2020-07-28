@@ -41,13 +41,13 @@ const BodyDescription = ({ body }: { body: HttpResponseBody }) => {
           values: { bodyBytes: formatNumber(bodyBytes, '0b') },
         })
       : null;
-  const combinedText = [truncatedText, bodySizeText].filter(s => s).join(' ');
+  const combinedText = [truncatedText, bodySizeText].filter((s) => s).join(' ');
 
   return <EuiText>{combinedText}</EuiText>;
 };
 
 const BodyExcerpt = ({ content }: { content: string }) =>
-  content ? <EuiCodeBlock>{content}</EuiCodeBlock> : null;
+  content ? <EuiCodeBlock overflowHeight={250}>{content}</EuiCodeBlock> : null;
 
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];

@@ -102,10 +102,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
   const onTestButtonClick = (index: number) => {
     if (index < customUrls.length) {
       getTestUrl(job, customUrls[index])
-        .then(testUrl => {
+        .then((testUrl) => {
           openCustomUrlWindow(testUrl, customUrls[index]);
         })
-        .catch(resp => {
+        .catch((resp) => {
           // eslint-disable-next-line no-console
           console.error('Error obtaining URL for test:', resp);
 
@@ -163,7 +163,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
             <EuiFieldText
               value={label}
               isInvalid={isInvalidLabel}
-              onChange={e => onLabelChange(e, index)}
+              onChange={(e) => onLabelChange(e, index)}
               data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
             />
           </EuiFormRow>
@@ -184,7 +184,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
                 }}
                 fullWidth={true}
                 value={customUrl.url_value}
-                onChange={e => onUrlValueChange(e, index)}
+                onChange={(e) => onUrlValueChange(e, index)}
                 onBlur={() => {
                   setExpandedUrlIndex(null);
                 }}
@@ -216,7 +216,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
               value={(customUrl as KibanaUrlConfig).time_range || ''}
               isInvalid={isInvalidTimeRange}
               placeholder={TIME_RANGE_TYPE.AUTO}
-              onChange={e => onTimeRangeChange(e, index)}
+              onChange={(e) => onTimeRangeChange(e, index)}
             />
           </EuiFormRow>
         </EuiFlexItem>

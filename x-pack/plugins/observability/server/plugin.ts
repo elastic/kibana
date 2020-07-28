@@ -38,7 +38,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         core,
         index: config.annotations.index,
         context: this.initContext,
-      }).catch(err => {
+      }).catch((err) => {
         const logger = this.initContext.logger.get('annotations');
         logger.warn(err);
         throw err;

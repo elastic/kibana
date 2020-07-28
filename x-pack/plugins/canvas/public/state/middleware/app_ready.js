@@ -7,7 +7,7 @@
 import { isAppReady } from '../selectors/app';
 import { appReady as readyAction } from '../actions/app';
 
-export const appReady = ({ dispatch, getState }) => next => action => {
+export const appReady = ({ dispatch, getState }) => (next) => (action) => {
   // execute the action
   next(action);
 

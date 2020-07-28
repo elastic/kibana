@@ -17,10 +17,15 @@
  * under the License.
  */
 
-export const searchSetupMock = {
-  registerSearchStrategyContext: jest.fn(),
-  registerSearchStrategyProvider: jest.fn(),
-  __LEGACY: {
+export function createSearchSetupMock() {
+  return {
+    registerSearchStrategy: jest.fn(),
+  };
+}
+
+export function createSearchStartMock() {
+  return {
+    getSearchStrategy: jest.fn(),
     search: jest.fn(),
-  },
-};
+  };
+}

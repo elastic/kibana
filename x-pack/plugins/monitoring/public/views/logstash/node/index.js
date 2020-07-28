@@ -26,7 +26,8 @@ import {
 } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_LOGSTASH } from '../../../../common/constants';
+import { CODE_PATH_LOGSTASH, ALERT_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
+import { AlertsCallout } from '../../../alerts/callout';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -44,8 +45,8 @@ function getPageData($injector) {
       },
       is_advanced: false,
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
@@ -69,11 +70,17 @@ uiRoutes.when('/logstash/node/:uuid', {
         reactNodeId: 'monitoringLogstashNodeApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
+          },
+        },
       });
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data || !data.nodeSummary) {
             return;
           }
@@ -103,6 +110,7 @@ uiRoutes.when('/logstash/node/:uuid', {
                   <DetailStatus stats={data.nodeSummary} />
                 </EuiPanel>
                 <EuiSpacer size="m" />
+                <AlertsCallout alerts={this.alerts} />
                 <EuiPageContent>
                   <EuiFlexGrid columns={2} gutterSize="s">
                     {metricsToShow.map((metric, index) => (

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
-
+import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+
+import { DashboardModeServerPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor = {
   schema: schema.object({
@@ -14,7 +15,8 @@ export const config: PluginConfigDescriptor = {
   }),
 };
 
-export const plugin = () => ({
-  setup() {},
-  start() {},
-});
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DashboardModeServerPlugin(initializerContext);
+}
+
+export { DashboardModeServerPlugin as Plugin };

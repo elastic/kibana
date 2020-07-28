@@ -39,6 +39,7 @@ export interface MonitorBarSeriesProps {
 export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => {
   const {
     colors: { danger },
+    chartTheme,
   } = useContext(UptimeThemeContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
@@ -62,6 +63,7 @@ export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => 
         <Settings
           xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }}
           onBrushEnd={onBrushEnd}
+          {...chartTheme}
         />
         <Axis
           hide

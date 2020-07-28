@@ -7,17 +7,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
-import { PartialTheme } from '@elastic/charts';
 import {
   IInterpreterRenderHandlers,
   ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/public';
-import { LensMultiTable, FormatFactory } from '../types';
+import { LensMultiTable, FormatFactory, LensFilterEvent } from '../types';
 import { PieExpressionProps, PieExpressionArgs } from './types';
-import { getExecuteTriggerActions } from '../services';
 import { PieComponent } from './render_function';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export interface PieRender {
   type: 'render';
@@ -74,6 +74,11 @@ export const pie: ExpressionFunctionDefinition<
       types: ['boolean'],
       help: '',
     },
+    legendPosition: {
+      types: ['string'],
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      help: '',
+    },
     percentDecimals: {
       types: ['number'],
       help: '',
@@ -94,8 +99,7 @@ export const pie: ExpressionFunctionDefinition<
 
 export const getPieRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
-  chartTheme: PartialTheme;
-  isDarkMode: boolean;
+  chartsThemeService: ChartsPluginSetup['theme'];
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
   name: 'lens_pie_renderer',
   displayName: i18n.translate('xpack.lens.pie.visualizationName', {
@@ -109,16 +113,17 @@ export const getPieRenderer = (dependencies: {
     config: PieExpressionProps,
     handlers: IInterpreterRenderHandlers
   ) => {
-    const executeTriggerActions = getExecuteTriggerActions();
+    const onClickValue = (data: LensFilterEvent['data']) => {
+      handlers.event({ name: 'filter', data });
+    };
     const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
       <I18nProvider>
         <MemoizedChart
           {...config}
-          {...dependencies}
           formatFactory={formatFactory}
-          executeTriggerActions={executeTriggerActions}
-          isDarkMode={dependencies.isDarkMode}
+          chartsThemeService={dependencies.chartsThemeService}
+          onClickValue={onClickValue}
         />
       </I18nProvider>,
       domNode,

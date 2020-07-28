@@ -18,6 +18,6 @@ export function rowCount(): ExpressionFunctionDefinition<'rowCount', Datatable, 
     inputTypes: ['datatable'],
     help,
     args: {},
-    fn: input => input.rows.length,
+    fn: (input) => input.rows.length,
   };
 }

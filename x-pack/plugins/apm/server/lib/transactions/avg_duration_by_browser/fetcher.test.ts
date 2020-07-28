@@ -7,7 +7,7 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../helpers/setup_request';
 import { fetcher } from './fetcher';
 
@@ -17,7 +17,7 @@ describe('fetcher', () => {
     const setup = ({
       client: { search },
       indices: {},
-      uiFiltersES: []
+      uiFiltersES: [],
     } as unknown) as Setup & SetupTimeRange & SetupUIFilters;
 
     await fetcher({ serviceName: 'testServiceName', setup });

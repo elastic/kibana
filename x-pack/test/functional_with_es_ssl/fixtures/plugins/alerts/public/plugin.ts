@@ -6,22 +6,22 @@
 
 import React from 'react';
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { PluginSetupContract as AlertingSetup } from '../../../../../../plugins/alerting/public';
-import { AlertType, SanitizedAlert } from '../../../../../../plugins/alerting/common';
+import { PluginSetupContract as AlertingSetup } from '../../../../../../plugins/alerts/public';
+import { AlertType, SanitizedAlert } from '../../../../../../plugins/alerts/common';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../../../../plugins/triggers_actions_ui/public';
 
 export type Setup = void;
 export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
-  public setup(core: CoreSetup, { alerting, triggers_actions_ui }: AlertingExamplePublicSetupDeps) {
-    alerting.registerNavigation(
-      'consumer-noop',
+  public setup(core: CoreSetup, { alerts, triggers_actions_ui }: AlertingExamplePublicSetupDeps) {
+    alerts.registerNavigation(
+      'alerting_fixture',
       'test.noop',
       (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
     );
@@ -49,8 +49,8 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
     });
 
     core.application.register({
-      id: 'consumer-noop',
-      title: 'No Op App',
+      id: 'alerting_fixture',
+      title: 'Alerting Fixture App',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');

@@ -14,7 +14,7 @@ import { LicenseContext } from '../../../../../context/LicenseContext';
 import { CustomLinkOverview } from '.';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
 import * as saveCustomLink from './CustomLinkFlyout/saveCustomLink';
 import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
@@ -24,20 +24,19 @@ const data = [
     id: '1',
     label: 'label 1',
     url: 'url 1',
-    'service.name': 'opbeans-java'
+    'service.name': 'opbeans-java',
   },
   {
     id: '2',
     label: 'label 2',
     url: 'url 2',
-    'transaction.type': 'request'
-  }
+    'transaction.type': 'request',
+  },
 ];
 
 describe('CustomLink', () => {
-  let callApmApiSpy: jasmine.Spy;
   beforeAll(() => {
-    callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({});
+    jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
   });
   afterAll(() => {
     jest.resetAllMocks();
@@ -49,14 +48,15 @@ describe('CustomLink', () => {
       mode: 'gold',
       status: 'active',
       type: 'gold',
-      uid: '1'
-    }
+      uid: '1',
+    },
   });
   describe('empty prompt', () => {
     beforeAll(() => {
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: [],
-        status: 'success'
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
       });
     });
 
@@ -75,9 +75,10 @@ describe('CustomLink', () => {
 
   describe('overview', () => {
     beforeAll(() => {
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data,
-        status: 'success'
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
       });
     });
 
@@ -97,11 +98,11 @@ describe('CustomLink', () => {
         'label 1',
         'url 1',
         'label 2',
-        'url 2'
+        'url 2',
       ]);
     });
 
-    it('checks if create custom link button is available and working', async () => {
+    it('checks if create custom link button is available and working', () => {
       const { queryByText, getByText } = render(
         <LicenseContext.Provider value={goldLicense}>
           <MockApmPluginContextWrapper>
@@ -113,27 +114,24 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(getByText('Create custom link'));
       });
-      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
       expect(queryByText('Create link')).toBeInTheDocument();
     });
   });
 
   describe('Flyout', () => {
     const refetch = jest.fn();
-    let saveCustomLinkSpy: Function;
+    let saveCustomLinkSpy: jest.SpyInstance;
+
     beforeAll(() => {
-      saveCustomLinkSpy = spyOn(saveCustomLink, 'saveCustomLink');
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      saveCustomLinkSpy = jest.spyOn(saveCustomLink, 'saveCustomLink');
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data,
-        status: 'success',
-        refetch
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch,
       });
     });
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
 
-    const openFlyout = async () => {
+    const openFlyout = () => {
       const component = render(
         <LicenseContext.Provider value={goldLicense}>
           <MockApmPluginContextWrapper>
@@ -145,29 +143,26 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(component.getByText('Create custom link'));
       });
-      await wait(() =>
-        expect(component.queryByText('Create link')).toBeInTheDocument()
-      );
-      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
+      expect(component.queryByText('Create link')).toBeInTheDocument();
       return component;
     };
 
     it('creates a custom link', async () => {
-      const component = await openFlyout();
+      const component = openFlyout();
       const labelInput = component.getByTestId('label');
       act(() => {
         fireEvent.change(labelInput, {
-          target: { value: 'foo' }
+          target: { value: 'foo' },
         });
       });
       const urlInput = component.getByTestId('url');
       act(() => {
         fireEvent.change(urlInput, {
-          target: { value: 'bar' }
+          target: { value: 'bar' },
         });
       });
       await act(async () => {
-        await wait(() => fireEvent.submit(component.getByText('Save')));
+        fireEvent.submit(component.getByText('Save'));
       });
       expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
     });
@@ -186,11 +181,12 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(editButtons[0]);
       });
-      expect(component.queryByText('Create link')).toBeInTheDocument();
+      await wait(() =>
+        expect(component.queryByText('Create link')).toBeInTheDocument()
+      );
       await act(async () => {
-        await wait(() => fireEvent.click(component.getByText('Delete')));
+        fireEvent.click(component.getByText('Delete'));
       });
-      expect(callApmApiSpy).toHaveBeenCalled();
       expect(refetch).toHaveBeenCalled();
     });
 
@@ -200,8 +196,8 @@ describe('CustomLink', () => {
           fireEvent.click(component.getByText('Add another filter'));
         }
       };
-      it('checks if add filter button is disabled after all elements have been added', async () => {
-        const component = await openFlyout();
+      it('checks if add filter button is disabled after all elements have been added', () => {
+        const component = openFlyout();
         expect(component.getAllByText('service.name').length).toEqual(1);
         addFilterField(component, 1);
         expect(component.getAllByText('service.name').length).toEqual(2);
@@ -211,8 +207,8 @@ describe('CustomLink', () => {
         addFilterField(component, 2);
         expect(component.getAllByText('service.name').length).toEqual(4);
       });
-      it('removes items already selected', async () => {
-        const component = await openFlyout();
+      it('removes items already selected', () => {
+        const component = openFlyout();
 
         const addFieldAndCheck = (
           fieldName: string,
@@ -225,12 +221,12 @@ describe('CustomLink', () => {
           }
           const field = component.getByTestId(fieldName) as HTMLSelectElement;
           const optionsAvailable = Object.values(field)
-            .map(option => (option as HTMLOptionElement).text)
-            .filter(option => option);
+            .map((option) => (option as HTMLOptionElement).text)
+            .filter((option) => option);
 
           act(() => {
             fireEvent.change(field, {
-              target: { value: selectValue }
+              target: { value: selectValue },
             });
           });
           expect(field.value).toEqual(selectValue);
@@ -242,25 +238,25 @@ describe('CustomLink', () => {
           'service.name',
           'service.environment',
           'transaction.type',
-          'transaction.name'
+          'transaction.name',
         ]);
 
         addFieldAndCheck('filter-1', 'service.name', true, [
           'Select field...',
           'service.name',
           'service.environment',
-          'transaction.type'
+          'transaction.type',
         ]);
 
         addFieldAndCheck('filter-2', 'transaction.type', true, [
           'Select field...',
           'service.environment',
-          'transaction.type'
+          'transaction.type',
         ]);
 
         addFieldAndCheck('filter-3', 'service.environment', true, [
           'Select field...',
-          'service.environment'
+          'service.environment',
         ]);
       });
     });
@@ -268,9 +264,10 @@ describe('CustomLink', () => {
 
   describe('invalid license', () => {
     beforeAll(() => {
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: [],
-        status: 'success'
+        status: hooks.FETCH_STATUS.SUCCESS,
+        refetch: jest.fn(),
       });
     });
     it('shows license prompt when user has a basic license', () => {
@@ -281,8 +278,8 @@ describe('CustomLink', () => {
           mode: 'basic',
           status: 'active',
           type: 'basic',
-          uid: '1'
-        }
+          uid: '1',
+        },
       });
       const component = render(
         <LicenseContext.Provider value={license}>
@@ -301,8 +298,8 @@ describe('CustomLink', () => {
           mode: 'gold',
           status: 'invalid',
           type: 'gold',
-          uid: '1'
-        }
+          uid: '1',
+        },
       });
       const component = render(
         <LicenseContext.Provider value={license}>
@@ -321,8 +318,8 @@ describe('CustomLink', () => {
           mode: 'trial',
           status: 'invalid',
           type: 'trial',
-          uid: '1'
-        }
+          uid: '1',
+        },
       });
       const component = render(
         <LicenseContext.Provider value={license}>
@@ -341,8 +338,8 @@ describe('CustomLink', () => {
           mode: 'trial',
           status: 'active',
           type: 'trial',
-          uid: '1'
-        }
+          uid: '1',
+        },
       });
       const component = render(
         <LicenseContext.Provider value={license}>

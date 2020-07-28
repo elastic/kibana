@@ -8,7 +8,7 @@ import { InfraMetadataAggregationBucket } from '../../../lib/adapters/framework'
 
 export const pickFeatureName = (buckets: InfraMetadataAggregationBucket[]): string[] => {
   if (buckets) {
-    const metadata = buckets.map(bucket => bucket.key);
+    const metadata = buckets.map((bucket) => bucket.key);
     return metadata;
   } else {
     return [];

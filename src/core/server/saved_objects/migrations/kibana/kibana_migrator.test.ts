@@ -18,14 +18,15 @@
  */
 import { take } from 'rxjs/operators';
 
+import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
-import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach(type =>
+  types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
       hidden: false,
@@ -66,31 +67,46 @@ describe('KibanaMigrator', () => {
   describe('runMigrations', () => {
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
-      const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
 
-      options.callCluster = clusterStub;
+      options.client.cat.templates.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          { templates: [] },
+          { statusCode: 404 }
+        )
+      );
+      options.client.indices.get.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+      options.client.indices.getAlias.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+
       const migrator = new KibanaMigrator(options);
+
       await migrator.runMigrations();
       await migrator.runMigrations();
 
-      // callCluster with "cat.templates" is called by "deleteIndexTemplates" function
-      // and should only be done once
-      const callClusterCommands = clusterStub.mock.calls
-        .map(([callClusterPath]) => callClusterPath)
-        .filter(callClusterPath => callClusterPath === 'cat.templates');
-      expect(callClusterCommands.length).toBe(1);
+      expect(options.client.cat.templates).toHaveBeenCalledTimes(1);
     });
 
     it('emits results on getMigratorResult$()', async () => {
       const options = mockOptions();
-      const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
 
-      options.callCluster = clusterStub;
+      options.client.cat.templates.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          { templates: [] },
+          { statusCode: 404 }
+        )
+      );
+      options.client.indices.get.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+      options.client.indices.getAlias.mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+
       const migrator = new KibanaMigrator(options);
-      const migratorStatus = migrator
-        .getStatus$()
-        .pipe(take(3))
-        .toPromise();
+      const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
       await migrator.runMigrations();
       const { status, result } = await migratorStatus;
       expect(status).toEqual('completed');
@@ -110,10 +126,13 @@ describe('KibanaMigrator', () => {
   });
 });
 
-function mockOptions(): KibanaMigratorOptions {
-  const callCluster = jest.fn();
-  return {
-    logger: loggingServiceMock.create().get(),
+type MockedOptions = KibanaMigratorOptions & {
+  client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+};
+
+const mockOptions = () => {
+  const options: MockedOptions = {
+    logger: loggingSystemMock.create().get(),
     kibanaVersion: '8.2.3',
     savedObjectValidations: {},
     typeRegistry: createRegistry([
@@ -151,6 +170,7 @@ function mockOptions(): KibanaMigratorOptions {
       scrollDuration: '10m',
       skip: false,
     },
-    callCluster,
+    client: elasticsearchClientMock.createElasticSearchClient(),
   };
-}
+  return options;
+};

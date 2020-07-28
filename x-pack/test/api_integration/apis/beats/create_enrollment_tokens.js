@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { ES_INDEX_NAME } from './constants';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -20,14 +20,14 @@ export default function({ getService }) {
         .send()
         .expect(200);
 
-      const tokensFromApi = apiResponse.results.map(r => r.item);
+      const tokensFromApi = apiResponse.results.map((r) => r.item);
 
       const esResponse = await es.search({
         index: ES_INDEX_NAME,
         q: 'type:enrollment_token',
       });
 
-      const tokensInEs = esResponse.hits.hits.map(hit => hit._source.enrollment_token.token);
+      const tokensInEs = esResponse.hits.hits.map((hit) => hit._source.enrollment_token.token);
 
       expect(tokensFromApi.length).to.eql(1);
       expect(tokensFromApi).to.eql(tokensInEs);
@@ -44,7 +44,7 @@ export default function({ getService }) {
         })
         .expect(200);
 
-      const tokensFromApi = apiResponse.results.map(r => r.item);
+      const tokensFromApi = apiResponse.results.map((r) => r.item);
 
       const esResponse = await es.search({
         index: ES_INDEX_NAME,
@@ -52,7 +52,7 @@ export default function({ getService }) {
         size: numTokens,
       });
 
-      const tokensInEs = esResponse.hits.hits.map(hit => hit._source.enrollment_token.token);
+      const tokensInEs = esResponse.hits.hits.map((hit) => hit._source.enrollment_token.token);
 
       expect(tokensFromApi).to.be.an('array');
       expect(tokensFromApi.length).to.eql(numTokens);
@@ -78,12 +78,8 @@ export default function({ getService }) {
       // from now because a bit of time has elapsed been the creation of the
       // tokens and this check.
       const tokenExpiresOn = moment(tokenInEs.expires_on).valueOf();
-      const tenMinutesFromNow = moment()
-        .add('10', 'minutes')
-        .valueOf();
-      const almostTenMinutesFromNow = moment(tenMinutesFromNow)
-        .subtract('2', 'seconds')
-        .valueOf();
+      const tenMinutesFromNow = moment().add('10', 'minutes').valueOf();
+      const almostTenMinutesFromNow = moment(tenMinutesFromNow).subtract('2', 'seconds').valueOf();
       expect(tokenExpiresOn).to.be.lessThan(tenMinutesFromNow);
       expect(tokenExpiresOn).to.be.greaterThan(almostTenMinutesFromNow);
     });

@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { join } from 'path';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -36,7 +36,7 @@ export default function({ getService }) {
             .query({ overwrite: true })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 3,
@@ -48,7 +48,7 @@ export default function({ getService }) {
           await supertest
             .post('/api/saved_objects/_import')
             .expect(415)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 415,
                 error: 'Unsupported Media Type',
@@ -62,7 +62,7 @@ export default function({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: false,
                 successCount: 0,
@@ -104,7 +104,7 @@ export default function({ getService }) {
             })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 3,
@@ -121,7 +121,7 @@ export default function({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', fileBuffer, 'export.ndjson')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: false,
                 successCount: 0,
@@ -148,7 +148,7 @@ export default function({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
             .expect(400)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
@@ -181,7 +181,7 @@ export default function({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', Buffer.from(objectsToImport.join('\n'), 'utf8'), 'export.ndjson')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: false,
                 successCount: 0,

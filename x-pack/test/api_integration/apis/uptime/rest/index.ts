@@ -10,7 +10,7 @@ import {
   settingsObjectType,
 } from '../../../../../plugins/uptime/server/lib/saved_objects';
 
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const server = getService('kibanaServer');
 

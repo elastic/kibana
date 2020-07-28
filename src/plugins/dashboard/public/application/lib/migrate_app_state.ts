@@ -39,7 +39,7 @@ import {
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
 export function migrateAppState(
-  appState: { [key: string]: unknown } & DashboardAppState,
+  appState: { [key: string]: any } & DashboardAppState,
   kibanaVersion: string,
   usageCollection?: UsageCollectionSetup
 ): DashboardAppState {
@@ -58,7 +58,7 @@ export function migrateAppState(
     | SavedDashboardPanel630
     | SavedDashboardPanel640To720
     | SavedDashboardPanel730ToLatest
-  >).some(panel => {
+  >).some((panel) => {
     if ((panel as { version?: string }).version === undefined) return true;
 
     const version = (panel as SavedDashboardPanel730ToLatest).version;

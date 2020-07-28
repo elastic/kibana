@@ -86,7 +86,7 @@ export const SplitByTermsUI = ({
       }),
     },
   ];
-  const selectedDirectionOption = dirOptions.find(option => {
+  const selectedDirectionOption = dirOptions.find((option) => {
     return model.terms_direction === option.value;
   });
   const selectedField = find(fields[indexPattern], ({ name }) => name === model.terms_field);

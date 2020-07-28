@@ -16,7 +16,6 @@ export interface AlertContextMeta {
   series?: MetricsExplorerSeries;
 }
 
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
 export type MetricExpression = Omit<MetricExpressionParams, 'metric'> & {
   metric?: string;
 };
@@ -35,7 +34,7 @@ export enum AGGREGATION_TYPES {
 
 export interface MetricThresholdAlertParams {
   criteria?: MetricExpression[];
-  groupBy?: string;
+  groupBy?: string | string[];
   filterQuery?: string;
   sourceId?: string;
 }
@@ -50,4 +49,13 @@ export type ExpressionChartSeries = ExpressionChartRow[][];
 export interface ExpressionChartData {
   id: string;
   series: ExpressionChartSeries;
+}
+
+export interface AlertParams {
+  criteria: MetricExpression[];
+  groupBy?: string;
+  filterQuery?: string;
+  sourceId?: string;
+  filterQueryText?: string;
+  alertOnNoData?: boolean;
 }

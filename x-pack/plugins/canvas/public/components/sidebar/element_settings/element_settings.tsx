@@ -7,9 +7,9 @@
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiTabbedContent } from '@elastic/eui';
-// @ts-ignore unconverted component
+// @ts-expect-error unconverted component
 import { Datasource } from '../../datasource';
-// @ts-ignore unconverted component
+// @ts-expect-error unconverted component
 import { FunctionFormList } from '../../function_form_list';
 import { PositionedElement } from '../../../../types';
 import { ComponentStrings } from '../../../../i18n';

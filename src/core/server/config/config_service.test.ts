@@ -28,12 +28,12 @@ import { rawConfigServiceMock } from './raw_config_service.mock';
 import { schema } from '@kbn/config-schema';
 
 import { ConfigService, Env } from '.';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { getEnvOptions } from './__mocks__/env';
 
 const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/kibana', emptyArgv);
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 
 const getRawConfigProvider = (rawConfig: Record<string, any>) =>
   rawConfigServiceMock.create({ rawConfig });
@@ -62,10 +62,10 @@ test('throws if config at path does not match schema', async () => {
     .atPath('key')
     .pipe(take(1))
     .subscribe(
-      value => {
+      (value) => {
         valuesReceived.push(value);
       },
-      error => {
+      (error) => {
         valuesReceived.push(error);
       }
     );
@@ -86,10 +86,10 @@ test('re-validate config when updated', async () => {
 
   const valuesReceived: any[] = [];
   await configService.atPath('key').subscribe(
-    value => {
+    (value) => {
       valuesReceived.push(value);
     },
-    error => {
+    (error) => {
       valuesReceived.push(error);
     }
   );
@@ -133,7 +133,7 @@ test("does not push new configs when reloading if config at path hasn't changed"
   await configService.setSchema('key', schema.string());
 
   const valuesReceived: any[] = [];
-  configService.atPath('key').subscribe(value => {
+  configService.atPath('key').subscribe((value) => {
     valuesReceived.push(value);
   });
 
@@ -150,7 +150,7 @@ test('pushes new config when reloading and config at path has changed', async ()
   await configService.setSchema('key', schema.string());
 
   const valuesReceived: any[] = [];
-  configService.atPath('key').subscribe(value => {
+  configService.atPath('key').subscribe((value) => {
     valuesReceived.push(value);
   });
 
@@ -443,9 +443,9 @@ test('logs deprecation warning during validation', async () => {
     return config;
   });
 
-  loggingServiceMock.clear(logger);
+  loggingSystemMock.clear(logger);
   await configService.validate();
-  expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
     Array [
       Array [
         "some deprecation message",

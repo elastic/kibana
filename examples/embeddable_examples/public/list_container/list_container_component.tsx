@@ -40,7 +40,7 @@ function renderList(
   embeddableServices: EmbeddableStart
 ) {
   let number = 0;
-  const list = Object.values(panels).map(panel => {
+  const list = Object.values(panels).map((panel) => {
     const child = embeddable.getChild(panel.explicitInput.id);
     number++;
     return (

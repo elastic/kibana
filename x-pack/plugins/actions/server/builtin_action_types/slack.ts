@@ -121,7 +121,7 @@ async function slackExecutor(
     if (status === 429) {
       return pipe(
         getRetryAfterIntervalFromHeaders(headers),
-        map(retry => retryResultSeconds(actionId, err.message, retry)),
+        map((retry) => retryResultSeconds(actionId, err.message, retry)),
         getOrElse(() => retryResult(actionId, err.message))
       );
     }

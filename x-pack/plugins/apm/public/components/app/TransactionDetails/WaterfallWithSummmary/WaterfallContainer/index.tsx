@@ -22,7 +22,7 @@ export function WaterfallContainer({
   location,
   urlParams,
   waterfall,
-  exceedsMax
+  exceedsMax,
 }: Props) {
   if (!waterfall) {
     return null;

@@ -19,7 +19,7 @@ import { goToWatchList } from '../../lib/navigation';
 export function getTypeFromAction(action: { [key: string]: any }) {
   const actionKeys = Object.keys(action);
   let type;
-  Object.keys(ACTION_TYPES).forEach(k => {
+  Object.keys(ACTION_TYPES).forEach((k) => {
     if (actionKeys.includes(ACTION_TYPES[k])) {
       type = ACTION_TYPES[k];
     }
@@ -52,7 +52,7 @@ function getPropsFromAction(type: string, action: { [key: string]: any }) {
 function createActionsForWatch(watchInstance: BaseWatch) {
   watchInstance.resetActions();
 
-  Object.keys(watchInstance.watch.actions).forEach(k => {
+  Object.keys(watchInstance.watch.actions).forEach((k) => {
     const action = watchInstance.watch.actions[k];
     const type = getTypeFromAction(action);
     const actionProps = { ...getPropsFromAction(type, action), ignoreDefaults: true };
@@ -88,11 +88,11 @@ export async function onWatchSave(watch: BaseWatch, toasts: ToastsSetup): Promis
       if (action.validate) {
         const errors = action.validate();
         const errorKeys = Object.keys(errors);
-        const hasErrors = !!errorKeys.find(errorKey => errors[errorKey].length >= 1);
+        const hasErrors = !!errorKeys.find((errorKey) => errors[errorKey].length >= 1);
         if (!hasErrors) {
           return actionsErrorsAcc;
         }
-        const newErrors = errorKeys.map(errorKey => errors[errorKey]);
+        const newErrors = errorKeys.map((errorKey) => errors[errorKey]);
         const newErrorsFlattened = newErrors && newErrors.length ? [].concat(...newErrors) : [];
 
         return [...actionsErrorsAcc, ...newErrorsFlattened];

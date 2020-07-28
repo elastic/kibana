@@ -13,7 +13,7 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -32,7 +32,7 @@ const fetchTransaction = debounce(
   async (filters: Filter[], callback: (transaction: Transaction) => void) => {
     const transaction = await callApmApi({
       pathname: '/api/apm/settings/custom_links/transaction',
-      params: { query: convertFiltersToQuery(filters) }
+      params: { query: convertFiltersToQuery(filters) },
     });
     callback(transaction);
   },
@@ -41,7 +41,7 @@ const fetchTransaction = debounce(
 
 const getTextColor = (value?: string) => (value ? 'default' : 'subdued');
 
-export const LinkPreview = ({ label, url, filters }: Props) => {
+export function LinkPreview({ label, url, filters }: Props) {
   const [transaction, setTransaction] = useState<Transaction | undefined>();
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
               'xpack.apm.settings.customizeUI.customLink.linkPreview.descrition',
               {
                 defaultMessage:
-                  'Test your link with values from an example transaction document based on the filters above.'
+                  'Test your link with values from an example transaction document based on the filters above.',
               }
             )}
           </EuiText>
@@ -128,4 +128,4 @@ export const LinkPreview = ({ label, url, filters }: Props) => {
       </EuiFlexGroup>
     </EuiPanel>
   );
-};
+}

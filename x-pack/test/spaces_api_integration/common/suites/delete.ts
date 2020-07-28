@@ -140,8 +140,8 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     const docs: [Record<string, any>] = multiNamespaceResponse.hits.hits;
     expect(docs).length(6); // just six results, since spaces_2_only got deleted
     Object.values(CASES).forEach(({ id, existingNamespaces }) => {
-      const remainingNamespaces = existingNamespaces.filter(x => x !== 'space_2');
-      const doc = docs.find(x => x._id === `sharedtype:${id}`);
+      const remainingNamespaces = existingNamespaces.filter((x) => x !== 'space_2');
+      const doc = docs.find((x) => x._id === `sharedtype:${id}`);
       if (remainingNamespaces.length > 0) {
         expect(doc?._source?.namespaces).to.eql(remainingNamespaces);
       } else {
@@ -186,10 +186,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
         // and can't include a config document with the correct id in the
         // archive we read the settings to trigger an automatic upgrade
         // in each space
-        await supertest
-          .get('/api/kibana/settings')
-          .auth(user.username, user.password)
-          .expect(200);
+        await supertest.get('/api/kibana/settings').auth(user.username, user.password).expect(200);
         await supertest
           .get('/s/space_1/api/kibana/settings')
           .auth(user.username, user.password)

@@ -23,10 +23,10 @@ import { calculateAggRoot } from './calculate_agg_root';
 import { createPositiveRate, filter } from '../series/positive_rate';
 
 export function positiveRate(req, panel, esQueryConfig, indexPatternObject) {
-  return next => doc => {
+  return (next) => (doc) => {
     const { interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { intervalString } = getBucketSize(req, interval);
-    panel.series.forEach(column => {
+    panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
       column.metrics.filter(filter).forEach(createPositiveRate(doc, intervalString, aggRoot));
     });

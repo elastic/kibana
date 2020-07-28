@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');
@@ -76,7 +76,7 @@ export default function({ getService, getPageObjects }) {
 
         await retry.try(async () => {
           const rows = await pipelineList.readRows();
-          const newRow = rows.find(row => row.id === id);
+          const newRow = rows.find((row) => row.id === id);
 
           expect(newRow).to.have.property('description', description);
         });

@@ -29,7 +29,7 @@ export function getFormat(interval, rules, dateFormat) {
 }
 
 export function createXaxisFormatter(interval, rules, dateFormat) {
-  return val => {
+  return (val) => {
     return moment(val).format(getFormat(interval, rules, dateFormat));
   };
 }

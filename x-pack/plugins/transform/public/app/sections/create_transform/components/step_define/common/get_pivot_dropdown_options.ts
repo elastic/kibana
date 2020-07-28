@@ -37,15 +37,15 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
 
   const ignoreFieldNames = ['_id', '_index', '_type'];
   const fields = indexPattern.fields
-    .filter(field => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
+    .filter((field) => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
     .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 
-  fields.forEach(field => {
+  fields.forEach((field) => {
     // Group by
     const availableGroupByAggs: [] = get(pivotGroupByFieldSupport, field.type);
 
     if (availableGroupByAggs !== undefined) {
-      availableGroupByAggs.forEach(groupByAgg => {
+      availableGroupByAggs.forEach((groupByAgg) => {
         // Aggregation name for the group-by is the plain field name. Illegal characters will be removed.
         const aggName = field.name.replace(illegalEsAggNameChars, '').trim();
         // Option name in the dropdown for the group-by is in the form of `sum(fieldname)`.
@@ -66,7 +66,7 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
     const availableAggs: [] = get(pivotAggsFieldSupport, field.type);
 
     if (availableAggs !== undefined) {
-      availableAggs.forEach(agg => {
+      availableAggs.forEach((agg) => {
         // Aggregation name is formatted like `fieldname.sum`. Illegal characters will be removed.
         const aggName = `${field.name.replace(illegalEsAggNameChars, '').trim()}.${agg}`;
         // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.

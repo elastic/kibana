@@ -38,11 +38,11 @@ function ValidationWrapper<T = unknown>({
   ...rest
 }: ValidationWrapperProps<T>) {
   const [panelState, setPanelState] = useState({} as { [key: string]: Item });
-  const isPanelValid = Object.values(panelState).every(item => item.isValid);
+  const isPanelValid = Object.values(panelState).every((item) => item.isValid);
   const { setValidity } = rest;
 
   const setValidityHandler = useCallback((paramName: string, isValid: boolean) => {
-    setPanelState(state => ({
+    setPanelState((state) => ({
       ...state,
       [paramName]: {
         isValid,

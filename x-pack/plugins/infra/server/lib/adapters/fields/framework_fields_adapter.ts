@@ -23,7 +23,7 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
     const response = await indexPatternsService.getFieldsForWildcard({
       pattern: indices,
     });
-    return response.map(field => ({
+    return response.map((field) => ({
       ...field,
       displayable: true,
     }));

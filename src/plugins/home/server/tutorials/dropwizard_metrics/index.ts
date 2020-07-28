@@ -36,6 +36,7 @@ export function dropwizardMetricsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('home.tutorials.dropwizardMetrics.nameTitle', {
       defaultMessage: 'Dropwizard metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.dropwizardMetrics.shortDescription', {

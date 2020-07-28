@@ -52,7 +52,9 @@ describe('alert_instances', () => {
     ];
 
     expect(
-      shallow(<AlertInstances {...mockAPIs} alert={alert} alertState={alertState} />)
+      shallow(
+        <AlertInstances {...mockAPIs} alert={alert} alertState={alertState} readOnly={false} />
+      )
         .find(EuiBasicTable)
         .prop('items')
     ).toEqual(instances);
@@ -68,6 +70,7 @@ describe('alert_instances', () => {
           durationEpoch={fake2MinutesAgo.getTime()}
           {...mockAPIs}
           alert={alert}
+          readOnly={false}
           alertState={alertState}
         />
       )
@@ -95,6 +98,7 @@ describe('alert_instances', () => {
         <AlertInstances
           {...mockAPIs}
           alert={alert}
+          readOnly={false}
           alertState={mockAlertState({
             alertInstances: instances,
           })}
@@ -118,6 +122,7 @@ describe('alert_instances', () => {
         <AlertInstances
           {...mockAPIs}
           alert={alert}
+          readOnly={false}
           alertState={mockAlertState({
             alertInstances: {},
           })}

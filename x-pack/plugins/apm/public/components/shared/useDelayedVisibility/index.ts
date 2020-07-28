@@ -20,9 +20,9 @@ export function useDelayedVisibility(
     const delayed = new Delayed({
       hideDelayMs,
       showDelayMs,
-      minimumVisibleDuration
+      minimumVisibleDuration,
     });
-    delayed.onChange(visibility => {
+    delayed.onChange((visibility) => {
       setIsVisible(visibility);
     });
     delayedRef.current = delayed;

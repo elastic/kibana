@@ -5,7 +5,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/public';
-// @ts-ignore unconverted local lib
+// @ts-expect-error unconverted local lib
 import { getState } from '../state/store';
 import { getAssetById } from '../state/selectors/assets';
 import { getFunctionHelp, getFunctionErrors } from '../../i18n';

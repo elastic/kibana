@@ -23,7 +23,7 @@ import { toArray, tap, distinct, map } from 'rxjs/operators';
 import {
   findPluginSpecs,
   defaultConfig,
-  // @ts-ignore
+  // @ts-expect-error
 } from '../../../../legacy/plugin_discovery/find_plugin_specs.js';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
@@ -63,14 +63,14 @@ export async function findLegacyPluginSpecs(
 
   const log$ = merge(
     pack$.pipe(
-      tap(definition => {
+      tap((definition) => {
         const path = definition.getPath();
         logger.debug(`Found plugin at ${path}`, { path });
       })
     ),
 
     invalidDirectoryError$.pipe(
-      tap(error => {
+      tap((error) => {
         logger.warn(`Unable to scan directory for plugins "${error.path}"`, {
           err: error,
           dir: error.path,
@@ -79,7 +79,7 @@ export async function findLegacyPluginSpecs(
     ),
 
     invalidPackError$.pipe(
-      tap(error => {
+      tap((error) => {
         logger.warn(`Skipping non-plugin directory at ${error.path}`, {
           path: error.path,
         });
@@ -87,21 +87,21 @@ export async function findLegacyPluginSpecs(
     ),
 
     otherError$.pipe(
-      tap(error => {
+      tap((error) => {
         // rethrow unhandled errors, which will fail the server
         throw error;
       })
     ),
 
     invalidVersionSpec$.pipe(
-      map(spec => {
+      map((spec) => {
         const name = spec.getId();
         const pluginVersion = spec.getExpectedKibanaVersion();
         const kibanaVersion = packageInfo.version;
         return `Plugin "${name}" was disabled because it expected Kibana version "${pluginVersion}", and found "${kibanaVersion}".`;
       }),
       distinct(),
-      tap(message => {
+      tap((message) => {
         logger.warn(message);
       })
     ),

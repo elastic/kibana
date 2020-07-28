@@ -20,7 +20,7 @@
 import React from 'react';
 import { collectionActions } from './lib/collection_actions';
 import { ColorRules } from './color_rules';
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -49,10 +49,7 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
         onChange: jest.fn(),
       };
       const wrapper = mountWithIntl(<ColorRules.WrappedComponent {...emptyProps} />);
-      const isNode = wrapper
-        .find('div')
-        .children()
-        .exists();
+      const isNode = wrapper.find('div').children().exists();
       expect(isNode).toBeFalsy();
     });
 
@@ -66,9 +63,9 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
       collectionActions.handleChange = jest.fn();
       const wrapper = mountWithIntl(<ColorRules.WrappedComponent {...defaultProps} />);
       const operatorInput = findTestSubject(wrapper, 'colorRuleOperator');
-      operatorInput.simulate('keyDown', { keyCode: keyCodes.DOWN });
-      operatorInput.simulate('keyDown', { keyCode: keyCodes.DOWN });
-      operatorInput.simulate('keyDown', { keyCode: keyCodes.ENTER });
+      operatorInput.simulate('keyDown', { key: keys.ARROW_DOWN });
+      operatorInput.simulate('keyDown', { key: keys.ARROW_DOWN });
+      operatorInput.simulate('keyDown', { key: keys.ENTER });
       expect(collectionActions.handleChange.mock.calls[0][1].operator).toEqual('gt');
 
       const numberInput = findTestSubject(wrapper, 'colorRuleValue');

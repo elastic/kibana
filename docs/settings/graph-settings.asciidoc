@@ -1,6 +1,6 @@
 [role="xpack"]
 [[graph-settings-kb]]
-=== Graph settings in Kibana
+=== Graph settings in {kib}
 ++++
 <titleabbrev>Graph settings</titleabbrev>
 ++++

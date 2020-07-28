@@ -70,7 +70,7 @@ describe('canViewInApp', () => {
     let uiCapabilities = createCapabilities({
       management: {
         kibana: {
-          index_patterns: true,
+          indexPatterns: true,
         },
       },
     });
@@ -81,7 +81,7 @@ describe('canViewInApp', () => {
     uiCapabilities = createCapabilities({
       management: {
         kibana: {
-          index_patterns: false,
+          indexPatterns: false,
         },
       },
     });

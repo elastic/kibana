@@ -5,29 +5,29 @@
  */
 
 import moment from 'moment';
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 import { ESResponse } from './fetcher';
 
-function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
-  const values = transactionGroups
+function calculateRelativeImpacts(items: ITransactionGroup[]) {
+  const values = items
     .map(({ impact }) => impact)
-    .filter(value => value !== null) as number[];
+    .filter((value) => value !== null) as number[];
 
   const max = Math.max(...values);
   const min = Math.min(...values);
 
-  return transactionGroups.map(bucket => ({
+  return items.map((bucket) => ({
     ...bucket,
     impact:
       bucket.impact !== null
         ? ((bucket.impact - min) / (max - min)) * 100 || 0
-        : 0
+        : 0,
   }));
 }
 
 const getBuckets = (response: ESResponse) => {
   if (response.aggregations) {
-    return sortByOrder(
+    return orderBy(
       response.aggregations.transaction_groups.buckets,
       ['sum.value'],
       ['desc']
@@ -52,25 +52,38 @@ function getTransactionGroup(
     p95: bucket.p95.values['95.0'],
     averageResponseTime,
     transactionsPerMinute,
-    impact
+    impact,
   };
 }
 
 export function transactionGroupsTransformer({
   response,
   start,
-  end
+  end,
+  bucketSize,
 }: {
   response: ESResponse;
   start: number;
   end: number;
-}): ITransactionGroup[] {
+  bucketSize: number;
+}): {
+  items: ITransactionGroup[];
+  isAggregationAccurate: boolean;
+  bucketSize: number;
+} {
   const buckets = getBuckets(response);
   const duration = moment.duration(end - start);
   const minutes = duration.asMinutes();
-  const transactionGroups = buckets.map(bucket =>
-    getTransactionGroup(bucket, minutes)
-  );
+  const items = buckets.map((bucket) => getTransactionGroup(bucket, minutes));
 
-  return calculateRelativeImpacts(transactionGroups);
+  const itemsWithRelativeImpact = calculateRelativeImpacts(items);
+
+  return {
+    items: itemsWithRelativeImpact,
+
+    // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
+    // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit
+    isAggregationAccurate: bucketSize >= buckets.length,
+    bucketSize,
+  };
 }

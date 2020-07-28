@@ -7,9 +7,9 @@
 import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import {
-  IClusterClient,
+  ILegacyClusterClient,
   IRouter,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
   kibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
@@ -26,8 +26,8 @@ import { routeDefinitionParamsMock } from '../index.mock';
 describe('Change password', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
-  let mockClusterClient: jest.Mocked<IClusterClient>;
-  let mockScopedClusterClient: jest.Mocked<IScopedClusterClient>;
+  let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
+  let mockScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
   let mockContext: RequestHandlerContext;
@@ -56,7 +56,7 @@ describe('Change password', () => {
       provider: { type: 'basic', name: 'basic' },
     });
 
-    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     mockClusterClient = routeParamsMock.clusterClient;
     mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 

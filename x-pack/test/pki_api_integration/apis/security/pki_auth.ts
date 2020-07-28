@@ -19,7 +19,7 @@ const UNTRUSTED_CLIENT_CERT = readFileSync(
   resolve(__dirname, '../../fixtures/untrusted_client.p12')
 );
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -321,7 +321,7 @@ export default function({ getService }: FtrProviderContext) {
         checkCookieIsSet(sessionCookie);
       });
 
-      it('AJAX call should re-acquire token and update existing cookie', async function() {
+      it('AJAX call should re-acquire token and update existing cookie', async function () {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
@@ -345,7 +345,7 @@ export default function({ getService }: FtrProviderContext) {
         checkCookieIsSet(refreshedCookie);
       });
 
-      it('non-AJAX call should re-acquire token and update existing cookie', async function() {
+      it('non-AJAX call should re-acquire token and update existing cookie', async function () {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.

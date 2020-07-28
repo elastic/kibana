@@ -24,7 +24,7 @@ import { IIndexPattern } from '../../../index_patterns/types';
 
 // @ts-ignore
 import { parse as parseKuery } from './_generated_/kuery';
-import { JsonObject } from '../../../../../kibana_utils/public';
+import { JsonObject } from '../../../../../kibana_utils/common';
 
 const fromExpression = (
   expression: string | DslQuery,

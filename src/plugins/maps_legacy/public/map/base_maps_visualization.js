@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
-import { getInjectedVarFunc, getUiSettings, getToasts } from '../kibana_services';
+import { getEmsTileLayerId, getUiSettings, getToasts } from '../kibana_services';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
@@ -129,7 +129,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
     }
 
     async _updateBaseLayer() {
-      const emsTileLayerId = getInjectedVarFunc()('emsTileLayerId', true);
+      const emsTileLayerId = getEmsTileLayerId();
 
       if (!this._kibanaMap) {
         return;
@@ -142,7 +142,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
-            : tmsServices.find(s => s.id === emsTileLayerId.bright);
+            : tmsServices.find((s) => s.id === emsTileLayerId.bright);
           if (initBasemapLayer) {
             this._setTmsLayer(initBasemapLayer);
           }
@@ -245,9 +245,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
       const interval$ = Rx.interval(10).pipe(filter(() => !this._baseLayerDirty));
       const timer$ = Rx.timer(maxTimeForBaseLayer);
 
-      return Rx.race(interval$, timer$)
-        .pipe(first())
-        .toPromise();
+      return Rx.race(interval$, timer$).pipe(first()).toPromise();
     }
   };
 }

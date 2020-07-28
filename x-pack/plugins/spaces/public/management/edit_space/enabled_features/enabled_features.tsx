@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
+import { ApplicationStart } from 'kibana/public';
 import { FeatureConfig } from '../../../../../../plugins/features/public';
 import { Space } from '../../../../common/model/space';
 import { getEnabledFeatures } from '../../lib/feature_utils';
@@ -19,6 +20,7 @@ interface Props {
   features: FeatureConfig[];
   securityEnabled: boolean;
   onChange: (space: Partial<Space>) => void;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 export class EnabledFeatures extends Component<Props, {}> {
@@ -136,7 +138,9 @@ export class EnabledFeatures extends Component<Props, {}> {
                 defaultMessage="Want to secure access? Go to {rolesLink}."
                 values={{
                   rolesLink: (
-                    <EuiLink href="#/management/security/roles">
+                    <EuiLink
+                      href={this.props.getUrlForApp('management', { path: 'security/roles' })}
+                    >
                       <FormattedMessage
                         id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
                         defaultMessage="Roles"

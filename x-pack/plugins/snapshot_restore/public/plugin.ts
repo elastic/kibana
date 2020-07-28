@@ -40,13 +40,13 @@ export class SnapshotRestoreUIPlugin {
     textService.setup(i18n);
     httpService.setup(http);
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.section.data.registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.snapshotRestore.appTitle', {
         defaultMessage: 'Snapshot and Restore',
       }),
-      order: 7,
-      mount: async params => {
+      order: 3,
+      mount: async (params) => {
         const { mountManagementSection } = await import('./application/mount_management_section');
         const services = {
           uiMetricService: this.uiMetricService,

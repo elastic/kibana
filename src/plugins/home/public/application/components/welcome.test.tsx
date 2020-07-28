@@ -30,56 +30,39 @@ jest.mock('../kibana_services', () => ({
 }));
 
 test('should render a Welcome screen with the telemetry disclaimer', () => {
-  const telemetry = telemetryPluginMock.createSetupContract();
-  const component = shallow(
-    // @ts-ignore
-    <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />
-  );
+  const telemetry = telemetryPluginMock.createStartContract();
+  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('should render a Welcome screen with the telemetry disclaimer when optIn is true', () => {
-  const telemetry = telemetryPluginMock.createSetupContract();
+  const telemetry = telemetryPluginMock.createStartContract();
   telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
-  const component = shallow(
-    // @ts-ignore
-    <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />
-  );
+  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('should render a Welcome screen with the telemetry disclaimer when optIn is false', () => {
-  const telemetry = telemetryPluginMock.createSetupContract();
+  const telemetry = telemetryPluginMock.createStartContract();
   telemetry.telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
-  const component = shallow(
-    // @ts-ignore
-    <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />
-  );
+  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('should render a Welcome screen with no telemetry disclaimer', () => {
-  // @ts-ignore
-  const component = shallow(
-    // @ts-ignore
-    <Welcome urlBasePath="/" onSkip={() => {}} telemetry={null} />
-  );
+  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} />);
 
   expect(component).toMatchSnapshot();
 });
 
 test('fires opt-in seen when mounted', () => {
-  const telemetry = telemetryPluginMock.createSetupContract();
+  const telemetry = telemetryPluginMock.createStartContract();
   const mockSetOptedInNoticeSeen = jest.fn();
-  // @ts-ignore
   telemetry.telemetryNotifications.setOptedInNoticeSeen = mockSetOptedInNoticeSeen;
-  shallow(
-    // @ts-ignore
-    <Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />
-  );
+  shallow(<Welcome urlBasePath="/" onSkip={() => {}} telemetry={telemetry} />);
 
   expect(mockSetOptedInNoticeSeen).toHaveBeenCalled();
 });

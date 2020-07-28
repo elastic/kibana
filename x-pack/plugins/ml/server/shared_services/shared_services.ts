@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KibanaRequest } from 'kibana/server';
 import { MlServerLicense } from '../lib/license';
 
 import { SpacesPluginSetup } from '../../../spaces/server';
@@ -18,12 +19,19 @@ import {
   getAnomalyDetectorsProvider,
 } from './providers/anomaly_detectors';
 import { ResolveMlCapabilities } from '../../common/types/capabilities';
+import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
   MlSystemProvider &
   ModulesProvider &
   ResultsServiceProvider;
+
+export interface SharedServicesChecks {
+  isFullLicense(): void;
+  isMinimumLicense(): void;
+  getHasMlCapabilities(request: KibanaRequest): HasMlCapabilities;
+}
 
 export function createSharedServices(
   mlLicense: MlServerLicense,
@@ -32,19 +40,18 @@ export function createSharedServices(
   resolveMlCapabilities: ResolveMlCapabilities
 ): SharedServices {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
+  const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
+  const checks: SharedServicesChecks = {
+    isFullLicense,
+    isMinimumLicense,
+    getHasMlCapabilities,
+  };
 
   return {
-    ...getJobServiceProvider(isFullLicense),
-    ...getAnomalyDetectorsProvider(isFullLicense),
-    ...getMlSystemProvider(
-      isMinimumLicense,
-      isFullLicense,
-      mlLicense,
-      spaces,
-      cloud,
-      resolveMlCapabilities
-    ),
-    ...getModulesProvider(isFullLicense),
-    ...getResultsServiceProvider(isFullLicense),
+    ...getJobServiceProvider(checks),
+    ...getAnomalyDetectorsProvider(checks),
+    ...getModulesProvider(checks),
+    ...getResultsServiceProvider(checks),
+    ...getMlSystemProvider(checks, mlLicense, spaces, cloud, resolveMlCapabilities),
   };
 }

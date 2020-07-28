@@ -111,14 +111,14 @@ function DefaultEditorAggSelect({
     },
     [setValue]
   );
-  const onSearchChange = useCallback(searchValue => setIsDirty(Boolean(searchValue)), []);
+  const onSearchChange = useCallback((searchValue) => setIsDirty(Boolean(searchValue)), []);
 
   const setTouched = useCallback(
     () => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.TOUCHED, payload: true }),
     [onChangeAggType]
   );
   const setValidity = useCallback(
-    valid => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALID, payload: valid }),
+    (valid) => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALID, payload: valid }),
     [onChangeAggType]
   );
 

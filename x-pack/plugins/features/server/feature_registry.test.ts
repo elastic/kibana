@@ -353,7 +353,7 @@ describe('FeatureRegistry', () => {
     );
   });
 
-  ['contains space', 'contains_invalid()_chars', ''].forEach(prohibitedChars => {
+  ['contains space', 'contains_invalid()_chars', ''].forEach((prohibitedChars) => {
     it(`prevents features from being registered with a navLinkId of "${prohibitedChars}"`, () => {
       const featureRegistry = new FeatureRegistry();
       expect(() =>
@@ -396,7 +396,7 @@ describe('FeatureRegistry', () => {
     });
   });
 
-  ['catalogue', 'management', 'navLinks', `doesn't match valid regex`].forEach(prohibitedId => {
+  ['catalogue', 'management', 'navLinks', `doesn't match valid regex`].forEach((prohibitedId) => {
     it(`prevents features from being registered with an ID of "${prohibitedId}"`, () => {
       const featureRegistry = new FeatureRegistry();
       expect(() =>
@@ -740,6 +740,168 @@ describe('FeatureRegistry', () => {
 
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
       `"Feature test-feature specifies catalogue entries which are not granted to any privileges: baz"`
+    );
+  });
+
+  it(`prevents privileges from specifying alerting entries that don't exist at the root level`, () => {
+    const feature: FeatureConfig = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      alerting: ['bar'],
+      privileges: {
+        all: {
+          alerting: {
+            all: ['foo', 'bar'],
+            read: ['baz'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+        read: {
+          alerting: { read: ['foo', 'bar', 'baz'] },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.all has unknown alerting entries: foo, baz"`
+    );
+  });
+
+  it(`prevents features from specifying alerting entries that don't exist at the privilege level`, () => {
+    const feature: FeatureConfig = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      alerting: ['foo', 'bar', 'baz'],
+      privileges: {
+        all: {
+          alerting: { all: ['foo'] },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+        read: {
+          alerting: { all: ['foo'] },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'my sub feature',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cool-sub-feature-privilege',
+                  name: 'cool privilege',
+                  includeIn: 'none',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  alerting: { all: ['bar'] },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature test-feature specifies alerting entries which are not granted to any privileges: baz"`
+    );
+  });
+
+  it(`prevents reserved privileges from specifying alerting entries that don't exist at the root level`, () => {
+    const feature: FeatureConfig = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      alerting: ['bar'],
+      privileges: null,
+      reserved: {
+        description: 'something',
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              alerting: { all: ['foo', 'bar', 'baz'] },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+        ],
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.reserved has unknown alerting entries: foo, baz"`
+    );
+  });
+
+  it(`prevents features from specifying alerting entries that don't exist at the reserved privilege level`, () => {
+    const feature: FeatureConfig = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      alerting: ['foo', 'bar', 'baz'],
+      privileges: null,
+      reserved: {
+        description: 'something',
+        privileges: [
+          {
+            id: 'reserved',
+            privilege: {
+              alerting: { all: ['foo', 'bar'] },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+              app: [],
+            },
+          },
+        ],
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature test-feature specifies alerting entries which are not granted to any privileges: baz"`
     );
   });
 

@@ -23,11 +23,11 @@ function mean(values) {
   return _.sum(values) / values.length;
 }
 
-const extractValue = r => (r && r[1]) || 0;
+const extractValue = (r) => (r && r[1]) || 0;
 
-const basic = fnName => targetSeries => {
+const basic = (fnName) => (targetSeries) => {
   const data = [];
-  _.zip(...targetSeries).forEach(row => {
+  _.zip(...targetSeries).forEach((row) => {
     const key = row[0][0];
     const values = row.map(extractValue);
     const fn = _[fnName] || (() => null);
@@ -36,15 +36,15 @@ const basic = fnName => targetSeries => {
   return [data];
 };
 
-const overall = fnName => targetSeries => {
+const overall = (fnName) => (targetSeries) => {
   const fn = _[fnName];
   const keys = [];
   const values = [];
-  _.zip(...targetSeries).forEach(row => {
+  _.zip(...targetSeries).forEach((row) => {
     keys.push(row[0][0]);
     values.push(fn(row.map(extractValue)));
   });
-  return [keys.map(k => [k, fn(values)])];
+  return [keys.map((k) => [k, fn(values)])];
 };
 
 export const SeriesAgg = {
@@ -53,7 +53,7 @@ export const SeriesAgg = {
   min: basic('min'),
   mean(targetSeries) {
     const data = [];
-    _.zip(...targetSeries).forEach(row => {
+    _.zip(...targetSeries).forEach((row) => {
       const key = row[0][0];
       const values = row.map(extractValue);
       data.push([key, mean(values)]);
@@ -69,17 +69,17 @@ export const SeriesAgg = {
     const fn = mean;
     const keys = [];
     const values = [];
-    _.zip(...targetSeries).forEach(row => {
+    _.zip(...targetSeries).forEach((row) => {
       keys.push(row[0][0]);
       values.push(_.sum(row.map(extractValue)));
     });
-    return [keys.map(k => [k, fn(values)])];
+    return [keys.map((k) => [k, fn(values)])];
   },
 
   cumulative_sum(targetSeries) {
     const data = [];
     let sum = 0;
-    _.zip(...targetSeries).forEach(row => {
+    _.zip(...targetSeries).forEach((row) => {
       const key = row[0][0];
       sum += _.sum(row.map(extractValue));
       data.push([key, sum]);

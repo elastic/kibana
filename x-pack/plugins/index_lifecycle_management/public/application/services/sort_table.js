@@ -6,8 +6,8 @@
 
 import { sortBy } from 'lodash';
 
-const stringSort = fieldName => item => item[fieldName];
-const arraySort = fieldName => item => (item[fieldName] || []).length;
+const stringSort = (fieldName) => (item) => item[fieldName];
+const arraySort = (fieldName) => (item) => (item[fieldName] || []).length;
 
 const sorters = {
   version: stringSort('version'),

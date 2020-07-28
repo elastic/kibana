@@ -80,16 +80,16 @@ export class FunctionForm extends BaseForm {
     const { args, argTypeDef } = data;
 
     // Don't instaniate these until render time, to give the registries a chance to populate.
-    const argInstances = this.args.map(argSpec => new Arg(argSpec));
+    const argInstances = this.args.map((argSpec) => new Arg(argSpec));
 
     if (!isPlainObject(args)) {
       throw new Error(`Form "${this.name}" expects "args" object`);
     }
 
     // get a mapping of arg values from the expression and from the renderable's schema
-    const argNames = uniq(argInstances.map(arg => arg.name).concat(Object.keys(args)));
-    const dataArgs = argNames.map(argName => {
-      const arg = argInstances.find(arg => arg.name === argName);
+    const argNames = uniq(argInstances.map((arg) => arg.name).concat(Object.keys(args)));
+    const dataArgs = argNames.map((argName) => {
+      const arg = argInstances.find((arg) => arg.name === argName);
 
       // if arg is not multi, only preserve the last value found
       // otherwise, leave the value alone (including if the arg is not defined)
@@ -104,10 +104,10 @@ export class FunctionForm extends BaseForm {
 
     try {
       // allow a hook to override the data args
-      const resolvedDataArgs = dataArgs.map(d => ({ ...d, ...this.resolveArg(d, props) }));
+      const resolvedDataArgs = dataArgs.map((d) => ({ ...d, ...this.resolveArg(d, props) }));
 
-      const argumentForms = compact(resolvedDataArgs.map(d => this.renderArg(props, d)));
-      const addableArgs = compact(resolvedDataArgs.map(d => this.getAddableArg(props, d)));
+      const argumentForms = compact(resolvedDataArgs.map((d) => this.renderArg(props, d)));
+      const addableArgs = compact(resolvedDataArgs.map((d) => this.getAddableArg(props, d)));
 
       if (!addableArgs.length && !argumentForms.length) {
         return null;

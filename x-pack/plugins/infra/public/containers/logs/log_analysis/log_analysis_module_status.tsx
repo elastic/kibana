@@ -43,8 +43,6 @@ type StatusReducerAction =
       payload: FetchJobStatusResponsePayload;
     }
   | { type: 'failedFetchingJobStatuses' }
-  | { type: 'requestedJobConfigurationUpdate' }
-  | { type: 'requestedJobDefinitionUpdate' }
   | { type: 'viewedResults' };
 
 const createInitialState = <JobType extends string>({
@@ -98,7 +96,7 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
         {} as Record<JobType, JobStatus>
       );
       const nextSetupStatus: SetupStatus = Object.values<JobStatus>(nextJobStatus).every(
-        jobState => jobState === 'started'
+        (jobState) => jobState === 'started'
       )
         ? { type: 'succeeded' }
         : {
@@ -106,10 +104,10 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
             reasons: [
               ...Object.values(datafeedSetupResults)
                 .filter(hasError)
-                .map(datafeed => datafeed.error.msg),
+                .map((datafeed) => datafeed.error.msg),
               ...Object.values(jobSetupResults)
                 .filter(hasError)
-                .map(job => job.error.msg),
+                .map((job) => job.error.msg),
             ],
           };
 
@@ -173,18 +171,6 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
         ),
       };
     }
-    case 'requestedJobConfigurationUpdate': {
-      return {
-        ...state,
-        setupStatus: { type: 'required', reason: 'reconfiguration' },
-      };
-    }
-    case 'requestedJobDefinitionUpdate': {
-      return {
-        ...state,
-        setupStatus: { type: 'required', reason: 'update' },
-      };
-    }
     case 'viewedResults': {
       return {
         ...state,
@@ -201,7 +187,7 @@ const hasSuccessfullyCreatedJob = (jobId: string) => (
   jobSetupResponses: SetupMlModuleResponsePayload['jobs']
 ) =>
   jobSetupResponses.filter(
-    jobSetupResponse =>
+    (jobSetupResponse) =>
       jobSetupResponse.id === jobId && jobSetupResponse.success && !jobSetupResponse.error
   ).length > 0;
 
@@ -209,7 +195,7 @@ const hasSuccessfullyStartedDatafeed = (datafeedId: string) => (
   datafeedSetupResponses: SetupMlModuleResponsePayload['datafeeds']
 ) =>
   datafeedSetupResponses.filter(
-    datafeedSetupResponse =>
+    (datafeedSetupResponse) =>
       datafeedSetupResponse.id === datafeedId &&
       datafeedSetupResponse.success &&
       datafeedSetupResponse.started &&
@@ -218,7 +204,7 @@ const hasSuccessfullyStartedDatafeed = (datafeedId: string) => (
 
 const getJobStatus = (jobId: string) => (jobSummaries: FetchJobStatusResponsePayload): JobStatus =>
   jobSummaries
-    .filter(jobSummary => jobSummary.id === jobId)
+    .filter((jobSummary) => jobSummary.id === jobId)
     .map(
       (jobSummary): JobStatus => {
         if (jobSummary.jobState === 'failed' || jobSummary.datafeedState === '') {
@@ -251,8 +237,8 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
 ): SetupStatus =>
   Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>((setupStatus, [, jobStatus]) => {
     if (jobStatus === 'missing') {
-      return { type: 'required', reason: 'missing' };
-    } else if (setupStatus.type === 'required') {
+      return { type: 'required' };
+    } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
       return setupStatus;
     } else if (setupStatus.type === 'skipped' || isJobStatusWithResults(jobStatus)) {
       return {
@@ -265,8 +251,9 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
     return setupStatus;
   }, previousSetupStatus);
 
-const hasError = <Value extends any>(value: Value): value is MandatoryProperty<Value, 'error'> =>
-  value.error != null;
+const hasError = <Value extends { error?: any }>(
+  value: Value
+): value is MandatoryProperty<Value, 'error'> => value.error != null;
 
 export const useModuleStatus = <JobType extends string>(jobTypes: JobType[]) => {
   return useReducer(createStatusReducer(jobTypes), { jobTypes }, createInitialState);

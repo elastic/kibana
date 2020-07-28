@@ -19,12 +19,13 @@
 
 import { getBucketsPath } from './get_buckets_path';
 import { parseInterval } from './parse_interval';
-import { set, isEmpty } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';
 
 function checkMetric(metric, fields) {
-  fields.forEach(field => {
+  fields.forEach((field) => {
     if (!metric[field]) {
       throw new Error(
         i18n.translate('visTypeTimeseries.metricMissingErrorMessage', {
@@ -76,7 +77,7 @@ export const bucketTransform = {
       },
     };
   },
-  static: bucket => {
+  static: (bucket) => {
     checkMetric(bucket, ['value']);
     // Anything containing a decimal point or an exponent is considered decimal value
     const isDecimalValue = Boolean(bucket.value.match(/[.e]/i));
@@ -101,7 +102,7 @@ export const bucketTransform = {
   variance: extendStats,
   std_deviation: extendStats,
 
-  top_hit: bucket => {
+  top_hit: (bucket) => {
     checkMetric(bucket, ['type', 'field', 'size']);
     const body = {
       filter: {
@@ -130,12 +131,12 @@ export const bucketTransform = {
   std_deviation_bucket: extendStatsBucket,
   variance_bucket: extendStatsBucket,
 
-  percentile: bucket => {
+  percentile: (bucket) => {
     checkMetric(bucket, ['type', 'field', 'percentiles']);
-    let percents = bucket.percentiles.map(p => (p.value ? Number(p.value) : 0));
-    if (bucket.percentiles.some(p => p.mode === 'band')) {
+    let percents = bucket.percentiles.map((p) => (p.value ? Number(p.value) : 0));
+    if (bucket.percentiles.some((p) => p.mode === 'band')) {
       percents = percents.concat(
-        bucket.percentiles.filter(p => p.percentile).map(p => p.percentile)
+        bucket.percentiles.filter((p) => p.percentile).map((p) => p.percentile)
       );
     }
     const agg = {
@@ -147,13 +148,13 @@ export const bucketTransform = {
     return agg;
   },
 
-  percentile_rank: bucket => {
+  percentile_rank: (bucket) => {
     checkMetric(bucket, ['type', 'field', 'values']);
 
     return {
       percentile_ranks: {
         field: bucket.field,
-        values: (bucket.values || []).map(value => (isEmpty(value) ? 0 : value)),
+        values: (bucket.values || []).map((value) => (isEmpty(value) ? 0 : value)),
       },
     };
   },

@@ -31,13 +31,13 @@ export async function getAgentEvents(
     perPage,
     page,
     sortField: 'timestamp',
-    sortOrder: 'DESC',
+    sortOrder: 'desc',
     defaultSearchOperator: 'AND',
     search: agentId,
     searchFields: ['agent_id'],
   });
 
-  const items: AgentEvent[] = saved_objects.map(so => {
+  const items: AgentEvent[] = saved_objects.map((so) => {
     return {
       id: so.id,
       ...so.attributes,

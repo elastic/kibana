@@ -11,7 +11,7 @@ import { IfElement } from '../list/if_element';
 import { ElseElement } from '../list/else_element';
 
 function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, pipelineStage) {
-  outgoingVertices.forEach(vertex => {
+  outgoingVertices.forEach((vertex) => {
     let currentVertex = vertex;
     while (isVertexPipelineStage(currentVertex, pipelineStage) && currentVertex !== next) {
       statements.push(makeStatement(currentVertex, pipelineStage));
@@ -21,7 +21,7 @@ function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, p
 }
 
 function addStatementsToList(list, statements, depth, id) {
-  statements.forEach(statement => {
+  statements.forEach((statement) => {
     list.push(...statement.toList(depth, id));
   });
 }

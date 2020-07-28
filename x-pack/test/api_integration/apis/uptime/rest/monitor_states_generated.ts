@@ -10,7 +10,7 @@ import { makeChecksWithStatus } from './helper/make_checks';
 import { MonitorSummary } from '../../../../../plugins/uptime/common/runtime_types';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('monitor state scoping', async () => {
     const numIps = 4; // Must be > 2 for IP uniqueness checks
@@ -39,7 +39,7 @@ export default function({ getService }: FtrProviderContext) {
       before(async () => {
         const es = getService('legacyEs');
         dateRangeStart = new Date().toISOString();
-        checks = await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', d => {
+        checks = await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', (d) => {
           // turn an all up status into having at least one down
           if (d.summary) {
             d.monitor.status = 'down';
@@ -51,18 +51,6 @@ export default function({ getService }: FtrProviderContext) {
 
         dateRangeEnd = new Date().toISOString();
         nonSummaryIp = checks[0][0].monitor.ip;
-      });
-
-      it('should return all IPs', async () => {
-        const filters = makeApiParams(testMonitorId);
-        const url = getBaseUrl(dateRangeStart, dateRangeEnd) + `&filters=${filters}`;
-        const apiResponse = await supertest.get(url);
-        const res = apiResponse.body;
-
-        const uniqueIps = new Set<string>();
-        res.summaries[0].state.checks.forEach((c: any) => uniqueIps.add(c.monitor.ip));
-
-        expect(uniqueIps.size).to.eql(4);
       });
 
       it('should match non summary documents without a status filter', async () => {

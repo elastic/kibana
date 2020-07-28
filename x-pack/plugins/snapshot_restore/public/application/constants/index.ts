@@ -6,7 +6,7 @@
 
 import { DAY } from '../../shared_imports';
 
-export const BASE_PATH = '/management/elasticsearch/snapshot_restore';
+export const BASE_PATH = '';
 export const DEFAULT_SECTION: Section = 'snapshots';
 export type Section = 'repositories' | 'snapshots' | 'restore_status' | 'policies';
 
@@ -81,11 +81,11 @@ export const UNREMOVABLE_INDEX_SETTINGS: string[] = [
 ];
 
 export const MODIFY_INDEX_SETTINGS_SUGGESTIONS: string[] = INDEX_SETTING_SUGGESTIONS.filter(
-  setting => !UNMODIFIABLE_INDEX_SETTINGS.includes(setting)
+  (setting) => !UNMODIFIABLE_INDEX_SETTINGS.includes(setting)
 );
 
 export const REMOVE_INDEX_SETTINGS_SUGGESTIONS: string[] = INDEX_SETTING_SUGGESTIONS.filter(
-  setting => !UNREMOVABLE_INDEX_SETTINGS.includes(setting)
+  (setting) => !UNREMOVABLE_INDEX_SETTINGS.includes(setting)
 );
 
 export const DEFAULT_POLICY_SCHEDULE = '0 30 1 * * ?';

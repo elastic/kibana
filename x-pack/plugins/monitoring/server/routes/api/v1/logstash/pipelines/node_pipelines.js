@@ -44,7 +44,7 @@ export function logstashNodePipelinesRoute(server) {
         }),
       },
     },
-    handler: async req => {
+    handler: async (req) => {
       const config = server.config();
       const { ccs, pagination, sort, queryText } = req.payload;
       const { clusterUuid, logstashUuid } = req.params;

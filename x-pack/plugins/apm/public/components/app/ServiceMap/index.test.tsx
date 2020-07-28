@@ -5,7 +5,7 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { FunctionComponent } from 'react';
+import React, { ReactNode } from 'react';
 import { License } from '../../../../../licensing/common/license';
 import { LicenseContext } from '../../../context/LicenseContext';
 import { ServiceMap } from './';
@@ -18,17 +18,17 @@ const expiredLicense = new License({
     mode: 'platinum',
     status: 'expired',
     type: 'platinum',
-    uid: '1'
-  }
+    uid: '1',
+  },
 });
 
-const Wrapper: FunctionComponent = ({ children }) => {
+function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <LicenseContext.Provider value={expiredLicense}>
       <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
     </LicenseContext.Provider>
   );
-};
+}
 
 describe('ServiceMap', () => {
   describe('with an inactive license', () => {
@@ -36,7 +36,7 @@ describe('ServiceMap', () => {
       expect(
         (
           await render(<ServiceMap />, {
-            wrapper: Wrapper
+            wrapper: Wrapper,
           }).findAllByText(/Platinum/)
         ).length
       ).toBeGreaterThan(0);

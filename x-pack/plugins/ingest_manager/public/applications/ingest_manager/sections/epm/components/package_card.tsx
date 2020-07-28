@@ -7,14 +7,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
 import { PackageInfo, PackageListItem } from '../../../types';
-import { useLinks } from '../hooks';
+import { useLink } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
+import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
 
-export interface BadgeProps {
-  showInstalledBadge?: boolean;
-}
-
-type PackageCardProps = (PackageListItem | PackageInfo) & BadgeProps;
+type PackageCardProps = PackageListItem | PackageInfo;
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
 // `a` tags use `euiLinkColor` which results in blueish Badge text
@@ -27,27 +24,28 @@ export function PackageCard({
   name,
   title,
   version,
-  showInstalledBadge,
+  release,
   status,
   icons,
   ...restProps
 }: PackageCardProps) {
-  const { toDetailView } = useLinks();
+  const { getHref } = useLink();
   let urlVersion = version;
   // if this is an installed package, link to the version installed
   if ('savedObject' in restProps) {
     urlVersion = restProps.savedObject.attributes.version || version;
   }
-  const url = toDetailView({ name, version: urlVersion });
 
   return (
     <Card
-      betaBadgeLabel={showInstalledBadge && status === 'installed' ? 'Installed' : ''}
-      layout="horizontal"
       title={title || ''}
       description={description}
       icon={<PackageIcon icons={icons} packageName={name} version={version} size="xl" />}
-      href={url}
+      href={getHref('integration_details', { pkgkey: `${name}-${urlVersion}` })}
+      betaBadgeLabel={release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined}
+      betaBadgeTooltipContent={
+        release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined
+      }
     />
   );
 }

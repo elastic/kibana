@@ -50,18 +50,14 @@ export class UrlParams {
     }
     description = _.clone(description || {});
     _.defaults(description, defaults);
-    _.each(
-      description,
-      function(pDescription, param) {
-        const component = new ParamComponent(param, this.rootComponent, pDescription);
-        if (Array.isArray(pDescription)) {
-          new ListComponent(param, pDescription, component);
-        } else if (pDescription === '__flag__') {
-          new ListComponent(param, ['true', 'false'], component);
-        }
-      },
-      this
-    );
+    _.each(description, (pDescription, param) => {
+      const component = new ParamComponent(param, this.rootComponent, pDescription);
+      if (Array.isArray(pDescription)) {
+        new ListComponent(param, pDescription, component);
+      } else if (pDescription === '__flag__') {
+        new ListComponent(param, ['true', 'false'], component);
+      }
+    });
   }
   getTopLevelComponents() {
     return this.rootComponent.next;

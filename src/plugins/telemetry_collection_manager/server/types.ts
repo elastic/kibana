@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { APICaller, Logger, KibanaRequest, IClusterClient } from 'kibana/server';
+import { LegacyAPICaller, Logger, KibanaRequest, ILegacyClusterClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPlugin } from './plugin';
 
@@ -64,7 +64,7 @@ export interface ClusterDetails {
 
 export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   start: string | number;
   end: string | number;
 }
@@ -129,7 +129,7 @@ export interface CollectionConfig<
 > {
   title: string;
   priority: number;
-  esCluster: IClusterClient;
+  esCluster: ILegacyClusterClient;
   statsGetter: StatsGetter<CustomContext, T>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
   licenseGetter: LicenseGetter<CustomContext>;
@@ -144,6 +144,6 @@ export interface Collection<
   statsGetter: StatsGetter<CustomContext, T>;
   licenseGetter: LicenseGetter<CustomContext>;
   clusterDetailsGetter: ClusterDetailsGetter<CustomContext>;
-  esCluster: IClusterClient;
+  esCluster: ILegacyClusterClient;
   title: string;
 }

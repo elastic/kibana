@@ -46,8 +46,8 @@ export default new Chainable('scale_interval', {
     const currentInterval = toMS(tlConfig.time.interval);
     const scaleInterval = toMS(args.byName.interval);
 
-    return alter(args, function(eachSeries) {
-      const data = _.map(eachSeries.data, function(point) {
+    return alter(args, function (eachSeries) {
+      const data = _.map(eachSeries.data, function (point) {
         return [point[0], (point[1] / currentInterval) * scaleInterval];
       });
       eachSeries.data = data;

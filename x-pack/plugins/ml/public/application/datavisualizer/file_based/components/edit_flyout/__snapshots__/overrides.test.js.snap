@@ -83,12 +83,12 @@ exports[`Overrides render overrides 1`] = `
       <EuiText
         size="xs"
       >
-        <ForwardRef
+        <EuiLink
           href="https://www.elastic.co/guide/en/elasticsearch/reference/jest-metadata-mock-branch/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern"
           target="_blank"
         >
           See more on accepted formats
-        </ForwardRef>
+        </EuiLink>
       </EuiText>
     }
     label={

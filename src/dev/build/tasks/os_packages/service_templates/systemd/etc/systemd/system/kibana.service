@@ -10,7 +10,7 @@ Group=kibana
 # exist, it continues onward.
 EnvironmentFile=-/etc/default/kibana
 EnvironmentFile=-/etc/sysconfig/kibana
-ExecStart=/usr/share/kibana/bin/kibana "-c /etc/kibana/kibana.yml"
+ExecStart=/usr/share/kibana/bin/kibana
 Restart=on-failure
 RestartSec=3
 StartLimitBurst=3

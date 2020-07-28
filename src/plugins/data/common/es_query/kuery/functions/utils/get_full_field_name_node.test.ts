@@ -24,7 +24,7 @@ import { IIndexPattern } from '../../../../index_patterns';
 // @ts-ignore
 import { getFullFieldNameNode } from './get_full_field_name_node';
 
-describe('getFullFieldNameNode', function() {
+describe('getFullFieldNameNode', function () {
   let indexPattern: IIndexPattern;
 
   beforeEach(() => {

@@ -20,7 +20,7 @@ To create a workpad, choose one of the following options:
 
 To use the background colors, images, and data of your choice, start with a blank workpad.
 
-. Open *Canvas*.
+. Open the menu, then go to *Canvas*.
 
 . On the *Canvas workpads* view, click *Create workpad*.
 
@@ -35,7 +35,7 @@ For example, click *720p* for a traditional presentation layout.
 . Click the *Background color* picker, then select the background color for your workpad.
 +
 [role="screenshot"]
-image::images/canvas-background-color-picker.gif[Canvas color picker]
+image::images/canvas-background-color-picker.png[Canvas color picker]
 
 [float]
 [[canvas-template-workpad]]
@@ -43,7 +43,7 @@ image::images/canvas-background-color-picker.gif[Canvas color picker]
 
 If you're unsure about where to start, you can use one of the preconfigured templates that come with Canvas.
 
-. Open *Canvas*.
+. Open the menu, then go to *Canvas*.
 
 . On the *Canvas workpads* view, select *Templates*.
 
@@ -57,7 +57,7 @@ If you're unsure about where to start, you can use one of the preconfigured temp
 
 When you want to use a workpad that someone else has already started, import the JSON file into Canvas.
 
-. Open *Canvas*.
+. Open the menu, then go to *Canvas*.
 
 . On the *Canvas workpads* view, click and drag the file to the *Import workpad JSON file* field.
 
@@ -96,23 +96,27 @@ background-color: #3990e6;
 [[configure-auto-refresh-interval]]
 === Change the auto-refresh interval
 
-Increase or decrease how often the data refreshes on your workpad.
+Change how often the data refreshes on your workpad.
 
-. In the top left corner, click the *Control settings* icon.
+. Click *View > Auto refresh settings*.
 
-. Under *Change auto-refresh interval*, select the interval you want to use.
+. Select the interval you want to use, or *Set a custom interval*.
 +
 [role="screenshot"]
 image::images/canvas-refresh-interval.png[Element data refresh interval]
-
-TIP: To manually refresh the data, click the *Refresh data* icon.
++
+To manually refresh the data, click image:canvas/images/canvas-refresh-data.png[].
 
 [float]
 [[zoom-in-out]]
 === Use the zoom options
 
-In the upper left corner, click the *Zoom controls* icon, then select one of the options.
+To get a closer look at a portion of your workpad, use the zoom options.
 
+. Click *View > Zoom*.
+
+. Select the zoom option.
++
 [role="screenshot"]
 image::images/canvas-zoom-controls.png[Zoom controls]
 

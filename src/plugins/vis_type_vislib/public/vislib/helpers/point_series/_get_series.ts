@@ -53,7 +53,7 @@ export function getSeries(table: Table, chart: Chart) {
       return;
     }
 
-    aspects.y.forEach(function(y) {
+    aspects.y.forEach(function (y) {
       const point = partGetPoint(row, rowIndex, y, zAspect);
       if (!point) {
         return;
@@ -71,7 +71,7 @@ export function getSeries(table: Table, chart: Chart) {
         seriesLabel = prefix + seriesLabel;
       }
 
-      point.seriesId = seriesId;
+      (point.seriesId as string | number) = seriesId;
       addToSiri(
         seriesMap,
         point,

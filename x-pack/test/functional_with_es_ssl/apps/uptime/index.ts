@@ -11,7 +11,7 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Uptime app', function() {
+  describe('Uptime app', function () {
     this.tags('ciGroup6');
 
     describe('with real-world data', () => {
@@ -22,6 +22,7 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
       after(async () => await esArchiver.unload(ARCHIVE));
 
       loadTestFile(require.resolve('./alert_flyout'));
+      loadTestFile(require.resolve('./anomaly_alert'));
     });
   });
 };

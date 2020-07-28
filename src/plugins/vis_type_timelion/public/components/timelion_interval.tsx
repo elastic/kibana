@@ -98,11 +98,11 @@ function TimelionInterval({ value, setValue, setValidity }: TimelionIntervalProp
   );
 
   const selectedOptions = useMemo(
-    () => [intervalOptions.find(op => op.value === value) || { label: value, value }],
+    () => [intervalOptions.find((op) => op.value === value) || { label: value, value }],
     [value]
   );
 
-  const isValid = intervalOptions.some(int => int.value === value) || isValidEsInterval(value);
+  const isValid = intervalOptions.some((int) => int.value === value) || isValidEsInterval(value);
 
   useValidation(setValidity, isValid);
 

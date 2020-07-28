@@ -49,7 +49,7 @@ describe('PluginStatement component', () => {
     };
   });
 
-  const render = props => shallow(<PluginStatement {...props} />);
+  const render = (props) => shallow(<PluginStatement {...props} />);
 
   it('renders input metrics and explicit id fields', () => {
     expect(render(props)).toMatchSnapshot();

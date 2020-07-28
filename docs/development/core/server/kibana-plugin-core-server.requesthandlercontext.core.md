@@ -13,11 +13,13 @@ core: {
             typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
-            dataClient: IScopedClusterClient;
-            adminClient: IScopedClusterClient;
+            legacy: {
+                client: ILegacyScopedClusterClient;
+            };
         };
         uiSettings: {
             client: IUiSettingsClient;
         };
+        auditor: Auditor;
     };
 ```

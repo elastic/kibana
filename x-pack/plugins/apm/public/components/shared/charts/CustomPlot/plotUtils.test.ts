@@ -16,7 +16,7 @@ describe('plotUtils', () => {
           plotUtils.getPlotValues([], [], { height: 1, width: 1 })
         ).toMatchObject({
           XY_HEIGHT: 1,
-          XY_WIDTH: 1
+          XY_WIDTH: 1,
         });
       });
     });
@@ -37,13 +37,13 @@ describe('plotUtils', () => {
               .getPlotValues(
                 [
                   { data: [{ x: 0, y: 200 }] },
-                  { data: [{ x: 0, y: 300 }] }
+                  { data: [{ x: 0, y: 300 }] },
                 ] as Array<TimeSeries<Coordinate>>,
                 [],
                 {
                   height: 1,
                   width: 1,
-                  yMin: 'min'
+                  yMin: 'min',
                 }
               )
               .y.domain()[0]
@@ -59,7 +59,7 @@ describe('plotUtils', () => {
             .getPlotValues([], [], {
               height: 1,
               width: 1,
-              yMax: 500
+              yMax: 500,
             })
             .y.domain()[1]
         ).toEqual(500);

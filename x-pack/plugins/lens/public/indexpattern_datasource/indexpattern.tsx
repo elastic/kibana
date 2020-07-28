@@ -46,6 +46,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { deleteColumn } from './state_helpers';
 import { Datasource, StateSetter } from '../index';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export { OperationType, IndexPatternColumn } from './operations';
 
@@ -86,7 +87,7 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
     return uniqueLabel;
   };
 
-  Object.values(layers).forEach(layer => {
+  Object.values(layers).forEach((layer) => {
     if (!layer.columns) {
       return;
     }
@@ -102,10 +103,12 @@ export function getIndexPatternDatasource({
   core,
   storage,
   data,
+  charts,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  charts: ChartsPluginSetup;
 }) {
   const savedObjectsClient = core.savedObjects.client;
   const uiSettings = core.uiSettings;
@@ -125,6 +128,7 @@ export function getIndexPatternDatasource({
         state,
         savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
+        storage,
       });
     },
 
@@ -180,8 +184,8 @@ export function getIndexPatternDatasource({
       return {
         filterableIndexPatterns: _.uniq(
           Object.values(state.layers)
-            .map(layer => layer.indexPatternId)
-            .map(indexPatternId => ({
+            .map((layer) => layer.indexPatternId)
+            .map((indexPatternId) => ({
               id: indexPatternId,
               title: state.indexPatterns[indexPatternId].title,
             }))
@@ -207,9 +211,11 @@ export function getIndexPatternDatasource({
                 setState,
                 savedObjectsClient,
                 onError: onIndexPatternLoadError,
+                storage,
               });
             }}
             data={data}
+            charts={charts}
             {...props}
           />
         </I18nProvider>,
@@ -281,8 +287,7 @@ export function getIndexPatternDatasource({
     ) => {
       render(
         <LayerPanel
-          state={props.state}
-          onChangeIndexPattern={indexPatternId => {
+          onChangeIndexPattern={(indexPatternId) => {
             changeLayerIndexPattern({
               savedObjectsClient,
               indexPatternId,
@@ -291,6 +296,7 @@ export function getIndexPatternDatasource({
               layerId: props.layerId,
               onError: onIndexPatternLoadError,
               replaceIfPossible: true,
+              storage,
             });
           }}
           {...props}
@@ -309,7 +315,7 @@ export function getIndexPatternDatasource({
         datasourceId: 'indexpattern',
 
         getTableSpec: () => {
-          return state.layers[layerId].columnOrder.map(colId => ({ columnId: colId }));
+          return state.layers[layerId].columnOrder.map((colId) => ({ columnId: colId }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];

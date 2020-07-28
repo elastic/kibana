@@ -41,7 +41,7 @@ describe('Integration', () => {
   });
 
   function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
-    test(testToRun.name, async function(done) {
+    test(testToRun.name, async function (done) {
       let lineOffset = 0; // add one for the extra method line
       let editorValue = data;
       if (requestLine != null) {
@@ -67,7 +67,7 @@ describe('Integration', () => {
         //    });
         //  }
         if (kbSchemes.endpoints) {
-          $.each(kbSchemes.endpoints, function(endpoint, scheme) {
+          $.each(kbSchemes.endpoints, function (endpoint, scheme) {
             testApi.addEndpointDescription(endpoint, scheme);
           });
         }
@@ -81,10 +81,10 @@ describe('Integration', () => {
       //setTimeout(function () {
       senseEditor.completer = {
         base: {},
-        changeListener: function() {},
+        changeListener: function () {},
       }; // mimic auto complete
 
-      senseEditor.autocomplete._test.getCompletions(senseEditor, null, cursor, '', function(
+      senseEditor.autocomplete._test.getCompletions(senseEditor, null, cursor, '', function (
         err,
         terms
       ) {
@@ -110,19 +110,19 @@ describe('Integration', () => {
         }
 
         if (testToRun.autoCompleteSet) {
-          const expectedTerms = _.map(testToRun.autoCompleteSet, function(t) {
+          const expectedTerms = _.map(testToRun.autoCompleteSet, function (t) {
             if (typeof t !== 'object') {
               t = { name: t };
             }
             return t;
           });
           if (terms.length !== expectedTerms.length) {
-            expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
+            expect(_.map(terms, 'name')).toEqual(_.map(expectedTerms, 'name'));
           } else {
-            const filteredActualTerms = _.map(terms, function(actualTerm, i) {
+            const filteredActualTerms = _.map(terms, function (actualTerm, i) {
               const expectedTerm = expectedTerms[i];
               const filteredTerm = {};
-              _.each(expectedTerm, function(v, p) {
+              _.each(expectedTerm, function (v, p) {
                 filteredTerm[p] = actualTerm[p];
               });
               return filteredTerm;
@@ -739,7 +739,7 @@ describe('Integration', () => {
                 },
               ],
               g: {
-                __scope_link: function() {
+                __scope_link: function () {
                   return {
                     a: 1,
                     b: 2,

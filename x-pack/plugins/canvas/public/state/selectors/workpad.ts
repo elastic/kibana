@@ -5,12 +5,18 @@
  */
 
 import { get, omit } from 'lodash';
-// @ts-ignore Untyped Local
+// @ts-expect-error untyped local
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
-// @ts-ignore Untyped Local
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
-import { State, CanvasWorkpad, CanvasPage, CanvasElement, ResolvedArgType } from '../../../types';
+import {
+  State,
+  CanvasWorkpad,
+  CanvasPage,
+  CanvasElement,
+  CanvasVariable,
+  ResolvedArgType,
+} from '../../../types';
 import {
   ExpressionContext,
   CanvasGroup,
@@ -49,8 +55,28 @@ export function getWorkpadPersisted(state: State) {
   return getWorkpad(state);
 }
 
+export function getWorkpadVariables(state: State) {
+  const workpad = getWorkpad(state);
+  return get(workpad, 'variables', []);
+}
+
+export function getWorkpadVariablesAsObject(state: State) {
+  const variables = getWorkpadVariables(state);
+  if (variables.length === 0) {
+    return {};
+  }
+
+  return (variables as CanvasVariable[]).reduce(
+    (vars: Record<string, any>, v: CanvasVariable) => ({ ...vars, [v.name]: v.value }),
+    {}
+  );
+}
+
 export function getWorkpadInfo(state: State): WorkpadInfo {
-  return omit(getWorkpad(state), ['pages']);
+  return {
+    ...getWorkpad(state),
+    pages: undefined,
+  };
 }
 
 export function isWriteable(state: State): boolean {
@@ -74,12 +100,12 @@ export function getPages(state: State): State['persistent']['workpad']['pages'] 
 
 export function getPageById(state: State, id: string): CanvasPage | undefined {
   const pages = getPages(state);
-  return pages.find(page => page.id === id);
+  return pages.find((page) => page.id === id);
 }
 
 export function getPageIndexById(state: State, id: string): number {
   const pages = getPages(state);
-  return pages.findIndex(page => page.id === id);
+  return pages.findIndex((page) => page.id === id);
 }
 
 export function getWorkpadName(state: State): string {
@@ -151,7 +177,7 @@ export function getElementCounts(state: State) {
     .filter(
       (maybeResolvedArg): maybeResolvedArg is ResolvedArgType => maybeResolvedArg !== undefined
     )
-    .forEach(resolvedArg => {
+    .forEach((resolvedArg) => {
       const { expressionRenderable } = resolvedArg;
 
       if (!expressionRenderable) {
@@ -224,7 +250,7 @@ function extractFilterGroups(
     if (fn === 'filters') {
       // we have a filter function, extract groups from args
       return groups.concat(
-        buildGroupValues(args, argValue => {
+        buildGroupValues(args, (argValue) => {
           // this only handles simple values
           if (argValue !== null && typeof argValue !== 'object') {
             return argValue;
@@ -234,7 +260,7 @@ function extractFilterGroups(
     } else {
       // dig into other functions, looking for filters function
       return groups.concat(
-        buildGroupValues(args, argValue => {
+        buildGroupValues(args, (argValue) => {
           // recursively collect filter groups
           if (argValue !== null && typeof argValue === 'object' && argValue.type === 'expression') {
             return extractFilterGroups(argValue);
@@ -268,7 +294,7 @@ export function getGlobalFilterGroups(state: State) {
         | ExpressionAstFunction
         | ExpressionAstExpression;
       const groups = extractFilterGroups(expressionAst);
-      groups.forEach(group => {
+      groups.forEach((group) => {
         if (!acc.includes(String(group))) {
           acc.push(String(group));
         }
@@ -308,7 +334,7 @@ export function getElements(
   }
 
   const page = getPageById(state, id);
-  const elements = get<typeof page, CanvasElement[] | undefined>(page, 'elements');
+  const elements = get(page, 'elements');
 
   if (!elements) {
     return [];
@@ -318,23 +344,29 @@ export function getElements(
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
   if (!withAst) {
-    return elements.map(el => omit(el, ['ast']));
+    // @ts-expect-error 'ast' is no longer on the CanvasElement type, but since we
+    // have JS calling into this, we can't be certain this call isn't necessary.
+    return elements.map((el) => omit(el, ['ast']));
   }
 
-  return elements.map(appendAst);
+  const elementAppendAst = (elem: CanvasElement) => appendAst(elem);
+
+  return elements.map(elementAppendAst);
 }
 
-const augment = (type: string) => <T extends any>(n: T): T => ({
+const augment = (type: string) => <T extends CanvasElement | CanvasGroup>(n: T): T => ({
   ...n,
   position: { ...n.position, type },
   ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic
 });
 
-const getNodesOfPage = (page: CanvasPage): CanvasElement[] => {
-  const elements = get<CanvasPage, CanvasElement[]>(page, 'elements').map(augment('element'));
-  const groups = get<CanvasPage, CanvasGroup[]>(page, 'groups', []).map(augment('group'));
+const getNodesOfPage = (page: CanvasPage): Array<CanvasElement | CanvasGroup> => {
+  const elements: Array<CanvasElement | CanvasGroup> = get(page, 'elements').map(
+    augment('element')
+  );
+  const groups = get(page, 'groups', [] as CanvasGroup[]).map(augment('group'));
 
-  return elements.concat(groups as CanvasElement[]);
+  return elements.concat(groups);
 };
 
 export function getNodesForPage(page: CanvasPage, withAst: true): PositionedElement[];
@@ -343,7 +375,11 @@ export function getNodesForPage(
   page: CanvasPage,
   withAst: boolean
 ): CanvasElement[] | PositionedElement[];
-export function getNodesForPage(page: CanvasPage, withAst: boolean): CanvasElement[] {
+
+export function getNodesForPage(
+  page: CanvasPage,
+  withAst: boolean
+): Array<CanvasElement | CanvasGroup> {
   const elements = getNodesOfPage(page);
 
   if (!elements) {
@@ -354,9 +390,12 @@ export function getNodesForPage(page: CanvasPage, withAst: boolean): CanvasEleme
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
   if (!withAst) {
-    return elements.map(el => omit(el, ['ast']));
+    // @ts-expect-error 'ast' is no longer on the CanvasElement type, but since we
+    // have JS calling into this, we can't be certain this call isn't necessary.
+    return elements.map((el) => omit(el, ['ast']));
   }
 
+  // @ts-expect-error All of this AST business needs to be cleaned up.
   return elements.map(appendAst);
 }
 
@@ -384,7 +423,7 @@ export function getElementById(
   id: string | null,
   pageId?: string
 ): PositionedElement | undefined {
-  const element = getElements(state, pageId, true).find(el => el.id === id);
+  const element = getElements(state, pageId, true).find((el) => el.id === id);
   if (element) {
     return appendAst(element);
   }
@@ -396,7 +435,7 @@ export function getNodeById(
   pageId: string
 ): PositionedElement | undefined {
   // do we need to pass a truthy empty array instead of `true`?
-  const group = getNodes(state, pageId, true).find(el => el.id === id);
+  const group = getNodes(state, pageId, true).find((el) => el.id === id);
   if (group) {
     return appendAst(group);
   }
@@ -407,7 +446,7 @@ export function getResolvedArgs(state: State, elementId: string, path: any): any
   if (!elementId) {
     return;
   }
-  const args = get<State, ResolvedArgType>(state, ['transient', 'resolvedArgs', elementId]);
+  const args = get(state, ['transient', 'resolvedArgs', elementId]) as any;
   if (path) {
     return get(args, path);
   }
@@ -437,11 +476,11 @@ export function getAutoplay(state: State): State['transient']['autoplay'] {
 export function getRenderedWorkpad(state: State) {
   const currentPages = getPages(state);
   const args = state.transient.resolvedArgs;
-  const renderedPages = currentPages.map(page => {
+  const renderedPages = currentPages.map((page) => {
     const { elements, ...rest } = page;
     return {
       ...rest,
-      elements: elements.map(element => {
+      elements: elements.map((element) => {
         const { id, position } = element;
         const arg = args[id];
         if (!arg) {
@@ -457,7 +496,7 @@ export function getRenderedWorkpad(state: State) {
   const workpad = getWorkpad(state);
 
   // eslint-disable-next-line no-unused-vars
-  const { pages, ...rest } = workpad;
+  const { pages, variables, ...rest } = workpad;
 
   return {
     pages: renderedPages,
@@ -470,8 +509,8 @@ export function getRenderedWorkpadExpressions(state: State) {
   const { pages } = workpad;
   const expressions: string[] = [];
 
-  pages.forEach(page =>
-    page.elements.forEach(element => {
+  pages.forEach((page) =>
+    page.elements.forEach((element) => {
       if (element && element.expressionRenderable) {
         const { value } = element.expressionRenderable;
         if (value) {

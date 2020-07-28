@@ -20,7 +20,7 @@ interface Props {
   errorCount: number;
 }
 
-const getTransactionResultSummaryItem = (transaction: Transaction) => {
+function getTransactionResultSummaryItem(transaction: Transaction) {
   const result = transaction.transaction.result;
   const isRumAgent = isRumAgentName(transaction.agent.name);
   const url = isRumAgent
@@ -39,13 +39,9 @@ const getTransactionResultSummaryItem = (transaction: Transaction) => {
   }
 
   return null;
-};
+}
 
-const TransactionSummary = ({
-  transaction,
-  totalDuration,
-  errorCount
-}: Props) => {
+function TransactionSummary({ transaction, totalDuration, errorCount }: Props) {
   const items = [
     <TimestampTooltip time={transaction.timestamp.us / 1000} />,
     <DurationSummaryItem
@@ -57,10 +53,10 @@ const TransactionSummary = ({
     errorCount ? <ErrorCountSummaryItemBadge count={errorCount} /> : null,
     transaction.user_agent ? (
       <UserAgentSummaryItem {...transaction.user_agent} />
-    ) : null
+    ) : null,
   ];
 
   return <Summary items={items} />;
-};
+}
 
 export { TransactionSummary };

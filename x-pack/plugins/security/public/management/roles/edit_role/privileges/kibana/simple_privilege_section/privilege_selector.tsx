@@ -31,7 +31,7 @@ export class PrivilegeSelector extends Component<Props, {}> {
     }
 
     options.push(
-      ...availablePrivileges.map(p => ({
+      ...availablePrivileges.map((p) => ({
         value: p,
         text: p,
       }))

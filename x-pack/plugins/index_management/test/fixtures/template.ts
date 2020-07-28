@@ -5,7 +5,11 @@
  */
 
 import { getRandomString, getRandomNumber } from '../../../../test_utils';
-import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../common';
+import { TemplateDeserialized, TemplateType, TemplateListItem } from '../../common';
+
+const objHasProperties = (obj?: Record<string, any>): boolean => {
+  return obj === undefined || Object.keys(obj).length === 0 ? false : true;
+};
 
 export const getTemplate = ({
   name = getRandomString(),
@@ -13,24 +17,35 @@ export const getTemplate = ({
   order = getRandomNumber(),
   indexPatterns = [],
   template: { settings, aliases, mappings } = {},
-  isManaged = false,
-  templateFormatVersion = DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
+  hasDatastream = false,
+  isLegacy = false,
+  type = 'default',
 }: Partial<
   TemplateDeserialized & {
-    templateFormatVersion?: 1 | 2;
+    isLegacy?: boolean;
+    type?: TemplateType;
+    hasDatastream: boolean;
   }
-> = {}): TemplateDeserialized => ({
-  name,
-  version,
-  order,
-  indexPatterns,
-  template: {
-    aliases,
-    mappings,
-    settings,
-  },
-  isManaged,
-  _kbnMeta: {
-    formatVersion: templateFormatVersion,
-  },
-});
+> = {}): TemplateDeserialized & TemplateListItem => {
+  const indexTemplate = {
+    name,
+    version,
+    order,
+    indexPatterns,
+    template: {
+      aliases,
+      mappings,
+      settings,
+    },
+    hasSettings: objHasProperties(settings),
+    hasMappings: objHasProperties(mappings),
+    hasAliases: objHasProperties(aliases),
+    _kbnMeta: {
+      type,
+      hasDatastream,
+      isLegacy,
+    },
+  };
+
+  return indexTemplate;
+};

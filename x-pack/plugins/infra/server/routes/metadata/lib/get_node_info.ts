@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, set, startsWith } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { first, startsWith } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
@@ -61,11 +62,11 @@ export const getNodeInfo = async (
       },
     },
   };
-  if (!CLOUD_METRICS_MODULES.some(m => startsWith(nodeType, m))) {
+  if (!CLOUD_METRICS_MODULES.some((m) => startsWith(nodeType, m))) {
     set(
       params,
       'body.query.bool.must_not',
-      CLOUD_METRICS_MODULES.map(module => ({ match: { 'event.module': module } }))
+      CLOUD_METRICS_MODULES.map((module) => ({ match: { 'event.module': module } }))
     );
   }
   const response = await framework.callWithRequest<{ _source: InfraMetadataInfo }, {}>(

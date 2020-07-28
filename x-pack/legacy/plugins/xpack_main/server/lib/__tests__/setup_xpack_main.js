@@ -102,7 +102,7 @@ describe('setupXPackMain()', () => {
       // We need this to make sure the code waits for `refreshNow` to complete before it tries
       // to access its properties.
       sinon.stub(xPackInfo, 'refreshNow').callsFake(() => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           xPackInfo.isAvailable.returns(true);
           resolve();
         });
@@ -121,7 +121,7 @@ describe('setupXPackMain()', () => {
       // We need this to make sure the code waits for `refreshNow` to complete before it tries
       // to access its properties.
       sinon.stub(xPackInfo, 'refreshNow').callsFake(() => {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           xPackInfo.isAvailable.returns(false);
           xPackInfo.unavailableReason.returns('Some weird error.');
           resolve();

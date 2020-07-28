@@ -15,7 +15,7 @@ function showError(err) {
 
   const close = document.createElement('a');
   close.textContent = 'close';
-  close.onclick = ev => {
+  close.onclick = (ev) => {
     ev.preventDefault();
     body.removeChild(notice);
   };
@@ -29,11 +29,7 @@ function showError(err) {
 
   if (err.stack) {
     const stack = document.createElement('pre');
-    stack.textContent = err.stack
-      .split('\n')
-      .slice(0, 2)
-      .concat('...')
-      .join('\n');
+    stack.textContent = err.stack.split('\n').slice(0, 2).concat('...').join('\n');
     notice.appendChild(stack);
   }
 
@@ -54,7 +50,7 @@ window.canvasInitErrorHandler = () => {
     console.log(message);
     const isKnownError =
       message.includes('ResizeObserver loop') ||
-      Object.keys(knownErrors).find(errorName => {
+      Object.keys(knownErrors).find((errorName) => {
         return err.constructor.name === errorName || message.indexOf(errorName) >= 0;
       });
     if (isKnownError) {

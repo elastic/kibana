@@ -4,27 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { RGBAImage } from './image_utils';
 
 export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLayer) {
   const mbStyle = mbMap.getStyle();
 
   const mbLayerIdsToRemove = [];
-  mbStyle.layers.forEach(mbLayer => {
+  mbStyle.layers.forEach((mbLayer) => {
     // ignore mapbox layers from spatial filter layer
     if (spatialFilterLayer.ownsMbLayerId(mbLayer.id)) {
       return;
     }
 
-    const layer = layerList.find(layer => {
+    const layer = layerList.find((layer) => {
       return layer.ownsMbLayerId(mbLayer.id);
     });
     if (!layer) {
       mbLayerIdsToRemove.push(mbLayer.id);
     }
   });
-  mbLayerIdsToRemove.forEach(mbLayerId => mbMap.removeLayer(mbLayerId));
+  mbLayerIdsToRemove.forEach((mbLayerId) => mbMap.removeLayer(mbLayerId));
 
   const mbSourcesToRemove = [];
   for (const mbSourceId in mbStyle.sources) {
@@ -34,7 +33,7 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
         return;
       }
 
-      const layer = layerList.find(layer => {
+      const layer = layerList.find((layer) => {
         return layer.ownsMbSourceId(mbSourceId);
       });
       if (!layer) {
@@ -42,85 +41,7 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
       }
     }
   }
-  mbSourcesToRemove.forEach(mbSourceId => mbMap.removeSource(mbSourceId));
-}
-
-export function moveLayerToTop(mbMap, layer) {
-  const mbStyle = mbMap.getStyle();
-
-  if (!mbStyle.layers || mbStyle.layers.length === 0) {
-    return;
-  }
-
-  layer.getMbLayerIds().forEach(mbLayerId => {
-    const mbLayer = mbMap.getLayer(mbLayerId);
-    if (mbLayer) {
-      mbMap.moveLayer(mbLayerId);
-    }
-  });
-}
-
-/**
- * This is function assumes only a single layer moved in the layerList, compared to mbMap
- * It is optimized to minimize the amount of mbMap.moveLayer calls.
- * @param mbMap
- * @param layerList
- */
-export function syncLayerOrderForSingleLayer(mbMap, layerList) {
-  if (!layerList || layerList.length === 0) {
-    return;
-  }
-
-  const mbLayers = mbMap.getStyle().layers.slice();
-  const layerIds = [];
-  mbLayers.forEach(mbLayer => {
-    const layer = layerList.find(layer => layer.ownsMbLayerId(mbLayer.id));
-    if (layer) {
-      layerIds.push(layer.getId());
-    }
-  });
-
-  const currentLayerOrderLayerIds = _.uniq(layerIds);
-
-  const newLayerOrderLayerIdsUnfiltered = layerList.map(l => l.getId());
-  const newLayerOrderLayerIds = newLayerOrderLayerIdsUnfiltered.filter(layerId =>
-    currentLayerOrderLayerIds.includes(layerId)
-  );
-
-  let netPos = 0;
-  let netNeg = 0;
-  const movementArr = currentLayerOrderLayerIds.reduce((accu, id, idx) => {
-    const movement = newLayerOrderLayerIds.findIndex(newOId => newOId === id) - idx;
-    movement > 0 ? netPos++ : movement < 0 && netNeg++;
-    accu.push({ id, movement });
-    return accu;
-  }, []);
-  if (netPos === 0 && netNeg === 0) {
-    return;
-  }
-  const movedLayerId =
-    (netPos >= netNeg && movementArr.find(l => l.movement < 0).id) ||
-    (netPos < netNeg && movementArr.find(l => l.movement > 0).id);
-  const nextLayerIdx = newLayerOrderLayerIds.findIndex(layerId => layerId === movedLayerId) + 1;
-
-  let nextMbLayerId;
-  if (nextLayerIdx === newLayerOrderLayerIds.length) {
-    nextMbLayerId = null;
-  } else {
-    const foundLayer = mbLayers.find(({ id: mbLayerId }) => {
-      const layerId = newLayerOrderLayerIds[nextLayerIdx];
-      const layer = layerList.find(layer => layer.getId() === layerId);
-      return layer.ownsMbLayerId(mbLayerId);
-    });
-    nextMbLayerId = foundLayer.id;
-  }
-
-  const movedLayer = layerList.find(layer => layer.getId() === movedLayerId);
-  mbLayers.forEach(({ id: mbLayerId }) => {
-    if (movedLayer.ownsMbLayerId(mbLayerId)) {
-      mbMap.moveLayer(mbLayerId, nextMbLayerId);
-    }
-  });
+  mbSourcesToRemove.forEach((mbSourceId) => mbMap.removeSource(mbSourceId));
 }
 
 export async function addSpritesheetToMap(json, imgUrl, mbMap) {
@@ -156,11 +77,11 @@ export async function loadSpriteSheetImageData(imgUrl) {
     if (isCrossOriginUrl(imgUrl)) {
       image.crossOrigin = 'Anonymous';
     }
-    image.onload = el => {
+    image.onload = (el) => {
       const imgData = getImageData(el.currentTarget);
       resolve(imgData);
     };
-    image.onerror = e => {
+    image.onerror = (e) => {
       reject(e);
     };
     image.src = imgUrl;

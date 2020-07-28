@@ -87,7 +87,7 @@ describe('KuiTextArea', () => {
     });
 
     describe('size', () => {
-      TEXTAREA_SIZE.forEach(size => {
+      TEXTAREA_SIZE.forEach((size) => {
         test(`renders ${size}`, () => {
           const component = <KuiTextArea size={size} onChange={() => {}} />;
 

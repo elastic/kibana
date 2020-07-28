@@ -25,8 +25,8 @@ import d3 from 'd3';
  * `.chart` elements as row objects.
  */
 export function chartSplit(selection, parent) {
-  selection.each(function(data) {
-    const div = d3.select(this).attr('class', function() {
+  selection.each(function (data) {
+    const div = d3.select(this).attr('class', function () {
       if (data.rows) {
         return 'visWrapper__splitCharts--row';
       } else if (data.columns) {
@@ -44,7 +44,7 @@ export function chartSplit(selection, parent) {
     const charts = div
       .selectAll('charts')
       .append('div')
-      .data(function(d) {
+      .data(function (d) {
         if (d.rows) {
           chartsNumber = d.rows.length;
           return d.rows;
@@ -59,7 +59,7 @@ export function chartSplit(selection, parent) {
       })
       .enter()
       .append('div')
-      .attr('class', function(d, i) {
+      .attr('class', function (d, i) {
         let fullDivClass = divClass;
         if (fullDivClass !== 'chart') {
           if (chartsNumber > 1) {

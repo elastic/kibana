@@ -7,14 +7,14 @@
 import expect from '@kbn/expect';
 import { checkForParseErrors } from '.';
 
-describe('checkForParseErrors', function() {
-  it('returns error from bad JSON', function() {
+describe('checkForParseErrors', function () {
+  it('returns error from bad JSON', function () {
     const json = '{"foo": {"bar": {"baz": "buzz}}}';
     const result = checkForParseErrors(json);
     expect(result.error.message).to.be(`Unexpected end of JSON input`);
   });
 
-  it('returns parsed value from good JSON', function() {
+  it('returns parsed value from good JSON', function () {
     const json = '{"foo": {"bar": {"baz": "buzz"}}}';
     const result = checkForParseErrors(json);
     expect(!!result.parsed).to.be(true);

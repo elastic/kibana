@@ -24,7 +24,8 @@ export const defaultTextParameters = {
   store: false,
 };
 
-describe('Mappings editor: text datatype', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/66669
+describe.skip('Mappings editor: text datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   /**
@@ -46,8 +47,6 @@ describe('Mappings editor: text datatype', () => {
 
   test('initial view and default parameters values', async () => {
     const defaultMappings = {
-      _meta: {},
-      _source: {},
       properties: {
         myField: {
           type: 'text',
@@ -76,13 +75,12 @@ describe('Mappings editor: text datatype', () => {
 
     // It should have the default parameters values added
     updatedMappings.properties.myField = {
-      type: 'text',
       ...defaultTextParameters,
     };
 
     ({ data } = await getMappingsEditorData(component));
     expect(data).toEqual(updatedMappings);
-  });
+  }, 10000);
 
   test('analyzer parameter: default values', async () => {
     const defaultMappings = {
@@ -210,7 +208,7 @@ describe('Mappings editor: text datatype', () => {
     expect(indexAnalyzerValue).toBe('standard');
     expect(searchAnalyzerValue).toBe('simple');
     expect(searchQuoteAnalyzerValue).toBe('whitespace');
-  }, 10000);
+  }, 50000);
 
   test('analyzer parameter: custom analyzer (external plugin)', async () => {
     const defaultMappings = {
@@ -303,7 +301,7 @@ describe('Mappings editor: text datatype', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  });
+  }, 100000);
 
   test('analyzer parameter: custom analyzer (from index settings)', async () => {
     const indexSettings = {
@@ -369,7 +367,7 @@ describe('Mappings editor: text datatype', () => {
     const subSelectOptions = indexAnalyzerSelects
       .at(1)
       .find('option')
-      .map(wrapper => wrapper.text());
+      .map((wrapper) => wrapper.text());
 
     expect(subSelectOptions).toEqual(customAnalyzers);
 
@@ -394,5 +392,5 @@ describe('Mappings editor: text datatype', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  });
+  }, 50000);
 });

@@ -23,7 +23,7 @@ import { Chrome } from '..';
 const savedObjectsClient = npStart.core.savedObjects.client;
 
 export function initSavedObjectClient(chrome: Chrome) {
-  chrome.getSavedObjectsClient = function() {
+  chrome.getSavedObjectsClient = function () {
     return savedObjectsClient;
   };
 }

@@ -32,14 +32,14 @@ import _ from 'lodash';
 export function getPieNames(data: any[]): string[] {
   const names: string[] = [];
 
-  _.forEach(data, function(obj) {
+  _.forEach(data, function (obj) {
     const columns = obj.raw ? obj.raw.columns : undefined;
-    _.forEach(getNames(obj, columns), function(name) {
+    _.forEach(getNames(obj, columns), function (name) {
       names.push(name);
     });
   });
 
-  return _.uniq(names, 'label');
+  return _.uniqBy(names, 'label');
 }
 
 /**
@@ -58,10 +58,10 @@ function getNames(data: any, columns: any): string[] {
     const namedObj = returnNames(slices.children, 0, columns);
 
     return _(namedObj)
-      .sortBy(function(obj) {
+      .sortBy(function (obj) {
         return obj.index;
       })
-      .unique(function(d) {
+      .uniqBy(function (d) {
         return d.label;
       })
       .value();
@@ -83,7 +83,7 @@ function getNames(data: any, columns: any): string[] {
 function returnNames(array: any[], index: number, columns: any): any[] {
   const names: any[] = [];
 
-  _.forEach(array, function(obj) {
+  _.forEach(array, function (obj) {
     names.push({
       label: obj.name,
       values: [obj.rawData],
@@ -93,7 +93,7 @@ function returnNames(array: any[], index: number, columns: any): any[] {
     if (obj.children) {
       const plusIndex = index + 1;
 
-      _.forEach(returnNames(obj.children, plusIndex, columns), function(namedObj) {
+      _.forEach(returnNames(obj.children, plusIndex, columns), function (namedObj) {
         names.push(namedObj);
       });
     }

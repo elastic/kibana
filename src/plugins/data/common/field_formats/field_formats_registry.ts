@@ -33,6 +33,7 @@ import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { SerializedFieldFormat } from '../../../expressions/common/types';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../types';
+import { UI_SETTINGS } from '../';
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();
@@ -49,7 +50,7 @@ export class FieldFormatsRegistry {
     metaParamsOptions: Record<string, any> = {},
     defaultFieldConverters: FieldFormatInstanceType[] = baseFormatters
   ) {
-    const defaultTypeMap = getConfig('format:defaultTypeMap');
+    const defaultTypeMap = getConfig(UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP);
     this.register(defaultFieldConverters);
     this.parseDefaultTypeMap(defaultTypeMap);
     this.getConfig = getConfig;
@@ -129,7 +130,7 @@ export class FieldFormatsRegistry {
       return undefined;
     }
 
-    return esTypes.find(type => this.defaultMap[type] && this.defaultMap[type].es);
+    return esTypes.find((type) => this.defaultMap[type] && this.defaultMap[type].es);
   };
 
   /**
@@ -179,10 +180,18 @@ export class FieldFormatsRegistry {
    * @param  {ES_FIELD_TYPES[]} esTypes
    * @return {FieldFormat}
    */
-  getDefaultInstancePlain(fieldType: KBN_FIELD_TYPES, esTypes?: ES_FIELD_TYPES[]): FieldFormat {
+  getDefaultInstancePlain(
+    fieldType: KBN_FIELD_TYPES,
+    esTypes?: ES_FIELD_TYPES[],
+    params: Record<string, any> = {}
+  ): FieldFormat {
     const conf = this.getDefaultConfig(fieldType, esTypes);
+    const instanceParams = {
+      ...conf.params,
+      ...params,
+    };
 
-    return this.getInstance(conf.id, conf.params);
+    return this.getInstance(conf.id, instanceParams);
   }
   /**
    * Returns a cache key built by the given variables for caching in memoized
@@ -231,8 +240,8 @@ export class FieldFormatsRegistry {
 
   parseDefaultTypeMap(value: any) {
     this.defaultMap = value;
-    forOwn(this, fn => {
-      if (isFunction(fn) && fn.cache) {
+    forOwn(this, (fn) => {
+      if (isFunction(fn) && (fn as any).cache) {
         // clear all memoize caches
         // @ts-ignore
         fn.cache = new memoize.Cache();
@@ -241,7 +250,7 @@ export class FieldFormatsRegistry {
   }
 
   register(fieldFormats: FieldFormatInstanceType[]) {
-    fieldFormats.forEach(fieldFormat => this.fieldFormats.set(fieldFormat.id, fieldFormat));
+    fieldFormats.forEach((fieldFormat) => this.fieldFormats.set(fieldFormat.id, fieldFormat));
   }
 
   /**

@@ -17,7 +17,7 @@ interface ExceptionStacktraceProps {
 
 export function ExceptionStacktrace({
   codeLanguage,
-  exceptions
+  exceptions,
 }: ExceptionStacktraceProps) {
   const title = exceptions[0]?.message;
 

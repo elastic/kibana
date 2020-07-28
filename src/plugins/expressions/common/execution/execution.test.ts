@@ -20,7 +20,7 @@
 import { Execution } from './execution';
 import { parseExpression, ExpressionAstExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
-import { ExpressionFunctionDefinition } from '../../public';
+import { ExpressionFunctionDefinition } from '../../common';
 import { ExecutionContract } from './execution_contract';
 
 beforeAll(() => {
@@ -264,9 +264,9 @@ describe('Execution', () => {
       expect(execution.state.get().result).toBe(undefined);
       execution.start(null);
       expect(execution.state.get().result).toBe(undefined);
-      await new Promise(r => setTimeout(r, 1));
+      await new Promise((r) => setTimeout(r, 1));
       expect(execution.state.get().result).toBe(undefined);
-      await new Promise(r => setTimeout(r, 11));
+      await new Promise((r) => setTimeout(r, 11));
       expect(execution.state.get().result).toBe(null);
     });
   });
@@ -376,6 +376,38 @@ describe('Execution', () => {
         value: 5,
       });
     });
+
+    test('can use global variables', async () => {
+      const result = await run(
+        'add val={var foo}',
+        {
+          variables: {
+            foo: 3,
+          },
+        },
+        null
+      );
+
+      expect(result).toMatchObject({
+        type: 'num',
+        value: 3,
+      });
+    });
+
+    test('can modify global variables', async () => {
+      const result = await run(
+        'add val={var_set name=foo value=66 | var bar} | var foo',
+        {
+          variables: {
+            foo: 3,
+            bar: 25,
+          },
+        },
+        null
+      );
+
+      expect(result).toBe(66);
+    });
   });
 
   describe('when arguments are missing', () => {
@@ -473,17 +505,6 @@ describe('Execution', () => {
           expect(node.debug?.duration).toBeLessThan(100);
           expect(node.debug?.duration).toBeGreaterThanOrEqual(0);
         }
-      });
-
-      test('sets duration to 10 milliseconds when function executes 10 milliseconds', async () => {
-        const execution = createExecution('sleep 10', {}, true);
-        execution.start(-1);
-        await execution.result;
-
-        const node = execution.state.get().ast.chain[0];
-        expect(typeof node.debug?.duration).toBe('number');
-        expect(node.debug?.duration).toBeLessThan(50);
-        expect(node.debug?.duration).toBeGreaterThanOrEqual(5);
       });
 
       test('adds .debug field in expression AST on each executed function', async () => {

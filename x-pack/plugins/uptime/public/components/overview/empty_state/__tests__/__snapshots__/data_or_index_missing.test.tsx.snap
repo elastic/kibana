@@ -19,7 +19,7 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
     <EuiPanel>
       <EuiEmptyPrompt
         actions={
-          <ForwardRef>
+          <EuiFlexGroup>
             <EuiFlexItem>
               <EuiButton
                 color="primary"
@@ -45,7 +45,7 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
                 />
               </EuiButton>
             </EuiFlexItem>
-          </ForwardRef>
+          </EuiFlexGroup>
         }
         body={
           <React.Fragment>

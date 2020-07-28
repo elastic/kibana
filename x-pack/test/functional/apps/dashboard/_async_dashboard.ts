@@ -6,8 +6,9 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
@@ -26,7 +27,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/65949
+  // Flakky: https://github.com/elastic/kibana/issues/65949
   describe.skip('sample data dashboard', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.sleep(5000);
@@ -96,14 +97,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         }
       ]`;
 
-      await kibanaServer.uiSettings.update({ 'timepicker:quickRanges': SAMPLE_DATA_RANGE });
+      await kibanaServer.uiSettings.update({
+        [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
+      });
       // refresh page to make sure ui settings update is picked up
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await appMenu.clickLink('Discover');
       await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
       await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
@@ -132,7 +135,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await pieChart.expectPieSliceCount(4);
 
       await appMenu.clickLink('Discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
@@ -145,7 +148,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('toggle from Discover to Dashboard attempt 1', async () => {
       await appMenu.clickLink('Discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
@@ -158,7 +161,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('toggle from Discover to Dashboard attempt 2', async () => {
       await appMenu.clickLink('Discover');
-      await retry.try(async function() {
+      await retry.try(async function () {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });

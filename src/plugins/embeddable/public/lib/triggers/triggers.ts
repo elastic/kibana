@@ -25,9 +25,8 @@ export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
-export interface ValueClickTriggerContext<T extends IEmbeddable = IEmbeddable> {
+export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
-  timeFieldName?: string;
   data: {
     data: Array<{
       table: Pick<KibanaDatatable, 'rows' | 'columns'>;
@@ -35,27 +34,32 @@ export interface ValueClickTriggerContext<T extends IEmbeddable = IEmbeddable> {
       row: number;
       value: any;
     }>;
+    timeFieldName?: string;
     negate?: boolean;
   };
 }
 
-export const isValueClickTriggerContext = (
-  context: ValueClickTriggerContext | RangeSelectTriggerContext
-): context is ValueClickTriggerContext => context.data && 'data' in context.data;
-
-export interface RangeSelectTriggerContext<T extends IEmbeddable = IEmbeddable> {
+export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
-  timeFieldName?: string;
   data: {
     table: KibanaDatatable;
     column: number;
     range: number[];
+    timeFieldName?: string;
   };
 }
 
+export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
+  | ValueClickContext<T>
+  | RangeSelectContext<T>;
+
+export const isValueClickTriggerContext = (
+  context: ChartActionContext
+): context is ValueClickContext => context.data && 'data' in context.data;
+
 export const isRangeSelectTriggerContext = (
-  context: ValueClickTriggerContext | RangeSelectTriggerContext
-): context is RangeSelectTriggerContext => context.data && 'range' in context.data;
+  context: ChartActionContext
+): context is RangeSelectContext => context.data && 'range' in context.data;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {

@@ -17,13 +17,13 @@ export const hasMatchingPoints = ({
   swimlaneData,
 }: HasMatchingPointsParams): boolean => {
   // If filtered fields includes a wildcard search maskAll only if there are no points matching the pattern
-  const wildCardField = filteredFields.find(field => /\@kuery-wildcard\@$/.test(field));
+  const wildCardField = filteredFields.find((field) => /\@kuery-wildcard\@$/.test(field));
   const substring =
     wildCardField !== undefined ? wildCardField.replace(/\@kuery-wildcard\@$/, '') : null;
 
   return (
     substring !== null &&
-    swimlaneData.points.some(point => {
+    swimlaneData.points.some((point) => {
       return point.laneLabel.includes(substring);
     })
   );

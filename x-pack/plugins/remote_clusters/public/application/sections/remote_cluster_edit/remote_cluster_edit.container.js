@@ -22,7 +22,7 @@ import {
   openDetailPanel,
 } from '../../store/actions';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     isLoading: isLoading(state),
     cluster: getEditedCluster(state),
@@ -31,21 +31,21 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    startEditingCluster: clusterName => {
+    startEditingCluster: (clusterName) => {
       dispatch(startEditingCluster({ clusterName }));
     },
     stopEditingCluster: () => {
       dispatch(stopEditingCluster());
     },
-    editCluster: cluster => {
+    editCluster: (cluster) => {
       dispatch(editCluster(cluster));
     },
     clearEditClusterErrors: () => {
       dispatch(clearEditClusterErrors());
     },
-    openDetailPanel: clusterName => {
+    openDetailPanel: (clusterName) => {
       dispatch(openDetailPanel({ name: clusterName }));
     },
   };

@@ -24,7 +24,7 @@ export function createTransform(deprecations) {
   return (settings, log = noop) => {
     const result = clone(settings);
 
-    forEach(deprecations, deprecation => {
+    forEach(deprecations, (deprecation) => {
       deprecation(result, log);
     });
 

@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { register } from './delete_route';
 import { API_BASE_PATH } from '../../../common/constants';
 import { LicenseStatus } from '../../types';
 
+import { xpackMocks } from '../../../../../mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -29,7 +30,7 @@ describe('DELETE remote clusters', () => {
     { licenseCheckResult = { valid: true }, apiResponses = [], asserts, params }: TestOptions
   ) => {
     test(description, async () => {
-      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
+      const elasticsearchMock = elasticsearchServiceMock.createLegacyClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),
@@ -41,10 +42,10 @@ describe('DELETE remote clusters', () => {
         },
       };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
       elasticsearchServiceMock
-        .createClusterClient()
+        .createLegacyClusterClient()
         .asScoped.mockReturnValue(mockScopedClusterClient);
 
       for (const apiResponse of apiResponses) {
@@ -61,14 +62,8 @@ describe('DELETE remote clusters', () => {
         headers: { authorization: 'foo' },
       });
 
-      const mockContext = ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClusterClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext;
-
+      const mockContext = xpackMocks.createRequestHandlerContext();
+      mockContext.core.elasticsearch.legacy.client = mockScopedClusterClient;
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(asserts.statusCode);

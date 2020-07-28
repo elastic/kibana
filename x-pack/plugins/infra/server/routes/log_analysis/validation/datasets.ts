@@ -33,7 +33,7 @@ export const initValidateLogAnalysisDatasetsRoute = ({
         } = request.body;
 
         const datasets = await Promise.all(
-          indices.map(async indexName => {
+          indices.map(async (indexName) => {
             const indexDatasets = await logEntries.getLogEntryDatasets(
               requestContext,
               timestampField,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import React, { Fragment, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
@@ -198,7 +198,7 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
 
   private subscribeToUpdates() {
     this.service.updateStatus();
-    this.subscription = this.service!.status$.subscribe(reindexState =>
+    this.subscription = this.service!.status$.subscribe((reindexState) =>
       this.setState({ reindexState })
     );
   }

@@ -23,7 +23,7 @@ import { Build } from './build';
 
 export async function buildAll({ styleSheets, log, buildDir }) {
   const bundles = await Promise.all(
-    styleSheets.map(async styleSheet => {
+    styleSheets.map(async (styleSheet) => {
       if (!styleSheet.localPath.endsWith('.scss')) {
         return;
       }
@@ -41,5 +41,5 @@ export async function buildAll({ styleSheets, log, buildDir }) {
     })
   );
 
-  return bundles.filter(v => v);
+  return bundles.filter((v) => v);
 }

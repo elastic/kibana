@@ -40,7 +40,7 @@ export const ActionTypeMenu = ({
         // would be enabled by upgrading to gold or trial
         if (setHasActionsUpgradeableByTrial) {
           const hasActionsUpgradeableByTrial = availableActionTypes.some(
-            action =>
+            (action) =>
               !index[action.id].enabledInLicense &&
               index[action.id].minimumLicenseRequired === 'gold'
           );
@@ -81,7 +81,7 @@ export const ActionTypeMenu = ({
         <EuiCard
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
-          icon={<EuiIcon size="l" type={item.iconClass} />}
+          icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}

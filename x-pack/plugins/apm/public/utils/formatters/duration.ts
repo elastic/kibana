@@ -18,13 +18,6 @@ interface FormatterOptions {
 
 type DurationTimeUnit = TimeUnit | 'microseconds';
 
-interface DurationUnit {
-  [unit: string]: {
-    label: string;
-    convert: (value: number) => string;
-  };
-}
-
 interface ConvertedDuration {
   value: string;
   unit?: string;
@@ -38,70 +31,95 @@ export type TimeFormatter = (
 
 type TimeFormatterBuilder = (max: number) => TimeFormatter;
 
-const durationUnit: DurationUnit = {
-  hours: {
-    label: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
-      defaultMessage: 'h'
-    }),
-    convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asHours())
-  },
-  minutes: {
-    label: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
-      defaultMessage: 'min'
-    }),
-    convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asMinutes())
-  },
-  seconds: {
-    label: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
-      defaultMessage: 's'
-    }),
-    convert: (value: number) =>
-      asDecimal(moment.duration(value / 1000).asSeconds())
-  },
-  milliseconds: {
-    label: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
-      defaultMessage: 'ms'
-    }),
-    convert: (value: number) =>
-      asInteger(moment.duration(value / 1000).asMilliseconds())
-  },
-  microseconds: {
-    label: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
-      defaultMessage: 'μs'
-    }),
-    convert: (value: number) => asInteger(value)
+function asDecimalOrInteger(value: number) {
+  // exact 0 or above 10 should not have decimal
+  if (value === 0 || value >= 10) {
+    return asInteger(value);
   }
-};
+  return asDecimal(value);
+}
+
+function getUnitLabelAndConvertedValue(
+  unitKey: DurationTimeUnit,
+  value: number
+) {
+  switch (unitKey) {
+    case 'hours': {
+      return {
+        unitLabel: i18n.translate('xpack.apm.formatters.hoursTimeUnitLabel', {
+          defaultMessage: 'h',
+        }),
+        convertedValue: asDecimalOrInteger(
+          moment.duration(value / 1000).asHours()
+        ),
+      };
+    }
+    case 'minutes': {
+      return {
+        unitLabel: i18n.translate('xpack.apm.formatters.minutesTimeUnitLabel', {
+          defaultMessage: 'min',
+        }),
+        convertedValue: asDecimalOrInteger(
+          moment.duration(value / 1000).asMinutes()
+        ),
+      };
+    }
+    case 'seconds': {
+      return {
+        unitLabel: i18n.translate('xpack.apm.formatters.secondsTimeUnitLabel', {
+          defaultMessage: 's',
+        }),
+        convertedValue: asDecimalOrInteger(
+          moment.duration(value / 1000).asSeconds()
+        ),
+      };
+    }
+    case 'milliseconds': {
+      return {
+        unitLabel: i18n.translate('xpack.apm.formatters.millisTimeUnitLabel', {
+          defaultMessage: 'ms',
+        }),
+        convertedValue: asDecimalOrInteger(
+          moment.duration(value / 1000).asMilliseconds()
+        ),
+      };
+    }
+    case 'microseconds': {
+      return {
+        unitLabel: i18n.translate('xpack.apm.formatters.microsTimeUnitLabel', {
+          defaultMessage: 'μs',
+        }),
+        convertedValue: asInteger(value),
+      };
+    }
+  }
+}
 
 /**
  * Converts a microseconds value into the unit defined.
- *
- * @param param0
- * { unit: "milliseconds" | "hours" | "minutes" | "seconds" | "microseconds", microseconds, defaultValue }
- *
- * @returns object { value, unit, formatted }
  */
-export function convertTo({
+function convertTo({
   unit,
   microseconds,
-  defaultValue = NOT_AVAILABLE_LABEL
+  defaultValue = NOT_AVAILABLE_LABEL,
 }: {
   unit: DurationTimeUnit;
   microseconds: Maybe<number>;
   defaultValue?: string;
 }): ConvertedDuration {
-  const duration = durationUnit[unit];
-  if (!duration || microseconds == null) {
+  if (microseconds == null) {
     return { value: defaultValue, formatted: defaultValue };
   }
 
-  const convertedValue = duration.convert(microseconds);
+  const { convertedValue, unitLabel } = getUnitLabelAndConvertedValue(
+    unit,
+    microseconds
+  );
+
   return {
     value: convertedValue,
-    unit: duration.label,
-    formatted: `${convertedValue} ${duration.label}`
+    unit: unitLabel,
+    formatted: `${convertedValue} ${unitLabel}`,
   };
 }
 
@@ -118,7 +136,7 @@ function getDurationUnitKey(max: number): DurationTimeUnit {
   if (max > toMicroseconds(10, 'seconds')) {
     return 'seconds';
   }
-  if (max > toMicroseconds(10, 'milliseconds')) {
+  if (max > toMicroseconds(1, 'milliseconds')) {
     return 'milliseconds';
   }
   return 'microseconds';
@@ -135,10 +153,6 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
 
 /**
  * Converts value and returns it formatted - 00 unit
- *
- * @param value
- * @param param1 { defaultValue }
- * @returns formated value - 00 unit
  */
 export function asDuration(
   value: Maybe<number>,
@@ -150,4 +164,16 @@ export function asDuration(
 
   const formatter = getDurationFormatter(value);
   return formatter(value, { defaultValue }).formatted;
+}
+
+/**
+ * Convert a microsecond value to decimal milliseconds. Normally we use
+ * `asDuration`, but this is used in places like tables where we always want
+ * the same units.
+ */
+export function asMillisecondDuration(time: number) {
+  return convertTo({
+    unit: 'milliseconds',
+    microseconds: time,
+  }).formatted;
 }

@@ -29,7 +29,7 @@ function getCell(esaggsResult: any, column: number, row: number): unknown | unde
   return esaggsResult?.rows[row]?.[columnId];
 }
 
-export default function({
+export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {

@@ -75,14 +75,14 @@ export class TelemetryPlugin implements Plugin {
   }
 
   public async setup(
-    { elasticsearch, http, savedObjects, metrics }: CoreSetup,
+    { elasticsearch, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsSetup
   ) {
     const currentKibanaVersion = this.currentKibanaVersion;
     const config$ = this.config$;
     const isDev = this.isDev;
 
-    registerCollection(telemetryCollectionManager, elasticsearch.dataClient);
+    registerCollection(telemetryCollectionManager, elasticsearch.legacy.client);
     const router = http.createRouter();
 
     registerRoutes({
@@ -93,7 +93,7 @@ export class TelemetryPlugin implements Plugin {
       telemetryCollectionManager,
     });
 
-    this.registerMappings(opts => savedObjects.registerType(opts));
+    this.registerMappings((opts) => savedObjects.registerType(opts));
     this.registerUsageCollectors(usageCollection);
   }
 

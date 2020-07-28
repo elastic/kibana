@@ -13,8 +13,7 @@ import { EuiDatePicker, EuiFieldText } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 
 export class TimeRangeSelector extends Component {
   constructor(props) {
@@ -28,7 +27,7 @@ export class TimeRangeSelector extends Component {
     this.now = this.props.now;
   }
 
-  setStartTab = tab => {
+  setStartTab = (tab) => {
     this.setState({ startTab: tab });
     switch (tab) {
       case 0:
@@ -42,7 +41,7 @@ export class TimeRangeSelector extends Component {
     }
   };
 
-  setEndTab = tab => {
+  setEndTab = (tab) => {
     this.setState({ endTab: tab });
     switch (tab) {
       case 0:
@@ -56,11 +55,11 @@ export class TimeRangeSelector extends Component {
     }
   };
 
-  setStartTime = time => {
+  setStartTime = (time) => {
     this.props.setStartTime(time);
   };
 
-  setEndTime = time => {
+  setEndTime = (time) => {
     this.props.setEndTime(time);
   };
 

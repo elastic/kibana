@@ -49,7 +49,7 @@ function SwitchOption<ParamName extends string>({
           checked={value}
           disabled={disabled}
           data-test-subj={dataTestSubj}
-          onChange={ev => setValue(paramName, ev.target.checked)}
+          onChange={(ev) => setValue(paramName, ev.target.checked)}
         />
       </EuiToolTip>
     </EuiFormRow>

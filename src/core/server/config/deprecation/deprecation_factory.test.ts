@@ -24,7 +24,7 @@ describe('DeprecationFactory', () => {
   const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
 
   let deprecationMessages: string[];
-  const logger: ConfigDeprecationLogger = msg => deprecationMessages.push(msg);
+  const logger: ConfigDeprecationLogger = (msg) => deprecationMessages.push(msg);
 
   beforeEach(() => {
     deprecationMessages = [];

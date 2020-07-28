@@ -20,12 +20,13 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
-import { IEmbeddable } from './i_embeddable';
+import { EmbeddableInput, IEmbeddable } from './i_embeddable';
 
 interface Props {
   embeddable?: IEmbeddable;
   loading?: boolean;
   error?: string;
+  input?: EmbeddableInput;
 }
 
 export class EmbeddableRoot extends React.Component<Props> {
@@ -45,10 +46,24 @@ export class EmbeddableRoot extends React.Component<Props> {
     }
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps?: Props) {
+    let justRendered = false;
     if (this.root && this.root.current && this.props.embeddable && !this.alreadyMounted) {
       this.alreadyMounted = true;
       this.props.embeddable.render(this.root.current);
+      justRendered = true;
+    }
+
+    if (
+      !justRendered &&
+      this.root &&
+      this.root.current &&
+      this.props.embeddable &&
+      this.alreadyMounted &&
+      this.props.input &&
+      prevProps?.input !== this.props.input
+    ) {
+      this.props.embeddable.updateInput(this.props.input);
     }
   }
 
@@ -57,7 +72,8 @@ export class EmbeddableRoot extends React.Component<Props> {
       newProps.error !== this.props.error ||
         newProps.loading !== this.props.loading ||
         newProps.embeddable !== this.props.embeddable ||
-        (this.root && this.root.current && newProps.embeddable && !this.alreadyMounted)
+        (this.root && this.root.current && newProps.embeddable && !this.alreadyMounted) ||
+        newProps.input !== this.props.input
     );
   }
 

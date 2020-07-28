@@ -21,7 +21,7 @@ import moment from 'moment';
 import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import {
   getDateHistogramBucketAgg,
   DateHistogramBucketAggDependencies,
@@ -29,10 +29,7 @@ import {
 } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { RangeFilter } from '../../../../../common';
-import { coreMock, notificationServiceMock } from '../../../../../../../core/public/mocks';
-import { queryServiceMock } from '../../../../query/mocks';
-import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
-import { InternalStartServices } from '../../../../types';
+import { coreMock } from '../../../../../../../core/public/mocks';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
@@ -46,16 +43,9 @@ describe('AggConfig Filters', () => {
       const { uiSettings } = coreMock.createSetup();
 
       aggTypesDependencies = {
+        calculateBounds: jest.fn(),
         uiSettings,
-        query: queryServiceMock.createSetupContract(),
-        getInternalStartServices: () =>
-          (({
-            fieldFormats: fieldFormatsServiceMock.createStartContract(),
-            notifications: notificationServiceMock.createStartContract(),
-          } as unknown) as InternalStartServices),
       };
-
-      mockDataServices();
     });
 
     const init = (interval: string = 'auto', duration: any = moment.duration(15, 'minutes')) => {
@@ -82,7 +72,6 @@ describe('AggConfig Filters', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]),
-          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
         }
       );
       const bucketKey = 1422579600000;
@@ -121,7 +110,7 @@ describe('AggConfig Filters', () => {
     });
 
     test('extends the filter edge to 1ms before the next bucket for all interval options', () => {
-      intervalOptions.forEach(option => {
+      intervalOptions.forEach((option) => {
         let duration;
         if (option.val !== 'custom' && moment(1, option.val).isValid()) {
           // @ts-ignore
@@ -137,12 +126,7 @@ describe('AggConfig Filters', () => {
         const params = filter.range[field.name];
 
         expect(params.gte).toBe(bucketStart.toISOString());
-        expect(params.lt).toBe(
-          bucketStart
-            .clone()
-            .add(interval)
-            .toISOString()
-        );
+        expect(params.lt).toBe(bucketStart.clone().add(interval).toISOString());
       });
     });
   });

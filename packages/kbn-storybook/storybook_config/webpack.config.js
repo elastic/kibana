@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const { resolve } = require('path');
+const { parse, resolve } = require('path');
 const webpack = require('webpack');
 const { stringifyRequest } = require('loader-utils');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -29,7 +29,7 @@ const { currentConfig } = require('../../../built_assets/storybook/current.confi
 module.exports = async ({ config }) => {
   // Find and alter the CSS rule to replace the Kibana public path string with a path
   // to the route we've added in middleware.js
-  const cssRule = config.module.rules.find(rule => rule.test.source.includes('.css$'));
+  const cssRule = config.module.rules.find((rule) => rule.test.source.includes('.css$'));
   cssRule.use.push({
     loader: 'string-replace-loader',
     options: {
@@ -96,12 +96,33 @@ module.exports = async ({ config }) => {
         },
       },
       {
+        loader: 'resolve-url-loader',
+        options: {
+          // If you don't have arguments (_, __) to the join function, the
+          // resolve-url-loader fails with a loader misconfiguration error.
+          //
+          // eslint-disable-next-line no-unused-vars
+          join: (_, __) => (uri, base) => {
+            if (!base || !parse(base).dir.includes('legacy')) {
+              return null;
+            }
+
+            // URIs on mixins in src/legacy/public/styles need to be resolved.
+            if (uri.startsWith('ui/assets')) {
+              return resolve(REPO_ROOT, 'src/core/server/core_app/', uri.replace('ui/', ''));
+            }
+
+            return null;
+          },
+        },
+      },
+      {
         loader: 'sass-loader',
         options: {
           prependData(loaderContext) {
             return `@import ${stringifyRequest(
               loaderContext,
-              resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+              resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_globals_v7light.scss')
             )};\n`;
           },
           sassOptions: {
@@ -123,16 +144,18 @@ module.exports = async ({ config }) => {
 
   // Copy the DLL files to the Webpack build for use in the Storybook UI
   config.plugins.push(
-    new CopyWebpackPlugin([
-      {
-        from: resolve(DLL_DIST_DIR, 'dll.js'),
-        to: 'dll.js',
-      },
-      {
-        from: resolve(DLL_DIST_DIR, 'dll.css'),
-        to: 'dll.css',
-      },
-    ])
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: resolve(DLL_DIST_DIR, 'dll.js'),
+          to: 'dll.js',
+        },
+        {
+          from: resolve(DLL_DIST_DIR, 'dll.css'),
+          to: 'dll.css',
+        },
+      ],
+    })
   );
 
   // Tell Webpack about the ts/x extensions

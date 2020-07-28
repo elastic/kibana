@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Matrix Histogram Component not initial load it renders no MatrixLoader 1`] = `"<div class=\\"sc-AykKI gltyKM\\"><div class=\\"euiPanel euiPanel--paddingMedium sc-AykKC sc-AykKK guzfus\\" data-test-subj=\\"mockIdPanel\\" height=\\"300\\"><div class=\\"headerSection\\"></div><div class=\\"barchart\\"></div></div></div>"`;
-
-exports[`Matrix Histogram Component on initial load it renders MatrixLoader 1`] = `"<div class=\\"sc-AykKI RNnzH\\"><div class=\\"euiPanel euiPanel--paddingMedium sc-AykKC sc-AykKK guzfus\\" data-test-subj=\\"mockIdPanel\\" height=\\"300\\"><div class=\\"headerSection\\"></div><div class=\\"matrixLoader\\"></div></div></div><div class=\\"euiSpacer euiSpacer--l\\" data-test-subj=\\"spacer\\"></div>"`;

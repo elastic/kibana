@@ -6,7 +6,11 @@
 
 import { RevertToBasic } from '../public/application/sections/license_dashboard/revert_to_basic';
 import { createMockLicense, getComponent } from './util';
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
 
 describe('RevertToBasic component', () => {
   test('should display when trial is active', () => {

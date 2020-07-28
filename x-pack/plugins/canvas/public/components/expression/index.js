@@ -15,19 +15,19 @@ import {
   renderComponent,
 } from 'recompose';
 import { fromExpression } from '@kbn/interpreter/common';
-import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { withServices } from '../../services';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   pageId: getSelectedPage(state),
   element: getSelectedElement(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  setExpression: (elementId, pageId) => expression => {
+const mapDispatchToProps = (dispatch) => ({
+  setExpression: (elementId, pageId) => (expression) => {
     // destroy the context cache
     dispatch(flushContext(elementId));
 
@@ -46,7 +46,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
   const { expression } = element;
 
-  const functions = Object.values(allProps.kibana.services.expressions.getFunctions());
+  const functions = Object.values(allProps.services.expressions.getFunctions());
 
   return {
     ...allProps,
@@ -71,7 +71,7 @@ const expressionLifecycle = lifecycle({
 });
 
 export const Expression = compose(
-  withKibana,
+  withServices,
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('formState', 'setFormState', ({ expression }) => ({
     expression,
@@ -82,14 +82,14 @@ export const Expression = compose(
     toggleCompactView: ({ isCompact, setCompact }) => () => {
       setCompact(!isCompact);
     },
-    updateValue: ({ setFormState }) => expression => {
+    updateValue: ({ setFormState }) => (expression) => {
       setFormState({
         expression,
         dirty: true,
       });
     },
-    setExpression: ({ setExpression, setFormState }) => exp => {
-      setFormState(prev => ({
+    setExpression: ({ setExpression, setFormState }) => (exp) => {
+      setFormState((prev) => ({
         ...prev,
         dirty: false,
       }));
@@ -98,7 +98,7 @@ export const Expression = compose(
   }),
   expressionLifecycle,
   withPropsOnChange(['formState'], ({ formState }) => ({
-    error: (function() {
+    error: (function () {
       try {
         // TODO: We should merge the advanced UI input and this into a single validated expression input.
         fromExpression(formState.expression);
@@ -108,5 +108,5 @@ export const Expression = compose(
       }
     })(),
   })),
-  branch(props => !props.element, renderComponent(ElementNotSelected))
+  branch((props) => !props.element, renderComponent(ElementNotSelected))
 )(Component);

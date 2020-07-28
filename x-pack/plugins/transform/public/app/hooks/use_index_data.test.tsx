@@ -8,7 +8,6 @@ import React from 'react';
 
 import { render, wait } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import '@testing-library/jest-dom/extend-expect';
 
 import { CoreSetup } from 'src/core/public';
 
@@ -31,7 +30,7 @@ const query: SimpleQuery = {
 };
 
 describe('Transform: useIndexData()', () => {
-  test('indexPattern set triggers loading', async done => {
+  test('indexPattern set triggers loading', async (done) => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useIndexData(
         ({
@@ -55,7 +54,7 @@ describe('Transform: useIndexData()', () => {
 
 describe('Transform: <DataGrid /> with useIndexData()', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async done => {
+  test('Minimal initialization', async (done) => {
     // Arrange
     const indexPattern = {
       title: 'the-index-pattern-title',

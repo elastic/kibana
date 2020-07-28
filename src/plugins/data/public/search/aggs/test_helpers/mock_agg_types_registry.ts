@@ -17,14 +17,32 @@
  * under the License.
  */
 
-import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { getAggTypes } from '../agg_types';
 import { BucketAggType } from '../buckets/bucket_agg_type';
 import { MetricAggType } from '../metrics/metric_agg_type';
-import { queryServiceMock } from '../../../query/mocks';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { InternalStartServices } from '../../../types';
+import { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
+
+// Mocked uiSettings shared among aggs unit tests
+const mockUiSettings = jest.fn().mockImplementation((key: string) => {
+  const config: TimeBucketsConfig = {
+    'histogram:maxBars': 4,
+    'histogram:barTarget': 3,
+    dateFormat: 'YYYY-MM-DD',
+    'dateFormat:scaled': [
+      ['', 'HH:mm:ss.SSS'],
+      ['PT1S', 'HH:mm:ss'],
+      ['PT1M', 'HH:mm'],
+      ['PT1H', 'YYYY-MM-DD HH:mm'],
+      ['P1DT', 'YYYY-MM-DD'],
+      ['P1YT', 'YYYY'],
+    ],
+  };
+  return config[key] ?? key;
+});
 
 /**
  * Testing utility which creates a new instance of AggTypesRegistry,
@@ -45,7 +63,7 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
   const registrySetup = registry.setup();
 
   if (types) {
-    types.forEach(type => {
+    types.forEach((type) => {
       if (type instanceof BucketAggType) {
         registrySetup.registerBucket(type);
       } else if (type instanceof MetricAggType) {
@@ -54,22 +72,19 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
     });
   } else {
     const coreSetup = coreMock.createSetup();
-    const coreStart = coreMock.createStart();
+    coreSetup.uiSettings.get = mockUiSettings;
 
     const aggTypes = getAggTypes({
-      uiSettings: coreSetup.uiSettings,
-      query: queryServiceMock.createSetupContract(),
+      calculateBounds: jest.fn(),
       getInternalStartServices: () =>
         (({
           fieldFormats: fieldFormatsServiceMock.createStartContract(),
-          notifications: notificationServiceMock.createStartContract(),
-          uiSettings: coreStart.uiSettings,
-          injectedMetadata: coreStart.injectedMetadata,
         } as unknown) as InternalStartServices),
+      uiSettings: coreSetup.uiSettings,
     });
 
-    aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
-    aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));
+    aggTypes.buckets.forEach((type) => registrySetup.registerBucket(type));
+    aggTypes.metrics.forEach((type) => registrySetup.registerMetric(type));
   }
 
   return registry.start();

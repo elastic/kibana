@@ -39,7 +39,7 @@ module.exports = {
       },
     ],
   },
-  create: context => {
+  create: (context) => {
     return {
       Program(program) {
         const licenses = init(context, program, () => {
@@ -70,8 +70,8 @@ module.exports = {
 
         sourceCode
           .getAllComments()
-          .filter(node => licenses.includes(normalizeWhitespace(node.value)))
-          .forEach(node => {
+          .filter((node) => licenses.includes(normalizeWhitespace(node.value)))
+          .forEach((node) => {
             context.report({
               node,
               message: 'This license header is not allowed in this file.',

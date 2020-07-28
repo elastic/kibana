@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import _ from 'lodash';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { NotificationsStart, Toast } from 'src/core/public';
 import { DashboardPanelState } from '../embeddable';
@@ -107,7 +108,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
         })}
         savedObjectMetaData={[...this.props.getEmbeddableFactories()]
           .filter(
-            embeddableFactory =>
+            (embeddableFactory) =>
               Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
           )
           .map(({ savedObjectMetaData }) => savedObjectMetaData as any)}

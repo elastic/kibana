@@ -5,20 +5,15 @@
  */
 
 jest.mock('../../../../kibana_services', () => {
-  const mockUiSettings = {
-    get: () => {
-      return undefined;
-    },
-  };
   return {
-    getUiSettings: () => {
-      return mockUiSettings;
+    getIsDarkMode() {
+      return false;
     },
   };
 });
 
 jest.mock('uuid/v4', () => {
-  return function() {
+  return function () {
     return '12345';
   };
 });

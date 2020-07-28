@@ -20,7 +20,7 @@ import { convertMetricNames } from '../../convert_metric_names';
 export function getMetricAggs(listingMetrics) {
   let aggItems = {};
 
-  listingMetrics.forEach(metricName => {
+  listingMetrics.forEach((metricName) => {
     const metric = metrics[metricName];
     let metricAgg = null;
 

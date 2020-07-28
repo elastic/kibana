@@ -8,7 +8,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
-  TRANSACTION_TYPE
+  TRANSACTION_TYPE,
 } from '../elasticsearch_fieldnames';
 import { FILTER_OPTIONS } from './custom_link_filter_options';
 

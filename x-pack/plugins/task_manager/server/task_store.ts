@@ -17,9 +17,10 @@ import {
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
+  SavedObjectsUpdateResponse,
 } from '../../../../src/core/server';
 
-import { asOk, asErr } from './lib/result_type';
+import { asOk, asErr, Result } from './lib/result_type';
 
 import {
   ConcreteTaskInstance,
@@ -98,10 +99,10 @@ export interface ClaimOwnershipResult {
   docs: ConcreteTaskInstance[];
 }
 
-export interface BulkUpdateTaskFailureResult {
-  error: NonNullable<SavedObject['error']>;
-  task: ConcreteTaskInstance;
-}
+export type BulkUpdateResult = Result<
+  ConcreteTaskInstance,
+  { entity: ConcreteTaskInstance; error: Error }
+>;
 
 export interface UpdateByQueryResult {
   updated: number;
@@ -150,7 +151,7 @@ export class TaskStore {
   }
 
   private emitEvents = (events: TaskClaim[]) => {
-    events.forEach(event => this.events$.next(event));
+    events.forEach((event) => this.events$.next(event));
   };
 
   /**
@@ -204,7 +205,7 @@ export class TaskStore {
     claimTasksById = [],
     size,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
-    const claimTasksByIdWithRawIds = claimTasksById.map(id =>
+    const claimTasksByIdWithRawIds = claimTasksById.map((id) =>
       this.serializer.generateRawId(undefined, 'task', id)
     );
 
@@ -220,13 +221,13 @@ export class TaskStore {
 
     // emit success/fail events for claimed tasks by id
     if (claimTasksById && claimTasksById.length) {
-      this.emitEvents(docs.map(doc => asTaskClaimEvent(doc.id, asOk(doc))));
+      this.emitEvents(docs.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))));
 
       this.emitEvents(
         difference(
           claimTasksById,
-          docs.map(doc => doc.id)
-        ).map(id => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
+          docs.map((doc) => doc.id)
+        ).map((id) => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
       );
     }
 
@@ -333,6 +334,54 @@ export class TaskStore {
   }
 
   /**
+   * Updates the specified docs in the index, returning the docs
+   * with their versions up to date.
+   *
+   * @param {Array<TaskDoc>} docs
+   * @returns {Promise<Array<TaskDoc>>}
+   */
+  public async bulkUpdate(docs: ConcreteTaskInstance[]): Promise<BulkUpdateResult[]> {
+    const attributesByDocId = docs.reduce((attrsById, doc) => {
+      attrsById.set(doc.id, taskInstanceToAttributes(doc));
+      return attrsById;
+    }, new Map());
+
+    const updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error> = (
+      await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+        docs.map((doc) => ({
+          type: 'task',
+          id: doc.id,
+          options: { version: doc.version },
+          attributes: attributesByDocId.get(doc.id)!,
+        })),
+        {
+          refresh: false,
+        }
+      )
+    ).saved_objects;
+
+    return updatedSavedObjects.map<BulkUpdateResult>((updatedSavedObject, index) =>
+      isSavedObjectsUpdateResponse(updatedSavedObject)
+        ? asOk(
+            savedObjectToConcreteTaskInstance({
+              ...updatedSavedObject,
+              attributes: defaults(
+                updatedSavedObject.attributes,
+                attributesByDocId.get(updatedSavedObject.id)!
+              ),
+            })
+          )
+        : asErr({
+            // The SavedObjectsRepository maintains the order of the docs
+            // so we can rely on the index in the `docs` to match an error
+            // on the same index in the `bulkUpdate` result
+            entity: docs[index],
+            error: updatedSavedObject,
+          })
+    );
+  }
+
+  /**
    * Removes the specified task from the index.
    *
    * @param {string} id
@@ -386,8 +435,8 @@ export class TaskStore {
 
     return {
       docs: (rawDocs as SavedObjectsRawDoc[])
-        .map(doc => this.serializer.rawToSavedObject(doc))
-        .map(doc => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+        .map((doc) => this.serializer.rawToSavedObject(doc))
+        .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
         .map(savedObjectToConcreteTaskInstance),
     };
   }
@@ -429,7 +478,7 @@ function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInst
     retryAt: (doc.retryAt && doc.retryAt.toISOString()) || null,
     runAt: (doc.runAt || new Date()).toISOString(),
     status: (doc as ConcreteTaskInstance).status || 'idle',
-  };
+  } as SerializedConcreteTaskInstance;
 }
 
 export function savedObjectToConcreteTaskInstance(
@@ -467,4 +516,10 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
     ...opts,
     query,
   };
+}
+
+function isSavedObjectsUpdateResponse(
+  result: SavedObjectsUpdateResponse | Error
+): result is SavedObjectsUpdateResponse {
+  return result && typeof (result as SavedObjectsUpdateResponse).id === 'string';
 }

@@ -26,9 +26,9 @@ export default function validateArgFn(functionDef) {
     const type = argType(value);
     const required = argDef.types;
     const multi = argDef.multi;
-    const isCorrectType = (function() {
+    const isCorrectType = (function () {
       // If argument is not allow to be specified multiple times, we're dealing with a plain value for type
-      if (!multi) return _.contains(required, type);
+      if (!multi) return _.includes(required, type);
       // If it is, we'll get an array for type
       return _.difference(type, required).length === 0;
     })();

@@ -39,7 +39,7 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
           return {
             name,
             ...mapping,
-            role_templates: (mapping.role_templates || []).map(entry => {
+            role_templates: (mapping.role_templates || []).map((entry) => {
               return {
                 ...entry,
                 template: tryParseRoleTemplate(entry.template as string),

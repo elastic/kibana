@@ -38,7 +38,7 @@ export function getApmsForClusters(req, apmIndexPattern, clusters) {
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
 
   return Promise.all(
-    clusters.map(async cluster => {
+    clusters.map(async (cluster) => {
       const clusterUuid = cluster.cluster_uuid;
       const params = {
         index: apmIndexPattern,

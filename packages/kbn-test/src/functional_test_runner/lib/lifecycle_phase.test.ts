@@ -104,7 +104,7 @@ describe('without randomness', () => {
 
     const handler = jest.fn(async () => {
       order.push('handler start');
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       order.push('handler done');
     });
     phase.add(handler);
@@ -124,10 +124,10 @@ describe('without randomness', () => {
     const phase = new LifecyclePhase({ singular: true });
 
     const beforeNotifs: Array<Rx.Notification<unknown>> = [];
-    phase.before$.pipe(materialize()).subscribe(n => beforeNotifs.push(n));
+    phase.before$.pipe(materialize()).subscribe((n) => beforeNotifs.push(n));
 
     const afterNotifs: Array<Rx.Notification<unknown>> = [];
-    phase.after$.pipe(materialize()).subscribe(n => afterNotifs.push(n));
+    phase.after$.pipe(materialize()).subscribe((n) => afterNotifs.push(n));
 
     await phase.trigger();
     expect(beforeNotifs).toMatchInlineSnapshot(`

@@ -20,14 +20,14 @@ const initialState = {
 
 function mapJobsToIds(jobs) {
   const jobsById = {};
-  jobs.forEach(job => {
+  jobs.forEach((job) => {
     jobsById[job.id] = job;
   });
   return jobsById;
 }
 
 function getJobsIds(jobs) {
-  return jobs.map(job => job.id);
+  return jobs.map((job) => job.id);
 }
 
 export function jobs(state = initialState, action) {

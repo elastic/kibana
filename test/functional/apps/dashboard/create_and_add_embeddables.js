@@ -20,8 +20,9 @@
 import expect from '@kbn/expect';
 
 import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const browser = getService('browser');
@@ -102,7 +103,7 @@ export default function({ getService, getPageObjects }) {
         before(async () => {
           await PageObjects.header.clickStackManagement();
           await PageObjects.settings.clickKibanaSettings();
-          await PageObjects.settings.toggleAdvancedSettingCheckbox('visualize:enableLabs');
+          await PageObjects.settings.toggleAdvancedSettingCheckbox(VISUALIZE_ENABLE_LABS_SETTING);
         });
 
         it('should not display lab visualizations in add panel', async () => {
@@ -117,7 +118,7 @@ export default function({ getService, getPageObjects }) {
         after(async () => {
           await PageObjects.header.clickStackManagement();
           await PageObjects.settings.clickKibanaSettings();
-          await PageObjects.settings.clearAdvancedSettings('visualize:enableLabs');
+          await PageObjects.settings.clearAdvancedSettings(VISUALIZE_ENABLE_LABS_SETTING);
           await PageObjects.header.clickDashboard();
         });
       });

@@ -25,7 +25,7 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
         heading={i18n.translate(
           'xpack.apm.stacktraceTab.noStacktraceAvailableLabel',
           {
-            defaultMessage: 'No stack trace available.'
+            defaultMessage: 'No stack trace available.',
           }
         )}
         hideSubheading
@@ -87,7 +87,7 @@ export function getGroupedStackframes(stackframes: IStackframe[]) {
       !stackframe.exclude_from_grouping;
 
     // append to group
-    if (shouldAppend) {
+    if (prevGroup && shouldAppend) {
       prevGroup.stackframes.push(stackframe);
       return acc;
     }
@@ -96,7 +96,7 @@ export function getGroupedStackframes(stackframes: IStackframe[]) {
     acc.push({
       isLibraryFrame: Boolean(stackframe.library_frame),
       excludeFromGrouping: Boolean(stackframe.exclude_from_grouping),
-      stackframes: [stackframe]
+      stackframes: [stackframe],
     });
     return acc;
   }, [] as StackframesGroup[]);

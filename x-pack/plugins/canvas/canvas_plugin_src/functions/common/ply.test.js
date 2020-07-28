@@ -11,7 +11,7 @@ import { ply } from './ply';
 
 const errors = getFunctionErrors().ply;
 
-const averagePrice = datatable => {
+const averagePrice = (datatable) => {
   const average = datatable.rows.reduce((sum, row) => sum + row.price, 0) / datatable.rows.length;
 
   return Promise.resolve({
@@ -21,8 +21,8 @@ const averagePrice = datatable => {
   });
 };
 
-const doublePrice = datatable => {
-  const newRows = datatable.rows.map(row => ({ double_price: row.price * 2 }));
+const doublePrice = (datatable) => {
+  const newRows = datatable.rows.map((row) => ({ double_price: row.price * 2 }));
 
   return Promise.resolve({
     type: 'datatable',
@@ -31,7 +31,7 @@ const doublePrice = datatable => {
   });
 };
 
-const rowCount = datatable => {
+const rowCount = (datatable) => {
   return Promise.resolve({
     type: 'datatable',
     columns: [{ name: 'row_count', type: 'number' }],
@@ -50,7 +50,7 @@ describe('ply', () => {
     const arbitaryRowIndex = 0;
 
     return fn(testTable, { by: ['name', 'in_stock'], expression: [averagePrice, rowCount] }).then(
-      result => {
+      (result) => {
         expect(result.type).toBe('datatable');
         expect(result.columns).toEqual([
           { name: 'name', type: 'string' },
@@ -66,12 +66,12 @@ describe('ply', () => {
 
   describe('missing args', () => {
     it('returns the original datatable if both args are missing', () => {
-      return fn(testTable).then(result => expect(result).toEqual(testTable));
+      return fn(testTable).then((result) => expect(result).toEqual(testTable));
     });
 
     describe('by', () => {
       it('passes the entire context into the expression when no columns are provided', () => {
-        return fn(testTable, { expression: [rowCount] }).then(result =>
+        return fn(testTable, { expression: [rowCount] }).then((result) =>
           expect(result).toEqual({
             type: 'datatable',
             rows: [{ row_count: testTable.rows.length }],
@@ -95,7 +95,7 @@ describe('ply', () => {
       it('returns the original datatable grouped by the specified columns', () => {
         const arbitaryRowIndex = 6;
 
-        return fn(testTable, { by: ['price', 'quantity'] }).then(result => {
+        return fn(testTable, { by: ['price', 'quantity'] }).then((result) => {
           expect(result.columns[0]).toHaveProperty('name', 'price');
           expect(result.columns[1]).toHaveProperty('name', 'quantity');
           expect(result.rows[arbitaryRowIndex]).toHaveProperty('price');
@@ -104,7 +104,7 @@ describe('ply', () => {
       });
 
       it('throws when row counts do not match across resulting datatables', () => {
-        return fn(testTable, { by: ['name'], expression: [doublePrice, rowCount] }).catch(e =>
+        return fn(testTable, { by: ['name'], expression: [doublePrice, rowCount] }).catch((e) =>
           expect(e.message).toBe(errors.rowCountMismatch().message)
         );
       });

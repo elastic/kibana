@@ -36,21 +36,25 @@ import {
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import readline from 'readline';
+import * as moment from 'moment';
 
 const ROOT = '../../../..';
 const COVERAGE_INGESTION_KIBANA_ROOT =
   process.env.COVERAGE_INGESTION_KIBANA_ROOT || resolve(__dirname, ROOT);
 const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || 'https://kibana-coverage.elastic.dev';
-const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
+const format = 'YYYY-MM-DDTHH:mm:SS';
+// eslint-disable-next-line import/namespace
+const formatted = `${moment.utc().format(format)}Z`;
+const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP || formatted);
 const preamble = pipe(statsAndstaticSiteUrl, rootDirAndOrigPath, buildId, addPrePopulatedTimeStamp);
 const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
-const transform = jsonSummaryPath => log => vcsInfo => {
+const transform = (jsonSummaryPath) => (log) => (vcsInfo) => {
   const objStream = jsonStream(jsonSummaryPath).on('done', noop);
   const itemizeVcsInfo = itemizeVcs(vcsInfo);
 
-  const jsonSummary$ = _ => objStream.on('node', '!.*', _);
+  const jsonSummary$ = (_) => objStream.on('node', '!.*', _);
 
   fromEventPattern(jsonSummary$)
     .pipe(
@@ -60,7 +64,7 @@ const transform = jsonSummaryPath => log => vcsInfo => {
       map(ciRunUrl),
       map(addJsonSummaryPath(jsonSummaryPath)),
       map(addTestRunnerAndStaticSiteUrl),
-      concatMap(x => of(x).pipe(delay(ms)))
+      concatMap((x) => of(x).pipe(delay(ms)))
     )
     .subscribe(ingest(log));
 };
@@ -73,8 +77,8 @@ function rootDirAndOrigPath(obj) {
   };
 }
 
-const mutateVcsInfo = vcsInfo => x => vcsInfo.push(x.trimStart().trimEnd());
-const vcsInfoLines$ = vcsInfoFilePath => {
+const mutateVcsInfo = (vcsInfo) => (x) => vcsInfo.push(x.trimStart().trimEnd());
+const vcsInfoLines$ = (vcsInfoFilePath) => {
   const rl = readline.createInterface({ input: createReadStream(vcsInfoFilePath) });
   return fromEvent(rl, 'line').pipe(takeUntil(fromEvent(rl, 'close')));
 };
@@ -88,7 +92,7 @@ export const prok = ({ jsonSummaryPath, vcsInfoFilePath }, log) => {
   const vcsInfo = [];
   vcsInfoLines$(vcsInfoFilePath).subscribe(
     mutateVcsInfo(vcsInfo),
-    err => log.error(err),
+    (err) => log.error(err),
     always(xformWithPath(vcsInfo))
   );
 };

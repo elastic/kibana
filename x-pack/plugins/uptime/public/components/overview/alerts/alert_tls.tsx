@@ -15,7 +15,7 @@ interface Props {
   setAlertFlyoutVisible: (value: boolean) => void;
 }
 
-export const AlertTlsComponent: React.FC<Props> = props => (
+export const AlertTlsComponent: React.FC<Props> = (props) => (
   <>
     <EuiSpacer size="l" />
     <EuiFlexGroup direction="column" gutterSize="none">

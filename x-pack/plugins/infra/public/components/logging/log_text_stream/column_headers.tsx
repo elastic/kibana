@@ -31,7 +31,7 @@ export const LogColumnHeaders: React.FunctionComponent<{
   const { firstVisiblePosition } = useContext(LogPositionState.Context);
   return (
     <LogColumnHeadersWrapper>
-      {columnConfigurations.map(columnConfiguration => {
+      {columnConfigurations.map((columnConfiguration) => {
         if (isTimestampLogColumnConfiguration(columnConfiguration)) {
           return (
             <LogColumnHeader
@@ -68,7 +68,7 @@ export const LogColumnHeaders: React.FunctionComponent<{
   );
 };
 
-const LogColumnHeader: React.FunctionComponent<{
+export const LogColumnHeader: React.FunctionComponent<{
   columnWidth: LogEntryColumnWidth;
   'data-test-subj'?: string;
 }> = ({ children, columnWidth, 'data-test-subj': dataTestSubj }) => (
@@ -77,8 +77,8 @@ const LogColumnHeader: React.FunctionComponent<{
   </LogColumnHeaderWrapper>
 );
 
-const LogColumnHeadersWrapper = euiStyled.div.attrs(() => ({
-  role: 'row',
+export const LogColumnHeadersWrapper = euiStyled.div.attrs((props) => ({
+  role: props.role ?? 'row',
 }))`
   align-items: stretch;
   display: flex;
@@ -87,14 +87,14 @@ const LogColumnHeadersWrapper = euiStyled.div.attrs(() => ({
   justify-content: flex-start;
   overflow: hidden;
   padding-right: ${ASSUMED_SCROLLBAR_WIDTH}px;
-  border-bottom: ${props => props.theme.eui.euiBorderThin};
-  box-shadow: 0 2px 2px -1px ${props => transparentize(0.3, props.theme.eui.euiColorLightShade)};
+  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+  box-shadow: 0 2px 2px -1px ${(props) => transparentize(0.3, props.theme.eui.euiColorLightShade)};
   position: relative;
   z-index: 1;
 `;
 
-const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs(() => ({
-  role: 'columnheader',
+const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs((props) => ({
+  role: props.role ?? 'columnheader',
 }))`
   align-items: center;
   display: flex;
@@ -104,10 +104,10 @@ const LogColumnHeaderWrapper = euiStyled(LogEntryColumn).attrs(() => ({
 `;
 
 const LogColumnHeaderContent = euiStyled(LogEntryColumnContent)`
-  color: ${props => props.theme.eui.euiTitleColor};
-  font-size: ${props => props.theme.eui.euiFontSizeS};
-  font-weight: ${props => props.theme.eui.euiFontWeightSemiBold};
-  line-height: ${props => props.theme.eui.euiLineHeight};
+  color: ${(props) => props.theme.eui.euiTitleColor};
+  font-size: ${(props) => props.theme.eui.euiFontSizeS};
+  font-weight: ${(props) => props.theme.eui.euiFontWeightSemiBold};
+  line-height: ${(props) => props.theme.eui.euiLineHeight};
   text-overflow: clip;
   white-space: pre;
 `;

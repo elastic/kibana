@@ -159,7 +159,7 @@ export class HashedItemStore implements IStorage<string, boolean> {
   }
 
   private getIndexedItem(hash: string, indexedItems: IndexedItem[] = this.getIndexedItems()) {
-    return indexedItems.find(indexedItem => indexedItem.hash === hash);
+    return indexedItems.find((indexedItem) => indexedItem.hash === hash);
   }
 
   private persistItem(hash: string, item: string): boolean {

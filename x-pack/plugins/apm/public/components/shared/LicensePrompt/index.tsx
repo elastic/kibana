@@ -14,10 +14,9 @@ interface Props {
   showBetaBadge?: boolean;
 }
 
-export const LicensePrompt = ({ text, showBetaBadge = false }: Props) => {
+export function LicensePrompt({ text, showBetaBadge = false }: Props) {
   const licensePageUrl = useKibanaUrl(
-    '/app/kibana',
-    '/management/elasticsearch/license_management/home'
+    '/app/management/stack/license_management'
   );
 
   const renderLicenseBody = (
@@ -27,7 +26,7 @@ export const LicensePrompt = ({ text, showBetaBadge = false }: Props) => {
       title={
         <h2>
           {i18n.translate('xpack.apm.license.title', {
-            defaultMessage: 'Start free 30-day trial'
+            defaultMessage: 'Start free 30-day trial',
           })}
         </h2>
       }
@@ -35,7 +34,7 @@ export const LicensePrompt = ({ text, showBetaBadge = false }: Props) => {
       actions={
         <EuiButton fill={true} href={licensePageUrl}>
           {i18n.translate('xpack.apm.license.button', {
-            defaultMessage: 'Start trial'
+            defaultMessage: 'Start trial',
           })}
         </EuiButton>
       }
@@ -45,13 +44,13 @@ export const LicensePrompt = ({ text, showBetaBadge = false }: Props) => {
   const renderWithBetaBadge = (
     <EuiPanel
       betaBadgeLabel={i18n.translate('xpack.apm.license.betaBadge', {
-        defaultMessage: 'Beta'
+        defaultMessage: 'Beta',
       })}
       betaBadgeTooltipContent={i18n.translate(
         'xpack.apm.license.betaTooltipMessage',
         {
           defaultMessage:
-            'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.'
+            'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
         }
       )}
     >
@@ -60,4 +59,4 @@ export const LicensePrompt = ({ text, showBetaBadge = false }: Props) => {
   );
 
   return <>{showBetaBadge ? renderWithBetaBadge : renderLicenseBody}</>;
-};
+}

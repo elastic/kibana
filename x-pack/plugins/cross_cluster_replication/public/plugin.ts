@@ -22,7 +22,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
   public setup(coreSetup: CoreSetup, plugins: PluginDependencies) {
     const { licensing, remoteClusters, usageCollection, management, indexManagement } = plugins;
-    const esSection = management.sections.getSection('elasticsearch');
+    const esSection = management.sections.section.data;
 
     const {
       http,
@@ -36,35 +36,46 @@ export class CrossClusterReplicationPlugin implements Plugin {
     initUiMetric(usageCollection);
     initNotification(toasts, fatalErrors);
 
-    const ccrApp = esSection!.registerApp({
+    const ccrApp = esSection.registerApp({
       id: MANAGEMENT_ID,
       title: PLUGIN.TITLE,
       order: 6,
-      mount: async ({ element, setBreadcrumbs }) => {
+      mount: async ({ element, setBreadcrumbs, history }) => {
         const { mountApp } = await import('./app');
 
         const [coreStart] = await getStartServices();
         const {
+          chrome: { docTitle },
           i18n: { Context: I18nContext },
           docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+          application: { getUrlForApp },
         } = coreStart;
 
-        return mountApp({
+        docTitle.change(PLUGIN.TITLE);
+
+        const unmountAppCallback = await mountApp({
           element,
           setBreadcrumbs,
           I18nContext,
           ELASTIC_WEBSITE_URL,
           DOC_LINK_VERSION,
+          history,
+          getUrlForApp,
         });
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
 
-    ccrApp.disable();
-
+    // NOTE: We enable the plugin by default instead of disabling it by default because this
+    // creates a race condition that causes functional tests to fail on CI (see #66781).
     licensing.license$
       .pipe(first())
       .toPromise()
-      .then(license => {
+      .then((license) => {
         const licenseStatus = license.check(PLUGIN.ID, PLUGIN.minimumLicenseType);
         const isLicenseOk = licenseStatus.state === 'valid';
         const config = this.initializerContext.config.get<ClientConfigType>();
@@ -75,8 +86,6 @@ export class CrossClusterReplicationPlugin implements Plugin {
         const isCcrUiEnabled = config.ui.enabled && remoteClusters.isUiEnabled;
 
         if (isLicenseOk && isCcrUiEnabled) {
-          ccrApp.enable();
-
           if (indexManagement) {
             const propertyPath = 'isFollowerIndex';
 
@@ -93,6 +102,8 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
             indexManagement.extensionsService.addBadge(followerBadgeExtension);
           }
+        } else {
+          ccrApp.disable();
         }
       });
   }

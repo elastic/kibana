@@ -13,7 +13,7 @@ import { CODE_PATH_LICENSE } from '../../../common/constants';
 uiRoutes.when('/license', {
   template,
   resolve: {
-    clusters: Private => {
+    clusters: (Private) => {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_LICENSE] });
     },

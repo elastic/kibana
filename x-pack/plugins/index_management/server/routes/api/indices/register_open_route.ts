@@ -26,7 +26,7 @@ export function registerOpenRoute({ router, license, lib }: RouteDependencies) {
       };
 
       try {
-        await await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.open', params);
+        await await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.open', params);
         return res.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

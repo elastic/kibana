@@ -30,7 +30,7 @@ describe('when simulating race condition', () => {
     function MyComponent({
       name,
       ms,
-      renderFn
+      renderFn,
     }: {
       name: string;
       ms: number;
@@ -58,7 +58,7 @@ describe('when simulating race condition', () => {
     expect(renderSpy).lastCalledWith({
       data: undefined,
       error: undefined,
-      status: 'loading'
+      status: 'loading',
     });
   });
 
@@ -70,7 +70,7 @@ describe('when simulating race condition', () => {
     expect(renderSpy).lastCalledWith({
       data: 'Hello from Peter',
       error: undefined,
-      status: 'success'
+      status: 'success',
     });
   });
 
@@ -81,7 +81,7 @@ describe('when simulating race condition', () => {
     expect(renderSpy).lastCalledWith({
       data: 'Hello from Peter',
       error: undefined,
-      status: 'success'
+      status: 'success',
     });
   });
 
@@ -92,7 +92,7 @@ describe('when simulating race condition', () => {
     expect(renderSpy).not.toHaveBeenCalledWith({
       data: 'Hello from John',
       error: undefined,
-      status: 'success'
+      status: 'success',
     });
   });
 
@@ -104,7 +104,7 @@ describe('when simulating race condition', () => {
       ['request', 'John', 500],
       ['request', 'Peter', 100],
       ['response', 'Peter', 100],
-      ['response', 'John', 500]
+      ['response', 'John', 500],
     ]);
   });
 });

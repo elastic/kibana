@@ -21,7 +21,7 @@ import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
+import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { SavedObjectEdition } from './object_view';
 
@@ -29,10 +29,12 @@ const SavedObjectsEditionPage = ({
   coreStart,
   serviceRegistry,
   setBreadcrumbs,
+  history,
 }: {
   coreStart: CoreStart;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  history: ScopedHistory;
 }) => {
   const { service: serviceName, id } = useParams<{ service: string; id: string }>();
   const capabilities = coreStart.application.capabilities;
@@ -47,7 +49,7 @@ const SavedObjectsEditionPage = ({
         text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
           defaultMessage: 'Saved objects',
         }),
-        href: '#/management/kibana/objects',
+        href: '/',
       },
       {
         text: i18n.translate('savedObjectsManagement.breadcrumb.edit', {
@@ -68,6 +70,7 @@ const SavedObjectsEditionPage = ({
       notifications={coreStart.notifications}
       capabilities={capabilities}
       notFoundType={query.notFound as string}
+      history={history}
     />
   );
 };

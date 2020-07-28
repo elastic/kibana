@@ -50,12 +50,12 @@ export async function getNonExistingReferenceAsKeys(
   }
 
   // Fetch references to see if they exist
-  const bulkGetOpts = Array.from(collector.values()).map(obj => ({ ...obj, fields: ['id'] }));
+  const bulkGetOpts = Array.from(collector.values()).map((obj) => ({ ...obj, fields: ['id'] }));
   const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts, { namespace });
 
   // Error handling
   const erroredObjects = bulkGetResponse.saved_objects.filter(
-    obj => obj.error && obj.error.statusCode !== 404
+    (obj) => obj.error && obj.error.statusCode !== 404
   );
   if (erroredObjects.length) {
     const err = Boom.badRequest();
@@ -89,7 +89,7 @@ export async function validateReferences(
   );
 
   // Filter out objects with missing references, add to error object
-  let filteredObjects = savedObjects.filter(savedObject => {
+  let filteredObjects = savedObjects.filter((savedObject) => {
     const missingReferences = [];
     const enforcedTypeReferences = (savedObject.references || []).filter(
       filterReferencesToValidate
@@ -117,7 +117,7 @@ export async function validateReferences(
 
   // Filter out objects that reference objects within the import but are missing_references
   // For example: visualization referencing a search that is missing an index pattern needs to be filtered out
-  filteredObjects = filteredObjects.filter(savedObject => {
+  filteredObjects = filteredObjects.filter((savedObject) => {
     let isBlocked = false;
     for (const reference of savedObject.references || []) {
       const referencedObjectError = errorMap[`${reference.type}:${reference.id}`];

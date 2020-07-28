@@ -189,7 +189,7 @@ export function matchesClauses<T extends BoolClauseFilter>(
   ...clauses: Array<BoolClauseWithAnyCondition<T>>
 ): BoolClauseWithAnyCondition<T> {
   return {
-    bool: Object.assign({}, ...clauses.map(clause => clause.bool)),
+    bool: Object.assign({}, ...clauses.map((clause) => clause.bool)),
   };
 }
 

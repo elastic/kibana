@@ -39,10 +39,7 @@ const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 };
 
 const xsrfDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if (
-    has(settings, 'server.xsrf.whitelist') &&
-    get<unknown[]>(settings, 'server.xsrf.whitelist').length > 0
-  ) {
+  if ((settings.server?.xsrf?.whitelist ?? []).length > 0) {
     log(
       'It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. ' +
         'It will be removed in 8.0 release. Instead, supply the "kbn-xsrf" header.'
@@ -72,26 +69,26 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   const rules: string[] = get(settings, 'csp.rules');
   if (rules) {
     const parsed = new Map(
-      rules.map(ruleStr => {
+      rules.map((ruleStr) => {
         const parts = ruleStr.split(/\s+/);
         return [parts[0], parts.slice(1)];
       })
     );
 
     settings.csp.rules = [...parsed].map(([policy, sourceList]) => {
-      if (sourceList.find(source => source.includes(NONCE_STRING))) {
+      if (sourceList.find((source) => source.includes(NONCE_STRING))) {
         log(`csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in ${policy}`);
-        sourceList = sourceList.filter(source => !source.includes(NONCE_STRING));
+        sourceList = sourceList.filter((source) => !source.includes(NONCE_STRING));
 
         // Add 'self' if not present
-        if (!sourceList.find(source => source.includes(SELF_STRING))) {
+        if (!sourceList.find((source) => source.includes(SELF_STRING))) {
           sourceList.push(SELF_STRING);
         }
       }
 
       if (
         SELF_POLICIES.includes(policy) &&
-        !sourceList.find(source => source.includes(SELF_STRING))
+        !sourceList.find((source) => source.includes(SELF_STRING))
       ) {
         log(`csp.rules must contain the 'self' source. Automatically adding to ${policy}.`);
         sourceList.push(SELF_STRING);

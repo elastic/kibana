@@ -52,8 +52,8 @@ export class UICapabilitiesService {
   }): Promise<GetUICapabilitiesResult> {
     const features = await this.featureService.get();
     const applications = Object.values(features)
-      .map(feature => feature.navLinkId)
-      .filter(link => !!link);
+      .flatMap((feature) => feature.app)
+      .filter((link) => !!link);
 
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
     this.log.debug(

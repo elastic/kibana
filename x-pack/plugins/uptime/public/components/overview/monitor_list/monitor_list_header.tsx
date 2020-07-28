@@ -12,13 +12,19 @@ import styled from 'styled-components';
 import { StatusFilter } from './status_filter';
 import { CERTIFICATES_ROUTE } from '../../../../common/constants';
 
-const TitleStyle = styled(EuiTitle)`
-  margin-left: auto;
+const LinkStyle = styled(Link)`
+  position: absolute;
+  right: 16px;
+  top: 16px;
+`;
+
+const FlexGroupContainer = styled(EuiFlexGroup)`
+  position: relative;
 `;
 
 export const MonitorListHeader: React.FC = () => {
   return (
-    <EuiFlexGroup alignItems="center">
+    <FlexGroupContainer alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h5>
@@ -32,18 +38,12 @@ export const MonitorListHeader: React.FC = () => {
       <EuiFlexItem grow={false}>
         <StatusFilter />
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <TitleStyle size="xs">
-          <h5>
-            <Link to={CERTIFICATES_ROUTE} data-test-subj="uptimeCertificatesLink">
-              <FormattedMessage
-                id="xpack.uptime.monitorList.viewCertificateTitle"
-                defaultMessage="Certificates status"
-              />
-            </Link>
-          </h5>
-        </TitleStyle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <LinkStyle to={CERTIFICATES_ROUTE} data-test-subj="uptimeCertificatesLink">
+        <FormattedMessage
+          id="xpack.uptime.monitorList.viewCertificateTitle"
+          defaultMessage="Certificates status"
+        />
+      </LinkStyle>
+    </FlexGroupContainer>
   );
 };

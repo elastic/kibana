@@ -6,7 +6,7 @@
 
 import { InstallTemplateFunction } from './types';
 
-export const linuxInstallTemplate: InstallTemplateFunction = variables => {
+export const linuxInstallTemplate: InstallTemplateFunction = (variables) => {
   const artifact = `elastic-agent-${variables.kibanaVersion}-linux-x86_64`;
 
   return `#!/bin/sh

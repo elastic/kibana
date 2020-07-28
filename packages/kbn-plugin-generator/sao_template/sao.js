@@ -20,9 +20,7 @@
 const { relative, resolve } = require('path');
 const fs = require('fs');
 
-const startCase = require('lodash.startcase');
-const camelCase = require('lodash.camelcase');
-const snakeCase = require('lodash.snakecase');
+const { camelCase, startCase, snakeCase } = require('lodash');
 const chalk = require('chalk');
 const execa = require('execa');
 
@@ -59,7 +57,7 @@ async function eslintPlugin(dir) {
   }
 }
 
-module.exports = function({ name, targetPath }) {
+module.exports = function ({ name, targetPath }) {
   return {
     prompts: {
       customPath: {
@@ -99,7 +97,7 @@ module.exports = function({ name, targetPath }) {
       },
       generateTranslations: {
         type: 'confirm',
-        when: answers => {
+        when: (answers) => {
           // only for 3rd party plugins
           return !answers.customPath && answers.generateApp;
         },
@@ -112,7 +110,7 @@ module.exports = function({ name, targetPath }) {
       generateScss: {
         type: 'confirm',
         message: 'Should SCSS be used?',
-        when: answers => answers.generateApp,
+        when: (answers) => answers.generateApp,
         default: true,
       },
       generateEslint: {
@@ -122,6 +120,11 @@ module.exports = function({ name, targetPath }) {
           return !customPath;
         },
       },
+      generateTsconfig: {
+        type: 'confirm',
+        message: 'Would you like to use a custom tsconfig file?',
+        default: true,
+      },
     },
     filters: {
       'public/**/index.scss': 'generateScss',
@@ -130,12 +133,13 @@ module.exports = function({ name, targetPath }) {
       'translations/**/*': 'generateTranslations',
       'i18nrc.json': 'generateTranslations',
       'eslintrc.js': 'generateEslint',
+      'tsconfig.json': 'generateTsconfig',
     },
     move: {
       'eslintrc.js': '.eslintrc.js',
       'i18nrc.json': '.i18nrc.json',
     },
-    data: answers => {
+    data: (answers) => {
       const pathToPlugin = answers.customPath
         ? resolve(answers.customPath, camelCase(name), 'public')
         : resolve(targetPath, 'public');

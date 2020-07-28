@@ -21,7 +21,7 @@ function expressionHelper(
   const layer = state.layers[0];
   const datasource = frame.datasourceLayers[layer.layerId];
   const operations = layer.groups
-    .map(columnId => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
+    .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
   if (!layer.metric || !operations.length) {
     return null;
@@ -36,11 +36,12 @@ function expressionHelper(
         arguments: {
           shape: [state.shape],
           hideLabels: [isPreview],
-          groups: operations.map(o => o.columnId),
+          groups: operations.map((o) => o.columnId),
           metric: [layer.metric],
           numberDisplay: [layer.numberDisplay],
           categoryDisplay: [layer.categoryDisplay],
           legendDisplay: [layer.legendDisplay],
+          legendPosition: [layer.legendPosition || 'right'],
           percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
           nestedLegend: [!!layer.nestedLegend],
         },

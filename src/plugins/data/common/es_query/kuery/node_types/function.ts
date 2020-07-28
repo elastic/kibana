@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-// @ts-ignore
+
 import { functions } from '../functions';
 import { IIndexPattern, KueryNode } from '../../..';
 import { FunctionName, FunctionTypeBuildNode } from './types';
@@ -30,7 +30,7 @@ export function buildNode(functionName: FunctionName, ...args: any[]) {
   }
 
   return {
-    type: 'function',
+    type: 'function' as 'function',
     function: functionName,
     // This requires better typing of the different typings and their return types.
     // @ts-ignore

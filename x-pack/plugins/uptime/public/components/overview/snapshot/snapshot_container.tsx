@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../hooks';
 import { getSnapshotCountAction } from '../../../state/actions';
 import { SnapshotComponent } from './snapshot';
-import { snapshotDataSelector } from '../../../state/selectors';
+import { esKuerySelector, snapshotDataSelector } from '../../../state/selectors';
+import { UptimeRefreshContext } from '../../../contexts';
 
 interface Props {
   /**
@@ -21,7 +22,10 @@ interface Props {
 export const Snapshot: React.FC<Props> = ({ height }: Props) => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  const { count, lastRefresh, loading, esKuery } = useSelector(snapshotDataSelector);
+  const { lastRefresh } = useContext(UptimeRefreshContext);
+
+  const { count, loading } = useSelector(snapshotDataSelector);
+  const esKuery = useSelector(esKuerySelector);
 
   const dispatch = useDispatch();
 

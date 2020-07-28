@@ -92,7 +92,7 @@ export const editRepository = async (editedRepository: Repository | EmptyReposit
 
 export const deleteRepositories = async (names: Array<Repository['name']>) => {
   const result = await sendRequest({
-    path: `${API_BASE_PATH}repositories/${names.map(name => encodeURIComponent(name)).join(',')}`,
+    path: `${API_BASE_PATH}repositories/${names.map((name) => encodeURIComponent(name)).join(',')}`,
     method: 'delete',
   });
 

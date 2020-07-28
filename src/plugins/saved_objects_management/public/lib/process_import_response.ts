@@ -60,7 +60,7 @@ export function processImportResponse(
       continue;
     }
     // Currently only supports resolving references on index patterns
-    const indexPatternRefs = error.references.filter(ref => ref.type === 'index-pattern');
+    const indexPatternRefs = error.references.filter((ref) => ref.type === 'index-pattern');
     for (const missingReference of indexPatternRefs) {
       const conflict = unmatchedReferences.get(
         `${missingReference.type}:${missingReference.id}`
@@ -81,7 +81,7 @@ export function processImportResponse(
     // returned errors of type missing_references.
     status:
       unmatchedReferences.size === 0 &&
-      !failedImports.some(issue => issue.error.type === 'conflict')
+      !failedImports.some((issue) => issue.error.type === 'conflict')
         ? 'success'
         : 'idle',
     importCount: response.successCount,

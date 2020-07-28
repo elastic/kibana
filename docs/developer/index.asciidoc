@@ -3,25 +3,27 @@
 
 [partintro]
 --
-Contributing to Kibana can be daunting at first, but it doesn't have to be. If
-you're planning a pull request to the Kibana repository, you may want to start
-with <<core-development>>.
+Contributing to {kib} can be daunting at first, but it doesn't have to be. The following sections should get you up and
+running in no time. If you have any problems, file an issue in the https://github.com/elastic/kibana/issues[Kibana repo].
 
-If you'd prefer to use Kibana's internal plugin API, then check out
-<<plugin-development>>.
+* <<development-getting-started>>
+* <<development-best-practices>>
+* <<contributing>>
+* <<external-plugin-development>>
+* <<kibana-architecture>>
+* <<advanced>>
+
 --
 
-include::core-development.asciidoc[]
+include::getting-started/index.asciidoc[]
 
-include::plugin-development.asciidoc[]
+include::best-practices/index.asciidoc[]
 
-include::visualize/development-visualize-index.asciidoc[]
+include::architecture/index.asciidoc[]
 
-include::add-data-guide.asciidoc[]
+include::contributing/index.asciidoc[]
 
-include::security/index.asciidoc[]
+include::plugin/index.asciidoc[]
 
-include::pr-review.asciidoc[]
-
-include::testing/interpreting-ci-failures.asciidoc[]
+include::advanced/index.asciidoc[]
 

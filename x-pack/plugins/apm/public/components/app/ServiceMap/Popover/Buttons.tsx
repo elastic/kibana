@@ -20,9 +20,14 @@ interface ButtonsProps {
 
 export function Buttons({
   onFocusClick = () => {},
-  selectedNodeServiceName
+  selectedNodeServiceName,
 }: ButtonsProps) {
-  const urlParams = useUrlParams().urlParams as APMQueryParams;
+  // The params may contain the service name. We want to use the selected node's
+  // service name in the button URLs, so make a copy and set the
+  // `serviceName` property.
+  const urlParams = { ...useUrlParams().urlParams } as APMQueryParams;
+  urlParams.serviceName = selectedNodeServiceName;
+
   const detailsUrl = getAPMHref(
     `/services/${selectedNodeServiceName}/transactions`,
     '',
@@ -39,14 +44,14 @@ export function Buttons({
       <EuiFlexItem>
         <EuiButton href={detailsUrl} fill={true}>
           {i18n.translate('xpack.apm.serviceMap.serviceDetailsButtonText', {
-            defaultMessage: 'Service Details'
+            defaultMessage: 'Service Details',
           })}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButton color="secondary" href={focusUrl} onClick={onFocusClick}>
           {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
-            defaultMessage: 'Focus map'
+            defaultMessage: 'Focus map',
           })}
         </EuiButton>
       </EuiFlexItem>

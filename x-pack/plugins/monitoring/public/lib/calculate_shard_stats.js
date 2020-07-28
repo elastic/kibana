@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 
 function addOne(obj, key) {
   let value = _.get(obj, key);
-  _.set(obj, key, ++value);
+  set(obj, key, ++value);
 }
 
 export function calculateShardStats(state) {
   const data = { totals: { primary: 0, replica: 0, unassigned: { replica: 0, primary: 0 } } };
-  const processShards = function(shard) {
+  const processShards = function (shard) {
     const metrics = data[shard.index] || {
       status: 'green',
       primary: 0,

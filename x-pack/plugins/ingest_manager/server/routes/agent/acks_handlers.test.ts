@@ -77,7 +77,7 @@ describe('test acks handlers', () => {
           id: 'action1',
         },
       ]),
-      getAgentByAccessAPIKeyId: jest.fn().mockReturnValueOnce({
+      authenticateAgentWithAccessToken: jest.fn().mockReturnValueOnce({
         id: 'agent',
       }),
       getSavedObjectsClientContract: jest.fn().mockReturnValueOnce(mockSavedObjectsClient),

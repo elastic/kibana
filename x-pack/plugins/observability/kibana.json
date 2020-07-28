@@ -6,6 +6,14 @@
     "xpack",
     "observability"
   ],
+  "optionalPlugins": [
+    "licensing"
+  ],
   "ui": true,
-  "server": true
+  "server": true,
+  "requiredBundles": [
+    "data",
+    "kibanaReact",
+    "kibanaUtils"
+  ]
 }

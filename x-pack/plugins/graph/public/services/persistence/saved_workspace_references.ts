@@ -53,7 +53,7 @@ export function injectReferences(
     return;
   }
   const indexPatternReference = references.find(
-    reference => reference.name === state.indexPatternRefName
+    (reference) => reference.name === state.indexPatternRefName
   );
   if (!indexPatternReference) {
     // Throw an error as "indexPatternRefName" means the reference exists within

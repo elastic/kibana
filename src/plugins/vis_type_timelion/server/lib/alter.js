@@ -30,7 +30,7 @@ import _ from 'lodash';
 export default function alter(args, fn) {
   // In theory none of the args should ever be promises. This is probably a waste.
   return Bluebird.all(args)
-    .then(function(args) {
+    .then(function (args) {
       const seriesList = args.shift();
 
       if (seriesList.type !== 'seriesList') {
@@ -38,7 +38,7 @@ export default function alter(args, fn) {
       }
 
       const list = _.chain(seriesList.list)
-        .map(function(series) {
+        .map(function (series) {
           return fn.apply(this, [series].concat(args));
         })
         .flatten()
@@ -47,7 +47,7 @@ export default function alter(args, fn) {
       seriesList.list = list;
       return seriesList;
     })
-    .catch(function(e) {
+    .catch(function (e) {
       throw e;
     });
 }

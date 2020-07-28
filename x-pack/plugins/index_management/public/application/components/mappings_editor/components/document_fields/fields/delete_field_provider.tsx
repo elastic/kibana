@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useMappingsState, useDispatch } from '../../../mappings_state';
+import { useMappingsState, useDispatch } from '../../../mappings_state_context';
 import { NormalizedField } from '../../../types';
 import { getAllDescendantAliases } from '../../../lib';
 import { ModalConfirmationDeleteFields } from './modal_confirmation_delete_fields';
@@ -54,9 +54,9 @@ export const DeleteFieldProvider = ({ children }: Props) => {
     );
   }
 
-  const deleteField: DeleteFieldFunc = field => {
+  const deleteField: DeleteFieldFunc = (field) => {
     const aliases = getAllDescendantAliases(field, fields)
-      .map(id => byId[id].path.join(' > '))
+      .map((id) => byId[id].path.join(' > '))
       .sort();
     const hasAliases = Boolean(aliases.length);
 

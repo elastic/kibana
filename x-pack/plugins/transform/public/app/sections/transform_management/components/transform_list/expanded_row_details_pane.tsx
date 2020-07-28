@@ -54,8 +54,8 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sectio
       <EuiFlexGroup>
         <EuiFlexItem style={{ width: '50%' }}>
           {sections
-            .filter(s => s.position === 'left')
-            .map(s => (
+            .filter((s) => s.position === 'left')
+            .map((s) => (
               <Fragment key={s.title}>
                 <EuiSpacer size="s" />
                 <Section section={s} />
@@ -64,8 +64,8 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sectio
         </EuiFlexItem>
         <EuiFlexItem style={{ width: '50%' }}>
           {sections
-            .filter(s => s.position === 'right')
-            .map(s => (
+            .filter((s) => s.position === 'right')
+            .map((s) => (
               <Fragment key={s.title}>
                 <EuiSpacer size="s" />
                 <Section section={s} />

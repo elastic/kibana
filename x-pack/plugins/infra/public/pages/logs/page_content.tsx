@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -17,7 +17,6 @@ import { HelpCenterContent } from '../../components/help_center_content';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
-import { useLogAnalysisCapabilitiesContext } from '../../containers/logs/log_analysis';
 import { useLogSourceContext } from '../../containers/logs/log_source';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { LogEntryCategoriesPage } from './log_entry_categories';
@@ -28,9 +27,10 @@ import { AlertDropdown } from '../../components/alerting/logs/alert_dropdown';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const logAnalysisCapabilities = useLogAnalysisCapabilitiesContext();
 
   const { initialize } = useLogSourceContext();
+
+  const kibana = useKibana();
 
   useMount(() => {
     initialize();
@@ -42,10 +42,10 @@ export const LogsPageContent: React.FunctionComponent = () => {
     pathname: '/stream',
   };
 
-  const logRateTab = {
+  const anomaliesTab = {
     app: 'logs',
-    title: logRateTabTitle,
-    pathname: '/log-rate',
+    title: anomaliesTabTitle,
+    pathname: '/anomalies',
   };
 
   const logCategoriesTab = {
@@ -77,25 +77,31 @@ export const LogsPageContent: React.FunctionComponent = () => {
       <AppNavigation aria-label={pageTitle}>
         <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
           <EuiFlexItem>
-            <RoutedTabs
-              tabs={
-                logAnalysisCapabilities.hasLogAnalysisCapabilites
-                  ? [streamTab, logRateTab, logCategoriesTab, settingsTab]
-                  : [streamTab, settingsTab]
-              }
-            />
+            <RoutedTabs tabs={[streamTab, anomaliesTab, logCategoriesTab, settingsTab]} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AlertDropdown />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={kibana.services?.application?.getUrlForApp('/home#/tutorial_directory/logging')}
+              size="s"
+              color="primary"
+              iconType="plusInCircle"
+            >
+              {ADD_DATA_LABEL}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </AppNavigation>
       <Switch>
         <Route path={streamTab.pathname} component={StreamPage} />
-        <Route path={logRateTab.pathname} component={LogEntryRatePage} />
+        <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
         <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
         <Route path={settingsTab.pathname} component={LogsSettingsPage} />
-        <RedirectWithQueryParams from={'/analysis'} to={logRateTab.pathname} exact />
+        <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
+        <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
+        <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
       </Switch>
     </ColumnarPage>
   );
@@ -109,8 +115,8 @@ const streamTabTitle = i18n.translate('xpack.infra.logs.index.streamTabTitle', {
   defaultMessage: 'Stream',
 });
 
-const logRateTabTitle = i18n.translate('xpack.infra.logs.index.logRateBetaBadgeTitle', {
-  defaultMessage: 'Log Rate',
+const anomaliesTabTitle = i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
+  defaultMessage: 'Anomalies',
 });
 
 const logCategoriesTabTitle = i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {
@@ -122,3 +128,7 @@ const settingsTabTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle
 });
 
 const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';
+
+const ADD_DATA_LABEL = i18n.translate('xpack.infra.logsHeaderAddDataButtonLabel', {
+  defaultMessage: 'Add data',
+});

@@ -102,7 +102,7 @@ export class XPackInfo {
         };
       }
 
-      this._licenseInfoChangedListeners.forEach(fn => fn());
+      this._licenseInfoChangedListeners.forEach((fn) => fn());
     });
 
     this._license = new XPackInfoLicense(() => this._cache.license);
@@ -204,9 +204,7 @@ export class XPackInfo {
       return this._cache.signature;
     }
 
-    this._cache.signature = createHash('md5')
-      .update(JSON.stringify(this.toJSON()))
-      .digest('hex');
+    this._cache.signature = createHash('md5').update(JSON.stringify(this.toJSON())).digest('hex');
 
     return this._cache.signature;
   }

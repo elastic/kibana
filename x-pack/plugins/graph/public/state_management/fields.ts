@@ -33,7 +33,7 @@ export const fieldsReducer = reducerWithInitialState(initialFields)
   .case(setDatasource, () => initialFields)
   .case(loadFields, (_currentFields, newFields) => {
     const newFieldMap: Record<string, WorkspaceField> = {};
-    newFields.forEach(field => {
+    newFields.forEach((field) => {
       newFieldMap[field.name] = field;
     });
 
@@ -51,16 +51,16 @@ export const fieldsReducer = reducerWithInitialState(initialFields)
   .build();
 
 export const fieldMapSelector = (state: GraphState) => state.fields;
-export const fieldsSelector = createSelector(fieldMapSelector, fields => Object.values(fields));
-export const selectedFieldsSelector = createSelector(fieldsSelector, fields =>
-  fields.filter(field => field.selected)
+export const fieldsSelector = createSelector(fieldMapSelector, (fields) => Object.values(fields));
+export const selectedFieldsSelector = createSelector(fieldsSelector, (fields) =>
+  fields.filter((field) => field.selected)
 );
-export const liveResponseFieldsSelector = createSelector(selectedFieldsSelector, fields =>
-  fields.filter(field => field.hopSize && field.hopSize > 0)
+export const liveResponseFieldsSelector = createSelector(selectedFieldsSelector, (fields) =>
+  fields.filter((field) => field.hopSize && field.hopSize > 0)
 );
 export const hasFieldsSelector = createSelector(
   selectedFieldsSelector,
-  fields => fields.length > 0
+  (fields) => fields.length > 0
 );
 
 /**
@@ -72,7 +72,7 @@ export const updateSaveButtonSaga = ({ notifyAngular }: GraphStoreDependencies) 
   function* notify(): IterableIterator<void> {
     notifyAngular();
   }
-  return function*() {
+  return function* () {
     yield takeLatest(matchesOne(selectField, deselectField), notify);
   };
 };
@@ -94,7 +94,7 @@ export const syncFieldsSaga = ({ getWorkspace, setLiveResponseFields }: GraphSto
     workspace.options.vertex_fields = selectedFieldsSelector(currentState);
     setLiveResponseFields(liveResponseFieldsSelector(currentState));
   }
-  return function*() {
+  return function* () {
     yield takeEvery(
       matchesOne(loadFields, selectField, deselectField, updateFieldProperties),
       syncFields
@@ -116,7 +116,7 @@ export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDep
     }
     const newColor = action.payload.fieldProperties.color;
     if (newColor) {
-      workspace.nodes.forEach(function(node) {
+      workspace.nodes.forEach(function (node) {
         if (node.data.field === action.payload.fieldName) {
           node.color = newColor;
         }
@@ -125,7 +125,7 @@ export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDep
     const newIcon = action.payload.fieldProperties.icon;
 
     if (newIcon) {
-      workspace.nodes.forEach(function(node) {
+      workspace.nodes.forEach(function (node) {
         if (node.data.field === action.payload.fieldName) {
           node.icon = newIcon;
         }
@@ -137,7 +137,7 @@ export const syncNodeStyleSaga = ({ getWorkspace, notifyAngular }: GraphStoreDep
     workspace.options.vertex_fields = selectedFields;
   }
 
-  return function*() {
+  return function* () {
     yield takeLatest(updateFieldProperties.match, syncNodeStyle);
   };
 };

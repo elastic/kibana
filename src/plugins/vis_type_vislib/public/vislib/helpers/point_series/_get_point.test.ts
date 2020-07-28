@@ -23,12 +23,12 @@ import { setFormatService } from '../../../services';
 import { Aspect } from './point_series';
 import { Table, Row, Column } from '../../types';
 
-describe('getPoint', function() {
+describe('getPoint', function () {
   let deserialize: IFieldFormatsRegistry['deserialize'];
 
   beforeAll(() => {
     deserialize = jest.fn(() => ({
-      convert: jest.fn(v => v),
+      convert: jest.fn((v) => v),
     })) as any;
 
     setFormatService({
@@ -44,17 +44,17 @@ describe('getPoint', function() {
     ],
   } as Table;
 
-  describe('Without series aspect', function() {
+  describe('Without series aspect', function () {
     let seriesAspect: undefined;
     let xAspect: Aspect;
     let yAspect: Aspect;
 
-    beforeEach(function() {
+    beforeEach(function () {
       xAspect = { accessor: '0' } as Aspect;
       yAspect = { accessor: '1', title: 'Y' } as Aspect;
     });
 
-    it('properly unwraps values', function() {
+    it('properly unwraps values', function () {
       const row = table.rows[0];
       const zAspect = { accessor: '2' } as Aspect;
       const point = getPoint(table, xAspect, seriesAspect, row, 0, yAspect, zAspect);
@@ -65,25 +65,25 @@ describe('getPoint', function() {
       expect(point).toHaveProperty('series', yAspect.title);
     });
 
-    it('ignores points with a y value of NaN', function() {
+    it('ignores points with a y value of NaN', function () {
       const row = table.rows[1];
       const point = getPoint(table, xAspect, seriesAspect, row, 1, yAspect);
       expect(point).toBe(void 0);
     });
   });
 
-  describe('With series aspect', function() {
+  describe('With series aspect', function () {
     let row: Row;
     let xAspect: Aspect;
     let yAspect: Aspect;
 
-    beforeEach(function() {
+    beforeEach(function () {
       row = table.rows[0];
       xAspect = { accessor: '0' } as Aspect;
       yAspect = { accessor: '2' } as Aspect;
     });
 
-    it('properly unwraps values', function() {
+    it('properly unwraps values', function () {
       const seriesAspect = [{ accessor: '1' } as Aspect];
       const point = getPoint(table, xAspect, seriesAspect, row, 0, yAspect);
 
@@ -92,7 +92,7 @@ describe('getPoint', function() {
       expect(point).toHaveProperty('y', 3);
     });
 
-    it('should call deserialize', function() {
+    it('should call deserialize', function () {
       const seriesAspect = [
         { accessor: '1', format: { id: 'number', params: { pattern: '$' } } } as Aspect,
       ];

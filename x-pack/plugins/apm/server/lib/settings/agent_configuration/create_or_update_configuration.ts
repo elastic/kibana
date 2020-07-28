@@ -8,14 +8,14 @@ import hash from 'object-hash';
 import { Setup } from '../../helpers/setup_request';
 import {
   AgentConfiguration,
-  AgentConfigurationIntake
+  AgentConfigurationIntake,
 } from '../../../../common/agent_configuration/configuration_types';
 import { APMIndexDocumentParams } from '../../helpers/es_client';
 
 export async function createOrUpdateConfiguration({
   configurationId,
   configurationIntake,
-  setup
+  setup,
 }: {
   configurationId?: string;
   configurationIntake: AgentConfigurationIntake;
@@ -30,13 +30,13 @@ export async function createOrUpdateConfiguration({
       agent_name: configurationIntake.agent_name,
       service: {
         name: configurationIntake.service.name,
-        environment: configurationIntake.service.environment
+        environment: configurationIntake.service.environment,
       },
       settings: configurationIntake.settings,
       '@timestamp': Date.now(),
       applied_by_agent: false,
-      etag: hash(configurationIntake)
-    }
+      etag: hash(configurationIntake),
+    },
   };
 
   // by specifying an id elasticsearch will delete the previous doc and insert the updated doc

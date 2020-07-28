@@ -10,7 +10,7 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchIndicesHelpers = es => {
+export const initElasticsearchIndicesHelpers = (es) => {
   let indicesCreated = [];
 
   const createIndex = (index = getRandomString(), body = {}) => {
@@ -23,10 +23,10 @@ export const initElasticsearchIndicesHelpers = es => {
       .then(() => index);
   };
 
-  const deleteIndex = index => {
+  const deleteIndex = (index) => {
     const indices = Array.isArray(index) ? index : [index];
-    indices.forEach(_index => {
-      indicesCreated = indicesCreated.filter(i => i !== _index);
+    indices.forEach((_index) => {
+      indicesCreated = indicesCreated.filter((i) => i !== _index);
     });
     return es.indices.delete({ index: indices }, { ignoreUnavailable: true });
   };

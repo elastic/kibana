@@ -7,11 +7,11 @@
 <b>Signature:</b>
 
 ```typescript
-setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
-        fieldFormats: {
-            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
-        };
+setup(core: CoreSetup<object, DataPluginStart>, { usageCollection }: DataPluginSetupDependencies): {
         search: ISearchSetup;
+        fieldFormats: {
+            register: (customFieldFormat: import("../common").FieldFormatInstanceType) => number;
+        };
     };
 ```
 
@@ -19,15 +19,15 @@ setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  core | <code>CoreSetup</code> |  |
+|  core | <code>CoreSetup&lt;object, DataPluginStart&gt;</code> |  |
 |  { usageCollection } | <code>DataPluginSetupDependencies</code> |  |
 
 <b>Returns:</b>
 
 `{
-        fieldFormats: {
-            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
-        };
         search: ISearchSetup;
+        fieldFormats: {
+            register: (customFieldFormat: import("../common").FieldFormatInstanceType) => number;
+        };
     }`
 

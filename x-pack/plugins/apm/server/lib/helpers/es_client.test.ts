@@ -12,7 +12,7 @@ describe('isApmIndex', () => {
     'apm-*-onboarding-*',
     'apm-*-span-*',
     'apm-*-transaction-*',
-    'apm-*-error-*'
+    'apm-*-error-*',
   ];
   describe('when indexParam is a string', () => {
     it('should return true if it matches any of the items in apmIndices', () => {
@@ -40,7 +40,7 @@ describe('isApmIndex', () => {
 
   describe('when indexParam is neither a string or an array', () => {
     it('should return false', () => {
-      [true, false, undefined].forEach(indexParam => {
+      [true, false, undefined].forEach((indexParam) => {
         expect(isApmIndex(apmIndices, indexParam)).toBe(false);
       });
     });

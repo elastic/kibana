@@ -24,6 +24,7 @@ export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [needsDestIndexPattern, setNeedsDestIndexPattern] = useState<boolean>(false);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [jobCapsServiceErrorMessage, setJobCapsServiceErrorMessage] = useState<undefined | string>(
@@ -34,7 +35,7 @@ export const useResultsViewConfig = (jobId: string) => {
 
   // get analytics configuration, index pattern and field caps
   useEffect(() => {
-    (async function() {
+    (async function () {
       setIsLoadingJobConfig(false);
 
       try {
@@ -68,6 +69,7 @@ export const useResultsViewConfig = (jobId: string) => {
             }
 
             if (indexP === undefined) {
+              setNeedsDestIndexPattern(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
               const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
               indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
@@ -100,5 +102,6 @@ export const useResultsViewConfig = (jobId: string) => {
     jobConfig,
     jobConfigErrorMessage,
     jobStatus,
+    needsDestIndexPattern,
   };
 };

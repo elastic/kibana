@@ -29,15 +29,15 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
 
   const choices = [{ text: 'No group', value: '' }].concat(
     argValueChoice,
-    filterGroups.map(f => ({ text: f }))
+    filterGroups.map((f) => ({ text: f }))
   );
 
-  const handleSelectGroup = ev => {
+  const handleSelectGroup = (ev) => {
     const selected = ev.target.value;
     onValueChange(selected);
   };
 
-  const handleAddGroup = ev => {
+  const handleAddGroup = (ev) => {
     // stop the form from submitting
     ev.preventDefault();
     // set the new value
@@ -56,7 +56,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
             compressed
             type="text"
             value={inputValue}
-            onChange={ev => setInputValue(ev.target.value)}
+            onChange={(ev) => setInputValue(ev.target.value)}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">

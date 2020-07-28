@@ -5,7 +5,7 @@
  */
 
 import { getApmHref } from '../get_apm_href';
-import { MonitorSummary } from '../../../../../common/runtime_types';
+import { MonitorSummary, makePing } from '../../../../../common/runtime_types';
 
 describe('getApmHref', () => {
   let summary: MonitorSummary;
@@ -15,22 +15,17 @@ describe('getApmHref', () => {
       monitor_id: 'foo',
       state: {
         summary: {},
-        checks: [
-          {
-            monitor: {
-              ip: '151.101.202.217',
-              status: 'up',
-            },
-            container: {
-              id: 'test-container-id',
-            },
-            kubernetes: {
-              pod: {
-                uid: 'test-pod-id',
-              },
-            },
-            timestamp: 123,
-          },
+        monitor: {},
+        summaryPings: [
+          makePing({
+            docId: 'foo',
+            id: 'foo',
+            type: 'test',
+            ip: '151.101.202.217',
+            status: 'up',
+            timestamp: '123',
+            duration: 123,
+          }),
         ],
         timestamp: '123',
         url: {

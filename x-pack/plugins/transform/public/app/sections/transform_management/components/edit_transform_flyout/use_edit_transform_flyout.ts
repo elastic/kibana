@@ -27,7 +27,7 @@ const numberAboveZeroNotValidErrorMessage = i18n.translate(
     defaultMessage: 'Value needs to be a number above zero.',
   }
 );
-export const numberAboveZeroValidator: Validator = arg =>
+export const numberAboveZeroValidator: Validator = (arg) =>
   !isNaN(arg) && parseInt(arg, 10) > 0 ? [] : [numberAboveZeroNotValidErrorMessage];
 
 // The way the current form is set up, this validator is just a sanity check,
@@ -38,7 +38,7 @@ const stringNotValidErrorMessage = i18n.translate(
     defaultMessage: 'Value needs to be of type string.',
   }
 );
-const stringValidator: Validator = arg =>
+const stringValidator: Validator = (arg) =>
   typeof arg === 'string' ? [] : [stringNotValidErrorMessage];
 
 // Only allow frequencies in the form of 1s/1h etc.
@@ -48,7 +48,7 @@ const frequencyNotValidErrorMessage = i18n.translate(
     defaultMessage: 'The frequency value is not valid.',
   }
 );
-export const frequencyValidator: Validator = arg => {
+export const frequencyValidator: Validator = (arg) => {
   if (typeof arg !== 'string' || arg === null) {
     return [stringNotValidErrorMessage];
   }

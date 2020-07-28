@@ -90,29 +90,32 @@ Array [
 exports[`calls "kbn:bootstrap" scripts and links executables after installing deps: script 1`] = `
 Array [
   Array [
-    "kbn:bootstrap",
-    Array [],
-    Project {
-      "allDependencies": Object {},
-      "devDependencies": Object {},
-      "isWorkspaceProject": false,
-      "isWorkspaceRoot": false,
-      "json": Object {
-        "name": "bar",
+    Object {
+      "args": Array [],
+      "debug": undefined,
+      "pkg": Project {
+        "allDependencies": Object {},
+        "devDependencies": Object {},
+        "isWorkspaceProject": false,
+        "isWorkspaceRoot": false,
+        "json": Object {
+          "name": "bar",
+          "scripts": Object {
+            "kbn:bootstrap": "node ./bar.js",
+          },
+          "version": "1.0.0",
+        },
+        "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/node_modules",
+        "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/package.json",
+        "path": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
+        "productionDependencies": Object {},
         "scripts": Object {
           "kbn:bootstrap": "node ./bar.js",
         },
+        "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/target",
         "version": "1.0.0",
       },
-      "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/node_modules",
-      "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/package.json",
-      "path": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
-      "productionDependencies": Object {},
-      "scripts": Object {
-        "kbn:bootstrap": "node ./bar.js",
-      },
-      "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/target",
-      "version": "1.0.0",
+      "script": "kbn:bootstrap",
     },
   ],
 ]
@@ -123,36 +126,6 @@ Array [
   Array [
     "<repoRoot>/packages/kbn-pm/src/commands",
     Array [],
-  ],
-]
-`;
-
-exports[`does not run installer if no deps in package: logs 1`] = `
-Array [
-  Array [
-    "
-Running installs in topological order:",
-  ],
-  Array [
-    "
-
-Installing dependencies in [kibana]:
-",
-  ],
-  Array [
-    "
-Installs completed, linking package executables:
-",
-  ],
-  Array [
-    "
-Linking executables completed, running \`kbn:bootstrap\` scripts
-",
-  ],
-  Array [
-    "
-Bootstrapping completed!
-",
   ],
 ]
 `;
@@ -181,48 +154,6 @@ Array [
   Array [
     "<repoRoot>/packages/kbn-pm/src/commands/packages/foo",
     Array [],
-  ],
-]
-`;
-
-exports[`handles dependencies of dependencies: logs 1`] = `
-Array [
-  Array [
-    "
-Running installs in topological order:",
-  ],
-  Array [
-    "
-
-Installing dependencies in [kibana]:
-",
-  ],
-  Array [
-    "
-
-Installing dependencies in [bar]:
-",
-  ],
-  Array [
-    "
-
-Installing dependencies in [foo]:
-",
-  ],
-  Array [
-    "
-Installs completed, linking package executables:
-",
-  ],
-  Array [
-    "
-Linking executables completed, running \`kbn:bootstrap\` scripts
-",
-  ],
-  Array [
-    "
-Bootstrapping completed!
-",
   ],
 ]
 `;

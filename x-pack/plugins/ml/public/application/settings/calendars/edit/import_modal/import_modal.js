@@ -47,7 +47,7 @@ export class ImportModal extends Component {
     };
   }
 
-  handleImport = async loadedFile => {
+  handleImport = async (loadedFile) => {
     const incomingFile = loadedFile[0];
     const errorMessage = i18n.translate(
       'xpack.ml.calendarsEdit.importModal.couldNotParseICSFileErrorMessage',
@@ -82,14 +82,14 @@ export class ImportModal extends Component {
     }
   };
 
-  onEventDelete = eventId => {
-    this.setState(prevState => ({
-      allImportedEvents: prevState.allImportedEvents.filter(event => event.event_id !== eventId),
-      selectedEvents: prevState.selectedEvents.filter(event => event.event_id !== eventId),
+  onEventDelete = (eventId) => {
+    this.setState((prevState) => ({
+      allImportedEvents: prevState.allImportedEvents.filter((event) => event.event_id !== eventId),
+      selectedEvents: prevState.selectedEvents.filter((event) => event.event_id !== eventId),
     }));
   };
 
-  onCheckboxToggle = e => {
+  onCheckboxToggle = (e) => {
     this.setState({
       includePastEvents: e.target.checked,
     });
@@ -99,7 +99,7 @@ export class ImportModal extends Component {
     const { allImportedEvents, selectedEvents, includePastEvents } = this.state;
     const eventsToImport = includePastEvents ? allImportedEvents : selectedEvents;
 
-    const events = eventsToImport.map(event => ({
+    const events = eventsToImport.map((event) => ({
       description: event.description,
       start_time: event.start_time,
       end_time: event.end_time,
@@ -135,7 +135,7 @@ export class ImportModal extends Component {
       importedEvents = selectedEvents;
     }
 
-    if (importedEvents.find(e => e.asterisk) !== undefined) {
+    if (importedEvents.find((e) => e.asterisk) !== undefined) {
       showRecurringWarning = true;
     }
 

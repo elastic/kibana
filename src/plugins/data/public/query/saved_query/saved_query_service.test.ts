@@ -89,7 +89,7 @@ describe('saved query service', () => {
     mockSavedObjectsClient.delete.mockReset();
   });
 
-  describe('saveQuery', function() {
+  describe('saveQuery', function () {
     it('should create a saved object for the given attributes', async () => {
       mockSavedObjectsClient.create.mockReturnValue({
         id: 'foo',
@@ -165,7 +165,7 @@ describe('saved query service', () => {
       expect(error).not.toBe(null);
     });
   });
-  describe('findSavedQueries', function() {
+  describe('findSavedQueries', function () {
     it('should find and return saved queries without search text or pagination parameters', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
@@ -276,7 +276,7 @@ describe('saved query service', () => {
     });
   });
 
-  describe('getSavedQuery', function() {
+  describe('getSavedQuery', function () {
     it('should retrieve a saved query by id', async () => {
       mockSavedObjectsClient.get.mockReturnValue({ id: 'foo', attributes: savedQueryAttributes });
 
@@ -291,14 +291,14 @@ describe('saved query service', () => {
     });
   });
 
-  describe('deleteSavedQuery', function() {
+  describe('deleteSavedQuery', function () {
     it('should delete the saved query for the given ID', async () => {
       await deleteSavedQuery('foo');
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo');
     });
   });
 
-  describe('getAllSavedQueries', function() {
+  describe('getAllSavedQueries', function () {
     it('should return all the saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
@@ -324,7 +324,7 @@ describe('saved query service', () => {
     });
   });
 
-  describe('getSavedQueryCount', function() {
+  describe('getSavedQueryCount', function () {
     it('should return the total number of saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         total: 1,

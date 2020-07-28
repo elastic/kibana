@@ -80,7 +80,7 @@ class ArgFormComponent extends PureComponent {
               });
             },
             error: hasError,
-            setLabel: label => this._isMounted && setLabel(label),
+            setLabel: (label) => this._isMounted && setLabel(label),
             resetErrorState: () => {
               resetErrorState();
               this._isMounted && setRenderError(false);
@@ -120,7 +120,7 @@ class ArgFormComponent extends PureComponent {
           );
 
           return (
-            <div className={`canvasArg ${expandableLabel ? 'canvasArg--expandable' : null}`}>
+            <div className={`canvasArg ${expandableLabel ? 'canvasSidebar__expandable' : null}`}>
               <ArgLabel
                 className="resolved"
                 argId={argId}

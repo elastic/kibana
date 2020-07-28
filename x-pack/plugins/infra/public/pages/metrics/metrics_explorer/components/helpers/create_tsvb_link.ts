@@ -6,7 +6,7 @@
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { colorTransformer, MetricsExplorerColor } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {
@@ -109,7 +109,21 @@ export const createFilterFromOptions = (
   }
   if (options.groupBy) {
     const id = series.id.replace('"', '\\"');
-    filters.push(`${options.groupBy} : "${id}"`);
+    const groupByFilters = Array.isArray(options.groupBy)
+      ? options.groupBy
+          .map((field, index) => {
+            if (!series.keys) {
+              return null;
+            }
+            const value = series.keys[index];
+            if (!value) {
+              return null;
+            }
+            return `${field}: "${value.replace('"', '\\"')}"`;
+          })
+          .join(' and ')
+      : `${options.groupBy} : "${id}"`;
+    filters.push(groupByFilters);
   }
   return { language: 'kuery', query: filters.join(' and ') };
 };

@@ -40,7 +40,7 @@ export default new Chainable('title', {
       'Adds a title to the top of the plot. If called on more than 1 seriesList the last call will be used.',
   }),
   fn: function hideFn(args) {
-    return alter(args, function(eachSeries, title) {
+    return alter(args, function (eachSeries, title) {
       eachSeries._title = title;
       return eachSeries;
     });

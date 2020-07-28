@@ -28,7 +28,7 @@ export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
       if (!isMounted()) return;
       setIndexPatterns(
         indexPatternSavedObjects
-          ? indexPatternSavedObjects.map(indexPattern => ({
+          ? indexPatternSavedObjects.map((indexPattern) => ({
               id: indexPattern.id,
               title: indexPattern.attributes.title,
             }))
@@ -41,7 +41,7 @@ export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
     <DiscoverDrilldownConfig
       activeIndexPatternId={config.indexPatternId}
       indexPatterns={indexPatterns}
-      onIndexPatternSelect={indexPatternId => {
+      onIndexPatternSelect={(indexPatternId) => {
         onConfig({ ...config, indexPatternId });
       }}
       customIndexPattern={config.customIndexPattern}

@@ -4,7 +4,7 @@
 
 Fleet workflow:
 
-- an agent enroll to fleet using an enrollmentAPiKey
+- an agent enroll to fleet using an enrollment token.
 - Every n seconds agent is polling the checkin API to send events and check for new configuration
 
 ### Agent enrollment
@@ -12,7 +12,7 @@ Fleet workflow:
 An agent must enroll using the REST Api provided by fleet.
 When an agent enroll Fleet:
 
-- verify the API Key is a valid ES API key
+- verify the Enrollment token is a valid ES API key
 - retrieve the Saved Object (SO) associated to this api key id (this SO contains the configuration|policy id)
 - create an ES ApiKey unique to the agent for accessing kibana during checkin
 - create an ES ApiKey per output to send logs and metrics to the output
@@ -26,7 +26,7 @@ Agent are going to poll the checkin API to send events and check for new configr
 
 When an agent checkin fleet:
 
-- verify the access API Key is a valid ES API key
+- verify the access token is a valid ES API key
 - retrieve the agent (SO associated to this api key id)
 - Insert events SO
 - If the Agent configuration has been updated since last checkin

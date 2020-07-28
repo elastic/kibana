@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-const assertStatsAndMetrics = body => {
+const assertStatsAndMetrics = (body) => {
   expect(body.kibana.name).to.be.a('string');
   expect(body.kibana.uuid).to.be.a('string');
   expect(body.kibana.host).to.be.a('string');
@@ -53,7 +53,7 @@ const assertStatsAndMetrics = body => {
   expect(body.concurrent_connections).to.be.a('number');
 };
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   describe('kibana stats api', () => {
     describe('basic', () => {

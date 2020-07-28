@@ -12,6 +12,7 @@ const bucketsA = [
   {
     doc_count: 3,
     aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
+    key_as_string: new Date(1577858400000).toISOString(),
   },
 ];
 
@@ -64,11 +65,11 @@ export const emptyMetricResponse = {
 export const basicCompositeResponse = {
   aggregations: {
     groupings: {
-      after_key: 'foo',
+      after_key: { groupBy0: 'foo' },
       buckets: [
         {
           key: {
-            groupBy: 'a',
+            groupBy0: 'a',
           },
           aggregatedIntervals: {
             buckets: bucketsA,
@@ -76,7 +77,7 @@ export const basicCompositeResponse = {
         },
         {
           key: {
-            groupBy: 'b',
+            groupBy0: 'b',
           },
           aggregatedIntervals: {
             buckets: bucketsB,
@@ -95,11 +96,11 @@ export const basicCompositeResponse = {
 export const alternateCompositeResponse = {
   aggregations: {
     groupings: {
-      after_key: 'foo',
+      after_key: { groupBy0: 'foo' },
       buckets: [
         {
           key: {
-            groupBy: 'a',
+            groupBy0: 'a',
           },
           aggregatedIntervals: {
             buckets: bucketsB,
@@ -107,7 +108,7 @@ export const alternateCompositeResponse = {
         },
         {
           key: {
-            groupBy: 'b',
+            groupBy0: 'b',
           },
           aggregatedIntervals: {
             buckets: bucketsA,

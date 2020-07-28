@@ -20,7 +20,7 @@
 import { fetchStreaming } from './fetch_streaming';
 import { mockXMLHttpRequest } from '../test_helpers/xhr';
 
-const tick = () => new Promise(resolve => setTimeout(resolve, 1));
+const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
 
 const setup = () => {
   const { xhr, XMLHttpRequest } = mockXMLHttpRequest();

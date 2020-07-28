@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Feature } from '../../../features/server';
 import {
   CoreSetup,
   HttpResources,
-  IClusterClient,
+  ILegacyClusterClient,
   IRouter,
   Logger,
 } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { Authentication } from '../authentication';
-import { Authorization } from '../authorization';
+import { AuthorizationServiceSetup } from '../authorization';
 import { ConfigType } from '../config';
 
 import { defineAuthenticationRoutes } from './authentication';
@@ -23,6 +24,7 @@ import { defineIndicesRoutes } from './indices';
 import { defineUsersRoutes } from './users';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineViewRoutes } from './views';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -32,11 +34,13 @@ export interface RouteDefinitionParams {
   basePath: CoreSetup['http']['basePath'];
   httpResources: HttpResources;
   logger: Logger;
-  clusterClient: IClusterClient;
+  clusterClient: ILegacyClusterClient;
   config: ConfigType;
   authc: Authentication;
-  authz: Authorization;
+  authz: AuthorizationServiceSetup;
   license: SecurityLicense;
+  getFeatures: () => Promise<Feature[]>;
+  getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {

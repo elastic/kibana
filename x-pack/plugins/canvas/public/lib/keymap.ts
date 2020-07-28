@@ -37,20 +37,20 @@ const getShortcuts = (
 
   // handle shift modifier
   if (modifiers.includes('shift')) {
-    macShortcuts = macShortcuts.map(shortcut => `shift+${shortcut}`);
-    shortcuts = shortcuts.map(shortcut => `shift+${shortcut}`);
+    macShortcuts = macShortcuts.map((shortcut) => `shift+${shortcut}`);
+    shortcuts = shortcuts.map((shortcut) => `shift+${shortcut}`);
   }
 
   // handle alt modifier
   if (modifiers.includes('alt') || modifiers.includes('option')) {
-    macShortcuts = macShortcuts.map(shortcut => `option+${shortcut}`);
-    shortcuts = shortcuts.map(shortcut => `alt+${shortcut}`);
+    macShortcuts = macShortcuts.map((shortcut) => `option+${shortcut}`);
+    shortcuts = shortcuts.map((shortcut) => `alt+${shortcut}`);
   }
 
   // handle ctrl modifier
   if (modifiers.includes('ctrl') || modifiers.includes('command')) {
-    macShortcuts = macShortcuts.map(shortcut => `command+${shortcut}`);
-    shortcuts = shortcuts.map(shortcut => `ctrl+${shortcut}`);
+    macShortcuts = macShortcuts.map((shortcut) => `command+${shortcut}`);
+    shortcuts = shortcuts.map((shortcut) => `ctrl+${shortcut}`);
   }
 
   return {
@@ -153,10 +153,12 @@ export const keymap: KeyMap = {
     displayName: namespaceDisplayNames.PRESENTATION,
     FULLSCREEN: fullscreenShortcut,
     FULLSCREEN_EXIT: getShortcuts('esc', { help: shortcutHelp.FULLSCREEN_EXIT }),
+    // @ts-expect-error TODO: figure out why lodash is inferring booleans, rather than ShortcutMap.
     PREV: mapValues(previousPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'backspace' and 'left' to list of shortcuts per OS
       key === 'help' ? osShortcuts : osShortcuts.concat(['backspace', 'left'])
     ),
+    // @ts-expect-error TODO: figure out why lodash is inferring booleans, rather than ShortcutMap.
     NEXT: mapValues(nextPageShortcut, (osShortcuts: string[], key?: string) =>
       // adds 'space' and 'right' to list of shortcuts per OS
       key === 'help' ? osShortcuts : osShortcuts.concat(['space', 'right'])

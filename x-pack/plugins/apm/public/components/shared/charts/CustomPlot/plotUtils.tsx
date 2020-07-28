@@ -20,7 +20,7 @@ const XY_MARGIN = {
   top: unit,
   left: unit * 5,
   right: 0,
-  bottom: unit * 2
+  bottom: unit * 2,
 };
 
 const getXScale = (xMin: number, xMax: number, width: number) => {
@@ -30,22 +30,19 @@ const getXScale = (xMin: number, xMax: number, width: number) => {
 };
 
 const getYScale = (yMin: number, yMax: number) => {
-  return scaleLinear()
-    .domain([yMin, yMax])
-    .range([XY_HEIGHT, 0])
-    .nice();
+  return scaleLinear().domain([yMin, yMax]).range([XY_HEIGHT, 0]).nice();
 };
 
 function getFlattenedCoordinates(
   visibleSeries: Array<TimeSeries<Coordinate>>,
   enabledSeries: Array<TimeSeries<Coordinate>>
 ) {
-  const enabledCoordinates = flatten(enabledSeries.map(serie => serie.data));
+  const enabledCoordinates = flatten(enabledSeries.map((serie) => serie.data));
   if (!isEmpty(enabledCoordinates)) {
     return enabledCoordinates;
   }
 
-  return flatten(visibleSeries.map(serie => serie.data));
+  return flatten(visibleSeries.map((serie) => serie.data));
 }
 
 export type PlotValues = ReturnType<typeof getPlotValues>;
@@ -58,7 +55,7 @@ export function getPlotValues(
     yMin = 0,
     yMax = 'max',
     height,
-    stackBy
+    stackBy,
   }: {
     width: number;
     yMin?: number | 'min';
@@ -72,14 +69,14 @@ export function getPlotValues(
     enabledSeries
   );
 
-  const xMin = d3.min(flattenedCoordinates, d => d.x);
-  const xMax = d3.max(flattenedCoordinates, d => d.x);
+  const xMin = d3.min(flattenedCoordinates, (d) => d.x);
+  const xMax = d3.max(flattenedCoordinates, (d) => d.x);
 
   if (yMax === 'max') {
-    yMax = d3.max(flattenedCoordinates, d => d.y ?? 0);
+    yMax = d3.max(flattenedCoordinates, (d) => d.y ?? 0);
   }
   if (yMin === 'min') {
-    yMin = d3.min(flattenedCoordinates, d => d.y ?? 0);
+    yMin = d3.min(flattenedCoordinates, (d) => d.y ?? 0);
   }
 
   const [xMinZone, xMaxZone] = getDomainTZ(xMin, xMax);
@@ -97,7 +94,7 @@ export function getPlotValues(
   const xTickValues = getTimeTicksTZ({
     domain: [xMinZone, xMaxZone],
     totalTicks: xTickTotal,
-    width
+    width,
   });
 
   return {
@@ -108,7 +105,7 @@ export function getPlotValues(
     XY_MARGIN,
     XY_HEIGHT: height || XY_HEIGHT,
     XY_WIDTH: width,
-    stackBy
+    stackBy,
   };
 }
 
@@ -145,6 +142,6 @@ SharedPlot.propTypes = {
     x: PropTypes.func.isRequired,
     y: PropTypes.func.isRequired,
     XY_WIDTH: PropTypes.number.isRequired,
-    height: PropTypes.number
-  }).isRequired
+    height: PropTypes.number,
+  }).isRequired,
 };

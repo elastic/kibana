@@ -17,8 +17,4 @@ export const pageSizeChanged = createAction('INDEX_MANAGEMENT_PAGE_SIZE_CHANGED'
 
 export const sortChanged = createAction('INDEX_MANAGEMENT_SORT_CHANGED');
 
-export const showSystemIndicesChanged = createAction(
-  'INDEX_MANAGEMENT_SHOW_SYSTEM_INDICES_CHANGED'
-);
-
 export const toggleChanged = createAction('INDEX_MANAGEMENT_TOGGLE_CHANGED');

@@ -23,10 +23,19 @@ jest.mock('./fs');
 
 import { resolve } from 'path';
 
+import { ToolingLogCollectingWriter } from '@kbn/dev-utils/tooling_log';
+
 import { absolutePathSnapshotSerializer, stripAnsiSnapshotSerializer } from '../test_helpers';
 import { linkProjectExecutables } from './link_project_executables';
 import { Project } from './project';
 import { buildProjectGraph } from './projects';
+import { log } from './log';
+
+const logWriter = new ToolingLogCollectingWriter();
+log.setWriters([logWriter]);
+beforeEach(() => {
+  logWriter.messages.length = 0;
+});
 
 const projectsByName = new Map([
   [
@@ -70,7 +79,7 @@ const projectGraph = buildProjectGraph(projectsByName);
 function getFsMockCalls() {
   const fs = require('./fs');
   const fsMockCalls: { [key: string]: any[][] } = {};
-  Object.keys(fs).map(key => {
+  Object.keys(fs).map((key) => {
     if (jest.isMockFunction(fs[key])) {
       fsMockCalls[key] = fs[key].mock.calls;
     }
@@ -101,12 +110,15 @@ describe('bin script points to a file', () => {
     const fs = require('./fs');
     fs.isFile.mockReturnValue(true);
 
-    const logMock = jest.spyOn(console, 'log').mockImplementation(() => {
-      // noop
-    });
     await linkProjectExecutables(projectsByName, projectGraph);
 
     expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
-    expect(logMock.mock.calls).toMatchSnapshot('logs');
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+         debg Linking package executables,
+         debg [foo] bar -> ../bar/bin/bar.js,
+         debg [baz] bar -> ../bar/bin/bar.js,
+      ]
+    `);
   });
 });

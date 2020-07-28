@@ -28,7 +28,7 @@ const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 
  *
  */
 export function normalizeQuery() {
-  return () => doc => {
+  return () => (doc) => {
     const series = _.get(doc, 'aggs.pivot.aggs');
     const normalizedSeries = {};
 

@@ -16,7 +16,7 @@ import {
   EuiTabbedContent,
   EuiTitle,
   EuiBadge,
-  EuiToolTip
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
@@ -44,7 +44,7 @@ function formatType(type: string) {
       return i18n.translate(
         'xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel',
         {
-          defaultMessage: 'Navigation timing'
+          defaultMessage: 'Navigation timing',
         }
       );
     default:
@@ -67,7 +67,7 @@ function getSpanTypes(span: Span) {
   return {
     spanType: formatType(type),
     spanSubtype: formatSubtype(subtype),
-    spanAction: action
+    spanAction: action,
   };
 }
 
@@ -91,7 +91,7 @@ export function SpanFlyout({
   span,
   parentTransaction,
   totalDuration,
-  onClose
+  onClose,
 }: Props) {
   if (!span) {
     return null;
@@ -117,7 +117,7 @@ export function SpanFlyout({
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
                     {
-                      defaultMessage: 'Span details'
+                      defaultMessage: 'Span details',
                     }
                   )}
                 </h2>
@@ -130,7 +130,7 @@ export function SpanFlyout({
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
                     {
-                      defaultMessage: 'View span in Discover'
+                      defaultMessage: 'View span in Discover',
                     }
                   )}
                 </EuiButtonEmpty>
@@ -190,7 +190,7 @@ export function SpanFlyout({
                   </EuiToolTip>
                 )}
                 <SyncBadge sync={span.span.sync} />
-              </>
+              </>,
             ]}
           />
           <EuiHorizontalRule />
@@ -202,7 +202,7 @@ export function SpanFlyout({
                 name: i18n.translate(
                   'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
                   {
-                    defaultMessage: 'Stack Trace'
+                    defaultMessage: 'Stack Trace',
                   }
                 ),
                 content: (
@@ -213,14 +213,14 @@ export function SpanFlyout({
                       codeLanguage={codeLanguage}
                     />
                   </Fragment>
-                )
+                ),
               },
               {
                 id: 'metadata',
                 name: i18n.translate(
                   'xpack.apm.propertiesTable.tabs.metadataLabel',
                   {
-                    defaultMessage: 'Metadata'
+                    defaultMessage: 'Metadata',
                   }
                 ),
                 content: (
@@ -228,8 +228,8 @@ export function SpanFlyout({
                     <EuiSpacer size="m" />
                     <SpanMetadata span={span} />
                   </Fragment>
-                )
-              }
+                ),
+              },
             ]}
           />
         </EuiFlyoutBody>

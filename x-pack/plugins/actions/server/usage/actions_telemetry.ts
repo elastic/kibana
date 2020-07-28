@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
-export async function getTotalCount(callCluster: APICaller, kibanaIndex: string) {
+export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: string) {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.types = [:]',
@@ -66,7 +66,7 @@ export async function getTotalCount(callCluster: APICaller, kibanaIndex: string)
   };
 }
 
-export async function getInUseTotalCount(callCluster: APICaller, kibanaIndex: string) {
+export async function getInUseTotalCount(callCluster: LegacyAPICaller, kibanaIndex: string) {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.connectorIds = new HashMap(); state.total = 0;',

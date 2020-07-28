@@ -14,7 +14,7 @@ import { matrixToAngle } from '../../lib/aeroelastic/matrix';
 import { isGroupId, elementToShape } from './utils';
 export * from './utils';
 
-const shapeToElement = shape => ({
+const shapeToElement = (shape) => ({
   left: shape.transformMatrix[12] - shape.a,
   top: shape.transformMatrix[13] - shape.b,
   width: shape.a * 2,
@@ -26,7 +26,7 @@ const shapeToElement = shape => ({
 
 const globalPositionUpdates = (setMultiplePositions, { shapes, gestureEnd }, unsortedElements) => {
   const ascending = (a, b) => (a.id < b.id ? -1 : 1);
-  const relevant = s => s.type !== 'annotation' && s.subtype !== 'adHocGroup';
+  const relevant = (s) => s.type !== 'annotation' && s.subtype !== 'adHocGroup';
   const elements = unsortedElements.filter(relevant).sort(ascending);
   const repositionings = shapes
     .filter(relevant)
@@ -62,26 +62,26 @@ const globalPositionUpdates = (setMultiplePositions, { shapes, gestureEnd }, uns
   return repositionings;
 };
 
-const dedupe = (d, i, a) => a.findIndex(s => s.id === d.id) === i;
+const dedupe = (d, i, a) => a.findIndex((s) => s.id === d.id) === i;
 
-const missingParentCheck = groups => {
-  const idMap = arrayToMap(groups.map(g => g.id));
-  groups.forEach(g => {
+const missingParentCheck = (groups) => {
+  const idMap = arrayToMap(groups.map((g) => g.id));
+  groups.forEach((g) => {
     if (g.parent && !idMap[g.parent]) {
       g.parent = null;
     }
   });
 };
 
-export const shapesForNodes = nodes => {
+export const shapesForNodes = (nodes) => {
   const rawShapes = nodes
     .map(elementToShape)
     // filtering to eliminate residual element of a possible group that had been deleted in Redux
-    .filter((d, i, a) => !isGroupId(d.id) || a.find(s => s.parent === d.id))
+    .filter((d, i, a) => !isGroupId(d.id) || a.find((s) => s.parent === d.id))
     .filter(dedupe);
   missingParentCheck(rawShapes);
   const getLocalMatrix = getLocalTransformMatrix(rawShapes);
-  return rawShapes.map(s => ({ ...s, localTransformMatrix: getLocalMatrix(s) }));
+  return rawShapes.map((s) => ({ ...s, localTransformMatrix: getLocalMatrix(s) }));
 };
 
 const updateGlobalPositionsInRedux = (setMultiplePositions, scene, unsortedElements) => {
@@ -91,17 +91,17 @@ const updateGlobalPositionsInRedux = (setMultiplePositions, scene, unsortedEleme
   }
 };
 
-export const globalStateUpdater = (dispatch, globalState) => state => {
+export const globalStateUpdater = (dispatch, globalState) => (state) => {
   const nextScene = state.currentScene;
   const page = getSelectedPage(globalState);
   const elements = getNodes(globalState, page);
   const shapes = nextScene.shapes;
-  const persistableGroups = shapes.filter(s => s.subtype === 'persistentGroup').filter(dedupe);
-  const persistedGroups = elements.filter(e => isGroupId(e.id)).filter(dedupe);
+  const persistableGroups = shapes.filter((s) => s.subtype === 'persistentGroup').filter(dedupe);
+  const persistedGroups = elements.filter((e) => isGroupId(e.id)).filter(dedupe);
 
-  persistableGroups.forEach(g => {
+  persistableGroups.forEach((g) => {
     if (
-      !persistedGroups.find(p => {
+      !persistedGroups.find((p) => {
         if (!p.id) {
           throw new Error('Element has no id');
         }
@@ -123,12 +123,13 @@ export const globalStateUpdater = (dispatch, globalState) => state => {
   const elementsToRemove = persistedGroups.filter(
     // list elements for removal if they're not in the persistable set, or if there's no longer an associated element
     // the latter of which shouldn't happen, so it's belts and braces
-    p =>
-      !persistableGroups.find(g => p.id === g.id) || !elements.find(e => e.position.parent === p.id)
+    (p) =>
+      !persistableGroups.find((g) => p.id === g.id) ||
+      !elements.find((e) => e.position.parent === p.id)
   );
 
   updateGlobalPositionsInRedux(
-    positions => dispatch(setMultiplePositions(positions.map(p => ({ ...p, pageId: page })))),
+    (positions) => dispatch(setMultiplePositions(positions.map((p) => ({ ...p, pageId: page })))),
     nextScene,
     elements
   );
@@ -137,7 +138,7 @@ export const globalStateUpdater = (dispatch, globalState) => state => {
     // remove elements for groups that were ungrouped
     dispatch(
       removeElements(
-        elementsToRemove.map(e => e.id),
+        elementsToRemove.map((e) => e.id),
         page
       )
     );
@@ -149,9 +150,9 @@ export const globalStateUpdater = (dispatch, globalState) => state => {
     dispatch(
       selectToplevelNodes(
         flatten(
-          selectedPrimaryShapes.map(n =>
-            n.startsWith('group') && (shapes.find(s => s.id === n) || {}).subtype === 'adHocGroup'
-              ? shapes.filter(s => s.type !== 'annotation' && s.parent === n).map(s => s.id)
+          selectedPrimaryShapes.map((n) =>
+            n.startsWith('group') && (shapes.find((s) => s.id === n) || {}).subtype === 'adHocGroup'
+              ? shapes.filter((s) => s.type !== 'annotation' && s.parent === n).map((s) => s.id)
               : [n]
           )
         )
@@ -160,10 +161,10 @@ export const globalStateUpdater = (dispatch, globalState) => state => {
   }
 };
 
-export const crawlTree = shapes => shapeId => {
-  const rec = shapeId => [
+export const crawlTree = (shapes) => (shapeId) => {
+  const rec = (shapeId) => [
     shapeId,
-    ...flatten(shapes.filter(s => s.position.parent === shapeId).map(s => rec(s.id))),
+    ...flatten(shapes.filter((s) => s.position.parent === shapeId).map((s) => rec(s.id))),
   ];
   return rec(shapeId);
 };

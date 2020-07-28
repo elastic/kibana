@@ -10,7 +10,7 @@ import {
   matchPath,
   RouteComponentProps,
   RouteProps,
-  withRouter
+  withRouter,
 } from 'react-router-dom';
 import { RouteName } from './route_config/route_names';
 
@@ -59,7 +59,7 @@ const parse = (options: ParseOptions) => {
 export function getBreadcrumb({
   location,
   currentPath,
-  routes
+  routes,
 }: {
   location: Location;
   currentPath: string;
@@ -80,7 +80,7 @@ export function getBreadcrumb({
       return parse({
         breadcrumb,
         match,
-        location
+        location,
       });
     }
 
@@ -90,7 +90,7 @@ export function getBreadcrumb({
 
 export function getBreadcrumbs({
   routes,
-  location
+  location,
 }: {
   routes: BreadcrumbRoute[];
   location: Location;
@@ -108,7 +108,7 @@ export function getBreadcrumbs({
       const breadcrumb = getBreadcrumb({
         location,
         currentPath,
-        routes
+        routes,
       });
 
       if (breadcrumb) {
@@ -126,7 +126,7 @@ function ProvideBreadcrumbsComponent({
   render,
   location,
   match,
-  history
+  history,
 }: ProvideBreadcrumbsProps) {
   const breadcrumbs = getBreadcrumbs({ routes, location });
   return render({ breadcrumbs, location, match, history });

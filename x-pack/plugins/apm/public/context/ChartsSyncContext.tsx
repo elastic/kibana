@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { history } from '../utils/history';
 import { useUrlParams } from '../hooks/useUrlParams';
@@ -17,7 +17,7 @@ const ChartsSyncContext = React.createContext<{
   onSelectionEnd: (range: { start: number; end: number }) => void;
 } | null>(null);
 
-const ChartsSyncContextProvider: React.FC = ({ children }) => {
+function ChartsSyncContextProvider({ children }: { children: ReactNode }) {
   const [time, setTime] = useState<number | null>(null);
   const { urlParams, uiFilters } = useUrlParams();
 
@@ -25,20 +25,20 @@ const ChartsSyncContextProvider: React.FC = ({ children }) => {
   const { environment } = uiFilters;
 
   const { data = { annotations: [] } } = useFetcher(
-    callApmApi => {
+    (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/services/{serviceName}/annotation/search',
           params: {
             path: {
-              serviceName
+              serviceName,
             },
             query: {
               start,
               end,
-              environment
-            }
-          }
+              environment,
+            },
+          },
         });
       }
     },
@@ -59,25 +59,25 @@ const ChartsSyncContextProvider: React.FC = ({ children }) => {
         const currentSearch = toQuery(history.location.search);
         const nextSearch = {
           rangeFrom: new Date(range.start).toISOString(),
-          rangeTo: new Date(range.end).toISOString()
+          rangeTo: new Date(range.end).toISOString(),
         };
 
         history.push({
           ...history.location,
           search: fromQuery({
             ...currentSearch,
-            ...nextSearch
-          })
+            ...nextSearch,
+          }),
         });
       },
       hoverX: time,
-      annotations: data.annotations
+      annotations: data.annotations,
     };
 
     return { ...hoverXHandlers };
   }, [time, data.annotations]);
 
   return <ChartsSyncContext.Provider value={value} children={children} />;
-};
+}
 
 export { ChartsSyncContext, ChartsSyncContextProvider };

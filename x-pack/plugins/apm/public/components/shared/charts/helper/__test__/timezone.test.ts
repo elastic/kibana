@@ -28,7 +28,7 @@ describe('Timezone helper', () => {
         new Date('2020-01-29T02:00:00.000Z'),
         new Date('2020-01-29T05:00:00.000Z'),
         new Date('2020-01-29T08:00:00.000Z'),
-        new Date('2020-01-29T11:00:00.000Z')
+        new Date('2020-01-29T11:00:00.000Z'),
       ]);
     });
     it('returns ticks when in Europe/Amsterdam timezone', () => {
@@ -44,7 +44,7 @@ describe('Timezone helper', () => {
         new Date('2020-01-28T20:00:00.000Z'),
         new Date('2020-01-28T23:00:00.000Z'),
         new Date('2020-01-29T02:00:00.000Z'),
-        new Date('2020-01-29T05:00:00.000Z')
+        new Date('2020-01-29T05:00:00.000Z'),
       ]);
     });
   });
@@ -54,14 +54,14 @@ describe('Timezone helper', () => {
       moment.tz.setDefault('America/New_York');
       expect(getDomainTZ(min, max)).toEqual([
         new Date('Tue Jan 28 2020 00:36:00 GMT+0100').valueOf(),
-        new Date('Wed Jan 29 2020 02:12:00 GMT+0100').valueOf()
+        new Date('Wed Jan 29 2020 02:12:00 GMT+0100').valueOf(),
       ]);
     });
     it('returns domain when in Europe/Amsterdam timezone', () => {
       moment.tz.setDefault('Europe/Amsterdam');
       expect(getDomainTZ(min, max)).toEqual([
         new Date('Tue Jan 28 2020 06:36:00 GMT+0100').valueOf(),
-        new Date('Wed Jan 29 2020 08:12:00 GMT+0100').valueOf()
+        new Date('Wed Jan 29 2020 08:12:00 GMT+0100').valueOf(),
       ]);
     });
   });

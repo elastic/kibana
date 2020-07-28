@@ -54,13 +54,13 @@ function GroupBySelectUi(props) {
       }),
       value: 'terms',
     },
-  ].map(field => ({
+  ].map((field) => ({
     ...field,
     disabled: !isGroupByFieldsEnabled(field.value, uiRestrictions),
   }));
 
   const selectedValue = props.value || 'everything';
-  const selectedOption = modeOptions.find(option => {
+  const selectedOption = modeOptions.find((option) => {
     return selectedValue === option.value;
   });
 

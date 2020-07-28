@@ -5,12 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function removeLifecycle(callAsCurrentUser: APICaller, indexNames: string[]) {
+async function removeLifecycle(callAsCurrentUser: LegacyAPICaller, indexNames: string[]) {
   const responses = [];
   for (let i = 0; i < indexNames.length; i++) {
     const indexName = indexNames[i];
@@ -37,7 +37,10 @@ export function registerRemoveRoute({ router, license, lib }: RouteDependencies)
       const { indexNames } = body;
 
       try {
-        await removeLifecycle(context.core.elasticsearch.dataClient.callAsCurrentUser, indexNames);
+        await removeLifecycle(
+          context.core.elasticsearch.legacy.client.callAsCurrentUser,
+          indexNames
+        );
         return response.ok();
       } catch (e) {
         if (lib.isEsError(e)) {

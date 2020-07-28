@@ -18,9 +18,10 @@
  */
 
 import { share } from 'rxjs/operators';
-import { CoreStart } from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FilterManager } from './filter_manager';
+import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
@@ -30,17 +31,24 @@ import { createQueryStateObservable } from './state_sync/create_global_query_obs
  * @internal
  */
 
-export interface QueryServiceDependencies {
+interface QueryServiceSetupDependencies {
   storage: IStorageWrapper;
-  uiSettings: CoreStart['uiSettings'];
+  uiSettings: IUiSettingsClient;
 }
+
+interface QueryServiceStartDependencies {
+  savedObjectsClient: SavedObjectsClientContract;
+  storage: IStorageWrapper;
+  uiSettings: IUiSettingsClient;
+}
+
 export class QueryService {
   filterManager!: FilterManager;
   timefilter!: TimefilterSetup;
 
   state$!: ReturnType<typeof createQueryStateObservable>;
 
-  public setup({ uiSettings, storage }: QueryServiceDependencies) {
+  public setup({ storage, uiSettings }: QueryServiceSetupDependencies) {
     this.filterManager = new FilterManager(uiSettings);
 
     const timefilterService = new TimefilterService();
@@ -61,12 +69,16 @@ export class QueryService {
     };
   }
 
-  public start(savedObjects: CoreStart['savedObjects']) {
+  public start({ savedObjectsClient, storage, uiSettings }: QueryServiceStartDependencies) {
     return {
+      addToQueryLog: createAddToQueryLog({
+        storage,
+        uiSettings,
+      }),
       filterManager: this.filterManager,
-      timefilter: this.timefilter,
+      savedQueries: createSavedQueryService(savedObjectsClient),
       state$: this.state$,
-      savedQueries: createSavedQueryService(savedObjects.client),
+      timefilter: this.timefilter,
     };
   }
 

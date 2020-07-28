@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../kbn_accessible_click';
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 
 describe('kbnAccessibleClick directive', () => {
   let $compile;
@@ -31,7 +31,7 @@ describe('kbnAccessibleClick directive', () => {
   beforeEach(ngMock.module('kibana'));
 
   beforeEach(
-    ngMock.inject(function(_$compile_, _$rootScope_) {
+    ngMock.inject(function (_$compile_, _$rootScope_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
     })
@@ -103,7 +103,7 @@ describe('kbnAccessibleClick directive', () => {
     let scope;
     let element;
 
-    beforeEach(function() {
+    beforeEach(function () {
       scope = $rootScope.$new();
       scope.handleClick = sinon.stub();
       const html = `<div ng-click="handleClick()" kbn-accessible-click></div>`;
@@ -112,14 +112,14 @@ describe('kbnAccessibleClick directive', () => {
 
     it(`on ENTER keyup`, () => {
       const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
-      e.keyCode = keyCodes.ENTER;
+      e.key = keys.ENTER;
       element.trigger(e);
       sinon.assert.calledOnce(scope.handleClick);
     });
 
     it(`on SPACE keyup`, () => {
       const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
-      e.keyCode = keyCodes.SPACE;
+      e.key = keys.SPACE;
       element.trigger(e);
       sinon.assert.calledOnce(scope.handleClick);
     });

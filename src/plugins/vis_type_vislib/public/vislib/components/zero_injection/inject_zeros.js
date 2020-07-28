@@ -35,7 +35,7 @@ import { zeroFillDataArray } from './zero_fill_data_array';
 export function injectZeros(obj, data, orderBucketsBySum = false) {
   const keys = orderXValues(data, orderBucketsBySum);
 
-  obj.forEach(function(series) {
+  obj.forEach(function (series) {
     const zeroArray = createZeroFilledArray(keys, series.label);
     series.values = zeroFillDataArray(zeroArray, series.values);
   });

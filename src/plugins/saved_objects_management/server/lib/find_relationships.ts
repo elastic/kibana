@@ -41,7 +41,7 @@ export async function findRelationships({
 
   // Use a map to avoid duplicates, it does happen but have a different "name" in the reference
   const referencedToBulkGetOpts = new Map(
-    references.map(ref => [`${ref.type}:${ref.id}`, { id: ref.id, type: ref.type }])
+    references.map((ref) => [`${ref.type}:${ref.id}`, { id: ref.id, type: ref.type }])
   );
 
   const [childReferencesResponse, parentReferencesResponse] = await Promise.all([
@@ -56,10 +56,10 @@ export async function findRelationships({
   ]);
 
   return childReferencesResponse.saved_objects
-    .map(obj => injectMetaAttributes(obj, savedObjectsManagement))
+    .map((obj) => injectMetaAttributes(obj, savedObjectsManagement))
     .map(extractCommonProperties)
     .map(
-      obj =>
+      (obj) =>
         ({
           ...obj,
           relationship: 'child',
@@ -67,10 +67,10 @@ export async function findRelationships({
     )
     .concat(
       parentReferencesResponse.saved_objects
-        .map(obj => injectMetaAttributes(obj, savedObjectsManagement))
+        .map((obj) => injectMetaAttributes(obj, savedObjectsManagement))
         .map(extractCommonProperties)
         .map(
-          obj =>
+          (obj) =>
             ({
               ...obj,
               relationship: 'parent',

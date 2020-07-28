@@ -7,7 +7,7 @@
 import { transactionGroupsFetcher } from './fetcher';
 import {
   SearchParamsMock,
-  inspectSearchParams
+  inspectSearchParams,
 } from '../../../public/utils/testHelpers';
 
 describe('transaction group queries', () => {
@@ -18,14 +18,16 @@ describe('transaction group queries', () => {
   });
 
   it('fetches top transactions', async () => {
-    mock = await inspectSearchParams(setup =>
+    const bucketSize = 100;
+    mock = await inspectSearchParams((setup) =>
       transactionGroupsFetcher(
         {
           type: 'top_transactions',
           serviceName: 'foo',
-          transactionType: 'bar'
+          transactionType: 'bar',
         },
-        setup
+        setup,
+        bucketSize
       )
     );
 
@@ -33,12 +35,14 @@ describe('transaction group queries', () => {
   });
 
   it('fetches top traces', async () => {
-    mock = await inspectSearchParams(setup =>
+    const bucketSize = 100;
+    mock = await inspectSearchParams((setup) =>
       transactionGroupsFetcher(
         {
-          type: 'top_traces'
+          type: 'top_traces',
         },
-        setup
+        setup,
+        bucketSize
       )
     );
 

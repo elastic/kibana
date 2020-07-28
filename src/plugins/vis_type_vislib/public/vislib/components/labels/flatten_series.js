@@ -30,8 +30,5 @@ export function flattenSeries(obj) {
 
   obj = obj.rows ? obj.rows : obj.columns;
 
-  return _.chain(obj)
-    .pluck('series')
-    .flattenDeep()
-    .value();
+  return _.chain(obj).map('series').flattenDeep().value();
 }

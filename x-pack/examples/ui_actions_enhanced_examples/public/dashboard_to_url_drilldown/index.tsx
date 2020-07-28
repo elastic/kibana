@@ -7,11 +7,8 @@
 import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
-import {
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
-} from '../../../../../src/plugins/embeddable/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
+import { ChartActionContext } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
 
 function isValidUrl(url: string) {
@@ -23,7 +20,7 @@ function isValidUrl(url: string) {
   }
 }
 
-export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
+export type ActionContext = ChartActionContext;
 
 export interface Config {
   url: string;
@@ -38,6 +35,8 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
   public readonly id = SAMPLE_DASHBOARD_TO_URL_DRILLDOWN;
 
   public readonly order = 8;
+
+  readonly minimalLicense = 'gold'; // example of minimal license support
 
   public readonly getDisplayName = () => 'Go to URL (example)';
 
@@ -63,7 +62,7 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
           name="url"
           placeholder="Enter URL"
           value={config.url}
-          onChange={event => onConfig({ ...config, url: event.target.value })}
+          onChange={(event) => onConfig({ ...config, url: event.target.value })}
           onBlur={() => {
             if (!config.url) return;
             if (/https?:\/\//.test(config.url)) return;

@@ -5,9 +5,9 @@
  */
 
 import { Subscription } from 'rxjs';
-import { History } from 'history';
-import { createHashHistory } from 'history';
-import { MonitoringPluginDependencies } from './types';
+import { History, createHashHistory } from 'history';
+import { MonitoringStartPluginDependencies } from './types';
+import { Legacy } from './legacy_shims';
 
 import {
   RefreshInterval,
@@ -64,13 +64,13 @@ export class GlobalState {
   private readonly stateStorage: IKbnUrlStateStorage;
   private readonly stateContainerChangeSub: Subscription;
   private readonly syncQueryStateWithUrlManager: { stop: () => void };
-  private readonly timefilterRef: MonitoringPluginDependencies['data']['query']['timefilter']['timefilter'];
+  private readonly timefilterRef: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
 
   private lastAssignedState: MonitoringAppState = {};
   private lastKnownGlobalState?: string;
 
   constructor(
-    queryService: MonitoringPluginDependencies['data']['query'],
+    queryService: MonitoringStartPluginDependencies['data']['query'],
     rootScope: ng.IRootScopeService,
     ngLocation: ng.ILocationService,
     externalState: RawObject
@@ -83,7 +83,7 @@ export class GlobalState {
     const initialStateFromUrl = this.stateStorage.get(GLOBAL_STATE_KEY) as MonitoringAppState;
 
     this.stateContainer = createStateContainer(initialStateFromUrl, {
-      set: state => (prop, value) => ({ ...state, [prop]: value }),
+      set: (state) => (prop, value) => ({ ...state, [prop]: value }),
     });
 
     this.stateSyncRef = syncState({
@@ -95,11 +95,11 @@ export class GlobalState {
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.lastAssignedState = this.getState();
       if (!this.stateContainer.get() && this.lastKnownGlobalState) {
-        rootScope.$applyAsync(() =>
-          ngLocation.search(`${GLOBAL_STATE_KEY}=${this.lastKnownGlobalState}`).replace()
-        );
+        ngLocation.search(`${GLOBAL_STATE_KEY}=${this.lastKnownGlobalState}`).replace();
       }
+      Legacy.shims.breadcrumbs.update();
       this.syncExternalState(externalState);
+      rootScope.$applyAsync();
     });
 
     this.syncQueryStateWithUrlManager = syncQueryStateWithUrl(queryService, this.stateStorage);

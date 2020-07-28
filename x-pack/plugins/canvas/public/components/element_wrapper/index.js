@@ -10,12 +10,12 @@ import { compose, withPropsOnChange, mapProps } from 'recompose';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue } from '../../lib/resolved_arg';
+import { createDispatchedHandlerFactory } from '../../lib/create_handlers';
 import { ElementWrapper as Component } from './element_wrapper';
-import { createHandlers as createHandlersWithDispatch } from './lib/handlers';
 
 function selectorFactory(dispatch) {
   let result = {};
-  const createHandlers = createHandlersWithDispatch(dispatch);
+  const createHandlers = createDispatchedHandlerFactory(dispatch);
 
   return (nextState, nextOwnProps) => {
     const { element, ...restOwnProps } = nextOwnProps;
@@ -59,14 +59,14 @@ export const ElementWrapper = compose(
   connectAdvanced(selectorFactory),
   withPropsOnChange(
     (props, nextProps) => !isEqual(props.element, nextProps.element),
-    props => {
+    (props) => {
       const { element, createHandlers } = props;
       const handlers = createHandlers(element);
       // this removes element and createHandlers from passed props
       return { handlers };
     }
   ),
-  mapProps(props => {
+  mapProps((props) => {
     // remove element and createHandlers from props passed to component
     // eslint-disable-next-line no-unused-vars
     const { element, createHandlers, selectedPage, ...restProps } = props;

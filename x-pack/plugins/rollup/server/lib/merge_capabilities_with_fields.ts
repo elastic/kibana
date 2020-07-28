@@ -19,7 +19,7 @@ export const mergeCapabilitiesWithFields = (
   const rollupFields = [...previousFields];
   const rollupFieldNames: string[] = [];
 
-  Object.keys(rollupIndexCapabilities).forEach(agg => {
+  Object.keys(rollupIndexCapabilities).forEach((agg) => {
     // Field names of the aggregation
     const fields = Object.keys(rollupIndexCapabilities[agg]);
 
@@ -41,7 +41,7 @@ export const mergeCapabilitiesWithFields = (
         ...defaultField,
         name: timeFieldName,
       };
-      const existingField = rollupFields.find(field => field.name === timeFieldName);
+      const existingField = rollupFields.find((field) => field.name === timeFieldName);
 
       if (existingField) {
         Object.assign(existingField, newField);
@@ -56,8 +56,8 @@ export const mergeCapabilitiesWithFields = (
     else {
       rollupFields.push(
         ...fields
-          .filter(field => !rollupFieldNames.includes(field))
-          .map(field => {
+          .filter((field) => !rollupFieldNames.includes(field))
+          .map((field) => {
             // Expand each field into object format that end consumption expects.
             const fieldCapsKey = `${field}.${agg}.value`;
             rollupFieldNames.push(field);

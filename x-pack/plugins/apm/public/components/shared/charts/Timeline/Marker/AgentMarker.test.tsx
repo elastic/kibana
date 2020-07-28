@@ -8,16 +8,23 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { AgentMarker } from './AgentMarker';
 import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
+import { EuiThemeProvider } from '../../../../../../../observability/public';
 
 describe('AgentMarker', () => {
   const mark = {
     id: 'agent',
     offset: 1000,
     type: 'agentMark',
-    verticalLine: true
+    verticalLine: true,
   } as AgentMark;
+
   it('renders', () => {
-    const component = shallow(<AgentMarker mark={mark} />);
+    const component = shallow(
+      <EuiThemeProvider>
+        <AgentMarker mark={mark} />
+      </EuiThemeProvider>
+    );
+
     expect(component).toMatchSnapshot();
   });
 });

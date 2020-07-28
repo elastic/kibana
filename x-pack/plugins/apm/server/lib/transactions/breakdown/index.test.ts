@@ -18,7 +18,7 @@ const mockIndices = {
   'apm_oss.transactionIndices': 'myIndex',
   'apm_oss.metricsIndices': 'myIndex',
   apmAgentConfigurationIndex: 'myIndex',
-  apmCustomLinkIndex: 'myIndex'
+  apmCustomLinkIndex: 'myIndex',
 };
 
 function getMockSetup(esResponse: any) {
@@ -31,12 +31,12 @@ function getMockSetup(esResponse: any) {
     config: new Proxy(
       {},
       {
-        get: () => 'myIndex'
+        get: () => 'myIndex',
       }
     ) as APMConfig,
     uiFiltersES: [],
     indices: mockIndices,
-    dynamicIndexPattern: null as any
+    dynamicIndexPattern: null as any,
   };
 }
 
@@ -45,7 +45,7 @@ describe('getTransactionBreakdown', () => {
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: getMockSetup(noDataResponse)
+      setup: getMockSetup(noDataResponse),
     });
 
     expect(response.kpis.length).toBe(0);
@@ -57,28 +57,28 @@ describe('getTransactionBreakdown', () => {
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: getMockSetup(dataResponse)
+      setup: getMockSetup(dataResponse),
     });
 
     expect(response.kpis.length).toBe(4);
 
-    expect(response.kpis.map(kpi => kpi.name)).toEqual([
+    expect(response.kpis.map((kpi) => kpi.name)).toEqual([
       'app',
       'dispatcher-servlet',
       'http',
-      'postgresql'
+      'postgresql',
     ]);
 
     expect(response.kpis[0]).toEqual({
       name: 'app',
       color: '#54b399',
-      percentage: 0.5408550899466306
+      percentage: 0.5408550899466306,
     });
 
     expect(response.kpis[3]).toEqual({
       name: 'postgresql',
       color: '#9170b8',
-      percentage: 0.047366859295002
+      percentage: 0.047366859295002,
     });
   });
 
@@ -86,7 +86,7 @@ describe('getTransactionBreakdown', () => {
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: getMockSetup(dataResponse)
+      setup: getMockSetup(dataResponse),
     });
 
     const { timeseries } = response;
@@ -114,24 +114,24 @@ describe('getTransactionBreakdown', () => {
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: getMockSetup(dataResponse)
+      setup: getMockSetup(dataResponse),
     });
 
     const { timeseries } = response;
 
-    expect(timeseries.map(serie => serie.title)).toEqual(['app', 'http']);
+    expect(timeseries.map((serie) => serie.title)).toEqual(['app', 'http']);
   });
 
   it('fills in gaps for a given timestamp', async () => {
     const response = await getTransactionBreakdown({
       serviceName: 'myServiceName',
       transactionType: 'request',
-      setup: getMockSetup(dataResponse)
+      setup: getMockSetup(dataResponse),
     });
 
     const { timeseries } = response;
 
-    const appTimeseries = timeseries.find(series => series.title === 'app');
+    const appTimeseries = timeseries.find((series) => series.title === 'app');
 
     // missing values should be 0 if other span types do have data for that timestamp
     expect((appTimeseries as NonNullable<typeof appTimeseries>).data[1].y).toBe(

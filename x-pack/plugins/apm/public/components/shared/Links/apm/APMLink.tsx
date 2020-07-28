@@ -10,7 +10,6 @@ import url from 'url';
 import { pick } from 'lodash';
 import { useLocation } from '../../../../hooks/useLocation';
 import { APMQueryParams, toQuery, fromQuery } from '../url_helpers';
-import { TIMEPICKER_DEFAULTS } from '../../../../context/UrlParamsContext/constants';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
@@ -26,7 +25,7 @@ export const PERSISTENT_APM_PARAMS = [
   'rangeTo',
   'refreshPaused',
   'refreshInterval',
-  'environment'
+  'environment',
 ];
 
 export function getAPMHref(
@@ -36,15 +35,14 @@ export function getAPMHref(
 ) {
   const currentQuery = toQuery(currentSearch);
   const nextQuery = {
-    ...TIMEPICKER_DEFAULTS,
     ...pick(currentQuery, PERSISTENT_APM_PARAMS),
-    ...query
+    ...query,
   };
   const nextSearch = fromQuery(nextQuery);
 
   return url.format({
     pathname: '',
-    hash: `${path}?${nextSearch}`
+    hash: `${path}?${nextSearch}`,
   });
 }
 

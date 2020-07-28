@@ -29,7 +29,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
 } from '../../../core/server';
 import {
   getTelemetryOptIn,
@@ -44,6 +44,14 @@ export interface FetcherTaskDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
 }
 
+interface TelemetryConfig {
+  telemetryOptIn: boolean | null;
+  telemetrySendUsageFrom: 'server' | 'browser';
+  telemetryUrl: string;
+  failureCount: number;
+  failureVersion: string | undefined;
+}
+
 export class FetcherTask {
   private readonly initialCheckDelayMs = 60 * 1000 * 5;
   private readonly checkIntervalMs = 60 * 1000 * 60 * 12;
@@ -55,7 +63,7 @@ export class FetcherTask {
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
-  private elasticsearchClient?: ICustomClusterClient;
+  private elasticsearchClient?: ILegacyCustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.config$ = initializerContext.config.create();
@@ -90,8 +98,16 @@ export class FetcherTask {
     if (this.isSending) {
       return;
     }
-    const telemetryConfig = await this.getCurrentConfigs();
-    if (!this.shouldSendReport(telemetryConfig)) {
+    let telemetryConfig: TelemetryConfig | undefined;
+
+    try {
+      telemetryConfig = await this.getCurrentConfigs();
+    } catch (err) {
+      this.logger.warn(`Error fetching telemetry configs: ${err}`);
+      return;
+    }
+
+    if (!telemetryConfig || !this.shouldSendReport(telemetryConfig)) {
       return;
     }
 
@@ -112,7 +128,7 @@ export class FetcherTask {
     this.isSending = false;
   }
 
-  private async getCurrentConfigs() {
+  private async getCurrentConfigs(): Promise<TelemetryConfig> {
     const telemetrySavedObject = await getTelemetrySavedObject(this.internalRepository!);
     const config = await this.config$.pipe(take(1)).toPromise();
     const currentKibanaVersion = this.currentKibanaVersion;
@@ -178,9 +194,7 @@ export class FetcherTask {
   private async fetchTelemetry() {
     return await this.telemetryCollectionManager!.getStats({
       unencrypted: false,
-      start: moment()
-        .subtract(20, 'minutes')
-        .toISOString(),
+      start: moment().subtract(20, 'minutes').toISOString(),
       end: moment().toISOString(),
     });
   }

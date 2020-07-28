@@ -1,6 +1,6 @@
 [role="xpack"]
 [[indexing-geojson-data-tutorial]]
-== Indexing GeoJSON data tutorial
+=== Tutorial: Index GeoJSON data
 
 In this tutorial, you'll build a customized map that shows the flight path between
 two airports, and the lightning hot spots on that route. You'll learn to:
@@ -15,7 +15,7 @@ two airports, and the lightning hot spots on that route. You'll learn to:
 This tutorial requires you to download the following GeoJSON sample data files.
 These files are good examples of the types
 of vector data that you can upload to Kibana and index in
-Elasticsearch for display in *Elastic Maps*.
+Elasticsearch for display in  Maps.
 
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/logan_international_airport.geojson[Logan International Airport]
 * https://raw.githubusercontent.com/elastic/examples/master/Maps/Getting%20Started%20Examples/geojson_upload_and_styling/bangor_international_airport.geojson[Bangor International Airport]

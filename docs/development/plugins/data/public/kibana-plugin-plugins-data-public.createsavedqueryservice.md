@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-createSavedQueryService: (savedObjectsClient: Pick<import("../../../../../core/public").SavedObjectsClient, "update" | "find" | "get" | "delete" | "create" | "bulkCreate" | "bulkGet" | "bulkUpdate">) => SavedQueryService
+createSavedQueryService: (savedObjectsClient: SavedObjectsClientContract) => SavedQueryService
 ```

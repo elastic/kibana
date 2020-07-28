@@ -47,7 +47,7 @@ export const registerResumeRoute = ({
               id: _id,
             })
             .then(() => itemsResumed.push(_id))
-            .catch(err => {
+            .catch((err) => {
               errors.push({ id: _id, error: formatError(err) });
             })
         )

@@ -24,7 +24,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle update action request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -37,10 +37,10 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -55,17 +55,19 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to update actions',
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: createdAction.id,
@@ -91,7 +93,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't update action from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -104,10 +106,10 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix('other')}/api/action/${createdAction.id}`)
+            .put(`${getUrlPrefix('other')}/api/actions/action/${createdAction.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -120,19 +122,22 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               },
             });
 
-          expect(response.statusCode).to.eql(404);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to update actions',
               });
               break;
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
@@ -146,7 +151,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it('should handle update action request appropriately when passing a null config', async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/action/1`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/action/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -156,17 +161,12 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -181,7 +181,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle update action request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/action/1`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/action/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -196,17 +196,19 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to update actions',
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
@@ -221,24 +223,19 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it('should handle update action request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/action/1`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/action/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({});
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -254,7 +251,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it('should handle update action request appropriately when secrets are not valid', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -267,10 +264,10 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -285,17 +282,19 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to update actions',
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -311,7 +310,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't update action from preconfigured list`, async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/action/custom-system-abc-connector`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/action/custom-system-abc-connector`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -326,17 +325,19 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to update actions',
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',

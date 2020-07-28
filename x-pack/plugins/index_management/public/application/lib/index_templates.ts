@@ -6,12 +6,12 @@
 import { parse } from 'query-string';
 import { Location } from 'history';
 
-export const getFormatVersionFromQueryparams = (location: Location): 1 | 2 | undefined => {
-  const { v: version } = parse(location.search.substring(1));
+export const getIsLegacyFromQueryParams = (location: Location): boolean => {
+  const { legacy } = parse(location.search.substring(1));
 
-  if (!Boolean(version) || typeof version !== 'string') {
-    return undefined;
+  if (!Boolean(legacy) || typeof legacy !== 'string') {
+    return false;
   }
 
-  return +version as 1 | 2;
+  return legacy === 'true';
 };

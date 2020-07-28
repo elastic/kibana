@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, ChangeEvent, FunctionComponent, useState, useEffect } from 'react';
+import React, {
+  Fragment,
+  ChangeEvent,
+  FunctionComponent,
+  useState,
+  useEffect,
+  useRef,
+} from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiModal,
@@ -18,7 +25,7 @@ import {
   EuiOverlayMask,
   EuiButton,
 } from '@elastic/eui';
-import { map, sortBy } from 'lodash';
+import { sortBy } from 'lodash';
 import { ComponentStrings } from '../../../i18n';
 import { CustomElement } from '../../../types';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
@@ -72,19 +79,23 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   removeCustomElement,
   updateCustomElement,
 }) => {
+  const hasLoadedElements = useRef<boolean>(false);
   const [elementToDelete, setElementToDelete] = useState<CustomElement | null>(null);
   const [elementToEdit, setElementToEdit] = useState<CustomElement | null>(null);
 
   useEffect(() => {
-    findCustomElements();
-  });
+    if (!hasLoadedElements.current) {
+      hasLoadedElements.current = true;
+      findCustomElements();
+    }
+  }, [findCustomElements, hasLoadedElements]);
 
   const showEditModal = (element: CustomElement) => setElementToEdit(element);
   const hideEditModal = () => setElementToEdit(null);
 
   const handleEdit = async (name: string, description: string, image: string) => {
     if (elementToEdit) {
-      await updateCustomElement(elementToEdit.id, name, description, image);
+      updateCustomElement(elementToEdit.id, name, description, image);
     }
     hideEditModal();
   };
@@ -94,7 +105,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   const handleDelete = async () => {
     if (elementToDelete) {
-      await removeCustomElement(elementToDelete.id);
+      removeCustomElement(elementToDelete.id);
     }
     hideDeleteModal();
   };
@@ -137,10 +148,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   };
 
   const sortElements = (elements: CustomElement[]): CustomElement[] =>
-    sortBy(
-      map(elements, (element, name) => ({ name, ...element })),
-      'displayName'
-    );
+    sortBy(elements, 'displayName');
 
   const onSearch = (e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value);
 

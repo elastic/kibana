@@ -32,8 +32,8 @@ export function reportApplicationUsage(
 ) {
   currentAppId$
     .pipe(
-      filter(appId => typeof appId === 'string' && !DO_NOT_REPORT.includes(appId)),
+      filter((appId) => typeof appId === 'string' && !DO_NOT_REPORT.includes(appId)),
       distinctUntilChanged()
     )
-    .subscribe(appId => appId && reporter.reportApplicationUsage(appId));
+    .subscribe((appId) => appId && reporter.reportApplicationUsage(appId));
 }

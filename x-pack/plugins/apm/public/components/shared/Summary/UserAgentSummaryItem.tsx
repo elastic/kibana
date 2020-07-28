@@ -6,7 +6,6 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UserAgent } from '../../../../typings/es_schemas/raw/fields/user_agent';
@@ -14,19 +13,19 @@ import { UserAgent } from '../../../../typings/es_schemas/raw/fields/user_agent'
 type UserAgentSummaryItemProps = UserAgent;
 
 const Version = styled('span')`
-  font-size: ${theme.euiFontSizeS};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
 export function UserAgentSummaryItem({
   name,
-  version
+  version,
 }: UserAgentSummaryItemProps) {
   return (
     <EuiToolTip
       content={i18n.translate(
         'xpack.apm.transactionDetails.userAgentAndVersionLabel',
         {
-          defaultMessage: 'User agent & version'
+          defaultMessage: 'User agent & version',
         }
       )}
     >

@@ -4,24 +4,20 @@
 
 When you are ready to present your workpad, use and enable the presentation options.
 
-[float]
-[[view-fullscreen-mode]]
-==== View your workpad in fullscreen mode
+. Configure the autoplay options.
 
-Click the *Enter fullscreen mode* icon.
+.. From the workpad menu, click *View > Autoplay settings*.
 
+.. Under *Change cycling interval*, select the interval you want to use, or *Set a custom interval*.
++
+[role="screenshot"]
+image::images/canvas-autoplay-interval.png[Element autoplay interval]
+
+. To enable autoplay, click *View > Turn autoplay on*.
+
+. To start your presentation, click *View > Enter fullscreen mode*.
++
 [role="screenshot"]
 image::images/canvas-fullscreen.png[Fullscreen mode]
 
-[float]
-[[enable-autoplay]]
-==== Enable autoplay 
-
-Automatically cycle through your workpads pages in fullscreen mode.
-
-. Click the *Control settings* icon.
-
-. Under *Change cycling interval*, select the interval you want to use.
-+
-[role="screenshot"]
-image::images/canvas-refresh-interval.png[Element data refresh interval]
+. When you are ready to exit fullscreen mode, press the Esc (Escape) key.

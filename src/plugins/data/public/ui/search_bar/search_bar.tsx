@@ -75,6 +75,7 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  indicateNoData?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -402,6 +403,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           dataTestSubj={this.props.dataTestSubj}
+          indicateNoData={this.props.indicateNoData}
         />
       );
     }
@@ -414,13 +416,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       filterBar = (
         <div
           id="GlobalFilterGroup"
-          ref={node => {
+          ref={(node) => {
             this.filterBarWrapperRef = node;
           }}
           className={filterGroupClasses}
         >
           <div
-            ref={node => {
+            ref={(node) => {
               this.filterBarRef = node;
             }}
           >
@@ -453,7 +455,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
             savedQueryService={this.savedQueryService}
-            onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
+            onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
             showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}

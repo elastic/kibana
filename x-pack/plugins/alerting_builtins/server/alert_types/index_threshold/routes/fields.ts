@@ -14,7 +14,7 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-  IScopedClusterClient,
+  ILegacyScopedClusterClient,
 } from 'kibana/server';
 import { Service } from '../../../types';
 
@@ -51,7 +51,7 @@ export function createFieldsRoute(service: Service, router: IRouter, baseRoute: 
     }
 
     try {
-      rawFields = await getRawFields(ctx.core.elasticsearch.dataClient, req.body.indexPatterns);
+      rawFields = await getRawFields(ctx.core.elasticsearch.legacy.client, req.body.indexPatterns);
     } catch (err) {
       const indexPatterns = req.body.indexPatterns.join(',');
       service.logger.warn(
@@ -93,7 +93,7 @@ interface Field {
 }
 
 async function getRawFields(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   indexes: string[]
 ): Promise<RawFields> {
   const params = {

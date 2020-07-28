@@ -14,7 +14,7 @@ export const setSelectedPrimaryShardCount = createAction('SET_SELECTED_PRIMARY_S
 export const setSelectedReplicaCount = createAction('SET_SELECTED_REPLICA_COUNT');
 export const fetchedNodes = createAction('FETCHED_NODES');
 let fetchingNodes = false;
-export const fetchNodes = () => async dispatch => {
+export const fetchNodes = () => async (dispatch) => {
   try {
     if (!fetchingNodes) {
       fetchingNodes = true;
@@ -38,7 +38,7 @@ export const fetchedNodeDetails = createAction(
     details,
   })
 );
-export const fetchNodeDetails = selectedNodeAttrs => async dispatch => {
+export const fetchNodeDetails = (selectedNodeAttrs) => async (dispatch) => {
   let details;
   try {
     details = await loadNodeDetails(selectedNodeAttrs);

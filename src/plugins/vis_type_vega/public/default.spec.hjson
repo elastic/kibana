@@ -6,7 +6,7 @@ Welcome to Vega visualizations.  Here you can design your own dataviz from scrat
 This example graph shows the document count in all indexes in the current time range.  You might need to adjust the time filter in the upper right corner.
 */
 
-  $schema: https://vega.github.io/schema/vega-lite/v2.json
+  $schema: https://vega.github.io/schema/vega-lite/v4.json
   title: Event counts from all indexes
 
   // Define the data source

@@ -318,4 +318,4 @@ export const fields: IFieldType[] = [
   },
 ];
 
-export const getField = (name: string) => fields.find(field => field.name === name) as IFieldType;
+export const getField = (name: string) => fields.find((field) => field.name === name) as IFieldType;

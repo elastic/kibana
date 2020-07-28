@@ -171,3 +171,127 @@ test('fails if loggers use unknown appenders.', () => {
 
   expect(() => new LoggingConfig(validateConfig)).toThrowErrorMatchingSnapshot();
 });
+
+describe('extend', () => {
+  it('adds new appenders', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        appenders: {
+          file1: {
+            kind: 'file',
+            layout: { kind: 'pattern' },
+            path: 'path',
+          },
+        },
+      })
+    );
+
+    const mergedConfigValue = configValue.extend(
+      config.schema.validate({
+        appenders: {
+          file2: {
+            kind: 'file',
+            layout: { kind: 'pattern' },
+            path: 'path',
+          },
+        },
+      })
+    );
+
+    expect([...mergedConfigValue.appenders.keys()]).toEqual([
+      'default',
+      'console',
+      'file1',
+      'file2',
+    ]);
+  });
+
+  it('overrides appenders', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        appenders: {
+          file1: {
+            kind: 'file',
+            layout: { kind: 'pattern' },
+            path: 'path',
+          },
+        },
+      })
+    );
+
+    const mergedConfigValue = configValue.extend(
+      config.schema.validate({
+        appenders: {
+          file1: {
+            kind: 'file',
+            layout: { kind: 'json' },
+            path: 'updatedPath',
+          },
+        },
+      })
+    );
+
+    expect(mergedConfigValue.appenders.get('file1')).toEqual({
+      kind: 'file',
+      layout: { kind: 'json' },
+      path: 'updatedPath',
+    });
+  });
+
+  it('adds new loggers', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [
+          {
+            context: 'plugins',
+            level: 'warn',
+          },
+        ],
+      })
+    );
+
+    const mergedConfigValue = configValue.extend(
+      config.schema.validate({
+        loggers: [
+          {
+            context: 'plugins.pid',
+            level: 'trace',
+          },
+        ],
+      })
+    );
+
+    expect([...mergedConfigValue.loggers.keys()]).toEqual(['root', 'plugins', 'plugins.pid']);
+  });
+
+  it('overrides loggers', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [
+          {
+            context: 'plugins',
+            level: 'warn',
+          },
+        ],
+      })
+    );
+
+    const mergedConfigValue = configValue.extend(
+      config.schema.validate({
+        loggers: [
+          {
+            appenders: ['console'],
+            context: 'plugins',
+            level: 'trace',
+          },
+        ],
+      })
+    );
+
+    expect(mergedConfigValue.loggers.get('plugins')).toEqual({
+      appenders: ['console'],
+      context: 'plugins',
+      level: 'trace',
+    });
+  });
+});

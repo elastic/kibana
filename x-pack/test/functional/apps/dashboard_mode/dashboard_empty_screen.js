@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
@@ -14,7 +14,7 @@ export default function({ getPageObjects, getService }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['common', 'dashboard', 'visualize', 'lens']);
 
-  describe('empty dashboard', function() {
+  describe('empty dashboard', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('lens/basic');
@@ -36,22 +36,19 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.visualize.clickLensWidget();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_xDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
       });
 
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_yDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
 
       await PageObjects.lens.configureDimension({
-        dimension:
-          '[data-test-subj="lnsXY_splitDimensionPanel"] [data-test-subj="lns-empty-dimension"]',
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
@@ -100,6 +97,16 @@ export default function({ getPageObjects, getService }) {
       expect(newPanelCount).to.eql(originalPanelCount + 1);
       const titles = await PageObjects.dashboard.getPanelTitles();
       expect(titles.indexOf(newTitle)).to.not.be(-1);
+    });
+
+    it('loses originatingApp connection after save as when redirectToOrigin is false', async () => {
+      const newTitle = 'wowee, my title just got cooler again';
+      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickEdit();
+      await PageObjects.lens.save(newTitle, true, false);
+      await PageObjects.lens.notLinkedToOriginatingApp();
+      await PageObjects.common.navigateToApp('dashboard');
     });
   });
 }

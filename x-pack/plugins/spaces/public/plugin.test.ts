@@ -7,8 +7,10 @@
 import { coreMock } from 'src/core/public/mocks';
 import { SpacesPlugin } from './plugin';
 import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
-import { ManagementSection } from '../../../../src/plugins/management/public';
-import { managementPluginMock } from '../../../../src/plugins/management/public/mocks';
+import {
+  managementPluginMock,
+  createManagementSectionMock,
+} from '../../../../src/plugins/management/public/mocks';
 import { advancedSettingsMock } from '../../../../src/plugins/advanced_settings/public/mocks';
 import { featuresPluginMock } from '../../features/public/mocks';
 
@@ -32,25 +34,13 @@ describe('Spaces plugin', () => {
 
     it('should register the management and feature catalogue sections when the management and home plugins are both available', () => {
       const coreSetup = coreMock.createSetup();
-
-      const kibanaSection = new ManagementSection(
-        {
-          id: 'kibana',
-          title: 'Mock Kibana Section',
-          order: 1,
-        },
-        jest.fn(),
-        jest.fn(),
-        jest.fn(),
-        coreSetup.getStartServices
-      );
-
-      const registerAppSpy = jest.spyOn(kibanaSection, 'registerApp');
-
       const home = homePluginMock.createSetupContract();
 
       const management = managementPluginMock.createSetupContract();
-      management.sections.getSection.mockReturnValue(kibanaSection);
+      const mockSection = createManagementSectionMock();
+      mockSection.registerApp = jest.fn();
+
+      management.sections.section.kibana = mockSection;
 
       const plugin = new SpacesPlugin();
       plugin.setup(coreSetup, {
@@ -58,7 +48,9 @@ describe('Spaces plugin', () => {
         home,
       });
 
-      expect(registerAppSpy).toHaveBeenCalledWith(expect.objectContaining({ id: 'spaces' }));
+      expect(mockSection.registerApp).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'spaces' })
+      );
 
       expect(home.featureCatalogue.register).toHaveBeenCalledWith(
         expect.objectContaining({

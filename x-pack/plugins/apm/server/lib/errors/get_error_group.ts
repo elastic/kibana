@@ -8,15 +8,15 @@ import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_SAMPLED
+  TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
@@ -26,7 +26,7 @@ export type ErrorGroupAPIResponse = PromiseReturnType<typeof getErrorGroup>;
 export async function getErrorGroup({
   serviceName,
   groupId,
-  setup
+  setup,
 }: {
   serviceName: string;
   groupId: string;
@@ -45,16 +45,16 @@ export async function getErrorGroup({
             { term: { [PROCESSOR_EVENT]: 'error' } },
             { term: { [ERROR_GROUP_ID]: groupId } },
             { range: rangeFilter(start, end) },
-            ...uiFiltersES
+            ...uiFiltersES,
           ],
-          should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
-        }
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
+        },
       },
       sort: [
         { _score: 'desc' }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
-        { '@timestamp': { order: 'desc' } } // sort by timestamp to get the most recent error
-      ]
-    }
+        { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
+      ],
+    },
   };
 
   const resp = await client.search<APMError>(params);
@@ -70,6 +70,6 @@ export async function getErrorGroup({
   return {
     transaction,
     error,
-    occurrencesCount: resp.hits.total.value
+    occurrencesCount: resp.hits.total.value,
   };
 }

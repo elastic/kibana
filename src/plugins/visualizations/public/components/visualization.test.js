@@ -31,7 +31,7 @@ class VisualizationStub {
   }
 
   render() {
-    renderPromise = new Promise(resolve => {
+    renderPromise = new Promise((resolve) => {
       this.el.innerText = this.vis.params.markdown;
       resolve();
     });
@@ -55,10 +55,10 @@ describe('<Visualization/>', () => {
 
   beforeEach(() => {
     vis = {
-      setUiState: function(uiState) {
+      setUiState: function (uiState) {
         this.uiState = uiState;
       },
-      getUiState: function() {
+      getUiState: function () {
         return this.uiState;
       },
       params: {},

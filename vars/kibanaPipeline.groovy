@@ -21,6 +21,7 @@ def functionalTestProcess(String name, Closure closure) {
     def kibanaPort = "61${processNumber}1"
     def esPort = "61${processNumber}2"
     def esTransportPort = "61${processNumber}3"
+    def ingestManagementPackageRegistryPort = "61${processNumber}4"
 
     withEnv([
       "CI_PARALLEL_PROCESS_NUMBER=${processNumber}",
@@ -29,11 +30,14 @@ def functionalTestProcess(String name, Closure closure) {
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+      "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
       "IS_PIPELINE_JOB=1",
       "JOB=${name}",
       "KBN_NP_PLUGINS_BUILT=true",
     ]) {
-      closure()
+      githubPr.sendCommentOnError {
+        closure()
+      }
     }
   }
 }
@@ -98,7 +102,7 @@ def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
-    'target/kibana-siem/**/*.png',
+    'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
     'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',
@@ -178,15 +182,32 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+  githubPr.sendCommentOnError {
+    retryWithDelay(2, 15) {
+      try {
+        runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+      } catch (ex) {
+        try {
+          // Setup expects this directory to be missing, so we need to remove it before we do a retry
+          bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+        } finally {
+          throw ex
+        }
+      }
+    }
+  }
 }
 
 def buildOss() {
-  runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  githubPr.sendCommentOnError {
+    runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  }
 }
 
 def buildXpack() {
-  runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  githubPr.sendCommentOnError {
+    runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  }
 }
 
 def runErrorReporter() {
@@ -196,20 +217,25 @@ def runErrorReporter() {
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun}
+      node scripts/report_failed_tests ${dryRun} target/junit/**/*.xml
     """,
     "Report failed tests, if necessary"
   )
 }
 
 def call(Map params = [:], Closure closure) {
-  def config = [timeoutMinutes: 135, checkPrChanges: false] + params
+  def config = [timeoutMinutes: 135, checkPrChanges: false, setCommitStatus: false] + params
 
   stage("Kibana Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
       timestamps {
         ansiColor('xterm') {
+          if (config.setCommitStatus) {
+            buildState.set('shouldSetCommitStatus', true)
+          }
           if (config.checkPrChanges && githubPr.isPr()) {
+            pipelineLibraryTests()
+
             print "Checking PR for changes to determine if CI needs to be run..."
 
             if (prChanges.areChangesSkippable()) {
@@ -217,8 +243,24 @@ def call(Map params = [:], Closure closure) {
               return
             }
           }
-          closure()
+          try {
+            closure()
+          } finally {
+            if (config.setCommitStatus) {
+              githubCommitStatus.onFinish()
+            }
+          }
         }
+      }
+    }
+  }
+}
+
+def pipelineLibraryTests() {
+  whenChanged(['vars/', '.ci/pipeline-library/']) {
+    workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
+      dir('.ci/pipeline-library') {
+        sh './gradlew test'
       }
     }
   }

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { MonitorSummaryResultType } from '../../../../../plugins/uptime/common/runtime_types';
+import { MonitorSummariesResultType } from '../../../../../plugins/uptime/common/runtime_types';
 import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 interface ExpectedMonitorStatesPage {
@@ -38,19 +38,19 @@ const checkMonitorStatesResponse = ({
   prevPagination,
   nextPagination,
 }: ExpectedMonitorStatesPage) => {
-  const decoded = MonitorSummaryResultType.decode(response);
+  const decoded = MonitorSummariesResultType.decode(response);
   expect(isRight(decoded)).to.be.ok();
   if (isRight(decoded)) {
     const { summaries, prevPagePagination, nextPagePagination, totalSummaryCount } = decoded.right;
     expect(summaries).to.have.length(size);
-    expect(summaries?.map(s => s.monitor_id)).to.eql(statesIds);
+    expect(summaries?.map((s) => s.monitor_id)).to.eql(statesIds);
     expect(
-      summaries?.map(s => (s.state.summary?.up && !s.state.summary?.down ? 'up' : 'down'))
+      summaries?.map((s) => (s.state.summary?.up && !s.state.summary?.down ? 'up' : 'down'))
     ).to.eql(statuses);
-    (summaries ?? []).forEach(s => {
+    (summaries ?? []).forEach((s) => {
       expect(s.state.url.full).to.be.ok();
-      expect(s.histogram?.count).to.be(20);
-      (s.histogram?.points ?? []).forEach(point => {
+      expect(Array.isArray(s.histogram?.points)).to.be(true);
+      (s.histogram?.points ?? []).forEach((point) => {
         expect(point.timestamp).to.be.greaterThan(absFrom);
         expect(point.timestamp).to.be.lessThan(absTo);
       });
@@ -61,7 +61,7 @@ const checkMonitorStatesResponse = ({
   }
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('monitor states endpoint', () => {
     const from = '2019-09-11T03:30:04.380Z';

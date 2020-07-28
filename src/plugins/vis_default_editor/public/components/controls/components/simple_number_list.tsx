@@ -47,7 +47,7 @@ function SimpleNumberList({
         !value.every((numberValue, index) => numberValue === numbers[index].value))
     ) {
       setNumbers(
-        value.map(numberValue => ({
+        value.map((numberValue) => ({
           id: generateId(),
           value: numberValue,
           isInvalid: false,
@@ -67,7 +67,7 @@ function SimpleNumberList({
   const onChangeValue = useCallback(
     (numberField: { id: string; value: string }) => {
       onUpdate(
-        numbers.map(number =>
+        numbers.map((number) =>
           number.id === numberField.id
             ? {
                 id: numberField.id,
@@ -95,7 +95,7 @@ function SimpleNumberList({
   }, [numbers, onUpdate]);
 
   const onDelete = useCallback(
-    (id: string) => onUpdate(numbers.filter(number => number.id !== id)),
+    (id: string) => onUpdate(numbers.filter((number) => number.id !== id)),
     [numbers, onUpdate]
   );
 

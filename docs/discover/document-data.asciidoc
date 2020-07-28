@@ -1,5 +1,5 @@
 [[document-data]]
-== Viewing document data
+== View document data
 
 When you submit a search query in *Discover*, the most recent documents that match the query
 are listed in the documents table.

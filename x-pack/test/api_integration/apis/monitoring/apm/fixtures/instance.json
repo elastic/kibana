@@ -1,727 +1,890 @@
 {
   "metrics": {
-    "apm_cpu": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+    "apm_cpu": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.beat.cpu.total.value",
+          "metricAgg": "max",
+          "label": "Total",
+          "title": "CPU Utilization",
+          "description": "Percentage of CPU time spent executing (user+kernel mode) for the APM process",
+          "units": "%",
+          "format": "0.[00]",
+          "hasCalculation": true,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0.13333333333333333],
+          [1535723940000, 0.3]
+        ]
+      }
+    ],
+    "apm_os_load": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.system.load.1",
+          "metricAgg": "max",
+          "label": "1m",
+          "title": "System Load",
+          "description": "Load average over the last 1 minute",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1535723880000, 1.37],
+          [1535723910000, 1.01],
+          [1535723940000, 0.61]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.beat.cpu.total.value",
-        "metricAgg": "max",
-        "label": "Total",
-        "title": "CPU Utilization",
-        "description": "Percentage of CPU time spent executing (user+kernel mode) for the APM process",
-        "units": "%",
-        "format": "0.[00]",
-        "hasCalculation": true,
-        "isDerivative": true
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.system.load.5",
+          "metricAgg": "max",
+          "label": "5m",
+          "title": "System Load",
+          "description": "Load average over the last 5 minutes",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1535723880000, 1.72],
+          [1535723910000, 1.6],
+          [1535723940000, 1.45]
+        ]
       },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0.13333333333333333],
-        [1535723940000, 0.3]
-      ]
-    }],
-    "apm_os_load": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.system.load.15",
+          "metricAgg": "max",
+          "label": "15m",
+          "title": "System Load",
+          "description": "Load average over the last 15 minutes",
+          "units": "",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1535723880000, 2.5],
+          [1535723910000, 2.43],
+          [1535723940000, 2.35]
+        ]
+      }
+    ],
+    "apm_memory": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.beat.memstats.memory_alloc",
+          "metricAgg": "max",
+          "label": "Allocated Memory",
+          "title": "Memory",
+          "description": "Allocated memory",
+          "units": "B",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1535723880000, 4421336],
+          [1535723910000, 3888048],
+          [1535723940000, 3087640]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.system.load.1",
-        "metricAgg": "max",
-        "label": "1m",
-        "title": "System Load",
-        "description": "Load average over the last 1 minute",
-        "units": "",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": false
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.beat.memstats.rss",
+          "metricAgg": "max",
+          "label": "Process Total",
+          "title": "Memory",
+          "description": "Resident set size of memory reserved by the APM service from the OS",
+          "units": "B",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1535723880000, 10260480],
+          [1535723910000, 11456512],
+          [1535723940000, 12095488]
+        ]
       },
-      "data": [
-        [1535723880000, 1.37],
-        [1535723910000, 1.01],
-        [1535723940000, 0.61]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.beat.memstats.gc_next",
+          "metricAgg": "max",
+          "label": "GC Next",
+          "title": "Memory",
+          "description": "Limit of allocated memory at which garbage collection will occur",
+          "units": "B",
+          "format": "0,0.0 b",
+          "hasCalculation": false,
+          "isDerivative": false
+        },
+        "data": [
+          [1535723880000, 4996912],
+          [1535723910000, 4996912],
+          [1535723940000, 4886176]
+        ]
+      }
+    ],
+    "apm_output_events_rate_success": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.libbeat.output.events.total",
+          "metricAgg": "max",
+          "label": "Total",
+          "title": "Output Events Rate",
+          "description": "Events processed by the output (including retries)",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0.1],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.system.load.5",
-        "metricAgg": "max",
-        "label": "5m",
-        "title": "System Load",
-        "description": "Load average over the last 5 minutes",
-        "units": "",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": false
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.libbeat.output.events.active",
+          "metricAgg": "max",
+          "label": "Active",
+          "title": "Output Active Events Rate",
+          "description": "Events processed by the output (including retries)",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, 1.72],
-        [1535723910000, 1.6],
-        [1535723940000, 1.45]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.libbeat.output.events.acked",
+          "metricAgg": "max",
+          "label": "Acked",
+          "title": "Output Acked Events Rate",
+          "description": "Events processed by the output (including retries)",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0.1],
+          [1535723940000, 0]
+        ]
+      }
+    ],
+    "apm_output_events_rate_failure": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.libbeat.output.events.failed",
+          "metricAgg": "max",
+          "label": "Failed",
+          "title": "Output Failed Events Rate",
+          "description": "Events processed by the output (including retries)",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.system.load.15",
-        "metricAgg": "max",
-        "label": "15m",
-        "title": "System Load",
-        "description": "Load average over the last 15 minutes",
-        "units": "",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": false
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.libbeat.output.events.dropped",
+          "metricAgg": "max",
+          "label": "Dropped",
+          "title": "Output Dropped Events Rate",
+          "description": "Events processed by the output (including retries)",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
+      }
+    ],
+    "apm_responses_valid": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.count",
+          "metricAgg": "max",
+          "label": "Total",
+          "title": "Response Count Intake API",
+          "description": "HTTP Requests responded to by server",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0.7],
+          [1535723940000, 0.7]
+        ]
       },
-      "data": [
-        [1535723880000, 2.5],
-        [1535723910000, 2.43],
-        [1535723940000, 2.35]
-      ]
-    }],
-    "apm_memory": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.valid.ok",
+          "metricAgg": "max",
+          "label": "Ok",
+          "title": "Ok",
+          "description": "200 OK response count",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0.6666666666666666],
+          [1535723940000, 0.7]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.beat.memstats.memory_alloc",
-        "metricAgg": "max",
-        "label": "Allocated Memory",
-        "title": "Memory",
-        "description": "Allocated memory",
-        "units": "B",
-        "format": "0,0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.valid.accepted",
+          "metricAgg": "max",
+          "label": "Accepted",
+          "title": "Accepted",
+          "description": "HTTP Requests successfully reporting new events",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0.03333333333333333],
+          [1535723940000, 0]
+        ]
+      }
+    ],
+    "apm_responses_errors": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.toolarge",
+          "metricAgg": "max",
+          "label": "Too large",
+          "title": "Response Errors Intake API",
+          "description": "HTTP Requests rejected due to excessive payload size",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, 4421336],
-        [1535723910000, 3888048],
-        [1535723940000, 3087640]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.validate",
+          "metricAgg": "max",
+          "label": "Validate",
+          "title": "Validate",
+          "description": "HTTP Requests rejected due to payload validation error",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.beat.memstats.rss",
-        "metricAgg": "max",
-        "label": "Process Total",
-        "title": "Memory",
-        "description": "Resident set size of memory reserved by the APM service from the OS",
-        "units": "B",
-        "format": "0,0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.method",
+          "metricAgg": "max",
+          "label": "Method",
+          "title": "Method",
+          "description": "HTTP Requests rejected due to incorrect HTTP method",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, 10260480],
-        [1535723910000, 11456512],
-        [1535723940000, 12095488]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.unauthorized",
+          "metricAgg": "max",
+          "label": "Unauthorized",
+          "title": "Unauthorized",
+          "description": "HTTP Requests rejected due to invalid secret token",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.beat.memstats.gc_next",
-        "metricAgg": "max",
-        "label": "GC Next",
-        "title": "Memory",
-        "description": "Limit of allocated memory at which garbage collection will occur",
-        "units": "B",
-        "format": "0,0.0 b",
-        "hasCalculation": false,
-        "isDerivative": false
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.ratelimit",
+          "metricAgg": "max",
+          "label": "Rate limit",
+          "title": "Rate limit",
+          "description": "HTTP Requests rejected to due excessive rate limit",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, 4996912],
-        [1535723910000, 4996912],
-        [1535723940000, 4886176]
-      ]
-    }],
-    "apm_output_events_rate_success": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.queue",
+          "metricAgg": "max",
+          "label": "Queue",
+          "title": "Queue",
+          "description": "HTTP Requests rejected to due internal queue filling up",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.libbeat.output.events.total",
-        "metricAgg": "max",
-        "label": "Total",
-        "title": "Output Events Rate",
-        "description": "Events processed by the output (including retries)",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.decode",
+          "metricAgg": "max",
+          "label": "Decode",
+          "title": "Decode",
+          "description": "HTTP Requests rejected to due decoding errors - invalid json, incorrect data type for entity",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 6],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.forbidden",
+          "metricAgg": "max",
+          "label": "Forbidden",
+          "title": "Forbidden",
+          "description": "Forbidden HTTP Requests rejected - CORS violation, disabled enpoint",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.libbeat.output.events.active",
-        "metricAgg": "max",
-        "label": "Active",
-        "title": "Output Active Events Rate",
-        "description": "Events processed by the output (including retries)",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.concurrency",
+          "metricAgg": "max",
+          "label": "Concurrency",
+          "title": "Concurrency",
+          "description": "HTTP Requests rejected due to overall concurrency limit breach",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.closed",
+          "metricAgg": "max",
+          "label": "Closed",
+          "title": "Closed",
+          "description": "HTTP Requests rejected during server shutdown",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.libbeat.output.events.acked",
-        "metricAgg": "max",
-        "label": "Acked",
-        "title": "Output Acked Events Rate",
-        "description": "Events processed by the output (including retries)",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.response.errors.internal",
+          "metricAgg": "max",
+          "label": "Internal",
+          "title": "Internal",
+          "description": "HTTP Requests rejected due to a miscellaneous internal error",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
+      }
+    ],
+    "apm_requests": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.server.request.count",
+          "metricAgg": "max",
+          "label": "Requested",
+          "title": "Request Count Intake API",
+          "description": "HTTP Requests received by server",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0.7],
+          [1535723940000, 0.7]
+        ]
+      }
+    ],
+    "apm_transformations": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.processor.transaction.transformations",
+          "metricAgg": "max",
+          "label": "Transaction",
+          "title": "Processed Events",
+          "description": "Transaction events processed",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0.03333333333333333],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 6],
-        [1535723940000, 0]
-      ]
-    }],
-    "apm_output_events_rate_failure": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.processor.span.transformations",
+          "metricAgg": "max",
+          "label": "Span",
+          "title": "Transformations",
+          "description": "Span events processed",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0.06666666666666667],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.libbeat.output.events.failed",
-        "metricAgg": "max",
-        "label": "Failed",
-        "title": "Output Failed Events Rate",
-        "description": "Events processed by the output (including retries)",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.processor.error.transformations",
+          "metricAgg": "max",
+          "label": "Error",
+          "title": "Transformations",
+          "description": "Error events processed",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.processor.metric.transformations",
+          "metricAgg": "max",
+          "label": "Metric",
+          "title": "Transformations",
+          "description": "Metric events processed",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
+      }
+    ],
+    "apm_acm_response": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.response.count",
+          "metricAgg": "max",
+          "label": "Count",
+          "title": "Response Count Agent Configuration Management",
+          "description": "HTTP requests responded to by APM Server",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.libbeat.output.events.dropped",
-        "metricAgg": "max",
-        "label": "Dropped",
-        "title": "Output Dropped Events Rate",
-        "description": "Events processed by the output (including retries)",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.response.errors.count",
+          "metricAgg": "max",
+          "label": "Error Count",
+          "title": "Response Error Count Agent Configuration Management",
+          "description": "HTTP errors count",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }],
-    "apm_responses_valid": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.response.valid.ok",
+          "metricAgg": "max",
+          "label": "OK",
+          "title": "Response OK Count Agent Configuration Management",
+          "description": "200 OK response count",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.count",
-        "metricAgg": "max",
-        "label": "Total",
-        "title": "Response Count Intake API",
-        "description": "HTTP Requests responded to by server",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.response.valid.notmodified",
+          "metricAgg": "max",
+          "label": "Not Modified",
+          "title": "Response Not Modified Agent Configuration Management",
+          "description": "304 Not modified response count",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
+      }
+    ],
+    "apm_acm_response_errors": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.response.errors.forbidden",
+          "metricAgg": "max",
+          "label": "Count",
+          "title": "Response Errors Agent Configuration Management",
+          "description": "Forbidden HTTP requests rejected count",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 42],
-        [1535723940000, 42]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.response.errors.unauthorized",
+          "metricAgg": "max",
+          "label": "Unauthorized",
+          "title": "Response Unauthorized Errors Agent Configuration Management",
+          "description": "Unauthorized HTTP requests rejected count",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.valid.ok",
-        "metricAgg": "max",
-        "label": "Ok",
-        "title": "Ok",
-        "description": "200 OK response count",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.response.errors.unavailable",
+          "metricAgg": "max",
+          "label": "Unavailable",
+          "title": "Response Unavailable Errors Agent Configuration Management",
+          "description": "Unavailable HTTP response count. Possible misconfiguration or unsupported version of Kibana",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 40],
-        [1535723940000, 42]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.response.errors.method",
+          "metricAgg": "max",
+          "label": "Method",
+          "title": "Response Method Errors Agent Configuration Management",
+          "description": "HTTP requests rejected due to incorrect HTTP method",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
       },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.valid.accepted",
-        "metricAgg": "max",
-        "label": "Accepted",
-        "title": "Accepted",
-        "description": "HTTP Requests successfully reporting new events",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 2],
-        [1535723940000, 0]
-      ]
-    }],
-    "apm_responses_errors": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.toolarge",
-        "metricAgg": "max",
-        "label": "Too large",
-        "title": "Response Errors Intake API",
-        "description": "HTTP Requests rejected due to excessive payload size",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.validate",
-        "metricAgg": "max",
-        "label": "Validate",
-        "title": "Validate",
-        "description": "HTTP Requests rejected due to payload validation error",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.method",
-        "metricAgg": "max",
-        "label": "Method",
-        "title": "Method",
-        "description": "HTTP Requests rejected due to incorrect HTTP method",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.unauthorized",
-        "metricAgg": "max",
-        "label": "Unauthorized",
-        "title": "Unauthorized",
-        "description": "HTTP Requests rejected due to invalid secret token",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.ratelimit",
-        "metricAgg": "max",
-        "label": "Rate limit",
-        "title": "Rate limit",
-        "description": "HTTP Requests rejected to due excessive rate limit",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.queue",
-        "metricAgg": "max",
-        "label": "Queue",
-        "title": "Queue",
-        "description": "HTTP Requests rejected to due internal queue filling up",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.decode",
-        "metricAgg": "max",
-        "label": "Decode",
-        "title": "Decode",
-        "description": "HTTP Requests rejected to due decoding errors - invalid json, incorrect data type for entity",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.forbidden",
-        "metricAgg": "max",
-        "label": "Forbidden",
-        "title": "Forbidden",
-        "description": "Forbidden HTTP Requests rejected - CORS violation, disabled enpoint",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.concurrency",
-        "metricAgg": "max",
-        "label": "Concurrency",
-        "title": "Concurrency",
-        "description": "HTTP Requests rejected due to overall concurrency limit breach",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.closed",
-        "metricAgg": "max",
-        "label": "Closed",
-        "title": "Closed",
-        "description": "HTTP Requests rejected during server shutdown",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.response.errors.internal",
-        "metricAgg": "max",
-        "label": "Internal",
-        "title": "Internal",
-        "description": "HTTP Requests rejected due to a miscellaneous internal error",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }],
-    "apm_requests": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.server.request.count",
-        "metricAgg": "max",
-        "label": "Requested",
-        "title": "Request Count Intake API",
-        "description": "HTTP Requests received by server",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 42],
-        [1535723940000, 42]
-      ]
-    }],
-    "apm_transformations": [{
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.processor.transaction.transformations",
-        "metricAgg": "max",
-        "label": "Transaction",
-        "title": "Processed Events",
-        "description": "Transaction events processed",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 2],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.processor.span.transformations",
-        "metricAgg": "max",
-        "label": "Span",
-        "title": "Transformations",
-        "description": "Span events processed",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 4],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.processor.error.transformations",
-        "metricAgg": "max",
-        "label": "Error",
-        "title": "Transformations",
-        "description": "Error events processed",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }, {
-      "bucket_size": "30 seconds",
-      "timeRange": {
-        "min": 1535720389104,
-        "max": 1535723989104
-      },
-      "metric": {
-        "app": "apm",
-        "field": "beats_stats.metrics.apm-server.processor.metric.transformations",
-        "metricAgg": "max",
-        "label": "Metric",
-        "title": "Transformations",
-        "description": "Metric events processed",
-        "units": "/m",
-        "format": "0,0.[00]",
-        "hasCalculation": false,
-        "isDerivative": true
-      },
-      "data": [
-        [1535723880000, null],
-        [1535723910000, 0],
-        [1535723940000, 0]
-      ]
-    }]
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.response.errors.invalidquery",
+          "metricAgg": "max",
+          "label": "Invalid Query",
+          "title": "Response Invalid Query Errors Agent Configuration Management",
+          "description": "Invalid HTTP query",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
+      }
+    ],
+    "apm_acm_request_count": [
+      {
+        "bucket_size": "30 seconds",
+        "timeRange": { "min": 1535720389104, "max": 1535723989104 },
+        "metric": {
+          "app": "apm",
+          "field": "beats_stats.metrics.apm-server.acm.request.count",
+          "metricAgg": "max",
+          "label": "Count",
+          "title": "Requests Agent Configuration Management",
+          "description": "HTTP Requests received by agent configuration managemen",
+          "units": "/s",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "data": [
+          [1535723880000, null],
+          [1535723910000, 0],
+          [1535723940000, 0]
+        ]
+      }
+    ]
   },
   "apmSummary": {
     "uuid": "9b16f434-2092-4983-a401-80a2b61c79d6",

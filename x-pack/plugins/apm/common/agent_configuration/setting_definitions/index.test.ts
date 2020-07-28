@@ -13,7 +13,7 @@ describe('filterByAgent', () => {
   describe('when `excludeAgents` is dotnet and nodejs', () => {
     const setting = {
       key: 'my-setting',
-      excludeAgents: ['dotnet', 'nodejs']
+      excludeAgents: ['dotnet', 'nodejs'],
     } as SettingDefinition;
 
     it('should not include dotnet', () => {
@@ -28,7 +28,7 @@ describe('filterByAgent', () => {
   describe('when `includeAgents` is dotnet and nodejs', () => {
     const setting = {
       key: 'my-setting',
-      includeAgents: ['dotnet', 'nodejs']
+      includeAgents: ['dotnet', 'nodejs'],
     } as SettingDefinition;
 
     it('should not include go', () => {
@@ -49,7 +49,7 @@ describe('filterByAgent', () => {
         'span_frames_min_duration',
         'stack_trace_limit',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -76,21 +76,21 @@ describe('filterByAgent', () => {
         'stress_monitor_system_cpu_relief_threshold',
         'stress_monitor_system_cpu_stress_threshold',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
     it('js-base', () => {
       expect(getSettingKeysForAgent('js-base')).toEqual([
         'recording',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
     it('rum-js', () => {
       expect(getSettingKeysForAgent('rum-js')).toEqual([
         'recording',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -98,7 +98,7 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent('nodejs')).toEqual([
         'capture_body',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -111,7 +111,7 @@ describe('filterByAgent', () => {
         'recording',
         'span_frames_min_duration',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -124,7 +124,7 @@ describe('filterByAgent', () => {
         'span_frames_min_duration',
         'stack_trace_limit',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -138,7 +138,7 @@ describe('filterByAgent', () => {
         'recording',
         'span_frames_min_duration',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
 
@@ -146,7 +146,7 @@ describe('filterByAgent', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual([
         'capture_body',
         'transaction_max_spans',
-        'transaction_sample_rate'
+        'transaction_sample_rate',
       ]);
     });
   });
@@ -155,7 +155,7 @@ describe('filterByAgent', () => {
 describe('settingDefinitions', () => {
   it('should have correct default values', () => {
     expect(
-      settingDefinitions.map(def => {
+      settingDefinitions.map((def) => {
         return {
           ...omit(def, [
             'category',
@@ -164,9 +164,9 @@ describe('settingDefinitions', () => {
             'excludeAgents',
             'includeAgents',
             'label',
-            'validation'
+            'validation',
           ]),
-          validationName: def.validation.name
+          validationName: def.validation.name,
         };
       })
     ).toMatchSnapshot();
@@ -175,5 +175,5 @@ describe('settingDefinitions', () => {
 
 function getSettingKeysForAgent(agentName: AgentName | undefined) {
   const definitions = settingDefinitions.filter(filterByAgent(agentName));
-  return definitions.map(def => def.key);
+  return definitions.map((def) => def.key);
 }

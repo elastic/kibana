@@ -21,7 +21,7 @@ import {
   checkPermission,
 } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import { Settings } from '../../../settings';
+import { AnomalyDetectionSettingsContext, Settings } from '../../../settings';
 import { ML_BREADCRUMB, SETTINGS } from '../../breadcrumbs';
 
 const breadcrumbs = [ML_BREADCRUMB, SETTINGS];
@@ -42,11 +42,17 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   const canGetFilters = checkPermission('canGetFilters');
+  const canCreateFilter = checkPermission('canCreateFilter');
   const canGetCalendars = checkPermission('canGetCalendars');
+  const canCreateCalendar = checkPermission('canCreateCalendar');
 
   return (
     <PageLoader context={context}>
-      <Settings canGetCalendars={canGetCalendars} canGetFilters={canGetFilters} />
+      <AnomalyDetectionSettingsContext.Provider
+        value={{ canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar }}
+      >
+        <Settings />
+      </AnomalyDetectionSettingsContext.Provider>
     </PageLoader>
   );
 };

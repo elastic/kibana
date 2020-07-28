@@ -30,6 +30,38 @@ Bundles built by the the optimizer include a cache file which describes the info
 
 When a bundle is determined to be up-to-date a worker is not started for the bundle. If running the optimizer with the `--dev/--watch` flag, then all the files referenced by cached bundles are watched for changes. Once a change is detected in any of the files referenced by the built bundle a worker is started. If a file is changed that is referenced by several bundles then workers will be started for each bundle, combining workers together to respect the worker limit.
 
+## Bundle Refs
+
+In order to dramatically reduce the size of our bundles, and the time it takes to build them, bundles will "ref" other bundles being built at the same time. When the optimizer starts it creates a list of "refs" that could be had from the list of bundles being built. Each worker uses that list to determine which import statements in a bundle should be replaced with a runtime reference to the output of another bundle.
+
+At runtime the bundles share a set of entry points via the `__kbnBundles__` global. By default a plugin shares `public` so that other code can use relative imports to access that directory. To expose additional directories they must be listed in the plugin's kibana.json "extraPublicDirs" field. The directories listed there will **also** be exported from the plugins bundle so that any other plugin can import that directory. "common" is commonly in the list of "extraPublicDirs".
+
+> NOTE: We plan to replace the `extraPublicDirs` functionality soon with better mechanisms for statically sharing code between bundles.
+
+When a directory is listed in the "extraPublicDirs" it will always be included in the bundle so that other plugins have access to it. The worker building the bundle has no way of knowing whether another plugin is using the directory, so be careful of adding test code or unnecessary directories to that list.
+
+Any import in a bundle which resolves into another bundles "context" directory, ie `src/plugins/*`, must map explicitly to a "public dir" exported by that plugin. If the resolved import is not in the list of public dirs an error will be thrown and the optimizer will fail to build that bundle until the error is fixed.
+
+## Themes
+
+SASS imports in bundles are automatically converted to CSS for one or more themes. In development we build the `v7light` and `v7dark` themes by default to improve build performance. When producing distributable bundles the default shifts to `*` so that the distributable bundles will include all themes, preventing the bundles from needing to be rebuilt when users change the active theme in Kibana's advanced settings.
+
+To customize the themes that are built for development you can specify the `KBN_OPTIMIZER_THEMES` environment variable to one or more theme tags, or use `*` to build styles for all themes. Unfortunately building more than one theme significantly impacts build performance, so try to be strategic about which themes you build.
+
+Currently supported theme tags: `v7light`, `v7dark`, `v8light`, `v8dark`
+
+Examples:
+```sh
+# start Kibana with only a single theme
+KBN_OPTIMIZER_THEMES=v7light yarn start
+
+# start Kibana with dark themes for version 7 and 8
+KBN_OPTIMIZER_THEMES=v7dark,v8dark yarn start
+
+# start Kibana with all the themes
+KBN_OPTIMIZER_THEMES=* yarn start
+```
+
 ## API
 
 To run the optimizer from code, you can import the [`OptimizerConfig`][OptimizerConfig] class and [`runOptimizer`][Optimizer] function. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`runOptimizer`][Optimizer] function. `runOptimizer()` returns an observable of update objects, which are summaries of the optimizer state plus an optional `event` property which describes the internal events occuring and may be of use. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log or checkout it's implementation to see how the internal events like [`WorkerStdio`][ObserveWorker] and [`WorkerStarted`][ObserveWorker] are used.

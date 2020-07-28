@@ -11,7 +11,7 @@ describe('Mappings configuration validator', () => {
   it('should convert non object to empty object', () => {
     const tests = ['abc', 123, [], null, undefined];
 
-    tests.forEach(testValue => {
+    tests.forEach((testValue) => {
       const { value, errors } = validateMappings(testValue as any);
       expect(isPlainObject(value)).toBe(true);
       expect(errors).toBe(undefined);
@@ -93,7 +93,7 @@ describe('Properties validator', () => {
   it('should convert non object to empty object', () => {
     const tests = ['abc', 123, [], null, undefined];
 
-    tests.forEach(testValue => {
+    tests.forEach((testValue) => {
       const { value, errors } = validateProperties(testValue as any);
       expect(isPlainObject(value)).toBe(true);
       expect(errors).toEqual([]);
@@ -127,7 +127,7 @@ describe('Properties validator', () => {
     });
 
     expect(errors).toEqual(
-      ['prop2', 'prop3', 'prop4', 'prop5', 'prop6.prop2'].map(fieldPath => ({
+      ['prop2', 'prop3', 'prop4', 'prop5', 'prop6.prop2'].map((fieldPath) => ({
         code: 'ERR_FIELD',
         fieldPath,
       }))
@@ -348,9 +348,9 @@ describe('Properties validator', () => {
     expect(value.goodField2).toEqual(properties.goodField2);
     expect(value.goodField3).toEqual(properties.goodField3);
 
-    const allWrongParameters = Object.keys(properties.wrongField).filter(v => v !== 'type');
+    const allWrongParameters = Object.keys(properties.wrongField).filter((v) => v !== 'type');
     expect(errors).toEqual(
-      allWrongParameters.map(paramName => ({
+      allWrongParameters.map((paramName) => ({
         code: 'ERR_PARAMETER',
         fieldPath: 'wrongField',
         paramName,

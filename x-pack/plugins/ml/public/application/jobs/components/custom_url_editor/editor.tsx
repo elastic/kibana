@@ -114,7 +114,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   };
 
   const onQueryEntitiesChange = (selectedOptions: EuiComboBoxOptionOption[]) => {
-    const selectedFieldNames = selectedOptions.map(option => option.label);
+    const selectedFieldNames = selectedOptions.map((option) => option.label);
 
     const kibanaSettings = customUrl.kibanaSettings;
     setEditCustomUrl({
@@ -159,22 +159,22 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
 
   const { label, type, timeRange, kibanaSettings, otherUrlSettings } = customUrl;
 
-  const dashboardOptions = dashboards.map(dashboard => {
+  const dashboardOptions = dashboards.map((dashboard) => {
     return { value: dashboard.id, text: dashboard.title };
   });
 
-  const indexPatternOptions = indexPatterns.map(indexPattern => {
+  const indexPatternOptions = indexPatterns.map((indexPattern) => {
     return { value: indexPattern.id, text: indexPattern.title };
   });
 
-  const entityOptions = queryEntityFieldNames.map(fieldName => ({ label: fieldName }));
+  const entityOptions = queryEntityFieldNames.map((fieldName) => ({ label: fieldName }));
   let selectedEntityOptions: EuiComboBoxOptionOption[] = [];
   if (kibanaSettings !== undefined && kibanaSettings.queryFieldNames !== undefined) {
     const queryFieldNames: string[] = kibanaSettings.queryFieldNames;
-    selectedEntityOptions = queryFieldNames.map(fieldName => ({ label: fieldName }));
+    selectedEntityOptions = queryFieldNames.map((fieldName) => ({ label: fieldName }));
   }
 
-  const timeRangeOptions = Object.values(TIME_RANGE_TYPE).map(timeRangeType => ({
+  const timeRangeOptions = Object.values(TIME_RANGE_TYPE).map((timeRangeType) => ({
     value: timeRangeType,
     text: timeRangeType,
   }));

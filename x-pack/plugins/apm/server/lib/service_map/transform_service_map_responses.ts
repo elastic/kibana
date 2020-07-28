@@ -3,26 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { sortBy, pick, identity } from 'lodash';
+import { sortBy, pickBy, identity } from 'lodash';
 import { ValuesType } from 'utility-types';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
-  SPAN_SUBTYPE
+  SPAN_SUBTYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import {
   Connection,
   ConnectionNode,
   ServiceConnectionNode,
-  ExternalConnectionNode
+  ExternalConnectionNode,
 } from '../../../common/service_map';
-import {
-  ConnectionsResponse,
-  ServicesResponse,
-  AnomaliesResponse
-} from './get_service_map';
-import { addAnomaliesDataToNodes } from './ml_helpers';
+import { ConnectionsResponse, ServicesResponse } from './get_service_map';
+import { ServiceAnomaliesResponse } from './get_service_anomalies';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -38,34 +34,48 @@ function getConnectionId(connection: Connection) {
   )}`;
 }
 
-export type ServiceMapResponse = ConnectionsResponse & {
-  anomalies: AnomaliesResponse;
-  services: ServicesResponse;
-};
-
-export function transformServiceMapResponses(response: ServiceMapResponse) {
-  const { anomalies, discoveredServices, services, connections } = response;
-
+export function getAllNodes(
+  services: ServiceMapResponse['services'],
+  connections: ServiceMapResponse['connections']
+) {
   // Derive the rest of the map nodes from the connections and add the services
   // from the services data query
   const allNodes: ConnectionNode[] = connections
-    .flatMap(connection => [connection.source, connection.destination])
-    .map(node => ({ ...node, id: getConnectionNodeId(node) }))
+    .flatMap((connection) => [connection.source, connection.destination])
+    .map((node) => ({ ...node, id: getConnectionNodeId(node) }))
     .concat(
-      services.map(service => ({
+      services.map((service) => ({
         ...service,
-        id: service[SERVICE_NAME]
+        id: service[SERVICE_NAME],
       }))
     );
 
+  return allNodes;
+}
+
+export function getServiceNodes(allNodes: ConnectionNode[]) {
   // List of nodes that are services
   const serviceNodes = allNodes.filter(
-    node => SERVICE_NAME in node
+    (node) => SERVICE_NAME in node
   ) as ServiceConnectionNode[];
+
+  return serviceNodes;
+}
+
+export type ServiceMapResponse = ConnectionsResponse & {
+  services: ServicesResponse;
+  anomalies: ServiceAnomaliesResponse;
+};
+
+export function transformServiceMapResponses(response: ServiceMapResponse) {
+  const { discoveredServices, services, connections, anomalies } = response;
+
+  const allNodes = getAllNodes(services, connections);
+  const serviceNodes = getServiceNodes(allNodes);
 
   // List of nodes that are externals
   const externalNodes = allNodes.filter(
-    node => SPAN_DESTINATION_SERVICE_RESOURCE in node
+    (node) => SPAN_DESTINATION_SERVICE_RESOURCE in node
   ) as ExternalConnectionNode[];
 
   // 1. Map external nodes to internal services
@@ -92,23 +102,29 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       serviceName = node[SERVICE_NAME];
     }
 
-    const matchedServiceNodes = serviceNodes.filter(
-      serviceNode => serviceNode[SERVICE_NAME] === serviceName
-    );
+    const matchedServiceNodes = serviceNodes
+      .filter((serviceNode) => serviceNode[SERVICE_NAME] === serviceName)
+      .map((serviceNode) => pickBy(serviceNode, identity));
+    const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
+
+    const serviceAnomalyStats = serviceName
+      ? anomalies.serviceAnomalies[serviceName]
+      : null;
 
     if (matchedServiceNodes.length) {
       return {
         ...map,
-        [node.id]: Object.assign(
-          {
-            id: matchedServiceNodes[0][SERVICE_NAME]
-          },
-          ...matchedServiceNodes.map(serviceNode => pick(serviceNode, identity))
-        )
+        [node.id]: {
+          id: matchedServiceNodes[0][SERVICE_NAME],
+          ...mergedServiceNode,
+          ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
+        },
       };
     }
 
-    const allMatchedExternalNodes = externalNodes.filter(n => n.id === node.id);
+    const allMatchedExternalNodes = externalNodes.filter(
+      (n) => n.id === node.id
+    );
 
     const firstMatchedNode = allMatchedExternalNodes[0];
 
@@ -117,11 +133,11 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       [node.id]: {
         ...firstMatchedNode,
         label: firstMatchedNode[SPAN_DESTINATION_SERVICE_RESOURCE],
-        [SPAN_TYPE]: allMatchedExternalNodes.map(n => n[SPAN_TYPE]).sort()[0],
+        [SPAN_TYPE]: allMatchedExternalNodes.map((n) => n[SPAN_TYPE]).sort()[0],
         [SPAN_SUBTYPE]: allMatchedExternalNodes
-          .map(n => n[SPAN_SUBTYPE])
-          .sort()[0]
-      }
+          .map((n) => n[SPAN_SUBTYPE])
+          .sort()[0],
+      },
     };
   }, {} as Record<string, ConnectionNode>);
 
@@ -132,7 +148,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
 
   // Build connections with mapped nodes
   const mappedConnections = connections
-    .map(connection => {
+    .map((connection) => {
       const sourceData = getConnectionNode(connection.source);
       const targetData = getConnectionNode(connection.destination);
 
@@ -141,19 +157,19 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
         target: targetData.id,
         id: getConnectionId({ source: sourceData, destination: targetData }),
         sourceData,
-        targetData
+        targetData,
       };
     })
-    .filter(connection => connection.source !== connection.target);
+    .filter((connection) => connection.source !== connection.target);
 
   const nodes = mappedConnections
-    .flatMap(connection => [connection.sourceData, connection.targetData])
+    .flatMap((connection) => [connection.sourceData, connection.targetData])
     .concat(serviceNodes);
 
   const dedupedNodes: typeof nodes = [];
 
-  nodes.forEach(node => {
-    if (!dedupedNodes.find(dedupedNode => node.id === dedupedNode.id)) {
+  nodes.forEach((node) => {
+    if (!dedupedNodes.find((dedupedNode) => node.id === dedupedNode.id)) {
       dedupedNodes.push(node);
     }
   });
@@ -164,7 +180,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
     (connectionMap, connection) => {
       return {
         ...connectionMap,
-        [connection.id]: connection
+        [connection.id]: connection,
       };
     },
     {} as Record<string, ConnectionWithId>
@@ -182,32 +198,24 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
     >
   >((prev, connection) => {
     const reversedConnection = prev.find(
-      c => c.target === connection.source && c.source === connection.target
+      (c) => c.target === connection.source && c.source === connection.target
     );
 
     if (reversedConnection) {
       reversedConnection.bidirectional = true;
       return prev.concat({
         ...connection,
-        isInverseEdge: true
+        isInverseEdge: true,
       });
     }
 
     return prev.concat(connection);
   }, []);
 
-  // Add anomlies data
-  const dedupedNodesWithAnomliesData = addAnomaliesDataToNodes(
-    dedupedNodes,
-    anomalies
-  );
-
   // Put everything together in elements, with everything in the "data" property
-  const elements = [...dedupedConnections, ...dedupedNodesWithAnomliesData].map(
-    element => ({
-      data: element
-    })
-  );
+  const elements = [...dedupedConnections, ...dedupedNodes].map((element) => ({
+    data: element,
+  }));
 
   return { elements };
 }

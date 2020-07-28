@@ -41,10 +41,7 @@ function createStubKbnServer(extraParams) {
   return {
     plugins: [],
     config: {
-      get: sinon
-        .stub()
-        .withArgs('server.basePath')
-        .returns(''),
+      get: sinon.stub().withArgs('server.basePath').returns(''),
     },
     server: {},
     ...extraParams,
@@ -288,7 +285,7 @@ describe('ui apps / UiApp', () => {
       it('throws an error at instantiation', () => {
         expect(() => {
           createUiApp(createStubUiAppSpec({ pluginId: 'foo' }));
-        }).to.throwException(error => {
+        }).to.throwException((error) => {
           expect(error.message).to.match(/Unknown plugin id/);
         });
       });

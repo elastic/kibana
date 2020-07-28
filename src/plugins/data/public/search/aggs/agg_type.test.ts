@@ -17,33 +17,15 @@
  * under the License.
  */
 
-import { AggType, AggTypeConfig, AggTypeDependencies } from './agg_type';
+import { AggType, AggTypeConfig } from './agg_type';
 import { IAggConfig } from './agg_config';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
-import { notificationServiceMock } from '../../../../../../src/core/public/mocks';
-import { InternalStartServices } from '../../types';
 
 describe('AggType Class', () => {
-  let dependencies: AggTypeDependencies;
-
-  beforeEach(() => {
-    dependencies = {
-      getInternalStartServices: () =>
-        (({
-          fieldFormats: {
-            ...fieldFormatsServiceMock.createStartContract(),
-            getDefaultInstance: jest.fn(() => 'default') as any,
-          },
-          notifications: notificationServiceMock.createStartContract(),
-        } as unknown) as InternalStartServices),
-    };
-  });
-
   describe('constructor', () => {
     test("requires a valid config object as it's first param", () => {
       expect(() => {
         const aggConfig: AggTypeConfig = (undefined as unknown) as AggTypeConfig;
-        new AggType(aggConfig, dependencies);
+        new AggType(aggConfig);
       }).toThrowError();
     });
 
@@ -54,7 +36,7 @@ describe('AggType Class', () => {
           title: 'title',
         };
 
-        const aggType = new AggType(config, dependencies);
+        const aggType = new AggType(config);
 
         expect(aggType.name).toBe('name');
         expect(aggType.title).toBe('title');
@@ -70,7 +52,7 @@ describe('AggType Class', () => {
             makeLabel,
           };
 
-          const aggType = new AggType(config, dependencies);
+          const aggType = new AggType(config);
 
           expect(aggType.makeLabel).toBe(makeLabel);
           expect(aggType.makeLabel(aggConfig)).toBe('label');
@@ -81,15 +63,12 @@ describe('AggType Class', () => {
         test('copies the value', () => {
           const testConfig = (aggConfig: IAggConfig) => [aggConfig];
 
-          const aggType = new AggType(
-            {
-              name: 'name',
-              title: 'title',
-              getResponseAggs: testConfig,
-              getRequestAggs: testConfig,
-            },
-            dependencies
-          );
+          const aggType = new AggType({
+            name: 'name',
+            title: 'title',
+            getResponseAggs: testConfig,
+            getRequestAggs: testConfig,
+          });
 
           expect(aggType.getResponseAggs).toBe(testConfig);
           expect(aggType.getResponseAggs).toBe(testConfig);
@@ -97,13 +76,10 @@ describe('AggType Class', () => {
 
         test('defaults to noop', () => {
           const aggConfig = {} as IAggConfig;
-          const aggType = new AggType(
-            {
-              name: 'name',
-              title: 'title',
-            },
-            dependencies
-          );
+          const aggType = new AggType({
+            name: 'name',
+            title: 'title',
+          });
           const responseAggs = aggType.getRequestAggs(aggConfig);
 
           expect(responseAggs).toBe(undefined);
@@ -112,13 +88,10 @@ describe('AggType Class', () => {
 
       describe('params', () => {
         test('defaults to AggParams object with JSON param', () => {
-          const aggType = new AggType(
-            {
-              name: 'smart agg',
-              title: 'title',
-            },
-            dependencies
-          );
+          const aggType = new AggType({
+            name: 'smart agg',
+            title: 'title',
+          });
 
           expect(Array.isArray(aggType.params)).toBeTruthy();
           expect(aggType.params.length).toBe(2);
@@ -127,14 +100,11 @@ describe('AggType Class', () => {
         });
 
         test('can disable customLabel', () => {
-          const aggType = new AggType(
-            {
-              name: 'smart agg',
-              title: 'title',
-              customLabels: false,
-            },
-            dependencies
-          );
+          const aggType = new AggType({
+            name: 'smart agg',
+            title: 'title',
+            customLabels: false,
+          });
 
           expect(aggType.params.length).toBe(1);
           expect(aggType.params[0].name).toBe('json');
@@ -144,14 +114,11 @@ describe('AggType Class', () => {
           const params = [{ name: 'one' }, { name: 'two' }];
           const paramLength = params.length + 2; // json and custom label are always appended
 
-          const aggType = new AggType(
-            {
-              name: 'bucketeer',
-              title: 'title',
-              params,
-            },
-            dependencies
-          );
+          const aggType = new AggType({
+            name: 'bucketeer',
+            title: 'title',
+            params,
+          });
 
           expect(Array.isArray(aggType.params)).toBeTruthy();
           expect(aggType.params.length).toBe(paramLength);
@@ -159,44 +126,62 @@ describe('AggType Class', () => {
       });
     });
 
-    describe('getFormat', function() {
-      let aggConfig: IAggConfig;
-      let field: any;
-
-      beforeEach(() => {
-        aggConfig = ({
-          getField: jest.fn(() => field),
+    describe('getSerializedFormat', () => {
+      test('returns the default serialized field format if it exists', () => {
+        const aggConfig = ({
+          params: {
+            field: {
+              format: {
+                toJSON: () => ({ id: 'format' }),
+              },
+            },
+          },
         } as unknown) as IAggConfig;
+        const aggType = new AggType({
+          name: 'name',
+          title: 'title',
+        });
+        expect(aggType.getSerializedFormat(aggConfig)).toMatchInlineSnapshot(`
+          Object {
+            "id": "format",
+          }
+        `);
       });
 
-      test('returns the formatter for the aggConfig', () => {
-        const aggType = new AggType(
-          {
-            name: 'name',
-            title: 'title',
-          },
-          dependencies
-        );
-
-        field = {
-          format: 'format',
-        };
-
-        expect(aggType.getFormat(aggConfig)).toBe('format');
+      test('returns an empty object if a field param does not exist', () => {
+        const aggConfig = ({
+          params: {},
+        } as unknown) as IAggConfig;
+        const aggType = new AggType({
+          name: 'name',
+          title: 'title',
+        });
+        expect(aggType.getSerializedFormat(aggConfig)).toMatchInlineSnapshot(`Object {}`);
       });
 
-      test('returns default formatter', () => {
-        const aggType = new AggType(
-          {
-            name: 'name',
-            title: 'title',
+      test('uses a custom getSerializedFormat function if defined', () => {
+        const aggConfig = ({
+          params: {
+            field: {
+              format: {
+                toJSON: () => ({ id: 'format' }),
+              },
+            },
           },
-          dependencies
-        );
-
-        field = undefined;
-
-        expect(aggType.getFormat(aggConfig)).toBe('default');
+        } as unknown) as IAggConfig;
+        const getSerializedFormat = jest.fn().mockReturnValue({ id: 'hello' });
+        const aggType = new AggType({
+          name: 'name',
+          title: 'title',
+          getSerializedFormat,
+        });
+        const serialized = aggType.getSerializedFormat(aggConfig);
+        expect(getSerializedFormat).toHaveBeenCalledWith(aggConfig);
+        expect(serialized).toMatchInlineSnapshot(`
+          Object {
+            "id": "hello",
+          }
+        `);
       });
     });
   });

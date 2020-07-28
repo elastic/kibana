@@ -25,7 +25,7 @@ const name = 'shape';
 export const shape: ExpressionTypeDefinition<typeof name, ExpressionValueRender<any>> = {
   name: 'shape',
   to: {
-    render: input => {
+    render: (input) => {
       return {
         type: 'render',
         as: name,

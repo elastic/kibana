@@ -48,13 +48,23 @@ export const ConnectorEditFlyout = ({
     actionTypeRegistry,
     reloadConnectors,
     docLinks,
+    consumer,
   } = useActionsConnectorsContext();
   const canSave = hasSaveActionsCapability(capabilities);
-  const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
+
   const [{ connector }, dispatch] = useReducer(connectorReducer, {
     connector: { ...initialConnector, secrets: {} },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const setConnector = (key: string, value: any) => {
+    dispatch({ command: { type: 'setConnector' }, payload: { key, value } });
+  };
+
+  const closeFlyout = useCallback(() => {
+    setEditFlyoutVisibility(false);
+    setConnector('connector', { ...initialConnector, secrets: {} });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setEditFlyoutVisibility]);
 
   if (!editFlyoutVisible) {
     return null;
@@ -65,11 +75,11 @@ export const ConnectorEditFlyout = ({
     ...actionTypeModel?.validateConnector(connector).errors,
     ...validateBaseProperties(connector).errors,
   } as IErrorObject;
-  hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
-      .then(savedConnector => {
+      .then((savedConnector) => {
         toastNotifications.addSuccess(
           i18n.translate(
             'xpack.triggersActionsUI.sections.editConnectorForm.updateSuccessNotificationText',
@@ -83,7 +93,7 @@ export const ConnectorEditFlyout = ({
         );
         return savedConnector;
       })
-      .catch(errorRes => {
+      .catch((errorRes) => {
         toastNotifications.addDanger(
           errorRes.body?.message ??
             i18n.translate(
@@ -185,6 +195,8 @@ export const ConnectorEditFlyout = ({
             actionTypeRegistry={actionTypeRegistry}
             http={http}
             docLinks={docLinks}
+            capabilities={capabilities}
+            consumer={consumer}
           />
         ) : (
           <Fragment>
@@ -197,7 +209,7 @@ export const ConnectorEditFlyout = ({
               )}
             </EuiText>
             <EuiLink
-              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-connectors.html`}
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`}
               target="_blank"
             >
               <FormattedMessage
@@ -211,7 +223,7 @@ export const ConnectorEditFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout}>
+            <EuiButtonEmpty onClick={closeFlyout} data-test-subj="cancelSaveEditedConnectorButton">
               {i18n.translate(
                 'xpack.triggersActionsUI.sections.editConnectorForm.cancelButtonLabel',
                 {

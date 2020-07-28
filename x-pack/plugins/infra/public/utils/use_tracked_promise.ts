@@ -99,7 +99,7 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
       const previousPendingPromises = pendingPromises.current;
 
       const cancelPreviousPendingPromises = () => {
-        previousPendingPromises.forEach(promise => promise.cancel());
+        previousPendingPromises.forEach((promise) => promise.cancel());
       };
 
       const newPromise = createPromise(...args);
@@ -123,8 +123,8 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
           rejectCancellationPromise(new SilentCanceledPromiseError());
         },
         promise: newCancelablePromise.then(
-          value => {
-            setPromiseState(previousPromiseState =>
+          (value) => {
+            setPromiseState((previousPromiseState) =>
               previousPromiseState.state === 'pending' &&
               previousPromiseState.promise === newCancelablePromise
                 ? {
@@ -141,7 +141,7 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
 
             // remove itself from the list of pending promises
             pendingPromises.current = pendingPromises.current.filter(
-              pendingPromise => pendingPromise.promise !== newPendingPromise.promise
+              (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
             );
 
             if (onResolve) {
@@ -150,9 +150,9 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
 
             return value;
           },
-          value => {
+          (value) => {
             if (!(value instanceof SilentCanceledPromiseError)) {
-              setPromiseState(previousPromiseState =>
+              setPromiseState((previousPromiseState) =>
                 previousPromiseState.state === 'pending' &&
                 previousPromiseState.promise === newCancelablePromise
                   ? {
@@ -170,7 +170,7 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
 
             // remove itself from the list of pending promises
             pendingPromises.current = pendingPromises.current.filter(
-              pendingPromise => pendingPromise.promise !== newPendingPromise.promise
+              (pendingPromise) => pendingPromise.promise !== newPendingPromise.promise
             );
 
             if (onReject) {
@@ -201,7 +201,7 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
    */
   useEffect(
     () => () => {
-      pendingPromises.current.forEach(promise => promise.cancelSilently());
+      pendingPromises.current.forEach((promise) => promise.cancelSilently());
     },
     []
   );

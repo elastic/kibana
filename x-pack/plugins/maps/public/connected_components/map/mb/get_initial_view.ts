@@ -24,7 +24,7 @@ export async function getInitialView(
     return await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         // success callback
-        pos => {
+        (pos) => {
           resolve({
             lat: pos.coords.latitude,
             lon: pos.coords.longitude,

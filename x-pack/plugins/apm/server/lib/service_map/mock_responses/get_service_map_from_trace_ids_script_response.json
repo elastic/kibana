@@ -1,0 +1,1165 @@
+{
+  "took": 43,
+  "timed_out": false,
+  "_shards": { "total": 6, "successful": 6, "skipped": 0, "failed": 0 },
+  "hits": {
+    "total": { "value": 465, "relation": "eq" },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "service_map": {
+      "value": {
+        "paths": [
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.6:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-python:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.6:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.7:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-ruby:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.7:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-ruby:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.7:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-python:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "93.184.216.34:80",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-ruby:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-python:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.7:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-ruby:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-ruby:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "redis",
+              "span.destination.service.resource": "redis",
+              "span.type": "cache"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-python:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "redis",
+              "span.destination.service.resource": "redis",
+              "span.type": "cache"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-ruby:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "postgresql",
+              "span.destination.service.resource": "postgresql",
+              "span.type": "db"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "redis",
+              "span.destination.service.resource": "redis",
+              "span.type": "cache"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-python:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.6:3000",
+              "span.type": "external"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-ruby:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "redis",
+              "span.destination.service.resource": "redis",
+              "span.type": "cache"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "ext"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "redis",
+              "span.destination.service.resource": "redis",
+              "span.type": "cache"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            },
+            {
+              "span.subtype": "redis",
+              "span.destination.service.resource": "redis",
+              "span.type": "cache"
+            }
+          ],
+          [
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            },
+            {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            },
+            {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "external"
+            }
+          ]
+        ],
+        "discoveredServices": [
+          {
+            "from": {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "external"
+            },
+            "to": {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            }
+          },
+          {
+            "from": {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.7:3000",
+              "span.type": "external"
+            },
+            "to": {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            }
+          },
+          {
+            "from": {
+              "span.subtype": "http",
+              "span.destination.service.resource": "opbeans-ruby:3000",
+              "span.type": "external"
+            },
+            "to": {
+              "service.environment": "production",
+              "service.name": "opbeans-ruby",
+              "agent.name": "ruby"
+            }
+          },
+          {
+            "from": {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-node:3000",
+              "span.type": "ext"
+            },
+            "to": {
+              "service.environment": "production",
+              "service.name": "opbeans-node",
+              "agent.name": "nodejs"
+            }
+          },
+          {
+            "from": {
+              "span.subtype": "http_rb",
+              "span.destination.service.resource": "opbeans-python:3000",
+              "span.type": "ext"
+            },
+            "to": {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            }
+          },
+          {
+            "from": {
+              "span.subtype": "http",
+              "span.destination.service.resource": "172.18.0.6:3000",
+              "span.type": "external"
+            },
+            "to": {
+              "service.environment": "production",
+              "service.name": "opbeans-python",
+              "agent.name": "python"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from 'src/core/server';
+import {
+  ILegacyClusterClient,
+  Logger,
+  SavedObjectsClientContract,
+  FakeRequest,
+} from 'src/core/server';
 import moment from 'moment';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
@@ -48,7 +53,7 @@ export class ReindexWorker {
   constructor(
     private client: SavedObjectsClientContract,
     private credentialStore: CredentialStore,
-    private clusterClient: IClusterClient,
+    private clusterClient: ILegacyClusterClient,
     log: Logger,
     private licensing: LicensingPluginSetup
   ) {
@@ -102,7 +107,7 @@ export class ReindexWorker {
    * Returns whether or not the given ReindexOperation is in the worker's queue.
    */
   public includes = (reindexOp: ReindexSavedObject) => {
-    return this.inProgressOps.map(o => o.id).includes(reindexOp.id);
+    return this.inProgressOps.map((o) => o.id).includes(reindexOp.id);
   };
 
   /**
@@ -121,11 +126,11 @@ export class ReindexWorker {
 
         if (
           this.inProgressOps.length &&
-          this.inProgressOps.every(op => !this.credentialStore.get(op))
+          this.inProgressOps.every((op) => !this.credentialStore.get(op))
         ) {
           // TODO: This tight loop needs something to relax potentially high CPU demands so this padding is added.
           // This scheduler should be revisited in future.
-          await new Promise(resolve => setTimeout(resolve, WORKER_PADDING_MS));
+          await new Promise((resolve) => setTimeout(resolve, WORKER_PADDING_MS));
         }
       }
     } finally {

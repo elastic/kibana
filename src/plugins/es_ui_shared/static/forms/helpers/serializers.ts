@@ -46,7 +46,7 @@ export const multiSelectComponent: Record<string, SerializerFunc<string[]>> = {
    * @param value The Eui Selectable options array
    */
   optionsToSelectedValue(options: EuiSelectableOption[]): string[] {
-    return options.filter(option => option.checked === 'on').map(option => option.label);
+    return options.filter((option) => option.checked === 'on').map((option) => option.label);
   },
 };
 
@@ -64,9 +64,13 @@ interface StripEmptyFieldsOptions {
  * @param options An optional configuration object. By default recursive it turned on.
  */
 export const stripEmptyFields = (
-  object: { [key: string]: any },
+  object?: { [key: string]: any },
   options?: StripEmptyFieldsOptions
 ): { [key: string]: any } => {
+  if (object === undefined) {
+    return {};
+  }
+
   const { types = ['string', 'object'], recursive = false } = options || {};
 
   return Object.entries(object).reduce((acc, [key, value]) => {

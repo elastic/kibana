@@ -19,8 +19,8 @@
 
 import { getGeoBoundingBoxFilterField } from './geo_bounding_box_filter';
 
-describe('geo_bounding_box filter', function() {
-  describe('getGeoBoundingBoxFilterField', function() {
+describe('geo_bounding_box filter', function () {
+  describe('getGeoBoundingBoxFilterField', function () {
     it('should return the name of the field a geo_bounding_box query is targeting', () => {
       const filter = {
         geo_bounding_box: {

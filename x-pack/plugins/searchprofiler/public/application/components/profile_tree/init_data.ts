@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash.clonedeep';
+import { cloneDeep } from 'lodash';
 import { flow } from 'fp-ts/lib/function';
 import { Targets, Shard, ShardSerialized } from '../../types';
 import { calcTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';
@@ -51,9 +51,9 @@ export function mutateSearchTimesTree(shard: Shard) {
 }
 
 const initShards = (data: ShardSerialized[]) =>
-  data.map(s => {
+  data.map((s) => {
     const idMatch = s.id.match(/\[([^\]\[]*?)\]/g) || [];
-    const ids = idMatch.map(id => {
+    const ids = idMatch.map((id) => {
       return id.replace('[', '').replace(']', '');
     });
     return {
@@ -108,7 +108,7 @@ export const normalize = (target: Targets) => (data: IndexMap) => {
 
 export const initDataFor = (target: Targets) =>
   flow(
-    cloneDeep,
+    cloneDeep as any,
     initShards,
     calculateShardValues(target),
     initIndices,

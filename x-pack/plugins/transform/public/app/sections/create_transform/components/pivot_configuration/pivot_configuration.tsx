@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash';
-import React, { memo, FC } from 'react';
+import React, { memo, FC, createContext } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 
@@ -16,20 +15,32 @@ import { DropDown } from '../aggregation_dropdown';
 import { GroupByListForm } from '../group_by_list';
 import { StepDefineFormHook } from '../step_define';
 
+export const PivotConfigurationContext = createContext<
+  StepDefineFormHook['pivotConfig'] | undefined
+>(undefined);
+
 export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
-  ({
-    actions: {
+  ({ actions, state }) => {
+    const {
       addAggregation,
       addGroupBy,
       deleteAggregation,
       deleteGroupBy,
       updateAggregation,
       updateGroupBy,
-    },
-    state: { aggList, aggOptions, aggOptionsData, groupByList, groupByOptions, groupByOptionsData },
-  }) => {
+    } = actions;
+
+    const {
+      aggList,
+      aggOptions,
+      aggOptionsData,
+      groupByList,
+      groupByOptions,
+      groupByOptionsData,
+    } = state;
+
     return (
-      <>
+      <PivotConfigurationContext.Provider value={{ actions, state }}>
         <EuiFormRow
           fullWidth
           label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
@@ -80,10 +91,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
             />
           </>
         </EuiFormRow>
-      </>
+      </PivotConfigurationContext.Provider>
     );
-  },
-  (prevProps, nextProps) => {
-    return isEqual(prevProps.state, nextProps.state);
   }
 );

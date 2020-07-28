@@ -10,8 +10,10 @@ import { getTransactionDistribution } from './distribution';
 import { getTransaction } from './get_transaction';
 import {
   SearchParamsMock,
-  inspectSearchParams
+  inspectSearchParams,
 } from '../../../public/utils/testHelpers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { loggerMock } from '../../../../../../src/core/server/logging/logger.mock';
 
 describe('transaction queries', () => {
   let mock: SearchParamsMock;
@@ -21,11 +23,11 @@ describe('transaction queries', () => {
   });
 
   it('fetches breakdown data for transactions', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getTransactionBreakdown({
         serviceName: 'foo',
         transactionType: 'bar',
-        setup
+        setup,
       })
     );
 
@@ -33,12 +35,12 @@ describe('transaction queries', () => {
   });
 
   it('fetches breakdown data for transactions for a transaction name', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getTransactionBreakdown({
         serviceName: 'foo',
         transactionType: 'bar',
         transactionName: 'baz',
-        setup
+        setup,
       })
     );
 
@@ -46,36 +48,42 @@ describe('transaction queries', () => {
   });
 
   it('fetches transaction charts', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getTransactionCharts({
         serviceName: 'foo',
         transactionName: undefined,
         transactionType: undefined,
-        setup
+        setup,
+        logger: loggerMock.create(),
+        uiFilters: {},
       })
     );
     expect(mock.params).toMatchSnapshot();
   });
 
   it('fetches transaction charts for a transaction type', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getTransactionCharts({
         serviceName: 'foo',
         transactionName: 'bar',
         transactionType: undefined,
-        setup
+        setup,
+        logger: loggerMock.create(),
+        uiFilters: {},
       })
     );
     expect(mock.params).toMatchSnapshot();
   });
 
   it('fetches transaction charts for a transaction type and transaction name', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getTransactionCharts({
         serviceName: 'foo',
         transactionName: 'bar',
         transactionType: 'baz',
-        setup
+        setup,
+        logger: loggerMock.create(),
+        uiFilters: {},
       })
     );
 
@@ -83,14 +91,14 @@ describe('transaction queries', () => {
   });
 
   it('fetches transaction distribution', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getTransactionDistribution({
         serviceName: 'foo',
         transactionName: 'bar',
         transactionType: 'baz',
         traceId: 'qux',
         transactionId: 'quz',
-        setup
+        setup,
       })
     );
 
@@ -98,7 +106,7 @@ describe('transaction queries', () => {
   });
 
   it('fetches a transaction', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getTransaction({ transactionId: 'foo', traceId: 'bar', setup })
     );
 

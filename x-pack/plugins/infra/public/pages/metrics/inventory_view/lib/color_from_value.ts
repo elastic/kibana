@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { eq, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
+import { isEqual, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
 import { mix, parseToRgb, toColorString } from 'polished';
 import {
   InfraWaffleMapBounds,
-  InfraWaffleMapGradientLegend,
   InfraWaffleMapLegend,
   InfraWaffleMapRuleOperator,
-  InfraWaffleMapStepLegend,
+  GradientLegendRT,
+  SteppedGradientLegendRT,
+  StepLegendRT,
+  InfraWaffleMapStepRule,
+  InfraWaffleMapGradientRule,
 } from '../../../../lib/lib';
-import { isInfraWaffleMapGradientLegend, isInfraWaffleMapStepLegend } from './type_guards';
 
 const OPERATOR_TO_FN = {
-  [InfraWaffleMapRuleOperator.eq]: eq,
+  [InfraWaffleMapRuleOperator.eq]: isEqual,
   [InfraWaffleMapRuleOperator.lt]: lt,
   [InfraWaffleMapRuleOperator.lte]: lte,
   [InfraWaffleMapRuleOperator.gte]: gte,
@@ -34,11 +36,16 @@ export const colorFromValue = (
   defaultColor = 'rgba(217, 217, 217, 1)'
 ): string => {
   try {
-    if (isInfraWaffleMapStepLegend(legend)) {
-      return convertToRgbString(calculateStepColor(legend, value, defaultColor));
+    if (StepLegendRT.is(legend)) {
+      return convertToRgbString(calculateStepColor(legend.rules, value, defaultColor));
     }
-    if (isInfraWaffleMapGradientLegend(legend)) {
-      return convertToRgbString(calculateGradientColor(legend, value, bounds, defaultColor));
+    if (GradientLegendRT.is(legend)) {
+      return convertToRgbString(calculateGradientColor(legend.rules, value, bounds, defaultColor));
+    }
+    if (SteppedGradientLegendRT.is(legend)) {
+      return convertToRgbString(
+        calculateSteppedGradientColor(legend.rules, value, bounds, defaultColor)
+      );
     }
     return defaultColor;
   } catch (error) {
@@ -50,12 +57,37 @@ const normalizeValue = (min: number, max: number, value: number): number => {
   return (value - min) / (max - min);
 };
 
+export const calculateSteppedGradientColor = (
+  rules: InfraWaffleMapGradientRule[],
+  value: number | string,
+  bounds: InfraWaffleMapBounds,
+  defaultColor = 'rgba(217, 217, 217, 1)'
+) => {
+  const normalizedValue = normalizeValue(bounds.min, bounds.max, Number(value));
+  const steps = rules.length;
+
+  // Since the stepped legend matches a range we need to ensure anything outside
+  // the max bounds get's the maximum color.
+  if (gte(normalizedValue, (last(rules) as any).value)) {
+    return (last(rules) as any).color;
+  }
+
+  return rules.reduce((color: string, rule) => {
+    const min = rule.value - 1 / steps;
+    const max = rule.value;
+    if (gte(normalizedValue, min) && lte(normalizedValue, max)) {
+      return rule.color;
+    }
+    return color;
+  }, (first(rules) as any).color || defaultColor);
+};
+
 export const calculateStepColor = (
-  legend: InfraWaffleMapStepLegend,
+  rules: InfraWaffleMapStepRule[],
   value: number | string,
   defaultColor = 'rgba(217, 217, 217, 1)'
 ): string => {
-  return sortBy(legend.rules, 'sortBy').reduce((color: string, rule) => {
+  return rules.reduce((color: string, rule) => {
     const operatorFn = OPERATOR_TO_FN[rule.operator];
     if (operatorFn(value, rule.value)) {
       return rule.color;
@@ -65,27 +97,29 @@ export const calculateStepColor = (
 };
 
 export const calculateGradientColor = (
-  legend: InfraWaffleMapGradientLegend,
+  rules: InfraWaffleMapGradientRule[],
   value: number | string,
   bounds: InfraWaffleMapBounds,
   defaultColor = 'rgba(0, 179, 164, 1)'
 ): string => {
-  if (legend.rules.length === 0) {
+  if (rules.length === 0) {
     return defaultColor;
   }
-  if (legend.rules.length === 1) {
-    return last(legend.rules).color;
+  if (rules.length === 1) {
+    return (last(rules) as any).color;
   }
   const { min, max } = bounds;
-  const sortedRules = sortBy(legend.rules, 'value');
+  const sortedRules = sortBy(rules, 'value');
   const normValue = normalizeValue(min, max, Number(value));
   const startRule = sortedRules.reduce((acc, rule) => {
     if (rule.value <= normValue) {
       return rule;
     }
     return acc;
-  }, first(sortedRules));
-  const endRule = sortedRules.filter(r => r !== startRule).find(r => r.value >= normValue);
+  }, first(sortedRules)) as any;
+  const endRule = sortedRules
+    .filter((r) => r !== startRule)
+    .find((r) => r.value >= normValue) as any;
   if (!endRule) {
     return startRule.color;
   }

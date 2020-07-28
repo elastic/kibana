@@ -70,6 +70,8 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
           "run `node scripts/mocha`"
         )
       })
+    } else if (job == 'accessibility') {
+      return kibanaPipeline.functionalTestProcess('kibana-accessibility', './test/scripts/jenkins_accessibility.sh')
     } else if (job == 'firefoxSmoke') {
       return kibanaPipeline.functionalTestProcess('firefoxSmoke', './test/scripts/jenkins_firefox_smoke.sh')
     } else if(job == 'visualRegression') {
@@ -79,7 +81,9 @@ def getWorkerFromParams(isXpack, job, ciGroup) {
     }
   }
 
-  if (job == 'firefoxSmoke') {
+  if (job == 'accessibility') {
+    return kibanaPipeline.functionalTestProcess('xpack-accessibility', './test/scripts/jenkins_xpack_accessibility.sh')
+  } else if (job == 'firefoxSmoke') {
     return kibanaPipeline.functionalTestProcess('xpack-firefoxSmoke', './test/scripts/jenkins_xpack_firefox_smoke.sh')
   } else if(job == 'visualRegression') {
     return kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh')

@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { IBasePath } from '../http';
+import { App, LegacyApp, PublicAppInfo, PublicLegacyAppInfo, ParsedAppUrl } from './types';
+
 /**
  * Utility to remove trailing, leading or duplicate slashes.
  * By default will only remove duplicates.
@@ -52,3 +55,83 @@ export const appendAppPath = (appBasePath: string, path: string = '') => {
     leading: false,
   });
 };
+
+export function isLegacyApp(app: App | LegacyApp): app is LegacyApp {
+  return app.legacy === true;
+}
+
+/**
+ * Converts a relative path to an absolute url.
+ * Implementation is based on a specified behavior of the browser to automatically convert
+ * a relative url to an absolute one when setting the `href` attribute of a `<a>` html element.
+ *
+ * @example
+ * ```ts
+ * // current url: `https://kibana:8000/base-path/app/my-app`
+ * relativeToAbsolute('/base-path/app/another-app') => `https://kibana:8000/base-path/app/another-app`
+ * ```
+ */
+export const relativeToAbsolute = (url: string): string => {
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  return a.href;
+};
+
+/**
+ * Parse given url and return the associated app id and path if any app matches.
+ * Input can either be:
+ * - a path containing the basePath, ie `/base-path/app/my-app/some-path`
+ * - an absolute url matching the `origin` of the kibana instance (as seen by the browser),
+ *   i.e `https://kibana:8080/base-path/app/my-app/some-path`
+ */
+export const parseAppUrl = (
+  url: string,
+  basePath: IBasePath,
+  apps: Map<string, App<unknown> | LegacyApp>,
+  getOrigin: () => string = () => window.location.origin
+): ParsedAppUrl | undefined => {
+  url = removeBasePath(url, basePath, getOrigin());
+  if (!url.startsWith('/')) {
+    return undefined;
+  }
+
+  for (const app of apps.values()) {
+    const appPath = isLegacyApp(app) ? app.appUrl : app.appRoute || `/app/${app.id}`;
+
+    if (url.startsWith(appPath)) {
+      const path = url.substr(appPath.length);
+      return {
+        app: app.id,
+        path: path.length ? path : undefined,
+      };
+    }
+  }
+};
+
+const removeBasePath = (url: string, basePath: IBasePath, origin: string): string => {
+  if (url.startsWith(origin)) {
+    url = url.substring(origin.length);
+  }
+  return basePath.remove(url);
+};
+
+export function getAppInfo(app: App<unknown> | LegacyApp): PublicAppInfo | PublicLegacyAppInfo {
+  if (isLegacyApp(app)) {
+    const { updater$, ...infos } = app;
+    return {
+      ...infos,
+      status: app.status!,
+      navLinkStatus: app.navLinkStatus!,
+      legacy: true,
+    };
+  } else {
+    const { updater$, mount, ...infos } = app;
+    return {
+      ...infos,
+      status: app.status!,
+      navLinkStatus: app.navLinkStatus!,
+      appRoute: app.appRoute!,
+      legacy: false,
+    };
+  }
+}

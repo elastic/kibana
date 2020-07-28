@@ -75,7 +75,7 @@ export const ColorManager: FunctionComponent<Props> = ({
           value={value}
           isInvalid={!validColor && value.length > 0}
           placeholder={strings.getCodePlaceholder()}
-          onChange={e => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
         />
       </EuiFlexItem>
       {buttons}

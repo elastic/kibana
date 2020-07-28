@@ -21,7 +21,7 @@ import { getTableData } from './get_table_data';
 import { getSeriesData } from './get_series_data';
 
 export function getPanelData(req) {
-  return panel => {
+  return (panel) => {
     if (panel.type === 'table') {
       return getTableData(req, panel);
     }

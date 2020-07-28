@@ -44,11 +44,11 @@ export const transactionGroupsResponse = ({
                           full: 'http://opbeans-node:3000/api/orders',
                           raw: '/api/orders',
                           protocol: 'http:',
-                          hostname: 'opbeans-node'
+                          hostname: 'opbeans-node',
                         },
                         socket: {
                           encrypted: false,
-                          remote_address: '::ffff:172.18.0.10'
+                          remote_address: '::ffff:172.18.0.10',
                         },
                         headers: {
                           host: 'opbeans-node:3000',
@@ -56,9 +56,9 @@ export const transactionGroupsResponse = ({
                           'content-type': 'application/json',
                           'content-length': '129',
                           connection: 'close',
-                          'user-agent': 'workload/2.4.3'
+                          'user-agent': 'workload/2.4.3',
                         },
-                        body: '[REDACTED]'
+                        body: '[REDACTED]',
                       },
                       response: {
                         status_code: 200,
@@ -68,35 +68,35 @@ export const transactionGroupsResponse = ({
                           'x-powered-by': 'Express',
                           'content-type': 'application/json; charset=utf-8',
                           'content-length': '13',
-                          etag: 'W/"d-g9K2iK4ordyN88lGL4LmPlYNfhc"'
-                        }
+                          etag: 'W/"d-g9K2iK4ordyN88lGL4LmPlYNfhc"',
+                        },
                       },
                       system: {
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
                         architecture: 'x64',
-                        platform: 'linux'
+                        platform: 'linux',
                       },
                       process: {
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 2413,
                         ppid: 1,
-                        title: 'node /app/server.js'
+                        title: 'node /app/server.js',
                       },
                       service: {
                         runtime: { name: 'node', version: '8.12.0' },
                         name: 'opbeans-node',
                         agent: { name: 'nodejs', version: '1.14.2' },
                         version: '1.0.0',
-                        language: { name: 'javascript' }
+                        language: { name: 'javascript' },
                       },
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         lorem:
@@ -104,21 +104,21 @@ export const transactionGroupsResponse = ({
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
                         'multi-line': 'foo\nbar\nbaz',
-                        foo: 'bar'
+                        foo: 'bar',
                       },
-                      custom: { containerId: 4669 }
+                      custom: { containerId: 4669 },
                     },
                     trace: { id: '2b1252a338249daeecf6afb0c236e31b' },
                     timestamp: { us: 1542573812010006 },
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       sampled: true,
@@ -127,14 +127,14 @@ export const transactionGroupsResponse = ({
                       name: 'POST /api/orders',
                       duration: { us: 291572 },
                       type: 'request',
-                      result: 'HTTP 2xx'
-                    }
+                      result: 'HTTP 2xx',
+                    },
                   },
-                  sort: [1542573812010]
-                }
-              ]
-            }
-          }
+                  sort: [1542573812010],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api' },
@@ -158,12 +158,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       hostname: 'b359e3afece8',
                       version: '7.0.0-alpha1',
-                      type: 'apm-server'
+                      type: 'apm-server',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       sampled: true,
@@ -172,7 +172,7 @@ export const transactionGroupsResponse = ({
                       name: 'GET /api',
                       duration: { us: 8684 },
                       type: 'request',
-                      result: 'HTTP 4xx'
+                      result: 'HTTP 4xx',
                     },
                     context: {
                       response: {
@@ -182,35 +182,35 @@ export const transactionGroupsResponse = ({
                           'transfer-encoding': 'chunked',
                           date: 'Sun, 18 Nov 2018 20:53:43 GMT',
                           connection: 'close',
-                          'x-powered-by': 'Express'
-                        }
+                          'x-powered-by': 'Express',
+                        },
                       },
                       system: {
                         hostname: '98195610c255',
                         architecture: 'x64',
                         platform: 'linux',
-                        ip: '172.18.0.10'
+                        ip: '172.18.0.10',
                       },
                       process: {
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3756,
                         ppid: 1,
-                        title: 'node /app/server.js'
+                        title: 'node /app/server.js',
                       },
                       service: {
                         runtime: { name: 'node', version: '8.12.0' },
                         name: 'opbeans-node',
                         agent: { version: '1.14.2', name: 'nodejs' },
                         version: '1.0.0',
-                        language: { name: 'javascript' }
+                        language: { name: 'javascript' },
                       },
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         foo: 'bar',
@@ -218,7 +218,7 @@ export const transactionGroupsResponse = ({
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
-                        'multi-line': 'foo\nbar\nbaz'
+                        'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 5176 },
                       request: {
@@ -229,11 +229,11 @@ export const transactionGroupsResponse = ({
                           port: '3000',
                           pathname: '/api/types/3',
                           full: 'http://opbeans-node:3000/api/types/3',
-                          raw: '/api/types/3'
+                          raw: '/api/types/3',
                         },
                         socket: {
                           encrypted: false,
-                          remote_address: '::ffff:172.18.0.6'
+                          remote_address: '::ffff:172.18.0.6',
                         },
                         headers: {
                           'accept-encoding': 'gzip, deflate',
@@ -242,19 +242,19 @@ export const transactionGroupsResponse = ({
                           'elastic-apm-traceparent':
                             '00-86c68779d8a65b06fb78e770ffc436a5-4aaea53dc1791183-01',
                           host: 'opbeans-node:3000',
-                          'user-agent': 'python-requests/2.20.0'
+                          'user-agent': 'python-requests/2.20.0',
                         },
-                        http_version: '1.1'
-                      }
+                        http_version: '1.1',
+                      },
                     },
                     parent: { id: '4aaea53dc1791183' },
-                    trace: { id: '86c68779d8a65b06fb78e770ffc436a5' }
+                    trace: { id: '86c68779d8a65b06fb78e770ffc436a5' },
                   },
-                  sort: [1542574424070]
-                }
-              ]
-            }
-          }
+                  sort: [1542574424070],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/orders' },
@@ -278,12 +278,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       type: 'request',
@@ -292,13 +292,13 @@ export const transactionGroupsResponse = ({
                       span_count: { started: 2 },
                       id: '89f200353eb50539',
                       name: 'GET /api/orders',
-                      duration: { us: 23040 }
+                      duration: { us: 23040 },
                     },
                     context: {
                       user: {
                         username: 'kimchy',
                         email: 'kimchy@elastic.co',
-                        id: '42'
+                        id: '42',
                       },
                       tags: {
                         foo: 'bar',
@@ -306,7 +306,7 @@ export const transactionGroupsResponse = ({
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
-                        'multi-line': 'foo\nbar\nbaz'
+                        'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 408 },
                       request: {
@@ -317,18 +317,18 @@ export const transactionGroupsResponse = ({
                           protocol: 'http:',
                           hostname: 'opbeans-node',
                           port: '3000',
-                          pathname: '/api/orders'
+                          pathname: '/api/orders',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           'user-agent': 'workload/2.4.3',
                           host: 'opbeans-node:3000',
-                          connection: 'close'
+                          connection: 'close',
                         },
-                        http_version: '1.1'
+                        http_version: '1.1',
                       },
                       response: {
                         status_code: 200,
@@ -338,39 +338,39 @@ export const transactionGroupsResponse = ({
                           connection: 'close',
                           'x-powered-by': 'Express',
                           'content-type': 'application/json; charset=utf-8',
-                          'content-length': '103612'
-                        }
+                          'content-length': '103612',
+                        },
                       },
                       system: {
                         platform: 'linux',
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
-                        architecture: 'x64'
+                        architecture: 'x64',
                       },
                       process: {
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3756,
-                        ppid: 1
+                        ppid: 1,
                       },
                       service: {
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
                         name: 'opbeans-node',
-                        agent: { version: '1.14.2', name: 'nodejs' }
-                      }
+                        agent: { version: '1.14.2', name: 'nodejs' },
+                      },
                     },
-                    trace: { id: '0afce85f593cbbdd09949936fe964f0f' }
+                    trace: { id: '0afce85f593cbbdd09949936fe964f0f' },
                   },
-                  sort: [1542574420973]
-                }
-              ]
-            }
-          }
+                  sort: [1542574420973],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /log-message' },
@@ -392,7 +392,7 @@ export const transactionGroupsResponse = ({
                     '@timestamp': '2018-11-18T20:49:09.225Z',
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       sampled: true,
@@ -401,13 +401,13 @@ export const transactionGroupsResponse = ({
                       name: 'GET /log-message',
                       duration: { us: 32381 },
                       type: 'request',
-                      result: 'HTTP 5xx'
+                      result: 'HTTP 5xx',
                     },
                     context: {
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         lorem:
@@ -415,18 +415,18 @@ export const transactionGroupsResponse = ({
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
                         'multi-line': 'foo\nbar\nbaz',
-                        foo: 'bar'
+                        foo: 'bar',
                       },
                       custom: { containerId: 321 },
                       request: {
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           'user-agent': 'workload/2.4.3',
                           host: 'opbeans-node:3000',
-                          connection: 'close'
+                          connection: 'close',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -436,8 +436,8 @@ export const transactionGroupsResponse = ({
                           hostname: 'opbeans-node',
                           port: '3000',
                           pathname: '/log-message',
-                          full: 'http://opbeans-node:3000/log-message'
-                        }
+                          full: 'http://opbeans-node:3000/log-message',
+                        },
                       },
                       response: {
                         status_code: 500,
@@ -447,46 +447,46 @@ export const transactionGroupsResponse = ({
                           'content-length': '24',
                           etag: 'W/"18-MS3VbhH7auHMzO0fUuNF6v14N/M"',
                           date: 'Sun, 18 Nov 2018 20:49:09 GMT',
-                          connection: 'close'
-                        }
+                          connection: 'close',
+                        },
                       },
                       system: {
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
                         architecture: 'x64',
-                        platform: 'linux'
+                        platform: 'linux',
                       },
                       process: {
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3142,
-                        ppid: 1
+                        ppid: 1,
                       },
                       service: {
                         language: { name: 'javascript' },
                         runtime: { version: '8.12.0', name: 'node' },
                         name: 'opbeans-node',
                         agent: { name: 'nodejs', version: '1.14.2' },
-                        version: '1.0.0'
-                      }
+                        version: '1.0.0',
+                      },
                     },
                     trace: { id: 'ba18b741cdd3ac83eca89a5fede47577' },
                     timestamp: { us: 1542574149225004 },
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
-                    host: { name: 'b359e3afece8' }
+                    host: { name: 'b359e3afece8' },
                   },
-                  sort: [1542574149225]
-                }
-              ]
-            }
-          }
+                  sort: [1542574149225],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/stats' },
@@ -511,12 +511,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       hostname: 'b359e3afece8',
                       version: '7.0.0-alpha1',
-                      type: 'apm-server'
+                      type: 'apm-server',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       sampled: true,
@@ -525,7 +525,7 @@ export const transactionGroupsResponse = ({
                       name: 'GET /api/stats',
                       duration: { us: 28753 },
                       type: 'request',
-                      result: 'HTTP 3xx'
+                      result: 'HTTP 3xx',
                     },
                     context: {
                       response: {
@@ -533,15 +533,15 @@ export const transactionGroupsResponse = ({
                           'x-powered-by': 'Express',
                           etag: 'W/"77-uxKJrX5GSMJJWTKh3orUFAEVxSs"',
                           date: 'Sun, 18 Nov 2018 20:53:42 GMT',
-                          connection: 'keep-alive'
+                          connection: 'keep-alive',
                         },
-                        status_code: 304
+                        status_code: 304,
                       },
                       system: {
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
                         architecture: 'x64',
-                        platform: 'linux'
+                        platform: 'linux',
                       },
                       process: {
                         pid: 3756,
@@ -549,20 +549,20 @@ export const transactionGroupsResponse = ({
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
-                        ]
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
+                        ],
                       },
                       service: {
                         name: 'opbeans-node',
                         agent: { version: '1.14.2', name: 'nodejs' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
-                        runtime: { name: 'node', version: '8.12.0' }
+                        runtime: { name: 'node', version: '8.12.0' },
                       },
                       user: {
                         email: 'kimchy@elastic.co',
                         id: '42',
-                        username: 'kimchy'
+                        username: 'kimchy',
                       },
                       tags: {
                         'multi-line': 'foo\nbar\nbaz',
@@ -570,7 +570,7 @@ export const transactionGroupsResponse = ({
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test'
+                          'test',
                       },
                       custom: { containerId: 207 },
                       request: {
@@ -580,11 +580,11 @@ export const transactionGroupsResponse = ({
                           port: '3000',
                           pathname: '/api/stats',
                           full: 'http://opbeans-node:3000/api/stats',
-                          raw: '/api/stats'
+                          raw: '/api/stats',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.7',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           'if-none-match': 'W/"77-uxKJrX5GSMJJWTKh3orUFAEVxSs"',
@@ -595,19 +595,19 @@ export const transactionGroupsResponse = ({
                             '00-63ccc3b0929dafb7f2fbcabdc7f7af25-821a787e73ab1563-01',
                           accept: '*/*',
                           referer: 'http://opbeans-node:3000/dashboard',
-                          'accept-encoding': 'gzip, deflate'
+                          'accept-encoding': 'gzip, deflate',
                         },
                         http_version: '1.1',
-                        method: 'GET'
-                      }
+                        method: 'GET',
+                      },
                     },
-                    parent: { id: '821a787e73ab1563' }
+                    parent: { id: '821a787e73ab1563' },
                   },
-                  sort: [1542574422560]
-                }
-              ]
-            }
-          }
+                  sort: [1542574422560],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /log-error' },
@@ -631,11 +631,11 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       sampled: true,
@@ -644,7 +644,7 @@ export const transactionGroupsResponse = ({
                       name: 'GET /log-error',
                       duration: { us: 33367 },
                       type: 'request',
-                      result: 'HTTP 5xx'
+                      result: 'HTTP 5xx',
                     },
                     context: {
                       service: {
@@ -652,12 +652,12 @@ export const transactionGroupsResponse = ({
                         agent: { version: '1.14.2', name: 'nodejs' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
-                        runtime: { name: 'node', version: '8.12.0' }
+                        runtime: { name: 'node', version: '8.12.0' },
                       },
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         'multi-line': 'foo\nbar\nbaz',
@@ -665,7 +665,7 @@ export const transactionGroupsResponse = ({
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test'
+                          'test',
                       },
                       custom: { containerId: 4877 },
                       request: {
@@ -677,17 +677,17 @@ export const transactionGroupsResponse = ({
                           protocol: 'http:',
                           hostname: 'opbeans-node',
                           port: '3000',
-                          pathname: '/log-error'
+                          pathname: '/log-error',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           'user-agent': 'workload/2.4.3',
                           host: 'opbeans-node:3000',
-                          connection: 'close'
-                        }
+                          connection: 'close',
+                        },
                       },
                       response: {
                         headers: {
@@ -696,34 +696,34 @@ export const transactionGroupsResponse = ({
                           'x-powered-by': 'Express',
                           'content-type': 'text/html; charset=utf-8',
                           'content-length': '24',
-                          etag: 'W/"18-MS3VbhH7auHMzO0fUuNF6v14N/M"'
+                          etag: 'W/"18-MS3VbhH7auHMzO0fUuNF6v14N/M"',
                         },
-                        status_code: 500
+                        status_code: 500,
                       },
                       system: {
                         architecture: 'x64',
                         platform: 'linux',
                         ip: '172.18.0.10',
-                        hostname: '98195610c255'
+                        hostname: '98195610c255',
                       },
                       process: {
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3659,
                         ppid: 1,
-                        title: 'node /app/server.js'
-                      }
+                        title: 'node /app/server.js',
+                      },
                     },
                     trace: { id: '15366d65659b5fc8f67ff127391b3aff' },
-                    timestamp: { us: 1542574371462005 }
+                    timestamp: { us: 1542574371462005 },
                   },
-                  sort: [1542574371462]
-                }
-              ]
-            }
-          }
+                  sort: [1542574371462],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/customers' },
@@ -750,13 +750,13 @@ export const transactionGroupsResponse = ({
                       name: 'GET /api/customers',
                       duration: { us: 18077 },
                       type: 'request',
-                      result: 'HTTP 2xx'
+                      result: 'HTTP 2xx',
                     },
                     context: {
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         foo: 'bar',
@@ -764,7 +764,7 @@ export const transactionGroupsResponse = ({
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
-                        'multi-line': 'foo\nbar\nbaz'
+                        'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 2531 },
                       request: {
@@ -776,11 +776,11 @@ export const transactionGroupsResponse = ({
                           port: '3000',
                           pathname: '/api/customers',
                           full: 'http://opbeans-node:3000/api/customers',
-                          raw: '/api/customers'
+                          raw: '/api/customers',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.6',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           accept: '*/*',
@@ -789,8 +789,8 @@ export const transactionGroupsResponse = ({
                             '00-541025da8ecc2f51f21c1a4ad6992b77-ca18d9d4c3879519-01',
                           host: 'opbeans-node:3000',
                           'user-agent': 'python-requests/2.20.0',
-                          'accept-encoding': 'gzip, deflate'
-                        }
+                          'accept-encoding': 'gzip, deflate',
+                        },
                       },
                       response: {
                         status_code: 200,
@@ -800,31 +800,31 @@ export const transactionGroupsResponse = ({
                           connection: 'keep-alive',
                           'x-powered-by': 'Express',
                           'content-type': 'application/json; charset=utf-8',
-                          'content-length': '186769'
-                        }
+                          'content-length': '186769',
+                        },
                       },
                       system: {
                         platform: 'linux',
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
-                        architecture: 'x64'
+                        architecture: 'x64',
                       },
                       process: {
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3710,
-                        ppid: 1
+                        ppid: 1,
                       },
                       service: {
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
                         name: 'opbeans-node',
-                        agent: { version: '1.14.2', name: 'nodejs' }
-                      }
+                        agent: { version: '1.14.2', name: 'nodejs' },
+                      },
                     },
                     parent: { id: 'ca18d9d4c3879519' },
                     trace: { id: '541025da8ecc2f51f21c1a4ad6992b77' },
@@ -832,19 +832,19 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
-                    }
+                      event: 'transaction',
+                    },
                   },
-                  sort: [1542574401180]
-                }
-              ]
-            }
-          }
+                  sort: [1542574401180],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/products/top' },
@@ -868,11 +868,11 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       span_count: { started: 4 },
@@ -881,7 +881,7 @@ export const transactionGroupsResponse = ({
                       duration: { us: 48781 },
                       type: 'request',
                       result: 'HTTP 2xx',
-                      sampled: true
+                      sampled: true,
                     },
                     context: {
                       request: {
@@ -893,7 +893,7 @@ export const transactionGroupsResponse = ({
                             '00-74f12e705936d66350f4741ebeb55189-fcebe94cd2136215-01',
                           accept: '*/*',
                           referer: 'http://opbeans-node:3000/dashboard',
-                          'accept-encoding': 'gzip, deflate'
+                          'accept-encoding': 'gzip, deflate',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -903,12 +903,12 @@ export const transactionGroupsResponse = ({
                           full: 'http://opbeans-node:3000/api/products/top',
                           raw: '/api/products/top',
                           protocol: 'http:',
-                          hostname: 'opbeans-node'
+                          hostname: 'opbeans-node',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.7',
-                          encrypted: false
-                        }
+                          encrypted: false,
+                        },
                       },
                       response: {
                         status_code: 200,
@@ -918,35 +918,35 @@ export const transactionGroupsResponse = ({
                           'content-length': '282',
                           etag: 'W/"11a-lcI9zuMZYYsDRpEZgYqDYr96cKM"',
                           date: 'Sun, 18 Nov 2018 20:52:57 GMT',
-                          connection: 'keep-alive'
-                        }
+                          connection: 'keep-alive',
+                        },
                       },
                       system: {
                         hostname: '98195610c255',
                         architecture: 'x64',
                         platform: 'linux',
-                        ip: '172.18.0.10'
+                        ip: '172.18.0.10',
                       },
                       process: {
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3686,
-                        ppid: 1
+                        ppid: 1,
                       },
                       service: {
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
                         name: 'opbeans-node',
-                        agent: { name: 'nodejs', version: '1.14.2' }
+                        agent: { name: 'nodejs', version: '1.14.2' },
                       },
                       user: {
                         username: 'kimchy',
                         email: 'kimchy@elastic.co',
-                        id: '42'
+                        id: '42',
                       },
                       tags: {
                         foo: 'bar',
@@ -954,19 +954,19 @@ export const transactionGroupsResponse = ({
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
-                        'multi-line': 'foo\nbar\nbaz'
+                        'multi-line': 'foo\nbar\nbaz',
                       },
-                      custom: { containerId: 5113 }
+                      custom: { containerId: 5113 },
                     },
                     parent: { id: 'fcebe94cd2136215' },
                     trace: { id: '74f12e705936d66350f4741ebeb55189' },
-                    timestamp: { us: 1542574377316005 }
+                    timestamp: { us: 1542574377316005 },
                   },
-                  sort: [1542574377316]
-                }
-              ]
-            }
-          }
+                  sort: [1542574377316],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'POST /api' },
@@ -993,13 +993,13 @@ export const transactionGroupsResponse = ({
                       sampled: true,
                       span_count: { started: 1 },
                       id: 'd67c2f7aa897110c',
-                      name: 'POST /api'
+                      name: 'POST /api',
                     },
                     context: {
                       user: {
                         email: 'kimchy@elastic.co',
                         id: '42',
-                        username: 'kimchy'
+                        username: 'kimchy',
                       },
                       tags: {
                         'multi-line': 'foo\nbar\nbaz',
@@ -1007,7 +1007,7 @@ export const transactionGroupsResponse = ({
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test'
+                          'test',
                       },
                       custom: { containerId: 2927 },
                       request: {
@@ -1017,11 +1017,11 @@ export const transactionGroupsResponse = ({
                           hostname: 'opbeans-node',
                           port: '3000',
                           pathname: '/api/orders',
-                          full: 'http://opbeans-node:3000/api/orders'
+                          full: 'http://opbeans-node:3000/api/orders',
                         },
                         socket: {
                           encrypted: false,
-                          remote_address: '::ffff:172.18.0.10'
+                          remote_address: '::ffff:172.18.0.10',
                         },
                         headers: {
                           accept: 'application/json',
@@ -1029,11 +1029,11 @@ export const transactionGroupsResponse = ({
                           'content-length': '129',
                           connection: 'close',
                           'user-agent': 'workload/2.4.3',
-                          host: 'opbeans-node:3000'
+                          host: 'opbeans-node:3000',
                         },
                         body: '[REDACTED]',
                         http_version: '1.1',
-                        method: 'POST'
+                        method: 'POST',
                       },
                       response: {
                         status_code: 400,
@@ -1041,14 +1041,14 @@ export const transactionGroupsResponse = ({
                           'x-powered-by': 'Express',
                           date: 'Sun, 18 Nov 2018 20:29:42 GMT',
                           'content-length': '0',
-                          connection: 'close'
-                        }
+                          connection: 'close',
+                        },
                       },
                       system: {
                         hostname: '98195610c255',
                         architecture: 'x64',
                         platform: 'linux',
-                        ip: '172.18.0.10'
+                        ip: '172.18.0.10',
                       },
                       process: {
                         pid: 546,
@@ -1056,35 +1056,35 @@ export const transactionGroupsResponse = ({
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
-                        ]
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
+                        ],
                       },
                       service: {
                         agent: { name: 'nodejs', version: '1.14.2' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
-                        name: 'opbeans-node'
-                      }
+                        name: 'opbeans-node',
+                      },
                     },
                     trace: { id: '8ed4d94ec8fc11b1ea1b0aa59c2320ff' },
                     timestamp: { us: 1542572982751005 },
                     agent: {
                       version: '7.0.0-alpha1',
                       type: 'apm-server',
-                      hostname: 'b359e3afece8'
+                      hostname: 'b359e3afece8',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
-                    }
+                      event: 'transaction',
+                    },
                   },
-                  sort: [1542572982751]
-                }
-              ]
-            }
-          }
+                  sort: [1542572982751],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/products/:id/customers' },
@@ -1107,12 +1107,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       event: 'transaction',
-                      name: 'transaction'
+                      name: 'transaction',
                     },
                     transaction: {
                       type: 'request',
@@ -1121,13 +1121,13 @@ export const transactionGroupsResponse = ({
                       span_count: { started: 1 },
                       id: '2a87ae20ad04ee0c',
                       name: 'GET /api/products/:id/customers',
-                      duration: { us: 49338 }
+                      duration: { us: 49338 },
                     },
                     context: {
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         lorem:
@@ -1135,7 +1135,7 @@ export const transactionGroupsResponse = ({
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
                         'multi-line': 'foo\nbar\nbaz',
-                        foo: 'bar'
+                        foo: 'bar',
                       },
                       custom: { containerId: 1735 },
                       request: {
@@ -1146,7 +1146,7 @@ export const transactionGroupsResponse = ({
                             '00-28f178c354d17f400dea04bc4a7b3c57-68f5d1607cac7779-01',
                           host: 'opbeans-node:3000',
                           'user-agent': 'python-requests/2.20.0',
-                          'accept-encoding': 'gzip, deflate'
+                          'accept-encoding': 'gzip, deflate',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -1157,12 +1157,12 @@ export const transactionGroupsResponse = ({
                             'http://opbeans-node:3000/api/products/2/customers',
                           raw: '/api/products/2/customers',
                           protocol: 'http:',
-                          hostname: 'opbeans-node'
+                          hostname: 'opbeans-node',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.6',
-                          encrypted: false
-                        }
+                          encrypted: false,
+                        },
                       },
                       response: {
                         status_code: 200,
@@ -1172,41 +1172,41 @@ export const transactionGroupsResponse = ({
                           date: 'Sun, 18 Nov 2018 20:48:24 GMT',
                           connection: 'keep-alive',
                           'x-powered-by': 'Express',
-                          'content-type': 'application/json; charset=utf-8'
-                        }
+                          'content-type': 'application/json; charset=utf-8',
+                        },
                       },
                       system: {
                         platform: 'linux',
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
-                        architecture: 'x64'
+                        architecture: 'x64',
                       },
                       process: {
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3100,
                         ppid: 1,
-                        title: 'node /app/server.js'
+                        title: 'node /app/server.js',
                       },
                       service: {
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
                         name: 'opbeans-node',
                         agent: { version: '1.14.2', name: 'nodejs' },
-                        version: '1.0.0'
-                      }
+                        version: '1.0.0',
+                      },
                     },
                     parent: { id: '68f5d1607cac7779' },
                     trace: { id: '28f178c354d17f400dea04bc4a7b3c57' },
-                    timestamp: { us: 1542574104769029 }
+                    timestamp: { us: 1542574104769029 },
                   },
-                  sort: [1542574104769]
-                }
-              ]
-            }
-          }
+                  sort: [1542574104769],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/types/:id' },
@@ -1228,7 +1228,7 @@ export const transactionGroupsResponse = ({
                     '@timestamp': '2018-11-18T20:53:35.967Z',
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       id: '053436abacdec0a4',
@@ -1237,29 +1237,29 @@ export const transactionGroupsResponse = ({
                       type: 'request',
                       result: 'HTTP 2xx',
                       sampled: true,
-                      span_count: { started: 2 }
+                      span_count: { started: 2 },
                     },
                     context: {
                       process: {
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3756,
-                        ppid: 1
+                        ppid: 1,
                       },
                       service: {
                         name: 'opbeans-node',
                         agent: { name: 'nodejs', version: '1.14.2' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
-                        runtime: { name: 'node', version: '8.12.0' }
+                        runtime: { name: 'node', version: '8.12.0' },
                       },
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         foo: 'bar',
@@ -1267,18 +1267,18 @@ export const transactionGroupsResponse = ({
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
-                        'multi-line': 'foo\nbar\nbaz'
+                        'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 5345 },
                       request: {
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           'user-agent': 'workload/2.4.3',
                           host: 'opbeans-node:3000',
-                          connection: 'close'
+                          connection: 'close',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -1288,8 +1288,8 @@ export const transactionGroupsResponse = ({
                           raw: '/api/types/1',
                           protocol: 'http:',
                           hostname: 'opbeans-node',
-                          port: '3000'
-                        }
+                          port: '3000',
+                        },
                       },
                       response: {
                         status_code: 200,
@@ -1299,15 +1299,15 @@ export const transactionGroupsResponse = ({
                           'content-length': '217',
                           etag: 'W/"d9-cebOOHODBQMZd1wt+ZZBaSPgQLQ"',
                           date: 'Sun, 18 Nov 2018 20:53:35 GMT',
-                          connection: 'close'
-                        }
+                          connection: 'close',
+                        },
                       },
                       system: {
                         platform: 'linux',
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
-                        architecture: 'x64'
-                      }
+                        architecture: 'x64',
+                      },
                     },
                     trace: { id: '2223b30b5cbaf2e221fcf70ac6d9abbe' },
                     timestamp: { us: 1542574415967005 },
@@ -1315,14 +1315,14 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
-                    }
+                      version: '7.0.0-alpha1',
+                    },
                   },
-                  sort: [1542574415967]
-                }
-              ]
-            }
-          }
+                  sort: [1542574415967],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/products' },
@@ -1347,12 +1347,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       span_count: { started: 2 },
@@ -1361,7 +1361,7 @@ export const transactionGroupsResponse = ({
                       duration: { us: 6915 },
                       type: 'request',
                       result: 'HTTP 2xx',
-                      sampled: true
+                      sampled: true,
                     },
                     context: {
                       custom: { containerId: 2857 },
@@ -1369,7 +1369,7 @@ export const transactionGroupsResponse = ({
                         headers: {
                           'user-agent': 'workload/2.4.3',
                           host: 'opbeans-node:3000',
-                          connection: 'close'
+                          connection: 'close',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -1379,12 +1379,12 @@ export const transactionGroupsResponse = ({
                           protocol: 'http:',
                           hostname: 'opbeans-node',
                           port: '3000',
-                          pathname: '/api/products'
+                          pathname: '/api/products',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
-                        }
+                          encrypted: false,
+                        },
                       },
                       response: {
                         status_code: 200,
@@ -1394,14 +1394,14 @@ export const transactionGroupsResponse = ({
                           'content-type': 'application/json; charset=utf-8',
                           'content-length': '1023',
                           etag: 'W/"3ff-VyOxcDApb+a/lnjkm9FeTOGSDrs"',
-                          date: 'Sun, 18 Nov 2018 20:53:43 GMT'
-                        }
+                          date: 'Sun, 18 Nov 2018 20:53:43 GMT',
+                        },
                       },
                       system: {
                         hostname: '98195610c255',
                         architecture: 'x64',
                         platform: 'linux',
-                        ip: '172.18.0.10'
+                        ip: '172.18.0.10',
                       },
                       process: {
                         pid: 3756,
@@ -1409,20 +1409,20 @@ export const transactionGroupsResponse = ({
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
-                        ]
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
+                        ],
                       },
                       service: {
                         runtime: { name: 'node', version: '8.12.0' },
                         name: 'opbeans-node',
                         agent: { version: '1.14.2', name: 'nodejs' },
                         version: '1.0.0',
-                        language: { name: 'javascript' }
+                        language: { name: 'javascript' },
                       },
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         foo: 'bar',
@@ -1430,15 +1430,15 @@ export const transactionGroupsResponse = ({
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
-                        'multi-line': 'foo\nbar\nbaz'
-                      }
-                    }
+                        'multi-line': 'foo\nbar\nbaz',
+                      },
+                    },
                   },
-                  sort: [1542574423477]
-                }
-              ]
-            }
-          }
+                  sort: [1542574423477],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/types' },
@@ -1460,7 +1460,7 @@ export const transactionGroupsResponse = ({
                     '@timestamp': '2018-11-18T20:53:44.978Z',
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       id: '0f10668e4fb3adc7',
@@ -1469,7 +1469,7 @@ export const transactionGroupsResponse = ({
                       type: 'request',
                       result: 'HTTP 2xx',
                       sampled: true,
-                      span_count: { started: 2 }
+                      span_count: { started: 2 },
                     },
                     context: {
                       request: {
@@ -1481,17 +1481,17 @@ export const transactionGroupsResponse = ({
                           pathname: '/api/types',
                           full: 'http://opbeans-node:3000/api/types',
                           raw: '/api/types',
-                          protocol: 'http:'
+                          protocol: 'http:',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           connection: 'close',
                           'user-agent': 'workload/2.4.3',
-                          host: 'opbeans-node:3000'
-                        }
+                          host: 'opbeans-node:3000',
+                        },
                       },
                       response: {
                         status_code: 200,
@@ -1501,14 +1501,14 @@ export const transactionGroupsResponse = ({
                           date: 'Sun, 18 Nov 2018 20:53:44 GMT',
                           connection: 'close',
                           'x-powered-by': 'Express',
-                          'content-type': 'application/json; charset=utf-8'
-                        }
+                          'content-type': 'application/json; charset=utf-8',
+                        },
                       },
                       system: {
                         hostname: '98195610c255',
                         architecture: 'x64',
                         platform: 'linux',
-                        ip: '172.18.0.10'
+                        ip: '172.18.0.10',
                       },
                       process: {
                         pid: 3756,
@@ -1516,20 +1516,20 @@ export const transactionGroupsResponse = ({
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
-                        ]
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
+                        ],
                       },
                       service: {
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
                         name: 'opbeans-node',
-                        agent: { version: '1.14.2', name: 'nodejs' }
+                        agent: { version: '1.14.2', name: 'nodejs' },
                       },
                       user: {
                         email: 'kimchy@elastic.co',
                         id: '42',
-                        username: 'kimchy'
+                        username: 'kimchy',
                       },
                       tags: {
                         foo: 'bar',
@@ -1537,24 +1537,24 @@ export const transactionGroupsResponse = ({
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
-                        'multi-line': 'foo\nbar\nbaz'
+                        'multi-line': 'foo\nbar\nbaz',
                       },
-                      custom: { containerId: 2193 }
+                      custom: { containerId: 2193 },
                     },
                     trace: { id: '0d84126973411c19b470f2d9eea958d3' },
                     timestamp: { us: 1542574424978005 },
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
-                    host: { name: 'b359e3afece8' }
+                    host: { name: 'b359e3afece8' },
                   },
-                  sort: [1542574424978]
-                }
-              ]
-            }
-          }
+                  sort: [1542574424978],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/orders/:id' },
@@ -1581,18 +1581,18 @@ export const transactionGroupsResponse = ({
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
-                        'multi-line': 'foo\nbar\nbaz'
+                        'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 5999 },
                       request: {
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           connection: 'close',
                           'user-agent': 'workload/2.4.3',
-                          host: 'opbeans-node:3000'
+                          host: 'opbeans-node:3000',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -1602,23 +1602,23 @@ export const transactionGroupsResponse = ({
                           hostname: 'opbeans-node',
                           port: '3000',
                           pathname: '/api/orders/183',
-                          full: 'http://opbeans-node:3000/api/orders/183'
-                        }
+                          full: 'http://opbeans-node:3000/api/orders/183',
+                        },
                       },
                       response: {
                         headers: {
                           date: 'Sun, 18 Nov 2018 20:51:36 GMT',
                           connection: 'close',
                           'content-length': '0',
-                          'x-powered-by': 'Express'
+                          'x-powered-by': 'Express',
                         },
-                        status_code: 404
+                        status_code: 404,
                       },
                       system: {
                         hostname: '98195610c255',
                         architecture: 'x64',
                         platform: 'linux',
-                        ip: '172.18.0.10'
+                        ip: '172.18.0.10',
                       },
                       process: {
                         pid: 3475,
@@ -1626,33 +1626,33 @@ export const transactionGroupsResponse = ({
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
-                        ]
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
+                        ],
                       },
                       service: {
                         agent: { name: 'nodejs', version: '1.14.2' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
-                        name: 'opbeans-node'
+                        name: 'opbeans-node',
                       },
                       user: {
                         username: 'kimchy',
                         email: 'kimchy@elastic.co',
-                        id: '42'
-                      }
+                        id: '42',
+                      },
                     },
                     trace: { id: 'dab6421fa44a6869887e0edf32e1ad6f' },
                     timestamp: { us: 1542574296949004 },
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       span_count: { started: 1 },
@@ -1661,14 +1661,14 @@ export const transactionGroupsResponse = ({
                       duration: { us: 5906 },
                       type: 'request',
                       result: 'HTTP 4xx',
-                      sampled: true
-                    }
+                      sampled: true,
+                    },
                   },
-                  sort: [1542574296949]
-                }
-              ]
-            }
-          }
+                  sort: [1542574296949],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/products/:id' },
@@ -1691,12 +1691,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       span_count: { started: 1 },
@@ -1705,7 +1705,7 @@ export const transactionGroupsResponse = ({
                       duration: { us: 6959 },
                       type: 'request',
                       result: 'HTTP 2xx',
-                      sampled: true
+                      sampled: true,
                     },
                     context: {
                       service: {
@@ -1713,12 +1713,12 @@ export const transactionGroupsResponse = ({
                         agent: { version: '1.14.2', name: 'nodejs' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
-                        runtime: { version: '8.12.0', name: 'node' }
+                        runtime: { version: '8.12.0', name: 'node' },
                       },
                       user: {
                         email: 'kimchy@elastic.co',
                         id: '42',
-                        username: 'kimchy'
+                        username: 'kimchy',
                       },
                       tags: {
                         'multi-line': 'foo\nbar\nbaz',
@@ -1726,18 +1726,18 @@ export const transactionGroupsResponse = ({
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test'
+                          'test',
                       },
                       custom: { containerId: 7184 },
                       request: {
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           host: 'opbeans-node:3000',
                           connection: 'close',
-                          'user-agent': 'workload/2.4.3'
+                          'user-agent': 'workload/2.4.3',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -1747,8 +1747,8 @@ export const transactionGroupsResponse = ({
                           full: 'http://opbeans-node:3000/api/products/3',
                           raw: '/api/products/3',
                           protocol: 'http:',
-                          hostname: 'opbeans-node'
-                        }
+                          hostname: 'opbeans-node',
+                        },
                       },
                       response: {
                         status_code: 200,
@@ -1758,14 +1758,14 @@ export const transactionGroupsResponse = ({
                           'content-length': '231',
                           etag: 'W/"e7-kkuzj37GZDzXDh0CWqh5Gan0VO4"',
                           date: 'Sun, 18 Nov 2018 20:52:57 GMT',
-                          connection: 'close'
-                        }
+                          connection: 'close',
+                        },
                       },
                       system: {
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
                         architecture: 'x64',
-                        platform: 'linux'
+                        platform: 'linux',
                       },
                       process: {
                         pid: 3686,
@@ -1773,18 +1773,18 @@ export const transactionGroupsResponse = ({
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
-                        ]
-                      }
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
+                        ],
+                      },
                     },
                     trace: { id: 'ca86ec845e412e4b4506a715d51548ec' },
-                    timestamp: { us: 1542574377963005 }
+                    timestamp: { us: 1542574377963005 },
                   },
-                  sort: [1542574377963]
-                }
-              ]
-            }
-          }
+                  sort: [1542574377963],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /api/customers/:id' },
@@ -1807,12 +1807,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       hostname: 'b359e3afece8',
                       version: '7.0.0-alpha1',
-                      type: 'apm-server'
+                      type: 'apm-server',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       span_count: { started: 1 },
@@ -1821,7 +1821,7 @@ export const transactionGroupsResponse = ({
                       duration: { us: 9735 },
                       type: 'request',
                       result: 'HTTP 2xx',
-                      sampled: true
+                      sampled: true,
                     },
                     context: {
                       response: {
@@ -1832,35 +1832,35 @@ export const transactionGroupsResponse = ({
                           'content-type': 'application/json; charset=utf-8',
                           'content-length': '193',
                           etag: 'W/"c1-LbuhkuLzFyZ0H+7+JQGA5b0kvNs"',
-                          date: 'Sun, 18 Nov 2018 20:52:56 GMT'
-                        }
+                          date: 'Sun, 18 Nov 2018 20:52:56 GMT',
+                        },
                       },
                       system: {
                         architecture: 'x64',
                         platform: 'linux',
                         ip: '172.18.0.10',
-                        hostname: '98195610c255'
+                        hostname: '98195610c255',
                       },
                       process: {
                         ppid: 1,
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
-                        pid: 3686
+                        pid: 3686,
                       },
                       service: {
                         name: 'opbeans-node',
                         agent: { name: 'nodejs', version: '1.14.2' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
-                        runtime: { name: 'node', version: '8.12.0' }
+                        runtime: { name: 'node', version: '8.12.0' },
                       },
                       user: {
                         username: 'kimchy',
                         email: 'kimchy@elastic.co',
-                        id: '42'
+                        id: '42',
                       },
                       tags: {
                         'multi-line': 'foo\nbar\nbaz',
@@ -1868,7 +1868,7 @@ export const transactionGroupsResponse = ({
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test'
+                          'test',
                       },
                       custom: { containerId: 8225 },
                       request: {
@@ -1879,7 +1879,7 @@ export const transactionGroupsResponse = ({
                           'elastic-apm-traceparent':
                             '00-e6140d30363f18b585f5d3b753f4d025-aa82e2c847265626-01',
                           host: 'opbeans-node:3000',
-                          'user-agent': 'python-requests/2.20.0'
+                          'user-agent': 'python-requests/2.20.0',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -1889,23 +1889,23 @@ export const transactionGroupsResponse = ({
                           raw: '/api/customers/700',
                           protocol: 'http:',
                           hostname: 'opbeans-node',
-                          port: '3000'
+                          port: '3000',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.6',
-                          encrypted: false
-                        }
-                      }
+                          encrypted: false,
+                        },
+                      },
                     },
                     parent: { id: 'aa82e2c847265626' },
                     trace: { id: 'e6140d30363f18b585f5d3b753f4d025' },
-                    timestamp: { us: 1542574376797031 }
+                    timestamp: { us: 1542574376797031 },
                   },
-                  sort: [1542574376797]
-                }
-              ]
-            }
-          }
+                  sort: [1542574376797],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'POST unknown route' },
@@ -1928,7 +1928,7 @@ export const transactionGroupsResponse = ({
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       sampled: true,
@@ -1937,14 +1937,14 @@ export const transactionGroupsResponse = ({
                       name: 'POST unknown route',
                       duration: { us: 3467 },
                       type: 'request',
-                      result: 'HTTP 4xx'
+                      result: 'HTTP 4xx',
                     },
                     context: {
                       system: {
                         platform: 'linux',
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
-                        architecture: 'x64'
+                        architecture: 'x64',
                       },
                       process: {
                         pid: 19196,
@@ -1952,20 +1952,20 @@ export const transactionGroupsResponse = ({
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
-                        ]
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
+                        ],
                       },
                       service: {
                         name: 'opbeans-node',
                         agent: { version: '1.14.2', name: 'nodejs' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
-                        runtime: { name: 'node', version: '8.12.0' }
+                        runtime: { name: 'node', version: '8.12.0' },
                       },
                       user: {
                         email: 'kimchy@elastic.co',
                         id: '42',
-                        username: 'kimchy'
+                        username: 'kimchy',
                       },
                       tags: {
                         'this-is-a-very-long-tag-name-without-any-spaces':
@@ -1973,7 +1973,7 @@ export const transactionGroupsResponse = ({
                         'multi-line': 'foo\nbar\nbaz',
                         foo: 'bar',
                         lorem:
-                          'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.'
+                          'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                       },
                       custom: { containerId: 6102 },
                       request: {
@@ -1984,11 +1984,11 @@ export const transactionGroupsResponse = ({
                           hostname: '172.18.0.9',
                           port: '3000',
                           pathname: '/api/orders/csv',
-                          full: 'http://172.18.0.9:3000/api/orders/csv'
+                          full: 'http://172.18.0.9:3000/api/orders/csv',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.9',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           'accept-encoding': 'gzip, deflate',
@@ -2000,10 +2000,10 @@ export const transactionGroupsResponse = ({
                           host: '172.18.0.9:3000',
                           'user-agent': 'Python/3.7 aiohttp/3.3.2',
                           'content-length': '380',
-                          accept: '*/*'
+                          accept: '*/*',
                         },
                         body: '[REDACTED]',
-                        http_version: '1.1'
+                        http_version: '1.1',
                       },
                       response: {
                         headers: {
@@ -2013,10 +2013,10 @@ export const transactionGroupsResponse = ({
                           'content-security-policy': "default-src 'self'",
                           'x-content-type-options': 'nosniff',
                           'content-type': 'text/html; charset=utf-8',
-                          'content-length': '154'
+                          'content-length': '154',
                         },
-                        status_code: 404
-                      }
+                        status_code: 404,
+                      },
                     },
                     parent: { id: '1fc3665eef2dcdfc' },
                     trace: { id: '19688959ea6cbccda8013c11566ea329' },
@@ -2024,14 +2024,14 @@ export const transactionGroupsResponse = ({
                     agent: {
                       version: '7.0.0-alpha1',
                       type: 'apm-server',
-                      hostname: 'b359e3afece8'
-                    }
+                      hostname: 'b359e3afece8',
+                    },
                   },
-                  sort: [1542566630994]
-                }
-              ]
-            }
-          }
+                  sort: [1542566630994],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /is-it-coffee-time' },
@@ -2054,12 +2054,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       id: '319a5c555a1ab207',
@@ -2068,7 +2068,7 @@ export const transactionGroupsResponse = ({
                       type: 'request',
                       result: 'HTTP 5xx',
                       sampled: true,
-                      span_count: { started: 0 }
+                      span_count: { started: 0 },
                     },
                     context: {
                       process: {
@@ -2077,20 +2077,20 @@ export const transactionGroupsResponse = ({
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
-                        ]
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
+                        ],
                       },
                       service: {
                         agent: { name: 'nodejs', version: '1.14.2' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
-                        name: 'opbeans-node'
+                        name: 'opbeans-node',
                       },
                       user: {
                         email: 'kimchy@elastic.co',
                         id: '42',
-                        username: 'kimchy'
+                        username: 'kimchy',
                       },
                       tags: {
                         foo: 'bar',
@@ -2098,14 +2098,14 @@ export const transactionGroupsResponse = ({
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
-                        'multi-line': 'foo\nbar\nbaz'
+                        'multi-line': 'foo\nbar\nbaz',
                       },
                       custom: { containerId: 8593 },
                       request: {
                         headers: {
                           'user-agent': 'workload/2.4.3',
                           host: 'opbeans-node:3000',
-                          connection: 'close'
+                          connection: 'close',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -2115,12 +2115,12 @@ export const transactionGroupsResponse = ({
                           full: 'http://opbeans-node:3000/is-it-coffee-time',
                           raw: '/is-it-coffee-time',
                           protocol: 'http:',
-                          hostname: 'opbeans-node'
+                          hostname: 'opbeans-node',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
-                        }
+                          encrypted: false,
+                        },
                       },
                       response: {
                         status_code: 500,
@@ -2131,24 +2131,24 @@ export const transactionGroupsResponse = ({
                           'content-security-policy': "default-src 'self'",
                           'x-content-type-options': 'nosniff',
                           'content-type': 'text/html; charset=utf-8',
-                          'content-length': '148'
-                        }
+                          'content-length': '148',
+                        },
                       },
                       system: {
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
                         architecture: 'x64',
-                        platform: 'linux'
-                      }
+                        platform: 'linux',
+                      },
                     },
                     trace: { id: '821812b416de4c73ced87f8777fa46a6' },
-                    timestamp: { us: 1542573979317007 }
+                    timestamp: { us: 1542573979317007 },
                   },
-                  sort: [1542573979317]
-                }
-              ]
-            }
-          }
+                  sort: [1542573979317],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET /throw-error' },
@@ -2171,12 +2171,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       version: '7.0.0-alpha1',
                       type: 'apm-server',
-                      hostname: 'b359e3afece8'
+                      hostname: 'b359e3afece8',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       id: 'ecd187dc53f09fbd',
@@ -2185,13 +2185,13 @@ export const transactionGroupsResponse = ({
                       type: 'request',
                       result: 'HTTP 5xx',
                       sampled: true,
-                      span_count: { started: 0 }
+                      span_count: { started: 0 },
                     },
                     context: {
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         lorem:
@@ -2199,7 +2199,7 @@ export const transactionGroupsResponse = ({
                         'this-is-a-very-long-tag-name-without-any-spaces':
                           'test',
                         'multi-line': 'foo\nbar\nbaz',
-                        foo: 'bar'
+                        foo: 'bar',
                       },
                       custom: { containerId: 7220 },
                       request: {
@@ -2211,17 +2211,17 @@ export const transactionGroupsResponse = ({
                           full: 'http://opbeans-node:3000/throw-error',
                           raw: '/throw-error',
                           protocol: 'http:',
-                          hostname: 'opbeans-node'
+                          hostname: 'opbeans-node',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           'user-agent': 'workload/2.4.3',
                           host: 'opbeans-node:3000',
-                          connection: 'close'
-                        }
+                          connection: 'close',
+                        },
                       },
                       response: {
                         status_code: 500,
@@ -2232,40 +2232,40 @@ export const transactionGroupsResponse = ({
                           date: 'Sun, 18 Nov 2018 20:47:10 GMT',
                           connection: 'close',
                           'x-powered-by': 'Express',
-                          'content-security-policy': "default-src 'self'"
-                        }
+                          'content-security-policy': "default-src 'self'",
+                        },
                       },
                       system: {
                         platform: 'linux',
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
-                        architecture: 'x64'
+                        architecture: 'x64',
                       },
                       process: {
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 2895,
-                        ppid: 1
+                        ppid: 1,
                       },
                       service: {
                         name: 'opbeans-node',
                         agent: { version: '1.14.2', name: 'nodejs' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
-                        runtime: { name: 'node', version: '8.12.0' }
-                      }
+                        runtime: { name: 'node', version: '8.12.0' },
+                      },
                     },
                     trace: { id: '6c0ef23e1f963f304ce440a909914d35' },
-                    timestamp: { us: 1542574030714012 }
+                    timestamp: { us: 1542574030714012 },
                   },
-                  sort: [1542574030714]
-                }
-              ]
-            }
-          }
+                  sort: [1542574030714],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET *' },
@@ -2288,12 +2288,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       span_count: { started: 0 },
@@ -2302,7 +2302,7 @@ export const transactionGroupsResponse = ({
                       duration: { us: 1901 },
                       type: 'request',
                       result: 'HTTP 3xx',
-                      sampled: true
+                      sampled: true,
                     },
                     context: {
                       request: {
@@ -2314,11 +2314,11 @@ export const transactionGroupsResponse = ({
                           pathname: '/dashboard',
                           full: 'http://opbeans-node:3000/dashboard',
                           raw: '/dashboard',
-                          protocol: 'http:'
+                          protocol: 'http:',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.7',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           accept:
@@ -2329,8 +2329,8 @@ export const transactionGroupsResponse = ({
                           host: 'opbeans-node:3000',
                           connection: 'keep-alive',
                           'upgrade-insecure-requests': '1',
-                          'user-agent': 'Chromeless 1.4.0'
-                        }
+                          'user-agent': 'Chromeless 1.4.0',
+                        },
                       },
                       response: {
                         status_code: 304,
@@ -2341,35 +2341,35 @@ export const transactionGroupsResponse = ({
                           'last-modified': 'Mon, 12 Nov 2018 10:27:07 GMT',
                           etag: 'W/"280-1670775e878"',
                           date: 'Sun, 18 Nov 2018 20:53:42 GMT',
-                          connection: 'keep-alive'
-                        }
+                          connection: 'keep-alive',
+                        },
                       },
                       system: {
                         hostname: '98195610c255',
                         architecture: 'x64',
                         platform: 'linux',
-                        ip: '172.18.0.10'
+                        ip: '172.18.0.10',
                       },
                       process: {
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3756,
-                        ppid: 1
+                        ppid: 1,
                       },
                       service: {
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
                         name: 'opbeans-node',
-                        agent: { version: '1.14.2', name: 'nodejs' }
+                        agent: { version: '1.14.2', name: 'nodejs' },
                       },
                       user: {
                         email: 'kimchy@elastic.co',
                         id: '42',
-                        username: 'kimchy'
+                        username: 'kimchy',
                       },
                       tags: {
                         'multi-line': 'foo\nbar\nbaz',
@@ -2377,18 +2377,18 @@ export const transactionGroupsResponse = ({
                         lorem:
                           'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                         'this-is-a-very-long-tag-name-without-any-spaces':
-                          'test'
+                          'test',
                       },
-                      custom: { containerId: 6446 }
+                      custom: { containerId: 6446 },
                     },
                     trace: { id: '7efb6ade88cdea20cd96ca482681cde7' },
-                    timestamp: { us: 1542574422493006 }
+                    timestamp: { us: 1542574422493006 },
                   },
-                  sort: [1542574422493]
-                }
-              ]
-            }
-          }
+                  sort: [1542574422493],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'OPTIONS unknown route' },
@@ -2412,12 +2412,12 @@ export const transactionGroupsResponse = ({
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       span_count: { started: 0 },
@@ -2426,13 +2426,13 @@ export const transactionGroupsResponse = ({
                       duration: { us: 2371 },
                       type: 'request',
                       result: 'HTTP 2xx',
-                      sampled: true
+                      sampled: true,
                     },
                     context: {
                       user: {
                         id: '42',
                         username: 'kimchy',
-                        email: 'kimchy@elastic.co'
+                        email: 'kimchy@elastic.co',
                       },
                       tags: {
                         'this-is-a-very-long-tag-name-without-any-spaces':
@@ -2440,19 +2440,19 @@ export const transactionGroupsResponse = ({
                         'multi-line': 'foo\nbar\nbaz',
                         foo: 'bar',
                         lorem:
-                          'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.'
+                          'ipsum dolor sit amet, consectetur adipiscing elit. Nulla finibus, ipsum id scelerisque consequat, enim leo vulputate massa, vel ultricies ante neque ac risus. Curabitur tincidunt vitae sapien id pulvinar. Mauris eu vestibulum tortor. Integer sit amet lorem fringilla, egestas tellus vitae, vulputate purus. Nulla feugiat blandit nunc et semper. Morbi purus libero, mattis sed mauris non, euismod iaculis lacus. Curabitur eleifend ante eros, non faucibus velit lacinia id. Duis posuere libero augue, at dignissim urna consectetur eget. Praesent eu congue est, iaculis finibus augue.',
                       },
                       custom: { containerId: 3775 },
                       request: {
                         socket: {
                           remote_address: '::ffff:172.18.0.10',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           'user-agent': 'workload/2.4.3',
                           host: 'opbeans-node:3000',
                           'content-length': '0',
-                          connection: 'close'
+                          connection: 'close',
                         },
                         http_version: '1.1',
                         method: 'OPTIONS',
@@ -2462,8 +2462,8 @@ export const transactionGroupsResponse = ({
                           full: 'http://opbeans-node:3000/',
                           raw: '/',
                           protocol: 'http:',
-                          hostname: 'opbeans-node'
-                        }
+                          hostname: 'opbeans-node',
+                        },
                       },
                       response: {
                         status_code: 200,
@@ -2474,39 +2474,39 @@ export const transactionGroupsResponse = ({
                           date: 'Sun, 18 Nov 2018 20:49:00 GMT',
                           connection: 'close',
                           'x-powered-by': 'Express',
-                          allow: 'GET,HEAD'
-                        }
+                          allow: 'GET,HEAD',
+                        },
                       },
                       system: {
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
                         architecture: 'x64',
-                        platform: 'linux'
+                        platform: 'linux',
                       },
                       process: {
                         ppid: 1,
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
-                        pid: 3142
+                        pid: 3142,
                       },
                       service: {
                         agent: { name: 'nodejs', version: '1.14.2' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
-                        name: 'opbeans-node'
-                      }
+                        name: 'opbeans-node',
+                      },
                     },
-                    trace: { id: '469e3e5f91ffe3195a8e58cdd1cdefa8' }
+                    trace: { id: '469e3e5f91ffe3195a8e58cdd1cdefa8' },
                   },
-                  sort: [1542574140707]
-                }
-              ]
-            }
-          }
+                  sort: [1542574140707],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET static file' },
@@ -2531,29 +2531,29 @@ export const transactionGroupsResponse = ({
                         platform: 'linux',
                         ip: '172.18.0.10',
                         hostname: '98195610c255',
-                        architecture: 'x64'
+                        architecture: 'x64',
                       },
                       process: {
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
                         ],
                         pid: 3756,
-                        ppid: 1
+                        ppid: 1,
                       },
                       service: {
                         name: 'opbeans-node',
                         agent: { name: 'nodejs', version: '1.14.2' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
-                        runtime: { name: 'node', version: '8.12.0' }
+                        runtime: { name: 'node', version: '8.12.0' },
                       },
                       request: {
                         headers: {
                           'user-agent': 'curl/7.38.0',
                           host: 'opbeans-node:3000',
-                          accept: '*/*'
+                          accept: '*/*',
                         },
                         http_version: '1.1',
                         method: 'GET',
@@ -2563,12 +2563,12 @@ export const transactionGroupsResponse = ({
                           raw: '/',
                           protocol: 'http:',
                           hostname: 'opbeans-node',
-                          port: '3000'
+                          port: '3000',
                         },
                         socket: {
                           encrypted: false,
-                          remote_address: '::ffff:172.18.0.10'
-                        }
+                          remote_address: '::ffff:172.18.0.10',
+                        },
                       },
                       response: {
                         status_code: 200,
@@ -2581,21 +2581,21 @@ export const transactionGroupsResponse = ({
                           'last-modified': 'Mon, 12 Nov 2018 10:27:07 GMT',
                           'content-type': 'text/html; charset=UTF-8',
                           date: 'Sun, 18 Nov 2018 20:53:43 GMT',
-                          connection: 'keep-alive'
-                        }
-                      }
+                          connection: 'keep-alive',
+                        },
+                      },
                     },
                     trace: { id: 'b303d2a4a007946b63b9db7fafe639a0' },
                     timestamp: { us: 1542574423304006 },
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
                     host: { name: 'b359e3afece8' },
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       span_count: { started: 0 },
@@ -2604,14 +2604,14 @@ export const transactionGroupsResponse = ({
                       duration: { us: 1801 },
                       type: 'request',
                       result: 'HTTP 2xx',
-                      sampled: true
-                    }
+                      sampled: true,
+                    },
                   },
-                  sort: [1542574423304]
-                }
-              ]
-            }
-          }
+                  sort: [1542574423304],
+                },
+              ],
+            },
+          },
         },
         {
           key: { transaction: 'GET unknown route' },
@@ -2633,7 +2633,7 @@ export const transactionGroupsResponse = ({
                     '@timestamp': '2018-11-18T20:53:42.504Z',
                     processor: {
                       name: 'transaction',
-                      event: 'transaction'
+                      event: 'transaction',
                     },
                     transaction: {
                       name: 'GET unknown route',
@@ -2642,14 +2642,14 @@ export const transactionGroupsResponse = ({
                       result: 'HTTP 2xx',
                       sampled: true,
                       span_count: { started: 0 },
-                      id: '107881ae2be1b56d'
+                      id: '107881ae2be1b56d',
                     },
                     context: {
                       system: {
                         hostname: '98195610c255',
                         architecture: 'x64',
                         platform: 'linux',
-                        ip: '172.18.0.10'
+                        ip: '172.18.0.10',
                       },
                       process: {
                         pid: 3756,
@@ -2657,15 +2657,15 @@ export const transactionGroupsResponse = ({
                         title: 'node /app/server.js',
                         argv: [
                           '/usr/local/bin/node',
-                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js'
-                        ]
+                          '/usr/local/lib/node_modules/pm2/lib/ProcessContainerFork.js',
+                        ],
                       },
                       service: {
                         agent: { version: '1.14.2', name: 'nodejs' },
                         version: '1.0.0',
                         language: { name: 'javascript' },
                         runtime: { name: 'node', version: '8.12.0' },
-                        name: 'opbeans-node'
+                        name: 'opbeans-node',
                       },
                       request: {
                         http_version: '1.1',
@@ -2676,11 +2676,11 @@ export const transactionGroupsResponse = ({
                           protocol: 'http:',
                           hostname: 'opbeans-node',
                           port: '3000',
-                          pathname: '/rum-config.js'
+                          pathname: '/rum-config.js',
                         },
                         socket: {
                           remote_address: '::ffff:172.18.0.7',
-                          encrypted: false
+                          encrypted: false,
                         },
                         headers: {
                           connection: 'keep-alive',
@@ -2688,8 +2688,8 @@ export const transactionGroupsResponse = ({
                           accept: '*/*',
                           referer: 'http://opbeans-node:3000/dashboard',
                           'accept-encoding': 'gzip, deflate',
-                          host: 'opbeans-node:3000'
-                        }
+                          host: 'opbeans-node:3000',
+                        },
                       },
                       response: {
                         headers: {
@@ -2697,27 +2697,27 @@ export const transactionGroupsResponse = ({
                           'content-type': 'text/javascript',
                           'content-length': '172',
                           date: 'Sun, 18 Nov 2018 20:53:42 GMT',
-                          connection: 'keep-alive'
+                          connection: 'keep-alive',
                         },
-                        status_code: 200
-                      }
+                        status_code: 200,
+                      },
                     },
                     trace: { id: '4399e7233e6e7b77e70c2fff111b8f28' },
                     timestamp: { us: 1542574422504004 },
                     agent: {
                       type: 'apm-server',
                       hostname: 'b359e3afece8',
-                      version: '7.0.0-alpha1'
+                      version: '7.0.0-alpha1',
                     },
-                    host: { name: 'b359e3afece8' }
+                    host: { name: 'b359e3afece8' },
                   },
-                  sort: [1542574422504]
-                }
-              ]
-            }
-          }
-        }
-      ]
-    }
-  }
+                  sort: [1542574422504],
+                },
+              ],
+            },
+          },
+        },
+      ],
+    },
+  },
 } as unknown) as ESResponse;

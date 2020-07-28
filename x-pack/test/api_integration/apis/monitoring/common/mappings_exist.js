@@ -12,7 +12,7 @@ import * as logstashMetrics from '../../../../../plugins/monitoring/server/lib/m
 import * as beatsMetrics from '../../../../../plugins/monitoring/server/lib/metrics/beats/metrics';
 import * as apmMetrics from '../../../../../plugins/monitoring/server/lib/metrics/apm/metrics';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const es = getService('legacyEs');
 
   const metricSets = [

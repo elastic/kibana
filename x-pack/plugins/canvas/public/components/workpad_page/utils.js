@@ -6,9 +6,9 @@
 
 import { multiply, rotateZ, translate } from '../../lib/aeroelastic/matrix';
 
-export const isGroupId = id => id.startsWith('group');
+export const isGroupId = (id) => id.startsWith('group');
 
-const headerData = id =>
+const headerData = (id) =>
   isGroupId(id)
     ? { id, type: 'group', subtype: 'persistentGroup' }
     : { id, type: 'rectangleElement', subtype: '' };

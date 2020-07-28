@@ -36,7 +36,7 @@ export function ExplorerChartLabel({
       <React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>
     );
 
-  const entityFieldBadges = entityFields.map(entity => (
+  const entityFieldBadges = entityFields.map((entity) => (
     <ExplorerChartLabelBadge entity={entity} key={`${entity.fieldName} ${entity.fieldValue}`} />
   ));
 

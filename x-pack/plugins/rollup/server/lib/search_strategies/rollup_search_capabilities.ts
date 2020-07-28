@@ -21,7 +21,7 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities: any) =>
     }
 
     public get dateHistogram() {
-      const [dateHistogram] = Object.values(this.availableMetrics.date_histogram);
+      const [dateHistogram] = Object.values<any>(this.availableMetrics.date_histogram);
 
       return dateHistogram;
     }

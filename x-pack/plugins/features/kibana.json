@@ -2,8 +2,10 @@
   "id": "features",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
+  "requiredPlugins": ["licensing"],
   "optionalPlugins": ["visTypeTimelion"],
   "configPath": ["xpack", "features"],
   "server": true,
-  "ui": true
+  "ui": true,
+  "extraPublicDirs": ["common"]
 }

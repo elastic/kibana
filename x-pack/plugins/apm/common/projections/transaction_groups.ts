@@ -7,7 +7,7 @@ import { omit } from 'lodash';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import { TRANSACTION_NAME, PARENT_ID } from '../elasticsearch_fieldnames';
@@ -18,35 +18,35 @@ import { mergeProjection } from './util/merge_projection';
 
 export function getTransactionGroupsProjection({
   setup,
-  options
+  options,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   options: Options;
 }) {
   const transactionsProjection = getTransactionsProjection({
     setup,
-    ...(omit(options, 'type') as Omit<typeof options, 'type'>)
+    ...(omit(options, 'type') as Omit<typeof options, 'type'>),
   });
 
   const bool =
     options.type === 'top_traces'
       ? {
-          must_not: [{ exists: { field: PARENT_ID } }]
+          must_not: [{ exists: { field: PARENT_ID } }],
         }
       : {};
 
   return mergeProjection(transactionsProjection, {
     body: {
       query: {
-        bool
+        bool,
       },
       aggs: {
         transactions: {
           terms: {
-            field: TRANSACTION_NAME
-          }
-        }
-      }
-    }
+            field: TRANSACTION_NAME,
+          },
+        },
+      },
+    },
   });
 }

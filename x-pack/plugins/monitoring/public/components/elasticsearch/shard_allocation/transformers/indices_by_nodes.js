@@ -57,7 +57,7 @@ export function indicesByNodes() {
 
     const data = _.reduce(
       decorateShards(shards, nodes),
-      function(obj, shard) {
+      function (obj, shard) {
         obj = createIndex(obj, shard);
         obj = createNodeAddShard(obj, shard);
         return obj;
@@ -67,7 +67,7 @@ export function indicesByNodes() {
 
     return _(data)
       .values()
-      .sortBy(index => [!index.unassignedPrimaries, /^\./.test(index.name), index.name])
+      .sortBy((index) => [!index.unassignedPrimaries, /^\./.test(index.name), index.name])
       .value();
   };
 }

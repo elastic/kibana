@@ -7,7 +7,7 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../../../helpers/setup_request';
 import { bucketFetcher } from './fetcher';
 import { bucketTransformer } from './transform';

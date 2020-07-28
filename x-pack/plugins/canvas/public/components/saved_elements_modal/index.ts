@@ -8,14 +8,12 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { compose, withState } from 'recompose';
 import { camelCase } from 'lodash';
-// @ts-ignore Untyped local
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
-import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { WithKibanaProps } from '../../';
-// @ts-ignore Untyped local
+import { withServices, WithServicesProps } from '../../services';
+// @ts-expect-error untyped local
 import { selectToplevelNodes } from '../../state/actions/transient';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { insertNodes } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
@@ -64,7 +62,7 @@ const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
 const mergeProps = (
   stateProps: StateProps,
   dispatchProps: DispatchProps,
-  ownProps: OwnPropsWithState & WithKibanaProps
+  ownProps: OwnPropsWithState & WithServicesProps
 ): ComponentProps => {
   const { pageId } = stateProps;
   const { onClose, search, setCustomElements } = ownProps;
@@ -92,7 +90,7 @@ const mergeProps = (
       try {
         await findCustomElements();
       } catch (err) {
-        ownProps.kibana.services.canvas.notify.error(err, {
+        ownProps.services.notify.error(err, {
           title: `Couldn't find custom elements`,
         });
       }
@@ -103,7 +101,7 @@ const mergeProps = (
         await customElementService.remove(id);
         await findCustomElements();
       } catch (err) {
-        ownProps.kibana.services.canvas.notify.error(err, {
+        ownProps.services.notify.error(err, {
           title: `Couldn't delete custom elements`,
         });
       }
@@ -119,7 +117,7 @@ const mergeProps = (
         });
         await findCustomElements();
       } catch (err) {
-        ownProps.kibana.services.canvas.notify.error(err, {
+        ownProps.services.notify.error(err, {
           title: `Couldn't update custom elements`,
         });
       }
@@ -128,7 +126,7 @@ const mergeProps = (
 };
 
 export const SavedElementsModal = compose<ComponentProps, OwnProps>(
-  withKibana,
+  withServices,
   withState('search', 'setSearch', ''),
   withState('customElements', 'setCustomElements', []),
   connect(mapStateToProps, mapDispatchToProps, mergeProps)

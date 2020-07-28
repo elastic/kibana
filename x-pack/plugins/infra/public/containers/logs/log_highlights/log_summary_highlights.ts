@@ -43,7 +43,7 @@ export const useLogSummaryHighlights = (
           highlightTerms,
         });
       },
-      onResolve: response => {
+      onResolve: (response) => {
         setLogSummaryHighlights(response.data);
       },
     },
@@ -60,7 +60,7 @@ export const useLogSummaryHighlights = (
 
   useEffect(() => {
     if (
-      highlightTerms.filter(highlightTerm => highlightTerm.length > 0).length &&
+      highlightTerms.filter((highlightTerm) => highlightTerm.length > 0).length &&
       startTimestamp &&
       endTimestamp
     ) {

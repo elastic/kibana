@@ -122,13 +122,15 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   if (!isUnsupportedAgg) {
     const optionsArr = dictionaryToArray(options);
     optionsArr
-      .filter(o => o.agg === defaultData.agg)
-      .forEach(o => {
+      .filter((o) => o.agg === defaultData.agg)
+      .forEach((o) => {
         availableFields.push({ text: o.field });
       });
     optionsArr
-      .filter(o => isPivotGroupByConfigWithUiSupport(defaultData) && o.field === defaultData.field)
-      .forEach(o => {
+      .filter(
+        (o) => isPivotGroupByConfigWithUiSupport(defaultData) && o.field === defaultData.field
+      )
+      .forEach((o) => {
         availableAggs.push({ text: o.agg });
       });
   }
@@ -179,7 +181,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         <EuiFieldText
           defaultValue={aggName}
           isInvalid={!validAggName}
-          onChange={e => setAggName(e.target.value)}
+          onChange={(e) => setAggName(e.target.value)}
         />
       </EuiFormRow>
       {availableAggs.length > 0 && (
@@ -191,7 +193,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           <EuiSelect
             options={availableAggs}
             value={agg}
-            onChange={e => setAgg(e.target.value as PivotSupportedGroupByAggs)}
+            onChange={(e) => setAgg(e.target.value as PivotSupportedGroupByAggs)}
           />
         </EuiFormRow>
       )}
@@ -204,7 +206,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           <EuiSelect
             options={availableFields}
             value={field}
-            onChange={e => setField(e.target.value)}
+            onChange={(e) => setField(e.target.value)}
           />
         </EuiFormRow>
       )}
@@ -227,7 +229,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
               <EuiFieldText
                 defaultValue={interval}
                 isInvalid={!validInterval}
-                onChange={e => setInterval(e.target.value)}
+                onChange={(e) => setInterval(e.target.value)}
               />
             )}
             {isGroupByDateHistogram(defaultData) && (
@@ -242,7 +244,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
                   { value: '1y', text: '1y' },
                 ]}
                 value={interval}
-                onChange={e => setInterval(e.target.value)}
+                onChange={(e) => setInterval(e.target.value)}
               />
             )}
           </Fragment>

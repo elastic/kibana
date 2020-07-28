@@ -31,7 +31,7 @@ import { File } from '../file';
 export function pickFilesToLint(log: ToolingLog, files: File[]) {
   const cli = new CLIEngine({});
 
-  return files.filter(file => {
+  return files.filter((file) => {
     if (!file.isJs() && !file.isTypescript()) {
       return;
     }

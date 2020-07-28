@@ -53,16 +53,23 @@ export class CoreApp {
       res.ok({ body: { version: '0.0.1' } })
     );
 
-    coreSetup.savedObjects.registerType({
-      name: 'server',
-      hidden: false,
-      namespaceType: 'single',
-      mappings: {
-        properties: {
-          uuid: { type: 'keyword' },
+    const anonymousStatusPage = coreSetup.status.isStatusPageAnonymous();
+    coreSetup.httpResources.createRegistrar(router).register(
+      {
+        path: '/status',
+        validate: false,
+        options: {
+          authRequired: !anonymousStatusPage,
         },
       },
-    });
+      async (context, request, response) => {
+        if (anonymousStatusPage) {
+          return response.renderAnonymousCoreApp();
+        } else {
+          return response.renderCoreApp();
+        }
+      }
+    );
   }
   private registerStaticDirs(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));

@@ -56,7 +56,7 @@ describe('pie', () => {
     describe('seriesStyle', () => {
       it('sets the color for a specific series', () => {
         const result = fn(testPie, { seriesStyle: [seriesStyle] }).value;
-        const seriesIndex = result.data.findIndex(series => series.label === seriesStyle.label);
+        const seriesIndex = result.data.findIndex((series) => series.label === seriesStyle.label);
         const resultSeries = result.data[seriesIndex];
 
         expect(resultSeries).toHaveProperty('color', seriesStyle.color);

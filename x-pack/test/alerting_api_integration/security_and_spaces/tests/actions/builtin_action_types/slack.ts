@@ -16,7 +16,6 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('slack action', () => {
@@ -30,11 +29,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
       );
     });
 
-    after(() => esArchiver.unload('empty_kibana'));
-
     it('should return 200 when creating a slack action successfully', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
@@ -56,7 +53,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(typeof createdAction.id).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdAction.id}`)
+        .get(`/api/actions/action/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
@@ -70,7 +67,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating a slack action with no webhookUrl', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
@@ -90,7 +87,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating a slack action with a non whitelisted webhookUrl', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
@@ -112,7 +109,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should respond with a 400 Bad Request when creating a slack action with a webhookUrl with no hostname', async () => {
       await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack action',
@@ -134,7 +131,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should create our slack simulator action successfully', async () => {
       const { body: createdSimulatedAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A slack simulator',
@@ -150,7 +147,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle firing with a simulated success', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -163,7 +160,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle an empty message error', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -177,7 +174,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle a 40x slack error', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -192,7 +189,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
     it('should handle a 429 slack error', async () => {
       const dateStart = new Date().getTime();
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -210,7 +207,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     it('should handle a 500 slack error', async () => {
       const { body: result } = await supertest
-        .post(`/api/action/${simulatedActionId}/_execute`)
+        .post(`/api/actions/action/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {

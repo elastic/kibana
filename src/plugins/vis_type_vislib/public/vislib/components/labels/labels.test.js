@@ -157,48 +157,48 @@ const columnsData = {
   ],
 };
 
-describe('Vislib Labels Module Test Suite', function() {
+describe('Vislib Labels Module Test Suite', function () {
   let uniqSeriesLabels;
-  describe('Labels (main)', function() {
+  describe('Labels (main)', function () {
     beforeEach(() => {
       seriesLabels = labels(seriesData);
       rowsLabels = labels(rowsData);
       seriesArr = Array.isArray(seriesLabels);
       rowsArr = Array.isArray(rowsLabels);
       uniqSeriesLabels = _.chain(rowsData.rows)
-        .pluck('series')
+        .map('series')
         .flattenDeep()
-        .pluck('label')
+        .map('label')
         .uniq()
         .value();
     });
 
-    it('should be a function', function() {
+    it('should be a function', function () {
       expect(typeof labels).toBe('function');
     });
 
-    it('should return an array if input is data.series', function() {
+    it('should return an array if input is data.series', function () {
       expect(seriesArr).toBe(true);
     });
 
-    it('should return an array if input is data.rows', function() {
+    it('should return an array if input is data.rows', function () {
       expect(rowsArr).toBe(true);
     });
 
-    it('should throw an error if input is not an object', function() {
-      expect(function() {
+    it('should throw an error if input is not an object', function () {
+      expect(function () {
         labels('string not object');
       }).toThrow();
     });
 
-    it('should return unique label values', function() {
+    it('should return unique label values', function () {
       expect(rowsLabels[0]).toEqual(uniqSeriesLabels[0]);
       expect(rowsLabels[1]).toEqual(uniqSeriesLabels[1]);
       expect(rowsLabels[2]).toEqual(uniqSeriesLabels[2]);
     });
   });
 
-  describe('Data array', function() {
+  describe('Data array', function () {
     const childrenObject = {
       children: [],
     };
@@ -227,36 +227,36 @@ describe('Vislib Labels Module Test Suite', function() {
       testRows = Array.isArray(rowsLabels);
     });
 
-    it('should throw an error if the input is not an object', function() {
-      expect(function() {
+    it('should throw an error if the input is not an object', function () {
+      expect(function () {
         dataArray(string);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         dataArray(number);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         dataArray(boolean);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         dataArray(emptyArray);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         dataArray(nullValue);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         dataArray(notAValue);
       }).toThrow();
     });
 
     it(
       'should throw an error if property series, rows, or ' + 'columns is not present',
-      function() {
-        expect(function() {
+      function () {
+        expect(function () {
           dataArray(childrenObject);
         }).toThrow();
       }
@@ -264,49 +264,49 @@ describe('Vislib Labels Module Test Suite', function() {
 
     it(
       'should not throw an error if object has property series, rows, or ' + 'columns',
-      function() {
-        expect(function() {
+      function () {
+        expect(function () {
           dataArray(seriesObject);
         }).not.toThrow();
 
-        expect(function() {
+        expect(function () {
           dataArray(rowsObject);
         }).not.toThrow();
 
-        expect(function() {
+        expect(function () {
           dataArray(columnsObject);
         }).not.toThrow();
       }
     );
 
-    it('should be a function', function() {
+    it('should be a function', function () {
       expect(typeof dataArray).toEqual('function');
     });
 
-    it('should return an array of objects if input is data.series', function() {
+    it('should return an array of objects if input is data.series', function () {
       expect(testSeries).toEqual(true);
     });
 
-    it('should return an array of objects if input is data.rows', function() {
+    it('should return an array of objects if input is data.rows', function () {
       expect(testRows).toEqual(true);
     });
 
-    it('should return an array of same length as input data.series', function() {
+    it('should return an array of same length as input data.series', function () {
       expect(seriesLabels.length).toEqual(seriesData.series.length);
     });
 
-    it('should return an array of same length as input data.rows', function() {
+    it('should return an array of same length as input data.rows', function () {
       expect(rowsLabels.length).toEqual(rowsData.rows.length);
     });
 
-    it('should return an array of objects with obj.labels and obj.values', function() {
+    it('should return an array of objects with obj.labels and obj.values', function () {
       expect(seriesLabels[0].label).toEqual('100');
       expect(seriesLabels[0].values[0].x).toEqual(0);
       expect(seriesLabels[0].values[0].y).toEqual(1);
     });
   });
 
-  describe('Unique labels', function() {
+  describe('Unique labels', function () {
     const arrObj = [
       { label: 'a' },
       { label: 'b' },
@@ -327,58 +327,58 @@ describe('Vislib Labels Module Test Suite', function() {
     let testArr;
 
     beforeEach(() => {
-      uniq = uniqLabels(arrObj, function(d) {
+      uniq = uniqLabels(arrObj, function (d) {
         return d;
       });
       testArr = Array.isArray(uniq);
     });
 
-    it('should throw an error if input is not an array', function() {
-      expect(function() {
+    it('should throw an error if input is not an array', function () {
+      expect(function () {
         uniqLabels(string);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         uniqLabels(number);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         uniqLabels(boolean);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         uniqLabels(nullValue);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         uniqLabels(emptyObject);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         uniqLabels(notAValue);
       }).toThrow();
     });
 
-    it('should not throw an error if the input is an array', function() {
-      expect(function() {
+    it('should not throw an error if the input is an array', function () {
+      expect(function () {
         uniqLabels(emptyArray);
       }).not.toThrow();
     });
 
-    it('should be a function', function() {
+    it('should be a function', function () {
       expect(typeof uniqLabels).toBe('function');
     });
 
-    it('should return an array', function() {
+    it('should return an array', function () {
       expect(testArr).toBe(true);
     });
 
-    it('should return array of 5 unique values', function() {
+    it('should return array of 5 unique values', function () {
       expect(uniq.length).toBe(5);
     });
   });
 
-  describe('Get series', function() {
+  describe('Get series', function () {
     const string = 'string';
     const number = 24;
     const boolean = false;
@@ -404,65 +404,65 @@ describe('Vislib Labels Module Test Suite', function() {
       rowsArr = Array.isArray(rowsLabels);
     });
 
-    it('should throw an error if input is not an object', function() {
-      expect(function() {
+    it('should throw an error if input is not an object', function () {
+      expect(function () {
         getSeries(string);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         getSeries(number);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         getSeries(boolean);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         getSeries(nullValue);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         getSeries(emptyArray);
       }).toThrow();
 
-      expect(function() {
+      expect(function () {
         getSeries(notAValue);
       }).toThrow();
     });
 
-    it('should throw an if property rows or columns is not set on the object', function() {
-      expect(function() {
+    it('should throw an if property rows or columns is not set on the object', function () {
+      expect(function () {
         getSeries(emptyObject);
       }).toThrow();
     });
 
-    it('should not throw an error if rows or columns set on object', function() {
-      expect(function() {
+    it('should not throw an error if rows or columns set on object', function () {
+      expect(function () {
         getSeries(rowsObject);
       }).not.toThrow();
 
-      expect(function() {
+      expect(function () {
         getSeries(columnsObject);
       }).not.toThrow();
     });
 
-    it('should be a function', function() {
+    it('should be a function', function () {
       expect(typeof getSeries).toBe('function');
     });
 
-    it('should return an array if input is data.columns', function() {
+    it('should return an array if input is data.columns', function () {
       expect(columnsArr).toBe(true);
     });
 
-    it('should return an array if input is data.rows', function() {
+    it('should return an array if input is data.rows', function () {
       expect(rowsArr).toBe(true);
     });
 
-    it('should return an array of the same length as as input data.columns', function() {
+    it('should return an array of the same length as as input data.columns', function () {
       expect(columnsLabels.length).toBe(columnsData.columns.length);
     });
 
-    it('should return an array of the same length as as input data.rows', function() {
+    it('should return an array of the same length as as input data.rows', function () {
       expect(rowsLabels.length).toBe(rowsData.rows.length);
     });
   });

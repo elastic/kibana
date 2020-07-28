@@ -18,11 +18,12 @@
  */
 import _ from 'lodash';
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
-import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
+import { SavedObjectNotFound } from '../../../../kibana_utils/public';
 import {
   IndexPattern,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
+  expandShorthand,
 } from '../../../../data/public';
 
 /**

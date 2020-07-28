@@ -46,7 +46,7 @@ export function createMockGraphStore({
     nodes: [],
     edges: [],
     options: {},
-    blacklistedNodes: [],
+    blocklistedNodes: [],
   } as unknown) as Workspace;
 
   const savedWorkspace = ({
@@ -103,7 +103,7 @@ export function createMockGraphStore({
 
   store.dispatch = jest.fn(store.dispatch);
 
-  sagas.forEach(sagaCreator => {
+  sagas.forEach((sagaCreator) => {
     sagaMiddleware.run(sagaCreator(mockedDeps));
   });
 

@@ -55,7 +55,7 @@ function getRootPackageDir(dirRoot, dir, rootPackageName) {
   }
 }
 
-exports.getProjectRoot = function(file, config) {
+exports.getProjectRoot = function (file, config) {
   const { root, dir } = parse(resolve(file));
   const { rootPackageName } = config;
 

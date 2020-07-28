@@ -25,7 +25,7 @@ export function prependDatasourceExpression(
     const state = datasourceStates[datasourceId].state;
     const layers = datasource.getLayers(datasourceStates[datasourceId].state);
 
-    layers.forEach(layerId => {
+    layers.forEach((layerId) => {
       const result = datasource.toExpression(state, layerId);
       if (result) {
         datasourceExpressions.push([layerId, result]);

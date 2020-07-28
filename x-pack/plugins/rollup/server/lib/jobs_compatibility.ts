@@ -45,7 +45,7 @@ export function mergeJobConfigurations(jobs = []) {
     const fieldNames = Object.keys(fields);
 
     // Check each field
-    fieldNames.forEach(fieldName => {
+    fieldNames.forEach((fieldName) => {
       const fieldAggs = fields[fieldName];
 
       // Look through each field's capabilities (aggregations)

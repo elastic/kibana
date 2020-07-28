@@ -22,7 +22,6 @@ export class NoDataController extends MonitoringViewBaseController {
   constructor($injector, $scope) {
     window.injectorThree = $injector;
     const monitoringClusters = $injector.get('monitoringClusters');
-    const kbnUrl = $injector.get('kbnUrl');
     const $http = $injector.get('$http');
     const checkers = [new ClusterSettingsChecker($http), new NodeSettingsChecker($http)];
 
@@ -33,7 +32,7 @@ export class NoDataController extends MonitoringViewBaseController {
           CODE_PATH_LICENSE,
         ]);
         if (monitoringClustersData && monitoringClustersData.length) {
-          kbnUrl.redirect('/home');
+          window.history.replaceState(null, null, '#/home');
           return monitoringClustersData;
         }
       } catch (err) {
@@ -81,8 +80,6 @@ export class NoDataController extends MonitoringViewBaseController {
       },
       true
     );
-
-    this.changePath = path => kbnUrl.changePath(path);
   }
 
   getDefaultModel() {
@@ -99,13 +96,6 @@ export class NoDataController extends MonitoringViewBaseController {
 
   render(enabler) {
     const props = this;
-    this.renderReact(
-      <NoData
-        {...props}
-        enabler={enabler}
-        changePath={this.changePath}
-        isCloudEnabled={Legacy.shims.isCloud}
-      />
-    );
+    this.renderReact(<NoData {...props} enabler={enabler} isCloudEnabled={Legacy.shims.isCloud} />);
   }
 }

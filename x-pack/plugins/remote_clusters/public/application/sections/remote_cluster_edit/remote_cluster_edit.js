@@ -20,8 +20,9 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
-import { extractQueryParams, getRouter, getRouterLinkProps, redirect } from '../../services';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { extractQueryParams } from '../../../shared_imports';
+import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
 
@@ -70,7 +71,7 @@ export class RemoteClusterEdit extends Component {
     this.props.stopEditingCluster();
   }
 
-  save = clusterConfig => {
+  save = (clusterConfig) => {
     this.props.editCluster(clusterConfig);
   };
 
@@ -89,7 +90,7 @@ export class RemoteClusterEdit extends Component {
       const decodedRedirect = decodeURIComponent(redirectUrl);
       redirect(decodedRedirect);
     } else {
-      history.push(CRUD_APP_BASE_PATH);
+      history.push('/list');
       openDetailPanel(clusterName);
     }
   };
@@ -143,7 +144,7 @@ export class RemoteClusterEdit extends Component {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                {...getRouterLinkProps(CRUD_APP_BASE_PATH)}
+                {...reactRouterNavigate(this.props.history, '/list')}
                 iconType="arrowLeft"
                 flush="left"
               >

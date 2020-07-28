@@ -21,6 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
+import { UI_SETTINGS } from '../../../../../data/server';
 
 export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
   const bool = { must: [] };
@@ -38,7 +39,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
 
   // Use the kibana filter bar filters
   if (config.kibana) {
-    bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter');
+    bool.filter = _.get(tlConfig, 'request.body.extended.es.filter');
   }
 
   const aggs = {
@@ -46,10 +47,10 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
       meta: { type: 'split' },
       filters: {
         filters: _.chain(config.q)
-          .map(function(q) {
+          .map(function (q) {
             return [q, { query_string: { query: q } }];
           })
-          .zipObject()
+          .fromPairs()
           .value(),
       },
       aggs: {},
@@ -58,7 +59,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
 
   let aggCursor = aggs.q.aggs;
 
-  _.each(config.split, function(clause) {
+  _.each(config.split, function (clause) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
       const termsAgg = buildAggBody(clause[0], scriptedFields);
@@ -78,7 +79,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
 
   const request = {
     index: config.index,
-    ignore_throttled: !tlConfig.settings['search:includeFrozen'],
+    ignore_throttled: !tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN],
     body: {
       query: {
         bool: bool,

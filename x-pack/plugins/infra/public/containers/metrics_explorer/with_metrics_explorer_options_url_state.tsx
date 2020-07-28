@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set, values } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { values } from 'lodash';
 import React, { useContext, useMemo } from 'react';
 import * as t from 'io-ts';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
@@ -81,7 +82,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
     field: t.string,
     rate: t.boolean,
     color: t.keyof(
-      Object.fromEntries(values(MetricsExplorerColor).map(c => [c, null])) as Record<string, null>
+      Object.fromEntries(values(MetricsExplorerColor).map((c) => [c, null])) as Record<string, null>
     ),
     label: t.string,
   });
@@ -97,6 +98,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
     limit: t.number,
     groupBy: t.string,
     filterQuery: t.string,
+    source: t.string,
   });
 
   const Options = t.intersection([OptionsRequired, OptionsOptional]);
@@ -114,13 +116,13 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
 function isMetricExplorerChartOptions(subject: any): subject is MetricsExplorerChartOptions {
   const ChartOptions = t.type({
     yAxisMode: t.keyof(
-      Object.fromEntries(values(MetricsExplorerYAxisMode).map(v => [v, null])) as Record<
+      Object.fromEntries(values(MetricsExplorerYAxisMode).map((v) => [v, null])) as Record<
         string,
         null
       >
     ),
     type: t.keyof(
-      Object.fromEntries(values(MetricsExplorerChartType).map(v => [v, null])) as Record<
+      Object.fromEntries(values(MetricsExplorerChartType).map((v) => [v, null])) as Record<
         string,
         null
       >
@@ -156,6 +158,7 @@ const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
   const finalState = {};
   if (value) {
     if (value.options && isMetricExplorerOptions(value.options)) {
+      value.options.source = 'url';
       set(finalState, 'options', value.options);
     }
     if (value.timerange && isMetricExplorerTimeOption(value.timerange)) {

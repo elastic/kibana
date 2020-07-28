@@ -24,7 +24,7 @@ export const table = () => ({
       argType: 'select',
       default: 10,
       options: {
-        choices: ['', 5, 10, 25, 50, 100].map(v => ({ name: String(v), value: v })),
+        choices: ['', 5, 10, 25, 50, 100].map((v) => ({ name: String(v), value: v })),
       },
     },
     {
@@ -33,6 +33,9 @@ export const table = () => ({
       help: strings.getPaginateHelp(),
       argType: 'toggle',
       default: true,
+      options: {
+        labelValue: strings.getPaginateToggleSwitch(),
+      },
     },
     {
       name: 'showHeader',
@@ -40,6 +43,9 @@ export const table = () => ({
       help: strings.getShowHeaderHelp(),
       argType: 'toggle',
       default: true,
+      options: {
+        labelValue: strings.getShowHeaderToggleSwitch(),
+      },
     },
   ],
 });

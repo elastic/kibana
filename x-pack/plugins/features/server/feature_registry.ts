@@ -32,14 +32,14 @@ export class FeatureRegistry {
 
   public getAll(): Feature[] {
     this.locked = true;
-    return Object.values(this.features).map(featureConfig => new Feature(featureConfig));
+    return Object.values(this.features).map((featureConfig) => new Feature(featureConfig));
   }
 }
 
 function applyAutomaticPrivilegeGrants(feature: FeatureConfig): FeatureConfig {
   const allPrivilege = feature.privileges?.all;
   const readPrivilege = feature.privileges?.read;
-  const reservedPrivileges = (feature.reserved?.privileges ?? []).map(rp => rp.privilege);
+  const reservedPrivileges = (feature.reserved?.privileges ?? []).map((rp) => rp.privilege);
 
   applyAutomaticAllPrivilegeGrants(allPrivilege, ...reservedPrivileges);
   applyAutomaticReadPrivilegeGrants(readPrivilege);
@@ -50,7 +50,7 @@ function applyAutomaticPrivilegeGrants(feature: FeatureConfig): FeatureConfig {
 function applyAutomaticAllPrivilegeGrants(
   ...allPrivileges: Array<FeatureKibanaPrivileges | undefined>
 ) {
-  allPrivileges.forEach(allPrivilege => {
+  allPrivileges.forEach((allPrivilege) => {
     if (allPrivilege) {
       allPrivilege.savedObject.all = uniq([...allPrivilege.savedObject.all, 'telemetry']);
       allPrivilege.savedObject.read = uniq([...allPrivilege.savedObject.read, 'config', 'url']);
@@ -61,7 +61,7 @@ function applyAutomaticAllPrivilegeGrants(
 function applyAutomaticReadPrivilegeGrants(
   ...readPrivileges: Array<FeatureKibanaPrivileges | undefined>
 ) {
-  readPrivileges.forEach(readPrivilege => {
+  readPrivileges.forEach((readPrivilege) => {
     if (readPrivilege) {
       readPrivilege.savedObject.read = uniq([...readPrivilege.savedObject.read, 'config', 'url']);
     }

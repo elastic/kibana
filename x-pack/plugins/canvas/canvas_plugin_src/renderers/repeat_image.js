@@ -41,7 +41,7 @@ export const repeatImage = () => ({
     }
 
     const img = new Image();
-    img.onload = function() {
+    img.onload = function () {
       setSize(img);
       if (settings.max && settings.count > settings.max) {
         settings.count = settings.max;
@@ -54,7 +54,7 @@ export const repeatImage = () => ({
         }
 
         const emptyImage = new Image();
-        emptyImage.onload = function() {
+        emptyImage.onload = function () {
           setSize(emptyImage);
           times(settings.max - settings.count, () => container.append(emptyImage.cloneNode(true)));
           finish();

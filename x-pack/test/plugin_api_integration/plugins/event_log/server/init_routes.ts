@@ -26,7 +26,7 @@ export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger
         body: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -61,7 +61,7 @@ export const registerProviderActionsRoute = (
     {
       path: '/api/log_event_fixture/{provider}/_registerProviderActions',
       validate: {
-        body: value => ({ value }),
+        body: (value) => ({ value }),
         params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
       },
       options: { authRequired: false },
@@ -96,7 +96,7 @@ export const isProviderActionRegisteredRoute = (
         params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -125,7 +125,7 @@ export const getProviderActionsRoute = (
         params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -152,7 +152,7 @@ export const getLoggerRoute = (
         params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
       },
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -177,7 +177,7 @@ export const isIndexingEntriesRoute = (
       path: `/api/log_event_fixture/isIndexingEntries`,
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -198,7 +198,7 @@ export const isEventLogServiceEnabledRoute = (
       path: `/api/log_event_fixture/isEventLogServiceEnabled`,
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
@@ -219,7 +219,7 @@ export const isEventLogServiceLoggingEntriesRoute = (
       path: `/api/log_event_fixture/isEventLogServiceLoggingEntries`,
       validate: {},
     },
-    async function(
+    async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory

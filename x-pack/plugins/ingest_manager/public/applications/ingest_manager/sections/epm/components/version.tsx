@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { RequirementVersion } from '../../../types';
 
 const CodeText = styled.span`
-  font-family: ${props => props.theme.eui.euiCodeFontFamily};
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
 `;
 export function Version({
   className,

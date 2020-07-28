@@ -64,10 +64,13 @@ describe('APIKeysGridPage', () => {
     });
   });
 
+  const coreStart = coreMock.createStart();
+
   const getViewProperties = () => {
-    const { docLinks, notifications } = coreMock.createStart();
+    const { docLinks, notifications, application } = coreStart;
     return {
       docLinks: new DocumentationLinksService(docLinks),
+      navigateToApp: application.navigateToApp,
       notifications,
       apiKeysAPIClient: apiClientMock,
     };
@@ -88,7 +91,7 @@ describe('APIKeysGridPage', () => {
 
     const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(NotEnabled).length > 0;
     });
 
@@ -104,7 +107,7 @@ describe('APIKeysGridPage', () => {
 
     const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
 
@@ -116,7 +119,7 @@ describe('APIKeysGridPage', () => {
 
     const wrapper = mountWithIntl(<APIKeysGridPage {...getViewProperties()} />);
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiCallOut).length > 0;
     });
 
@@ -132,7 +135,7 @@ describe('APIKeysGridPage', () => {
     it('renders a callout indicating the user is an administrator', async () => {
       const calloutEl = 'EuiCallOut[data-test-subj="apiKeyAdminDescriptionCallOut"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(calloutEl).length > 0;
       });
 
@@ -142,7 +145,7 @@ describe('APIKeysGridPage', () => {
     it('renders the correct description text', async () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(descriptionEl).length > 0;
       });
 
@@ -168,7 +171,7 @@ describe('APIKeysGridPage', () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
       const calloutEl = 'EuiCallOut[data-test-subj="apiKeyAdminDescriptionCallOut"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(descriptionEl).length > 0;
       });
 
@@ -178,7 +181,7 @@ describe('APIKeysGridPage', () => {
     it('renders the correct description text', async () => {
       const descriptionEl = 'EuiText[data-test-subj="apiKeysDescriptionText"]';
 
-      await waitForRender(wrapper, updatedWrapper => {
+      await waitForRender(wrapper, (updatedWrapper) => {
         return updatedWrapper.find(descriptionEl).length > 0;
       });
 

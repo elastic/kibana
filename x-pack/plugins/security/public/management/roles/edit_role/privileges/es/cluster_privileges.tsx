@@ -24,11 +24,11 @@ export class ClusterPrivileges extends Component<Props, {}> {
   public buildComboBox = (items: string[]) => {
     const role = this.props.role;
 
-    const options = items.map(i => ({
+    const options = items.map((i) => ({
       label: i,
     }));
 
-    const selectedOptions = (role.elasticsearch.cluster || []).map(k => ({ label: k }));
+    const selectedOptions = (role.elasticsearch.cluster || []).map((k) => ({ label: k }));
 
     return (
       <EuiFlexItem key={'clusterPrivs'}>

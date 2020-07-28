@@ -16,9 +16,49 @@ export const HttpResponseBodyType = t.partial({
 
 export type HttpResponseBody = t.TypeOf<typeof HttpResponseBodyType>;
 
-export const TlsType = t.partial({
+const ECSDistinguishedName = t.type({
+  common_name: t.string,
+  distinguished_name: t.string,
+});
+
+export const X509ExpiryType = t.type({
   not_after: t.string,
   not_before: t.string,
+});
+
+export type X509Expiry = t.TypeOf<typeof X509ExpiryType>;
+
+export const X509Type = t.intersection([
+  t.type({
+    issuer: ECSDistinguishedName,
+    subject: ECSDistinguishedName,
+    serial_number: t.string,
+    public_key_algorithm: t.string,
+    signature_algorithm: t.string,
+  }),
+  X509ExpiryType,
+  t.partial({
+    public_key_curve: t.string,
+    public_key_exponent: t.number,
+    public_key_size: t.number,
+  }),
+]);
+
+export type X509 = t.TypeOf<typeof X509Type>;
+
+export const TlsType = t.partial({
+  // deprecated in favor of server.x509.not_after/not_before
+  certificate_not_valid_after: t.string,
+  certificate_not_valid_before: t.string,
+  cipher: t.string,
+  established: t.boolean,
+  server: t.partial({
+    hash: t.type({
+      sha256: t.string,
+      sha1: t.string,
+    }),
+    x509: X509Type,
+  }),
 });
 
 export type Tls = t.TypeOf<typeof TlsType>;
@@ -36,9 +76,9 @@ export const MonitorType = t.intersection([
     check_group: t.string,
     ip: t.string,
     name: t.string,
-    timespan: t.partial({
+    timespan: t.type({
       gte: t.string,
-      lte: t.string,
+      lt: t.string,
     }),
   }),
 ]);
@@ -55,13 +95,13 @@ export const PingType = t.intersection([
     agent: t.intersection([
       t.type({
         ephemeral_id: t.string,
-        hostname: t.string,
         id: t.string,
         type: t.string,
         version: t.string,
       }),
       t.partial({
         name: t.string,
+        hostname: t.string,
       }),
     ]),
     container: t.partial({
@@ -123,6 +163,11 @@ export const PingType = t.intersection([
     observer: t.partial({
       geo: t.partial({
         name: t.string,
+        location: t.union([
+          t.string,
+          t.partial({ lat: t.number, lon: t.number }),
+          t.partial({ lat: t.string, lon: t.string }),
+        ]),
       }),
     }),
     resolve: t.partial({
@@ -155,6 +200,30 @@ export const PingType = t.intersection([
 ]);
 
 export type Ping = t.TypeOf<typeof PingType>;
+
+// Convenience function for tests etc that makes an empty ping
+// object with the minimum of fields.
+export const makePing = (f: {
+  docId?: string;
+  type?: string;
+  id?: string;
+  timestamp?: string;
+  ip?: string;
+  status?: string;
+  duration?: number;
+}): Ping => {
+  return {
+    docId: f.docId || 'myDocId',
+    timestamp: f.timestamp || '2020-07-07T01:14:08Z',
+    monitor: {
+      id: f.id || 'myId',
+      type: f.type || 'myType',
+      ip: f.ip || '127.0.0.1',
+      status: f.status || 'up',
+      duration: { us: f.duration || 100000 },
+    },
+  };
+};
 
 export const PingsResponseType = t.type({
   total: t.number,

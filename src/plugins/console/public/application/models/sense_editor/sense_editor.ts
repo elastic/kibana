@@ -425,8 +425,8 @@ export class SenseEditor {
     }
 
     const column =
-        (this.coreEditor.getLineValue(curLineNumber) || '').length +
-        1 /* Range goes to 1 after last char */;
+      (this.coreEditor.getLineValue(curLineNumber) || '').length +
+      1; /* Range goes to 1 after last char */
 
     return {
       lineNumber: curLineNumber,
@@ -467,7 +467,7 @@ export class SenseEditor {
 
   getRequestsAsCURL = async (elasticsearchBaseUrl: string, range?: Range): Promise<string> => {
     const requests = await this.getRequestsInRange(range, true);
-    const result = _.map(requests, req => {
+    const result = _.map(requests, (req) => {
       if (typeof req === 'string') {
         // no request block
         return req;

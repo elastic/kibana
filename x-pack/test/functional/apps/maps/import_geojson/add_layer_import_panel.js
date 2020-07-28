@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import path from 'path';
 
-export default function({ getPageObjects }) {
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';

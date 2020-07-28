@@ -59,7 +59,7 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
           id="xpack.ml.validateJob.modal.linkToJobTipsText"
           values={
             Object {
-              "mlJobTipsLink": <ForwardRef
+              "mlJobTipsLink": <EuiLink
                 href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/create-jobs.html#job-tips"
                 target="_blank"
               >
@@ -68,7 +68,7 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
                   id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>,
+              </EuiLink>,
             }
           }
         />
@@ -149,7 +149,7 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
           id="xpack.ml.validateJob.modal.linkToJobTipsText"
           values={
             Object {
-              "mlJobTipsLink": <ForwardRef
+              "mlJobTipsLink": <EuiLink
                 href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/create-jobs.html#job-tips"
                 target="_blank"
               >
@@ -158,7 +158,7 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
                   id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
                   values={Object {}}
                 />
-              </ForwardRef>,
+              </EuiLink>,
             }
           }
         />

@@ -23,7 +23,7 @@ import { FollowerIndexEdit as FollowerIndexEditView } from './follower_index_edi
 
 const scope = SECTIONS.FOLLOWER_INDEX;
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   apiStatus: {
     get: getApiStatus(`${scope}-get`)(state),
     save: getApiStatus(`${scope}-save`)(state),
@@ -36,9 +36,9 @@ const mapStateToProps = state => ({
   followerIndex: getSelectedFollowerIndex('edit')(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  getFollowerIndex: id => dispatch(getFollowerIndex(id)),
-  selectFollowerIndex: id => dispatch(selectEditFollowerIndex(id)),
+const mapDispatchToProps = (dispatch) => ({
+  getFollowerIndex: (id) => dispatch(getFollowerIndex(id)),
+  selectFollowerIndex: (id) => dispatch(selectEditFollowerIndex(id)),
   saveFollowerIndex: (id, followerIndex) => dispatch(saveFollowerIndex(id, followerIndex, true)),
   clearApiError: () => {
     dispatch(clearApiError(`${scope}-get`));

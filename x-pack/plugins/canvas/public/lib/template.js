@@ -25,7 +25,7 @@ export function Template(config) {
   // Tags for categorizing the template
   this.tags = config.tags || [];
 
-  this.tags.forEach(tag => {
+  this.tags.forEach((tag) => {
     if (!tagsRegistry.get(tag)) {
       tagsRegistry.register(() => ({ name: tag, color: '#666666' }));
     }

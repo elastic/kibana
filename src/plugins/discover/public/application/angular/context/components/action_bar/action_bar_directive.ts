@@ -19,6 +19,6 @@
 import { getAngularModule } from '../../../../../kibana_services';
 import { ActionBar } from './action_bar';
 
-getAngularModule().directive('contextActionBar', function(reactDirective: any) {
+getAngularModule().directive('contextActionBar', function (reactDirective: any) {
   return reactDirective(ActionBar);
 });

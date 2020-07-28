@@ -43,7 +43,7 @@ function checkout_sibling {
       fi
 
       cloneAuthor="elastic"
-      cloneBranch="${PR_SOURCE_BRANCH:-${GIT_BRANCH#*/}}" # GIT_BRANCH starts with the repo, i.e., origin/master
+      cloneBranch="$GIT_BRANCH"
       if clone_target_is_valid ; then
         return 0
       fi

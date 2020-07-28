@@ -19,6 +19,9 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 import { coreMock } from '../../../core/public/mocks';
+import { managementPluginMock } from '../../management/public/mocks';
+import { kibanaLegacyPluginMock } from '../../kibana_legacy/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
@@ -32,6 +35,10 @@ const createSetupContract = (): IndexPatternManagementSetup => ({
   list: {
     addListConfig: jest.fn(),
   } as any,
+  fieldFormatEditors: {
+    getAll: jest.fn(),
+    getById: jest.fn(),
+  } as any,
 });
 
 const createStartContract = (): IndexPatternManagementStart => ({
@@ -44,13 +51,23 @@ const createStartContract = (): IndexPatternManagementStart => ({
     getFieldInfo: jest.fn(),
     areScriptedFieldsEnabled: jest.fn(),
   } as any,
+  fieldFormatEditors: {
+    getAll: jest.fn(),
+    getById: jest.fn(),
+  } as any,
 });
 
 const createInstance = async () => {
   const plugin = new IndexPatternManagementPlugin({} as PluginInitializerContext);
 
-  const setup = plugin.setup(coreMock.createSetup());
-  const doStart = () => plugin.start(coreMock.createStart(), {});
+  const setup = plugin.setup(coreMock.createSetup(), {
+    management: managementPluginMock.createSetupContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
+  });
+  const doStart = () =>
+    plugin.start(coreMock.createStart(), {
+      data: dataPluginMock.createStartContract(),
+    });
 
   return {
     plugin,
@@ -59,8 +76,43 @@ const createInstance = async () => {
   };
 };
 
+const docLinks = {
+  links: {
+    indexPatterns: {},
+    scriptedFields: {},
+  },
+};
+
+const createIndexPatternManagmentContext = () => {
+  const {
+    chrome,
+    application,
+    savedObjects,
+    uiSettings,
+    notifications,
+    overlays,
+  } = coreMock.createStart();
+  const { http } = coreMock.createSetup();
+  const data = dataPluginMock.createStartContract();
+
+  return {
+    chrome,
+    application,
+    savedObjects,
+    uiSettings,
+    notifications,
+    overlays,
+    http,
+    docLinks,
+    data,
+    indexPatternManagementStart: createStartContract(),
+    setBreadcrumbs: () => {},
+  };
+};
+
 export const mockManagementPlugin = {
   createSetupContract,
   createStartContract,
   createInstance,
+  createIndexPatternManagmentContext,
 };

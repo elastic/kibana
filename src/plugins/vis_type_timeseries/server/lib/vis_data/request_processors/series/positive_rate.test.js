@@ -57,7 +57,7 @@ describe('positiveRate(req, panel, series)', () => {
   });
 
   test('returns positive rate aggs', () => {
-    const next = doc => doc;
+    const next = (doc) => doc;
     const doc = positiveRate(req, panel, series)(next)({});
     expect(doc).toEqual({
       aggs: {

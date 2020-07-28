@@ -30,10 +30,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NotificationsStart } from 'src/core/public';
+import { NotificationsStart, ScopedHistory } from 'src/core/public';
 import { User, EditUser, Role, isRoleDeprecated } from '../../../../common/model';
 import { AuthenticationServiceSetup } from '../../../authentication';
-import { USERS_PATH } from '../../management_urls';
 import { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
 import { UserValidator, UserValidationResult } from './validate_user';
@@ -47,6 +46,7 @@ interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   authc: AuthenticationServiceSetup;
   notifications: NotificationsStart;
+  history: ScopedHistory;
 }
 
 interface State {
@@ -57,12 +57,8 @@ interface State {
   showDeleteConfirmation: boolean;
   user: EditUser;
   roles: Role[];
-  selectedRoles: string[];
+  selectedRoles: readonly string[];
   formError: UserValidationResult | null;
-}
-
-function backToUserList() {
-  window.location.hash = USERS_PATH;
 }
 
 export class EditUserPage extends Component<Props, State> {
@@ -102,6 +98,10 @@ export class EditUserPage extends Component<Props, State> {
     }
   }
 
+  private backToUserList() {
+    this.props.history.push('/');
+  }
+
   private async setCurrentUser() {
     const { username, userAPIClient, rolesAPIClient, notifications, authc } = this.props;
     let { user, currentUser } = this.state;
@@ -120,7 +120,7 @@ export class EditUserPage extends Component<Props, State> {
           }),
           text: get(err, 'body.message') || err.message,
         });
-        return backToUserList();
+        return this.backToUserList();
       }
     }
 
@@ -148,7 +148,7 @@ export class EditUserPage extends Component<Props, State> {
 
   private handleDelete = (usernames: string[], errors: string[]) => {
     if (errors.length === 0) {
-      backToUserList();
+      this.backToUserList();
     }
   };
 
@@ -184,7 +184,7 @@ export class EditUserPage extends Component<Props, State> {
           )
         );
 
-        backToUserList();
+        this.backToUserList();
       } catch (e) {
         this.props.notifications.toasts.addDanger(
           i18n.translate('xpack.security.management.users.editUser.savingUserErrorMessage', {
@@ -382,8 +382,8 @@ export class EditUserPage extends Component<Props, State> {
       return null;
     }
 
-    const hasAnyDeprecatedRolesAssigned = selectedRoles.some(selected => {
-      const role = roles.find(r => r.name === selected);
+    const hasAnyDeprecatedRolesAssigned = selectedRoles.some((selected) => {
+      const role = roles.find((r) => r.name === selected);
       return role && isRoleDeprecated(role);
     });
 
@@ -394,9 +394,7 @@ export class EditUserPage extends Component<Props, State> {
           defaultMessage="This user is assigned a deprecated role. Please migrate to a supported role."
         />
       </span>
-    ) : (
-      undefined
-    );
+    ) : undefined;
 
     return (
       <div className="secUsersEditPage">
@@ -551,7 +549,7 @@ export class EditUserPage extends Component<Props, State> {
               <EuiHorizontalRule />
 
               {reserved && (
-                <EuiButton onClick={backToUserList}>
+                <EuiButton onClick={() => this.backToUserList()}>
                   <FormattedMessage
                     id="xpack.security.management.users.editUser.returnToUserListButtonLabel"
                     defaultMessage="Return to user list"
@@ -581,7 +579,10 @@ export class EditUserPage extends Component<Props, State> {
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty data-test-subj="userFormCancelButton" onClick={backToUserList}>
+                    <EuiButtonEmpty
+                      data-test-subj="userFormCancelButton"
+                      onClick={() => this.backToUserList()}
+                    >
                       <FormattedMessage
                         id="xpack.security.management.users.editUser.cancelButtonLabel"
                         defaultMessage="Cancel"

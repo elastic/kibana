@@ -153,9 +153,7 @@
             "min": 223
           }
         },
-        "versions": [
-          "6.3.1"
-        ]
+        "versions": ["6.3.1"]
       },
       "status": "yellow",
       "timestamp": 1532386499084
@@ -297,9 +295,7 @@
           },
           "audit": {
             "enabled": false,
-            "outputs": [
-              "logfile"
-            ]
+            "outputs": ["logfile"]
           },
           "available": false,
           "enabled": true,

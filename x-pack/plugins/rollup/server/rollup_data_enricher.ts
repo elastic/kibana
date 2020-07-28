@@ -18,7 +18,7 @@ export const rollupDataEnricher = async (indicesList: Index[], callWithRequest: 
 
   try {
     const rollupJobData = await callWithRequest('transport.request', params);
-    return indicesList.map(index => {
+    return indicesList.map((index) => {
       const isRollupIndex = !!rollupJobData[index.name];
       return {
         ...index,

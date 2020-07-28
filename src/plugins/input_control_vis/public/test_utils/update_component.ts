@@ -25,7 +25,7 @@ export const updateComponent = async (
     | ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>
 ) => {
   // Ensure all promises resolve
-  await new Promise(resolve => process.nextTick(resolve));
+  await new Promise((resolve) => process.nextTick(resolve));
   // Ensure the state changes are reflected
   component.update();
 };

@@ -187,58 +187,24 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
           We checked the cluster settings and found that 
           <EuiCode>
             <EuiCodeBlockImpl
-              fontSize="s"
               inline={true}
-              isCopyable={false}
-              paddingSize="l"
-              transparentBackground={false}
-              whiteSpace="pre-wrap"
             >
-              <Portal
-                containerInfo={
-                  <div>
-                    xpack.monitoring.collection.enabled
-                  </div>
-                }
-              >
-                xpack.monitoring.collection.enabled
-              </Portal>
-              <span
-                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                style={Object {}}
-              >
-                <code
-                  className="euiCodeBlock__code"
-                />
+              <span>
+                <code>
+                  xpack.monitoring.collection.enabled
+                </code>
               </span>
             </EuiCodeBlockImpl>
           </EuiCode>
            is set to 
           <EuiCode>
             <EuiCodeBlockImpl
-              fontSize="s"
               inline={true}
-              isCopyable={false}
-              paddingSize="l"
-              transparentBackground={false}
-              whiteSpace="pre-wrap"
             >
-              <Portal
-                containerInfo={
-                  <div>
-                    -1
-                  </div>
-                }
-              >
-                -1
-              </Portal>
-              <span
-                className="euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge euiCodeBlock--inline"
-                style={Object {}}
-              >
-                <code
-                  className="euiCodeBlock__code"
-                />
+              <span>
+                <code>
+                  -1
+                </code>
               </span>
             </EuiCodeBlockImpl>
           </EuiCode>

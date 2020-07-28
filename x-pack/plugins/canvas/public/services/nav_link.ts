@@ -8,15 +8,15 @@ import { CanvasServiceFactory } from '.';
 import { SESSIONSTORAGE_LASTPATH } from '../../common/lib/constants';
 import { getSessionStorage } from '../lib/storage';
 
-interface NavLinkService {
+export interface NavLinkService {
   updatePath: (path: string) => void;
 }
 
 export const navLinkServiceFactory: CanvasServiceFactory<NavLinkService> = (
   coreSetup,
-  coreStart,
-  setupPlugins,
-  startPlugins,
+  _coreStart,
+  _setupPlugins,
+  _startPlugins,
   appUpdater
 ) => {
   return {
@@ -25,7 +25,7 @@ export const navLinkServiceFactory: CanvasServiceFactory<NavLinkService> = (
         defaultPath: `#${path}`,
       }));
 
-      getSessionStorage().set(SESSIONSTORAGE_LASTPATH, path);
+      getSessionStorage().set(`${SESSIONSTORAGE_LASTPATH}:${coreSetup.http.basePath.get()}`, path);
     },
   };
 };

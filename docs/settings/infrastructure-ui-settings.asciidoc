@@ -1,6 +1,6 @@
 [role="xpack"]
 [[infrastructure-ui-settings-kb]]
-=== Metrics settings in Kibana
+=== Metrics settings in {kib}
 ++++
 <titleabbrev>Metrics settings</titleabbrev>
 ++++

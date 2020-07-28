@@ -110,13 +110,13 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
         const allFeatures = features.getFeatures();
 
-        const isRegisteredApp = allFeatures.some(feature => feature.app.includes(appId));
+        const isRegisteredApp = allFeatures.some((feature) => feature.app.includes(appId));
         if (isRegisteredApp) {
           const enabledFeatures = allFeatures.filter(
-            feature => !space.disabledFeatures.includes(feature.id)
+            (feature) => !space.disabledFeatures.includes(feature.id)
           );
 
-          const isAvailableInSpace = enabledFeatures.some(feature => feature.app.includes(appId));
+          const isAvailableInSpace = enabledFeatures.some((feature) => feature.app.includes(appId));
 
           if (!isAvailableInSpace) {
             log.debug(`App ${appId} is not enabled within space "${spaceId}".`);

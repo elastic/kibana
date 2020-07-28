@@ -30,6 +30,7 @@ export interface SnapshotDetails {
   versionId: number;
   version: string;
   indices: string[];
+  dataStreams: string[];
   includeGlobalState: boolean;
   state: string;
   /** e.g. '2019-04-05T21:56:40.438Z' */
@@ -52,6 +53,7 @@ export interface SnapshotDetailsEs {
   version_id: number;
   version: string;
   indices: string[];
+  data_streams?: string[];
   include_global_state: boolean;
   state: string;
   /** e.g. '2019-04-05T21:56:40.438Z' */

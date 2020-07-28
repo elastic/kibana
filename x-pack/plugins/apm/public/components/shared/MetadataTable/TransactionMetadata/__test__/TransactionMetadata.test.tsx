@@ -10,12 +10,12 @@ import { render } from '@testing-library/react';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import {
   expectTextsInDocument,
-  expectTextsNotInDocument
+  expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
 import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = {
-  wrapper: MockApmPluginContextWrapper
+  wrapper: MockApmPluginContextWrapper,
 };
 
 function getTransaction() {
@@ -34,13 +34,13 @@ function getTransaction() {
       id: '7efbc7056b746fcb',
       notIncluded: 'transaction not included value',
       custom: {
-        someKey: 'custom value'
+        someKey: 'custom value',
       },
       message: {
         age: { ms: 1577958057123 },
-        queue: { name: 'queue name' }
-      }
-    }
+        queue: { name: 'queue name' },
+      },
+    },
   } as unknown) as Transaction;
 }
 
@@ -64,7 +64,7 @@ describe('TransactionMetadata', () => {
       'URL',
       'User',
       'Custom',
-      'Message'
+      'Message',
     ]);
   });
 
@@ -88,13 +88,13 @@ describe('TransactionMetadata', () => {
       'user.someKey',
       'transaction.custom.someKey',
       'transaction.message.age.ms',
-      'transaction.message.queue.name'
+      'transaction.message.queue.name',
     ]);
 
     // excluded keys
     expectTextsNotInDocument(output, [
       'notIncluded',
-      'transaction.notIncluded'
+      'transaction.notIncluded',
     ]);
   });
 
@@ -118,13 +118,13 @@ describe('TransactionMetadata', () => {
       'user value',
       'custom value',
       '1577958057123',
-      'queue name'
+      'queue name',
     ]);
 
     // excluded values
     expectTextsNotInDocument(output, [
       'not included value',
-      'transaction not included value'
+      'transaction not included value',
     ]);
   });
 
@@ -148,7 +148,7 @@ describe('TransactionMetadata', () => {
       'Agent',
       'URL',
       'Custom',
-      'Message'
+      'Message',
     ]);
   });
 });

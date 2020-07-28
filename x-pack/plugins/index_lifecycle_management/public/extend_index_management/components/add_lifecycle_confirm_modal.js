@@ -23,7 +23,6 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
-import { BASE_PATH } from '../../../common/constants';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
@@ -82,7 +81,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
       );
     }
   };
-  renderAliasFormElement = selectedPolicy => {
+  renderAliasFormElement = (selectedPolicy) => {
     const { selectedAlias } = this.state;
     const { index } = this.props;
     const showAliasSelect =
@@ -118,7 +117,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
         </Fragment>
       );
     }
-    const aliasOptions = aliases.map(alias => {
+    const aliasOptions = aliases.map((alias) => {
       return {
         text: alias,
         value: alias,
@@ -145,7 +144,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
         <EuiSelect
           options={aliasOptions}
           value={selectedAlias}
-          onChange={e => {
+          onChange={(e) => {
             this.setState({ selectedAlias: e.target.value });
           }}
         />
@@ -155,7 +154,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
   renderForm() {
     const { policies, selectedPolicyName, policyError } = this.state;
     const selectedPolicy = selectedPolicyName
-      ? policies.find(policy => policy.name === selectedPolicyName)
+      ? policies.find((policy) => policy.name === selectedPolicyName)
       : null;
 
     const options = policies.map(({ name }) => {
@@ -188,7 +187,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
           <EuiSelect
             options={options}
             value={selectedPolicyName}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({ policyError: null, selectedPolicyName: e.target.value });
             }}
           />
@@ -216,7 +215,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
   }
   render() {
     const { policies } = this.state;
-    const { indexName, closeModal } = this.props;
+    const { indexName, closeModal, getUrlForApp } = this.props;
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
@@ -246,7 +245,11 @@ export class AddLifecyclePolicyConfirmModal extends Component {
                 color="warning"
               >
                 <p>
-                  <EuiLink href={`#${BASE_PATH}policies/edit`}>
+                  <EuiLink
+                    href={getUrlForApp('management', {
+                      path: `data/index_lifecycle_management/policies/edit`,
+                    })}
+                  >
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
                       defaultMessage="Define lifecycle policy"

@@ -28,6 +28,7 @@ import { ActionInternal, Action, ActionDefinition, ActionContext } from '../acti
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
+import { UiActionsExecutionService } from './ui_actions_execution_service';
 
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
@@ -40,6 +41,7 @@ export interface UiActionsServiceParams {
 }
 
 export class UiActionsService {
+  public readonly executionService = new UiActionsExecutionService();
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
@@ -108,7 +110,7 @@ export class UiActionsService {
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    if (!actionIds!.find(id => id === actionId)) {
+    if (!actionIds!.find((id) => id === actionId)) {
       this.triggerToActions.set(triggerId, [...actionIds!, actionId]);
     }
   };
@@ -126,7 +128,7 @@ export class UiActionsService {
 
     this.triggerToActions.set(
       triggerId,
-      actionIds!.filter(id => id !== actionId)
+      actionIds!.filter((id) => id !== actionId)
     );
   };
 
@@ -165,7 +167,7 @@ export class UiActionsService {
     const actionIds = this.triggerToActions.get(triggerId);
 
     const actions = actionIds!
-      .map(actionId => this.actions.get(actionId) as ActionInternal)
+      .map((actionId) => this.actions.get(actionId) as ActionInternal)
       .filter(Boolean);
 
     return actions as Array<Action<TriggerContext<T>>>;
@@ -176,7 +178,7 @@ export class UiActionsService {
     context: TriggerContextMapping[T]
   ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
     const actions = this.getTriggerActions!(triggerId);
-    const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
+    const isCompatibles = await Promise.all(actions.map((action) => action.isCompatible(context)));
     return actions.reduce(
       (acc: Array<Action<TriggerContextMapping[T]>>, action, i) =>
         isCompatibles[i] ? [...acc, action] : acc,
@@ -220,7 +222,6 @@ export class UiActionsService {
     for (const [key, value] of this.actions.entries()) actions.set(key, value);
     for (const [key, value] of this.triggerToActions.entries())
       triggerToActions.set(key, [...value]);
-
     return new UiActionsService({ triggers, actions, triggerToActions });
   };
 }

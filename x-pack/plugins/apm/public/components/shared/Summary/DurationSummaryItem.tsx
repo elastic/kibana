@@ -15,16 +15,12 @@ interface Props {
   parentType: 'trace' | 'transaction';
 }
 
-const DurationSummaryItem = ({
-  duration,
-  totalDuration,
-  parentType
-}: Props) => {
+function DurationSummaryItem({ duration, totalDuration, parentType }: Props) {
   const calculatedTotalDuration =
     totalDuration === undefined ? duration : totalDuration;
 
   const label = i18n.translate('xpack.apm.transactionDurationLabel', {
-    defaultMessage: 'Duration'
+    defaultMessage: 'Duration',
   });
   return (
     <>
@@ -41,6 +37,6 @@ const DurationSummaryItem = ({
       </EuiText>
     </>
   );
-};
+}
 
 export { DurationSummaryItem };

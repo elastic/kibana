@@ -95,7 +95,7 @@ export class XPackInfoLicense {
    * @returns {boolean}
    */
   isBasic() {
-    return this.isActiveLicense(mode => mode === 'basic');
+    return this.isActiveLicense((mode) => mode === 'basic');
   }
 
   /**
@@ -106,6 +106,6 @@ export class XPackInfoLicense {
    * @returns {boolean}
    */
   isNotBasic() {
-    return this.isActiveLicense(mode => mode !== 'basic');
+    return this.isActiveLicense((mode) => mode !== 'basic');
   }
 }

@@ -71,6 +71,10 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.number,
     template: '{{value}} seconds',
   },
+  ['rdsLatency']: {
+    formatter: InfraFormatterType.number,
+    template: '{{value}} ms',
+  },
 };
 
 export const createInventoryMetricFormatter = (metric: SnapshotMetricInput) => (

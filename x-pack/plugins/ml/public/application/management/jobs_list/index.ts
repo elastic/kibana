@@ -11,12 +11,13 @@ import { ManagementAppMountParams } from '../../../../../../../src/plugins/manag
 import { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
+import { setDependencyCache, clearCache } from '../../util/dependency_cache';
 
 const renderApp = (element: HTMLElement, coreStart: CoreStart) => {
-  const I18nContext = coreStart.i18n.Context;
-  ReactDOM.render(React.createElement(JobsListPage, { I18nContext }), element);
+  ReactDOM.render(React.createElement(JobsListPage, { coreStart }), element);
   return () => {
     unmountComponentAtNode(element);
+    clearCache();
   };
 };
 
@@ -25,6 +26,15 @@ export async function mountApp(
   params: ManagementAppMountParams
 ) {
   const [coreStart] = await core.getStartServices();
+
+  setDependencyCache({
+    docLinks: coreStart.docLinks!,
+    basePath: coreStart.http.basePath,
+    http: coreStart.http,
+    i18n: coreStart.i18n,
+  });
+
   params.setBreadcrumbs(getJobsListBreadcrumbs());
+
   return renderApp(params.element, coreStart);
 }

@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { APICaller } from 'src/core/server';
+import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -25,7 +25,7 @@ function formatPolicies(policiesMap: any): any {
   }, []);
 }
 
-async function fetchPolicies(callAsCurrentUser: APICaller): Promise<any> {
+async function fetchPolicies(callAsCurrentUser: LegacyAPICaller): Promise<any> {
   const params = {
     method: 'GET',
     path: '/_ilm/policy',
@@ -36,7 +36,7 @@ async function fetchPolicies(callAsCurrentUser: APICaller): Promise<any> {
   return await callAsCurrentUser('transport.request', params);
 }
 
-async function addLinkedIndices(callAsCurrentUser: APICaller, policiesMap: any) {
+async function addLinkedIndices(callAsCurrentUser: LegacyAPICaller, policiesMap: any) {
   if (policiesMap.status === 404) {
     return policiesMap;
   }
@@ -66,7 +66,7 @@ export function registerFetchRoute({ router, license, lib }: RouteDependencies) 
     license.guardApiRoute(async (context, request, response) => {
       const query = request.query as typeof querySchema.type;
       const { withIndices } = query;
-      const { callAsCurrentUser } = context.core.elasticsearch.dataClient;
+      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
 
       try {
         const policiesMap = await fetchPolicies(callAsCurrentUser);

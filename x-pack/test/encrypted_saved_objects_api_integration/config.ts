@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
+import path from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
 
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
     testFiles: [require.resolve('./tests')],
@@ -18,12 +18,16 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'X-Pack Encrypted Saved Objects API Integration Tests',
     },
+    esArchiver: {
+      directory: path.join(__dirname, 'fixtures', 'es_archiver'),
+    },
     esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        `--plugin-path=${resolve(__dirname, './fixtures/api_consumer_plugin')}`,
+        '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
+        `--plugin-path=${path.resolve(__dirname, './fixtures/api_consumer_plugin')}`,
       ],
     },
   };

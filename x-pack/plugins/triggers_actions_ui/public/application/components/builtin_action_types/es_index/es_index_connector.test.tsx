@@ -88,6 +88,7 @@ describe('IndexActionConnectorFields renders', () => {
         editActionSecrets={() => {}}
         http={deps!.http}
         docLinks={deps!.docLinks}
+        readOnly={false}
       />
     );
 
@@ -105,10 +106,7 @@ describe('IndexActionConnectorFields renders', () => {
     const indexComboBox = wrapper.find('#indexConnectorSelectSearchBox');
     indexComboBox.first().simulate('click');
     const event = { target: { value: 'indexPattern1' } };
-    indexComboBox
-      .find('input')
-      .first()
-      .simulate('change', event);
+    indexComboBox.find('input').first().simulate('change', event);
 
     const indexSearchBoxValueBeforeEnterData = wrapper.find(
       '[data-test-subj="comboBoxSearchInput"]'

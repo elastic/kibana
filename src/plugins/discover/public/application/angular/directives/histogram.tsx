@@ -40,12 +40,13 @@ import {
   ElementClickListener,
   XYChartElementEvent,
   BrushEndListener,
+  Theme,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
 import { getServices } from '../../../kibana_services';
 import { Chart as IChart } from '../helpers/point_series';
 
@@ -56,6 +57,7 @@ export interface DiscoverHistogramProps {
 
 interface DiscoverHistogramState {
   chartsTheme: EuiChartThemeType['theme'];
+  chartsBaseTheme: Theme;
 }
 
 function findIntervalFromDuration(
@@ -66,10 +68,7 @@ function findIntervalFromDuration(
 ) {
   const date = moment.tz(dateValue, timeZone);
   const startOfDate = moment.tz(date, timeZone).startOf(esUnit);
-  const endOfDate = moment
-    .tz(date, timeZone)
-    .startOf(esUnit)
-    .add(esValue, esUnit);
+  const endOfDate = moment.tz(date, timeZone).startOf(esUnit).add(esValue, esUnit);
   return endOfDate.valueOf() - startOfDate.valueOf();
 }
 
@@ -129,18 +128,21 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
   private subscription?: Subscription;
   public state = {
     chartsTheme: getServices().theme.chartsDefaultTheme,
+    chartsBaseTheme: getServices().theme.chartsDefaultBaseTheme,
   };
 
   componentDidMount() {
-    this.subscription = getServices().theme.chartsTheme$.subscribe(
-      (chartsTheme: EuiChartThemeType['theme']) => this.setState({ chartsTheme })
+    this.subscription = combineLatest(
+      getServices().theme.chartsTheme$,
+      getServices().theme.chartsBaseTheme$
+    ).subscribe(([chartsTheme, chartsBaseTheme]) =>
+      this.setState({ chartsTheme, chartsBaseTheme })
     );
   }
 
   componentWillUnmount() {
     if (this.subscription) {
       this.subscription.unsubscribe();
-      this.subscription = undefined;
     }
   }
 
@@ -207,7 +209,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const uiSettings = getServices().uiSettings;
     const timeZone = getTimezone(uiSettings);
     const { chartData } = this.props;
-    const { chartsTheme } = this.state;
+    const { chartsTheme, chartsBaseTheme } = this.state;
 
     if (!chartData) {
       return null;
@@ -242,10 +244,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if
     // the annotation is within this range; if so, the line annotation uses the domainEnd as its value
     const now = moment();
-    const isAnnotationAtEdge =
-      moment(domainEnd)
-        .add(60000)
-        .isAfter(now) && now.isAfter(domainEnd);
+    const isAnnotationAtEdge = moment(domainEnd).add(60000).isAfter(now) && now.isAfter(domainEnd);
     const lineAnnotationValue = isAnnotationAtEdge ? domainEnd : now;
 
     const lineAnnotationData = [
@@ -299,6 +298,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           onElementClick={this.onElementClick(xInterval)}
           tooltip={tooltipProps}
           theme={chartsTheme}
+          baseTheme={chartsBaseTheme}
         />
         <Axis
           id="discover-histogram-left-axis"
@@ -329,6 +329,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
         />
         <HistogramBarSeries
           id="discover-histogram"
+          minBarHeight={2}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor="x"

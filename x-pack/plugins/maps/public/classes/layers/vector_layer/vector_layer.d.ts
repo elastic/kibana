@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Feature, GeoJsonProperties } from 'geojson';
 import { AbstractLayer } from '../layer';
 import { IVectorSource } from '../../sources/vector_source';
 import {
@@ -16,7 +17,8 @@ import { ILayer } from '../layer';
 import { IJoin } from '../../joins/join';
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IField } from '../../fields/field';
-import { SyncContext } from '../../../actions/map_actions';
+import { DataRequestContext } from '../../../actions';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export type VectorLayerArguments = {
   source: IVectorSource;
@@ -27,8 +29,13 @@ export type VectorLayerArguments = {
 export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
+  getJoins(): IJoin[];
   getValidJoins(): IJoin[];
   getSource(): IVectorSource;
+  getStyle(): IVectorStyle;
+  getFeatureById(id: string | number): Feature | null;
+  getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  hasJoins(): boolean;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -44,14 +51,15 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getLayerTypeIconName(): string;
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
+  getJoins(): IJoin[];
   getValidJoins(): IJoin[];
   _syncSourceStyleMeta(
-    syncContext: SyncContext,
+    syncContext: DataRequestContext,
     source: IVectorSource,
     style: IVectorStyle
   ): Promise<void>;
   _syncSourceFormatters(
-    syncContext: SyncContext,
+    syncContext: DataRequestContext,
     source: IVectorSource,
     style: IVectorStyle
   ): Promise<void>;
@@ -61,10 +69,18 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     source: IVectorSource,
     style: IVectorStyle
   ): VectorSourceRequestMeta;
-  _syncData(syncContext: SyncContext, source: IVectorSource, style: IVectorStyle): Promise<void>;
+  _syncData(
+    syncContext: DataRequestContext,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): Promise<void>;
   ownsMbSourceId(sourceId: string): boolean;
   ownsMbLayerId(sourceId: string): boolean;
   _setMbPointsProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   _setMbLinePolygonProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   getSource(): IVectorSource;
+  getStyle(): IVectorStyle;
+  getFeatureById(id: string | number): Feature | null;
+  getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  hasJoins(): boolean;
 }

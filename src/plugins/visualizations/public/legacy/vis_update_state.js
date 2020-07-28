@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 
 /**
@@ -31,7 +32,7 @@ function convertHeatmapLabelColor(visState) {
   if (visState.type === 'heatmap' && visState.params && !hasOverwriteColorParam) {
     const showLabels = _.get(visState, 'params.valueAxes[0].labels.show', false);
     const color = _.get(visState, 'params.valueAxes[0].labels.color', '#555');
-    _.set(visState, 'params.valueAxes[0].labels.overwriteColor', showLabels && color !== '#555');
+    set(visState, 'params.valueAxes[0].labels.overwriteColor', showLabels && color !== '#555');
   }
 }
 
@@ -42,7 +43,7 @@ function convertHeatmapLabelColor(visState) {
  */
 function convertTermAggregation(visState) {
   if (visState.aggs) {
-    visState.aggs.forEach(agg => {
+    visState.aggs.forEach((agg) => {
       if (agg.type === 'terms' && agg.params && agg.params.orderBy === '_term') {
         agg.params.orderBy = '_key';
       }
@@ -60,7 +61,7 @@ function convertPropertyNames(visState) {
 
 function convertDateHistogramScaleMetrics(visState) {
   if (visState.aggs) {
-    visState.aggs.forEach(agg => {
+    visState.aggs.forEach((agg) => {
       if (
         agg.type === 'date_histogram' &&
         agg.params &&
@@ -153,7 +154,7 @@ function convertSeriesParams(visState) {
  * It will return the updated version as Kibana would expect it. It does not modify
  * the passed state.
  */
-export const updateOldState = visState => {
+export const updateOldState = (visState) => {
   if (!visState) return visState;
   const newState = _.cloneDeep(visState);
 
@@ -167,7 +168,7 @@ export const updateOldState = visState => {
 
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;
-    _.set(newState, 'gauge.style.fontSize', visState.fontSize);
+    set(newState, 'gauge.style.fontSize', visState.fontSize);
   }
 
   // update old metric to the new one

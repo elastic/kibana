@@ -80,7 +80,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentConfigs = [],
 }) => {
-  const configDefaultValue = agentConfigs.find(config => config.is_default)?.id;
+  const configDefaultValue = agentConfigs.find((config) => config.is_default)?.id;
   const form = useCreateApiKeyForm(configDefaultValue, () => {
     onClose();
   });
@@ -110,7 +110,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
             required={true}
             defaultValue={configDefaultValue}
             {...form.configIdInput.props}
-            options={agentConfigs.map(config => ({ value: config.id, text: config.name }))}
+            options={agentConfigs.map((config) => ({ value: config.id, text: config.name }))}
           />
         </EuiFormRow>
         <EuiButton type="submit" fill isLoading={form.isLoading}>
@@ -139,7 +139,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
                 id="xpack.ingestManager.newEnrollmentKey.cancelButtonLabel"
                 defaultMessage="Cancel"

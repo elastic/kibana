@@ -10,7 +10,7 @@ export function getCapabilitiesForRollupIndices(indices: { [key: string]: any })
   const indexNames = Object.keys(indices);
   const capabilities = {} as { [key: string]: any };
 
-  indexNames.forEach(index => {
+  indexNames.forEach((index) => {
     try {
       capabilities[index] = mergeJobConfigurations(indices[index].rollup_jobs);
     } catch (e) {

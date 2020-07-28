@@ -18,6 +18,7 @@ import {
   AgentEventSOAttributes,
   AgentSOAttributes,
   AgentActionSOAttributes,
+  FullAgentConfig,
 } from '../../types';
 import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -25,6 +26,7 @@ import {
   AGENT_ACTION_SAVED_OBJECT_TYPE,
 } from '../../constants';
 import { getAgentActionByIds } from './actions';
+import { forceUnenrollAgent } from './unenroll';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
 
@@ -40,8 +42,8 @@ export async function acknowledgeAgentActions(
   }
 
   const actionIds = agentEvents
-    .map(event => event.action_id)
-    .filter(actionId => actionId !== undefined) as string[];
+    .map((event) => event.action_id)
+    .filter((actionId) => actionId !== undefined) as string[];
 
   let actions;
   try {
@@ -62,18 +64,24 @@ export async function acknowledgeAgentActions(
   if (actions.length === 0) {
     return [];
   }
-  const configRevision = getLatestConfigRevison(agent, actions);
+
+  const isAgentUnenrolled = actions.some((action) => action.type === 'UNENROLL');
+  if (isAgentUnenrolled) {
+    await forceUnenrollAgent(soClient, agent.id);
+  }
+
+  const config = getLatestConfigIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    buildUpdateAgentConfigRevision(agent.id, configRevision),
+    ...(config ? [buildUpdateAgentConfig(agent.id, config)] : []),
     ...buildUpdateAgentActionSentAt(actionIds),
   ]);
 
   return actions;
 }
 
-function getLatestConfigRevison(agent: Agent, actions: AgentAction[]) {
-  return actions.reduce((acc, action) => {
+function getLatestConfigIfUpdated(agent: Agent, actions: AgentAction[]) {
+  return actions.reduce<null | FullAgentConfig>((acc, action) => {
     if (action.type !== 'CONFIG_CHANGE') {
       return acc;
     }
@@ -83,16 +91,27 @@ function getLatestConfigRevison(agent: Agent, actions: AgentAction[]) {
       return acc;
     }
 
-    return data?.config?.revision > acc ? data?.config?.revision : acc;
-  }, agent.config_revision || 0);
+    const currentRevision = (acc && acc.revision) || agent.config_revision || 0;
+
+    return data?.config?.revision > currentRevision ? data?.config : acc;
+  }, null);
 }
 
-function buildUpdateAgentConfigRevision(agentId: string, configRevision: number) {
+function buildUpdateAgentConfig(agentId: string, config: FullAgentConfig) {
+  const packages = config.inputs.reduce<string[]>((acc, input) => {
+    const packageName = input.meta?.package?.name;
+    if (packageName && acc.indexOf(packageName) < 0) {
+      return [packageName, ...acc];
+    }
+    return acc;
+  }, []);
+
   return {
     type: AGENT_SAVED_OBJECT_TYPE,
     id: agentId,
     attributes: {
-      config_revision: configRevision,
+      config_revision: config.revision,
+      packages,
     },
   };
 }
@@ -101,7 +120,7 @@ function buildUpdateAgentActionSentAt(
   actionsIds: string[],
   sentAt: string = new Date().toISOString()
 ) {
-  return actionsIds.map(actionId => ({
+  return actionsIds.map((actionId) => ({
     type: AGENT_ACTION_SAVED_OBJECT_TYPE,
     id: actionId,
     attributes: {
@@ -119,7 +138,7 @@ export async function saveAgentEvents(
   events: AgentEvent[]
 ): Promise<SavedObjectsBulkResponse<AgentEventSOAttributes>> {
   const objects: Array<SavedObjectsBulkCreateObject<AgentEventSOAttributes>> = events.map(
-    eventData => {
+    (eventData) => {
       return {
         attributes: {
           ...eventData,
@@ -140,9 +159,9 @@ export interface AcksService {
     actionIds: AgentEvent[]
   ) => Promise<AgentAction[]>;
 
-  getAgentByAccessAPIKeyId: (
+  authenticateAgentWithAccessToken: (
     soClient: SavedObjectsClientContract,
-    accessAPIKeyId: string
+    request: KibanaRequest
   ) => Promise<Agent>;
 
   getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;

@@ -116,16 +116,7 @@ export const validateNumTopFeatureImportanceValues = (
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const {
-    jobIdEmpty,
-    jobIdValid,
-    jobIdExists,
-    jobType,
-    createIndexPattern,
-    excludes,
-    maxDistinctValuesError,
-    requiredFieldsError,
-  } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern, includes } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -144,7 +135,7 @@ export const validateAdvancedEditor = (state: State): State => {
       sourceIndexNameValid = !sourceIndex.includes(',');
     }
     if (Array.isArray(sourceIndex)) {
-      sourceIndexNameValid = !sourceIndex.some(d => d?.includes(','));
+      sourceIndexNameValid = !sourceIndex.some((d) => d?.includes(','));
     }
   }
 
@@ -153,6 +144,11 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
+
+  const resultsFieldEmptyString =
+    typeof jobConfig?.dest?.results_field === 'string' &&
+    jobConfig?.dest?.results_field.trim() === '';
+
   const mml = jobConfig.model_memory_limit;
   const modelMemoryLimitEmpty = mml === '' || mml === undefined;
   if (!modelMemoryLimitEmpty && mml !== undefined) {
@@ -161,7 +157,7 @@ export const validateAdvancedEditor = (state: State): State => {
   }
 
   let dependentVariableEmpty = false;
-  let excludesValid = true;
+  let includesValid = true;
   let trainingPercentValid = true;
   let numTopFeatureImportanceValuesValid = true;
 
@@ -179,14 +175,19 @@ export const validateAdvancedEditor = (state: State): State => {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
     dependentVariableEmpty = dependentVariableName === '';
 
-    if (!dependentVariableEmpty && excludes.includes(dependentVariableName)) {
-      excludesValid = false;
+    if (
+      !dependentVariableEmpty &&
+      includes !== undefined &&
+      includes.length > 0 &&
+      !includes.includes(dependentVariableName)
+    ) {
+      includesValid = false;
 
       state.advancedEditorMessages.push({
         error: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.excludesInvalid',
+          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.includesInvalid',
           {
-            defaultMessage: 'The dependent variable cannot be excluded.',
+            defaultMessage: 'The dependent variable must be included.',
           }
         ),
         message: '',
@@ -296,6 +297,18 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  if (resultsFieldEmptyString) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.resultsFieldEmptyString',
+        {
+          defaultMessage: 'The results field must not be an empty string.',
+        }
+      ),
+      message: '',
+    });
+  }
+
   if (dependentVariableEmpty) {
     state.advancedEditorMessages.push({
       error: i18n.translate(
@@ -330,9 +343,7 @@ export const validateAdvancedEditor = (state: State): State => {
   state.form.destinationIndexPatternTitleExists = destinationIndexPatternTitleExists;
 
   state.isValid =
-    maxDistinctValuesError === undefined &&
-    requiredFieldsError === undefined &&
-    excludesValid &&
+    includesValid &&
     trainingPercentValid &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
@@ -342,6 +353,7 @@ export const validateAdvancedEditor = (state: State): State => {
     sourceIndexNameValid &&
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
+    !resultsFieldEmptyString &&
     !dependentVariableEmpty &&
     !modelMemoryLimitEmpty &&
     numTopFeatureImportanceValuesValid &&
@@ -396,10 +408,8 @@ const validateForm = (state: State): State => {
     destinationIndexPatternTitleExists,
     createIndexPattern,
     dependentVariable,
-    maxDistinctValuesError,
     modelMemoryLimit,
     numTopFeatureImportanceValuesValid,
-    requiredFieldsError,
   } = state.form;
   const { estimatedModelMemoryLimit } = state;
 
@@ -414,8 +424,6 @@ const validateForm = (state: State): State => {
   state.form.modelMemoryLimitValidationResult = mmlValidationResult;
 
   state.isValid =
-    maxDistinctValuesError === undefined &&
-    requiredFieldsError === undefined &&
     !jobTypeEmpty &&
     !mmlValidationResult &&
     !jobIdEmpty &&
@@ -441,12 +449,6 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.RESET_REQUEST_MESSAGES:
       return { ...state, requestMessages: [] };
-
-    case ACTION.CLOSE_MODAL:
-      return { ...state, isModalVisible: false };
-
-    case ACTION.OPEN_MODAL:
-      return { ...state, isModalVisible: true };
 
     case ACTION.RESET_ADVANCED_EDITOR_MESSAGES:
       return { ...state, advancedEditorMessages: [] };
@@ -478,9 +480,6 @@ export function reducer(state: State, action: Action): State {
 
       // update state attributes which are derived from other state attributes.
       if (action.payload.destinationIndex !== undefined) {
-        newFormState.destinationIndexNameExists = state.indexNames.some(
-          name => newFormState.destinationIndex === name
-        );
         newFormState.destinationIndexNameEmpty = newFormState.destinationIndex === '';
         newFormState.destinationIndexNameValid = isValidIndexName(newFormState.destinationIndex);
         newFormState.destinationIndexPatternTitleExists =
@@ -488,7 +487,7 @@ export function reducer(state: State, action: Action): State {
       }
 
       if (action.payload.jobId !== undefined) {
-        newFormState.jobIdExists = state.jobIds.some(id => newFormState.jobId === id);
+        newFormState.jobIdExists = state.jobIds.some((id) => newFormState.jobId === id);
         newFormState.jobIdEmpty = newFormState.jobId === '';
         newFormState.jobIdValid = isJobIdValid(newFormState.jobId);
         newFormState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(
@@ -512,14 +511,6 @@ export function reducer(state: State, action: Action): State {
         ? validateAdvancedEditor({ ...state, form: newFormState })
         : validateForm({ ...state, form: newFormState });
 
-    case ACTION.SET_INDEX_NAMES: {
-      const newState = { ...state, indexNames: action.indexNames };
-      newState.form.destinationIndexNameExists = newState.indexNames.some(
-        name => newState.form.destinationIndex === name
-      );
-      return newState;
-    }
-
     case ACTION.SET_INDEX_PATTERN_TITLES: {
       const newState = {
         ...state,
@@ -536,18 +527,12 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SET_IS_JOB_STARTED:
       return { ...state, isJobStarted: action.isJobStarted };
 
-    case ACTION.SET_IS_MODAL_BUTTON_DISABLED:
-      return { ...state, isModalButtonDisabled: action.isModalButtonDisabled };
-
-    case ACTION.SET_IS_MODAL_VISIBLE:
-      return { ...state, isModalVisible: action.isModalVisible };
-
     case ACTION.SET_JOB_CONFIG:
       return validateAdvancedEditor({ ...state, jobConfig: action.payload });
 
     case ACTION.SET_JOB_IDS: {
       const newState = { ...state, jobIds: action.jobIds };
-      newState.form.jobIdExists = newState.jobIds.some(id => newState.form.jobId === id);
+      newState.form.jobIdExists = newState.jobIds.some((id) => newState.form.jobId === id);
       return newState;
     }
 

@@ -15,7 +15,7 @@ export const ErrableFormRow = ({ errorKey, isShowingErrors, errors, children, ..
       {...rest}
     >
       <Fragment>
-        {Children.map(children, child =>
+        {Children.map(children, (child) =>
           cloneElement(child, {
             isInvalid: isShowingErrors && errors[errorKey].length > 0,
           })

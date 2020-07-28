@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects([
@@ -30,8 +30,8 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('histogram agg onSearchRequestStart', function() {
-    before(async function() {
+  describe('histogram agg onSearchRequestStart', function () {
+    before(async function () {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickDataTable');
@@ -46,8 +46,8 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.selectField('machine.ram');
     });
 
-    describe('interval parameter uses autoBounds', function() {
-      it('should use provided value when number of generated buckets is less than histogram:maxBars', async function() {
+    describe('interval parameter uses autoBounds', function () {
+      it('should use provided value when number of generated buckets is less than histogram:maxBars', async function () {
         const providedInterval = 2400000000;
         log.debug(`Interval = ${providedInterval}`);
         await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
@@ -63,7 +63,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      it('should scale value to round number when number of generated buckets is greater than histogram:maxBars', async function() {
+      it('should scale value to round number when number of generated buckets is greater than histogram:maxBars', async function () {
         const providedInterval = 100;
         log.debug(`Interval = ${providedInterval}`);
         await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });

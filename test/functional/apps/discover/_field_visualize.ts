@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
@@ -33,7 +33,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover field visualize button', () => {
-    before(async function() {
+    before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 

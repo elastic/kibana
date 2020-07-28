@@ -82,22 +82,19 @@ export class SavedObjectsManagementPlugin
           'Import, export, and manage your saved searches, visualizations, and dashboards.',
       }),
       icon: 'savedObjectsApp',
-      path: '/app/kibana#/management/kibana/objects',
+      path: '/app/management/kibana/objects',
       showOnHomePage: true,
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    const kibanaSection = management.sections.getSection('kibana');
-    if (!kibanaSection) {
-      throw new Error('`kibana` management section not found.');
-    }
+    const kibanaSection = management.sections.section.kibana;
     kibanaSection.registerApp({
       id: 'objects',
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved Objects',
       }),
-      order: 10,
-      mount: async mountParams => {
+      order: 1,
+      mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section');
         return mountManagementSection({
           core,

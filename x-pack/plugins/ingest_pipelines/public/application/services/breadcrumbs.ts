@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { BASE_PATH } from '../../../common/constants';
 import { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
@@ -28,7 +27,7 @@ export class BreadcrumbService {
     create: [
       {
         text: homeBreadcrumbText,
-        href: `#${BASE_PATH}`,
+        href: `/`,
       },
       {
         text: i18n.translate('xpack.ingestPipelines.breadcrumb.createPipelineLabel', {
@@ -39,7 +38,7 @@ export class BreadcrumbService {
     edit: [
       {
         text: homeBreadcrumbText,
-        href: `#${BASE_PATH}`,
+        href: `/`,
       },
       {
         text: i18n.translate('xpack.ingestPipelines.breadcrumb.editPipelineLabel', {

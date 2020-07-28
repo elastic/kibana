@@ -217,7 +217,7 @@ async function getIndexPatternId(name) {
   const indexPatternSavedObjects = savedObjectSearch.savedObjects;
 
   if (indexPatternSavedObjects) {
-    const ip = indexPatternSavedObjects.find(i => i.attributes.title === name);
+    const ip = indexPatternSavedObjects.find((i) => i.attributes.title === name);
     return ip !== undefined ? ip.id : undefined;
   } else {
     return undefined;
@@ -239,7 +239,7 @@ export const getExistingIndexPatternNames = async () => {
       fields: ['id', 'title', 'type', 'fields'],
       perPage: 10000,
     })
-    .then(({ savedObjects }) => savedObjects.map(savedObject => savedObject.get('title')));
+    .then(({ savedObjects }) => savedObjects.map((savedObject) => savedObject.get('title')));
   return indexPatterns ? indexPatterns.map(({ name }) => name) : [];
 };
 

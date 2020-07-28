@@ -19,19 +19,13 @@
 
 import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES } from '../aggs';
-import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
+import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { TabbedResponseWriterOptions } from './types';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('TabbedAggResponseWriter class', () => {
-  beforeEach(() => {
-    mockDataServices();
-  });
-
   let responseWriter: TabbedAggResponseWriter;
 
   const typesRegistry = mockAggTypesRegistry();
-  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
   const splitAggConfig = [
     {
@@ -60,30 +54,29 @@ describe('TabbedAggResponseWriter class', () => {
   ];
 
   const createResponseWritter = (aggs: any[] = [], opts?: Partial<TabbedResponseWriterOptions>) => {
-    const field = {
-      name: 'geo.src',
-    };
+    const fields = [
+      {
+        name: 'geo.src',
+      },
+      {
+        name: 'machine.os.raw',
+      },
+    ];
 
     const indexPattern = {
       id: '1234',
       title: 'logstash-*',
       fields: {
-        getByName: () => field,
-        filter: () => [field],
+        getByName: (name: string) => fields.find((f) => f.name === name),
+        filter: () => fields,
       },
     } as any;
 
-    return new TabbedAggResponseWriter(
-      new AggConfigs(indexPattern, aggs, {
-        typesRegistry,
-        fieldFormats,
-      }),
-      {
-        metricsAtAllLevels: false,
-        partialRows: false,
-        ...opts,
-      }
-    );
+    return new TabbedAggResponseWriter(new AggConfigs(indexPattern, aggs, { typesRegistry }), {
+      metricsAtAllLevels: false,
+      partialRows: false,
+      ...opts,
+    });
   };
 
   describe('Constructor', () => {

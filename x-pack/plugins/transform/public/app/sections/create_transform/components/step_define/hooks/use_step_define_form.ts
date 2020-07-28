@@ -73,7 +73,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
   }, [
     JSON.stringify(advancedPivotEditor.state),
     JSON.stringify(advancedSourceEditor.state),
-    JSON.stringify(pivotConfig.state),
+    pivotConfig.state,
     JSON.stringify(searchBar.state),
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);

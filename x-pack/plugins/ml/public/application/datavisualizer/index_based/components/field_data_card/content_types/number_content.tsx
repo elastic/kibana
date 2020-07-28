@@ -145,7 +145,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiButtonGroup
         options={detailsOptions}
         idSelected={detailsMode}
-        onChange={optionId => setDetailsMode(optionId as DETAILS_MODE)}
+        onChange={(optionId) => setDetailsMode(optionId as DETAILS_MODE)}
         aria-label={i18n.translate(
           'xpack.ml.fieldDataCard.cardNumber.selectMetricDetailsDisplayAriaLabel',
           {

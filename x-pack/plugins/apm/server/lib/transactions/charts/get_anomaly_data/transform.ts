@@ -18,7 +18,7 @@ function getBucket(
     x: bucket.key,
     anomalyScore: bucket.anomaly_score.value,
     lower: bucket.lower.value,
-    upper: bucket.upper.value
+    upper: bucket.upper.value,
   };
 }
 
@@ -29,7 +29,8 @@ export function anomalySeriesTransform(
   response: ESResponse,
   mlBucketSize: number,
   bucketSize: number,
-  timeSeriesDates: number[]
+  timeSeriesDates: number[],
+  jobId: string
 ) {
   const buckets =
     response.aggregations?.ml_avg_response_times.buckets.map(getBucket) || [];
@@ -37,12 +38,13 @@ export function anomalySeriesTransform(
   const bucketSizeInMillis = Math.max(bucketSize, mlBucketSize) * 1000;
 
   return {
+    jobId,
     anomalyScore: getAnomalyScoreDataPoints(
       buckets,
       timeSeriesDates,
       bucketSizeInMillis
     ),
-    anomalyBoundaries: getAnomalyBoundaryDataPoints(buckets, timeSeriesDates)
+    anomalyBoundaries: getAnomalyBoundaryDataPoints(buckets, timeSeriesDates),
   };
 }
 
@@ -55,16 +57,20 @@ export function getAnomalyScoreDataPoints(
   const firstDate = first(timeSeriesDates);
   const lastDate = last(timeSeriesDates);
 
+  if (firstDate === undefined || lastDate === undefined) {
+    return [];
+  }
+
   return buckets
     .filter(
-      bucket =>
+      (bucket) =>
         bucket.anomalyScore !== null && bucket.anomalyScore > ANOMALY_THRESHOLD
     )
     .filter(isInDateRange(firstDate, lastDate))
-    .map(bucket => {
+    .map((bucket) => {
       return {
         x0: bucket.x,
-        x: Math.min(bucket.x + bucketSizeInMillis, lastDate) // don't go beyond last date
+        x: Math.min(bucket.x + bucketSizeInMillis, lastDate), // don't go beyond last date
       };
     });
 }
@@ -74,12 +80,12 @@ export function getAnomalyBoundaryDataPoints(
   timeSeriesDates: number[]
 ): Coordinate[] {
   return replaceFirstAndLastBucket(buckets, timeSeriesDates)
-    .filter(bucket => bucket.lower !== null)
-    .map(bucket => {
+    .filter((bucket) => bucket.lower !== null)
+    .map((bucket) => {
       return {
         x: bucket.x,
         y0: bucket.lower,
-        y: bucket.upper
+        y: bucket.upper,
       };
     });
 }
@@ -91,10 +97,14 @@ export function replaceFirstAndLastBucket(
   const firstDate = first(timeSeriesDates);
   const lastDate = last(timeSeriesDates);
 
+  if (firstDate === undefined || lastDate === undefined) {
+    return buckets;
+  }
+
   const preBucketWithValue = buckets
-    .filter(p => p.x <= firstDate)
+    .filter((p) => p.x <= firstDate)
     .reverse()
-    .find(p => p.lower !== null);
+    .find((p) => p.lower !== null);
 
   const bucketsInRange = buckets.filter(isInDateRange(firstDate, lastDate));
 
@@ -107,7 +117,7 @@ export function replaceFirstAndLastBucket(
 
   const lastBucketWithValue = [...buckets]
     .reverse()
-    .find(p => p.lower !== null);
+    .find((p) => p.lower !== null);
 
   // replace last bucket if it is null
   const lastBucket = last(bucketsInRange);

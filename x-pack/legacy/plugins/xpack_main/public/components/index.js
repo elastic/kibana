@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { LicenseStatus } from '../../../../../plugins/license_management/public/application/sections/license_dashboard/license_status/license_status';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { AddLicense } from '../../../../../plugins/license_management/public/application/sections/license_dashboard/add_license/add_license';
 
 /*

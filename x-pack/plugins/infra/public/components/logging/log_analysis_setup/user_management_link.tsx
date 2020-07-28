@@ -9,10 +9,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { useLinkProps } from '../../../hooks/use_link_props';
 
-export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = props => {
+export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (props) => {
   const linkProps = useLinkProps({
-    app: 'kibana',
-    hash: '/management/security/users',
+    app: 'management',
+    pathname: '/security/users',
   });
   return (
     <EuiButton color="primary" fill {...linkProps} {...props}>

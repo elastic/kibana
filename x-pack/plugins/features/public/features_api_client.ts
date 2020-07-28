@@ -12,6 +12,6 @@ export class FeaturesAPIClient {
 
   public async getFeatures() {
     const features = await this.http.get<FeatureConfig[]>('/api/features');
-    return features.map(config => new Feature(config));
+    return features.map((config) => new Feature(config));
   }
 }

@@ -41,7 +41,7 @@ class DatasourceWrapper extends React.PureComponent {
   render() {
     return (
       <RenderToDom
-        render={domNode => {
+        render={(domNode) => {
           this.domNode = domNode;
           this.callRenderFn();
         }}

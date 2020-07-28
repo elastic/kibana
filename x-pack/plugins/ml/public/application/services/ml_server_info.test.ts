@@ -10,6 +10,7 @@ import {
   isCloud,
   getNewJobDefaults,
   getNewJobLimits,
+  extractDeploymentId,
 } from './ml_server_info';
 import mockMlInfoResponse from './__mocks__/ml_info_response.json';
 
@@ -20,27 +21,27 @@ jest.mock('./ml_api_service', () => ({
 }));
 
 describe('ml_server_info initial state', () => {
-  it('server info not loaded ', () => {
+  it('should fail to get server info ', () => {
     expect(isCloud()).toBe(false);
     expect(getCloudDeploymentId()).toBe(null);
   });
 });
 
 describe('ml_server_info', () => {
-  beforeEach(async done => {
+  beforeEach(async (done) => {
     await loadMlServerInfo();
     done();
   });
 
   describe('cloud information', () => {
-    it('can get could deployment id', () => {
+    it('should get could deployment id', () => {
       expect(isCloud()).toBe(true);
       expect(getCloudDeploymentId()).toBe('85d666f3350c469e8c3242d76a7f459c');
     });
   });
 
   describe('defaults', () => {
-    it('can get defaults', async done => {
+    it('should get defaults', async (done) => {
       const defaults = getNewJobDefaults();
 
       expect(defaults.anomaly_detectors.model_memory_limit).toBe('128mb');
@@ -52,11 +53,37 @@ describe('ml_server_info', () => {
   });
 
   describe('limits', () => {
-    it('can get limits', async done => {
+    it('should get limits', async (done) => {
       const limits = getNewJobLimits();
 
       expect(limits.max_model_memory_limit).toBe('128mb');
       done();
+    });
+  });
+
+  describe('cloud extract deployment ID', () => {
+    const cloudIdWithDeploymentName =
+      'cloud_message_test:ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg==';
+
+    const cloudIdWithOutDeploymentName =
+      ':ZXUtd2VzdC0yLmF3cy5jbG91ZC5lcy5pbyQ4NWQ2NjZmMzM1MGM0NjllOGMzMjQyZDc2YTdmNDU5YyQxNmI1ZDM2ZGE1Mzk0YjlkYjIyZWJlNDk1OWY1OGQzMg==';
+
+    const badCloudId = 'cloud_message_test:this_is_not_a_base64_string';
+
+    it('should extract cloud ID when deployment name is present', () => {
+      expect(extractDeploymentId(cloudIdWithDeploymentName)).toBe(
+        '85d666f3350c469e8c3242d76a7f459c'
+      );
+    });
+
+    it('should extract cloud ID when deployment name is not present', () => {
+      expect(extractDeploymentId(cloudIdWithOutDeploymentName)).toBe(
+        '85d666f3350c469e8c3242d76a7f459c'
+      );
+    });
+
+    it('should fail to extract cloud ID', () => {
+      expect(extractDeploymentId(badCloudId)).toBe(null);
     });
   });
 });

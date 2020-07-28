@@ -82,11 +82,7 @@ describe('setupMode SetupModeTooltip', () => {
       for (const { name } of PRODUCTS) {
         it(`should render for ${name}`, () => {
           const component = shallow(
-            <SetupModeTooltip
-              setupModeData={scenario.data}
-              productName={name}
-              badgeClickAction={() => {}}
-            />
+            <SetupModeTooltip setupModeData={scenario.data} productName={name} badgeClickLink="" />
           );
           expect(component).toMatchSnapshot();
         });

@@ -36,9 +36,8 @@ import {
 } from '@elastic/eui';
 
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
-
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { getIndexListUri } from '../../../../../../../index_management/public';
-import { BASE_PATH } from '../../../../../../common/constants';
 import { UIM_EDIT_CLICK } from '../../../../constants';
 import { getPolicyPath } from '../../../../services/navigation';
 import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
@@ -141,7 +140,7 @@ export class PolicyTable extends Component {
     this.props.fetchPolicies(true);
     this.setState({ renderDeleteConfirmModal: null, policyToDelete: null });
   };
-  onSort = column => {
+  onSort = (column) => {
     const { sortField, isSortAscending, policySortChanged } = this.props;
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
     policySortChanged(column, newIsSortAscending);
@@ -181,8 +180,9 @@ export class PolicyTable extends Component {
         /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
           data-test-subj="policyTablePolicyNameLink"
-          href={getPolicyPath(value)}
-          onClick={() => trackUiMetric('click', UIM_EDIT_CLICK)}
+          {...reactRouterNavigate(this.props.history, getPolicyPath(value), () =>
+            trackUiMetric('click', UIM_EDIT_CLICK)
+          )}
         >
           {value}
         </EuiLink>
@@ -201,7 +201,7 @@ export class PolicyTable extends Component {
   renderCreatePolicyButton() {
     return (
       <EuiButton
-        href={`#${BASE_PATH}policies/edit`}
+        {...reactRouterNavigate(this.props.history, '/policies/edit')}
         fill
         iconType="plusInCircle"
         data-test-subj="createPolicyButton"
@@ -253,7 +253,9 @@ export class PolicyTable extends Component {
         name: viewIndicesLabel,
         icon: 'list',
         onClick: () => {
-          window.location.hash = getIndexListUri(`ilm.policy:${policy.name}`);
+          this.props.navigateToApp('management', {
+            path: `/data/index_management${getIndexListUri(`ilm.policy:${policy.name}`, true)}`,
+          });
         },
       });
     }
@@ -286,22 +288,22 @@ export class PolicyTable extends Component {
     };
     return flattenPanelTree(panelTree);
   }
-  togglePolicyPopover = policy => {
+  togglePolicyPopover = (policy) => {
     if (this.isPolicyPopoverOpen(policy)) {
       this.closePolicyPopover(policy);
     } else {
       this.openPolicyPopover(policy);
     }
   };
-  isPolicyPopoverOpen = policy => {
+  isPolicyPopoverOpen = (policy) => {
     return this.state.policyPopover === policy.name;
   };
-  closePolicyPopover = policy => {
+  closePolicyPopover = (policy) => {
     if (this.isPolicyPopoverOpen(policy)) {
       this.setState({ policyPopover: null });
     }
   };
-  openPolicyPopover = policy => {
+  openPolicyPopover = (policy) => {
     this.setState({ policyPopover: policy.name });
   };
   buildRowCells(policy) {
@@ -374,7 +376,7 @@ export class PolicyTable extends Component {
 
   buildRows() {
     const { policies = [] } = this.props;
-    return policies.map(policy => {
+    return policies.map((policy) => {
       const { name } = policy;
       return <EuiTableRow key={`${name}-row`}>{this.buildRowCells(policy)}</EuiTableRow>;
     });
@@ -394,7 +396,7 @@ export class PolicyTable extends Component {
     );
   }
 
-  onItemSelectionChanged = selectedPolicies => {
+  onItemSelectionChanged = (selectedPolicies) => {
     this.setState({ selectedPolicies });
   };
 
@@ -455,7 +457,7 @@ export class PolicyTable extends Component {
               <EuiFieldSearch
                 fullWidth
                 value={filter}
-                onChange={event => {
+                onChange={(event) => {
                   policyFilterChanged(event.target.value);
                 }}
                 data-test-subj="policyTableFilterInput"

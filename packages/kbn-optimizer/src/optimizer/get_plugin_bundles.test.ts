@@ -31,35 +31,47 @@ it('returns a bundle for core and each plugin', () => {
           directory: '/repo/plugins/foo',
           id: 'foo',
           isUiPlugin: true,
+          extraPublicDirs: [],
+          manifestPath: '/repo/plugins/foo/kibana.json',
         },
         {
           directory: '/repo/plugins/bar',
           id: 'bar',
           isUiPlugin: false,
+          extraPublicDirs: [],
+          manifestPath: '/repo/plugins/bar/kibana.json',
         },
         {
           directory: '/outside/of/repo/plugins/baz',
           id: 'baz',
           isUiPlugin: true,
+          extraPublicDirs: [],
+          manifestPath: '/outside/of/repo/plugins/baz/kibana.json',
         },
       ],
       '/repo'
-    ).map(b => b.toSpec())
+    ).map((b) => b.toSpec())
   ).toMatchInlineSnapshot(`
     Array [
       Object {
         "contextDir": <absolute path>/plugins/foo,
-        "entry": "./public/index",
         "id": "foo",
+        "manifestPath": <absolute path>/plugins/foo/kibana.json,
         "outputDir": <absolute path>/plugins/foo/target/public,
+        "publicDirNames": Array [
+          "public",
+        ],
         "sourceRoot": <absolute path>,
         "type": "plugin",
       },
       Object {
         "contextDir": "/outside/of/repo/plugins/baz",
-        "entry": "./public/index",
         "id": "baz",
+        "manifestPath": "/outside/of/repo/plugins/baz/kibana.json",
         "outputDir": "/outside/of/repo/plugins/baz/target/public",
+        "publicDirNames": Array [
+          "public",
+        ],
         "sourceRoot": <absolute path>,
         "type": "plugin",
       },

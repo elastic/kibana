@@ -23,7 +23,7 @@ import { hostname } from 'os';
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
-const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
+const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
@@ -42,22 +42,8 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      cors: schema.conditional(
-        schema.contextRef('dev'),
-        true,
-        schema.object(
-          {
-            origin: schema.arrayOf(schema.string()),
-          },
-          {
-            defaultValue: {
-              origin: ['*://localhost:9876'], // karma test server
-            },
-          }
-        ),
-        schema.boolean({ defaultValue: false })
-      ),
-      customResponseHeaders: schema.recordOf(schema.string(), schema.string(), {
+      cors: schema.boolean({ defaultValue: false }),
+      customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
         defaultValue: {},
       }),
       host: schema.string({
@@ -103,7 +89,7 @@ export const config = {
       }),
     },
     {
-      validate: rawConfig => {
+      validate: (rawConfig) => {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
         }
@@ -136,7 +122,7 @@ export class HttpConfig {
   public socketTimeout: number;
   public port: number;
   public cors: boolean | { origin: string[] };
-  public customResponseHeaders: Record<string, string>;
+  public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;
   public basePath?: string;
   public rewriteBasePath: boolean;
@@ -153,7 +139,15 @@ export class HttpConfig {
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
-    this.customResponseHeaders = rawHttpConfig.customResponseHeaders;
+    this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(
+      (headers, [key, value]) => {
+        return {
+          ...headers,
+          [key]: Array.isArray(value) ? value.map((e) => convertHeader(e)) : convertHeader(value),
+        };
+      },
+      {}
+    );
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
     this.basePath = rawHttpConfig.basePath;
@@ -166,3 +160,7 @@ export class HttpConfig {
     this.xsrf = rawHttpConfig.xsrf;
   }
 }
+
+const convertHeader = (entry: any): string => {
+  return typeof entry === 'object' ? JSON.stringify(entry) : String(entry);
+};

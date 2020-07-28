@@ -11,7 +11,7 @@ import { argv } from 'yargs';
 import { requestFromApi } from './request_from_api';
 
 async function listFiles() {
-  const scan = pattern => {
+  const scan = (pattern) => {
     return new Promise((resolve, reject) => {
       glob(pattern, {}, (err, files) => (err ? reject(err) : resolve(files)));
     });
@@ -19,7 +19,7 @@ async function listFiles() {
 
   const pattern = resolve(__dirname, './apis/*/index.js');
   const files = await scan(pattern);
-  files.forEach(file => {
+  files.forEach((file) => {
     const { name, description } = require(file); // eslint-disable-line import/no-dynamic-require
     console.log('    ' + bold(`node ${argv.$0} ${name}`));
     console.log(`      ${description}`);

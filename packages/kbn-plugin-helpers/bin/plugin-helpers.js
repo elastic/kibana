@@ -25,4 +25,4 @@ if (nodeMajorVersion < 6) {
   process.exit(1);
 }
 
-require('../cli');
+require('../target/cli');

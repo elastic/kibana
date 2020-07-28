@@ -55,7 +55,7 @@ describe('#id', () => {
   });
 
   ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', ',', '.', '/', '?'].forEach(
-    invalidCharacter => {
+    (invalidCharacter) => {
       test(`doesn't allow ${invalidCharacter}`, () => {
         expect(() =>
           spaceSchema.validate({

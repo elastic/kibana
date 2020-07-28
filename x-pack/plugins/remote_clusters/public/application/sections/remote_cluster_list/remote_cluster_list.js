@@ -28,8 +28,8 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps, extractQueryParams } from '../../services';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { extractQueryParams } from '../../../shared_imports';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 
 import { RemoteClusterTable } from './remote_cluster_table';
@@ -99,7 +99,7 @@ export class RemoteClusterList extends Component {
           {isAuthorized && (
             <EuiPageContentHeaderSection>
               <EuiButton
-                {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
+                {...reactRouterNavigate(this.props.history, '/add')}
                 fill
                 data-test-subj="remoteClusterCreateButton"
               >
@@ -185,7 +185,7 @@ export class RemoteClusterList extends Component {
         }
         actions={
           <EuiButton
-            {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
+            {...reactRouterNavigate(this.props.history, '/add')}
             fill
             iconType="plusInCircle"
             data-test-subj="remoteClusterEmptyPromptCreateButton"

@@ -137,11 +137,11 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
       this.setState({ actionContextMenuPanel: undefined });
       this.props
         .getActionContextMenuPanel()
-        .then(actionContextMenuPanel => {
+        .then((actionContextMenuPanel) => {
           if (!this.mounted) return;
           this.setState({ actionContextMenuPanel });
         })
-        .catch(error => console.error(error)); // eslint-disable-line no-console
+        .catch((error) => console.error(error)); // eslint-disable-line no-console
     };
     this.setState(({ isPopoverOpen }) => ({ isPopoverOpen: !isPopoverOpen }), after);
   };

@@ -20,14 +20,14 @@ describe('getFormObject', () => {
     it('number', () => {
       expect(getFormObject)
         .withArgs('2')
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be('Cannot render scalar values or complex math expressions');
         });
     });
     it('complex expression', () => {
       expect(getFormObject)
         .withArgs('mean(field * 3)')
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be('Cannot render scalar values or complex math expressions');
         });
     });

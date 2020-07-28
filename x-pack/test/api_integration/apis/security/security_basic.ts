@@ -6,8 +6,8 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('security (basic license)', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('security (basic license)', function () {
     this.tags('ciGroup6');
 
     // Updates here should be mirrored in `./index.js` if tests

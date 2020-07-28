@@ -38,7 +38,7 @@ describe('<FormDataProvider />', () => {
           <UseField path="name" defaultValue="Initial value" data-test-subj="nameField" />
           <UseField path="lastName" defaultValue="Initial value" data-test-subj="lastNameField" />
           <FormDataProvider>
-            {formData => {
+            {(formData) => {
               onFormData(formData);
               return null;
             }}
@@ -106,7 +106,7 @@ describe('<FormDataProvider />', () => {
           <UseField path="name" defaultValue="Initial value" data-test-subj="nameField" />
           <UseField path="lastName" defaultValue="Initial value" data-test-subj="lastNameField" />
           <FormDataProvider pathsToWatch="name">
-            {formData => {
+            {(formData) => {
               onFormData(formData);
               return null;
             }}
@@ -145,7 +145,7 @@ describe('<FormDataProvider />', () => {
           <UseField path="lastName" defaultValue="Initial value" data-test-subj="lastNameField" />
           <UseField path="company" defaultValue="Initial value" data-test-subj="companyField" />
           <FormDataProvider pathsToWatch={['name', 'lastName']}>
-            {formData => {
+            {(formData) => {
               onFormData(formData);
               return null;
             }}

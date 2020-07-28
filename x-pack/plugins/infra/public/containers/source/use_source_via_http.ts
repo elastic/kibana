@@ -8,8 +8,8 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import createContainer from 'constate';
-import { HttpHandler } from 'target/types/core/public/http';
-import { ToastInput } from 'target/types/core/public/notifications/toasts/toasts_api';
+import { HttpHandler } from 'src/core/public';
+import { ToastInput } from 'src/core/public';
 import {
   SourceResponseRuntimeType,
   SourceResponse,
@@ -76,6 +76,7 @@ export const useSourceViaHttp = ({
         title: pickIndexPattern(response?.source, indexType),
       };
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [response, type]
   );
 

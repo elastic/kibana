@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Plugin, CoreStart, CoreSetup, PluginInitializerContext } from 'kibana/public';
 import { first } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
+import { Plugin, CoreSetup } from 'src/core/public';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { ILicense } from '../../licensing/common/types';
@@ -20,9 +20,7 @@ const checkLicenseStatus = (license: ILicense) => {
 };
 
 export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPluginDependencies> {
-  constructor(ctx: PluginInitializerContext) {}
-
-  async setup(
+  public setup(
     { http, getStartServices }: CoreSetup,
     { devTools, home, licensing }: AppPublicPluginDependencies
   ) {
@@ -47,7 +45,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       }),
       order: 5,
       enableRouting: false,
-      mount: async (ctx, params) => {
+      mount: async (params) => {
         const [coreStart] = await getStartServices();
         const { notifications, i18n: i18nDep } = coreStart;
         const { boot } = await import('./application/boot');
@@ -65,7 +63,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       },
     });
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
         devTool.disable();
       } else if (devTool.isDisabled()) {
@@ -74,7 +72,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
     });
   }
 
-  async start(core: CoreStart, plugins: any) {}
+  public start() {}
 
-  async stop() {}
+  public stop() {}
 }

@@ -29,23 +29,18 @@ export class AxisTitle {
   }
 
   render() {
-    d3.select(this.axisConfig.get('rootEl'))
-      .selectAll(this.elSelector)
-      .call(this.draw());
+    d3.select(this.axisConfig.get('rootEl')).selectAll(this.elSelector).call(this.draw());
   }
 
   destroy() {
-    $(this.axisConfig.get('rootEl'))
-      .find(this.elSelector)
-      .find('svg')
-      .remove();
+    $(this.axisConfig.get('rootEl')).find(this.elSelector).find('svg').remove();
   }
 
   draw() {
     const config = this.axisConfig;
 
-    return function(selection) {
-      selection.each(function() {
+    return function (selection) {
+      selection.each(function () {
         if (!config.get('show') && !config.get('title.show', false)) return;
 
         const el = this;
@@ -63,7 +58,7 @@ export class AxisTitle {
 
         const bbox = svg
           .append('text')
-          .attr('transform', function() {
+          .attr('transform', function () {
             if (config.isHorizontal()) {
               return `translate(${width / 2},0)`;
             }

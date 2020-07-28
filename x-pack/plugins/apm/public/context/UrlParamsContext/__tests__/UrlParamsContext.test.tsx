@@ -43,7 +43,7 @@ describe('UrlParamsContext', () => {
 
   it('should have default params', () => {
     const location = {
-      pathname: '/services/opbeans-node/transactions'
+      pathname: '/services/opbeans-node/transactions',
     } as Location;
 
     jest
@@ -53,15 +53,9 @@ describe('UrlParamsContext', () => {
     const params = getDataFromOutput(wrapper);
 
     expect(params).toEqual({
-      start: '2000-06-14T12:00:00.000Z',
       serviceName: 'opbeans-node',
-      end: '2000-06-15T12:00:00.000Z',
       page: 0,
       processorEvent: 'transaction',
-      rangeFrom: 'now-24h',
-      rangeTo: 'now',
-      refreshInterval: 0,
-      refreshPaused: true
     });
   });
 
@@ -69,7 +63,7 @@ describe('UrlParamsContext', () => {
     const location = {
       pathname: '/test/pathname',
       search:
-        '?rangeFrom=2010-03-15T12:00:00Z&rangeTo=2010-04-10T12:00:00Z&transactionId=123abc'
+        '?rangeFrom=2010-03-15T12:00:00Z&rangeTo=2010-04-10T12:00:00Z&transactionId=123abc',
     } as Location;
 
     const wrapper = mountParams(location);
@@ -82,7 +76,7 @@ describe('UrlParamsContext', () => {
     const location = {
       pathname: '/test/updated',
       search:
-        '?rangeFrom=2009-03-15T12:00:00Z&rangeTo=2009-04-10T12:00:00Z&transactionId=UPDATED'
+        '?rangeFrom=2009-03-15T12:00:00Z&rangeTo=2009-04-10T12:00:00Z&transactionId=UPDATED',
     } as Location;
 
     const wrapper = mountParams(location);
@@ -97,7 +91,7 @@ describe('UrlParamsContext', () => {
   it('should parse relative time ranges on mount', () => {
     const location = {
       pathname: '/test/updated',
-      search: '?rangeFrom=now-1d%2Fd&rangeTo=now-1d%2Fd&transactionId=UPDATED'
+      search: '?rangeFrom=now-1d%2Fd&rangeTo=now-1d%2Fd&transactionId=UPDATED',
     } as Location;
 
     const wrapper = mountParams(location);
@@ -113,9 +107,9 @@ describe('UrlParamsContext', () => {
     const calls = [];
     const history = ({
       location: {
-        pathname: '/test'
+        pathname: '/test',
       },
-      listen: jest.fn()
+      listen: jest.fn(),
     } as unknown) as History;
 
     const wrapper = mount(
@@ -131,7 +125,7 @@ describe('UrlParamsContext', () => {
                     onClick={() =>
                       refreshTimeRange({
                         rangeFrom: '2005-09-20T12:00:00Z',
-                        rangeTo: '2005-10-21T12:00:00Z'
+                        rangeTo: '2005-10-21T12:00:00Z',
                       })
                     }
                   />
@@ -161,9 +155,9 @@ describe('UrlParamsContext', () => {
   it('should refresh the time range with new values if time range is relative', async () => {
     const history = ({
       location: {
-        pathname: '/test'
+        pathname: '/test',
       },
-      listen: jest.fn()
+      listen: jest.fn(),
     } as unknown) as History;
 
     jest
@@ -182,7 +176,7 @@ describe('UrlParamsContext', () => {
                     onClick={() =>
                       refreshTimeRange({
                         rangeFrom: 'now-1d/d',
-                        rangeTo: 'now-1d/d'
+                        rangeTo: 'now-1d/d',
                       })
                     }
                   />

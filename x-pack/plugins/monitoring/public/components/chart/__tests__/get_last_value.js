@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLastValue } from '../get_last_value';
 
-describe('monitoringChartGetLastValue', function() {
+describe('monitoringChartGetLastValue', function () {
   it('getLastValue for single number', () => {
     expect(getLastValue(3)).to.be(3);
   });

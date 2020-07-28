@@ -37,14 +37,14 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
         validation: getIntegerRt({ min, max }),
         min,
         max,
-        ...setting
+        ...setting,
       };
     }
 
     case 'float': {
       return {
         validation: floatRt,
-        ...setting
+        ...setting,
       };
     }
 
@@ -57,7 +57,7 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
         validation: getBytesRt({ min, max }),
         units,
         min,
-        ...setting
+        ...setting,
       };
     }
 
@@ -70,7 +70,7 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
         validation: getDurationRt({ min, max }),
         units,
         min,
-        ...setting
+        ...setting,
       };
     }
 

@@ -17,20 +17,22 @@
  * under the License.
  */
 
-import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/server';
 import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CollectorOptions } from '../../../../../plugins/usage_collection/server/collector/collector';
+import {
+  CollectorOptions,
+  createUsageCollectionSetupMock,
+} from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerUiMetricUsageCollector } from './';
 
 describe('telemetry_ui_metric', () => {
   let collector: CollectorOptions;
 
-  const usageCollectionMock: jest.Mocked<UsageCollectionSetup> = {
-    makeUsageCollector: jest.fn().mockImplementation(config => (collector = config)),
-    registerCollector: jest.fn(),
-  } as any;
+  const usageCollectionMock = createUsageCollectionSetupMock();
+  usageCollectionMock.makeUsageCollector.mockImplementation((config) => {
+    collector = config;
+    return createUsageCollectionSetupMock().makeUsageCollector(config);
+  });
 
   const getUsageCollector = jest.fn();
   const registerType = jest.fn();

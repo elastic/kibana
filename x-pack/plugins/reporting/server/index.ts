@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from 'kibana/server';
 import { ReportingPlugin } from './plugin';
+import { ReportingConfigType } from './config';
 
-export { config, ConfigSchema } from './config';
-export { ConfigType, PluginsSetup } from './plugin';
+export const plugin = (initContext: PluginInitializerContext<ReportingConfigType>) =>
+  new ReportingPlugin(initContext);
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new ReportingPlugin(initializerContext);
+export { ReportingPlugin as Plugin };
+export { config } from './config';
+export { ReportingSetupDeps as PluginSetup } from './types';
+export { ReportingStartDeps as PluginStart } from './types';
+
+// internal imports
+export { ReportingCore } from './core';
+export { ReportingConfig } from './config/config';

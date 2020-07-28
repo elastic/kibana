@@ -20,7 +20,7 @@ export const HeroCopy = memo(() => {
           <h1>
             <FormattedMessage
               id="xpack.ingestManager.epm.pageTitle"
-              defaultMessage="Elastic Integrations"
+              defaultMessage="Integrations"
             />
           </h1>
         </EuiText>
@@ -39,22 +39,26 @@ export const HeroCopy = memo(() => {
   );
 });
 
+const Illustration = styled(EuiImage)`
+  margin-bottom: -68px;
+  width: 80%;
+`;
+
 export const HeroImage = memo(() => {
   const { toAssets } = useLinks();
   const { uiSettings } = useCore();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
-  const Illustration = styled(EuiImage).attrs(props => ({
-    alt: i18n.translate('xpack.ingestManager.epm.illustrationAltText', {
-      defaultMessage: 'Illustration of an Elastic integration',
-    }),
-    url: IS_DARK_THEME
-      ? toAssets('illustration_integrations_darkmode.svg')
-      : toAssets('illustration_integrations_lightmode.svg'),
-  }))`
-    margin-bottom: -68px;
-    width: 80%;
-  `;
-
-  return <Illustration />;
+  return (
+    <Illustration
+      alt={i18n.translate('xpack.ingestManager.epm.illustrationAltText', {
+        defaultMessage: 'Illustration of an integration',
+      })}
+      url={
+        IS_DARK_THEME
+          ? toAssets('illustration_integrations_darkmode.svg')
+          : toAssets('illustration_integrations_lightmode.svg')
+      }
+    />
+  );
 });

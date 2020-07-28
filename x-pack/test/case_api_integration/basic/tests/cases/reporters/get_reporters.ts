@@ -22,11 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return reporters', async () => {
-      await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq).expect(200);
 
       const { body } = await supertest
         .get(CASE_REPORTERS_URL)

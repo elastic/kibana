@@ -103,11 +103,11 @@ export class Pipeline {
         )
       );
     }
-    const id = get<string>(upstreamPipeline, '_id');
-    const description = get<string>(upstreamPipeline, '_source.description');
-    const username = get<string>(upstreamPipeline, '_source.username');
-    const pipeline = get<string>(upstreamPipeline, '_source.pipeline');
-    const settings = get<Record<string, any>>(upstreamPipeline, '_source.pipeline_settings');
+    const id = get(upstreamPipeline, '_id') as string;
+    const description = get(upstreamPipeline, '_source.description') as string;
+    const username = get(upstreamPipeline, '_source.username') as string;
+    const pipeline = get(upstreamPipeline, '_source.pipeline') as string;
+    const settings = get(upstreamPipeline, '_source.pipeline_settings') as Record<string, any>;
 
     const opts: PipelineOptions = { id, description, username, pipeline, settings };
 

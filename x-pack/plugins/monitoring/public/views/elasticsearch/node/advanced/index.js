@@ -16,7 +16,7 @@ import template from './index.html';
 import { Legacy } from '../../../../legacy_shims';
 import { AdvancedNode } from '../../../../components/elasticsearch/node/advanced';
 import { MonitoringViewBaseController } from '../../../base_controller';
-import { CODE_PATH_ELASTICSEARCH } from '../../../../../common/constants';
+import { CODE_PATH_ELASTICSEARCH, ALERT_CPU_USAGE } from '../../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -34,8 +34,8 @@ function getPageData($injector) {
       },
       is_advanced: true,
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
@@ -45,7 +45,7 @@ function getPageData($injector) {
 uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
@@ -53,17 +53,31 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
   },
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
+      const $route = $injector.get('$route');
+      const nodeName = $route.current.params.node;
+
       super({
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchAdvancedNodeApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_CPU_USAGE],
+            filters: [
+              {
+                nodeUuid: nodeName,
+              },
+            ],
+          },
+        },
       });
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data || !data.nodeSummary) {
             return;
           }
@@ -80,6 +94,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
           this.renderReact(
             <AdvancedNode
               nodeSummary={data.nodeSummary}
+              alerts={this.alerts}
               metrics={data.metrics}
               onBrush={this.onBrush}
               zoomInfo={this.zoomInfo}

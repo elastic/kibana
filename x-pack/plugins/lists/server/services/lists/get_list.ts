@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LegacyAPICaller } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
 
 import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
+import { transformElasticToList } from '../utils/transform_elastic_to_list';
 
 interface GetListOptions {
   id: Id;
-  callCluster: APICaller;
+  callCluster: LegacyAPICaller;
   listIndex: string;
 }
 
@@ -20,7 +21,10 @@ export const getList = async ({
   callCluster,
   listIndex,
 }: GetListOptions): Promise<ListSchema | null> => {
-  const result: SearchResponse<SearchEsListSchema> = await callCluster('search', {
+  // Note: This typing of response = await callCluster<SearchResponse<SearchEsListSchema>>
+  // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
+  // to explicitly define the type <T>.
+  const response = await callCluster<SearchResponse<SearchEsListSchema>>('search', {
     body: {
       query: {
         term: {
@@ -30,13 +34,8 @@ export const getList = async ({
     },
     ignoreUnavailable: true,
     index: listIndex,
+    seq_no_primary_term: true,
   });
-  if (result.hits.hits.length) {
-    return {
-      id: result.hits.hits[0]._id,
-      ...result.hits.hits[0]._source,
-    };
-  } else {
-    return null;
-  }
+  const list = transformElasticToList({ response });
+  return list[0] ?? null;
 };

@@ -51,15 +51,17 @@ export const ConfirmDeployConfigModal: React.FunctionComponent<{
             },
           })}
         >
-          <FormattedMessage
-            id="xpack.ingestManager.agentConfig.confirmModalCalloutDescription"
-            defaultMessage="Fleet has detected that the selected agent configuration, {configName}, is already in use by
+          <div className="eui-textBreakWord">
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfig.confirmModalCalloutDescription"
+              defaultMessage="Fleet has detected that the selected agent configuration, {configName}, is already in use by
             some of your agents. As a result of this action, Fleet will deploy updates to all agents
             that use this configuration."
-            values={{
-              configName: <b>{agentConfig.name}</b>,
-            }}
-          />
+              values={{
+                configName: <b>{agentConfig.name}</b>,
+              }}
+            />
+          </div>
         </EuiCallOut>
         <EuiSpacer size="l" />
         <FormattedMessage

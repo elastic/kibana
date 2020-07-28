@@ -22,24 +22,12 @@ import { BaseParamType } from './param_types/base';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
 import { AggParamType } from '../aggs/param_types/agg';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
-import { notificationServiceMock } from '../../../../../../src/core/public/mocks';
-import { AggTypeDependencies } from './agg_type';
-import { InternalStartServices } from '../../types';
 
 describe('AggParams class', () => {
-  const aggTypesDependencies: AggTypeDependencies = {
-    getInternalStartServices: () =>
-      (({
-        fieldFormats: fieldFormatsServiceMock.createStartContract(),
-        notifications: notificationServiceMock.createStartContract(),
-      } as unknown) as InternalStartServices),
-  };
-
   describe('constructor args', () => {
     it('accepts an array of param defs', () => {
       const params = [{ name: 'one' }, { name: 'two' }] as AggParamType[];
-      const aggParams = initParams(params, aggTypesDependencies);
+      const aggParams = initParams(params);
 
       expect(aggParams).toHaveLength(params.length);
       expect(Array.isArray(aggParams)).toBeTruthy();
@@ -49,7 +37,7 @@ describe('AggParams class', () => {
   describe('AggParam creation', () => {
     it('Uses the FieldParamType class for params with the name "field"', () => {
       const params = [{ name: 'field', type: 'field' }] as AggParamType[];
-      const aggParams = initParams(params, aggTypesDependencies);
+      const aggParams = initParams(params);
 
       expect(aggParams).toHaveLength(params.length);
       expect(aggParams[0] instanceof FieldParamType).toBeTruthy();
@@ -62,13 +50,13 @@ describe('AggParams class', () => {
           type: 'optioned',
         },
       ] as AggParamType[];
-      const aggParams = initParams(params, aggTypesDependencies);
+      const aggParams = initParams(params);
 
       expect(aggParams).toHaveLength(params.length);
       expect(aggParams[0] instanceof OptionedParamType).toBeTruthy();
     });
 
-    it('Always converts the params to a BaseParamType', function() {
+    it('Always converts the params to a BaseParamType', function () {
       const params = [
         {
           name: 'height',
@@ -84,11 +72,11 @@ describe('AggParams class', () => {
         },
       ] as AggParamType[];
 
-      const aggParams = initParams(params, aggTypesDependencies);
+      const aggParams = initParams(params);
 
       expect(aggParams).toHaveLength(params.length);
 
-      aggParams.forEach(aggParam => expect(aggParam instanceof BaseParamType).toBeTruthy());
+      aggParams.forEach((aggParam) => expect(aggParam instanceof BaseParamType).toBeTruthy());
     });
   });
 });

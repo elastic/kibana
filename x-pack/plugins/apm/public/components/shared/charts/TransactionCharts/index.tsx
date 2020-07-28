@@ -12,7 +12,7 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
@@ -24,10 +24,10 @@ import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
-  asInteger,
   tpmUnit,
   TimeFormatter,
-  getDurationFormatter
+  getDurationFormatter,
+  asDecimal,
 } from '../../../../utils/formatters';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 import { LicenseContext } from '../../../../context/LicenseContext';
@@ -38,11 +38,10 @@ import { DurationByCountryMap } from './DurationByCountryMap';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_ROUTE_CHANGE,
-  TRANSACTION_REQUEST
+  TRANSACTION_REQUEST,
 } from '../../../../../common/transaction_types';
 
 interface TransactionChartProps {
-  hasMLJob: boolean;
   charts: ITransactionChartData;
   location: Location;
   urlParams: IUrlParams;
@@ -86,7 +85,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   public getTPMFormatter = (t: number) => {
     const { urlParams } = this.props;
     const unit = tpmUnit(urlParams.transactionType);
-    return `${asInteger(t)} ${unit}`;
+    return `${asDecimal(t)} ${unit}`;
   };
 
   public getTPMTooltipFormatter = (p: Coordinate) => {
@@ -96,12 +95,13 @@ export class TransactionCharts extends Component<TransactionChartProps> {
   };
 
   public renderMLHeader(hasValidMlLicense: boolean | undefined) {
-    const { hasMLJob } = this.props;
-    if (!hasValidMlLicense || !hasMLJob) {
+    const { mlJobId } = this.props.charts;
+
+    if (!hasValidMlLicense || !mlJobId) {
       return null;
     }
 
-    const { serviceName, transactionType, kuery } = this.props.urlParams;
+    const { serviceName, kuery, transactionType } = this.props.urlParams;
     if (!serviceName) {
       return null;
     }
@@ -120,7 +120,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
           'xpack.apm.metrics.transactionChart.machineLearningTooltip',
           {
             defaultMessage:
-              'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores >= 75.'
+              'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores ≥ 75.',
           }
         )}
       />
@@ -134,11 +134,12 @@ export class TransactionCharts extends Component<TransactionChartProps> {
             {i18n.translate(
               'xpack.apm.metrics.transactionChart.machineLearningLabel',
               {
-                defaultMessage: 'Machine learning:'
+                defaultMessage: 'Machine learning:',
               }
             )}{' '}
           </span>
           <MLJobLink
+            jobId={mlJobId}
             serviceName={serviceName}
             transactionType={transactionType}
           >
@@ -169,7 +170,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
                     </EuiTitle>
                   </EuiFlexItem>
                   <LicenseContext.Consumer>
-                    {license =>
+                    {(license) =>
                       this.renderMLHeader(license?.getFeature('ml').isAvailable)
                     }
                   </LicenseContext.Consumer>
@@ -228,13 +229,13 @@ function tpmLabel(type?: string) {
     ? i18n.translate(
         'xpack.apm.metrics.transactionChart.requestsPerMinuteLabel',
         {
-          defaultMessage: 'Requests per minute'
+          defaultMessage: 'Requests per minute',
         }
       )
     : i18n.translate(
         'xpack.apm.metrics.transactionChart.transactionsPerMinuteLabel',
         {
-          defaultMessage: 'Transactions per minute'
+          defaultMessage: 'Transactions per minute',
         }
       );
 }
@@ -245,21 +246,21 @@ function responseTimeLabel(type?: string) {
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.pageLoadTimesLabel',
         {
-          defaultMessage: 'Page load times'
+          defaultMessage: 'Page load times',
         }
       );
     case TRANSACTION_ROUTE_CHANGE:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.routeChangeTimesLabel',
         {
-          defaultMessage: 'Route change times'
+          defaultMessage: 'Route change times',
         }
       );
     default:
       return i18n.translate(
         'xpack.apm.metrics.transactionChart.transactionDurationLabel',
         {
-          defaultMessage: 'Transaction duration'
+          defaultMessage: 'Transaction duration',
         }
       );
   }

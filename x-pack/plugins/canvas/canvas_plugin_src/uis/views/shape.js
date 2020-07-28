@@ -46,6 +46,9 @@ export const shape = () => ({
       displayName: strings.getMaintainAspectDisplayName(),
       argType: 'toggle',
       help: strings.getMaintainAspectHelp(),
+      options: {
+        labelValue: strings.getMaintainAspectLabelName(),
+      },
     },
   ],
 });

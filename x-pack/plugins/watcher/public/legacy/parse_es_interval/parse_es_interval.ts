@@ -35,9 +35,7 @@ export type ParsedInterval = ReturnType<typeof parseEsInterval>;
  *
  */
 export function parseEsInterval(interval: string) {
-  const matches = String(interval)
-    .trim()
-    .match(ES_INTERVAL_STRING_REGEX);
+  const matches = String(interval).trim().match(ES_INTERVAL_STRING_REGEX);
 
   if (!matches) {
     throw new InvalidEsIntervalFormatError(interval);

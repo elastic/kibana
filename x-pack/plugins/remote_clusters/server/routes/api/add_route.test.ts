@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { register } from './add_route';
 import { API_BASE_PATH } from '../../../common/constants';
 import { LicenseStatus } from '../../types';
 
+import { xpackMocks } from '../../../../../mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -27,7 +28,7 @@ describe('ADD remote clusters', () => {
     { licenseCheckResult = { valid: true }, apiResponses = [], asserts, payload }: TestOptions
   ) => {
     test(description, async () => {
-      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
+      const elasticsearchMock = elasticsearchServiceMock.createLegacyClusterClient();
 
       const mockRouteDependencies = {
         router: httpServiceMock.createRouter(),
@@ -39,10 +40,10 @@ describe('ADD remote clusters', () => {
         },
       };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
 
       elasticsearchServiceMock
-        .createClusterClient()
+        .createLegacyClusterClient()
         .asScoped.mockReturnValue(mockScopedClusterClient);
 
       for (const apiResponse of apiResponses) {
@@ -59,13 +60,8 @@ describe('ADD remote clusters', () => {
         headers: { authorization: 'foo' },
       });
 
-      const mockContext = ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClusterClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext;
+      const mockContext = xpackMocks.createRequestHandlerContext();
+      mockContext.core.elasticsearch.legacy.client = mockScopedClusterClient;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
 

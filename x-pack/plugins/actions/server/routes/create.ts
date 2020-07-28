@@ -26,15 +26,12 @@ export const bodySchema = schema.object({
 export const createActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.post(
     {
-      path: BASE_ACTION_API_PATH,
+      path: `${BASE_ACTION_API_PATH}/action`,
       validate: {
         body: bodySchema,
       },
-      options: {
-        tags: ['access:actions-all'],
-      },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<unknown, unknown, TypeOf<typeof bodySchema>>,
       res: KibanaResponseFactory

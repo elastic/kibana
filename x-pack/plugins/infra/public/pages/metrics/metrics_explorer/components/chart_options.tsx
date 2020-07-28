@@ -103,7 +103,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
   );
 
   const handleStackChange = useCallback(
-    e => {
+    (e) => {
       onChange({
         ...chartOptions,
         stack: e.target.checked,

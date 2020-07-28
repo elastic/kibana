@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import semver from 'semver';
+import moment, { Duration } from 'moment';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 
@@ -178,7 +179,7 @@ export function isModelPlotEnabled(
 
       if (detectorHasPartitionField) {
         const partitionEntity = entityFields.find(
-          entityField => entityField.fieldName === detector.partition_field_name
+          (entityField) => entityField.fieldName === detector.partition_field_name
         );
         isEnabled =
           partitionEntity?.fieldValue !== undefined &&
@@ -187,7 +188,7 @@ export function isModelPlotEnabled(
 
       if (isEnabled === true && detectorHasByField === true) {
         const byEntity = entityFields.find(
-          entityField => entityField.fieldName === detector.by_field_name
+          (entityField) => entityField.fieldName === detector.by_field_name
         );
         isEnabled =
           byEntity?.fieldValue !== undefined && terms.indexOf(String(byEntity.fieldValue)) !== -1;
@@ -349,7 +350,7 @@ export function basicJobValidation(
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
       let v = true;
-      _.each(job.analysis_config.categorization_filters, d => {
+      _.each(job.analysis_config.categorization_filters, (d) => {
         try {
           new RegExp(d);
         } catch (e) {
@@ -381,7 +382,7 @@ export function basicJobValidation(
       valid = false;
     } else {
       let v = true;
-      _.each(job.analysis_config.detectors, d => {
+      _.each(job.analysis_config.detectors, (d) => {
         if (_.isEmpty(d.function)) {
           v = false;
         }
@@ -398,7 +399,7 @@ export function basicJobValidation(
     if (job.analysis_config.detectors.length >= 2) {
       // create an array of objects with a subset of the attributes
       // where we want to make sure they are not be the same across detectors
-      const compareSubSet = job.analysis_config.detectors.map(d =>
+      const compareSubSet = job.analysis_config.detectors.map((d) =>
         _.pick(d, [
           'function',
           'field_name',
@@ -433,7 +434,7 @@ export function basicJobValidation(
       messages.push({ id: 'bucket_span_empty' });
       valid = false;
     } else {
-      if (isValidTimeFormat(job.analysis_config.bucket_span)) {
+      if (isValidTimeInterval(job.analysis_config.bucket_span)) {
         messages.push({
           id: 'bucket_span_valid',
           bucketSpan: job.analysis_config.bucket_span,
@@ -479,8 +480,8 @@ export function basicJobValidation(
   return {
     messages,
     valid,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -490,14 +491,14 @@ export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
 
   if (datafeed) {
     let queryDelayMessage = { id: 'query_delay_valid' };
-    if (isValidTimeFormat(datafeed.query_delay) === false) {
+    if (isValidTimeInterval(datafeed.query_delay) === false) {
       queryDelayMessage = { id: 'query_delay_invalid' };
       valid = false;
     }
     messages.push(queryDelayMessage);
 
     let frequencyMessage = { id: 'frequency_valid' };
-    if (isValidTimeFormat(datafeed.frequency) === false) {
+    if (isValidTimeInterval(datafeed.frequency) === false) {
       frequencyMessage = { id: 'frequency_invalid' };
       valid = false;
     }
@@ -507,8 +508,8 @@ export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
   return {
     messages,
     valid,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -540,8 +541,8 @@ export function validateModelMemoryLimit(job: Job, limits: MlServerLimits): Vali
   return {
     valid,
     messages,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -567,16 +568,16 @@ export function validateModelMemoryLimitUnits(
   return {
     valid,
     messages,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
 export function validateGroupNames(job: Job): ValidationResults {
   const { groups = [] } = job;
   const errorMessages: ValidationResults['messages'] = [
-    ...(groups.some(group => !isJobIdValid(group)) ? [{ id: 'job_group_id_invalid' }] : []),
-    ...(groups.some(group => maxLengthValidator(JOB_ID_MAX_LENGTH)(group))
+    ...(groups.some((group) => !isJobIdValid(group)) ? [{ id: 'job_group_id_invalid' }] : []),
+    ...(groups.some((group) => maxLengthValidator(JOB_ID_MAX_LENGTH)(group))
       ? [{ id: 'job_group_id_invalid_max_length' }]
       : []),
   ];
@@ -586,17 +587,55 @@ export function validateGroupNames(job: Job): ValidationResults {
   return {
     valid,
     messages,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
-function isValidTimeFormat(value: string | undefined): boolean {
+/**
+ * Parses the supplied string to a time interval suitable for use in an ML anomaly
+ * detection job or datafeed.
+ * @param value the string to parse
+ * @return {Duration} the parsed interval, or null if it does not represent a valid
+ * time interval.
+ */
+export function parseTimeIntervalForJob(value: string | undefined): Duration | null {
+  if (value === undefined) {
+    return null;
+  }
+
+  // Must be a valid interval, greater than zero,
+  // and if specified in ms must be a multiple of 1000ms.
+  const interval = parseInterval(value, true);
+  return interval !== null && interval.asMilliseconds() !== 0 && interval.milliseconds() === 0
+    ? interval
+    : null;
+}
+
+// Checks that the value for a field which represents a time interval,
+// such as a job bucket span or datafeed query delay, is valid.
+function isValidTimeInterval(value: string | undefined): boolean {
   if (value === undefined) {
     return true;
   }
-  const interval = parseInterval(value);
-  return interval !== null && interval.asMilliseconds() !== 0;
+  return parseTimeIntervalForJob(value) !== null;
+}
+
+// The earliest start time for the datafeed should be the max(latest_record_timestamp, latest_bucket.timestamp + bucket_span).
+export function getEarliestDatafeedStartTime(
+  latestRecordTimestamp: number | undefined,
+  latestBucketTimestamp: number | undefined,
+  bucketSpan?: Duration | null | undefined
+): number | undefined {
+  if (latestRecordTimestamp !== undefined && latestBucketTimestamp !== undefined) {
+    // if bucket span is available (e.g. 15m) add it to the latest bucket timestamp in ms
+    const adjustedBucketStartTime = bucketSpan
+      ? moment(latestBucketTimestamp).add(bucketSpan).valueOf()
+      : latestBucketTimestamp;
+    return Math.max(latestRecordTimestamp, adjustedBucketStartTime);
+  } else {
+    return latestRecordTimestamp !== undefined ? latestRecordTimestamp : latestBucketTimestamp;
+  }
 }
 
 // Returns the latest of the last source data and last processed bucket timestamp,
@@ -626,6 +665,6 @@ export function processCreatedBy(customSettings: CustomSettings) {
 
 export function splitIndexPatternNames(indexPatternName: string): string[] {
   return indexPatternName.includes(',')
-    ? indexPatternName.split(',').map(i => i.trim())
+    ? indexPatternName.split(',').map((i) => i.trim())
     : [indexPatternName];
 }

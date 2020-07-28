@@ -12,7 +12,7 @@ describe('View routes', () => {
   it('does not register Login routes if both `basic` and `token` providers are disabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(
-      provider => provider !== 'basic' && provider !== 'token'
+      (provider) => provider !== 'basic' && provider !== 'token'
     );
 
     defineViewRoutes(routeParamsMock);
@@ -37,7 +37,7 @@ describe('View routes', () => {
   it('registers Login routes if `basic` provider is enabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(
-      provider => provider !== 'token'
+      (provider) => provider !== 'token'
     );
 
     defineViewRoutes(routeParamsMock);
@@ -64,7 +64,7 @@ describe('View routes', () => {
   it('registers Login routes if `token` provider is enabled', () => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     routeParamsMock.authc.isProviderTypeEnabled.mockImplementation(
-      provider => provider !== 'basic'
+      (provider) => provider !== 'basic'
     );
 
     defineViewRoutes(routeParamsMock);

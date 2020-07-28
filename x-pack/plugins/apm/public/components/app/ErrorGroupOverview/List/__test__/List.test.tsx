@@ -11,6 +11,12 @@ import { ErrorGroupList } from '../index';
 import props from './props.json';
 import { MockUrlParamsContextProvider } from '../../../../../context/UrlParamsContext/MockUrlParamsContextProvider';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
+
 describe('ErrorGroupOverview -> List', () => {
   beforeAll(() => {
     mockMoment();

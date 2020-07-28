@@ -83,7 +83,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
               {reservedPrivileges.length > 0 ? (
                 <EuiComboBox
                   fullWidth
-                  selectedOptions={reservedPrivileges.map(rp => ({ label: rp }))}
+                  selectedOptions={reservedPrivileges.map((rp) => ({ label: rp }))}
                   isDisabled
                 />
               ) : (
@@ -215,7 +215,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
                   }
                   onChange={this.onFeaturePrivilegeChange}
                   onChangeAll={this.onChangeAllFeaturePrivileges}
-                  privilegeIndex={this.props.role.kibana.findIndex(k =>
+                  privilegeIndex={this.props.role.kibana.findIndex((k) =>
                     isGlobalPrivilegeDefinition(k)
                   )}
                   canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
@@ -248,7 +248,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
 
     if (privilege === NO_PRIVILEGE_VALUE) {
       // Remove global entry if no privilege value
-      role.kibana = role.kibana.filter(entry => !isGlobalPrivilegeDefinition(entry));
+      role.kibana = role.kibana.filter((entry) => !isGlobalPrivilegeDefinition(entry));
     } else if (privilege === CUSTOM_PRIVILEGE_VALUE) {
       // Remove base privilege if customizing feature privileges
       form.base = [];
@@ -280,7 +280,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
 
     const form = this.locateGlobalPrivilege(role) || this.createGlobalPrivilegeEntry(role);
     if (privileges.length > 0) {
-      this.props.kibanaPrivileges.getSecuredFeatures().forEach(feature => {
+      this.props.kibanaPrivileges.getSecuredFeatures().forEach((feature) => {
         form.feature[feature.id] = [...privileges];
       });
     } else {
@@ -292,7 +292,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
   private maybeRenderSpacePrivilegeWarning = () => {
     const kibanaPrivileges = this.props.role.kibana;
     const hasSpacePrivileges = kibanaPrivileges.some(
-      privilege => !isGlobalPrivilegeDefinition(privilege)
+      (privilege) => !isGlobalPrivilegeDefinition(privilege)
     );
 
     if (hasSpacePrivileges) {
@@ -306,12 +306,12 @@ export class SimplePrivilegeSection extends Component<Props, State> {
   };
 
   private locateGlobalPrivilegeIndex = (role: Role) => {
-    return role.kibana.findIndex(privileges => isGlobalPrivilegeDefinition(privileges));
+    return role.kibana.findIndex((privileges) => isGlobalPrivilegeDefinition(privileges));
   };
 
   private locateGlobalPrivilege = (role: Role) => {
     const spacePrivileges = role.kibana;
-    return spacePrivileges.find(privileges => isGlobalPrivilegeDefinition(privileges));
+    return spacePrivileges.find((privileges) => isGlobalPrivilegeDefinition(privileges));
   };
 
   private createGlobalPrivilegeEntry(role: Role): RoleKibanaPrivilege {

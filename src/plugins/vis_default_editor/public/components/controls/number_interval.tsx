@@ -23,6 +23,7 @@ import React, { useEffect, useCallback } from 'react';
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { UI_SETTINGS } from '../../../../data/public';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
@@ -38,7 +39,7 @@ const label = (
         <FormattedMessage
           id="visDefaultEditor.controls.numberInterval.minimumIntervalTooltip"
           defaultMessage="Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}"
-          values={{ histogramMaxBars: 'histogram:maxBars' }}
+          values={{ histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS }}
         />
       }
       type="questionInCircle"
@@ -55,7 +56,7 @@ function NumberIntervalParamEditor({
   setValidity,
   setValue,
 }: AggParamEditorProps<number | undefined>) {
-  const base: number = get(editorConfig, 'interval.base');
+  const base: number = get(editorConfig, 'interval.base') as number;
   const min = base || 0;
   const isValid = value !== undefined && value >= min;
 

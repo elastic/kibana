@@ -39,7 +39,7 @@ export function formatValue(
       // Currently only multi-value response is for lat_long detectors.
       // Return with array style formatting, with items formatted as numbers, rather than
       // the default String format which is set for geo_point and geo_shape fields.
-      const values = value.map(val => formatSingleValue(val, mlFunction, undefined, record));
+      const values = value.map((val) => formatSingleValue(val, mlFunction, undefined, record));
       return `[${values}]`;
     }
   } else {
@@ -73,20 +73,14 @@ function formatSingleValue(
       record !== undefined && record.timestamp !== undefined
         ? new Date(record.timestamp)
         : new Date();
-    const utcMoment = moment
-      .utc(d)
-      .startOf('week')
-      .add(value, 's');
+    const utcMoment = moment.utc(d).startOf('week').add(value, 's');
     return moment(utcMoment.valueOf()).format('ddd HH:mm');
   } else if (mlFunction === 'time_of_day') {
     const d =
       record !== undefined && record.timestamp !== undefined
         ? new Date(record.timestamp)
         : new Date();
-    const utcMoment = moment
-      .utc(d)
-      .startOf('day')
-      .add(value, 's');
+    const utcMoment = moment.utc(d).startOf('day').add(value, 's');
     return moment(utcMoment.valueOf()).format('HH:mm');
   } else {
     if (fieldFormat !== undefined) {

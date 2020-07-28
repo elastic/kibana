@@ -44,7 +44,8 @@ describe('state selectors', () => {
       basePath: 'yyz',
       esKuery: '',
       integrationsPopoverOpen: null,
-      lastRefresh: 125,
+      searchText: '',
+      monitorId: '',
     },
     monitorStatus: {
       status: null,
@@ -106,6 +107,11 @@ describe('state selectors', () => {
         data: null,
         loading: false,
       },
+    },
+    selectedFilters: null,
+    alerts: {
+      alertDeletion: { data: null, loading: false },
+      alert: { data: null, loading: false },
     },
   };
 

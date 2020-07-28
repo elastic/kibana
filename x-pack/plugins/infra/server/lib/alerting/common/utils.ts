@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
-    validate: value =>
+    validate: (value) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
   });
 
@@ -29,3 +29,5 @@ export const validateIsStringElasticsearchJSONFilter = (value: string) => {
     return errorMessage;
   }
 };
+
+export const UNGROUPED_FACTORY_KEY = '*';

@@ -36,7 +36,7 @@ function escapeValue(value) {
 
 function formatCsvValues(fields, values) {
   return fields
-    .map(field => {
+    .map((field) => {
       const value = values[field];
 
       if (isNull(value) || isUndefined(value)) {
@@ -50,7 +50,7 @@ function formatCsvValues(fields, values) {
 }
 
 export default function licensesCSVReport(grunt) {
-  grunt.registerTask('licenses:csv_report', 'Report of 3rd party dependencies', async function() {
+  grunt.registerTask('licenses:csv_report', 'Report of 3rd party dependencies', async function () {
     const fields = ['name', 'version', 'url', 'license'];
     const done = this.async();
 
@@ -66,7 +66,7 @@ export default function licensesCSVReport(grunt) {
       });
 
       const csv = packages
-        .map(pkg => {
+        .map((pkg) => {
           const data = {
             name: pkg.name,
             version: pkg.version,

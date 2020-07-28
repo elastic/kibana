@@ -39,7 +39,7 @@ describe('GET connectors', () => {
     const res = await routeHandler(context, req, kibanaResponseFactory);
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual(
-      getActions().filter(action => action.actionTypeId === '.servicenow')
+      getActions().filter((action) => action.actionTypeId === '.servicenow')
     );
   });
 

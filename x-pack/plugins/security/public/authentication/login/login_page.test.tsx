@@ -48,10 +48,6 @@ describe('LoginPage', () => {
     resetHttpMock();
   });
 
-  afterAll(() => {
-    delete (window as any).location;
-  });
-
   describe('page', () => {
     it('renders as expected', async () => {
       const coreStartMock = coreMock.createStart();

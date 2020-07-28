@@ -31,7 +31,7 @@ export const ACTION_VIEW_IN_MAPS = 'ACTION_VIEW_IN_MAPS';
 export const ACTION_TRAVEL_GUIDE = 'ACTION_TRAVEL_GUIDE';
 export const ACTION_CALL_PHONE_NUMBER = 'ACTION_CALL_PHONE_NUMBER';
 export const ACTION_EDIT_USER = 'ACTION_EDIT_USER';
-export const ACTION_PHONE_USER = 'ACTION_PHONE_USER';
+export const ACTION_TRIGGER_PHONE_USER = 'ACTION_TRIGGER_PHONE_USER';
 export const ACTION_SHOWCASE_PLUGGABILITY = 'ACTION_SHOWCASE_PLUGGABILITY';
 
 export const showcasePluggability = createAction<typeof ACTION_SHOWCASE_PLUGGABILITY>({
@@ -47,14 +47,14 @@ export interface PhoneContext {
 export const makePhoneCallAction = createAction<typeof ACTION_CALL_PHONE_NUMBER>({
   type: ACTION_CALL_PHONE_NUMBER,
   getDisplayName: () => 'Call phone number',
-  execute: async context => alert(`Pretend calling ${context.phone}...`),
+  execute: async (context) => alert(`Pretend calling ${context.phone}...`),
 });
 
 export const lookUpWeatherAction = createAction<typeof ACTION_TRAVEL_GUIDE>({
   type: ACTION_TRAVEL_GUIDE,
   getIconType: () => 'popout',
   getDisplayName: () => 'View travel guide',
-  execute: async context => {
+  execute: async (context) => {
     window.open(`https://www.worldtravelguide.net/?s=${context.country}`, '_blank');
   },
 });
@@ -67,7 +67,7 @@ export const viewInMapsAction = createAction<typeof ACTION_VIEW_IN_MAPS>({
   type: ACTION_VIEW_IN_MAPS,
   getIconType: () => 'popout',
   getDisplayName: () => 'View in maps',
-  execute: async context => {
+  execute: async (context) => {
     window.open(`https://www.google.com/maps/place/${context.country}`, '_blank');
   },
 });
@@ -90,7 +90,7 @@ function EditUserModal({
   const [name, setName] = useState(user.name);
   return (
     <EuiModalBody>
-      <EuiFieldText prepend="Name" value={name} onChange={e => setName(e.target.value)} />
+      <EuiFieldText prepend="Name" value={name} onChange={(e) => setName(e.target.value)} />
       <EuiButton
         onClick={() => {
           update({ ...user, name });
@@ -120,19 +120,13 @@ export interface UserContext {
   update: (user: User) => void;
 }
 
-export const createPhoneUserAction = (getUiActionsApi: () => Promise<UiActionsStart>) =>
-  createAction<typeof ACTION_PHONE_USER>({
-    type: ACTION_PHONE_USER,
+export const createTriggerPhoneTriggerAction = (getUiActionsApi: () => Promise<UiActionsStart>) =>
+  createAction<typeof ACTION_TRIGGER_PHONE_USER>({
+    type: ACTION_TRIGGER_PHONE_USER,
     getDisplayName: () => 'Call phone number',
+    shouldAutoExecute: async () => true,
     isCompatible: async ({ user }) => user.phone !== undefined,
     execute: async ({ user }) => {
-      // One option - execute the more specific action directly.
-      // makePhoneCallAction.execute({ phone: user.phone });
-
-      // Another option - emit the trigger and automatically get *all* the actions attached
-      // to the phone number trigger.
-      // TODO: we need to figure out the best way to handle these nested actions however, since
-      // we don't want multiple context menu's to pop up.
       if (user.phone !== undefined) {
         (await getUiActionsApi()).executeTriggerActions(PHONE_TRIGGER, { phone: user.phone });
       }

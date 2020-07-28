@@ -14,7 +14,7 @@ import { SessionStorageMock } from '../../../../services/__test__/SessionStorage
 import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
 import {
   MockApmPluginContextWrapper,
-  mockApmPluginContextValue
+  mockApmPluginContextValue,
 } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 jest.mock('ui/new_platform');
@@ -32,10 +32,10 @@ function wrapper({ children }: { children: ReactChild }) {
               ...mockApmPluginContextValue.core.notifications,
               toasts: {
                 ...mockApmPluginContextValue.core.notifications.toasts,
-                addWarning
-              }
-            }
-          }
+                addWarning,
+              },
+            },
+          },
         } as unknown) as ApmPluginContextValue
       }
     >
@@ -59,18 +59,20 @@ describe('Service Overview -> View', () => {
     global.sessionStorage = new SessionStorageMock();
 
     // mock urlParams
-    spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
+    jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
       urlParams: {
         start: 'myStart',
-        end: 'myEnd'
-      }
+        end: 'myEnd',
+      },
+      refreshTimeRange: jest.fn(),
+      uiFilters: {},
     });
 
     jest.spyOn(useLocalUIFilters, 'useLocalUIFilters').mockReturnValue({
       filters: [],
       setFilterValue: () => null,
       clearValues: () => null,
-      status: FETCH_STATUS.SUCCESS
+      status: FETCH_STATUS.SUCCESS,
     });
   });
 
@@ -90,7 +92,7 @@ describe('Service Overview -> View', () => {
           transactionsPerMinute: 100,
           errorsPerMinute: 200,
           avgResponseTime: 300,
-          environments: ['test', 'dev']
+          environments: ['test', 'dev'],
         },
         {
           serviceName: 'My Go Service',
@@ -98,9 +100,9 @@ describe('Service Overview -> View', () => {
           transactionsPerMinute: 400,
           errorsPerMinute: 500,
           avgResponseTime: 600,
-          environments: []
-        }
-      ]
+          environments: [],
+        },
+      ],
     });
 
     const { container, getByText } = renderServiceOverview();
@@ -116,7 +118,7 @@ describe('Service Overview -> View', () => {
     httpGet.mockResolvedValueOnce({
       hasLegacyData: false,
       hasHistoricalData: false,
-      items: []
+      items: [],
     });
 
     const { container, getByText } = renderServiceOverview();
@@ -138,7 +140,7 @@ describe('Service Overview -> View', () => {
     httpGet.mockResolvedValueOnce({
       hasLegacyData: false,
       hasHistoricalData: true,
-      items: []
+      items: [],
     });
 
     const { container, getByText } = renderServiceOverview();
@@ -155,7 +157,7 @@ describe('Service Overview -> View', () => {
       httpGet.mockResolvedValueOnce({
         hasLegacyData: true,
         hasHistoricalData: true,
-        items: []
+        items: [],
       });
 
       renderServiceOverview();
@@ -165,7 +167,7 @@ describe('Service Overview -> View', () => {
 
       expect(addWarning).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          title: 'Legacy data was detected within the selected time range'
+          title: 'Legacy data was detected within the selected time range',
         })
       );
     });
@@ -176,7 +178,7 @@ describe('Service Overview -> View', () => {
       httpGet.mockResolvedValueOnce({
         hasLegacyData: false,
         hasHistoricalData: true,
-        items: []
+        items: [],
       });
 
       renderServiceOverview();

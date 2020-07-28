@@ -20,29 +20,11 @@
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import {
-  getSignificantTermsBucketAgg,
-  SignificantTermsBucketAggDependencies,
-} from './significant_terms';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
-import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
-import { InternalStartServices } from '../../../types';
+import { getSignificantTermsBucketAgg } from './significant_terms';
 
 describe('Significant Terms Agg', () => {
   describe('order agg editor UI', () => {
     describe('convert include/exclude from old format', () => {
-      let aggTypesDependencies: SignificantTermsBucketAggDependencies;
-
-      beforeEach(() => {
-        aggTypesDependencies = {
-          getInternalStartServices: () =>
-            (({
-              fieldFormats: fieldFormatsServiceMock.createStartContract(),
-              notifications: notificationServiceMock.createStartContract(),
-            } as unknown) as InternalStartServices),
-        };
-      });
-
       const getAggConfigs = (params: Record<string, any> = {}) => {
         const indexPattern = {
           id: '1234',
@@ -69,10 +51,7 @@ describe('Significant Terms Agg', () => {
             },
           ],
           {
-            typesRegistry: mockAggTypesRegistry([
-              getSignificantTermsBucketAgg(aggTypesDependencies),
-            ]),
-            fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+            typesRegistry: mockAggTypesRegistry([getSignificantTermsBucketAgg()]),
           }
         );
       };

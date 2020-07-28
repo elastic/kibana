@@ -61,8 +61,8 @@
  */
 
 import Boom from 'boom';
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import cloneDeep from 'lodash.clonedeep';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
@@ -151,7 +151,7 @@ export class DocumentMigrator implements VersionedTransformer {
     // Clone the document to prevent accidental mutations on the original data
     // Ex: Importing sample data that is cached at import level, migrations would
     // execute on mutated data the second time.
-    const clonedDoc = cloneDeep(doc);
+    const clonedDoc = _.cloneDeep(doc);
     return this.transformDoc(clonedDoc);
   };
 }
@@ -183,7 +183,7 @@ function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
     }
   }
 
-  registry.getAllTypes().forEach(type => {
+  registry.getAllTypes().forEach((type) => {
     if (type.migrations) {
       assertObject(
         type.migrations,
@@ -209,7 +209,7 @@ function buildActiveMigrations(
 ): ActiveMigrations {
   return typeRegistry
     .getAllTypes()
-    .filter(type => type.migrations && Object.keys(type.migrations).length > 0)
+    .filter((type) => type.migrations && Object.keys(type.migrations).length > 0)
     .reduce((migrations, type) => {
       const transforms = Object.entries(type.migrations!)
         .map(([version, transform]) => ({
@@ -220,7 +220,7 @@ function buildActiveMigrations(
       return {
         ...migrations,
         [type.name]: {
-          latestVersion: _.last(transforms).version,
+          latestVersion: _.last(transforms)!.version,
           transforms,
         },
       };
@@ -292,7 +292,7 @@ function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrat
     ...doc,
     migrationVersion: props(doc).reduce((acc, prop) => {
       const version = propVersion(migrations, prop);
-      return version ? _.set(acc, prop, version) : acc;
+      return version ? set(acc, prop, version) : acc;
     }, {}),
   };
 }
@@ -334,7 +334,7 @@ function wrapWithTry(
  * Finds the first unmigrated property in the specified document.
  */
 function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
-  return props(doc).find(p => {
+  return props(doc).find((p) => {
     const latestVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
 
@@ -431,7 +431,7 @@ function assertNoDowngrades(
   }
 
   const downgrade = Object.keys(migrationVersion).find(
-    k => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
+    (k) => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
   );
 
   if (downgrade) {

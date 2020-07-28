@@ -19,6 +19,7 @@
 
 export * from './bundle';
 export * from './bundle_cache';
+export * from './bundle_refs';
 export * from './worker_config';
 export * from './worker_messages';
 export * from './compiler_messages';
@@ -28,3 +29,4 @@ export * from './array_helpers';
 export * from './event_stream_helpers';
 export * from './disallowed_syntax_plugin';
 export * from './parse_path';
+export * from './theme_tags';

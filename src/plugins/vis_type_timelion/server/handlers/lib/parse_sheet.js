@@ -26,7 +26,7 @@ import PEG from 'pegjs';
 const Parser = PEG.generate(grammar);
 
 export default function parseSheet(sheet) {
-  return _.map(sheet, function(plot) {
+  return _.map(sheet, function (plot) {
     try {
       return Parser.parse(plot).tree;
     } catch (e) {

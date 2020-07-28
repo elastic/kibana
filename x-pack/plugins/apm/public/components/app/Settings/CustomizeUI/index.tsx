@@ -9,13 +9,13 @@ import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CustomLinkOverview } from './CustomLink';
 
-export const CustomizeUI = () => {
+export function CustomizeUI() {
   return (
     <>
       <EuiTitle size="l">
         <h1>
           {i18n.translate('xpack.apm.settings.customizeApp', {
-            defaultMessage: 'Customize app'
+            defaultMessage: 'Customize app',
           })}
         </h1>
       </EuiTitle>
@@ -23,4 +23,4 @@ export const CustomizeUI = () => {
       <CustomLinkOverview />
     </>
   );
-};
+}

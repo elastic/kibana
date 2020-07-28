@@ -27,12 +27,12 @@ const renderers = [
  * Mock all of the render functions to return a `div` containing
  * a predictable string.
  */
-export const renderFunctions = renderers.map(fn => () => ({
+export const renderFunctions = renderers.map((fn) => () => ({
   name: fn,
   displayName: fn,
   help: fn,
   reuseDomNode: true,
-  render: domNode => {
+  render: (domNode) => {
     ReactDOM.render(<div>{fn} mock</div>, domNode);
   },
 }));

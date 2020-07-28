@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function visualize({ loadTestFile }: FtrProviderContext) {
   describe('Visualize', function visualizeTestSuite() {
-    this.tags(['ciGroup4', 'skipFirefox', 'skipCoverage']);
+    this.tags(['ciGroup4', 'skipFirefox']);
 
     loadTestFile(require.resolve('./feature_controls/visualize_security'));
     loadTestFile(require.resolve('./feature_controls/visualize_spaces'));

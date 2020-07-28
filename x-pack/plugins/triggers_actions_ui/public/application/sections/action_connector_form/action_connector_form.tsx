@@ -18,10 +18,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup, DocLinksStart } from 'kibana/public';
+import { HttpSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { ReducerAction } from './connector_reducer';
 import { ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
 import { TypeRegistry } from '../../type_registry';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
   const validationResult = { errors: {} };
@@ -53,6 +54,8 @@ interface ActionConnectorProps {
   http: HttpSetup;
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   docLinks: DocLinksStart;
+  capabilities: ApplicationStart['capabilities'];
+  consumer?: string;
 }
 
 export const ActionConnectorForm = ({
@@ -64,7 +67,11 @@ export const ActionConnectorForm = ({
   http,
   actionTypeRegistry,
   docLinks,
+  capabilities,
+  consumer,
 }: ActionConnectorProps) => {
+  const canSave = hasSaveActionsCapability(capabilities);
+
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
@@ -136,13 +143,13 @@ export const ActionConnectorForm = ({
       >
         <EuiFieldText
           fullWidth
-          autoFocus={true}
+          readOnly={!canSave}
           isInvalid={errors.name.length > 0 && connector.name !== undefined}
           name="name"
           placeholder="Untitled"
           data-test-subj="nameInput"
           value={connector.name || ''}
-          onChange={e => {
+          onChange={(e) => {
             setActionProperty('name', e.target.value);
           }}
           onBlur={() => {
@@ -166,10 +173,12 @@ export const ActionConnectorForm = ({
           <FieldsComponent
             action={connector}
             errors={errors}
+            readOnly={!canSave}
             editActionConfig={setActionConfigProperty}
             editActionSecrets={setActionSecretsProperty}
             http={http}
             docLinks={docLinks}
+            consumer={consumer}
           />
         </Suspense>
       ) : null}

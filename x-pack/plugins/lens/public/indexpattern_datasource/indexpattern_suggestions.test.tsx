@@ -146,7 +146,7 @@ function testInitialState(): IndexPatternPrivateState {
         },
       },
     },
-    showEmptyFields: false,
+    isFirstExistenceFetch: false,
   };
 }
 
@@ -305,7 +305,7 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternRefs: [],
           existingFields: {},
           currentIndexPatternId: '1',
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatterns: {
             1: {
               id: '1',
@@ -510,7 +510,7 @@ describe('IndexPattern Data Source suggestions', () => {
           indexPatternRefs: [],
           existingFields: {},
           currentIndexPatternId: '1',
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatterns: {
             1: {
               id: '1',
@@ -1049,7 +1049,7 @@ describe('IndexPattern Data Source suggestions', () => {
     it('returns no suggestions if there are no columns', () => {
       expect(
         getDatasourceSuggestionsFromCurrentState({
-          showEmptyFields: false,
+          isFirstExistenceFetch: false,
           indexPatternRefs: [],
           existingFields: {},
           indexPatterns: expectedIndexPatterns,
@@ -1308,7 +1308,7 @@ describe('IndexPattern Data Source suggestions', () => {
         ...state,
         indexPatterns: { 1: { ...state.indexPatterns['1'], timeFieldName: undefined } },
       });
-      suggestions.forEach(suggestion => expect(suggestion.table.columns.length).toBe(1));
+      suggestions.forEach((suggestion) => expect(suggestion.table.columns.length).toBe(1));
     });
 
     it('returns simplified versions of table with more than 2 columns', () => {
@@ -1355,7 +1355,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -1475,7 +1475,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -1529,7 +1529,7 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
           },
         },
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -1560,7 +1560,7 @@ describe('IndexPattern Data Source suggestions', () => {
         existingFields: {},
         currentIndexPatternId: '1',
         indexPatterns: expectedIndexPatterns,
-        showEmptyFields: true,
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             ...initialState.layers.first,
@@ -1616,9 +1616,9 @@ function isTableWithBucketColumns(
   columnIds: string[],
   numBuckets: number
 ) {
-  expect(suggestion.table.columns.map(column => column.columnId)).toEqual(columnIds);
+  expect(suggestion.table.columns.map((column) => column.columnId)).toEqual(columnIds);
   expect(
-    suggestion.table.columns.slice(0, numBuckets).every(column => column.operation.isBucketed)
+    suggestion.table.columns.slice(0, numBuckets).every((column) => column.operation.isBucketed)
   ).toBeTruthy();
 }
 
@@ -1627,6 +1627,6 @@ function isTableWithMetricColumns(
   columnIds: string[]
 ) {
   expect(suggestion.table.isMultiRow).toEqual(false);
-  expect(suggestion.table.columns.map(column => column.columnId)).toEqual(columnIds);
-  expect(suggestion.table.columns.every(column => !column.operation.isBucketed)).toBeTruthy();
+  expect(suggestion.table.columns.map((column) => column.columnId)).toEqual(columnIds);
+  expect(suggestion.table.columns.every((column) => !column.operation.isBucketed)).toBeTruthy();
 }

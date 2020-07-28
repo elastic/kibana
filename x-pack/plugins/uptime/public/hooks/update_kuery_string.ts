@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { combineFiltersAndUserSearch, stringifyKueries } from '../lib/helper';
 import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 
 const getKueryString = (urlFilters: string): string => {
   let kueryString = '';

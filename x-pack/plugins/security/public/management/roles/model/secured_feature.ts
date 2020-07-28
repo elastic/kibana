@@ -34,7 +34,7 @@ export class SecuredFeature extends Feature {
     }
 
     this.securedSubFeatures =
-      this.config.subFeatures?.map(sf => new SecuredSubFeature(sf, actionMapping)) ?? [];
+      this.config.subFeatures?.map((sf) => new SecuredSubFeature(sf, actionMapping)) ?? [];
 
     this.subFeaturePrivileges = this.securedSubFeatures.reduce((acc, subFeature) => {
       return [...acc, ...subFeature.privilegeIterator()];

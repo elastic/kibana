@@ -63,7 +63,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
 
       const supportedTypes = context.core.savedObjects.typeRegistry
         .getImportableAndExportableTypes()
-        .map(type => type.name);
+        .map((type) => type.name);
 
       const result = await importSavedObjectsFromStream({
         supportedTypes,

@@ -14,7 +14,7 @@ export function StaticColorForm({
   styleProperty,
   swatches,
 }) {
-  const onColorChange = color => {
+  const onColorChange = (color) => {
     onStaticStyleChange(styleProperty.getStyleName(), { color });
   };
 

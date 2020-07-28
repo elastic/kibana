@@ -1,0 +1,10 @@
+.monSummaryStatusNoWrap {
+  margin-left: $euiSizeM;
+  margin-right: $euiSizeM;
+
+  .monSummaryStatusNoWrap__stat {
+    p {
+      @include euiTextTruncate;
+    }
+  }
+}

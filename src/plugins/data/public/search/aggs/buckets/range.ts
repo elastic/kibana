@@ -19,15 +19,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { BucketAggType } from './bucket_agg_type';
-import { FieldFormat, KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../../../common';
 import { RangeKey } from './range_key';
 import { createFilterRange } from './create_filter/range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { GetInternalStartServicesFn } from '../../../types';
 import { BaseAggParams } from '../types';
-
-const keyCaches = new WeakMap();
-const formats = new WeakMap();
 
 const rangeTitle = i18n.translate('data.search.aggs.buckets.rangeTitle', {
   defaultMessage: 'Range',
@@ -45,80 +42,66 @@ export interface AggParamsRange extends BaseAggParams {
   }>;
 }
 
-export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDependencies) =>
-  new BucketAggType(
-    {
-      name: BUCKET_TYPES.RANGE,
-      title: rangeTitle,
-      createFilter: createFilterRange,
-      makeLabel(aggConfig) {
-        return i18n.translate('data.search.aggs.aggTypesLabel', {
-          defaultMessage: '{fieldName} ranges',
-          values: {
-            fieldName: aggConfig.getFieldDisplayName(),
-          },
-        });
-      },
-      getKey(bucket, key, agg) {
-        let keys = keyCaches.get(agg);
+export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDependencies) => {
+  const keyCaches = new WeakMap();
 
-        if (!keys) {
-          keys = new Map();
-          keyCaches.set(agg, keys);
-        }
-
-        const id = RangeKey.idBucket(bucket);
-
-        key = keys.get(id);
-        if (!key) {
-          key = new RangeKey(bucket);
-          keys.set(id, key);
-        }
-
-        return key;
-      },
-      getFormat(agg) {
-        let aggFormat = formats.get(agg);
-        if (aggFormat) return aggFormat;
-
-        const RangeFormat = FieldFormat.from((range: any) => {
-          const format = agg.fieldOwnFormatter();
-          const gte = '\u2265';
-          const lt = '\u003c';
-          return i18n.translate('data.search.aggs.aggTypes.rangesFormatMessage', {
-            defaultMessage: '{gte} {from} and {lt} {to}',
-            values: {
-              gte,
-              from: format(range.gte),
-              lt,
-              to: format(range.lt),
-            },
-          });
-        });
-
-        aggFormat = new RangeFormat();
-
-        formats.set(agg, aggFormat);
-        return aggFormat;
-      },
-      params: [
-        {
-          name: 'field',
-          type: 'field',
-          filterFieldTypes: [KBN_FIELD_TYPES.NUMBER],
+  return new BucketAggType({
+    name: BUCKET_TYPES.RANGE,
+    title: rangeTitle,
+    createFilter: createFilterRange(getInternalStartServices),
+    makeLabel(aggConfig) {
+      return i18n.translate('data.search.aggs.aggTypesLabel', {
+        defaultMessage: '{fieldName} ranges',
+        values: {
+          fieldName: aggConfig.getFieldDisplayName(),
         },
-        {
-          name: 'ranges',
-          default: [
-            { from: 0, to: 1000 },
-            { from: 1000, to: 2000 },
-          ],
-          write(aggConfig, output) {
-            output.params.ranges = aggConfig.params.ranges;
-            output.params.keyed = true;
-          },
-        },
-      ],
+      });
     },
-    { getInternalStartServices }
-  );
+    getKey(bucket, key, agg) {
+      let keys = keyCaches.get(agg);
+
+      if (!keys) {
+        keys = new Map();
+        keyCaches.set(agg, keys);
+      }
+
+      const id = RangeKey.idBucket(bucket);
+
+      key = keys.get(id);
+      if (!key) {
+        key = new RangeKey(bucket);
+        keys.set(id, key);
+      }
+
+      return key;
+    },
+    getSerializedFormat(agg) {
+      const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+      return {
+        id: 'range',
+        params: {
+          id: format.id,
+          params: format.params,
+        },
+      };
+    },
+    params: [
+      {
+        name: 'field',
+        type: 'field',
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER],
+      },
+      {
+        name: 'ranges',
+        default: [
+          { from: 0, to: 1000 },
+          { from: 1000, to: 2000 },
+        ],
+        write(aggConfig, output) {
+          output.params.ranges = aggConfig.params.ranges;
+          output.params.keyed = true;
+        },
+      },
+    ],
+  });
+};

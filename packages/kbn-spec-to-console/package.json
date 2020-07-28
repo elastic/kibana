@@ -17,8 +17,8 @@
   },
   "homepage": "https://github.com/jbudz/spec-to-console#readme",
   "devDependencies": {
-    "jest": "^24.9.0",
-    "prettier": "^1.19.1"
+    "jest": "^25.5.4",
+    "prettier": "^2.0.5"
   },
   "dependencies": {
     "commander": "^3.0.0",

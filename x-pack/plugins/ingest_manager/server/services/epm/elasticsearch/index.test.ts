@@ -9,7 +9,7 @@ import { getDatasetAssetBaseName } from './index';
 
 test('getBaseName', () => {
   const dataset: Dataset = {
-    id: 'nginx.access',
+    name: 'nginx.access',
     title: 'Nginx Acess Logs',
     release: 'beta',
     type: 'logs',

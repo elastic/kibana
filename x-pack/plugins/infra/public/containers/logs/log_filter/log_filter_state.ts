@@ -48,7 +48,7 @@ export const useLogFilterState: (props: {
 
   const setLogFilterQueryDraft = useMemo(() => {
     const setDraft = (payload: KueryFilterQuery) =>
-      setState(prevState => ({ ...prevState, filterQueryDraft: payload }));
+      setState((prevState) => ({ ...prevState, filterQueryDraft: payload }));
     return (expression: string) =>
       setDraft({
         kind: 'kuery',
@@ -57,7 +57,7 @@ export const useLogFilterState: (props: {
   }, []);
   const applyLogFilterQuery = useMemo(() => {
     const applyQuery = (payload: SerializedFilterQuery) =>
-      setState(prevState => ({
+      setState((prevState) => ({
         ...prevState,
         filterQueryDraft: payload.query,
         filterQuery: payload,
@@ -82,6 +82,7 @@ export const useLogFilterState: (props: {
     }
 
     return true;
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [filterQueryDraft]);
 
   const serializedFilterQuery = useMemo(() => (filterQuery ? filterQuery.serializedQuery : null), [

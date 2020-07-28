@@ -18,10 +18,10 @@
  */
 import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
-import { compact, uniq, map, every, isUndefined } from 'lodash';
+import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
+import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
 import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
@@ -75,7 +75,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   };
 
   setColor = (label: string, color: string) => (event: BaseSyntheticEvent) => {
-    if ((event as KeyboardEvent).keyCode && (event as KeyboardEvent).keyCode !== keyCodes.ENTER) {
+    if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
       return;
     }
 
@@ -106,29 +106,25 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
   };
 
   toggleDetails = (label: string | null) => (event?: BaseSyntheticEvent) => {
-    if (
-      event &&
-      (event as KeyboardEvent).keyCode &&
-      (event as KeyboardEvent).keyCode !== keyCodes.ENTER
-    ) {
+    if (event && (event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
       return;
     }
     this.setState({ selectedLabel: this.state.selectedLabel === label ? null : label });
   };
 
   getSeriesLabels = (data: any[]) => {
-    const values = data.map(chart => chart.series).reduce((a, b) => a.concat(b), []);
+    const values = data.map((chart) => chart.series).reduce((a, b) => a.concat(b), []);
 
-    return compact(uniq(values, 'label')).map((label: any) => ({
+    return compact(uniqBy(values, 'label')).map((label: any) => ({
       ...label,
       values: [label.values[0].seriesRaw],
     }));
   };
 
   setFilterableLabels = (items: LegendItem[]): Promise<void> =>
-    new Promise(async resolve => {
+    new Promise(async (resolve) => {
       const filterableLabels = new Set<string>();
-      items.forEach(async item => {
+      items.forEach(async (item) => {
         const canFilter = await this.canFilter(item);
         if (canFilter) {
           filterableLabels.add(item.label);
@@ -143,7 +139,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     if (CUSTOM_LEGEND_VIS_TYPES.includes(type)) {
       const legendLabels = this.props.vislibVis.getLegendLabels();
       if (legendLabels) {
-        labels = map(legendLabels, label => {
+        labels = map(legendLabels, (label) => {
           return { label };
         });
       }
@@ -229,7 +225,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
 
   renderLegend = (anchorPosition: EuiPopoverProps['anchorPosition']) => (
     <ul className="visLegend__list" id={this.legendId}>
-      {this.state.labels.map(item => (
+      {this.state.labels.map((item) => (
         <VisLegendItem
           item={item}
           key={item.label}

@@ -1,4 +1,4 @@
-==== Running Kibana with `systemd`
+==== Run {kib} with `systemd`
 
 To configure Kibana to start automatically when the system boots up,
 run the following commands:

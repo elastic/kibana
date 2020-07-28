@@ -67,7 +67,7 @@ export class FileDataVisualizerView extends Component {
     this.setState({ hasPermissionToImport });
   }
 
-  onFilePickerChange = files => {
+  onFilePickerChange = (files) => {
     this.overrides = {};
 
     this.setState(
@@ -147,8 +147,8 @@ export class FileDataVisualizerView extends Component {
         // if no overrides were used, store all the settings returned from the endpoint
         this.originalSettings = serverSettings;
       } else {
-        Object.keys(serverOverrides).forEach(o => {
-          const camelCaseO = o.replace(/_\w/g, m => m[1].toUpperCase());
+        Object.keys(serverOverrides).forEach((o) => {
+          const camelCaseO = o.replace(/_\w/g, (m) => m[1].toUpperCase());
           this.overrides[camelCaseO] = serverOverrides[o];
         });
 
@@ -156,7 +156,7 @@ export class FileDataVisualizerView extends Component {
         // e.g. changing the name of the time field which is also the time field
         // will cause the timestamp_field setting to change.
         // if any have changed, update the originalSettings value
-        Object.keys(serverSettings).forEach(o => {
+        Object.keys(serverSettings).forEach((o) => {
           const value = serverSettings[o];
           if (
             this.overrides[o] === undefined &&
@@ -225,7 +225,7 @@ export class FileDataVisualizerView extends Component {
     this.setState({ bottomBarVisible: false });
   };
 
-  setOverrides = overrides => {
+  setOverrides = (overrides) => {
     console.log('setOverrides', overrides);
     this.setState(
       {
@@ -239,7 +239,7 @@ export class FileDataVisualizerView extends Component {
     );
   };
 
-  changeMode = mode => {
+  changeMode = (mode) => {
     this.setState({ mode });
   };
 

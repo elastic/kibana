@@ -1,0 +1,180 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScriptingWarningCallOut should render normally 1`] = `
+<ScriptingWarningCallOut
+  isVisible={true}
+>
+  <EuiCallOut
+    color="warning"
+    iconType="alert"
+    title={
+      <FormattedMessage
+        defaultMessage="Proceed with caution"
+        id="indexPatternManagement.warningCallOutHeader"
+        values={Object {}}
+      />
+    }
+  >
+    <div
+      className="euiCallOut euiCallOut--warning"
+    >
+      <div
+        className="euiCallOutHeader"
+      >
+        <EuiIcon
+          aria-hidden="true"
+          className="euiCallOutHeader__icon"
+          size="m"
+          type="alert"
+        >
+          <div
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+            size="m"
+          />
+        </EuiIcon>
+        <span
+          className="euiCallOutHeader__title"
+        >
+          <FormattedMessage
+            defaultMessage="Proceed with caution"
+            id="indexPatternManagement.warningCallOutHeader"
+            values={Object {}}
+          >
+            <span>
+              Proceed with caution
+            </span>
+          </FormattedMessage>
+        </span>
+      </div>
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
+              id="indexPatternManagement.warningCallOutLabel.callOutDetail"
+              values={
+                Object {
+                  "scripFields": <EuiLink
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      defaultMessage="script fields"
+                      id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
+                      values={Object {}}
+                    />
+                     
+                    <EuiIcon
+                      type="link"
+                    />
+                  </EuiLink>,
+                  "scriptsInAggregation": <EuiLink
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      defaultMessage="scripts in aggregations"
+                      id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
+                      values={Object {}}
+                    />
+                     
+                    <EuiIcon
+                      type="link"
+                    />
+                  </EuiLink>,
+                }
+              }
+            >
+              <span>
+                Please familiarize yourself with 
+                <EuiLink
+                  target="_blank"
+                >
+                  <button
+                    className="euiLink euiLink--primary"
+                    type="button"
+                  >
+                    <FormattedMessage
+                      defaultMessage="script fields"
+                      id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
+                      values={Object {}}
+                    >
+                      <span>
+                        script fields
+                      </span>
+                    </FormattedMessage>
+                     
+                    <EuiIcon
+                      type="link"
+                    >
+                      <div
+                        data-euiicon-type="link"
+                      />
+                    </EuiIcon>
+                  </button>
+                </EuiLink>
+                 and with 
+                <EuiLink
+                  target="_blank"
+                >
+                  <button
+                    className="euiLink euiLink--primary"
+                    type="button"
+                  >
+                    <FormattedMessage
+                      defaultMessage="scripts in aggregations"
+                      id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
+                      values={Object {}}
+                    >
+                      <span>
+                        scripts in aggregations
+                      </span>
+                    </FormattedMessage>
+                     
+                    <EuiIcon
+                      type="link"
+                    >
+                      <div
+                        data-euiicon-type="link"
+                      />
+                    </EuiIcon>
+                  </button>
+                </EuiLink>
+                 before using scripted fields.
+              </span>
+            </FormattedMessage>
+          </p>
+          <p>
+            <FormattedMessage
+              defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!"
+              id="indexPatternManagement.warningCallOut.descriptionLabel"
+              values={Object {}}
+            >
+              <span>
+                Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!
+              </span>
+            </FormattedMessage>
+          </p>
+        </div>
+      </EuiText>
+    </div>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  >
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+  </EuiSpacer>
+</ScriptingWarningCallOut>
+`;
+
+exports[`ScriptingWarningCallOut should render nothing if not visible 1`] = `
+<ScriptingWarningCallOut
+  isVisible={false}
+/>
+`;

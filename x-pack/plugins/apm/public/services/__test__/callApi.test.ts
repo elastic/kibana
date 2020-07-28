@@ -19,8 +19,8 @@ describe('callApi', () => {
   beforeEach(() => {
     http = ({
       get: jest.fn().mockReturnValue({
-        my_key: 'hello_world'
-      })
+        my_key: 'hello_world',
+      }),
     } as unknown) as HttpMock;
 
     // @ts-ignore
@@ -41,7 +41,7 @@ describe('callApi', () => {
       await callApi(http, { pathname: `/api/apm/status/server` });
 
       expect(http.get).toHaveBeenCalledWith('/api/apm/status/server', {
-        query: { _debug: true }
+        query: { _debug: true },
       });
     });
 
@@ -76,15 +76,15 @@ describe('callApi', () => {
       it('should return cached response for identical calls', async () => {
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011' }
+          query: { start: '2010', end: '2011' },
         });
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011' }
+          query: { start: '2010', end: '2011' },
         });
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011' }
+          query: { start: '2010', end: '2011' },
         });
 
         expect(http.get).toHaveBeenCalledTimes(1);
@@ -93,15 +93,15 @@ describe('callApi', () => {
       it('should not return cached response for subsequent calls if arguments change', async () => {
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011', foo: 'bar1' }
+          query: { start: '2010', end: '2011', foo: 'bar1' },
         });
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011', foo: 'bar2' }
+          query: { start: '2010', end: '2011', foo: 'bar2' },
         });
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011', foo: 'bar3' }
+          query: { start: '2010', end: '2011', foo: 'bar3' },
         });
 
         expect(http.get).toHaveBeenCalledTimes(3);
@@ -110,15 +110,15 @@ describe('callApi', () => {
       it('should not return cached response if `end` is a future timestamp', async () => {
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { end: '2030' }
+          query: { end: '2030' },
         });
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { end: '2030' }
+          query: { end: '2030' },
         });
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { end: '2030' }
+          query: { end: '2030' },
         });
 
         expect(http.get).toHaveBeenCalledTimes(3);
@@ -127,15 +127,15 @@ describe('callApi', () => {
       it('should return cached response if calls contain `end` param in the past', async () => {
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2009', end: '2010' }
+          query: { start: '2009', end: '2010' },
         });
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2009', end: '2010' }
+          query: { start: '2009', end: '2010' },
         });
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2009', end: '2010' }
+          query: { start: '2009', end: '2010' },
         });
 
         expect(http.get).toHaveBeenCalledTimes(1);
@@ -144,15 +144,15 @@ describe('callApi', () => {
       it('should return cached response even if order of properties change', async () => {
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { end: '2010', start: '2009' }
+          query: { end: '2010', start: '2009' },
         });
         await callApi(http, {
           pathname: `/api/kibana`,
-          query: { start: '2009', end: '2010' }
+          query: { start: '2009', end: '2010' },
         });
         await callApi(http, {
           query: { start: '2009', end: '2010' },
-          pathname: `/api/kibana`
+          pathname: `/api/kibana`,
         });
 
         expect(http.get).toHaveBeenCalledTimes(1);
@@ -162,17 +162,17 @@ describe('callApi', () => {
         await callApi(http, {
           isCachable: false,
           pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011' }
+          query: { start: '2010', end: '2011' },
         });
         await callApi(http, {
           isCachable: false,
           pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011' }
+          query: { start: '2010', end: '2011' },
         });
         await callApi(http, {
           isCachable: false,
           pathname: `/api/kibana`,
-          query: { start: '2010', end: '2011' }
+          query: { start: '2010', end: '2011' },
         });
 
         expect(http.get).toHaveBeenCalledTimes(3);
@@ -182,17 +182,17 @@ describe('callApi', () => {
         await callApi(http, {
           isCachable: true,
           pathname: `/api/kibana`,
-          query: { end: '2030' }
+          query: { end: '2030' },
         });
         await callApi(http, {
           isCachable: true,
           pathname: `/api/kibana`,
-          query: { end: '2030' }
+          query: { end: '2030' },
         });
         await callApi(http, {
           isCachable: true,
           pathname: `/api/kibana`,
-          query: { end: '2030' }
+          query: { end: '2030' },
         });
 
         expect(http.get).toHaveBeenCalledTimes(1);

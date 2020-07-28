@@ -24,7 +24,7 @@ import { LiteralTypeBuildNode } from '../node_types/types';
 
 export function buildNodeParams(fieldName: string, points: LatLon[]) {
   const fieldNameArg = nodeTypes.literal.buildNode(fieldName);
-  const args = points.map(point => {
+  const args = points.map((point) => {
     const latLon = `${point.lat}, ${point.lon}`;
     return nodeTypes.literal.buildNode(latLon);
   });

@@ -38,7 +38,7 @@ export interface IndexMap {
  */
 export function createIndexMap({ kibanaIndexName, registry, indexMap }: CreateIndexMapOptions) {
   const map: IndexMap = {};
-  Object.keys(indexMap).forEach(type => {
+  Object.keys(indexMap).forEach((type) => {
     const typeDef = registry.getType(type);
     const script = typeDef?.convertToAliasScript;
     // Defaults to kibanaIndexName if indexPattern isn't defined

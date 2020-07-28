@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { px, units } from '../../../../../../../style/variables';
 
@@ -16,13 +16,11 @@ const ToggleButtonContainer = styled.div`
 `;
 
 interface Props {
+  children: ReactNode;
   previewHeight: number;
 }
 
-export const TruncateHeightSection: React.FC<Props> = ({
-  children,
-  previewHeight
-}) => {
+export function TruncateHeightSection({ children, previewHeight }: Props) {
   const contentContainerEl = useRef<HTMLDivElement>(null);
 
   const [showToggle, setShowToggle] = useState(true);
@@ -42,7 +40,7 @@ export const TruncateHeightSection: React.FC<Props> = ({
         ref={contentContainerEl}
         style={{
           overflow: 'hidden',
-          maxHeight: isOpen ? 'initial' : px(previewHeight)
+          maxHeight: isOpen ? 'initial' : px(previewHeight),
         }}
       >
         {children}
@@ -57,20 +55,20 @@ export const TruncateHeightSection: React.FC<Props> = ({
             <EuiIcon
               style={{
                 transition: 'transform 0.1s',
-                transform: `rotate(${isOpen ? 90 : 0}deg)`
+                transform: `rotate(${isOpen ? 90 : 0}deg)`,
               }}
               type="arrowRight"
             />{' '}
             {isOpen
               ? i18n.translate('xpack.apm.toggleHeight.showLessButtonLabel', {
-                  defaultMessage: 'Show fewer lines'
+                  defaultMessage: 'Show fewer lines',
                 })
               : i18n.translate('xpack.apm.toggleHeight.showMoreButtonLabel', {
-                  defaultMessage: 'Show more lines'
+                  defaultMessage: 'Show more lines',
                 })}
           </EuiLink>
         </ToggleButtonContainer>
       ) : null}
     </Fragment>
   );
-};
+}

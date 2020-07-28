@@ -61,7 +61,7 @@ export default new Chainable('aggregate', {
     if (!fn)
       throw new Error('.aggregate() function must be one of: ' + _.keys(functions).join(', '));
 
-    return alter(args, function(eachSeries) {
+    return alter(args, function (eachSeries) {
       const times = _.map(eachSeries.data, 0);
       const values = _.map(eachSeries.data, 1);
 

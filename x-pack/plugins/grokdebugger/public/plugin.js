@@ -6,10 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
-import { registerFeature } from './register_feature';
-import { PLUGIN } from '../common/constants';
 
-export class Plugin {
+import { PLUGIN } from '../common/constants';
+import { registerFeature } from './register_feature';
+
+export class GrokDebuggerUIPlugin {
   setup(coreSetup, plugins) {
     registerFeature(plugins.home);
 
@@ -20,7 +21,7 @@ export class Plugin {
       }),
       id: PLUGIN.ID,
       enableRouting: false,
-      async mount(context, { element }) {
+      async mount({ element }) {
         const [coreStart] = await coreSetup.getStartServices();
         const license = await plugins.licensing.license$.pipe(first()).toPromise();
         const { renderApp } = await import('./render_app');
@@ -28,7 +29,7 @@ export class Plugin {
       },
     });
 
-    plugins.licensing.license$.subscribe(license => {
+    plugins.licensing.license$.subscribe((license) => {
       if (!license.isActive && !devTool.isDisabled()) {
         devTool.disable();
       } else if (devTool.isDisabled()) {

@@ -6,7 +6,7 @@
 
 import { MapStoreState } from '../reducers/store';
 
-import { FLYOUT_STATE, INDEXING_STAGE } from '../reducers/ui';
+import { FLYOUT_STATE } from '../reducers/ui';
 
 export const getFlyoutDisplay = ({ ui }: MapStoreState): FLYOUT_STATE => ui.flyoutDisplay;
 export const getIsSetViewOpen = ({ ui }: MapStoreState): boolean => ui.isSetViewOpen;
@@ -14,5 +14,3 @@ export const getIsLayerTOCOpen = ({ ui }: MapStoreState): boolean => ui.isLayerT
 export const getOpenTOCDetails = ({ ui }: MapStoreState): string[] => ui.openTOCDetails;
 export const getIsFullScreen = ({ ui }: MapStoreState): boolean => ui.isFullScreen;
 export const getIsReadOnly = ({ ui }: MapStoreState): boolean => ui.isReadOnly;
-export const getIndexingStage = ({ ui }: MapStoreState): INDEXING_STAGE | null =>
-  ui.importIndexingStage;

@@ -45,7 +45,7 @@ export class SpecDefinitionsService {
       copiedDescription = { ...this.endpoints[endpoint] };
     }
     let urlParamsDef: any;
-    _.each(description.patterns || [], function(p) {
+    _.each(description.patterns || [], function (p) {
       if (p.indexOf('{indices}') >= 0) {
         urlParamsDef = urlParamsDef || {};
         urlParamsDef.ignore_unavailable = '__flag__';
@@ -55,11 +55,11 @@ export class SpecDefinitionsService {
     });
 
     if (urlParamsDef) {
-      description.url_params = _.extend(description.url_params || {}, copiedDescription.url_params);
+      description.url_params = _.assign(description.url_params || {}, copiedDescription.url_params);
       _.defaults(description.url_params, urlParamsDef);
     }
 
-    _.extend(copiedDescription, description);
+    _.assign(copiedDescription, description);
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],
@@ -114,7 +114,7 @@ export class SpecDefinitionsService {
     const overrideFiles = glob.sync(join(dirname, 'overrides', '*.json'));
 
     return generatedFiles.reduce((acc, file) => {
-      const overrideFile = overrideFiles.find(f => basename(f) === basename(file));
+      const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
       const loadedSpec = JSON.parse(readFileSync(file, 'utf8'));
       if (overrideFile) {
         merge(loadedSpec, JSON.parse(readFileSync(overrideFile, 'utf8')));
@@ -135,16 +135,16 @@ export class SpecDefinitionsService {
 
   private loadJsonSpec() {
     const result = this.loadJSONSpecInDir(PATH_TO_OSS_JSON_SPEC);
-    this.extensionSpecFilePaths.forEach(extensionSpecFilePath => {
+    this.extensionSpecFilePaths.forEach((extensionSpecFilePath) => {
       merge(result, this.loadJSONSpecInDir(extensionSpecFilePath));
     });
 
-    Object.keys(result).forEach(endpoint => {
+    Object.keys(result).forEach((endpoint) => {
       this.addEndpointDescription(endpoint, result[endpoint]);
     });
   }
 
   private loadJSSpec() {
-    jsSpecLoaders.forEach(addJsSpec => addJsSpec(this));
+    jsSpecLoaders.forEach((addJsSpec) => addJsSpec(this));
   }
 }

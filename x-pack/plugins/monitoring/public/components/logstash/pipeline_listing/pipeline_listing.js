@@ -24,6 +24,7 @@ import { Sparkline } from '../../../components/sparkline';
 import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export class PipelineListing extends Component {
   tooltipXValueFormatter(xValue, dateFormat) {
@@ -36,7 +37,6 @@ export class PipelineListing extends Component {
 
   getColumns() {
     const { onBrush, dateFormat } = this.props;
-    const { kbnUrl, scope } = this.props.angular;
 
     return [
       {
@@ -45,15 +45,8 @@ export class PipelineListing extends Component {
         }),
         field: 'id',
         sortable: true,
-        render: id => (
-          <EuiLink
-            data-test-subj="id"
-            onClick={() => {
-              scope.$evalAsync(() => {
-                kbnUrl.changePath(`/logstash/pipelines/${id}`);
-              });
-            }}
-          >
+        render: (id) => (
+          <EuiLink data-test-subj="id" href={getSafeForExternalLink(`#/logstash/pipelines/${id}`)}>
             {id}
           </EuiLink>
         ),
@@ -73,7 +66,7 @@ export class PipelineListing extends Component {
                   series={throughput.data}
                   onBrush={onBrush}
                   tooltip={{
-                    xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
+                    xValueFormatter: (value) => this.tooltipXValueFormatter(value, dateFormat),
                     yValueFormatter: partialRight(
                       this.tooltipYValueFormatter,
                       throughput.metric.format,
@@ -105,7 +98,7 @@ export class PipelineListing extends Component {
                   series={nodesCount.data}
                   onBrush={onBrush}
                   tooltip={{
-                    xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
+                    xValueFormatter: (value) => this.tooltipXValueFormatter(value, dateFormat),
                     yValueFormatter: partialRight(
                       this.tooltipYValueFormatter,
                       nodesCount.metric.format,

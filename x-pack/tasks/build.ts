@@ -8,7 +8,7 @@ import execa from 'execa';
 import { resolve } from 'path';
 import { writeFileSync } from 'fs';
 
-import pluginHelpers from '@kbn/plugin-helpers';
+import * as pluginHelpers from '@kbn/plugin-helpers';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import gulp from 'gulp';
 import del from 'del';
@@ -16,7 +16,6 @@ import fancyLog from 'fancy-log';
 import chalk from 'chalk';
 
 import { generateNoticeFromSource } from '../../src/dev/notice';
-import { prepareTask } from './prepare';
 import { gitInfo } from './helpers/git_info';
 import { PKG_NAME } from './helpers/pkg';
 import { BUILD_VERSION } from './helpers/build_version';
@@ -78,7 +77,6 @@ async function generateNoticeText() {
 export const buildTask = gulp.series(
   cleanBuildTask,
   reportTask,
-  prepareTask,
   buildCanvasShareableRuntime,
   pluginHelpersBuild,
   generateNoticeText

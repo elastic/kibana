@@ -49,7 +49,7 @@ export class JsonParamType extends BaseParamType {
             return _(a)
               .keys()
               .union(_.keys(b))
-              .transform(function(dest, key) {
+              .transform(function (dest: any, key) {
                 const val = compare(a[key], b[key]);
                 if (val !== undefined) dest[key] = val;
               }, {})
@@ -58,7 +58,7 @@ export class JsonParamType extends BaseParamType {
 
           function mergeArrays(a: any, b: any): any {
             // attempt to merge each value
-            return _.times(Math.max(a.length, b.length), function(i) {
+            return _.times(Math.max(a.length, b.length), function (i) {
               return compare(a[i], b[i]);
             });
           }

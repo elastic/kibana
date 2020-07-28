@@ -21,7 +21,7 @@ import { Subscription } from 'rxjs';
 
 import { IUiSettingsClient } from '../../ui_settings';
 import { CoreService } from '../../../types';
-// @ts-ignore
+// @ts-expect-error
 import disableAnimationsCss from '!!raw-loader!./disable_animations.css';
 
 interface StartDeps {

@@ -7,13 +7,9 @@
 import { IRouter } from 'kibana/server';
 
 import { LIST_ITEM_URL } from '../../common/constants';
-import {
-  buildRouteValidation,
-  buildSiemResponse,
-  transformError,
-  validate,
-} from '../siem_server_deps';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { listItemArraySchema, listItemSchema, readListItemSchema } from '../../common/schemas';
+import { validate } from '../../common/siem_common_deps';
 
 import { getListClient } from '.';
 
@@ -21,7 +17,7 @@ export const readListItemRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: LIST_ITEM_URL,
       validate: {
@@ -77,7 +73,7 @@ export const readListItemRoute = (router: IRouter): void => {
           }
         } else {
           return siemResponse.error({
-            body: `Either "list_id" or "id" needs to be defined in the request`,
+            body: 'Either "list_id" or "id" needs to be defined in the request',
             statusCode: 400,
           });
         }

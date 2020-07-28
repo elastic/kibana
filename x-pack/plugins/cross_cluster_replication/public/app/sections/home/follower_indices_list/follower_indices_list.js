@@ -17,8 +17,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { routing } from '../../../services/routing';
-import { extractQueryParams } from '../../../services/query_params';
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { extractQueryParams } from '../../../../shared_imports';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
 import { API_STATUS, UIM_FOLLOWER_INDEX_LIST_LOAD } from '../../../constants';
 import { SectionLoading, SectionError, SectionUnauthorized } from '../../../components';
@@ -94,7 +94,7 @@ export class FollowerIndicesList extends PureComponent {
   }
 
   renderHeader() {
-    const { isAuthorized } = this.props;
+    const { isAuthorized, history } = this.props;
 
     return (
       <Fragment>
@@ -113,7 +113,7 @@ export class FollowerIndicesList extends PureComponent {
           <EuiFlexItem grow={false}>
             {isAuthorized && (
               <EuiButton
-                {...routing.getRouterLinkProps('/follower_indices/add')}
+                {...reactRouterNavigate(history, `/follower_indices/add`)}
                 fill
                 iconType="plusInCircle"
                 data-test-subj="createFollowerIndexButton"
@@ -204,7 +204,7 @@ export class FollowerIndicesList extends PureComponent {
         }
         actions={
           <EuiButton
-            {...routing.getRouterLinkProps('/follower_indices/add')}
+            {...reactRouterNavigate(this.props.history, `/follower_indices/add`)}
             fill
             iconType="plusInCircle"
             data-test-subj="createFollowerIndexButton"

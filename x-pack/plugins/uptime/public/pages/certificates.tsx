@@ -5,7 +5,7 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,6 +13,8 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiHideFor,
+  EuiShowFor,
 } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -70,38 +72,59 @@ export const CertificatesPage: React.FC = () => {
   }, [dispatch, page, search, sort.direction, sort.field, lastRefresh]);
 
   const { data: certificates } = useSelector(certificatesSelector);
+  const history = useHistory();
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem grow={false} style={{ marginRight: 'auto', alignSelf: 'center' }}>
-          <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
-            <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-              {labels.RETURN_TO_OVERVIEW}
-            </EuiButtonEmpty>
-          </Link>
+          <EuiButtonEmpty
+            color="primary"
+            data-test-subj="uptimeCertificatesToOverviewLink"
+            href={history.createHref({ pathname: OVERVIEW_ROUTE })}
+            iconType="arrowLeft"
+            size="s"
+          >
+            {labels.RETURN_TO_OVERVIEW}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ToggleAlertFlyoutButton alertOptions={[CLIENT_ALERT_TYPES.TLS]} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-          <Link to={SETTINGS_ROUTE} data-test-subj="uptimeCertificatesToOverviewLink">
-            <EuiButtonEmpty size="s" color="primary" iconType="gear">
-              {labels.SETTINGS_ON_CERT}
-            </EuiButtonEmpty>
-          </Link>
+          <EuiButtonEmpty
+            aria-label={labels.SETTINGS_ON_CERT}
+            color="primary"
+            data-test-subj="uptimeCertificatesToOverviewLink"
+            iconType="gear"
+            href={history.createHref({ pathname: SETTINGS_ROUTE })}
+            size="s"
+          >
+            <EuiHideFor sizes={['xs']}> {labels.SETTINGS_ON_CERT}</EuiHideFor>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="refresh"
-            onClick={() => {
-              refreshApp();
-            }}
-            data-test-subj="superDatePickerApplyTimeButton"
-          >
-            {labels.REFRESH_CERT}
-          </EuiButton>
+          <EuiHideFor sizes={['xs']}>
+            <EuiButton
+              fill
+              iconType="refresh"
+              onClick={() => {
+                refreshApp();
+              }}
+              data-test-subj="superDatePickerApplyTimeButton"
+            >
+              {labels.REFRESH_CERT}
+            </EuiButton>
+          </EuiHideFor>
+          <EuiShowFor sizes={['xs']}>
+            <EuiButtonEmpty
+              iconType="refresh"
+              onClick={() => {
+                refreshApp();
+              }}
+              data-test-subj="superDatePickerApplyTimeButton"
+            />
+          </EuiShowFor>
         </EuiFlexItem>
       </EuiFlexGroup>
 

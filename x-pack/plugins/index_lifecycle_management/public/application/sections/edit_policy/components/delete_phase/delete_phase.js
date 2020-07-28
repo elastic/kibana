@@ -7,11 +7,12 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiDescribedFormGroup, EuiSwitch } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiSwitch, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import { PHASE_DELETE, PHASE_ENABLED } from '../../../../constants';
-import { ActiveBadge, PhaseErrorMessage } from '../../../components';
+import { PHASE_DELETE, PHASE_ENABLED, PHASE_WAIT_FOR_SNAPSHOT_POLICY } from '../../../../constants';
+import { ActiveBadge, LearnMoreLink, OptionalLabel, PhaseErrorMessage } from '../../../components';
 import { MinAgeInput } from '../min_age_input';
+import { SnapshotPolicies } from '../snapshot_policies';
 
 export class DeletePhase extends PureComponent {
   static propTypes = {
@@ -63,7 +64,7 @@ export class DeletePhase extends PureComponent {
                 }
                 id={`${PHASE_DELETE}-${PHASE_ENABLED}`}
                 checked={phaseData[PHASE_ENABLED]}
-                onChange={e => {
+                onChange={(e) => {
                   setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
                 aria-controls="deletePhaseContent"
@@ -85,6 +86,47 @@ export class DeletePhase extends PureComponent {
             <div />
           )}
         </EuiDescribedFormGroup>
+        {phaseData[PHASE_ENABLED] ? (
+          <EuiDescribedFormGroup
+            title={
+              <h3>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotTitle"
+                  defaultMessage="Wait for snapshot policy"
+                />
+              </h3>
+            }
+            description={
+              <EuiTextColor color="subdued">
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotDescription"
+                  defaultMessage="Specify a snapshot policy to be executed before the deletion of the index. This ensures that a snapshot of the deleted index is available."
+                />{' '}
+                <LearnMoreLink docPath="ilm-wait-for-snapshot.html" />
+              </EuiTextColor>
+            }
+            titleSize="xs"
+            fullWidth
+          >
+            <EuiFormRow
+              id="deletePhaseWaitForSnapshot"
+              label={
+                <Fragment>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.waitForSnapshotLabel"
+                    defaultMessage="Snapshot policy name"
+                  />
+                  <OptionalLabel />
+                </Fragment>
+              }
+            >
+              <SnapshotPolicies
+                value={phaseData[PHASE_WAIT_FOR_SNAPSHOT_POLICY]}
+                onChange={(value) => setPhaseData(PHASE_WAIT_FOR_SNAPSHOT_POLICY, value)}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+        ) : null}
       </div>
     );
   }

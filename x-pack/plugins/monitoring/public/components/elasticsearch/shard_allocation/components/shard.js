@@ -56,13 +56,13 @@ export class Shard extends React.Component {
     const self = this;
     if (shard.tooltip_message) {
       key = this.generateKey();
-      vents.on(key, function(action) {
+      vents.on(key, function (action) {
         self.setState({ tooltipVisible: action === 'show' });
       });
     }
   }
 
-  generateKey = relocating => {
+  generateKey = (relocating) => {
     const shard = this.props.shard;
     const shardType = shard.primary ? 'primary' : 'replica';
     const additionId = shard.state === 'UNASSIGNED' ? Math.random() : '';
@@ -79,7 +79,7 @@ export class Shard extends React.Component {
     }
   }
 
-  toggle = event => {
+  toggle = (event) => {
     if (this.props.shard.tooltip_message) {
       const action = event.type === 'mouseenter' ? 'show' : 'hide';
       const key = this.generateKey(true);

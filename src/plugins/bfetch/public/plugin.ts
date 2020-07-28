@@ -78,7 +78,7 @@ export class BfetchPublicPlugin
   private fetchStreaming = (
     version: string,
     basePath: string
-  ): BfetchPublicSetup['fetchStreaming'] => params =>
+  ): BfetchPublicSetup['fetchStreaming'] => (params) =>
     fetchStreamingStatic({
       ...params,
       url: `${basePath}/${removeLeadingSlash(params.url)}`,
@@ -91,7 +91,7 @@ export class BfetchPublicPlugin
 
   private batchedFunction = (
     fetchStreaming: BfetchPublicContract['fetchStreaming']
-  ): BfetchPublicContract['batchedFunction'] => params =>
+  ): BfetchPublicContract['batchedFunction'] => (params) =>
     createStreamingBatchedFunction({
       ...params,
       fetchStreaming: params.fetchStreaming || fetchStreaming,

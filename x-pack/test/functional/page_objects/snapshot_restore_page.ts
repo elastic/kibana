@@ -30,7 +30,7 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
       const table = await testSubjects.find('repositoryTable');
       const rows = await table.findAllByTestSubject('row');
       return await Promise.all(
-        rows.map(async row => {
+        rows.map(async (row) => {
           return {
             repoName: await (await row.findByTestSubject('Name_cell')).getVisibleText(),
             repoLink: await (await row.findByTestSubject('Name_cell')).findByCssSelector('a'),
@@ -44,7 +44,7 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
     async viewRepositoryDetails(name: string) {
       const repos = await this.getRepoList();
       if (repos.length === 1) {
-        const repoToView = repos.filter(r => (r.repoName = name))[0];
+        const repoToView = repos.filter((r) => (r.repoName = name))[0];
         await repoToView.repoLink.click();
       }
       await retry.waitForWithTimeout(`Repo title should be ${name}`, 10000, async () => {

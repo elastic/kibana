@@ -5,13 +5,13 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { CategoryId, Category } from '../../../../../common/types/categories';
-import { callWithRequestType } from '../../../../../common/types/kibana';
 
-export function topCategoriesProvider(callWithRequest: callWithRequestType) {
+export function topCategoriesProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
   async function getTotalCategories(jobId: string): Promise<{ total: number }> {
-    const totalResp = await callWithRequest('search', {
+    const totalResp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -37,7 +37,7 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
-    const top: SearchResponse<any> = await callWithRequest('search', {
+    const top: SearchResponse<any> = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -99,7 +99,7 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
             field: 'category_id',
           },
         };
-    const result: SearchResponse<any> = await callWithRequest('search', {
+    const result: SearchResponse<any> = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size,
       body: {
@@ -125,7 +125,7 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
     const catCounts = await getTopCategoryCounts(jobId, numberOfCategories);
     const categories = await getCategories(
       jobId,
-      catCounts.map(c => c.id),
+      catCounts.map((c) => c.id),
       catCounts.length || numberOfCategories
     );
 
@@ -149,7 +149,7 @@ export function topCategoriesProvider(callWithRequest: callWithRequestType) {
     } else {
       return {
         total,
-        categories: categories.map(category => {
+        categories: categories.map((category) => {
           return {
             category,
           };

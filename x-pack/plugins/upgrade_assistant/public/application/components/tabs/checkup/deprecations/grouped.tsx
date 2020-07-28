@@ -36,7 +36,7 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
 
   if (search.length > 0) {
     // Change everything to lower case for a case-insensitive comparison
-    conditions.push(dep => {
+    conditions.push((dep) => {
       try {
         const searchReg = new RegExp(search.toLowerCase());
         return Boolean(
@@ -53,7 +53,7 @@ export const filterDeps = (level: LevelFilterOption, search: string = '') => {
   }
 
   // Return true if every condition function returns true (boolean AND)
-  return (dep: EnrichedDeprecationInfo) => conditions.map(c => c(dep)).every(t => t);
+  return (dep: EnrichedDeprecationInfo) => conditions.map((c) => c(dep)).every((t) => t);
 };
 
 /**
@@ -67,7 +67,7 @@ export const DeprecationAccordion: FunctionComponent<{
   forceExpand: boolean;
 }> = ({ id, deprecations, title, currentGroupBy, forceExpand }) => {
   const hasIndices = Boolean(
-    currentGroupBy === GroupByOption.message && deprecations.filter(d => d.index).length
+    currentGroupBy === GroupByOption.message && deprecations.filter((d) => d.index).length
   );
   const numIndices = hasIndices ? deprecations.length : null;
 
@@ -219,7 +219,7 @@ export class GroupedDeprecations extends React.Component<
             .sort()
             // Apply pagination
             .slice(currentPage * PER_PAGE, (currentPage + 1) * PER_PAGE)
-            .map(groupName => [
+            .map((groupName) => [
               <DeprecationAccordion
                 key={expandNumber}
                 id={`depgroup-${groupName}`}

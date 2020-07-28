@@ -10,14 +10,20 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'crossClusterReplication']);
   const log = getService('log');
+  const security = getService('security');
 
-  describe('Home page', function() {
+  describe('Home page', function () {
     before(async () => {
+      await security.testUser.setRoles(['global_ccr_role']);
       await pageObjects.common.navigateToApp('crossClusterReplication');
     });
 
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     it('Loads the app', async () => {
-      await log.debug(`Checking for app title to be Cross-Cluster Replication`);
+      log.debug(`Checking for app title to be Cross-Cluster Replication`);
       const appTitleText = await pageObjects.crossClusterReplication.appTitleText();
       expect(appTitleText).to.be('Cross-Cluster Replication');
 

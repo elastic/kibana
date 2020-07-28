@@ -7,14 +7,14 @@
 import sinon from 'sinon';
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = server => {
+const registerHttpRequestMockHelpers = (server) => {
   const mockResponse = (defaultResponse, response) => [
     200,
     { 'Content-Type': 'application/json' },
     JSON.stringify({ ...defaultResponse, ...response }),
   ];
 
-  const setLoadFollowerIndicesResponse = response => {
+  const setLoadFollowerIndicesResponse = (response) => {
     const defaultResponse = { indices: [] };
 
     server.respondWith(
@@ -24,7 +24,7 @@ const registerHttpRequestMockHelpers = server => {
     );
   };
 
-  const setLoadAutoFollowPatternsResponse = response => {
+  const setLoadAutoFollowPatternsResponse = (response) => {
     const defaultResponse = { patterns: [] };
 
     server.respondWith(
@@ -34,7 +34,7 @@ const registerHttpRequestMockHelpers = server => {
     );
   };
 
-  const setDeleteAutoFollowPatternResponse = response => {
+  const setDeleteAutoFollowPatternResponse = (response) => {
     const defaultResponse = { errors: [], itemsDeleted: [] };
 
     server.respondWith(
@@ -44,7 +44,7 @@ const registerHttpRequestMockHelpers = server => {
     );
   };
 
-  const setAutoFollowStatsResponse = response => {
+  const setAutoFollowStatsResponse = (response) => {
     const defaultResponse = {
       numberOfFailedFollowIndices: 0,
       numberOfFailedRemoteClusterStateRequests: 0,
@@ -82,7 +82,7 @@ const registerHttpRequestMockHelpers = server => {
     }
   };
 
-  const setGetAutoFollowPatternResponse = response => {
+  const setGetAutoFollowPatternResponse = (response) => {
     const defaultResponse = {};
 
     server.respondWith(
@@ -100,7 +100,7 @@ const registerHttpRequestMockHelpers = server => {
     ]);
   };
 
-  const setGetFollowerIndexResponse = response => {
+  const setGetFollowerIndexResponse = (response) => {
     const defaultResponse = {};
 
     server.respondWith(

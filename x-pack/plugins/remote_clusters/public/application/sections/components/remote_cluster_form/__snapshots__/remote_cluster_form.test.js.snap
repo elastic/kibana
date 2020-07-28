@@ -251,7 +251,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                     <div
                       className="euiFormRow euiFormRow--fullWidth"
                       data-test-subj="remoteClusterFormNameFormRow"
-                      id="mockId-row"
+                      id="staticGenerator_staticId-row"
                     >
                       <div
                         className="euiFormRow__labelWrapper"
@@ -259,7 +259,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         <EuiFormLabel
                           aria-invalid={false}
                           className="euiFormRow__label"
-                          htmlFor="mockId"
+                          htmlFor="staticGenerator_staticId"
                           isFocused={false}
                           isInvalid={false}
                           type="label"
@@ -267,7 +267,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="mockId"
+                            htmlFor="staticGenerator_staticId"
                           >
                             <FormattedMessage
                               defaultMessage="Name"
@@ -283,10 +283,10 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         className="euiFormRow__fieldWrapper"
                       >
                         <EuiFieldText
-                          aria-describedby="mockId-help"
+                          aria-describedby="staticGenerator_staticId-help"
                           data-test-subj="remoteClusterFormNameInput"
                           fullWidth={true}
-                          id="mockId"
+                          id="staticGenerator_staticId"
                           isInvalid={false}
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -295,7 +295,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         >
                           <EuiFormControlLayout
                             fullWidth={true}
-                            inputId="mockId"
+                            inputId="staticGenerator_staticId"
                           >
                             <div
                               className="euiFormControlLayout euiFormControlLayout--fullWidth"
@@ -307,10 +307,10 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   isInvalid={false}
                                 >
                                   <input
-                                    aria-describedby="mockId-help"
+                                    aria-describedby="staticGenerator_staticId-help"
                                     className="euiFieldText euiFieldText--fullWidth"
                                     data-test-subj="remoteClusterFormNameInput"
-                                    id="mockId"
+                                    id="staticGenerator_staticId"
                                     onBlur={[Function]}
                                     onChange={[Function]}
                                     onFocus={[Function]}
@@ -325,11 +325,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         </EuiFieldText>
                         <EuiFormHelpText
                           className="euiFormRow__text"
-                          id="mockId-help"
+                          id="staticGenerator_staticId-help"
                         >
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="mockId-help"
+                            id="staticGenerator_staticId-help"
                           >
                             <FormattedMessage
                               defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
@@ -462,7 +462,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           >
                             <div
                               className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
-                              id="mockId-row"
+                              id="staticGenerator_staticId-row"
                             >
                               <div
                                 className="euiFormRow__fieldWrapper"
@@ -470,7 +470,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                 <EuiSwitch
                                   checked={true}
                                   data-test-subj="remoteClusterFormConnectionModeToggle"
-                                  id="mockId"
+                                  id="staticGenerator_staticId"
                                   label={
                                     <FormattedMessage
                                       defaultMessage="Use proxy mode"
@@ -487,10 +487,10 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   >
                                     <button
                                       aria-checked={true}
-                                      aria-labelledby="mockId"
+                                      aria-labelledby="staticGenerator_staticId"
                                       className="euiSwitch__button"
                                       data-test-subj="remoteClusterFormConnectionModeToggle"
-                                      id="mockId"
+                                      id="staticGenerator_staticId"
                                       onBlur={[Function]}
                                       onClick={[Function]}
                                       onFocus={[Function]}
@@ -533,7 +533,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                     </button>
                                     <span
                                       className="euiSwitch__label"
-                                      id="mockId"
+                                      id="staticGenerator_staticId"
                                       onClick={[Function]}
                                     >
                                       <FormattedMessage
@@ -595,7 +595,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                     <div
                       className="euiFormRow euiFormRow--fullWidth"
                       data-test-subj="remoteClusterFormProxyAddressFormRow"
-                      id="mockId-row"
+                      id="staticGenerator_staticId-row"
                     >
                       <div
                         className="euiFormRow__labelWrapper"
@@ -603,7 +603,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         <EuiFormLabel
                           aria-invalid={false}
                           className="euiFormRow__label"
-                          htmlFor="mockId"
+                          htmlFor="staticGenerator_staticId"
                           isFocused={false}
                           isInvalid={false}
                           type="label"
@@ -611,7 +611,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="mockId"
+                            htmlFor="staticGenerator_staticId"
                           >
                             <FormattedMessage
                               defaultMessage="Proxy address"
@@ -627,10 +627,10 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         className="euiFormRow__fieldWrapper"
                       >
                         <EuiFieldText
-                          aria-describedby="mockId-help"
+                          aria-describedby="staticGenerator_staticId-help"
                           data-test-subj="remoteClusterFormProxyAddressInput"
                           fullWidth={true}
-                          id="mockId"
+                          id="staticGenerator_staticId"
                           isInvalid={false}
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -640,7 +640,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         >
                           <EuiFormControlLayout
                             fullWidth={true}
-                            inputId="mockId"
+                            inputId="staticGenerator_staticId"
                           >
                             <div
                               className="euiFormControlLayout euiFormControlLayout--fullWidth"
@@ -652,10 +652,10 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   isInvalid={false}
                                 >
                                   <input
-                                    aria-describedby="mockId-help"
+                                    aria-describedby="staticGenerator_staticId-help"
                                     className="euiFieldText euiFieldText--fullWidth"
                                     data-test-subj="remoteClusterFormProxyAddressInput"
-                                    id="mockId"
+                                    id="staticGenerator_staticId"
                                     onBlur={[Function]}
                                     onChange={[Function]}
                                     onFocus={[Function]}
@@ -671,11 +671,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         </EuiFieldText>
                         <EuiFormHelpText
                           className="euiFormRow__text"
-                          id="mockId-help"
+                          id="staticGenerator_staticId-help"
                         >
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="mockId-help"
+                            id="staticGenerator_staticId-help"
                           >
                             <FormattedMessage
                               defaultMessage="The address to use for remote connections."
@@ -703,7 +703,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
                         values={
                           Object {
-                            "learnMoreLink": <ForwardRef
+                            "learnMoreLink": <EuiLink
                               target="_blank"
                             >
                               <FormattedMessage
@@ -711,7 +711,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                 id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
                                 values={Object {}}
                               />
-                            </ForwardRef>,
+                            </EuiLink>,
                           }
                         }
                       />
@@ -729,7 +729,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                     <div
                       className="euiFormRow euiFormRow--fullWidth"
                       data-test-subj="remoteClusterFormServerNameFormRow"
-                      id="mockId-row"
+                      id="staticGenerator_staticId-row"
                     >
                       <div
                         className="euiFormRow__labelWrapper"
@@ -737,7 +737,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         <EuiFormLabel
                           aria-invalid={false}
                           className="euiFormRow__label"
-                          htmlFor="mockId"
+                          htmlFor="staticGenerator_staticId"
                           isFocused={false}
                           isInvalid={false}
                           type="label"
@@ -745,7 +745,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           <label
                             aria-invalid={false}
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="mockId"
+                            htmlFor="staticGenerator_staticId"
                           >
                             <FormattedMessage
                               defaultMessage="Server name (optional)"
@@ -761,9 +761,9 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         className="euiFormRow__fieldWrapper"
                       >
                         <EuiFieldText
-                          aria-describedby="mockId-help"
+                          aria-describedby="staticGenerator_staticId-help"
                           fullWidth={true}
-                          id="mockId"
+                          id="staticGenerator_staticId"
                           isInvalid={false}
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -772,7 +772,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         >
                           <EuiFormControlLayout
                             fullWidth={true}
-                            inputId="mockId"
+                            inputId="staticGenerator_staticId"
                           >
                             <div
                               className="euiFormControlLayout euiFormControlLayout--fullWidth"
@@ -784,9 +784,9 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                   isInvalid={false}
                                 >
                                   <input
-                                    aria-describedby="mockId-help"
+                                    aria-describedby="staticGenerator_staticId-help"
                                     className="euiFieldText euiFieldText--fullWidth"
-                                    id="mockId"
+                                    id="staticGenerator_staticId"
                                     onBlur={[Function]}
                                     onChange={[Function]}
                                     onFocus={[Function]}
@@ -801,18 +801,18 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         </EuiFieldText>
                         <EuiFormHelpText
                           className="euiFormRow__text"
-                          id="mockId-help"
+                          id="staticGenerator_staticId-help"
                         >
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="mockId-help"
+                            id="staticGenerator_staticId-help"
                           >
                             <FormattedMessage
                               defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
                               id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
                               values={
                                 Object {
-                                  "learnMoreLink": <ForwardRef
+                                  "learnMoreLink": <EuiLink
                                     target="_blank"
                                   >
                                     <FormattedMessage
@@ -820,7 +820,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                       id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
                                       values={Object {}}
                                     />
-                                  </ForwardRef>,
+                                  </EuiLink>,
                                 }
                               }
                             >
@@ -873,20 +873,20 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                     <div
                       className="euiFormRow euiFormRow--fullWidth"
                       data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
-                      id="mockId-row"
+                      id="staticGenerator_staticId-row"
                     >
                       <div
                         className="euiFormRow__labelWrapper"
                       >
                         <EuiFormLabel
                           className="euiFormRow__label"
-                          htmlFor="mockId"
+                          htmlFor="staticGenerator_staticId"
                           isFocused={false}
                           type="label"
                         >
                           <label
                             className="euiFormLabel euiFormRow__label"
-                            htmlFor="mockId"
+                            htmlFor="staticGenerator_staticId"
                           >
                             <FormattedMessage
                               defaultMessage="Socket connections"
@@ -902,9 +902,9 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         className="euiFormRow__fieldWrapper"
                       >
                         <EuiFieldNumber
-                          aria-describedby="mockId-help"
+                          aria-describedby="staticGenerator_staticId-help"
                           fullWidth={true}
-                          id="mockId"
+                          id="staticGenerator_staticId"
                           onBlur={[Function]}
                           onChange={[Function]}
                           onFocus={[Function]}
@@ -913,7 +913,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           <EuiFormControlLayout
                             compressed={false}
                             fullWidth={true}
-                            inputId="mockId"
+                            inputId="staticGenerator_staticId"
                             isLoading={false}
                           >
                             <div
@@ -924,9 +924,9 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               >
                                 <EuiValidatableControl>
                                   <input
-                                    aria-describedby="mockId-help"
+                                    aria-describedby="staticGenerator_staticId-help"
                                     className="euiFieldNumber euiFieldNumber--fullWidth"
-                                    id="mockId"
+                                    id="staticGenerator_staticId"
                                     onBlur={[Function]}
                                     onChange={[Function]}
                                     onFocus={[Function]}
@@ -943,11 +943,11 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         </EuiFieldNumber>
                         <EuiFormHelpText
                           className="euiFormRow__text"
-                          id="mockId-help"
+                          id="staticGenerator_staticId-help"
                         >
                           <div
                             className="euiFormHelpText euiFormRow__text"
-                            id="mockId-help"
+                            id="staticGenerator_staticId-help"
                           >
                             <FormattedMessage
                               defaultMessage="The number of socket connections to open per remote cluster."
@@ -976,7 +976,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
                 values={
                   Object {
-                    "learnMoreLink": <ForwardRef
+                    "learnMoreLink": <EuiLink
                       target="_blank"
                     >
                       <FormattedMessage
@@ -984,7 +984,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
                         values={Object {}}
                       />
-                    </ForwardRef>,
+                    </EuiLink>,
                     "optionName": <strong>
                       <FormattedMessage
                         defaultMessage="Skip if unavailable"
@@ -1069,7 +1069,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                               id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
                               values={
                                 Object {
-                                  "learnMoreLink": <ForwardRef
+                                  "learnMoreLink": <EuiLink
                                     target="_blank"
                                   >
                                     <FormattedMessage
@@ -1077,7 +1077,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                       id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
                                       values={Object {}}
                                     />
-                                  </ForwardRef>,
+                                  </EuiLink>,
                                   "optionName": <strong>
                                     <FormattedMessage
                                       defaultMessage="Skip if unavailable"
@@ -1143,7 +1143,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                     <div
                       className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
                       data-test-subj="remoteClusterFormSkipUnavailableFormRow"
-                      id="mockId-row"
+                      id="staticGenerator_staticId-row"
                     >
                       <div
                         className="euiFormRow__fieldWrapper"
@@ -1151,7 +1151,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                         <EuiSwitch
                           checked={false}
                           data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
-                          id="mockId"
+                          id="staticGenerator_staticId"
                           label="Skip if unavailable"
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -1162,10 +1162,10 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                           >
                             <button
                               aria-checked={false}
-                              aria-labelledby="mockId"
+                              aria-labelledby="staticGenerator_staticId"
                               className="euiSwitch__button"
                               data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
-                              id="mockId"
+                              id="staticGenerator_staticId"
                               onBlur={[Function]}
                               onClick={[Function]}
                               onFocus={[Function]}
@@ -1208,7 +1208,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                             </button>
                             <span
                               className="euiSwitch__label"
-                              id="mockId"
+                              id="staticGenerator_staticId"
                               onClick={[Function]}
                             >
                               Skip if unavailable
@@ -1387,7 +1387,7 @@ Array [
           <div
             class="euiFormRow euiFormRow--fullWidth"
             data-test-subj="remoteClusterFormNameFormRow"
-            id="mockId-row"
+            id="staticGenerator_staticId-row"
           >
             <div
               class="euiFormRow__labelWrapper"
@@ -1395,7 +1395,7 @@ Array [
               <label
                 aria-invalid="false"
                 class="euiFormLabel euiFormRow__label"
-                for="mockId"
+                for="staticGenerator_staticId"
               >
                 Name
               </label>
@@ -1410,10 +1410,10 @@ Array [
                   class="euiFormControlLayout__childrenWrapper"
                 >
                   <input
-                    aria-describedby="mockId-help"
+                    aria-describedby="staticGenerator_staticId-help"
                     class="euiFieldText euiFieldText--fullWidth"
                     data-test-subj="remoteClusterFormNameInput"
-                    id="mockId"
+                    id="staticGenerator_staticId"
                     type="text"
                     value=""
                   />
@@ -1421,7 +1421,7 @@ Array [
               </div>
               <div
                 class="euiFormHelpText euiFormRow__text"
-                id="mockId-help"
+                id="staticGenerator_staticId-help"
               >
                 Name can only contain letters, numbers, underscores, and dashes.
               </div>
@@ -1454,7 +1454,7 @@ Array [
               Use seed nodes by default, or switch to proxy mode.
               <div
                 class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
-                id="mockId-row"
+                id="staticGenerator_staticId-row"
               >
                 <div
                   class="euiFormRow__fieldWrapper"
@@ -1464,10 +1464,10 @@ Array [
                   >
                     <button
                       aria-checked="false"
-                      aria-labelledby="mockId"
+                      aria-labelledby="staticGenerator_staticId"
                       class="euiSwitch__button"
                       data-test-subj="remoteClusterFormConnectionModeToggle"
-                      id="mockId"
+                      id="staticGenerator_staticId"
                       role="switch"
                       type="button"
                     >
@@ -1493,7 +1493,7 @@ Array [
                     </button>
                     <span
                       class="euiSwitch__label"
-                      id="mockId"
+                      id="staticGenerator_staticId"
                     >
                       Use proxy mode
                     </span>
@@ -1509,7 +1509,7 @@ Array [
           <div
             class="euiFormRow euiFormRow--fullWidth"
             data-test-subj="remoteClusterFormSeedNodesFormRow"
-            id="mockId-row"
+            id="staticGenerator_staticId-row"
           >
             <div
               class="euiFormRow__labelWrapper"
@@ -1517,7 +1517,7 @@ Array [
               <label
                 aria-invalid="false"
                 class="euiFormLabel euiFormRow__label"
-                for="mockId"
+                for="staticGenerator_staticId"
               >
                 Seed nodes
               </label>
@@ -1526,7 +1526,7 @@ Array [
               class="euiFormRow__fieldWrapper"
             >
               <div
-                aria-describedby="mockId-help"
+                aria-describedby="staticGenerator_staticId-help"
                 aria-expanded="false"
                 aria-haspopup="listbox"
                 class="euiComboBox euiComboBox--fullWidth"
@@ -1556,7 +1556,7 @@ Array [
                         <input
                           aria-controls=""
                           data-test-subj="comboBoxSearchInput"
-                          id="mockId"
+                          id="staticGenerator_staticId"
                           role="textbox"
                           style="box-sizing:content-box;width:1px"
                           value=""
@@ -1571,7 +1571,7 @@ Array [
               </div>
               <div
                 class="euiFormHelpText euiFormRow__text"
-                id="mockId-help"
+                id="staticGenerator_staticId-help"
               >
                 An IP address or host name, followed by the 
                 <button
@@ -1587,14 +1587,14 @@ Array [
           <div
             class="euiFormRow euiFormRow--fullWidth"
             data-test-subj="remoteClusterFormNodeConnectionsFormRow"
-            id="mockId-row"
+            id="staticGenerator_staticId-row"
           >
             <div
               class="euiFormRow__labelWrapper"
             >
               <label
                 class="euiFormLabel euiFormRow__label"
-                for="mockId"
+                for="staticGenerator_staticId"
               >
                 Node connections
               </label>
@@ -1609,9 +1609,9 @@ Array [
                   class="euiFormControlLayout__childrenWrapper"
                 >
                   <input
-                    aria-describedby="mockId-help"
+                    aria-describedby="staticGenerator_staticId-help"
                     class="euiFieldNumber euiFieldNumber--fullWidth"
-                    id="mockId"
+                    id="staticGenerator_staticId"
                     type="number"
                     value="3"
                   />
@@ -1619,7 +1619,7 @@ Array [
               </div>
               <div
                 class="euiFormHelpText euiFormRow__text"
-                id="mockId-help"
+                id="staticGenerator_staticId-help"
               >
                 The number of gateway nodes to connect to for this cluster.
               </div>
@@ -1671,7 +1671,7 @@ Array [
           <div
             class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
             data-test-subj="remoteClusterFormSkipUnavailableFormRow"
-            id="mockId-row"
+            id="staticGenerator_staticId-row"
           >
             <div
               class="euiFormRow__fieldWrapper"
@@ -1681,10 +1681,10 @@ Array [
               >
                 <button
                   aria-checked="false"
-                  aria-labelledby="mockId"
+                  aria-labelledby="staticGenerator_staticId"
                   class="euiSwitch__button"
                   data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
-                  id="mockId"
+                  id="staticGenerator_staticId"
                   role="switch"
                   type="button"
                 >
@@ -1710,7 +1710,7 @@ Array [
                 </button>
                 <span
                   class="euiSwitch__label"
-                  id="mockId"
+                  id="staticGenerator_staticId"
                 >
                   Skip if unavailable
                 </span>
@@ -1787,7 +1787,7 @@ Array [
   <div
     class="euiFormRow euiFormRow--fullWidth"
     data-test-subj="remoteClusterFormNameFormRow"
-    id="mockId-row"
+    id="staticGenerator_staticId-row"
   >
     <div
       class="euiFormRow__labelWrapper"
@@ -1795,7 +1795,7 @@ Array [
       <label
         aria-invalid="true"
         class="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
-        for="mockId"
+        for="staticGenerator_staticId"
       >
         Name
       </label>
@@ -1810,10 +1810,10 @@ Array [
           class="euiFormControlLayout__childrenWrapper"
         >
           <input
-            aria-describedby="mockId-help mockId-error-0"
+            aria-describedby="staticGenerator_staticId-help staticGenerator_staticId-error-0"
             class="euiFieldText euiFieldText--fullWidth"
             data-test-subj="remoteClusterFormNameInput"
-            id="mockId"
+            id="staticGenerator_staticId"
             type="text"
             value=""
           />
@@ -1822,13 +1822,13 @@ Array [
       <div
         aria-live="polite"
         class="euiFormErrorText euiFormRow__text"
-        id="mockId-error-0"
+        id="staticGenerator_staticId-error-0"
       >
         Name is required.
       </div>
       <div
         class="euiFormHelpText euiFormRow__text"
-        id="mockId-help"
+        id="staticGenerator_staticId-help"
       >
         Name can only contain letters, numbers, underscores, and dashes.
       </div>
@@ -1837,7 +1837,7 @@ Array [
   <div
     class="euiFormRow euiFormRow--fullWidth"
     data-test-subj="remoteClusterFormSeedNodesFormRow"
-    id="mockId-row"
+    id="staticGenerator_staticId-row"
   >
     <div
       class="euiFormRow__labelWrapper"
@@ -1845,7 +1845,7 @@ Array [
       <label
         aria-invalid="true"
         class="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
-        for="mockId"
+        for="staticGenerator_staticId"
       >
         Seed nodes
       </label>
@@ -1854,7 +1854,7 @@ Array [
       class="euiFormRow__fieldWrapper"
     >
       <div
-        aria-describedby="mockId-help mockId-error-0"
+        aria-describedby="staticGenerator_staticId-help staticGenerator_staticId-error-0"
         aria-expanded="false"
         aria-haspopup="listbox"
         class="euiComboBox euiComboBox--fullWidth euiComboBox-isInvalid"
@@ -1884,7 +1884,7 @@ Array [
                 <input
                   aria-controls=""
                   data-test-subj="comboBoxSearchInput"
-                  id="mockId"
+                  id="staticGenerator_staticId"
                   role="textbox"
                   style="box-sizing: content-box; width: 2px;"
                   value=""
@@ -1900,13 +1900,13 @@ Array [
       <div
         aria-live="polite"
         class="euiFormErrorText euiFormRow__text"
-        id="mockId-error-0"
+        id="staticGenerator_staticId-error-0"
       >
         At least one seed node is required.
       </div>
       <div
         class="euiFormHelpText euiFormRow__text"
-        id="mockId-help"
+        id="staticGenerator_staticId-help"
       >
         An IP address or host name, followed by the 
         <button
@@ -1922,7 +1922,7 @@ Array [
   <div
     class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth remoteClusterSkipIfUnavailableSwitch"
     data-test-subj="remoteClusterFormSkipUnavailableFormRow"
-    id="mockId-row"
+    id="staticGenerator_staticId-row"
   >
     <div
       class="euiFormRow__fieldWrapper"
@@ -1932,10 +1932,10 @@ Array [
       >
         <button
           aria-checked="false"
-          aria-labelledby="mockId"
+          aria-labelledby="staticGenerator_staticId"
           class="euiSwitch__button"
           data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
-          id="mockId"
+          id="staticGenerator_staticId"
           role="switch"
           type="button"
         >
@@ -1961,7 +1961,7 @@ Array [
         </button>
         <span
           class="euiSwitch__label"
-          id="mockId"
+          id="staticGenerator_staticId"
         >
           Skip if unavailable
         </span>

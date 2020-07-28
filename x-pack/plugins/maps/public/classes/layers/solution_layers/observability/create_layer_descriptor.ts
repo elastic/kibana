@@ -40,6 +40,7 @@ import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style
 
 // redefining APM constant to avoid making maps app depend on APM plugin
 export const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+export const APM_INDEX_PATTERN_TITLE = 'apm-*';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
@@ -173,7 +174,7 @@ export function createLayerDescriptor({
             type: SOURCE_TYPES.ES_TERM_SOURCE,
             id: joinId,
             indexPatternId: APM_INDEX_PATTERN_ID,
-            indexPatternTitle: 'apm-*', // TODO look up from APM_OSS.indexPattern
+            indexPatternTitle: APM_INDEX_PATTERN_TITLE, // TODO look up from APM_OSS.indexPattern
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
             whereQuery: apmSourceQuery,

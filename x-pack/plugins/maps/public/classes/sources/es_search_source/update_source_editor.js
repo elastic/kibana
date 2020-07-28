@@ -12,7 +12,12 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { getTermsFields, getSourceFields, supportsGeoTileAgg } from '../../../index_pattern_util';
+import {
+  getGeoTileAggNotSupportedReason,
+  getTermsFields,
+  getSourceFields,
+  supportsGeoTileAgg,
+} from '../../../index_pattern_util';
 import { SORT_ORDER } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -82,7 +87,7 @@ export class UpdateSourceEditor extends Component {
 
     //todo move this all to the source
     const rawTooltipFields = getSourceFields(indexPattern.fields);
-    const sourceFields = rawTooltipFields.map(field => {
+    const sourceFields = rawTooltipFields.map((field) => {
       return new ESDocField({
         fieldName: field.name,
         source: this.props.source,
@@ -91,22 +96,23 @@ export class UpdateSourceEditor extends Component {
 
     this.setState({
       supportsClustering: supportsGeoTileAgg(geoField),
+      clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(
-        field => field.sortable && !indexPatterns.isNestedField(field)
+        (field) => field.sortable && !indexPatterns.isNestedField(field)
       ), //todo change sort fields to use fields
     });
   }
-  _onTooltipPropertiesChange = propertyNames => {
+  _onTooltipPropertiesChange = (propertyNames) => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  _onSortFieldChange = sortField => {
+  _onSortFieldChange = (sortField) => {
     this.props.onChange({ propName: 'sortField', value: sortField });
   };
 
-  _onSortOrderChange = e => {
+  _onSortOrderChange = (e) => {
     this.props.onChange({ propName: 'sortOrder', value: e.target.value });
   };
 
@@ -201,6 +207,7 @@ export class UpdateSourceEditor extends Component {
           onChange={this.props.onChange}
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
+          clusteringDisabledReason={this.state.clusteringDisabledReason}
           termFields={this.state.termFields}
           topHitsSplitField={this.props.topHitsSplitField}
           topHitsSize={this.props.topHitsSize}

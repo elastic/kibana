@@ -11,17 +11,8 @@ jest.mock('../../layers/vector_layer/vector_layer', () => {});
 
 function makeEMSFileSource(tooltipProperties: string[]) {
   const emsFileSource = new EMSFileSource({ tooltipProperties });
-  emsFileSource.getEMSFileLayer = async () => {
-    return {
-      getFieldsInLanguage() {
-        return [
-          {
-            name: 'iso2',
-            description: 'ISO 2 CODE',
-          },
-        ];
-      },
-    };
+  emsFileSource.getEmsFieldLabel = async (name: string) => {
+    return name === 'iso2' ? 'ISO 2 CODE' : name;
   };
   return emsFileSource;
 }

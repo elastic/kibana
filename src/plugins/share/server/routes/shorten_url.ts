@@ -38,7 +38,7 @@ export const createShortenUrlRoute = ({
         body: schema.object({ url: schema.string() }),
       },
     },
-    router.handleLegacyErrors(async function(context, request, response) {
+    router.handleLegacyErrors(async function (context, request, response) {
       shortUrlAssertValid(request.body.url);
       const urlId = await shortUrlLookup.generateUrlId(request.body.url, {
         savedObjects: context.core.savedObjects.client,

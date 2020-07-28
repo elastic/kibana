@@ -34,7 +34,7 @@ export const GroupByListForm: React.FC<ListProps> = ({
   return (
     <Fragment>
       {listKeys.map((aggName: AggName, i) => {
-        const otherAggNames = listKeys.filter(k => k !== aggName);
+        const otherAggNames = listKeys.filter((k) => k !== aggName);
         return (
           <Fragment key={aggName}>
             <EuiPanel paddingSize="s" data-test-subj={`transformGroupByEntry ${i}`}>
@@ -42,7 +42,7 @@ export const GroupByListForm: React.FC<ListProps> = ({
                 deleteHandler={deleteHandler}
                 item={list[aggName]}
                 otherAggNames={otherAggNames}
-                onChange={item => onChange(aggName, item)}
+                onChange={(item) => onChange(aggName, item)}
                 options={options}
               />
             </EuiPanel>

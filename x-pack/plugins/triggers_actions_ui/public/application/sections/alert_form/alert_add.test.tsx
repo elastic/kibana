@@ -18,6 +18,12 @@ import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { AppContextProvider } from '../../app_context';
+import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+jest.mock('../../lib/alert_api', () => ({
+  loadAlertTypes: jest.fn(),
+  health: jest.fn((async) => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
+}));
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
@@ -42,6 +48,31 @@ describe('alert_add', () => {
 
   async function setup() {
     const mocks = coreMock.createSetup();
+    const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+    const alertTypes = [
+      {
+        id: 'my-alert-type',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        producer: ALERTS_FEATURE_ID,
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          test: { read: true, all: true },
+        },
+        actionVariables: {
+          context: [],
+          state: [],
+          params: [],
+        },
+      },
+    ];
+    loadAlertTypes.mockResolvedValue(alertTypes);
     const [
       {
         application: { capabilities },
@@ -121,7 +152,7 @@ describe('alert_add', () => {
           }}
         >
           <AlertAdd
-            consumer={'alerting'}
+            consumer={ALERTS_FEATURE_ID}
             addFlyoutVisible={true}
             setAddFlyoutVisibility={() => {}}
           />
@@ -139,13 +170,14 @@ describe('alert_add', () => {
   it('renders alert add flyout', async () => {
     await setup();
 
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
 
-    wrapper
-      .find('[data-test-subj="my-alert-type-SelectOption"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
 
     expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
   });

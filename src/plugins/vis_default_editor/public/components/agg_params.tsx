@@ -132,7 +132,7 @@ function DefaultEditorAggParams({
     !!error || isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   const onAggSelect = useCallback(
-    value => {
+    (value) => {
       if (agg.type !== value) {
         onAggTypeChange(agg.id, value);
         // reset touched and valid of params
@@ -147,7 +147,7 @@ function DefaultEditorAggParams({
 
   useEffect(() => {
     Object.entries(editorConfig).forEach(([param, paramConfig]) => {
-      const paramOptions = agg.type.params.find(paramOption => paramOption.name === param);
+      const paramOptions = agg.type.params.find((paramOption) => paramOption.name === param);
 
       const hasFixedValue = paramConfig.hasOwnProperty(FIXED_VALUE_PROP);
       const hasDefault = paramConfig.hasOwnProperty(DEFAULT_PROP);
@@ -210,7 +210,7 @@ function DefaultEditorAggParams({
         onChangeAggType={onChangeAggType}
       />
 
-      {params.basic.map(param => {
+      {params.basic.map((param) => {
         const model = paramsState[param.aggParam.name] || {
           touched: false,
           valid: true,
@@ -240,7 +240,7 @@ function DefaultEditorAggParams({
             })}
           >
             <EuiSpacer size="s" />
-            {params.advanced.map(param => {
+            {params.advanced.map((param) => {
               const model = paramsState[param.aggParam.name] || {
                 touched: false,
                 valid: true,

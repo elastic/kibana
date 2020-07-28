@@ -12,15 +12,13 @@ import {
   STYLE_TYPE,
 } from '../../../../common/constants';
 import {
-  COLOR_GRADIENTS,
-  COLOR_PALETTES,
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS,
-  // @ts-ignore
-} from '../color_utils';
+  NUMERICAL_COLOR_PALETTES,
+  CATEGORICAL_COLOR_PALETTES,
+} from '../color_palettes';
 import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
-// @ts-ignore
-import { getUiSettings } from '../../../kibana_services';
+import { getIsDarkMode } from '../../../kibana_services';
 
 export const MIN_SIZE = 1;
 export const MAX_SIZE = 64;
@@ -29,8 +27,8 @@ export const DEFAULT_MAX_SIZE = 32;
 export const DEFAULT_SIGMA = 3;
 export const DEFAULT_LABEL_SIZE = 14;
 export const DEFAULT_ICON_SIZE = 6;
-export const DEFAULT_COLOR_RAMP = COLOR_GRADIENTS[0].value;
-export const DEFAULT_COLOR_PALETTE = COLOR_PALETTES[0].value;
+export const DEFAULT_COLOR_RAMP = NUMERICAL_COLOR_PALETTES[0].value;
+export const DEFAULT_COLOR_PALETTE = CATEGORICAL_COLOR_PALETTES[0].value;
 
 export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
 export const POLYGON_STYLES = [
@@ -58,13 +56,17 @@ export function getDefaultProperties(mapColors: string[] = []): VectorStylePrope
 export function getDefaultStaticProperties(
   mapColors: string[] = []
 ): VectorStylePropertiesDescriptor {
-  // Colors must be state-aware to reduce unnecessary incrementation
-  const lastColor = mapColors.pop();
-  const nextColorIndex = (DEFAULT_FILL_COLORS.indexOf(lastColor) + 1) % DEFAULT_FILL_COLORS.length;
+  let nextColorIndex = 0;
+  if (mapColors.length) {
+    const lastColor = mapColors[mapColors.length - 1];
+    if (DEFAULT_FILL_COLORS.includes(lastColor)) {
+      nextColorIndex = (DEFAULT_FILL_COLORS.indexOf(lastColor) + 1) % DEFAULT_FILL_COLORS.length;
+    }
+  }
   const nextFillColor = DEFAULT_FILL_COLORS[nextColorIndex];
   const nextLineColor = DEFAULT_LINE_COLORS[nextColorIndex];
 
-  const isDarkMode = getUiSettings().get('theme:darkMode', false);
+  const isDarkMode = getIsDarkMode();
 
   return {
     [VECTOR_STYLES.ICON]: {

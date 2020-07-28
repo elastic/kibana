@@ -64,7 +64,7 @@ export default function loggingConfiguration(config) {
     },
     events: _.transform(
       events,
-      function(filtered, val, key) {
+      function (filtered, val, key) {
         // provide a string compatible way to remove events
         if (val !== '!') filtered[key] = val;
       },

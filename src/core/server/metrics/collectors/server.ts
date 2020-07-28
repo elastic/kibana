@@ -45,7 +45,7 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
       });
       return h.continue;
     });
-    this.server.events.on('response', request => {
+    this.server.events.on('response', (request) => {
       const statusCode = (request.response as ResponseObject)?.statusCode;
       if (statusCode) {
         if (!this.requests.statusCodes[statusCode]) {
@@ -62,7 +62,7 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
   }
 
   public async collect(): Promise<OpsServerMetrics> {
-    const connections = await new Promise<number>(resolve => {
+    const connections = await new Promise<number>((resolve) => {
       this.server.listener.getConnections((_, count) => {
         resolve(count);
       });

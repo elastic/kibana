@@ -32,7 +32,7 @@ export class ConsoleExtensionsServerPlugin implements Plugin<void, void, SetupDe
   }
 
   start(core: CoreStart, { console: { addProcessorDefinition } }: StartDependencies) {
-    processors.forEach(processor => addProcessorDefinition(processor));
+    processors.forEach((processor) => addProcessorDefinition(processor));
     this.log.debug('Added processor definition extensions.');
   }
 }

@@ -11,7 +11,6 @@ import url from 'url';
 
 import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../src/plugins/dashboard/public';
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
@@ -47,7 +46,7 @@ export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
     datafeedConfig.indices.length > 0
   ) {
     const datafeedIndex = datafeedConfig.indices[0];
-    let defaultIndexPattern = indexPatterns.find(indexPattern => {
+    let defaultIndexPattern = indexPatterns.find((indexPattern) => {
       return indexPattern.title === datafeedIndex;
     });
 
@@ -87,7 +86,7 @@ export function getQueryEntityFieldNames(job) {
   detectors.forEach((detector, detectorIndex) => {
     const partitioningFields = getPartitioningFieldNames(job, detectorIndex);
 
-    partitioningFields.forEach(fieldName => {
+    partitioningFields.forEach((fieldName) => {
       if (entityFieldNames.indexOf(fieldName) === -1) {
         entityFieldNames.push(fieldName);
       }
@@ -139,7 +138,7 @@ function buildDashboardUrlFromSettings(settings) {
     const savedObjectsClient = getSavedObjectsClient();
     savedObjectsClient
       .get('dashboard', dashboardId)
-      .then(response => {
+      .then((response) => {
         // Use the filters from the saved dashboard if there are any.
         let filters = [];
 
@@ -176,7 +175,7 @@ function buildDashboardUrlFromSettings(settings) {
             // template to inject the time parameters.
             useHash: false,
           })
-          .then(urlValue => {
+          .then((urlValue) => {
             const urlToAdd = {
               url_name: settings.label,
               url_value: decodeURIComponent(`dashboards${url.parse(urlValue).hash}`),
@@ -190,7 +189,7 @@ function buildDashboardUrlFromSettings(settings) {
             resolve(urlToAdd);
           });
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -295,12 +294,12 @@ export function getTestUrl(job, customUrl) {
   };
 
   return new Promise((resolve, reject) => {
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      rest_total_hits_as_int: true,
-      body,
-    })
-      .then(resp => {
+    ml.results
+      .anomalySearch({
+        rest_total_hits_as_int: true,
+        body,
+      })
+      .then((resp) => {
         if (resp.hits.total > 0) {
           const record = resp.hits.hits[0]._source;
           testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, record, 'timestamp');
@@ -308,7 +307,7 @@ export function getTestUrl(job, customUrl) {
         } else {
           // No anomalies yet for this job, so do a preview of the search
           // configured in the job datafeed to obtain sample docs.
-          mlJobService.searchPreview(job).then(response => {
+          mlJobService.searchPreview(job).then((response) => {
             let testDoc;
             const docTimeFieldName = job.data_description.time_field;
 
@@ -348,7 +347,7 @@ export function getTestUrl(job, customUrl) {
           });
         }
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });

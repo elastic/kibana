@@ -26,7 +26,6 @@ import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 
 const indexPattern = {
   id: '1234',
@@ -220,10 +219,9 @@ const nestedOtherResponse = {
 
 describe('Terms Agg Other bucket helper', () => {
   const typesRegistry = mockAggTypesRegistry();
-  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
   const getAggConfigs = (aggs: CreateAggConfigParams[] = []) => {
-    return new AggConfigs(indexPattern, [...aggs], { typesRegistry, fieldFormats });
+    return new AggConfigs(indexPattern, [...aggs], { typesRegistry });
   };
 
   describe('buildOtherBucketAgg', () => {
@@ -305,6 +303,83 @@ describe('Terms Agg Other bucket helper', () => {
                   must_not: [
                     { match_phrase: { 'machine.os.raw': 'ios' } },
                     { match_phrase: { 'machine.os.raw': 'win xp' } },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      };
+      expect(agg).toBeDefined();
+      if (agg) {
+        expect(agg()).toEqual(expectedResponse);
+      }
+    });
+
+    test('excludes exists filter for scripted fields', () => {
+      const aggConfigs = getAggConfigs(nestedTerm.aggs);
+      aggConfigs.aggs[1].params.field.scripted = true;
+      const agg = buildOtherBucketAgg(
+        aggConfigs,
+        aggConfigs.aggs[1] as IBucketAggConfig,
+        nestedTermResponse
+      );
+      const expectedResponse = {
+        'other-filter': {
+          aggs: undefined,
+          filters: {
+            filters: {
+              '-IN': {
+                bool: {
+                  must: [],
+                  filter: [{ match_phrase: { 'geo.src': 'IN' } }],
+                  should: [],
+                  must_not: [
+                    {
+                      script: {
+                        script: {
+                          lang: undefined,
+                          params: { value: 'ios' },
+                          source: '(undefined) == value',
+                        },
+                      },
+                    },
+                    {
+                      script: {
+                        script: {
+                          lang: undefined,
+                          params: { value: 'win xp' },
+                          source: '(undefined) == value',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              '-US': {
+                bool: {
+                  must: [],
+                  filter: [{ match_phrase: { 'geo.src': 'US' } }],
+                  should: [],
+                  must_not: [
+                    {
+                      script: {
+                        script: {
+                          lang: undefined,
+                          params: { value: 'ios' },
+                          source: '(undefined) == value',
+                        },
+                      },
+                    },
+                    {
+                      script: {
+                        script: {
+                          lang: undefined,
+                          params: { value: 'win xp' },
+                          source: '(undefined) == value',
+                        },
+                      },
+                    },
                   ],
                 },
               },

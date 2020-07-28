@@ -18,17 +18,18 @@
  */
 
 import { times } from 'lodash';
-import { SavedObjectsFindOptions, SavedObject } from 'src/core/server';
+import { SavedObjectsFindOptions, SavedObjectsFindResult } from 'src/core/server';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
 import { findAll } from './find_all';
 
 describe('findAll', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
-  const createObj = (id: number): SavedObject => ({
+  const createObj = (id: number): SavedObjectsFindResult => ({
     type: 'type',
     id: `id-${id}`,
     attributes: {},
+    score: 1,
     references: [],
   });
 
@@ -90,6 +91,6 @@ describe('findAll', () => {
       page: 3,
     });
 
-    expect(results).toEqual(times(6, num => createObj(num + 1)));
+    expect(results).toEqual(times(6, (num) => createObj(num + 1)));
   });
 });

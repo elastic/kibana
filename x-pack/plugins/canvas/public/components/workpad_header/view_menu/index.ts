@@ -7,20 +7,17 @@
 import { connect } from 'react-redux';
 import { compose, withHandlers } from 'recompose';
 import { Dispatch } from 'redux';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public/';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
-// @ts-ignore Untyped local
+// @ts-expect-error untyped local
 import { setZoomScale, setFullscreen, selectToplevelNodes } from '../../../state/actions/transient';
-// @ts-ignore Untyped local
 import {
   setWriteable,
   setRefreshInterval,
   enableAutoplay,
   setAutoplayInterval,
-  // @ts-ignore Untyped local
 } from '../../../state/actions/workpad';
 import { getZoomScale, canUserWrite } from '../../../state/selectors/app';
 import {
@@ -75,7 +72,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   },
   doRefresh: () => dispatch(fetchAllRenderables()),
   setRefreshInterval: (interval: number) => dispatch(setRefreshInterval(interval)),
-  enableAutoplay: (autoplay: number) => dispatch(enableAutoplay(autoplay)),
+  enableAutoplay: (autoplay: number) => dispatch(enableAutoplay(!!autoplay)),
   setAutoplayInterval: (interval: number) => dispatch(setAutoplayInterval(interval)),
 });
 
@@ -99,6 +96,5 @@ const mergeProps = (
 
 export const ViewMenu = compose<ComponentProps, {}>(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withKibana,
   withHandlers(zoomHandlerCreators)
 )(Component);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { API_BASE_PATH } from '../../../../common/constants';
-import { SlmPolicy, SlmPolicyPayload } from '../../../../common/types';
+import { SlmPolicy, SlmPolicyPayload, PolicyIndicesResponse } from '../../../../common/types';
 import {
   UIM_POLICY_EXECUTE,
   UIM_POLICY_DELETE,
@@ -40,7 +40,7 @@ export const useLoadPolicy = (name: SlmPolicy['name']) => {
 };
 
 export const useLoadIndices = () => {
-  return useRequest({
+  return useRequest<PolicyIndicesResponse>({
     path: `${API_BASE_PATH}policies/indices`,
     method: 'get',
   });
@@ -58,7 +58,7 @@ export const executePolicy = async (name: SlmPolicy['name']) => {
 
 export const deletePolicies = async (names: Array<SlmPolicy['name']>) => {
   const result = sendRequest({
-    path: `${API_BASE_PATH}policies/${names.map(name => encodeURIComponent(name)).join(',')}`,
+    path: `${API_BASE_PATH}policies/${names.map((name) => encodeURIComponent(name)).join(',')}`,
     method: 'delete',
   });
 

@@ -50,9 +50,7 @@ describe('get_kibana_info', () => {
           {
             _source: {
               kibana_stats: {
-                timestamp: moment()
-                  .subtract(11, 'minutes')
-                  .format(),
+                timestamp: moment().subtract(11, 'minutes').format(),
                 kibana: {
                   data: 123,
                 },

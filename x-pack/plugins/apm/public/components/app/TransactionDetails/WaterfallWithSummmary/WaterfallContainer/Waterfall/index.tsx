@@ -21,7 +21,7 @@ import { WaterfallFlyout } from './WaterfallFlyout';
 import { WaterfallItem } from './WaterfallItem';
 import {
   IWaterfall,
-  IWaterfallItem
+  IWaterfallItem,
 } from './waterfall_helpers/waterfall_helpers';
 
 const Container = styled.div`
@@ -34,12 +34,12 @@ const TIMELINE_MARGINS = {
   top: 40,
   left: 50,
   right: 50,
-  bottom: 0
+  bottom: 0,
 };
 
 const toggleFlyout = ({
   item,
-  location
+  location,
 }: {
   item?: IWaterfallItem;
   location: Location;
@@ -49,15 +49,15 @@ const toggleFlyout = ({
     search: fromQuery({
       ...toQuery(location.search),
       flyoutDetailTab: undefined,
-      waterfallItemId: item?.id
-    })
+      waterfallItemId: item?.id,
+    }),
   });
 };
 
 const WaterfallItemsContainer = styled.div<{
   paddingTop: number;
 }>`
-  padding-top: ${props => px(props.paddingTop)};
+  padding-top: ${(props) => px(props.paddingTop)};
 `;
 
 interface Props {
@@ -67,12 +67,12 @@ interface Props {
   exceedsMax: boolean;
 }
 
-export const Waterfall: React.FC<Props> = ({
+export function Waterfall({
   waterfall,
   exceedsMax,
   waterfallItemId,
-  location
-}) => {
+  location,
+}: Props) {
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
   const waterfallHeight = itemContainerHeight * waterfall.items.length;
 
@@ -81,7 +81,7 @@ export const Waterfall: React.FC<Props> = ({
   const agentMarks = getAgentMarks(waterfall.entryTransaction);
   const errorMarks = getErrorMarks(waterfall.errorItems, serviceColors);
 
-  const renderWaterfallItem = (item: IWaterfallItem) => {
+  function renderWaterfallItem(item: IWaterfallItem) {
     const errorCount =
       item.docType === 'transaction'
         ? waterfall.errorsPerTransaction[item.doc.transaction.id]
@@ -99,7 +99,7 @@ export const Waterfall: React.FC<Props> = ({
         onClick={() => toggleFlyout({ item, location })}
       />
     );
-  };
+  }
 
   return (
     <Container>
@@ -110,7 +110,7 @@ export const Waterfall: React.FC<Props> = ({
           iconType="alert"
           title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
             defaultMessage:
-              'Number of items in this trace exceed what is displayed'
+              'Number of items in this trace exceed what is displayed',
           })}
         />
       )}
@@ -134,4 +134,4 @@ export const Waterfall: React.FC<Props> = ({
       />
     </Container>
   );
-};
+}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';
@@ -43,8 +43,12 @@ type Validator = (obj: {
   messages: Messages;
 }>;
 
-const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validator => {
-  const dv = new DataVisualizer(callWithRequest);
+const validateFactory = (
+  mlClusterClient: ILegacyScopedClusterClient,
+  job: CombinedJob
+): Validator => {
+  const { callAsCurrentUser } = mlClusterClient;
+  const dv = new DataVisualizer(mlClusterClient);
 
   const modelPlotConfigTerms = job?.model_plot_config?.terms ?? '';
   const modelPlotConfigFieldCount =
@@ -62,16 +66,18 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
     >;
 
     const detectors = job.analysis_config.detectors;
-    const relevantDetectors = detectors.filter(detector => {
+    const relevantDetectors = detectors.filter((detector) => {
       return typeof detector[fieldName] !== 'undefined';
     });
 
     if (relevantDetectors.length > 0) {
       try {
-        const uniqueFieldNames = [...new Set(relevantDetectors.map(f => f[fieldName]))] as string[];
+        const uniqueFieldNames = [
+          ...new Set(relevantDetectors.map((f) => f[fieldName])),
+        ] as string[];
 
         // use fieldCaps endpoint to get data about whether fields are aggregatable
-        const fieldCaps = await callWithRequest('fieldCaps', {
+        const fieldCaps = await callAsCurrentUser('fieldCaps', {
           index: job.datafeed_config.indices.join(','),
           fields: uniqueFieldNames,
         });
@@ -79,7 +85,7 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
         let aggregatableFieldNames: string[] = [];
         // parse fieldCaps to return an array of just the fields which are aggregatable
         if (typeof fieldCaps === 'object' && typeof fieldCaps.fields === 'object') {
-          aggregatableFieldNames = uniqueFieldNames.filter(field => {
+          aggregatableFieldNames = uniqueFieldNames.filter((field) => {
             if (typeof fieldCaps.fields[field] !== 'undefined') {
               const fieldType = Object.keys(fieldCaps.fields[field])[0];
               return fieldCaps.fields[field][fieldType].aggregatable;
@@ -96,9 +102,9 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
           job.data_description.time_field
         );
 
-        uniqueFieldNames.forEach(uniqueFieldName => {
+        uniqueFieldNames.forEach((uniqueFieldName) => {
           const field = stats.aggregatableExistsFields.find(
-            fieldData => fieldData.fieldName === uniqueFieldName
+            (fieldData) => fieldData.fieldName === uniqueFieldName
           );
           if (field !== undefined && typeof field === 'object' && field.stats) {
             modelPlotCardinality +=
@@ -148,7 +154,7 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
 };
 
 export async function validateCardinality(
-  callWithRequest: APICaller,
+  mlClusterClient: ILegacyScopedClusterClient,
   job?: CombinedJob
 ): Promise<Messages> | never {
   const messages: Messages = [];
@@ -160,7 +166,7 @@ export async function validateCardinality(
 
   // find out if there are any relevant detector field names
   // where cardinality checks could be run against.
-  const numDetectorsWithFieldNames = job.analysis_config.detectors.filter(d => {
+  const numDetectorsWithFieldNames = job.analysis_config.detectors.filter((d) => {
     return d.by_field_name || d.over_field_name || d.partition_field_name;
   });
   if (numDetectorsWithFieldNames.length === 0) {
@@ -168,30 +174,30 @@ export async function validateCardinality(
   }
 
   // validate({ type, isInvalid }) asynchronously returns an array of validation messages
-  const validate = validateFactory(callWithRequest, job);
+  const validate = validateFactory(mlClusterClient, job);
 
   const modelPlotEnabled = job.model_plot_config?.enabled ?? false;
 
   // check over fields (population analysis)
   const validateOverFieldsLow = validate({
     type: 'over',
-    isInvalid: cardinality => cardinality < OVER_FIELD_CARDINALITY_THRESHOLD_LOW,
+    isInvalid: (cardinality) => cardinality < OVER_FIELD_CARDINALITY_THRESHOLD_LOW,
     messageId: 'cardinality_over_field_low',
   });
   const validateOverFieldsHigh = validate({
     type: 'over',
-    isInvalid: cardinality => cardinality > OVER_FIELD_CARDINALITY_THRESHOLD_HIGH,
+    isInvalid: (cardinality) => cardinality > OVER_FIELD_CARDINALITY_THRESHOLD_HIGH,
     messageId: 'cardinality_over_field_high',
   });
 
   // check partition/by fields (multi-metric analysis)
   const validatePartitionFields = validate({
     type: 'partition',
-    isInvalid: cardinality => cardinality > PARTITION_FIELD_CARDINALITY_THRESHOLD,
+    isInvalid: (cardinality) => cardinality > PARTITION_FIELD_CARDINALITY_THRESHOLD,
   });
   const validateByFields = validate({
     type: 'by',
-    isInvalid: cardinality => cardinality > BY_FIELD_CARDINALITY_THRESHOLD,
+    isInvalid: (cardinality) => cardinality > BY_FIELD_CARDINALITY_THRESHOLD,
   });
 
   // we already called the validation functions above,
@@ -217,7 +223,7 @@ export async function validateCardinality(
   }
 
   // add all messages returned from the individual cardinality checks
-  validations.forEach(v => messages.push(...v.messages));
+  validations.forEach((v) => messages.push(...v.messages));
 
   if (messages.length === 0) {
     messages.push({ id: 'success_cardinality' });

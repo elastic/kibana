@@ -16,8 +16,6 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-// @ts-ignore
-import { CRUD_APP_BASE_PATH } from './crud_app/constants';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
@@ -71,32 +69,39 @@ export class RollupPlugin implements Plugin {
             'Summarize and store historical data in a smaller index for future analysis.',
         }),
         icon: 'indexRollupApp',
-        path: `#${CRUD_APP_BASE_PATH}/job_list`,
+        path: `/app/management/data/rollup_jobs/job_list`,
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
       });
     }
 
-    const esSection = management.sections.getSection('elasticsearch');
-    if (esSection) {
-      esSection.registerApp({
-        id: 'rollup_jobs',
-        title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
-        order: 5,
-        async mount(params) {
-          params.setBreadcrumbs([
-            {
-              text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
-                defaultMessage: 'Rollup Jobs',
-              }),
-            },
-          ]);
-          const { renderApp } = await import('./application');
+    const pluginName = i18n.translate('xpack.rollupJobs.appTitle', {
+      defaultMessage: 'Rollup Jobs',
+    });
 
-          return renderApp(core, params);
-        },
-      });
-    }
+    management.sections.section.data.registerApp({
+      id: 'rollup_jobs',
+      title: pluginName,
+      order: 4,
+      async mount(params) {
+        const [coreStart] = await core.getStartServices();
+
+        const {
+          chrome: { docTitle },
+        } = coreStart;
+
+        docTitle.change(pluginName);
+        params.setBreadcrumbs([{ text: pluginName }]);
+
+        const { renderApp } = await import('./application');
+        const unmountAppCallback = await renderApp(core, params);
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
+      },
+    });
   }
 
   start(core: CoreStart) {

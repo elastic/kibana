@@ -11,7 +11,7 @@ describe('alert reducer', () => {
   beforeAll(() => {
     initialAlert = ({
       params: {},
-      consumer: 'alerting',
+      consumer: 'alerts',
       alertTypeId: null,
       schedule: {
         interval: '1m',

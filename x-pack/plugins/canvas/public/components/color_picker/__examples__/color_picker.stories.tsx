@@ -5,7 +5,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { boolean, withKnobs } from '@storybook/addon-knobs';
+import { boolean } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorPicker } from '../color_picker';
@@ -28,11 +28,11 @@ class Interactive extends React.Component<
       <div>
         <ColorPicker
           colors={this.state.colors}
-          onAddColor={value => this.setState({ colors: this.state.colors.concat(value) })}
-          onRemoveColor={value =>
-            this.setState({ colors: this.state.colors.filter(color => color !== value) })
+          onAddColor={(value) => this.setState({ colors: this.state.colors.concat(value) })}
+          onRemoveColor={(value) =>
+            this.setState({ colors: this.state.colors.filter((color) => color !== value) })
           }
-          onChange={value => this.setState({ value })}
+          onChange={(value) => this.setState({ value })}
           hasButtons={this.state.hasButtons}
           value={this.state.value}
         />
@@ -54,7 +54,6 @@ class Interactive extends React.Component<
 }
 
 storiesOf('components/Color/ColorPicker', module)
-  .addDecorator(withKnobs)
   .addParameters({
     info: {
       inline: true,

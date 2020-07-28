@@ -6,20 +6,22 @@
 
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import { ILicense } from '../../licensing/public';
+import { ILicense } from '../../licensing/common/types';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
-  SPAN_TYPE
+  SPAN_TYPE,
 } from './elasticsearch_fieldnames';
+import { ServiceAnomalyStats } from './anomaly_detection';
 
 export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
   [SERVICE_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
   [AGENT_NAME]: string;
+  serviceAnomalyStats?: ServiceAnomalyStats;
 }
 export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
   [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
@@ -34,12 +36,14 @@ export interface Connection {
   destination: ConnectionNode;
 }
 
-export interface ServiceNodeMetrics {
+export interface ServiceNodeStats {
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
-  avgTransactionDuration: number | null;
-  avgRequestsPerMinute: number | null;
-  avgErrorsPerMinute: number | null;
+  transactionStats: {
+    avgTransactionDuration: number | null;
+    avgRequestsPerMinute: number | null;
+  };
+  avgErrorRate: number | null;
 }
 
 export function isValidPlatinumLicense(license: ILicense) {
@@ -50,6 +54,6 @@ export const invalidLicenseMessage = i18n.translate(
   'xpack.apm.serviceMap.invalidLicenseMessage',
   {
     defaultMessage:
-      "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."
+      "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data.",
   }
 );

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError } from './lib';
 
@@ -37,9 +37,9 @@ interface FieldSubType {
 }
 
 export class IndexPatternsFetcher {
-  private _callDataCluster: APICaller;
+  private _callDataCluster: LegacyAPICaller;
 
-  constructor(callDataCluster: APICaller) {
+  constructor(callDataCluster: LegacyAPICaller) {
     this._callDataCluster = callDataCluster;
   }
 

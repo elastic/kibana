@@ -15,6 +15,6 @@ export function getMetricsDateHistogramParams(start: number, end: number) {
     fixed_interval: `${Math.max(bucketSize, 30)}s`,
 
     min_doc_count: 0,
-    extended_bounds: { min: start, max: end }
+    extended_bounds: { min: start, max: end },
   };
 }

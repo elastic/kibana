@@ -24,6 +24,7 @@ jest.mock('../../../kibana_services', () => {
   return {
     getServices: () => ({
       core: { uiSettings: {}, savedObjects: {} },
+      addBasePath: (path) => path,
     }),
   };
 });

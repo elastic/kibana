@@ -32,5 +32,5 @@ export function uiSettingsServiceFactory(
   server: Legacy.Server,
   options: UiSettingsServiceFactoryOptions
 ): IUiSettingsClient {
-  return server.newPlatform.__internals.uiSettings.asScopedToClient(options.savedObjectsClient);
+  return server.newPlatform.start.core.uiSettings.asScopedToClient(options.savedObjectsClient);
 }

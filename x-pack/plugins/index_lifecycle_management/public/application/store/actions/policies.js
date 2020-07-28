@@ -22,7 +22,7 @@ export const policyPageChanged = createAction('POLICY_PAGE_CHANGED');
 export const policySortDirectionChanged = createAction('POLICY_SORT_DIRECTION_CHANGED');
 export const policyFilterChanged = createAction('POLICY_FILTER_CHANGED');
 
-export const fetchPolicies = (withIndices, callback) => async dispatch => {
+export const fetchPolicies = (withIndices, callback) => async (dispatch) => {
   let policies;
   try {
     policies = await loadPolicies(withIndices);

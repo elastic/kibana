@@ -19,7 +19,6 @@ import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { getId } from '../../../lib/get_id';
 import { Popover, ClosePopoverFn } from '../../popover';
-// @ts-ignore Untyped local
 import { AssetManager } from '../../asset_manager';
 import { SavedElementsModal } from '../../saved_elements_modal';
 

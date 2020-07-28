@@ -48,7 +48,7 @@ export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, n
     calculateAuto(100, duration).asSeconds()
   );
 
-  const uuidsToInclude = pageOfNodes.map(node => node.uuid);
+  const uuidsToInclude = pageOfNodes.map((node) => node.uuid);
   const filters = [
     {
       terms: {

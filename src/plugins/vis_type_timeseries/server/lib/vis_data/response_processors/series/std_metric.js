@@ -24,7 +24,7 @@ import { mapBucket } from '../../helpers/map_bucket';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 export function stdMetric(resp, panel, series, meta) {
-  return next => results => {
+  return (next) => (results) => {
     const metric = getLastMetric(series);
     if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
       return next(results);
@@ -35,7 +35,7 @@ export function stdMetric(resp, panel, series, meta) {
     }
     if (/_bucket$/.test(metric.type)) return next(results);
     const decoration = getDefaultDecoration(series);
-    getSplits(resp, panel, series, meta).forEach(split => {
+    getSplits(resp, panel, series, meta).forEach((split) => {
       const data = split.timeseries.buckets.map(mapBucket(metric));
       results.push({
         id: `${split.id}`,

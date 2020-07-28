@@ -195,24 +195,24 @@ exports[`apmUiEnabled 1`] = `
           <span
             id="aria-describedby.addSiemButtonLabel"
           >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
+            Protect hosts, analyze security information and events, hunt threats, automate detections, and create cases.
           </span>
         }
         footer={
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/tutorial_directory/siem"
+            href="#/tutorial_directory/security"
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.securitySolution.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         textAlign="left"
-        title="SIEM"
+        title="SIEM + Endpoint Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -277,7 +277,7 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="path/app/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -461,24 +461,24 @@ exports[`isNewKibanaInstance 1`] = `
           <span
             id="aria-describedby.addSiemButtonLabel"
           >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
+            Protect hosts, analyze security information and events, hunt threats, automate detections, and create cases.
           </span>
         }
         footer={
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/tutorial_directory/siem"
+            href="#/tutorial_directory/security"
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.securitySolution.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         textAlign="left"
-        title="SIEM"
+        title="SIEM + Endpoint Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -543,7 +543,7 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="path/app/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -758,24 +758,24 @@ exports[`mlEnabled 1`] = `
           <span
             id="aria-describedby.addSiemButtonLabel"
           >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
+            Protect hosts, analyze security information and events, hunt threats, automate detections, and create cases.
           </span>
         }
         footer={
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/tutorial_directory/siem"
+            href="#/tutorial_directory/security"
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.securitySolution.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         textAlign="left"
-        title="SIEM"
+        title="SIEM + Endpoint Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -876,7 +876,7 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="path/app/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -1060,24 +1060,24 @@ exports[`render 1`] = `
           <span
             id="aria-describedby.addSiemButtonLabel"
           >
-            Centralize security events for interactive investigation in ready-to-go visualizations.
+            Protect hosts, analyze security information and events, hunt threats, automate detections, and create cases.
           </span>
         }
         footer={
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            href="#/tutorial_directory/siem"
+            href="#/tutorial_directory/security"
           >
             <FormattedMessage
               defaultMessage="Add events"
-              id="home.addData.siem.addSiemEventsButtonLabel"
+              id="home.addData.securitySolution.addSecurityEventsButtonLabel"
               values={Object {}}
             />
           </EuiButton>
         }
         textAlign="left"
-        title="SIEM"
+        title="SIEM + Endpoint Security"
         titleSize="xs"
       />
     </EuiFlexItem>
@@ -1142,7 +1142,7 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          href="#/management/kibana/index_pattern"
+          href="path/app/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",

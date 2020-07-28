@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { PanelState, EmbeddableInput } from '../../../embeddable_plugin';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';

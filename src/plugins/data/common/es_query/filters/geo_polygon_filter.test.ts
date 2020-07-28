@@ -19,8 +19,8 @@
 
 import { getGeoPolygonFilterField } from './geo_polygon_filter';
 
-describe('geo_polygon filter', function() {
-  describe('getGeoPolygonFilterField', function() {
+describe('geo_polygon filter', function () {
+  describe('getGeoPolygonFilterField', function () {
     it('should return the name of the field a geo_polygon query is targeting', () => {
       const filter = {
         geo_polygon: {

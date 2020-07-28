@@ -43,7 +43,7 @@ export function expandAliases(indicesOrAliases) {
   if (typeof indicesOrAliases === 'string') {
     indicesOrAliases = [indicesOrAliases];
   }
-  indicesOrAliases = $.map(indicesOrAliases, function(iOrA) {
+  indicesOrAliases = $.map(indicesOrAliases, function (iOrA) {
     if (perAliasIndexes[iOrA]) {
       return perAliasIndexes[iOrA];
     }
@@ -52,7 +52,7 @@ export function expandAliases(indicesOrAliases) {
   let ret = [].concat.apply([], indicesOrAliases);
   ret.sort();
   let last;
-  ret = $.map(ret, function(v) {
+  ret = $.map(ret, function (v) {
     const r = last === v ? null : v;
     last = v;
     return r;
@@ -80,7 +80,7 @@ export function getFields(indices, types) {
       ret = f ? f : [];
     } else {
       // filter what we need
-      $.each(typeDict, function(type, fields) {
+      $.each(typeDict, function (type, fields) {
         if (!types || types.length === 0 || $.inArray(type, types) !== -1) {
           ret.push(fields);
         }
@@ -90,7 +90,7 @@ export function getFields(indices, types) {
     }
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function(index) {
+    $.each(perIndexTypes, function (index) {
       if (!indices || indices.length === 0 || $.inArray(index, indices) !== -1) {
         ret.push(getFields(index, types));
       }
@@ -98,7 +98,7 @@ export function getFields(indices, types) {
     ret = [].concat.apply([], ret);
   }
 
-  return _.uniq(ret, function(f) {
+  return _.uniqBy(ret, function (f) {
     return f.name + ':' + f.type;
   });
 }
@@ -113,12 +113,12 @@ export function getTypes(indices) {
     }
 
     // filter what we need
-    $.each(typeDict, function(type) {
+    $.each(typeDict, function (type) {
       ret.push(type);
     });
   } else {
     // multi index mode.
-    $.each(perIndexTypes, function(index) {
+    $.each(perIndexTypes, function (index) {
       if (!indices || $.inArray(index, indices) !== -1) {
         ret.push(getTypes(index));
       }
@@ -131,11 +131,11 @@ export function getTypes(indices) {
 
 export function getIndices(includeAliases) {
   const ret = [];
-  $.each(perIndexTypes, function(index) {
+  $.each(perIndexTypes, function (index) {
     ret.push(index);
   });
   if (typeof includeAliases === 'undefined' ? true : includeAliases) {
-    $.each(perAliasIndexes, function(alias) {
+    $.each(perAliasIndexes, function (alias) {
       ret.push(alias);
     });
   }
@@ -151,7 +151,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   function applyPathSettings(nestedFieldNames) {
     const pathType = fieldMapping.path || 'full';
     if (pathType === 'full') {
-      return $.map(nestedFieldNames, function(f) {
+      return $.map(nestedFieldNames, function (f) {
         f.name = fieldName + '.' + f.name;
         return f;
       });
@@ -174,7 +174,7 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
   }
 
   if (fieldMapping.fields) {
-    nestedFields = $.map(fieldMapping.fields, function(fieldMapping, fieldName) {
+    nestedFields = $.map(fieldMapping.fields, function (fieldMapping, fieldName) {
       return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
     });
     nestedFields = applyPathSettings(nestedFields);
@@ -186,12 +186,12 @@ function getFieldNamesFromFieldMapping(fieldName, fieldMapping) {
 }
 
 function getFieldNamesFromProperties(properties = {}) {
-  const fieldList = $.map(properties, function(fieldMapping, fieldName) {
+  const fieldList = $.map(properties, function (fieldMapping, fieldName) {
     return getFieldNamesFromFieldMapping(fieldName, fieldMapping);
   });
 
   // deduping
-  return _.uniq(fieldList, function(f) {
+  return _.uniqBy(fieldList, function (f) {
     return f.name + ':' + f.type;
   });
 }
@@ -203,7 +203,7 @@ function loadTemplates(templatesObject = {}) {
 export function loadMappings(mappings) {
   perIndexTypes = {};
 
-  $.each(mappings, function(index, indexMapping) {
+  $.each(mappings, function (index, indexMapping) {
     const normalizedIndexMappings = {};
 
     // Migrate 1.0.0 mappings. This format has changed, so we need to extract the underlying mapping.
@@ -211,7 +211,7 @@ export function loadMappings(mappings) {
       indexMapping = indexMapping.mappings;
     }
 
-    $.each(indexMapping, function(typeName, typeMapping) {
+    $.each(indexMapping, function (typeName, typeMapping) {
       if (typeName === 'properties') {
         const fieldList = getFieldNamesFromProperties(typeMapping);
         normalizedIndexMappings[typeName] = fieldList;
@@ -226,11 +226,11 @@ export function loadMappings(mappings) {
 
 export function loadAliases(aliases) {
   perAliasIndexes = {};
-  $.each(aliases || {}, function(index, omdexAliases) {
+  $.each(aliases || {}, function (index, omdexAliases) {
     // verify we have an index defined. useful when mapping loading is disabled
     perIndexTypes[index] = perIndexTypes[index] || {};
 
-    $.each(omdexAliases.aliases || {}, function(alias) {
+    $.each(omdexAliases.aliases || {}, function (alias) {
       if (alias === index) {
         return;
       } // alias which is identical to index means no index.

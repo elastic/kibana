@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PackageInfo, InstallationStatus } from '../types';
-import { packageToConfigDatasource, packageToConfigDatasourceInputs } from './package_to_config';
+import { packageToPackageConfig, packageToPackageConfigInputs } from './package_to_config';
 
 describe('Ingest Manager - packageToConfig', () => {
   const mockPackage: PackageInfo = {
@@ -31,32 +31,32 @@ describe('Ingest Manager - packageToConfig', () => {
     status: InstallationStatus.notInstalled,
   };
 
-  describe('packageToConfigDatasourceInputs', () => {
-    it('returns empty array for packages with no datasources', () => {
-      expect(packageToConfigDatasourceInputs(mockPackage)).toEqual([]);
-      expect(packageToConfigDatasourceInputs({ ...mockPackage, datasources: [] })).toEqual([]);
+  describe('packageToPackageConfigInputs', () => {
+    it('returns empty array for packages with no config templates', () => {
+      expect(packageToPackageConfigInputs(mockPackage)).toEqual([]);
+      expect(packageToPackageConfigInputs({ ...mockPackage, config_templates: [] })).toEqual([]);
     });
 
-    it('returns empty array for packages a datasource but no inputs', () => {
+    it('returns empty array for packages with a config template but no inputs', () => {
       expect(
-        packageToConfigDatasourceInputs(({
+        packageToPackageConfigInputs(({
           ...mockPackage,
-          datasources: [{ inputs: [] }],
+          config_templates: [{ inputs: [] }],
         } as unknown) as PackageInfo)
       ).toEqual([]);
     });
 
     it('returns inputs with no streams for packages with no streams', () => {
       expect(
-        packageToConfigDatasourceInputs(({
+        packageToPackageConfigInputs(({
           ...mockPackage,
-          datasources: [{ inputs: [{ type: 'foo' }] }],
+          config_templates: [{ inputs: [{ type: 'foo' }] }],
         } as unknown) as PackageInfo)
       ).toEqual([{ type: 'foo', enabled: true, streams: [] }]);
       expect(
-        packageToConfigDatasourceInputs(({
+        packageToPackageConfigInputs(({
           ...mockPackage,
-          datasources: [{ inputs: [{ type: 'foo' }, { type: 'bar' }] }],
+          config_templates: [{ inputs: [{ type: 'foo' }, { type: 'bar' }] }],
         } as unknown) as PackageInfo)
       ).toEqual([
         { type: 'foo', enabled: true, streams: [] },
@@ -66,14 +66,16 @@ describe('Ingest Manager - packageToConfig', () => {
 
     it('returns inputs with streams for packages with streams', () => {
       expect(
-        packageToConfigDatasourceInputs(({
+        packageToPackageConfigInputs(({
           ...mockPackage,
-          datasources: [
+          datasets: [
+            { type: 'logs', name: 'foo', streams: [{ input: 'foo' }] },
+            { type: 'logs', name: 'bar', streams: [{ input: 'bar' }] },
+            { type: 'logs', name: 'bar2', streams: [{ input: 'bar' }] },
+          ],
+          config_templates: [
             {
-              inputs: [
-                { type: 'foo', streams: [{ dataset: 'foo' }] },
-                { type: 'bar', streams: [{ dataset: 'bar' }, { dataset: 'bar2' }] },
-              ],
+              inputs: [{ type: 'foo' }, { type: 'bar' }],
             },
           ],
         } as unknown) as PackageInfo)
@@ -81,14 +83,14 @@ describe('Ingest Manager - packageToConfig', () => {
         {
           type: 'foo',
           enabled: true,
-          streams: [{ id: 'foo-foo', enabled: true, dataset: 'foo' }],
+          streams: [{ id: 'foo-foo', enabled: true, dataset: { name: 'foo', type: 'logs' } }],
         },
         {
           type: 'bar',
           enabled: true,
           streams: [
-            { id: 'bar-bar', enabled: true, dataset: 'bar' },
-            { id: 'bar-bar2', enabled: true, dataset: 'bar2' },
+            { id: 'bar-bar', enabled: true, dataset: { name: 'bar', type: 'logs' } },
+            { id: 'bar-bar2', enabled: true, dataset: { name: 'bar2', type: 'logs' } },
           ],
         },
       ]);
@@ -96,31 +98,38 @@ describe('Ingest Manager - packageToConfig', () => {
 
     it('returns inputs with streams configurations for packages with stream vars', () => {
       expect(
-        packageToConfigDatasourceInputs(({
+        packageToPackageConfigInputs(({
           ...mockPackage,
-          datasources: [
+          datasets: [
             {
-              inputs: [
+              type: 'logs',
+              name: 'foo',
+              streams: [{ input: 'foo', vars: [{ default: 'foo-var-value', name: 'var-name' }] }],
+            },
+            {
+              type: 'logs',
+              name: 'bar',
+              streams: [
                 {
-                  type: 'foo',
-                  streams: [
-                    { dataset: 'foo', vars: [{ default: 'foo-var-value', name: 'var-name' }] },
-                  ],
-                },
-                {
-                  type: 'bar',
-                  streams: [
-                    {
-                      dataset: 'bar',
-                      vars: [{ default: 'bar-var-value', name: 'var-name', type: 'text' }],
-                    },
-                    {
-                      dataset: 'bar2',
-                      vars: [{ default: 'bar2-var-value', name: 'var-name', type: 'yaml' }],
-                    },
-                  ],
+                  input: 'bar',
+                  vars: [{ default: 'bar-var-value', name: 'var-name', type: 'text' }],
                 },
               ],
+            },
+            {
+              type: 'logs',
+              name: 'bar2',
+              streams: [
+                {
+                  input: 'bar',
+                  vars: [{ default: 'bar2-var-value', name: 'var-name', type: 'yaml' }],
+                },
+              ],
+            },
+          ],
+          config_templates: [
+            {
+              inputs: [{ type: 'foo' }, { type: 'bar' }],
             },
           ],
         } as unknown) as PackageInfo)
@@ -132,7 +141,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'foo-foo',
               enabled: true,
-              dataset: 'foo',
+              dataset: { name: 'foo', type: 'logs' },
               vars: { 'var-name': { value: 'foo-var-value' } },
             },
           ],
@@ -144,13 +153,13 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'bar-bar',
               enabled: true,
-              dataset: 'bar',
+              dataset: { name: 'bar', type: 'logs' },
               vars: { 'var-name': { type: 'text', value: 'bar-var-value' } },
             },
             {
               id: 'bar-bar2',
               enabled: true,
-              dataset: 'bar2',
+              dataset: { name: 'bar2', type: 'logs' },
               vars: { 'var-name': { type: 'yaml', value: 'bar2-var-value' } },
             },
           ],
@@ -160,9 +169,57 @@ describe('Ingest Manager - packageToConfig', () => {
 
     it('returns inputs with streams configurations for packages with stream and input vars', () => {
       expect(
-        packageToConfigDatasourceInputs(({
+        packageToPackageConfigInputs(({
           ...mockPackage,
-          datasources: [
+          datasets: [
+            {
+              type: 'logs',
+              name: 'foo',
+              streams: [{ input: 'foo', vars: [{ default: 'foo-var-value', name: 'var-name' }] }],
+            },
+            {
+              type: 'logs',
+              name: 'bar',
+              streams: [
+                {
+                  input: 'bar',
+                  vars: [{ default: 'bar-var-value', name: 'var-name' }],
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              name: 'bar2',
+              streams: [
+                {
+                  input: 'bar',
+                  vars: [{ default: 'bar2-var-value', name: 'var-name' }],
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              name: 'disabled',
+              streams: [
+                {
+                  input: 'with-disabled-streams',
+                  enabled: false,
+                  vars: [{ multi: true, name: 'var-name' }],
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              name: 'disabled2',
+              streams: [
+                {
+                  input: 'with-disabled-streams',
+                  enabled: false,
+                },
+              ],
+            },
+          ],
+          config_templates: [
             {
               inputs: [
                 {
@@ -172,9 +229,6 @@ describe('Ingest Manager - packageToConfig', () => {
                     { default: 'foo-input2-var-value', name: 'foo-input2-var-name' },
                     { name: 'foo-input3-var-name' },
                   ],
-                  streams: [
-                    { dataset: 'foo', vars: [{ default: 'foo-var-value', name: 'var-name' }] },
-                  ],
                 },
                 {
                   type: 'bar',
@@ -182,21 +236,9 @@ describe('Ingest Manager - packageToConfig', () => {
                     { default: ['value1', 'value2'], name: 'bar-input-var-name' },
                     { default: 123456, name: 'bar-input2-var-name' },
                   ],
-                  streams: [
-                    { dataset: 'bar', vars: [{ default: 'bar-var-value', name: 'var-name' }] },
-                    { dataset: 'bar2', vars: [{ default: 'bar2-var-value', name: 'var-name' }] },
-                  ],
                 },
                 {
                   type: 'with-disabled-streams',
-                  streams: [
-                    {
-                      dataset: 'disabled',
-                      enabled: false,
-                      vars: [{ multi: true, name: 'var-name' }],
-                    },
-                    { dataset: 'disabled2', enabled: false },
-                  ],
                 },
               ],
             },
@@ -215,7 +257,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'foo-foo',
               enabled: true,
-              dataset: 'foo',
+              dataset: { name: 'foo', type: 'logs' },
               vars: {
                 'var-name': { value: 'foo-var-value' },
               },
@@ -233,7 +275,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'bar-bar',
               enabled: true,
-              dataset: 'bar',
+              dataset: { name: 'bar', type: 'logs' },
               vars: {
                 'var-name': { value: 'bar-var-value' },
               },
@@ -241,7 +283,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'bar-bar2',
               enabled: true,
-              dataset: 'bar2',
+              dataset: { name: 'bar2', type: 'logs' },
               vars: {
                 'var-name': { value: 'bar2-var-value' },
               },
@@ -255,7 +297,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'with-disabled-streams-disabled',
               enabled: false,
-              dataset: 'disabled',
+              dataset: { name: 'disabled', type: 'logs' },
               vars: {
                 'var-name': { value: [] },
               },
@@ -263,7 +305,7 @@ describe('Ingest Manager - packageToConfig', () => {
             {
               id: 'with-disabled-streams-disabled2',
               enabled: false,
-              dataset: 'disabled2',
+              dataset: { name: 'disabled2', type: 'logs' },
             },
           ],
         },
@@ -271,10 +313,11 @@ describe('Ingest Manager - packageToConfig', () => {
     });
   });
 
-  describe('packageToConfigDatasource', () => {
-    it('returns datasource with default name', () => {
-      expect(packageToConfigDatasource(mockPackage, '1', '2')).toEqual({
+  describe('packageToPackageConfig', () => {
+    it('returns package config with default name', () => {
+      expect(packageToPackageConfig(mockPackage, '1', '2')).toEqual({
         config_id: '1',
+        namespace: '',
         enabled: true,
         inputs: [],
         name: 'mock-package-1',
@@ -286,12 +329,13 @@ describe('Ingest Manager - packageToConfig', () => {
         },
       });
     });
-    it('returns datasource with custom name', () => {
-      expect(packageToConfigDatasource(mockPackage, '1', '2', 'ds-1')).toEqual({
+    it('returns package config with custom name', () => {
+      expect(packageToPackageConfig(mockPackage, '1', '2', 'default', 'pkgConfig-1')).toEqual({
         config_id: '1',
+        namespace: 'default',
         enabled: true,
         inputs: [],
-        name: 'ds-1',
+        name: 'pkgConfig-1',
         output_id: '2',
         package: {
           name: 'mock-package',
@@ -300,21 +344,21 @@ describe('Ingest Manager - packageToConfig', () => {
         },
       });
     });
-    it('returns datasource with namespace and description', () => {
+    it('returns package config with namespace and description', () => {
       expect(
-        packageToConfigDatasource(
+        packageToPackageConfig(
           mockPackage,
           '1',
           '2',
-          'ds-1',
           'mock-namespace',
+          'pkgConfig-1',
           'Test description'
         )
       ).toEqual({
         config_id: '1',
         enabled: true,
         inputs: [],
-        name: 'ds-1',
+        name: 'pkgConfig-1',
         namespace: 'mock-namespace',
         description: 'Test description',
         output_id: '2',
@@ -325,17 +369,20 @@ describe('Ingest Manager - packageToConfig', () => {
         },
       });
     });
-    it('returns datasource with inputs', () => {
-      const mockPackageWithDatasources = ({
+    it('returns package config with inputs', () => {
+      const mockPackageWithConfigTemplates = ({
         ...mockPackage,
-        datasources: [{ inputs: [{ type: 'foo' }] }],
+        config_templates: [{ inputs: [{ type: 'foo' }] }],
       } as unknown) as PackageInfo;
 
-      expect(packageToConfigDatasource(mockPackageWithDatasources, '1', '2', 'ds-1')).toEqual({
+      expect(
+        packageToPackageConfig(mockPackageWithConfigTemplates, '1', '2', 'default', 'pkgConfig-1')
+      ).toEqual({
         config_id: '1',
+        namespace: 'default',
         enabled: true,
         inputs: [{ type: 'foo', enabled: true, streams: [] }],
-        name: 'ds-1',
+        name: 'pkgConfig-1',
         output_id: '2',
         package: {
           name: 'mock-package',

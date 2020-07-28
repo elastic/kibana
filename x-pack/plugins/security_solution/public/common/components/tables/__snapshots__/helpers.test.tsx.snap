@@ -1,0 +1,147 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table Helpers #getRowItemDraggable it returns correctly against snapshot 1`] = `
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "idPrefix-attrName-item1",
+      "kqlQuery": "",
+      "name": "item1",
+      "queryMatch": Object {
+        "displayValue": "item1",
+        "field": "attrName",
+        "operator": ":",
+        "value": "item1",
+      },
+    }
+  }
+  key="idPrefix-attrName-item1"
+  render={[Function]}
+/>
+`;
+
+exports[`Table Helpers #getRowItemDraggables it returns correctly against snapshot 1`] = `
+<DragDropContext
+  onDragEnd={[MockFunction]}
+>
+  <DraggableWrapper
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "idPrefix-attrName-item1-0",
+        "kqlQuery": "",
+        "name": "item1",
+        "queryMatch": Object {
+          "displayValue": "item1",
+          "field": "attrName",
+          "operator": ":",
+          "value": "item1",
+        },
+      }
+    }
+    key="idPrefix-attrName-item1-0"
+    render={[Function]}
+  />
+  ,
+  <Spacer />
+  <DraggableWrapper
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "idPrefix-attrName-item2-1",
+        "kqlQuery": "",
+        "name": "item2",
+        "queryMatch": Object {
+          "displayValue": "item2",
+          "field": "attrName",
+          "operator": ":",
+          "value": "item2",
+        },
+      }
+    }
+    key="idPrefix-attrName-item2-1"
+    render={[Function]}
+  />
+  ,
+  <Spacer />
+  <DraggableWrapper
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "idPrefix-attrName-item3-2",
+        "kqlQuery": "",
+        "name": "item3",
+        "queryMatch": Object {
+          "displayValue": "item3",
+          "field": "attrName",
+          "operator": ":",
+          "value": "item3",
+        },
+      }
+    }
+    key="idPrefix-attrName-item3-2"
+    render={[Function]}
+  />
+   
+</DragDropContext>
+`;
+
+exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot 1`] = `
+<div>
+  <Popover
+    count={2}
+    idPrefix="attrName"
+  >
+    <EuiText
+      size="xs"
+    >
+      <ul>
+        <li
+          key="attrName-item2"
+        >
+          item2
+        </li>
+      </ul>
+      <p
+        data-test-subj="popover-additional-overflow"
+      >
+        <EuiTextColor
+          color="subdued"
+        >
+          1
+           
+          <FormattedMessage
+            defaultMessage="more not shown"
+            id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
+            values={Object {}}
+          />
+        </EuiTextColor>
+      </p>
+    </EuiText>
+  </Popover>
+</div>
+`;
+
+exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] = `
+<span>
+  This string is exactly fifty-one chars in length!!
+  <EuiToolTip
+    content="This string is exactly fifty-one chars in length!!!"
+    delay="regular"
+    position="top"
+  >
+    <MoreRowItems
+      type="boxesHorizontal"
+    />
+  </EuiToolTip>
+</span>
+`;

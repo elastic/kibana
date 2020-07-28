@@ -31,6 +31,7 @@ import {
   PHASE_FREEZE_ENABLED,
   PHASE_INDEX_PRIORITY,
   PHASE_ROLLOVER_MAX_DOCUMENTS,
+  PHASE_WAIT_FOR_SNAPSHOT_POLICY,
 } from '../../constants';
 
 import { filterItems, sortTable } from '../../services';
@@ -42,23 +43,23 @@ import {
   defaultEmptyHotPhase,
 } from '../defaults';
 
-export const getPolicies = state => state.policies.policies;
+export const getPolicies = (state) => state.policies.policies;
 export const getPolicyByName = (state, name) =>
-  getPolicies(state).find(policy => policy.name === name) || {};
-export const getIsNewPolicy = state => state.policies.selectedPolicy.isNew;
-export const getSelectedPolicy = state => state.policies.selectedPolicy;
-export const getIsSelectedPolicySet = state => state.policies.selectedPolicySet;
-export const getSelectedOriginalPolicyName = state => state.policies.originalPolicyName;
-export const getPolicyFilter = state => state.policies.filter;
-export const getPolicySort = state => state.policies.sort;
-export const getPolicyCurrentPage = state => state.policies.currentPage;
-export const getPolicyPageSize = state => state.policies.pageSize;
-export const isPolicyListLoaded = state => state.policies.isLoaded;
+  getPolicies(state).find((policy) => policy.name === name) || {};
+export const getIsNewPolicy = (state) => state.policies.selectedPolicy.isNew;
+export const getSelectedPolicy = (state) => state.policies.selectedPolicy;
+export const getIsSelectedPolicySet = (state) => state.policies.selectedPolicySet;
+export const getSelectedOriginalPolicyName = (state) => state.policies.originalPolicyName;
+export const getPolicyFilter = (state) => state.policies.filter;
+export const getPolicySort = (state) => state.policies.sort;
+export const getPolicyCurrentPage = (state) => state.policies.currentPage;
+export const getPolicyPageSize = (state) => state.policies.pageSize;
+export const isPolicyListLoaded = (state) => state.policies.isLoaded;
 
 const getFilteredPolicies = createSelector(getPolicies, getPolicyFilter, (policies, filter) => {
   return filterItems(['name'], filter, policies);
 });
-export const getTotalPolicies = createSelector(getFilteredPolicies, filteredPolicies => {
+export const getTotalPolicies = createSelector(getFilteredPolicies, (filteredPolicies) => {
   return filteredPolicies.length;
 });
 export const getPolicyPager = createSelector(
@@ -80,16 +81,16 @@ export const getPageOfPolicies = createSelector(
     return pagedPolicies;
   }
 );
-export const getSaveAsNewPolicy = state => state.policies.selectedPolicy.saveAsNew;
+export const getSaveAsNewPolicy = (state) => state.policies.selectedPolicy.saveAsNew;
 
-export const getSelectedPolicyName = state => {
+export const getSelectedPolicyName = (state) => {
   if (!getSaveAsNewPolicy(state)) {
     return getSelectedOriginalPolicyName(state);
   }
   return state.policies.selectedPolicy.name;
 };
 
-export const getPhases = state => state.policies.selectedPolicy.phases;
+export const getPhases = (state) => state.policies.selectedPolicy.phases;
 
 export const getPhase = (state, phase) => getPhases(state)[phase];
 
@@ -100,7 +101,7 @@ export const getPhaseData = (state, phase, key) => {
   return getPhase(state, phase)[key];
 };
 
-export const splitSizeAndUnits = field => {
+export const splitSizeAndUnits = (field) => {
   let size;
   let units;
 
@@ -116,8 +117,8 @@ export const splitSizeAndUnits = field => {
   };
 };
 
-export const isNumber = value => typeof value === 'number';
-export const isEmptyObject = obj => {
+export const isNumber = (value) => typeof value === 'number';
+export const isEmptyObject = (obj) => {
   return !obj || (Object.entries(obj).length === 0 && obj.constructor === Object);
 };
 
@@ -166,7 +167,7 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
     if (actions.allocate) {
       const allocate = actions.allocate;
       if (allocate.require) {
-        Object.entries(allocate.require).forEach(entry => {
+        Object.entries(allocate.require).forEach((entry) => {
           policy[PHASE_NODE_ATTRS] = entry.join(':');
         });
         // checking for null or undefined here
@@ -192,13 +193,19 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
     }
 
     if (actions.set_priority) {
-      policy[PHASE_INDEX_PRIORITY] = actions.set_priority.priority;
+      const { priority } = actions.set_priority;
+
+      policy[PHASE_INDEX_PRIORITY] = priority ?? '';
+    }
+
+    if (actions.wait_for_snapshot) {
+      policy[PHASE_WAIT_FOR_SNAPSHOT_POLICY] = actions.wait_for_snapshot.policy;
     }
   }
   return policy;
 };
 
-export const policyFromES = policy => {
+export const policyFromES = (policy) => {
   const {
     name,
     policy: { phases },
@@ -307,6 +314,18 @@ export const phaseToES = (phase, originalEsPhase) => {
     esPhase.actions.set_priority = {
       priority: phase[PHASE_INDEX_PRIORITY],
     };
+  } else if (phase[PHASE_INDEX_PRIORITY] === '') {
+    esPhase.actions.set_priority = {
+      priority: null,
+    };
+  }
+
+  if (phase[PHASE_WAIT_FOR_SNAPSHOT_POLICY]) {
+    esPhase.actions.wait_for_snapshot = {
+      policy: phase[PHASE_WAIT_FOR_SNAPSHOT_POLICY],
+    };
+  } else {
+    delete esPhase.actions.wait_for_snapshot;
   }
   return esPhase;
 };

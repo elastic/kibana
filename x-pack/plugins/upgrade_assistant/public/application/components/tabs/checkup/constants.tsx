@@ -14,7 +14,9 @@ export const LEVEL_MAP: { [level: string]: number } = {
   critical: 1,
 };
 
-export const REVERSE_LEVEL_MAP: { [idx: number]: DeprecationInfo['level'] } = invert(LEVEL_MAP);
+export const REVERSE_LEVEL_MAP: { [idx: number]: DeprecationInfo['level'] } = invert(
+  LEVEL_MAP
+) as any;
 
 export const COLOR_MAP: { [level: string]: IconColor } = {
   warning: 'default',

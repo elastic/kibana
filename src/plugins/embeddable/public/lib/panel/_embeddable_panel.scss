@@ -132,6 +132,14 @@
   }
 }
 
+// LOADING and ERRORS
+
+.embPanel--loading {
+  .embPanel__title {
+    color: $euiTextSubduedColor;
+  }
+}
+
 .embPanel__error {
   text-align: center;
   justify-content: center;
@@ -139,4 +147,16 @@
   overflow: auto;
   text-align: center;
   padding: $euiSizeS;
+}
+
+.embPanel__label {
+  position: absolute;
+  padding-left: $euiSizeS;
+}
+
+.embPanel__content[data-error],
+.embPanel__content[data-loading] {
+  pointer-events: none;
+  filter: grayscale(100%);
+  filter: gray;
 }

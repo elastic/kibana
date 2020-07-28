@@ -32,7 +32,7 @@ exports.extractConfigFiles = function extractConfigFiles(config, dest, options =
   const originalConfig = typeof config === 'string' ? [config] : config;
   const localConfig = [];
 
-  originalConfig.forEach(prop => {
+  originalConfig.forEach((prop) => {
     const [key, value] = prop.split('=');
 
     if (isFile(value)) {

@@ -6,6 +6,13 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "data"
+    "data",
+    "kibanaLegacy"
+  ],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "share",
+    "charts"
   ]
 }

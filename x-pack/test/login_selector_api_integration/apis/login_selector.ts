@@ -18,7 +18,7 @@ import {
 import { getSAMLRequestId, getSAMLResponse } from '../../saml_api_integration/fixtures/saml_tools';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
@@ -102,7 +102,7 @@ export default function({ getService }: FtrProviderContext) {
         });
       }
 
-      it('should be able to log in via IdP initiated login for any configured realm', async () => {
+      it('should be able to log in via IdP initiated login for any configured provider', async () => {
         for (const providerName of ['saml1', 'saml2']) {
           const authenticationResponse = await supertest
             .post('/api/security/saml/callback')
@@ -112,6 +112,57 @@ export default function({ getService }: FtrProviderContext) {
                 issuer: `http://www.elastic.co/${providerName}`,
               }),
             })
+            .expect(302);
+
+          // User should be redirected to the base URL.
+          expect(authenticationResponse.headers.location).to.be('/');
+
+          const cookies = authenticationResponse.headers['set-cookie'];
+          expect(cookies).to.have.length(1);
+
+          await checkSessionCookie(request.cookie(cookies[0])!, 'a@b.c', providerName);
+        }
+      });
+
+      it('should redirect to URL from relay state in case of IdP initiated login only for providers that explicitly enabled that behaviour', async () => {
+        for (const { providerName, redirectURL } of [
+          { providerName: 'saml1', redirectURL: '/' },
+          { providerName: 'saml2', redirectURL: '/app/kibana#/dashboards' },
+        ]) {
+          const authenticationResponse = await supertest
+            .post('/api/security/saml/callback')
+            .ca(CA_CERT)
+            .type('form')
+            .send({
+              SAMLResponse: await createSAMLResponse({
+                issuer: `http://www.elastic.co/${providerName}`,
+              }),
+            })
+            .send({ RelayState: '/app/kibana#/dashboards' })
+            .expect(302);
+
+          // User should be redirected to the base URL.
+          expect(authenticationResponse.headers.location).to.be(redirectURL);
+
+          const cookies = authenticationResponse.headers['set-cookie'];
+          expect(cookies).to.have.length(1);
+
+          await checkSessionCookie(request.cookie(cookies[0])!, 'a@b.c', providerName);
+        }
+      });
+
+      it('should not redirect to URL from relay state in case of IdP initiated login if URL is not internal', async () => {
+        for (const providerName of ['saml1', 'saml2']) {
+          const authenticationResponse = await supertest
+            .post('/api/security/saml/callback')
+            .ca(CA_CERT)
+            .type('form')
+            .send({
+              SAMLResponse: await createSAMLResponse({
+                issuer: `http://www.elastic.co/${providerName}`,
+              }),
+            })
+            .send({ RelayState: 'http://www.elastic.co/app/kibana#/dashboards' })
             .expect(302);
 
           // User should be redirected to the base URL.
@@ -186,6 +237,43 @@ export default function({ getService }: FtrProviderContext) {
 
         // It should be `/overwritten_session` instead of `/` once it's generalized.
         expect(saml2AuthenticationResponse.headers.location).to.be('/');
+
+        const saml2SessionCookie = request.cookie(
+          saml2AuthenticationResponse.headers['set-cookie'][0]
+        )!;
+        await checkSessionCookie(saml2SessionCookie, 'a@b.c', 'saml2');
+      });
+
+      it('should redirect to URL from relay state in case of IdP initiated login even if session with other SAML provider exists', async () => {
+        // First login with `saml1`.
+        const saml1AuthenticationResponse = await supertest
+          .post('/api/security/saml/callback')
+          .ca(CA_CERT)
+          .send({
+            SAMLResponse: await createSAMLResponse({ issuer: `http://www.elastic.co/saml1` }),
+          })
+          .expect(302);
+
+        const saml1SessionCookie = request.cookie(
+          saml1AuthenticationResponse.headers['set-cookie'][0]
+        )!;
+        await checkSessionCookie(saml1SessionCookie, 'a@b.c', 'saml1');
+
+        // And now try to login with `saml2`.
+        const saml2AuthenticationResponse = await supertest
+          .post('/api/security/saml/callback')
+          .ca(CA_CERT)
+          .set('Cookie', saml1SessionCookie.cookieString())
+          .type('form')
+          .send({
+            SAMLResponse: await createSAMLResponse({ issuer: `http://www.elastic.co/saml2` }),
+          })
+          .send({ RelayState: '/app/kibana#/dashboards' })
+          .expect(302);
+
+        // It should be `/overwritten_session` with `?next='/app/kibana#/dashboards'` instead of just
+        // `'/app/kibana#/dashboards'` once it's generalized.
+        expect(saml2AuthenticationResponse.headers.location).to.be('/app/kibana#/dashboards');
 
         const saml2SessionCookie = request.cookie(
           saml2AuthenticationResponse.headers['set-cookie'][0]

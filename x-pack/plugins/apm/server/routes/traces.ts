@@ -14,24 +14,24 @@ import { rangeRt, uiFiltersRt } from './default_api_types';
 export const tracesRoute = createRoute(() => ({
   path: '/api/apm/traces',
   params: {
-    query: t.intersection([rangeRt, uiFiltersRt])
+    query: t.intersection([rangeRt, uiFiltersRt]),
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return getTransactionGroupList({ type: 'top_traces' }, setup);
-  }
+  },
 }));
 
 export const tracesByIdRoute = createRoute(() => ({
   path: '/api/apm/traces/{traceId}',
   params: {
     path: t.type({
-      traceId: t.string
+      traceId: t.string,
     }),
-    query: rangeRt
+    query: rangeRt,
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return getTrace(context.params.path.traceId, setup);
-  }
+  },
 }));

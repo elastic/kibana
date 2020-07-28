@@ -6,12 +6,23 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['visualize', 'header', 'maps']);
+
+  const security = getService('security');
 
   describe('visualize create menu', () => {
     before(async () => {
+      await security.testUser.setRoles(
+        ['test_logstash_reader', 'global_maps_all', 'geoshape_data_reader', 'global_visualize_all'],
+        false
+      );
+
       await PageObjects.visualize.navigateToNewVisualization();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should show maps application in create menu', async () => {

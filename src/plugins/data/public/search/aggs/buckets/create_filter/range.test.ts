@@ -17,31 +17,29 @@
  * under the License.
  */
 
-import { getRangeBucketAgg, RangeBucketAggDependencies } from '../range';
+import { getRangeBucketAgg } from '../range';
 import { createFilterRange } from './range';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common';
 import { AggConfigs } from '../../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
+import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
+import { FieldFormatsStart } from '../../../../field_formats';
 import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
-import { notificationServiceMock } from '../../../../../../../core/public/mocks';
-import { InternalStartServices } from '../../../../types';
+import { GetInternalStartServicesFn, InternalStartServices } from '../../../../types';
 
 describe('AggConfig Filters', () => {
   describe('range', () => {
-    let aggTypesDependencies: RangeBucketAggDependencies;
+    let getInternalStartServices: GetInternalStartServicesFn;
+    let fieldFormats: FieldFormatsStart;
 
     beforeEach(() => {
-      aggTypesDependencies = {
-        getInternalStartServices: () =>
-          (({
-            fieldFormats: fieldFormatsServiceMock.createStartContract(),
-            notifications: notificationServiceMock.createStartContract(),
-          } as unknown) as InternalStartServices),
-      };
+      fieldFormats = fieldFormatsServiceMock.createStartContract();
 
-      mockDataServices();
+      getInternalStartServices = () =>
+        (({
+          fieldFormats,
+        } as unknown) as InternalStartServices);
     });
 
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
@@ -74,26 +72,29 @@ describe('AggConfig Filters', () => {
           },
         ],
         {
-          typesRegistry: mockAggTypesRegistry([getRangeBucketAgg(aggTypesDependencies)]),
-          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+          typesRegistry: mockAggTypesRegistry([getRangeBucketAgg({ getInternalStartServices })]),
         }
       );
     };
 
     test('should return a range filter for range agg', () => {
       const aggConfigs = getAggConfigs();
-      const filter = createFilterRange(aggConfigs.aggs[0] as IBucketAggConfig, {
-        gte: 1024,
-        lt: 2048.0,
-      });
+      const filter = createFilterRange(getInternalStartServices)(
+        aggConfigs.aggs[0] as IBucketAggConfig,
+        {
+          gte: 1024,
+          lt: 2048.0,
+        }
+      );
 
+      expect(fieldFormats.deserialize).toHaveBeenCalledTimes(1);
       expect(filter).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter.range).toHaveProperty('bytes');
       expect(filter.range.bytes).toHaveProperty('gte', 1024.0);
       expect(filter.range.bytes).toHaveProperty('lt', 2048.0);
-      expect(filter.meta).toHaveProperty('formattedValue', '≥ 1,024 and < 2,048');
+      expect(filter.meta).toHaveProperty('formattedValue');
     });
   });
 });

@@ -31,7 +31,7 @@ describe('markdown', () => {
 
       it('compiles and concatenates handlebars expressions using context', () => {
         let expectedContent = 'Columns:';
-        testTable.columns.map(col => (expectedContent += ` ${col.name}`));
+        testTable.columns.map((col) => (expectedContent += ` ${col.name}`));
 
         const result = fn(testTable, {
           content: ['Columns:', '{{#each columns}} {{name}}{{/each}}'],

@@ -7,7 +7,7 @@
 import { getTraceItems } from './get_trace_items';
 import {
   SearchParamsMock,
-  inspectSearchParams
+  inspectSearchParams,
 } from '../../../public/utils/testHelpers';
 
 describe('trace queries', () => {
@@ -18,7 +18,7 @@ describe('trace queries', () => {
   });
 
   it('fetches a trace', async () => {
-    mock = await inspectSearchParams(setup => getTraceItems('foo', setup));
+    mock = await inspectSearchParams((setup) => getTraceItems('foo', setup));
 
     expect(mock.params).toMatchSnapshot();
   });

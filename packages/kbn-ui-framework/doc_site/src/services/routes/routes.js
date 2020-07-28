@@ -159,14 +159,14 @@ export default {
     return allRoutes;
   },
   getPreviousRoute: function getPreviousRoute(routeName) {
-    const index = allRoutes.findIndex(item => {
+    const index = allRoutes.findIndex((item) => {
       return item.name === routeName;
     });
 
     return index >= 0 ? allRoutes[index - 1] : undefined;
   },
   getNextRoute: function getNextRoute(routeName) {
-    const index = allRoutes.findIndex(item => {
+    const index = allRoutes.findIndex((item) => {
       return item.name === routeName;
     });
 

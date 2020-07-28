@@ -27,7 +27,6 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   async function createWebhookAction(
@@ -45,7 +44,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     };
 
     const { body: createdAction } = await supertest
-      .post('/api/action')
+      .post('/api/actions/action')
       .set('kbn-xsrf', 'test')
       .send({
         name: 'A generic Webhook action',
@@ -71,11 +70,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       );
     });
 
-    after(() => esArchiver.unload('empty_kibana'));
-
     it('should return 200 when creating a webhook action successfully', async () => {
       const { body: createdAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'test')
         .send({
           name: 'A generic Webhook action',
@@ -104,7 +101,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(typeof createdAction.id).to.be('string');
 
       const { body: fetchedAction } = await supertest
-        .get(`/api/action/${createdAction.id}`)
+        .get(`/api/actions/action/${createdAction.id}`)
         .expect(200);
 
       expect(fetchedAction).to.eql({
@@ -122,7 +119,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     it('should send authentication to the webhook target', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL);
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -137,7 +134,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     it('should support the POST method against webhook target', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL, { method: 'post' });
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -152,7 +149,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     it('should support the PUT method against webhook target', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL, { method: 'put' });
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -166,7 +163,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     it('should handle target webhooks that are not whitelisted', async () => {
       const { body: result } = await supertest
-        .post('/api/action')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'test')
         .send({
           name: 'A generic Webhook action',
@@ -188,7 +185,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     it('should handle unreachable webhook targets', async () => {
       const webhookActionId = await createWebhookAction('http://some.non.existent.com/endpoint');
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {
@@ -204,7 +201,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     it('should handle failing webhook targets', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL);
       const { body: result } = await supertest
-        .post(`/api/action/${webhookActionId}/_execute`)
+        .post(`/api/actions/action/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({
           params: {

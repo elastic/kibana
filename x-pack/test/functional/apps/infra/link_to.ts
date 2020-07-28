@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const traceId = '433b4651687e18be2c6c8e3b11f53d09';
 
-  describe('Infra link-to', function() {
+  describe('Infra link-to', function () {
     it('redirects to the logs app and parses URL search params correctly', async () => {
       const location = {
         hash: '',

@@ -20,7 +20,7 @@ export class PrivilegeCollection {
   }
 
   private checkActions(knownActions: ReadonlySet<string>, candidateActions: string[]) {
-    const missing = candidateActions.filter(action => !knownActions.has(action));
+    const missing = candidateActions.filter((action) => !knownActions.has(action));
 
     const hasAllRequested =
       knownActions.size > 0 && candidateActions.length > 0 && missing.length === 0;

@@ -19,14 +19,13 @@
 
 import { Filter, esQuery, TimeRange, Query } from '../../data/public';
 
-// @ts-ignore
-import { SearchCache } from './data_model/search_cache';
-// @ts-ignore
+import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
-import { getData } from './services';
+import { getData, getInjectedMetadata } from './services';
+import { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
   query: Query;
@@ -35,12 +34,16 @@ interface VegaRequestHandlerParams {
   visParams: VisParams;
 }
 
-export function createVegaRequestHandler({
-  plugins: { data },
-  core: { uiSettings },
-  serviceSettings,
-}: VegaVisualizationDependencies) {
-  let searchCache: SearchCache | undefined;
+interface VegaRequestHandlerContext {
+  abortSignal?: AbortSignal;
+  inspectorAdapters?: VegaInspectorAdapters;
+}
+
+export function createVegaRequestHandler(
+  { plugins: { data }, core: { uiSettings }, serviceSettings }: VegaVisualizationDependencies,
+  context: VegaRequestHandlerContext = {}
+) {
+  let searchAPI: SearchAPI;
   const { timefilter } = data.query.timefilter;
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
@@ -50,20 +53,24 @@ export function createVegaRequestHandler({
     query,
     visParams,
   }: VegaRequestHandlerParams) {
-    if (!searchCache) {
-      searchCache = new SearchCache(getData().search.__LEGACY.esClient, {
-        max: 10,
-        maxAge: 4 * 1000,
-      });
+    if (!searchAPI) {
+      searchAPI = new SearchAPI(
+        {
+          uiSettings,
+          search: getData().search,
+          injectedMetadata: getInjectedMetadata(),
+        },
+        context.abortSignal,
+        context.inspectorAdapters
+      );
     }
 
     timeCache.setTimeRange(timeRange);
 
     const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
     const filtersDsl = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
-    // @ts-ignore
     const { VegaParser } = await import('./data_model/vega_parser');
-    const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
+    const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, serviceSettings);
 
     return await vp.parseAsync();
   };

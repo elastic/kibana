@@ -46,10 +46,7 @@ const createClientMock = () => {
 const createSetupMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServiceSetup> = {
     register: jest.fn(),
-    asScopedToClient: jest.fn(),
   };
-
-  mocked.asScopedToClient.mockReturnValue(createClientMock());
 
   return mocked;
 };

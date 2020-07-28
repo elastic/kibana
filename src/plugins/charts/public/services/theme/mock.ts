@@ -21,9 +21,17 @@ import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { ThemeService } from './theme';
 
 export const themeServiceMock: ThemeService = {
-  chartsTheme$: jest.fn(() => ({
-    subsribe: jest.fn(),
-  })),
   chartsDefaultTheme: EUI_CHARTS_THEME_LIGHT.theme,
-  useChartsTheme: jest.fn(),
+  chartsTheme$: jest.fn(() => ({
+    subscribe: jest.fn(),
+  })),
+  chartsBaseTheme$: jest.fn(() => ({
+    subscribe: jest.fn(),
+  })),
+  darkModeEnabled$: jest.fn(() => ({
+    subscribe: jest.fn(),
+  })),
+  useDarkMode: jest.fn().mockReturnValue(false),
+  useChartsTheme: jest.fn().mockReturnValue({}),
+  useChartsBaseTheme: jest.fn().mockReturnValue({}),
 } as any;

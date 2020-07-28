@@ -65,7 +65,7 @@ export class TableHead extends React.Component {
   render() {
     const propLabels = this.props.scope.labels || [];
     const labelColumns = propLabels
-      .map(label => {
+      .map((label) => {
         const column = {
           key: label.content.toLowerCase(),
         };

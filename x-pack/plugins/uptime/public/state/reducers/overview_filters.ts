@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { handleActions, Action } from 'redux-actions';
 import { OverviewFilters } from '../../../common/runtime_types';
 import {
-  FETCH_OVERVIEW_FILTERS,
-  FETCH_OVERVIEW_FILTERS_FAIL,
-  FETCH_OVERVIEW_FILTERS_SUCCESS,
-  OverviewFiltersAction,
+  fetchOverviewFilters,
+  fetchOverviewFiltersFail,
+  fetchOverviewFiltersSuccess,
+  setOverviewFilters,
+  GetOverviewFiltersPayload,
+  OverviewFiltersPayload,
 } from '../actions';
 
 export interface OverviewFiltersState {
@@ -29,29 +32,29 @@ const initialState: OverviewFiltersState = {
   loading: false,
 };
 
-export function overviewFiltersReducer(
-  state = initialState,
-  action: OverviewFiltersAction
-): OverviewFiltersState {
-  switch (action.type) {
-    case FETCH_OVERVIEW_FILTERS:
-      return {
-        ...state,
-        loading: true,
-      };
-    case FETCH_OVERVIEW_FILTERS_SUCCESS:
-      return {
-        ...state,
-        filters: action.payload,
-        loading: false,
-      };
-    case FETCH_OVERVIEW_FILTERS_FAIL:
-      return {
-        ...state,
-        errors: [...state.errors, action.payload],
-        loading: false,
-      };
-    default:
-      return state;
-  }
-}
+export const overviewFiltersReducer = handleActions<OverviewFiltersState, OverviewFiltersPayload>(
+  {
+    [String(fetchOverviewFilters)]: (state, _action: Action<GetOverviewFiltersPayload>) => ({
+      ...state,
+      loading: true,
+    }),
+
+    [String(fetchOverviewFiltersSuccess)]: (state, action: Action<OverviewFilters>) => ({
+      ...state,
+      filters: action.payload,
+      loading: false,
+    }),
+
+    [String(fetchOverviewFiltersFail)]: (state, action: Action<Error>) => ({
+      ...state,
+      errors: [...state.errors, action.payload],
+      loading: false,
+    }),
+
+    [String(setOverviewFilters)]: (state, action: Action<OverviewFilters>) => ({
+      ...state,
+      filters: action.payload,
+    }),
+  },
+  initialState
+);

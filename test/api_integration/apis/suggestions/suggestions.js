@@ -17,11 +17,11 @@
  * under the License.
  */
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Suggestions API', function() {
+  describe('Suggestions API', function () {
     before(async () => {
       await esArchiver.load('index_patterns/basic_index');
       await esArchiver.load('index_patterns/basic_kibana');

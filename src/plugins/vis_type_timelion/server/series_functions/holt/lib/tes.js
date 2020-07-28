@@ -48,9 +48,9 @@ function initSeasonalComponents(samplePoints, seasonLength) {
     []
   );
 
-  const seasonals = _.times(seasonLength, i => {
+  const seasonals = _.times(seasonLength, (i) => {
     let sumOfValsOverAvg = 0;
-    _.times(sampledSeasonCount, j => {
+    _.times(sampledSeasonCount, (j) => {
       sumOfValsOverAvg += samplePoints[seasonLength * j + i] - seasonalAverages[j];
     });
 
@@ -64,7 +64,7 @@ function initSeasonalComponents(samplePoints, seasonLength) {
 // the difference in points between seasons
 function initTrend(samplePoints, seasonLength) {
   let sum = 0;
-  _.times(seasonLength, i => {
+  _.times(seasonLength, (i) => {
     sum += (samplePoints[i + seasonLength] - samplePoints[i]) / seasonLength;
   });
   return sum / seasonLength;

@@ -91,7 +91,7 @@ export class LegacyService implements CoreService {
     this.log = logger.get('legacy-service');
     this.devConfig$ = configService
       .atPath<DevConfigType>(devConfig.path)
-      .pipe(map(rawConfig => new DevConfig(rawConfig)));
+      .pipe(map((rawConfig) => new DevConfig(rawConfig)));
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
@@ -108,7 +108,7 @@ export class LegacyService implements CoreService {
           this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
         }
       }),
-      tap({ error: err => this.log.error(err) }),
+      tap({ error: (err) => this.log.error(err) }),
       publishReplay(1)
     ) as ConnectableObservable<[Config, PathConfigType]>;
 
@@ -146,14 +146,14 @@ export class LegacyService implements CoreService {
     };
 
     const deprecationProviders = await pluginSpecs
-      .map(spec => spec.getDeprecationsProvider())
+      .map((spec) => spec.getDeprecationsProvider())
       .reduce(async (providers, current) => {
         if (current) {
           return [...(await providers), await convertLegacyDeprecationProvider(current)];
         }
         return providers;
       }, Promise.resolve([] as ConfigDeprecationProvider[]));
-    deprecationProviders.forEach(provider =>
+    deprecationProviders.forEach((provider) =>
       this.coreContext.configService.addDeprecationProvider('', provider)
     );
 
@@ -264,6 +264,11 @@ export class LegacyService implements CoreService {
     const coreStart: CoreStart = {
       capabilities: startDeps.core.capabilities,
       elasticsearch: startDeps.core.elasticsearch,
+      http: {
+        auth: startDeps.core.http.auth,
+        basePath: startDeps.core.http.basePath,
+        getServerInfo: startDeps.core.http.getServerInfo,
+      },
       savedObjects: {
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
@@ -271,7 +276,11 @@ export class LegacyService implements CoreService {
         createSerializer: startDeps.core.savedObjects.createSerializer,
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
+      metrics: {
+        getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
+      },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      auditTrail: startDeps.core.auditTrail,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -279,9 +288,10 @@ export class LegacyService implements CoreService {
       capabilities: setupDeps.core.capabilities,
       context: setupDeps.core.context,
       elasticsearch: {
-        adminClient: setupDeps.core.elasticsearch.adminClient,
-        dataClient: setupDeps.core.elasticsearch.dataClient,
-        createClient: setupDeps.core.elasticsearch.createClient,
+        legacy: {
+          client: setupDeps.core.elasticsearch.legacy.client,
+          createClient: setupDeps.core.elasticsearch.legacy.createClient,
+        },
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
@@ -291,6 +301,7 @@ export class LegacyService implements CoreService {
         ),
         createRouter: () => router,
         resources: setupDeps.core.httpResources.createRegistrar(router),
+        registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
@@ -301,11 +312,10 @@ export class LegacyService implements CoreService {
           isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
         },
         csp: setupDeps.core.http.csp,
-        isTlsEnabled: setupDeps.core.http.isTlsEnabled,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
-      metrics: {
-        getOpsMetrics$: setupDeps.core.metrics.getOpsMetrics$,
+      logging: {
+        configure: (config$) => setupDeps.core.logging.configure([], config$),
       },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
@@ -322,6 +332,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
+      auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 
@@ -352,7 +363,6 @@ export class LegacyService implements CoreService {
           uiPlugins: setupDeps.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           rendering: setupDeps.core.rendering,
-          uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
           legacy: this.legacyInternals,
         },

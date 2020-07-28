@@ -14,25 +14,26 @@ import { VectorStyle } from '../../styles/vector/vector_style';
 import {
   FIELD_ORIGIN,
   COUNT_PROP_NAME,
+  LAYER_WIZARD_CATEGORY,
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
-// @ts-ignore
-import { COLOR_GRADIENTS } from '../../styles/color_utils';
+import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
+  categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.pewPewDescription', {
     defaultMessage: 'Aggregated data paths between the source and destination',
   }),
   icon: 'logoElasticsearch',
-  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {
-        previewLayer(null);
+        previewLayers([]);
         return;
       }
 
@@ -49,7 +50,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
               },
-              color: COLOR_GRADIENTS[0].value,
+              color: NUMERICAL_COLOR_PALETTES[0].value,
             },
           },
           [VECTOR_STYLES.LINE_WIDTH]: {
@@ -65,7 +66,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
           },
         }),
       });
-      previewLayer(layerDescriptor);
+      previewLayers([layerDescriptor]);
     };
 
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;

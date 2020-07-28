@@ -31,7 +31,7 @@ describe('Config service', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject($injector => {
+    ngMock.inject(($injector) => {
       config = $injector.get('config');
       uiSettings = chrome.getUiSettingsClient();
       $q = $injector.get('$q');
@@ -191,8 +191,8 @@ describe('Config service', () => {
     it('synchronously emits events when changes are outside a digest cycle', async () => {
       const stub = sinon.stub();
 
-      await new Promise(resolve => {
-        setTimeout(function() {
+      await new Promise((resolve) => {
+        setTimeout(function () {
           const off = $rootScope.$on('change:config.foobar', stub);
           config.set('foobar', 'baz');
           // we unlisten to make sure that stub is not called before our assertions below

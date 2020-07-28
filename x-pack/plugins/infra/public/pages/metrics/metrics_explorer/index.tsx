@@ -6,7 +6,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { useTrackPageview } from '../../../../../observability/public';
 import { SourceQuery } from '../../../../common/graphql/types';
@@ -15,6 +15,7 @@ import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
+import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 
 interface MetricsExplorerPageProps {
   source: SourceQuery.Query['source']['configuration'];
@@ -37,12 +38,27 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleTimeChange,
     handleRefresh,
     handleLoadMore,
-    defaultViewState,
     onViewStateChange,
-  } = useMetricsExplorerState(source, derivedIndexPattern);
+    loadData,
+  } = useMetricsExplorerState(source, derivedIndexPattern, false);
+  const { currentView, shouldLoadDefault } = useSavedViewContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
+
+  useEffect(() => {
+    if (currentView) {
+      onViewStateChange(currentView);
+    }
+  }, [currentView, onViewStateChange]);
+
+  useEffect(() => {
+    if (currentView != null || !shouldLoadDefault) {
+      // load metrics explorer data after default view loaded, unless we're not loading a view
+      loadData();
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [loadData, shouldLoadDefault]);
 
   return (
     <EuiErrorBoundary>
@@ -68,8 +84,6 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
         onMetricsChange={handleMetricsChange}
         onAggregationChange={handleAggregationChange}
         onChartOptionsChange={setChartOptions}
-        defaultViewState={defaultViewState}
-        onViewStateChange={onViewStateChange}
       />
       {error ? (
         <NoData

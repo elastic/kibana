@@ -13,5 +13,11 @@
     "uiActions",
     "visualizations"
   ],
-  "optionalPlugins": ["home", "share"]
+  "optionalPlugins": ["home", "share"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "home",
+    "savedObjects",
+    "kibanaReact"
+  ]
 }

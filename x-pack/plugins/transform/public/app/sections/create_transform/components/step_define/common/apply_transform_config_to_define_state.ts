@@ -13,12 +13,12 @@ import {
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   TransformPivotConfig,
-  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../../common';
 import { Dictionary } from '../../../../../../../common/types/common';
 
 import { StepDefineExposedState } from './types';
+import { getAggConfigFromEsAgg, PivotSupportedAggs } from '../../../../../common/pivot_aggs';
 
 export function applyTransformConfigToDefineState(
   state: StepDefineExposedState,
@@ -28,14 +28,10 @@ export function applyTransformConfigToDefineState(
   if (transformConfig !== undefined) {
     // transform aggregations config to wizard state
     state.aggList = Object.keys(transformConfig.pivot.aggregations).reduce((aggList, aggName) => {
-      const aggConfig = transformConfig.pivot.aggregations[aggName] as Dictionary<any>;
-      const agg = Object.keys(aggConfig)[0];
-      aggList[aggName] = {
-        ...aggConfig[agg],
-        agg: agg as PIVOT_SUPPORTED_AGGS,
-        aggName,
-        dropDownName: aggName,
-      } as PivotAggsConfig;
+      const aggConfig = transformConfig.pivot.aggregations[
+        aggName as PivotSupportedAggs
+      ] as Dictionary<any>;
+      aggList[aggName] = getAggConfigFromEsAgg(aggConfig, aggName) as PivotAggsConfig;
       return aggList;
     }, {} as PivotAggsConfigDict);
 

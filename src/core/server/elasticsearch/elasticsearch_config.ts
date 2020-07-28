@@ -51,7 +51,7 @@ export const configSchema = schema.object({
       schema.contextRef('dist'),
       false,
       schema.string({
-        validate: rawConfig => {
+        validate: (rawConfig) => {
           if (rawConfig === 'elastic') {
             return (
               'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
@@ -96,7 +96,7 @@ export const configSchema = schema.object({
       alwaysPresentCertificate: schema.boolean({ defaultValue: false }),
     },
     {
-      validate: rawConfig => {
+      validate: (rawConfig) => {
         if (rawConfig.key && rawConfig.keystore.path) {
           return 'cannot use [key] when [keystore.path] is specified';
         }
@@ -112,7 +112,7 @@ export const configSchema = schema.object({
     schema.contextRef('dev'),
     false,
     schema.boolean({
-      validate: rawValue => {
+      validate: (rawValue) => {
         if (rawValue === true) {
           return '"ignoreVersionMismatch" can only be set to true in development mode';
         }

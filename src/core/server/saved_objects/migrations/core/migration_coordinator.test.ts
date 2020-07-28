@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { coordinateMigration } from './migration_coordinator';
 import { createSavedObjectsMigrationLoggerMock } from '../mocks';
 

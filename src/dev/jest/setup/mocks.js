@@ -54,6 +54,6 @@ jest.mock('@elastic/eui/lib/services/react', () => {
   // This is for performance, but when used in certain Jest scernarios it can be nondeterministic.
   // Jest tests are never concerned about the state prior to batch completion, so we bypass batching entirely.
   return {
-    enqueueStateChange: fn => fn(),
+    enqueueStateChange: (fn) => fn(),
   };
 });

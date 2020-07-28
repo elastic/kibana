@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 
 export function jobAuditMessagesProvider(
-  callAsCurrentUser: APICaller
+  mlClusterClient: ILegacyScopedClusterClient
 ): {
   getJobAuditMessages: (jobId?: string, from?: string) => any;
   getAuditMessagesSummary: (jobIds?: string[]) => any;

@@ -98,7 +98,7 @@ describe('seriesAgg(resp, panel, series)', () => {
   });
 
   test('creates a series', () => {
-    const next = seriesAgg(resp, panel, series)(results => results);
+    const next = seriesAgg(resp, panel, series)((results) => results);
     const results = stdMetric(resp, panel, series)(next)([]);
     expect(results).toHaveLength(1);
 

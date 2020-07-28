@@ -59,6 +59,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/sbeyn/kibana-plugin-traffic-sg[Traffic] (sbeyn)
 * https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
 * https://github.com/nyurik/kibana-vega-vis[Vega-based visualizations] (nyurik) - Support for user-defined graphs, external data sources, maps, images, and user-defined interactivity.
+* https://github.com/Camichan/kbn_aframe[VR Graph Visualizations] (Camichan)
 
 [float]
 === Other
@@ -71,4 +72,4 @@ Use it to create, edit and embed visualizations, and also to search inside an em
 * https://github.com/datasweet-fr/kibana-datasweet-formula[Datasweet Formula] (datasweet) - enables calculated metric on any standard Kibana visualization.
 * https://github.com/pjhampton/kibana-prometheus-exporter[Prometheus Exporter] - exports the Kibana metrics in the prometheus format
 
-NOTE: If you want your plugin to be added to this page, open a {repo}tree/{branch}/docs/plugins/known-plugins.asciidoc[pull request].
+NOTE: If you want your plugin to be added to this page, open a {kib-repo}tree/{branch}/docs/plugins/known-plugins.asciidoc[pull request].

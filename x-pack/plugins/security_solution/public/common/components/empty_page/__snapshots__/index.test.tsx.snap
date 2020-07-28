@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders correctly 1`] = `
+<EmptyPrompt
+  actions={
+    <EuiFlexGroup
+      justifyContent="center"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          fill={true}
+          href="my/url/from/nowwhere"
+        >
+          Do Something
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  }
+  iconType="logoSecurity"
+  title={
+    <h2>
+      My Super Title
+    </h2>
+  }
+/>
+`;

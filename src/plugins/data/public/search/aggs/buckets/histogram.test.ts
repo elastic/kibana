@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -42,7 +42,6 @@ describe('Histogram Agg', () => {
       getInternalStartServices: () =>
         (({
           fieldFormats: fieldFormatsServiceMock.createStartContract(),
-          notifications: notificationServiceMock.createStartContract(),
         } as unknown) as InternalStartServices),
     };
   });
@@ -74,7 +73,6 @@ describe('Histogram Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry([getHistogramBucketAgg(aggTypesDependencies)]),
-        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
       }
     );
   };

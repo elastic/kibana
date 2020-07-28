@@ -21,12 +21,12 @@ import supertest from 'supertest';
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 
 let server: HttpService;
 
-let logger: ReturnType<typeof loggingServiceMock.create>;
+let logger: ReturnType<typeof loggingSystemMock.create>;
 const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
@@ -34,7 +34,7 @@ const setupDeps = {
 };
 
 beforeEach(() => {
-  logger = loggingServiceMock.create();
+  logger = loggingSystemMock.create();
 
   server = createHttpServer({ logger });
 });
@@ -43,7 +43,7 @@ afterEach(async () => {
   await server.stop();
 });
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 describe('KibanaRequest', () => {
   describe('auth', () => {
     describe('isAuthenticated', () => {
@@ -56,11 +56,9 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener)
-          .get('/')
-          .expect(200, {
-            isAuthenticated: false,
-          });
+        await supertest(innerServer.listener).get('/').expect(200, {
+          isAuthenticated: false,
+        });
       });
       it('returns false if not authenticated on a route with authRequired: "optional"', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
@@ -72,11 +70,9 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener)
-          .get('/')
-          .expect(200, {
-            isAuthenticated: false,
-          });
+        await supertest(innerServer.listener).get('/').expect(200, {
+          isAuthenticated: false,
+        });
       });
       it('returns false if redirected on a route with authRequired: "optional"', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
@@ -88,11 +84,9 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener)
-          .get('/')
-          .expect(200, {
-            isAuthenticated: false,
-          });
+        await supertest(innerServer.listener).get('/').expect(200, {
+          isAuthenticated: false,
+        });
       });
       it('returns true if authenticated on a route with authRequired: "optional"', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
@@ -104,11 +98,9 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener)
-          .get('/')
-          .expect(200, {
-            isAuthenticated: true,
-          });
+        await supertest(innerServer.listener).get('/').expect(200, {
+          isAuthenticated: true,
+        });
       });
       it('returns true if authenticated', async () => {
         const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
@@ -120,17 +112,15 @@ describe('KibanaRequest', () => {
         );
         await server.start();
 
-        await supertest(innerServer.listener)
-          .get('/')
-          .expect(200, {
-            isAuthenticated: true,
-          });
+        await supertest(innerServer.listener).get('/').expect(200, {
+          isAuthenticated: true,
+        });
       });
     });
   });
   describe('events', () => {
     describe('aborted$', () => {
-      it('emits once and completes when request aborted', async done => {
+      it('emits once and completes when request aborted', async (done) => {
         expect.assertions(1);
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');

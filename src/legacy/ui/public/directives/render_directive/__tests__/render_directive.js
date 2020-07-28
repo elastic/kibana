@@ -27,10 +27,10 @@ let init;
 let $rootScope;
 let $compile;
 
-describe('render_directive', function() {
+describe('render_directive', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject(function($injector) {
+    ngMock.inject(function ($injector) {
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
       init = function init(markup = '', definition = {}) {
@@ -55,14 +55,14 @@ describe('render_directive', function() {
     })
   );
 
-  describe('directive requirements', function() {
-    it('should throw if not given a definition', function() {
+  describe('directive requirements', function () {
+    it('should throw if not given a definition', function () {
       expect(() => init('', null)).to.throwException(/must have a definition/);
     });
   });
 
-  describe('rendering with definition', function() {
-    it('should call link method', function() {
+  describe('rendering with definition', function () {
+    it('should call link method', function () {
       const markup = '<p>hello world</p>';
       const definition = {
         link: sinon.stub(),
@@ -73,7 +73,7 @@ describe('render_directive', function() {
       sinon.assert.callCount(definition.link, 1);
     });
 
-    it('should call controller method', function() {
+    it('should call controller method', function () {
       const markup = '<p>hello world</p>';
       const definition = {
         controller: sinon.stub(),
@@ -85,8 +85,8 @@ describe('render_directive', function() {
     });
   });
 
-  describe('definition scope binding', function() {
-    it('should accept two-way, attribute, and expression binding directives', function() {
+  describe('definition scope binding', function () {
+    it('should accept two-way, attribute, and expression binding directives', function () {
       const $el = angular.element(`
         <render-directive
           definition="definition"
@@ -107,7 +107,7 @@ describe('render_directive', function() {
         },
       };
       $parentScope.parentTwoWay = true;
-      $parentScope.parentExpression = function() {
+      $parentScope.parentExpression = function () {
         return !$parentScope.parentTwoWay;
       };
 

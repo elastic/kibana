@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import get from 'lodash/object/get';
+import { get } from 'lodash';
 
 import {
   EuiButtonEmpty,
@@ -51,8 +51,8 @@ const checkWhiteListedMetricByFieldType = (fieldType, metricType) => {
 // associated field types. After processing each of these
 // objects should have a fieldTypes: { date: true, numeric: true }
 // like object.
-const metricTypesConfig = (function() {
-  return METRICS_CONFIG.map(config => {
+const metricTypesConfig = (function () {
+  return METRICS_CONFIG.map((config) => {
     const fieldTypes = {};
     for (const [fieldType, metrics] of Object.entries(whiteListedMetricByFieldType)) {
       fieldTypes[fieldType] = !!metrics[config.type];
@@ -132,7 +132,9 @@ export class StepMetrics extends Component {
         if (isAllMetricTypes) {
           applicableMetrics.forEach(({ types, type }) => {
             const whiteListedSubset = Object.keys(whiteListedMetricByFieldType[type]);
-            if (whiteListedSubset.every(metricName => types.some(type => type === metricName))) {
+            if (
+              whiteListedSubset.every((metricName) => types.some((type) => type === metricName))
+            ) {
               ++checkedCount;
             }
           });
@@ -140,7 +142,7 @@ export class StepMetrics extends Component {
           isDisabled = metrics.length === 0;
         } else {
           applicableMetrics.forEach(({ types }) => {
-            const metricSelected = types.some(type => type === metricType);
+            const metricSelected = types.some((type) => type === metricType);
             if (metricSelected) {
               ++checkedCount;
             }
@@ -228,7 +230,7 @@ export class StepMetrics extends Component {
     const onChange = () => {
       const isSelected = hasSelectedItems ? types.length !== maxItemsToBeSelected : true;
       const newMetrics = metricTypesConfig
-        .filter(config => config.fieldTypes[fieldType])
+        .filter((config) => config.fieldTypes[fieldType])
         .reduce((acc, { type: typeConfig }) => {
           return this.setMetric(fieldName, typeConfig, isSelected);
         }, null);
@@ -278,7 +280,7 @@ export class StepMetrics extends Component {
               </EuiFlexItem>
             );
           })
-          .filter(checkbox => checkbox !== undefined);
+          .filter((checkbox) => checkbox !== undefined);
 
         return (
           <EuiFlexGroup wrap gutterSize="m">
@@ -292,7 +294,7 @@ export class StepMetrics extends Component {
     });
   }
 
-  onSelectField = field => {
+  onSelectField = (field) => {
     const {
       fields: { metrics },
       onFieldsChange,
@@ -306,7 +308,7 @@ export class StepMetrics extends Component {
     onFieldsChange({ metrics: newMetrics });
   };
 
-  onRemoveField = field => {
+  onRemoveField = (field) => {
     const {
       fields: { metrics },
       onFieldsChange,
@@ -323,7 +325,7 @@ export class StepMetrics extends Component {
     } = this.props;
 
     return fields
-      .filter(field => checkWhiteListedMetricByFieldType(field.type, metricType))
+      .filter((field) => checkWhiteListedMetricByFieldType(field.type, metricType))
       .reduce((acc, metric) => {
         return this.setMetric(metric.name, metricType, isSelected);
       }, []);

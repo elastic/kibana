@@ -55,7 +55,7 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
   };
 
   onTogglePopover = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isPopoverOpen: !state.isPopoverOpen,
     }));
   };

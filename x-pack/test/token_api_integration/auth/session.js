@@ -7,13 +7,15 @@
 import request from 'request';
 import expect from '@kbn/expect';
 
-const delay = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
+const delay = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {
-    const cookie = (response.headers['set-cookie'] || []).find(header => header.startsWith('sid='));
+    const cookie = (response.headers['set-cookie'] || []).find((header) =>
+      header.startsWith('sid=')
+    );
     return cookie ? request.cookie(cookie) : undefined;
   }
 
@@ -60,7 +62,7 @@ export default function({ getService }) {
         .expect(200);
     });
 
-    describe('API access with expired access token.', function() {
+    describe('API access with expired access token.', function () {
       const expectNewSessionCookie = (originalCookie, newCookie) => {
         if (!newCookie) {
           throw new Error('No session cookie set after token refresh');
@@ -73,7 +75,7 @@ export default function({ getService }) {
         }
       };
 
-      it('expired access token should be automatically refreshed', async function() {
+      it('expired access token should be automatically refreshed', async function () {
         this.timeout(40000);
 
         const originalCookie = await createSessionCookie();
@@ -128,7 +130,7 @@ export default function({ getService }) {
       let sessionCookie;
       beforeEach(async () => (sessionCookie = await createSessionCookie()));
 
-      it('should clear cookie and redirect to login', async function() {
+      it('should clear cookie and redirect to login', async function () {
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
@@ -137,9 +139,7 @@ export default function({ getService }) {
           q: 'doc_type:token',
           refresh: true,
         });
-        expect(esResponse)
-          .to.have.property('deleted')
-          .greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
 
         const response = await supertest
           .get('/abc/xyz/')

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function({ loadTestFile }) {
+export default function ({ loadTestFile }) {
   describe('management plugin', () => {
     loadTestFile(require.resolve('./management_plugin'));
   });

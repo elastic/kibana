@@ -9,24 +9,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiButton
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DeleteButton } from './DeleteButton';
 
-export const FlyoutFooter = ({
+export function FlyoutFooter({
   onClose,
   isSaving,
   onDelete,
   customLinkId,
-  isSaveButtonEnabled
+  isSaveButtonEnabled,
 }: {
   onClose: () => void;
   isSaving: boolean;
   onDelete: () => void;
   customLinkId?: string;
   isSaveButtonEnabled: boolean;
-}) => {
+}) {
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -35,7 +35,7 @@ export const FlyoutFooter = ({
             {i18n.translate(
               'xpack.apm.settings.customizeUI.customLink.flyout.close',
               {
-                defaultMessage: 'Close'
+                defaultMessage: 'Close',
               }
             )}
           </EuiButtonEmpty>
@@ -53,7 +53,7 @@ export const FlyoutFooter = ({
             {i18n.translate(
               'xpack.apm.settings.customizeUI.customLink.flyout.save',
               {
-                defaultMessage: 'Save'
+                defaultMessage: 'Save',
               }
             )}
           </EuiButton>
@@ -61,4 +61,4 @@ export const FlyoutFooter = ({
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
-};
+}

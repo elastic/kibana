@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
-import { BASE_PATH } from '../../../../common/constants';
 import { setBreadcrumbs, listBreadcrumb } from '../../services/breadcrumbs';
 import { routing } from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
@@ -45,7 +44,7 @@ export class CrossClusterReplicationHome extends PureComponent {
   ];
 
   componentDidMount() {
-    setBreadcrumbs([listBreadcrumb]);
+    setBreadcrumbs([listBreadcrumb()]);
   }
 
   static getDerivedStateFromProps(props) {
@@ -59,7 +58,8 @@ export class CrossClusterReplicationHome extends PureComponent {
     };
   }
 
-  onSectionChange = section => {
+  onSectionChange = (section) => {
+    setBreadcrumbs([listBreadcrumb(`/${section}`)]);
     routing.navigate(`/${section}`);
   };
 
@@ -79,7 +79,7 @@ export class CrossClusterReplicationHome extends PureComponent {
           <EuiSpacer size="s" />
 
           <EuiTabs>
-            {this.tabs.map(tab => (
+            {this.tabs.map((tab) => (
               <EuiTab
                 onClick={() => this.onSectionChange(tab.id)}
                 isSelected={tab.id === this.state.activeSection}
@@ -94,12 +94,8 @@ export class CrossClusterReplicationHome extends PureComponent {
           <EuiSpacer size="m" />
 
           <Switch>
-            <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
-            <Route
-              exact
-              path={`${BASE_PATH}/auto_follow_patterns`}
-              component={AutoFollowPatternList}
-            />
+            <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
+            <Route exact path={`/auto_follow_patterns`} component={AutoFollowPatternList} />
           </Switch>
         </EuiPageContent>
       </EuiPageBody>

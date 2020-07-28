@@ -17,11 +17,13 @@ describe('Validate address', () => {
         expect(isAddressValid('____')).toBe(false);
       });
 
-      ['/', '\\', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '=', '+', '?'].forEach(char => {
-        it(char, () => {
-          expect(isAddressValid(char)).toBe(false);
-        });
-      });
+      ['/', '\\', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '=', '+', '?'].forEach(
+        (char) => {
+          it(char, () => {
+            expect(isAddressValid(char)).toBe(false);
+          });
+        }
+      );
     });
 
     describe('accepts', () => {

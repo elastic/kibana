@@ -12,41 +12,47 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
 
-jest.mock('../../contexts/kibana/kibana_context', () => ({
-  useMlKibana: () => {
-    return {
-      services: {
-        uiSettings: { get: jest.fn() },
-        data: {
-          query: {
-            timefilter: {
+jest.mock('../../contexts/kibana/kibana_context', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { of } = require('rxjs');
+  return {
+    useMlKibana: () => {
+      return {
+        services: {
+          uiSettings: { get: jest.fn() },
+          data: {
+            query: {
               timefilter: {
-                disableTimeRangeSelector: jest.fn(),
-                disableAutoRefreshSelector: jest.fn(),
-                enableTimeRangeSelector: jest.fn(),
-                enableAutoRefreshSelector: jest.fn(),
-                getRefreshInterval: jest.fn(),
-                setRefreshInterval: jest.fn(),
-                getTime: jest.fn(),
-                isAutoRefreshSelectorEnabled: jest.fn(),
-                isTimeRangeSelectorEnabled: jest.fn(),
-                getRefreshIntervalUpdate$: jest.fn(),
-                getTimeUpdate$: jest.fn(),
-                getEnabledUpdated$: jest.fn(),
+                timefilter: {
+                  disableTimeRangeSelector: jest.fn(),
+                  disableAutoRefreshSelector: jest.fn(),
+                  enableTimeRangeSelector: jest.fn(),
+                  enableAutoRefreshSelector: jest.fn(),
+                  getRefreshInterval: jest.fn(),
+                  setRefreshInterval: jest.fn(),
+                  getTime: jest.fn(),
+                  isAutoRefreshSelectorEnabled: jest.fn(),
+                  isTimeRangeSelectorEnabled: jest.fn(),
+                  getRefreshIntervalUpdate$: jest.fn(),
+                  getTimeUpdate$: jest.fn(() => {
+                    return of();
+                  }),
+                  getEnabledUpdated$: jest.fn(),
+                },
+                history: { get: jest.fn() },
               },
-              history: { get: jest.fn() },
+            },
+          },
+          notifications: {
+            toasts: {
+              addDanger: () => {},
             },
           },
         },
-        notifications: {
-          toasts: {
-            addDanger: () => {},
-          },
-        },
-      },
-    };
-  },
-}));
+      };
+    },
+  };
+});
 
 jest.mock('../../util/dependency_cache', () => ({
   getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),

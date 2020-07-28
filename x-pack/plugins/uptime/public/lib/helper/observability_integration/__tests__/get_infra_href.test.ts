@@ -5,33 +5,32 @@
  */
 
 import { getInfraContainerHref, getInfraKubernetesHref, getInfraIpHref } from '../get_infra_href';
-import { MonitorSummary } from '../../../../../common/runtime_types';
+import { MonitorSummary, makePing, Ping } from '../../../../../common/runtime_types';
 
 describe('getInfraHref', () => {
   let summary: MonitorSummary;
   beforeEach(() => {
+    const ping: Ping = {
+      ...makePing({
+        docId: 'myDocId',
+        type: 'test',
+        id: 'myId',
+        ip: '151.101.202.217',
+        status: 'up',
+        duration: 123,
+        timestamp: '123',
+      }),
+      container: { id: 'test-container-id' },
+      kubernetes: { pod: { uid: 'test-pod-uid' } },
+    };
+
     summary = {
       monitor_id: 'foo',
       state: {
-        checks: [
-          {
-            monitor: {
-              ip: '151.101.202.217',
-              status: 'up',
-            },
-            container: {
-              id: 'test-container-id',
-            },
-            kubernetes: {
-              pod: {
-                uid: 'test-pod-uid',
-              },
-            },
-            timestamp: 123,
-          },
-        ],
+        summaryPings: [ping],
         summary: {},
         url: {},
+        monitor: {},
         timestamp: '123',
       },
     };
@@ -51,50 +50,36 @@ describe('getInfraHref', () => {
   });
 
   it('getInfraContainerHref returns undefined when no container id is present', () => {
-    summary.state.checks = [];
+    summary.state.summaryPings = [];
     expect(getInfraContainerHref(summary, 'foo')).toBeUndefined();
   });
 
   it('getInfraContainerHref returns the first item when multiple container ids are supplied', () => {
-    summary.state.checks = [
-      {
-        monitor: {
-          ip: '151.101.202.217',
-          status: 'up',
-        },
-        container: {
-          id: 'test-container-id',
-        },
-        kubernetes: {
-          pod: {
-            uid: 'test-pod-uid',
-          },
-        },
-        timestamp: 123,
-      },
-      {
-        monitor: {
-          ip: '151.101.202.27',
-          status: 'up',
-        },
-        container: {
-          id: 'test-container-id-foo',
-        },
-        kubernetes: {
-          pod: {
-            uid: 'test-pod-uid-bar',
-          },
-        },
-        timestamp: 123,
-      },
-    ];
+    const pingBase = makePing({
+      docId: 'myDocId',
+      type: 'test',
+      id: 'myId',
+      ip: '151.101.202.217',
+      status: 'up',
+      duration: 123,
+      timestamp: '123',
+    });
+    const pingTestContainerId: Ping = {
+      ...pingBase,
+      container: { id: 'test-container-id' },
+    };
+    const pingTestFooContainerId: Ping = {
+      ...pingBase,
+      container: { id: 'test-container-id-foo' },
+    };
+    summary.state.summaryPings = [pingTestContainerId, pingTestFooContainerId];
     expect(getInfraContainerHref(summary, 'bar')).toMatchInlineSnapshot(
       `"bar/app/metrics/link-to/container-detail/test-container-id"`
     );
   });
 
-  it('getInfraContainerHref returns undefined when checks are undefined', () => {
-    delete summary.state.checks;
+  it('getInfraContainerHref returns undefined when summaryPings are undefined', () => {
+    delete summary.state.summaryPings;
     expect(getInfraContainerHref(summary, '')).toBeUndefined();
   });
 
@@ -111,55 +96,41 @@ describe('getInfraHref', () => {
   });
 
   it('getInfraKubernetesHref returns undefined when no pod data is present', () => {
-    summary.state.checks = [];
+    summary.state.summaryPings = [];
     expect(getInfraKubernetesHref(summary, 'foo')).toBeUndefined();
   });
 
   it('getInfraKubernetesHref selects the first pod uid when there are multiple', () => {
-    summary.state.checks = [
-      {
-        monitor: {
-          ip: '151.101.202.217',
-          status: 'up',
-        },
-        container: {
-          id: 'test-container-id',
-        },
-        kubernetes: {
-          pod: {
-            uid: 'test-pod-uid',
-          },
-        },
-        timestamp: 123,
-      },
-      {
-        monitor: {
-          ip: '151.101.202.27',
-          status: 'up',
-        },
-        container: {
-          id: 'test-container-id-foo',
-        },
-        kubernetes: {
-          pod: {
-            uid: 'test-pod-uid-bar',
-          },
-        },
-        timestamp: 123,
-      },
-    ];
+    const pingBase = makePing({
+      docId: 'myDocId',
+      type: 'test',
+      id: 'myId',
+      ip: '151.101.202.217',
+      status: 'up',
+      duration: 123,
+      timestamp: '123',
+    });
+    const pingTestPodId: Ping = {
+      ...pingBase,
+      kubernetes: { pod: { uid: 'test-pod-uid' } },
+    };
+    const pingTestBarPodId: Ping = {
+      ...pingBase,
+      kubernetes: { pod: { uid: 'test-pod-uid-bar' } },
+    };
+    summary.state.summaryPings = [pingTestPodId, pingTestBarPodId];
     expect(getInfraKubernetesHref(summary, '')).toMatchInlineSnapshot(
       `"/app/metrics/link-to/pod-detail/test-pod-uid"`
     );
   });
 
-  it('getInfraKubernetesHref returns undefined when checks are undefined', () => {
-    delete summary.state.checks;
+  it('getInfraKubernetesHref returns undefined when summaryPings are undefined', () => {
+    delete summary.state.summaryPings;
     expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
   });
 
-  it('getInfraKubernetesHref returns undefined when checks are null', () => {
-    delete summary.state.checks![0]!.kubernetes!.pod!.uid;
+  it('getInfraKubernetesHref returns undefined when summaryPings are null', () => {
+    delete summary.state.summaryPings![0]!.kubernetes!.pod!.uid;
     expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
   });
 
@@ -177,47 +148,42 @@ describe('getInfraHref', () => {
   });
 
   it('getInfraIpHref returns undefined when ip is undefined', () => {
-    summary.state.checks = [];
+    summary.state.summaryPings = [];
     expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
   });
 
   it('getInfraIpHref returns undefined when ip is null', () => {
-    delete summary.state.checks![0].monitor.ip;
+    delete summary.state.summaryPings![0].monitor.ip;
     expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
   });
 
   it('getInfraIpHref returns a url for ors between multiple ips', () => {
-    summary.state.checks = [
-      {
-        timestamp: 123,
-        monitor: {
-          ip: '152.151.23.192',
-          status: 'up',
-        },
-      },
-      {
-        monitor: {
-          ip: '151.101.202.217',
-          status: 'up',
-        },
-        container: {
-          id: 'test-container-id',
-        },
-        kubernetes: {
-          pod: {
-            uid: 'test-pod-uid',
-          },
-        },
-        timestamp: 123,
-      },
-    ];
+    const pingOne = makePing({
+      docId: 'myDocId',
+      type: 'test',
+      id: 'myId',
+      ip: '152.151.23.192',
+      status: 'up',
+      duration: 123,
+      timestamp: '123',
+    });
+    const pingTwo = makePing({
+      docId: 'myDocId2',
+      type: 'test',
+      id: 'myId',
+      ip: '151.101.202.217',
+      status: 'up',
+      duration: 123,
+      timestamp: '123',
+    });
+    summary.state.summaryPings = [pingOne, pingTwo];
     expect(getInfraIpHref(summary, 'foo')).toMatchInlineSnapshot(
       `"foo/app/metrics/inventory?waffleFilter=(expression:'host.ip%20%3A%20152.151.23.192%20or%20host.ip%20%3A%20151.101.202.217',kind:kuery)"`
     );
   });
 
-  it('getInfraIpHref returns undefined if checks are undefined', () => {
-    delete summary.state.checks;
+  it('getInfraIpHref returns undefined if summaryPings are undefined', () => {
+    delete summary.state.summaryPings;
     expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
   });
 });

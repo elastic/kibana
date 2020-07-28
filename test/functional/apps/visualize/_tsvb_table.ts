@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects }: FtrProviderContext) {
   const { visualBuilder, visualize, visChart } = getPageObjects([
     'visualBuilder',
     'visualize',

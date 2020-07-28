@@ -223,6 +223,21 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'POST',
   });
 
+  ml.updateDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_update',
+        req: {
+          analyticsId: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    needBody: true,
+    method: 'POST',
+  });
+
   ml.deleteJob = ca({
     urls: [
       {
@@ -393,6 +408,17 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
 
   ml.stopDatafeed = ca({
     urls: [
+      {
+        fmt: '/_ml/datafeeds/<%=datafeedId%>/_stop?force=<%=force%>',
+        req: {
+          datafeedId: {
+            type: 'string',
+          },
+          force: {
+            type: 'boolean',
+          },
+        },
+      },
       {
         fmt: '/_ml/datafeeds/<%=datafeedId%>/_stop',
         req: {
@@ -822,5 +848,82 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
       },
     ],
     method: 'GET',
+  });
+
+  ml.modelSnapshots = ca({
+    urls: [
+      {
+        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>',
+        req: {
+          jobId: {
+            type: 'string',
+          },
+          snapshotId: {
+            type: 'string',
+          },
+        },
+      },
+      {
+        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots',
+        req: {
+          jobId: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'GET',
+  });
+
+  ml.updateModelSnapshot = ca({
+    urls: [
+      {
+        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>/_update',
+        req: {
+          jobId: {
+            type: 'string',
+          },
+          snapshotId: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'POST',
+    needBody: true,
+  });
+
+  ml.deleteModelSnapshot = ca({
+    urls: [
+      {
+        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>',
+        req: {
+          jobId: {
+            type: 'string',
+          },
+          snapshotId: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'DELETE',
+  });
+
+  ml.revertModelSnapshot = ca({
+    urls: [
+      {
+        fmt: '/_xpack/ml/anomaly_detectors/<%=jobId%>/model_snapshots/<%=snapshotId%>/_revert',
+        req: {
+          jobId: {
+            type: 'string',
+          },
+          snapshotId: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'POST',
   });
 };

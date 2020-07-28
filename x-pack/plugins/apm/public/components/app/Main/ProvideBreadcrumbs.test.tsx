@@ -15,34 +15,34 @@ describe('getBreadcrumbs', () => {
       path: '/a/ignored',
       exact: true,
       breadcrumb: 'Ignored Route',
-      name: RouteName.METRICS
+      name: RouteName.METRICS,
     },
     {
       path: '/a/:letter',
       exact: true,
       name: RouteName.SERVICE,
-      breadcrumb: ({ match }) => `Second level: ${match.params.letter}`
+      breadcrumb: ({ match }) => `Second level: ${match.params.letter}`,
     },
     {
       path: '/a/:letter/c',
       exact: true,
       name: RouteName.ERRORS,
-      breadcrumb: ({ match }) => `Third level: ${match.params.letter}`
-    }
+      breadcrumb: ({ match }) => `Third level: ${match.params.letter}`,
+    },
   ];
 
   const getLocation = () =>
     ({
-      pathname: '/a/b/c/'
+      pathname: '/a/b/c/',
     } as Location);
 
   it('should return a set of matching breadcrumbs for a given path', () => {
     const breadcrumbs = getBreadcrumbs({
       location: getLocation(),
-      routes: getTestRoutes()
+      routes: getTestRoutes(),
     });
 
-    expect(breadcrumbs.map(b => b.value)).toMatchInlineSnapshot(`
+    expect(breadcrumbs.map((b) => b.value)).toMatchInlineSnapshot(`
 Array [
   "A",
   "Second level: b",
@@ -59,10 +59,10 @@ Array [
 
     const breadcrumbs = getBreadcrumbs({
       location,
-      routes
+      routes,
     });
 
-    expect(breadcrumbs.map(b => b.value)).toMatchInlineSnapshot(`
+    expect(breadcrumbs.map((b) => b.value)).toMatchInlineSnapshot(`
 Array [
   "A",
   "Third level: b",
@@ -78,7 +78,7 @@ Array [
 
     const breadcrumbs = getBreadcrumbs({ location, routes });
 
-    expect(breadcrumbs.map(b => b.value)).toMatchInlineSnapshot(`
+    expect(breadcrumbs.map((b) => b.value)).toMatchInlineSnapshot(`
 Array [
   "A",
   "Third level: b",
@@ -94,10 +94,10 @@ Array [
 
     const breadcrumbs = getBreadcrumbs({
       location,
-      routes
+      routes,
     });
 
-    expect(breadcrumbs.map(b => b.value)).toMatchInlineSnapshot(`
+    expect(breadcrumbs.map((b) => b.value)).toMatchInlineSnapshot(`
 Array [
   "A",
   "Second level: b",

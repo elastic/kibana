@@ -10,7 +10,7 @@ import { getRangeTypeMessage } from './get_range_type_message';
 
 export function getIntegerRt({
   min = -Infinity,
-  max = Infinity
+  max = Infinity,
 }: {
   min?: number;
   max?: number;
@@ -21,13 +21,16 @@ export function getIntegerRt({
     'integerRt',
     t.string.is,
     (input, context) => {
-      return either.chain(t.string.validate(input, context), inputAsString => {
-        const inputAsInt = parseInt(inputAsString, 10);
-        const isValid = inputAsInt >= min && inputAsInt <= max;
-        return isValid
-          ? t.success(inputAsString)
-          : t.failure(input, context, message);
-      });
+      return either.chain(
+        t.string.validate(input, context),
+        (inputAsString) => {
+          const inputAsInt = parseInt(inputAsString, 10);
+          const isValid = inputAsInt >= min && inputAsInt <= max;
+          return isValid
+            ? t.success(inputAsString)
+            : t.failure(input, context, message);
+        }
+      );
     },
     t.identity
   );

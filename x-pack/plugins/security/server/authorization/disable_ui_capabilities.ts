@@ -10,17 +10,20 @@ import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { Feature } from '../../../features/server';
 
 import { CheckPrivilegesResponse } from './check_privileges';
-import { Authorization } from './index';
+import { AuthorizationServiceSetup } from '.';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,
   features: Feature[],
   logger: Logger,
-  authz: Authorization
+  authz: AuthorizationServiceSetup
 ) {
+  // nav links are sourced from the apps property.
+  // The Kibana Platform associates nav links to the app which registers it, in a 1:1 relationship.
+  // This behavior is replacing the `navLinkId` property.
   const featureNavLinkIds = features
-    .map(feature => feature.navLinkId)
-    .filter(navLinkId => navLinkId != null);
+    .flatMap((feature) => feature.app)
+    .filter((navLinkId) => navLinkId != null);
 
   const shouldDisableFeatureUICapability = (
     featureId: keyof UICapabilities,
@@ -60,7 +63,9 @@ export function disableUICapabilitiesFactory(
         return [authz.actions.ui.get(featureId, uiCapability)];
       }
       if (isObject(value)) {
-        return Object.keys(value).map(item => authz.actions.ui.get(featureId, uiCapability, item));
+        return Object.keys(value).map((item) =>
+          authz.actions.ui.get(featureId, uiCapability, item)
+        );
       }
       throw new Error(`Expected value type of boolean or object, but found ${value}`);
     }
@@ -106,7 +111,7 @@ export function disableUICapabilitiesFactory(
 
       const action = authz.actions.ui.get(featureId, ...uiCapabilityParts);
       return checkPrivilegesResponse.privileges.some(
-        x => x.privilege === action && x.authorized === true
+        (x) => x.privilege === action && x.authorized === true
       );
     };
 

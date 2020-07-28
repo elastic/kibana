@@ -27,15 +27,12 @@ const paramSchema = schema.object({
 export const deleteActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.delete(
     {
-      path: `${BASE_ACTION_API_PATH}/{id}`,
+      path: `${BASE_ACTION_API_PATH}/action/{id}`,
       validate: {
         params: paramSchema,
       },
-      options: {
-        tags: ['access:actions-all'],
-      },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, unknown>,
       res: KibanaResponseFactory

@@ -27,6 +27,7 @@ import { toggleSetupMode } from '../../lib/setup_mode';
 import { CheckingSettings } from './checking_settings';
 import { ReasonFound, WeTried } from './reasons';
 import { CheckerErrors } from './checker_errors';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 function NoDataMessage(props) {
   const { isLoading, reason, checkMessage } = props;
@@ -49,7 +50,7 @@ export function NoData(props) {
   async function startSetup() {
     setIsLoading(true);
     await toggleSetupMode(true);
-    props.changePath('/elasticsearch/nodes');
+    window.location.hash = getSafeForExternalLink('#/elasticsearch/nodes');
   }
 
   if (useInternalCollection) {
@@ -167,7 +168,6 @@ export function NoData(props) {
 }
 
 NoData.propTypes = {
-  changePath: PropTypes.func,
   isLoading: PropTypes.bool.isRequired,
   reason: PropTypes.object,
   checkMessage: PropTypes.string,

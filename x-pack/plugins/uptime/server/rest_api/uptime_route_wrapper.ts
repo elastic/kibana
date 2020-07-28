@@ -7,13 +7,13 @@
 import { UMKibanaRouteWrapper } from './types';
 import { savedObjectsAdapter } from '../lib/saved_objects';
 
-export const uptimeRouteWrapper: UMKibanaRouteWrapper = uptimeRoute => ({
+export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
   ...uptimeRoute,
   options: {
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
   },
   handler: async (context, request, response) => {
-    const { callAsCurrentUser: callES } = context.core.elasticsearch.dataClient;
+    const { callAsCurrentUser: callES } = context.core.elasticsearch.legacy.client;
     const { client: savedObjectsClient } = context.core.savedObjects;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
     return uptimeRoute.handler(

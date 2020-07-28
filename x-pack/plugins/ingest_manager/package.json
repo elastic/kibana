@@ -1,11 +1,10 @@
 {
-    "author": "Elastic",
-    "name": "ingest-manager",
-    "version": "8.0.0",
-    "private": true,
-    "license": "Elastic-License",
-    "dependencies": {
-      "react-markdown": "^4.2.2"
-    }
+  "author": "Elastic",
+  "name": "ingest-manager",
+  "version": "8.0.0",
+  "private": true,
+  "license": "Elastic-License",
+  "dependencies": {
+    "abort-controller": "^3.0.0"
   }
-  
+}

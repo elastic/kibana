@@ -52,12 +52,12 @@ export class AreaChart extends PointSeries {
       // Default opacity should return to 0.6 on mouseout
       const defaultOpacity = 0.6;
       this.seriesConfig.defaultOpacity = defaultOpacity;
-      handler.highlight = function(element) {
+      handler.highlight = function (element) {
         const label = this.getAttribute('data-label');
         if (!label) return;
 
         const highlightOpacity = 0.8;
-        const highlightElements = $('[data-label]', element.parentNode).filter(function(els, el) {
+        const highlightElements = $('[data-label]', element.parentNode).filter(function (els, el) {
           return `${$(el).data('label')}` === label;
         });
         $('[data-label]', element.parentNode)
@@ -65,7 +65,7 @@ export class AreaChart extends PointSeries {
           .css('opacity', defaultOpacity / 2); // half of the default opacity
         highlightElements.css('opacity', highlightOpacity);
       };
-      handler.unHighlight = function(element) {
+      handler.unHighlight = function (element) {
         $('[data-label]', element).css('opacity', defaultOpacity);
 
         //The legend should keep max opacity
@@ -85,7 +85,7 @@ export class AreaChart extends PointSeries {
     const isHorizontal = this.getCategoryAxis().axisConfig.isHorizontal();
 
     // Data layers
-    const layer = svg.append('g').attr('class', function(d, i) {
+    const layer = svg.append('g').attr('class', function (d, i) {
       return 'series series-' + i;
     });
 
@@ -95,7 +95,7 @@ export class AreaChart extends PointSeries {
       .attr('data-label', data.label)
       .style('fill', () => color(data.label))
       .style('stroke', () => color(data.label))
-      .classed('visAreaChart__overlapArea', function() {
+      .classed('visAreaChart__overlapArea', function () {
         return isOverlapping;
       })
       .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
@@ -120,25 +120,17 @@ export class AreaChart extends PointSeries {
 
     function getArea() {
       if (isHorizontal) {
-        return d3.svg
-          .area()
-          .x(x)
-          .y0(y0)
-          .y1(y1);
+        return d3.svg.area().x(x).y0(y0).y1(y1);
       } else {
-        return d3.svg
-          .area()
-          .y(x)
-          .x0(y0)
-          .x1(y1);
+        return d3.svg.area().y(x).x0(y0).x1(y1);
       }
     }
 
     // update
     path
-      .attr('d', function() {
+      .attr('d', function () {
         const area = getArea()
-          .defined(function(d) {
+          .defined(function (d) {
             return !_.isNull(d.y);
           })
           .interpolate(interpolate);
@@ -242,8 +234,8 @@ export class AreaChart extends PointSeries {
   draw() {
     const self = this;
 
-    return function(selection) {
-      selection.each(function() {
+    return function (selection) {
+      selection.each(function () {
         const svg = self.chartEl.append('g');
         svg.data([self.chartData]);
 

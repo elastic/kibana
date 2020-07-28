@@ -40,7 +40,7 @@ const createLegacyExports = ({
 
 const createPluginSpecs = (...ids: string[]): LegacyPluginSpec[] =>
   ids.map(
-    id =>
+    (id) =>
       ({
         getId: () => id,
       } as LegacyPluginSpec)

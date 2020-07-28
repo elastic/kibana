@@ -27,7 +27,7 @@ describe('brushHandler', () => {
   beforeEach(() => {
     mockTimefilter = {
       time: {},
-      setTime: function(time) {
+      setTime: function (time) {
         this.time = time;
       },
     };

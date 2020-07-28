@@ -6,7 +6,7 @@
 import {
   CoreSetup,
   CoreStart,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -23,7 +23,7 @@ interface SetupDeps {
 
 export class LogstashPlugin implements Plugin {
   private readonly logger: Logger;
-  private esClient?: ICustomClusterClient;
+  private esClient?: ILegacyCustomClusterClient;
   private coreSetup?: CoreSetup;
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();

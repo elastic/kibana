@@ -15,6 +15,7 @@ export interface ApplicationStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [applications$](./kibana-plugin-core-public.applicationstart.applications_.md) | <code>Observable&lt;ReadonlyMap&lt;string, PublicAppInfo &#124; PublicLegacyAppInfo&gt;&gt;</code> | Observable emitting the list of currently registered apps and their associated status. |
 |  [capabilities](./kibana-plugin-core-public.applicationstart.capabilities.md) | <code>RecursiveReadonly&lt;Capabilities&gt;</code> | Gets the read-only capabilities. |
 |  [currentAppId$](./kibana-plugin-core-public.applicationstart.currentappid_.md) | <code>Observable&lt;string &#124; undefined&gt;</code> | An observable that emits the current application id and each subsequent id update. |
 
@@ -22,7 +23,8 @@ export interface ApplicationStart
 
 |  Method | Description |
 |  --- | --- |
-|  [getUrlForApp(appId, options)](./kibana-plugin-core-public.applicationstart.geturlforapp.md) | Returns an URL to a given app, including the global base path. By default, the URL is relative (/basePath/app/my-app). Use the <code>absolute</code> option to generate an absolute url (http://host:port/basePath/app/my-app)<!-- -->Note that when generating absolute urls, the protocol, host and port are determined from the browser location. |
+|  [getUrlForApp(appId, options)](./kibana-plugin-core-public.applicationstart.geturlforapp.md) | Returns an URL to a given app, including the global base path. By default, the URL is relative (/basePath/app/my-app). Use the <code>absolute</code> option to generate an absolute url (http://host:port/basePath/app/my-app)<!-- -->Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's location. |
 |  [navigateToApp(appId, options)](./kibana-plugin-core-public.applicationstart.navigatetoapp.md) | Navigate to a given app |
+|  [navigateToUrl(url)](./kibana-plugin-core-public.applicationstart.navigatetourl.md) | Navigate to given url, which can either be an absolute url or a relative path, in a SPA friendly way when possible.<!-- -->If all these criteria are true for the given url: - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space) - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's <code>appRoute</code> configuration)<!-- -->Then a SPA navigation will be performed using <code>navigateToApp</code> using the corresponding application and path. Otherwise, fallback to a full page reload to navigate to the url using <code>window.location.assign</code> |
 |  [registerMountContext(contextName, provider)](./kibana-plugin-core-public.applicationstart.registermountcontext.md) | Register a context provider for application mounting. Will only be available to applications that depend on the plugin that registered this context. Deprecated, use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->. |
 

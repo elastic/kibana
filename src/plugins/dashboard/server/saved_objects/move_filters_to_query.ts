@@ -61,7 +61,7 @@ export function moveFiltersToQuery(
     searchSource.filter = [];
   }
 
-  searchSource.filter.forEach(filter => {
+  searchSource.filter.forEach((filter) => {
     if (isQueryFilter(filter)) {
       searchSource730.query = {
         query: filter.query.query_string ? filter.query.query_string.query : '',

@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Ip Details it matches the snapshot 1`] = `
+<div
+  data-test-subj="ip-details-page"
+>
+  <Memo(WrapperPageComponent)>
+    <Memo(HeaderPageComponent)
+      border={true}
+      title="123.456.78.90"
+    />
+    <Memo(OverviewEmptyComponent) />
+  </Memo(WrapperPageComponent)>
+  <withRouter(undefined)
+    pageName="network"
+  />
+</div>
+`;

@@ -7,16 +7,22 @@
 import { Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { OutputRuleAlertRest } from '../../plugins/siem/server/lib/detection_engine/types';
-import { DETECTION_ENGINE_INDEX_URL } from '../../plugins/siem/common/constants';
+import {
+  Status,
+  SignalIds,
+} from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
+import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
+import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
+import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
+import { DETECTION_ENGINE_INDEX_URL } from '../../plugins/security_solution/common/constants';
 
 /**
  * This will remove server generated properties such as date times, etc...
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedProperties = (
-  rule: Partial<OutputRuleAlertRest>
-): Partial<OutputRuleAlertRest> => {
+  rule: Partial<RulesSchema>
+): Partial<RulesSchema> => {
   const {
     created_at,
     updated_at,
@@ -37,8 +43,8 @@ export const removeServerGeneratedProperties = (
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedPropertiesIncludingRuleId = (
-  rule: Partial<OutputRuleAlertRest>
-): Partial<OutputRuleAlertRest> => {
+  rule: Partial<RulesSchema>
+): Partial<RulesSchema> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
   const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
   return additionalRuledIdRemoved;
@@ -48,7 +54,22 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId
  */
-export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getSimpleRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+  name: 'Simple Rule Query',
+  description: 'Simple Rule Query',
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  index: ['auditbeat-*'],
+  type: 'query',
+  query: 'user.name: root or user.name: admin',
+});
+
+/**
+ * This is a typical simple rule for testing that is easy for most basic testing
+ * @param ruleId
+ */
+export const getSimpleRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   risk_score: 1,
@@ -63,7 +84,18 @@ export const getSimpleRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> =
  * This is a representative ML rule payload as expected by the server
  * @param ruleId
  */
-export const getSimpleMlRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getSimpleMlRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+  name: 'Simple ML Rule',
+  description: 'Simple Machine Learning Rule',
+  anomaly_threshold: 44,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  machine_learning_job_id: 'some_job_id',
+  type: 'machine_learning',
+});
+
+export const getSimpleMlRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',
   anomaly_threshold: 44,
@@ -78,12 +110,24 @@ export const getSignalStatus = () => ({
   aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
 });
 
+export const getQueryAllSignals = () => ({
+  query: { match_all: {} },
+});
+
+export const getQuerySignalIds = (signalIds: SignalIds) => ({
+  query: {
+    terms: {
+      _id: signalIds,
+    },
+  },
+});
+
 export const setSignalStatus = ({
   signalIds,
   status,
 }: {
-  signalIds: string[];
-  status: 'open' | 'closed';
+  signalIds: SignalIds;
+  status: Status;
 }) => ({
   signal_ids: signalIds,
   status,
@@ -107,7 +151,7 @@ export const getSignalStatusEmptyResponse = () => ({
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  */
-export const getSimpleRuleWithoutRuleId = (): Partial<OutputRuleAlertRest> => {
+export const getSimpleRuleWithoutRuleId = (): CreateRulesSchema => {
   const simpleRule = getSimpleRule();
   const { rule_id, ...ruleWithoutId } = simpleRule;
   return ruleWithoutId;
@@ -130,10 +174,12 @@ export const binaryToString = (res: any, callback: any): void => {
 };
 
 /**
- * This is the typical output of a simple rule that Kibana will output with all the defaults.
+ * This is the typical output of a simple rule that Kibana will output with all the defaults
+ * except for the server generated properties.  Useful for testing end to end tests.
  */
-export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   created_by: 'elastic',
   description: 'Simple Rule Query',
   enabled: true,
@@ -147,10 +193,12 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 1,
+  risk_score_mapping: [],
   name: 'Simple Rule Query',
   query: 'user.name: root or user.name: admin',
   references: [],
   severity: 'high',
+  severity_mapping: [],
   updated_by: 'elastic',
   tags: [],
   to: 'now',
@@ -162,17 +210,16 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertR
 });
 
 /**
- * This is the typical output of a simple rule that Kibana will output with all the defaults.
+ * This is the typical output of a simple rule that Kibana will output with all the defaults except
+ * for all the server generated properties such as created_by. Useful for testing end to end tests.
  */
-export const getSimpleRuleOutputWithoutRuleId = (
-  ruleId = 'rule-1'
-): Partial<OutputRuleAlertRest> => {
+export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
   const { rule_id, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
 };
 
-export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => {
+export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
   const { query, language, index, ...rest } = rule;
 
@@ -188,12 +235,38 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAler
 
 /**
  * Remove all alerts from the .kibana index
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllAlerts = async (es: Client): Promise<void> => {
+export const deleteAllAlerts = async (es: Client, retryCount = 20): Promise<void> => {
+  if (retryCount > 0) {
+    try {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: 'type:alert',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Failure trying to deleteAllAlerts, retries left are: ${retryCount - 1}`, err);
+      await deleteAllAlerts(es, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteAllAlerts, no retries are left');
+  }
+};
+
+/**
+ * Remove all timelines from the .kibana index
+ * @param es The ElasticSearch handle
+ */
+export const deleteAllTimelines = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    q: 'type:alert',
+    q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,
     body: {},
@@ -202,30 +275,57 @@ export const deleteAllAlerts = async (es: Client): Promise<void> => {
 
 /**
  * Remove all rules statuses from the .kibana index
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: '.kibana',
-    q: 'type:siem-detection-engine-rule-status',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
-  });
+export const deleteAllRulesStatuses = async (es: Client, retryCount = 20): Promise<void> => {
+  if (retryCount > 0) {
+    try {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: 'type:siem-detection-engine-rule-status',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Failure trying to deleteAllRulesStatuses, retries left are: ${retryCount - 1}`,
+        err
+      );
+      await deleteAllRulesStatuses(es, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteAllRulesStatuses, no retries are left');
+  }
 };
 
 /**
  * Creates the signals index for use inside of beforeEach blocks of tests
+ * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
 export const createSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  retryCount = 20
 ): Promise<void> => {
-  await supertest
-    .post(DETECTION_ENGINE_INDEX_URL)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
+  if (retryCount > 0) {
+    try {
+      await supertest.post(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `Failure trying to create the signals index, retries left are: ${retryCount - 1}`,
+        err
+      );
+      await createSignalsIndex(supertest, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not createSignalsIndex, no retries are left');
+  }
 };
 
 /**
@@ -233,13 +333,21 @@ export const createSignalsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteSignalsIndex = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  retryCount = 20
 ): Promise<void> => {
-  await supertest
-    .delete(DETECTION_ENGINE_INDEX_URL)
-    .set('kbn-xsrf', 'true')
-    .send()
-    .expect(200);
+  if (retryCount > 0) {
+    try {
+      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(`Failure trying to deleteSignalsIndex, retries left are: ${retryCount - 1}`, err);
+      await deleteSignalsIndex(supertest, retryCount - 1);
+    }
+  } else {
+    // eslint-disable-next-line no-console
+    console.log('Could not deleteSignalsIndex, no retries are left');
+  }
 };
 
 /**
@@ -248,7 +356,7 @@ export const deleteSignalsIndex = async (
  * @param ruleIds Array of strings of rule_ids
  */
 export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
-  const stringOfRules = ruleIds.map(ruleId => {
+  const stringOfRules = ruleIds.map((ruleId) => {
     const simpleRule = getSimpleRule(ruleId);
     return JSON.stringify(simpleRule);
   });
@@ -260,7 +368,7 @@ export const getSimpleRuleAsNdjson = (ruleIds: string[]): Buffer => {
  * testing upload features.
  * @param rule The rule to convert to ndjson
  */
-export const ruleToNdjson = (rule: Partial<OutputRuleAlertRest>): Buffer => {
+export const ruleToNdjson = (rule: Partial<CreateRulesSchema>): Buffer => {
   const stringified = JSON.stringify(rule);
   return Buffer.from(`${stringified}\n`);
 };
@@ -269,8 +377,9 @@ export const ruleToNdjson = (rule: Partial<OutputRuleAlertRest>): Buffer => {
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getComplexRule = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
   false_positives: [
@@ -278,6 +387,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
     'some text string about why another condition could be a false positive',
   ],
   risk_score: 1,
+  risk_score_mapping: [],
   rule_id: ruleId,
   filters: [
     {
@@ -304,6 +414,7 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
   to: 'now',
   from: 'now-6m',
   severity: 'high',
+  severity_mapping: [],
   language: 'kuery',
   type: 'query',
   threat: [
@@ -353,8 +464,9 @@ export const getComplexRule = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> 
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlertRest> => ({
+export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => ({
   actions: [],
+  author: [],
   created_by: 'elastic',
   name: 'Complex Rule Query',
   description: 'Complex Rule Query',
@@ -363,6 +475,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
     'some text string about why another condition could be a false positive',
   ],
   risk_score: 1,
+  risk_score_mapping: [],
   rule_id: ruleId,
   filters: [
     {
@@ -390,6 +503,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
   to: 'now',
   from: 'now-6m',
   severity: 'high',
+  severity_mapping: [],
   language: 'kuery',
   type: 'query',
   threat: [
@@ -437,3 +551,29 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAlert
   query: 'user.name: root or user.name: admin',
   exceptions_list: [],
 });
+
+// Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
+export const waitFor = async (
+  functionToTest: () => Promise<boolean>,
+  maxTimeout: number = 5000,
+  timeoutWait: number = 10
+) => {
+  await new Promise(async (resolve, reject) => {
+    let found = false;
+    let numberOfTries = 0;
+    while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+      const itPasses = await functionToTest();
+      if (itPasses) {
+        found = true;
+      } else {
+        numberOfTries++;
+      }
+      await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
+    }
+    if (found) {
+      resolve();
+    } else {
+      reject(new Error('timed out waiting for function condition to be true'));
+    }
+  });
+};

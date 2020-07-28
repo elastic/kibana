@@ -31,6 +31,7 @@ describe('SlackActionFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         docLinks={deps!.docLinks}
+        readOnly={false}
       />
     );
 
@@ -39,11 +40,8 @@ describe('SlackActionFields renders', () => {
       wrapper.update();
     });
     expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="slackWebhookUrlInput"]')
-        .first()
-        .prop('value')
-    ).toBe('http:\\test');
+    expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').first().prop('value')).toBe(
+      'http:\\test'
+    );
   });
 });

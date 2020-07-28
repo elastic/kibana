@@ -1,7 +1,7 @@
 [[configuring-tls]]
-=== Encrypting communications in {kib}
+=== Encrypt communications in {kib}
 ++++
-<titleabbrev>Encrypting communications</titleabbrev>
+<titleabbrev>Encrypt communications</titleabbrev>
 ++++
 
 Secure Sockets Layer (SSL) and Transport Layer Security (TLS) provide encryption for data-in-transit. While these terms are often used
@@ -14,7 +14,7 @@ contains a public key and has an associated -- but separate -- private key; thes
 supports certificates and private keys in PEM or PKCS#12 format.
 
 [[configuring-tls-browser-kib]]
-==== Encrypting traffic between the browser and {kib}
+==== Encrypt traffic between the browser and {kib}
 
 NOTE: You do not need to enable the {es} {security-features} for this type of encryption.
 
@@ -106,7 +106,7 @@ server.ssl.enabled: true
 After making these changes, you must always access {kib} via HTTPS. For example, https://<your_kibana_host>.com.
 
 [[configuring-tls-kib-es]]
-==== Encrypting traffic between {kib} and {es}
+==== Encrypt traffic between {kib} and {es}
 
 NOTE: To perform this step, you must {ref}/configuring-security.html[enable the {es} {security-features}] or you must have a proxy that
 provides an HTTPS endpoint for {es}.

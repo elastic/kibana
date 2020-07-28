@@ -34,6 +34,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         docLinks={deps!.docLinks}
+        readOnly={false}
       />
     );
 
@@ -43,12 +44,9 @@ describe('PagerDutyActionConnectorFields renders', () => {
     });
 
     expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="pagerdutyApiUrlInput"]')
-        .first()
-        .prop('value')
-    ).toBe('http:\\test');
+    expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').first().prop('value')).toBe(
+      'http:\\test'
+    );
     expect(wrapper.find('[data-test-subj="pagerdutyRoutingKeyInput"]').length > 0).toBeTruthy();
   });
 });

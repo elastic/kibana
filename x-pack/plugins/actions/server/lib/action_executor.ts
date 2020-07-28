@@ -12,18 +12,19 @@ import {
   GetServicesFunction,
   RawAction,
   PreConfiguredAction,
-  Services,
 } from '../types';
-import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
-import { EVENT_LOG_ACTIONS } from '../plugin';
+import { EVENT_LOG_ACTIONS, PluginStartContract } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { ActionsClient } from '../actions_client';
 
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceSetup;
   getServices: GetServicesFunction;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  getActionsClientWithRequest: PluginStartContract['getActionsClientWithRequest'];
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   preconfiguredActions: PreConfiguredAction[];
@@ -72,10 +73,11 @@ export class ActionExecutor {
     const {
       spaces,
       getServices,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       actionTypeRegistry,
       eventLogger,
       preconfiguredActions,
+      getActionsClientWithRequest,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
@@ -83,8 +85,8 @@ export class ActionExecutor {
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     const { actionTypeId, name, config, secrets } = await getActionInfo(
-      services,
-      encryptedSavedObjectsPlugin,
+      await getActionsClientWithRequest(request),
+      encryptedSavedObjectsClient,
       preconfiguredActions,
       actionId,
       namespace.namespace
@@ -195,15 +197,15 @@ interface ActionInfo {
 }
 
 async function getActionInfo(
-  services: Services,
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart,
+  actionsClient: PublicMethodsOf<ActionsClient>,
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
   namespace: string | undefined
 ): Promise<ActionInfo> {
   // check to see if it's a pre-configured action first
   const pcAction = preconfiguredActions.find(
-    preconfiguredAction => preconfiguredAction.id === actionId
+    (preconfiguredAction) => preconfiguredAction.id === actionId
   );
   if (pcAction) {
     return {
@@ -216,13 +218,11 @@ async function getActionInfo(
 
   // if not pre-configured action, should be a saved object
   // ensure user can read the action before processing
-  const {
-    attributes: { actionTypeId, config, name },
-  } = await services.savedObjectsClient.get<RawAction>('action', actionId);
+  const { actionTypeId, config, name } = await actionsClient.get({ id: actionId });
 
   const {
     attributes: { secrets },
-  } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAction>('action', actionId, {
+  } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
     namespace: namespace === 'default' ? undefined : namespace,
   });
 

@@ -25,10 +25,10 @@ interface Props {
 
 export const SpaceCopyResultDetails = (props: Props) => {
   const onOverwriteClick = (object: { type: string; id: string }) => {
-    const retry = props.retries.find(r => r.type === object.type && r.id === object.id);
+    const retry = props.retries.find((r) => r.type === object.type && r.id === object.id);
 
     props.onRetriesChange([
-      ...props.retries.filter(r => r !== retry),
+      ...props.retries.filter((r) => r !== retry),
       {
         type: object.type,
         id: object.id,
@@ -38,7 +38,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
   };
 
   const hasPendingOverwrite = (object: { type: string; id: string }) => {
-    const retry = props.retries.find(r => r.type === object.type && r.id === object.id);
+    const retry = props.retries.find((r) => r.type === object.type && r.id === object.id);
 
     return Boolean(retry && retry.overwrite);
   };

@@ -62,7 +62,6 @@ describe('getPingHistogram', () => {
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: 'now-15m',
       to: 'now',
-      filters: null,
     });
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);
@@ -81,7 +80,7 @@ describe('getPingHistogram', () => {
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: 'now-15m',
       to: 'now',
-      filters: null,
+      filters: '',
     });
 
     expect(mockEsClient).toHaveBeenCalledTimes(1);

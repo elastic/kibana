@@ -21,9 +21,7 @@ import _ from 'lodash';
 import { inflector } from './inflector';
 import { organizeBy } from './helpers/organize_by';
 
-const pathGetter = _(_.get)
-  .rearg(1, 0)
-  .ary(2);
+const pathGetter = _(_.get).rearg(1, 0).ary(2);
 const inflectIndex = inflector('by');
 const inflectOrder = inflector('in', 'Order');
 
@@ -54,7 +52,7 @@ export class IndexedArray {
 
     this._indexNames = _.union(
       this._setupIndex(config.group, inflectIndex, organizeByIndexedArray(config)),
-      this._setupIndex(config.index, inflectIndex, _.indexBy),
+      this._setupIndex(config.index, inflectIndex, _.keyBy),
       this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
         return [...raw].sort((itemA, itemB) => {
           const a = pluckValue(itemA);
@@ -62,9 +60,7 @@ export class IndexedArray {
           if (typeof a === 'number' && typeof b === 'number') {
             return a - b;
           }
-          return String(a)
-            .toLowerCase()
-            .localeCompare(String(b).toLowerCase());
+          return String(a).toLowerCase().localeCompare(String(b).toLowerCase());
         });
       })
     );
@@ -171,7 +167,7 @@ export class IndexedArray {
     // shortcut for empty props
     if (!props || props.length === 0) return;
 
-    return props.map(prop => {
+    return props.map((prop) => {
       const indexName = inflect(prop);
       const getIndexValueFromItem = pathGetter.partial(prop).value();
       let cache;
@@ -180,7 +176,7 @@ export class IndexedArray {
         enumerable: false,
         configurable: false,
 
-        set: val => {
+        set: (val) => {
           // can't set any value other than the CLEAR_CACHE constant
           if (val === CLEAR_CACHE) {
             cache = false;
@@ -208,7 +204,7 @@ export class IndexedArray {
    * @return {undefined}
    */
   _clearIndices() {
-    this._indexNames.forEach(name => {
+    this._indexNames.forEach((name) => {
       this[name] = CLEAR_CACHE;
     });
   }

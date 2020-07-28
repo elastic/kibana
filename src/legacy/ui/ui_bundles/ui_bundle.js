@@ -57,7 +57,7 @@ export class UiBundle {
   }
 
   getRequires() {
-    return this._modules.map(module => `require('${normalizePath(module)}');`);
+    return this._modules.map((module) => `require('${normalizePath(module)}');`);
   }
 
   renderContent() {
@@ -66,7 +66,7 @@ export class UiBundle {
 
   async readEntryFile() {
     try {
-      const content = await fcb(cb => readFile(this.getEntryPath(), cb));
+      const content = await fcb((cb) => readFile(this.getEntryPath(), cb));
       return content.toString('utf8');
     } catch (e) {
       return null;
@@ -74,11 +74,11 @@ export class UiBundle {
   }
 
   async writeEntryFile() {
-    return await fcb(cb => writeFile(this.getEntryPath(), this.renderContent(), 'utf8', cb));
+    return await fcb((cb) => writeFile(this.getEntryPath(), this.renderContent(), 'utf8', cb));
   }
 
   async touchStyleFile() {
-    return await fcb(cb => writeFile(this.getStylePath(), '', 'utf8', cb));
+    return await fcb((cb) => writeFile(this.getStylePath(), '', 'utf8', cb));
   }
 
   /**
@@ -98,8 +98,8 @@ export class UiBundle {
     }
 
     try {
-      await fcb(cb => stat(this.getOutputPath(), cb));
-      await fcb(cb => stat(this.getStylePath(), cb));
+      await fcb((cb) => stat(this.getOutputPath(), cb));
+      await fcb((cb) => stat(this.getStylePath(), cb));
       return true;
     } catch (e) {
       return false;

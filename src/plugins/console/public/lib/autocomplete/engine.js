@@ -21,27 +21,23 @@ import _ from 'lodash';
 
 export function wrapComponentWithDefaults(component, defaults) {
   const originalGetTerms = component.getTerms;
-  component.getTerms = function(context, editor) {
+  component.getTerms = function (context, editor) {
     let result = originalGetTerms.call(component, context, editor);
     if (!result) {
       return result;
     }
-    result = _.map(
-      result,
-      function(term) {
-        if (!_.isObject(term)) {
-          term = { name: term };
-        }
-        return _.defaults(term, defaults);
-      },
-      this
-    );
+    result = _.map(result, (term) => {
+      if (!_.isObject(term)) {
+        term = { name: term };
+      }
+      return _.defaults(term, defaults);
+    });
     return result;
   };
   return component;
 }
 
-const tracer = function() {
+const tracer = function () {
   if (window.engine_trace) {
     console.log.call(console, ...arguments);
   }
@@ -77,9 +73,9 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
 
   tracer('starting token evaluation [' + token + ']');
 
-  _.each(walkingStates, function(ws) {
+  _.each(walkingStates, function (ws) {
     const contextForState = passThroughContext(context, ws.contextExtensionList);
-    _.each(ws.components, function(component) {
+    _.each(ws.components, function (component) {
       tracer('evaluating [' + token + '] with [' + component.name + ']', component);
       const result = component.match(token, contextForState, editor);
       if (result && !_.isEmpty(result)) {
@@ -117,7 +113,7 @@ export function walkTokenPath(tokenPath, walkingStates, context, editor) {
 
   if (nextWalkingStates.length === 0) {
     // no where to go, still return context variables returned so far..
-    return _.map(walkingStates, function(ws) {
+    return _.map(walkingStates, function (ws) {
       return new WalkingState(ws.name, [], ws.contextExtensionList);
     });
   }
@@ -134,10 +130,10 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
   );
   if (includeAutoComplete) {
     let autoCompleteSet = [];
-    _.each(walkStates, function(ws) {
+    _.each(walkStates, function (ws) {
       const contextForState = passThroughContext(context, ws.contextExtensionList);
-      _.each(ws.components, function(component) {
-        _.each(component.getTerms(contextForState, editor), function(term) {
+      _.each(ws.components, function (component) {
+        _.each(component.getTerms(contextForState, editor), function (term) {
           if (!_.isObject(term)) {
             term = { name: term };
           }
@@ -145,17 +141,17 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
         });
       });
     });
-    autoCompleteSet = _.uniq(autoCompleteSet, false);
+    autoCompleteSet = _.uniq(autoCompleteSet);
     context.autoCompleteSet = autoCompleteSet;
   }
 
   // apply what values were set so far to context, selecting the deepest on which sets the context
   if (walkStates.length !== 0) {
     let wsToUse;
-    walkStates = _.sortBy(walkStates, function(ws) {
+    walkStates = _.sortBy(walkStates, function (ws) {
       return _.isNumber(ws.priority) ? ws.priority : Number.MAX_VALUE;
     });
-    wsToUse = _.find(walkStates, function(ws) {
+    wsToUse = _.find(walkStates, function (ws) {
       return _.isEmpty(ws.components);
     });
 
@@ -170,7 +166,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
       wsToUse = walkStates[0];
     }
 
-    _.each(wsToUse.contextExtensionList, function(extension) {
+    _.each(wsToUse.contextExtensionList, function (extension) {
       _.assign(context, extension);
     });
   }

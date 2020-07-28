@@ -9,6 +9,9 @@ import { EditorFrameProps } from './index';
 import { Datasource, Visualization } from '../../types';
 import { createExpressionRendererMock } from '../mocks';
 import { coreMock } from 'src/core/public/mocks';
+import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 
 describe('editor_frame state management', () => {
   describe('initialization', () => {
@@ -24,9 +27,15 @@ describe('editor_frame state management', () => {
         ExpressionRenderer: createExpressionRendererMock(),
         onChange: jest.fn(),
         core: coreMock.createSetup(),
+        plugins: {
+          uiActions: uiActionsPluginMock.createStartContract(),
+          data: dataPluginMock.createStartContract(),
+          expressions: expressionsPluginMock.createStartContract(),
+        },
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         query: { query: '', language: 'lucene' },
         filters: [],
+        showNoDataPopover: jest.fn(),
       };
     });
 
@@ -380,6 +389,7 @@ describe('editor_frame state management', () => {
               filters: [],
             },
             title: 'heyo!',
+            description: 'My lens',
             type: 'lens',
             visualizationType: 'line',
           },
@@ -398,6 +408,7 @@ describe('editor_frame state management', () => {
         },
         persistedId: 'b',
         title: 'heyo!',
+        description: 'My lens',
         visualization: {
           activeId: 'line',
           state: {

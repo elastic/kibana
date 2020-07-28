@@ -20,7 +20,7 @@ import { closeDetailPanel } from './detail_panel';
 
 import { getNotifications } from '../../../kibana_services';
 
-export const deleteJobs = jobIds => async (dispatch, getState) => {
+export const deleteJobs = (jobIds) => async (dispatch, getState) => {
   dispatch({
     type: UPDATE_JOB_START,
   });

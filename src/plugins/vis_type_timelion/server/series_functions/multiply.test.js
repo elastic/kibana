@@ -30,7 +30,7 @@ describe('multiply.js', () => {
   });
 
   it('multiplies by a number', () => {
-    return invoke(fn, [seriesList, 2]).then(r => {
+    return invoke(fn, [seriesList, 2]).then((r) => {
       expect(_.map(r.output.list[1].data, 1)).to.eql([200, 100, 100, 40]);
     });
   });

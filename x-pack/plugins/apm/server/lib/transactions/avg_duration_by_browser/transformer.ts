@@ -9,7 +9,7 @@ import { AvgDurationByBrowserAPIResponse } from '.';
 import { Coordinate } from '../../../../typings/timeseries';
 
 export function transformer({
-  response
+  response,
 }: {
   response: ESResponse;
 }): AvgDurationByBrowserAPIResponse {
@@ -26,7 +26,7 @@ export function transformer({
       const x = next.key;
       const seenUserAgentKeys = new Set<string>();
 
-      userAgentBuckets.map(userAgentBucket => {
+      userAgentBuckets.map((userAgentBucket) => {
         const key = userAgentBucket.key;
         const y = userAgentBucket.avg_duration?.value;
 
@@ -35,12 +35,12 @@ export function transformer({
       });
 
       const emptyUserAgents = new Set<string>(
-        [...allUserAgentKeys].filter(key => !seenUserAgentKeys.has(key))
+        [...allUserAgentKeys].filter((key) => !seenUserAgentKeys.has(key))
       );
 
       // If no user agent requests exist for this bucked, fill in the data with
       // undefined
-      [...emptyUserAgents].map(key => {
+      [...emptyUserAgents].map((key) => {
         acc[key] = (acc[key] || []).concat({ x, y: undefined });
       });
 

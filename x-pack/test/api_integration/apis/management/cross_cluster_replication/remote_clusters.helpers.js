@@ -10,7 +10,7 @@ import { REMOTE_CLUSTER_NAME, REMOTE_CLUSTERS_API_BASE_PATH } from './constants'
  * Remote clusters for the tests.
  * @param {Supertest} supertest The supertest instance
  */
-export const registerHelpers = supertest => {
+export const registerHelpers = (supertest) => {
   let remoteClustersCreated = [];
 
   const addCluster = (name = REMOTE_CLUSTER_NAME) => {
@@ -33,7 +33,7 @@ export const registerHelpers = supertest => {
   };
 
   const deleteCluster = (name = REMOTE_CLUSTER_NAME) => {
-    remoteClustersCreated = remoteClustersCreated.filter(c => c !== name);
+    remoteClustersCreated = remoteClustersCreated.filter((c) => c !== name);
 
     return supertest.delete(`${REMOTE_CLUSTERS_API_BASE_PATH}/${name}`).set('kbn-xsrf', 'xxx');
   };

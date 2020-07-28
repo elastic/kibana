@@ -8,13 +8,13 @@ import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
 import { testTable, emptyTable } from './__tests__/fixtures/test_tables';
 import { mapColumn } from './mapColumn';
 
-const pricePlusTwo = datatable => Promise.resolve(datatable.rows[0].price + 2);
+const pricePlusTwo = (datatable) => Promise.resolve(datatable.rows[0].price + 2);
 
 describe('mapColumn', () => {
   const fn = functionWrapper(mapColumn);
 
   it('returns a datatable with a new column with the values from mapping a function over each row in a datatable', () => {
-    return fn(testTable, { name: 'pricePlusTwo', expression: pricePlusTwo }).then(result => {
+    return fn(testTable, { name: 'pricePlusTwo', expression: pricePlusTwo }).then((result) => {
       const arbitraryRowIndex = 2;
 
       expect(result.type).toBe('datatable');
@@ -28,7 +28,7 @@ describe('mapColumn', () => {
   });
 
   it('overwrites existing column with the new column if an existing column name is provided', () => {
-    return fn(testTable, { name: 'name', expression: pricePlusTwo }).then(result => {
+    return fn(testTable, { name: 'name', expression: pricePlusTwo }).then((result) => {
       const nameColumnIndex = result.columns.findIndex(({ name }) => name === 'name');
       const arbitraryRowIndex = 4;
 
@@ -41,7 +41,7 @@ describe('mapColumn', () => {
   });
 
   it('adds a column to empty tables', () => {
-    return fn(emptyTable, { name: 'name', expression: pricePlusTwo }).then(result => {
+    return fn(emptyTable, { name: 'name', expression: pricePlusTwo }).then((result) => {
       expect(result.type).toBe('datatable');
       expect(result.columns).toHaveLength(1);
       expect(result.columns[0]).toHaveProperty('name', 'name');
@@ -51,7 +51,7 @@ describe('mapColumn', () => {
 
   describe('expression', () => {
     it('maps null values to the new column', () => {
-      return fn(testTable, { name: 'empty' }).then(result => {
+      return fn(testTable, { name: 'empty' }).then((result) => {
         const emptyColumnIndex = result.columns.findIndex(({ name }) => name === 'empty');
         const arbitraryRowIndex = 8;
 

@@ -5,10 +5,10 @@
  */
 
 import LRU from 'lru-cache';
-import { APICaller } from '../../../../../../src/core/server';
+import { LegacyAPICaller } from '../../../../../../src/core/server';
 import {
   IndexPatternsFetcher,
-  IIndexPattern
+  IIndexPattern,
 } from '../../../../../../src/plugins/data/server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -16,14 +16,14 @@ import { APMRequestHandlerContext } from '../../routes/typings';
 
 const cache = new LRU<string, IIndexPattern | undefined>({
   max: 100,
-  maxAge: 1000 * 60
+  maxAge: 1000 * 60,
 });
 
 // TODO: this is currently cached globally. In the future we might want to cache this per user
 export const getDynamicIndexPattern = async ({
   context,
   indices,
-  processorEvent
+  processorEvent,
 }: {
   context: APMRequestHandlerContext;
   indices: ApmIndicesConfig;
@@ -37,8 +37,8 @@ export const getDynamicIndexPattern = async ({
   }
 
   const indexPatternsFetcher = new IndexPatternsFetcher(
-    (...rest: Parameters<APICaller>) =>
-      context.core.elasticsearch.adminClient.callAsCurrentUser(...rest)
+    (...rest: Parameters<LegacyAPICaller>) =>
+      context.core.elasticsearch.legacy.client.callAsCurrentUser(...rest)
   );
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
@@ -47,12 +47,12 @@ export const getDynamicIndexPattern = async ({
   // (would be a bad first time experience)
   try {
     const fields = await indexPatternsFetcher.getFieldsForWildcard({
-      pattern: patternIndices
+      pattern: patternIndices,
     });
 
     const indexPattern: IIndexPattern = {
       fields,
-      title: indexPatternTitle
+      title: indexPatternTitle,
     };
 
     cache.set(CACHE_KEY, indexPattern);
@@ -84,8 +84,8 @@ function getPatternIndices(
   const indicesMap = {
     transaction: indices['apm_oss.transactionIndices'],
     metric: indices['apm_oss.metricsIndices'],
-    error: indices['apm_oss.errorIndices']
+    error: indices['apm_oss.errorIndices'],
   };
 
-  return indexNames.map(name => indicesMap[name]);
+  return indexNames.map((name) => indicesMap[name]);
 }

@@ -19,9 +19,18 @@
 
 import { Server } from 'hapi';
 import { CspConfig } from '../../../../../../core/server';
-import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
+import {
+  UsageCollectionSetup,
+  CollectorOptions,
+} from '../../../../../../plugins/usage_collection/server';
 
-export function createCspCollector(server: Server) {
+interface Usage {
+  strict: boolean;
+  warnLegacyBrowsers: boolean;
+  rulesChangedFromDefault: boolean;
+}
+
+export function createCspCollector(server: Server): CollectorOptions<Usage> {
   return {
     type: 'csp',
     isReady: () => true,
@@ -37,10 +46,22 @@ export function createCspCollector(server: Server) {
         rulesChangedFromDefault: header !== CspConfig.DEFAULT.header,
       };
     },
+    schema: {
+      strict: {
+        type: 'boolean',
+      },
+      warnLegacyBrowsers: {
+        type: 'boolean',
+      },
+      rulesChangedFromDefault: {
+        type: 'boolean',
+      },
+    },
   };
 }
 
 export function registerCspCollector(usageCollection: UsageCollectionSetup, server: Server): void {
-  const collector = usageCollection.makeUsageCollector(createCspCollector(server));
+  const collectorConfig = createCspCollector(server);
+  const collector = usageCollection.makeUsageCollector<Usage>(collectorConfig);
   usageCollection.registerCollector(collector);
 }

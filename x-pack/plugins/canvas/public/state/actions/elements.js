@@ -5,11 +5,17 @@
  */
 
 import { createAction } from 'redux-actions';
-import { createThunk } from 'redux-thunks/cjs';
 import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
-import { getPages, getNodeById, getNodes, getSelectedPageIndex } from '../selectors/workpad';
+import { createThunk } from '../../lib/create_thunk';
+import {
+  getPages,
+  getWorkpadVariablesAsObject,
+  getNodeById,
+  getNodes,
+  getSelectedPageIndex,
+} from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
@@ -55,7 +61,7 @@ function getBareElement(el, includeId = false) {
 
 export const elementLayer = createAction('elementLayer');
 
-export const setMultiplePositions = createAction('setMultiplePosition', repositionedElements => ({
+export const setMultiplePositions = createAction('setMultiplePosition', (repositionedElements) => ({
   repositionedElements,
 }));
 
@@ -96,14 +102,16 @@ export const fetchContext = createThunk(
       return i < index;
     });
 
+    const variables = getWorkpadVariablesAsObject(getState());
+
     // get context data from a partial AST
     return interpretAst(
       {
         ...element.ast,
         chain: astChain,
       },
-      prevContextValue
-    ).then(value => {
+      variables
+    ).then((value) => {
       dispatch(
         args.setValue({
           path: contextPath,
@@ -114,7 +122,7 @@ export const fetchContext = createThunk(
   }
 );
 
-const fetchRenderableWithContextFn = ({ dispatch }, element, ast, context) => {
+const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, context) => {
   const argumentPath = [element.id, 'expressionRenderable'];
   dispatch(
     args.setLoading({
@@ -122,17 +130,19 @@ const fetchRenderableWithContextFn = ({ dispatch }, element, ast, context) => {
     })
   );
 
-  const getAction = renderable =>
+  const getAction = (renderable) =>
     args.setValue({
       path: argumentPath,
       value: renderable,
     });
 
-  return runInterpreter(ast, context, { castToRender: true })
-    .then(renderable => {
+  const variables = getWorkpadVariablesAsObject(getState());
+
+  return runInterpreter(ast, context, variables, { castToRender: true })
+    .then((renderable) => {
       dispatch(getAction(renderable));
     })
-    .catch(err => {
+    .catch((err) => {
       services.notify.getService().error(err);
       dispatch(getAction(err));
     });
@@ -162,25 +172,27 @@ export const fetchAllRenderables = createThunk(
 
     function fetchElementsOnPages(pages) {
       const elements = [];
-      pages.forEach(page => {
-        page.elements.forEach(element => {
+      pages.forEach((page) => {
+        page.elements.forEach((element) => {
           elements.push(element);
         });
       });
 
-      const renderablePromises = elements.map(element => {
+      const renderablePromises = elements.map((element) => {
         const ast = element.ast || safeElementFromExpression(element.expression);
         const argumentPath = [element.id, 'expressionRenderable'];
 
-        return runInterpreter(ast, null, { castToRender: true })
-          .then(renderable => ({ path: argumentPath, value: renderable }))
-          .catch(err => {
+        const variables = getWorkpadVariablesAsObject(getState());
+
+        return runInterpreter(ast, null, variables, { castToRender: true })
+          .then((renderable) => ({ path: argumentPath, value: renderable }))
+          .catch((err) => {
             services.notify.getService().error(err);
             return { path: argumentPath, value: err };
           });
       });
 
-      return Promise.all(renderablePromises).then(renderables => {
+      return Promise.all(renderablePromises).then((renderables) => {
         dispatch(args.setValues(renderables));
       });
     }
@@ -203,17 +215,17 @@ export const insertNodes = createThunk('insertNodes', ({ dispatch, type }, eleme
   const _insertNodes = createAction(type);
   const newElements = elements.map(cloneDeep);
   // move the root element so users can see that it was added
-  newElements.forEach(newElement => {
+  newElements.forEach((newElement) => {
     newElement.position.top = newElement.position.top + 10;
     newElement.position.left = newElement.position.left + 10;
   });
   dispatch(_insertNodes({ pageId, elements: newElements }));
 
   // refresh all elements just once per `insertNodes call` if there's a filter on any, otherwise just render the new element
-  if (elements.some(element => element.filter)) {
+  if (elements.some((element) => element.filter)) {
     dispatch(fetchAllRenderables());
   } else {
-    newElements.forEach(newElement => dispatch(fetchRenderable(newElement)));
+    newElements.forEach((newElement) => dispatch(fetchRenderable(newElement)));
   }
 });
 
@@ -224,15 +236,17 @@ export const removeElements = createThunk(
 
     // todo consider doing the group membership collation in aeroelastic, or the Redux reducer, when adding templates
     const allElements = getNodes(state, pageId);
-    const allRoots = rootElementIds.map(id => allElements.find(e => id === e.id)).filter(d => d);
+    const allRoots = rootElementIds
+      .map((id) => allElements.find((e) => id === e.id))
+      .filter((d) => d);
     const elementIds = subMultitree(
-      e => e.id,
-      e => e.position.parent,
+      (e) => e.id,
+      (e) => e.position.parent,
       allElements,
       allRoots
-    ).map(e => e.id);
+    ).map((e) => e.id);
 
-    const shouldRefresh = elementIds.some(elementId => {
+    const shouldRefresh = elementIds.some((elementId) => {
       const element = getNodeById(state, elementId, pageId);
       const filterIsApplied = element.filter && element.filter.length > 0;
       return filterIsApplied;
@@ -275,7 +289,7 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
   // TODO: find a way to extract a list of filter renderers from the functions registry
   if (
     updatedElement.filter &&
-    !['dropdownControl', 'timefilterControl', 'exactly'].some(filter =>
+    !['dropdownControl', 'timefilterControl', 'exactly'].some((filter) =>
       updatedElement.expression.includes(filter)
     )
   ) {

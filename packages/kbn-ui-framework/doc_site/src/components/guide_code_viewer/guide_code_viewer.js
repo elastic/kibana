@@ -65,7 +65,7 @@ export class GuideCodeViewer extends Component {
       'is-code-viewer-open': this.props.isOpen,
     });
 
-    const codeSections = this.props.source.map(sourceObject =>
+    const codeSections = this.props.source.map((sourceObject) =>
       this.renderSection(sourceObject.type, sourceObject.code)
     );
 

@@ -20,8 +20,7 @@
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import * as vega from 'vega-lib';
-import * as vegaLite from 'vega-lite';
+import { vega, vegaLite } from '../lib/vega';
 import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -79,10 +78,7 @@ export class VegaBaseView {
     this._initialized = true;
 
     try {
-      this._$parentEl
-        .empty()
-        .addClass(`vgaVis`)
-        .css('flex-direction', this._parser.containerDir);
+      this._$parentEl.empty().addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
       for (const warn of this._parser.warnings) {
@@ -151,7 +147,7 @@ export class VegaBaseView {
             defaultMessage:
               'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
             values: {
-              enableExternalUrls: 'vega.enableExternalUrls: true',
+              enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
               kibanaConfigFileName: 'kibana.yml',
             },
           })
@@ -199,13 +195,9 @@ export class VegaBaseView {
     const width = Math.max(0, this._$container.width() - this._parser.paddingWidth);
     const height =
       Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
-    // Somehow the `height` signal in vega becomes zero if the height is set exactly to
-    // an even number. This is a dirty workaround for this.
-    // when vega itself is updated again, it should be checked whether this is still
-    // necessary.
-    const adjustedHeight = height + 0.00000001;
-    if (view.width() !== width || view.height() !== adjustedHeight) {
-      view.width(width).height(adjustedHeight);
+
+    if (view.width() !== width || view.height() !== height) {
+      view.width(width).height(height);
       return true;
     }
     return false;
@@ -283,7 +275,7 @@ export class VegaBaseView {
     const filterToRemove = esFilters.buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
-    const existingFilter = currentFilters.find(filter =>
+    const existingFilter = currentFilters.find((filter) =>
       esFilters.compareFilters(filter, filterToRemove)
     );
 
@@ -368,6 +360,11 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
+    this._parser.searchAPI.inspectorAdapters?.vega.bindInspectValues({
+      view,
+      spec: vlspec || spec,
+    });
+
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
         console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
@@ -398,7 +395,7 @@ export class VegaBaseView {
     // into the _ongoingDestroy promise, while handlers are being disposed
     if (this._destroyHandlers) {
       // If no destroy is yet running, execute all handlers and wait for all of them to resolve.
-      this._ongoingDestroy = Promise.all(this._destroyHandlers.map(v => v()));
+      this._ongoingDestroy = Promise.all(this._destroyHandlers.map((v) => v()));
       this._destroyHandlers = null;
     }
     return this._ongoingDestroy;

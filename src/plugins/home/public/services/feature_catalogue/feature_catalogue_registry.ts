@@ -73,7 +73,7 @@ export class FeatureCatalogueRegistry {
     }
     const capabilities = this.capabilities;
     return [...this.features.values()]
-      .filter(entry => capabilities.catalogue[entry.id] !== false)
+      .filter((entry) => capabilities.catalogue[entry.id] !== false)
       .sort(compareByKey('title'));
   }
 }

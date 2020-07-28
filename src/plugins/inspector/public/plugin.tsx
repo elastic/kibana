@@ -22,8 +22,9 @@ import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { toMountPoint } from '../../kibana_react/public';
 import { InspectorViewRegistry } from './view_registry';
-import { Adapters, InspectorOptions, InspectorSession } from './types';
+import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
+import { Adapters } from '../common';
 
 import { getRequestsViewDescription, getDataViewDescription } from './views';
 
@@ -82,7 +83,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   }
 
   public start(core: CoreStart) {
-    const isAvailable: Start['isAvailable'] = adapters =>
+    const isAvailable: Start['isAvailable'] = (adapters) =>
       this.views!.getVisible(adapters).length > 0;
 
     const closeButtonLabel = i18n.translate('inspector.closeButton', {

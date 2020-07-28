@@ -17,14 +17,10 @@
  * under the License.
  */
 
-import { get, has } from 'lodash';
+import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaContext,
-  KibanaDatatable,
-  ExpressionFunctionDefinition,
-  KibanaDatatableColumn,
-} from '../../../../../plugins/expressions/public';
+
+import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
@@ -33,15 +29,22 @@ import { IAggConfigs } from '../aggs';
 import { ISearchSource } from '../search_source';
 import { tabifyAggResponse } from '../tabify';
 import {
+  calculateBounds,
+  EsaggsExpressionFunctionDefinition,
   Filter,
-  Query,
-  serializeFieldFormat,
-  TimeRange,
+  getTime,
   IIndexPattern,
   isRangeFilter,
+  Query,
+  TimeRange,
 } from '../../../common';
-import { FilterManager, calculateBounds, getTime } from '../../query';
-import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
+import { FilterManager } from '../../query';
+import {
+  getFieldFormats,
+  getIndexPatterns,
+  getQueryService,
+  getSearchService,
+} from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
 
@@ -64,18 +67,6 @@ export interface RequestHandlerParams {
 }
 
 const name = 'esaggs';
-
-type Input = KibanaContext | null;
-type Output = Promise<KibanaDatatable>;
-
-interface Arguments {
-  index: string;
-  metricsAtAllLevels: boolean;
-  partialRows: boolean;
-  includeFormatHints: boolean;
-  aggConfigs: string;
-  timeFields?: string[];
-}
 
 const handleCourierRequest = async ({
   searchSource,
@@ -115,7 +106,7 @@ const handleCourierRequest = async ({
     },
   });
 
-  requestSearchSource.setField('aggs', function() {
+  requestSearchSource.setField('aggs', function () {
     return aggs.toDsl(metricsAtAllLevels);
   });
 
@@ -134,7 +125,7 @@ const handleCourierRequest = async ({
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
       return allTimeFields
-        .map(fieldName => getTime(indexPattern, timeRange, { fieldName }))
+        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName }))
         .filter(isRangeFilter);
     });
   }
@@ -169,7 +160,7 @@ const handleCourierRequest = async ({
 
       (searchSource as any).lastQuery = queryHash;
 
-      request.stats(getResponseInspectorStats(searchSource, response)).ok({ json: response });
+      request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
 
       (searchSource as any).rawResponse = response;
     } catch (e) {
@@ -189,13 +180,13 @@ const handleCourierRequest = async ({
   // response data incorrectly in the inspector.
   let resp = (searchSource as any).rawResponse;
   for (const agg of aggs.aggs) {
-    if (has(agg, 'type.postFlightRequest')) {
+    if (hasIn(agg, 'type.postFlightRequest')) {
       resp = await agg.type.postFlightRequest(
         resp,
         aggs,
         agg,
         requestSearchSource,
-        inspectorAdapters,
+        inspectorAdapters.requests,
         abortSignal
       );
     }
@@ -227,14 +218,18 @@ const handleCourierRequest = async ({
   }
 
   inspectorAdapters.data.setTabularLoader(
-    () => buildTabularInspectorData((searchSource as any).tabifiedResponse, filterManager),
+    () =>
+      buildTabularInspectorData((searchSource as any).tabifiedResponse, {
+        queryFilter: filterManager,
+        deserializeFieldFormat: getFieldFormats().deserialize,
+      }),
     { returnsFormattedValues: true }
   );
 
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
+export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
   name,
   type: 'kibana_datatable',
   inputTypes: ['kibana_context', 'null'],
@@ -292,7 +287,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
       aggs,
       indexPattern,
       timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined),
+      query: get(input, 'query', undefined) as any,
       filters: get(input, 'filters', undefined),
       timeFields: args.timeFields,
       forceFetch: true,
@@ -313,7 +308,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
           meta: serializeAggConfig(column.aggConfig),
         };
         if (args.includeFormatHints) {
-          cleanedColumn.formatHint = serializeFieldFormat(column.aggConfig);
+          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
         }
         return cleanedColumn;
       }),

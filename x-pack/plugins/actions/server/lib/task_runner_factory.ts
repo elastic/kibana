@@ -8,7 +8,7 @@ import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import { Logger, CoreStart, KibanaRequest } from '../../../../../src/core/server';
 import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
@@ -17,11 +17,12 @@ import {
   SpaceIdToNamespaceFunction,
   ActionTypeExecutorResult,
 } from '../types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 export interface TaskRunnerContext {
   logger: Logger;
   actionTypeRegistry: ActionTypeRegistryContract;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
   getScopedSavedObjectsClient: CoreStart['savedObjects']['getScopedClient'];
@@ -52,7 +53,7 @@ export class TaskRunnerFactory {
     const { actionExecutor } = this;
     const {
       logger,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getBasePath,
       getScopedSavedObjectsClient,
@@ -65,8 +66,8 @@ export class TaskRunnerFactory {
 
         const {
           attributes: { actionId, params, apiKey },
-        } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<ActionTaskParams>(
-          'action_task_params',
+        } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
           actionTaskParamsId,
           { namespace }
         );
@@ -121,11 +122,11 @@ export class TaskRunnerFactory {
         // Cleanup action_task_params object now that we're done with it
         try {
           const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-          await savedObjectsClient.delete('action_task_params', actionTaskParamsId);
+          await savedObjectsClient.delete(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, actionTaskParamsId);
         } catch (e) {
           // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
           logger.error(
-            `Failed to cleanup action_task_params object [id="${actionTaskParamsId}"]: ${e.message}`
+            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskParamsId}"]: ${e.message}`
           );
         }
       },

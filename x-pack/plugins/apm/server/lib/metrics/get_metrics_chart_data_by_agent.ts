@@ -6,7 +6,7 @@
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
 } from '../helpers/setup_request';
 import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
@@ -20,7 +20,7 @@ export async function getMetricsChartDataByAgent({
   setup,
   serviceName,
   serviceNodeName,
-  agentName
+  agentName,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;

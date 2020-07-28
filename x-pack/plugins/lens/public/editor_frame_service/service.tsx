@@ -26,6 +26,7 @@ import { mergeTables } from './merge_tables';
 import { formatColumn } from './format_column';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -37,6 +38,7 @@ export interface EditorFrameStartPlugins {
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
   expressions: ExpressionsStart;
+  uiActions?: UiActionsStart;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
@@ -44,7 +46,7 @@ async function collectAsyncDefinitions<T extends { id: string }>(
 ) {
   const resolvedDefinitions = await Promise.all(definitions);
   const definitionMap: Record<string, T> = {};
-  resolvedDefinitions.forEach(definition => {
+  resolvedDefinitions.forEach((definition) => {
     definitionMap[definition.id] = definition;
   });
 
@@ -73,6 +75,7 @@ export class EditorFrameService {
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
         indexPatternService: deps.data.indexPatterns,
+        uiActions: deps.uiActions,
       };
     };
 
@@ -81,10 +84,10 @@ export class EditorFrameService {
     }
 
     return {
-      registerDatasource: datasource => {
+      registerDatasource: (datasource) => {
         this.datasources.push(datasource as Datasource<unknown, unknown>);
       },
-      registerVisualization: visualization => {
+      registerVisualization: (visualization) => {
         this.visualizations.push(visualization as Visualization<unknown, unknown>);
       },
     };
@@ -99,7 +102,10 @@ export class EditorFrameService {
       ]);
 
       return {
-        mount: (element, { doc, onError, dateRange, query, filters, savedQuery, onChange }) => {
+        mount: (
+          element,
+          { doc, onError, dateRange, query, filters, savedQuery, onChange, showNoDataPopover }
+        ) => {
           domElement = element;
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
           const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
@@ -116,6 +122,7 @@ export class EditorFrameService {
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
                 core={core}
+                plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
                 doc={doc}
                 dateRange={dateRange}
@@ -123,6 +130,7 @@ export class EditorFrameService {
                 filters={filters}
                 savedQuery={savedQuery}
                 onChange={onChange}
+                showNoDataPopover={showNoDataPopover}
               />
             </I18nProvider>,
             domElement

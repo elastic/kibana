@@ -30,7 +30,7 @@ export class StepTerms extends Component {
     termsFields: PropTypes.array.isRequired,
   };
 
-  onSelectField = field => {
+  onSelectField = (field) => {
     const {
       fields: { terms },
       onFieldsChange,
@@ -39,13 +39,13 @@ export class StepTerms extends Component {
     onFieldsChange({ terms: terms.concat(field) });
   };
 
-  onRemoveField = field => {
+  onRemoveField = (field) => {
     const {
       fields: { terms },
       onFieldsChange,
     } = this.props;
 
-    onFieldsChange({ terms: terms.filter(term => term !== field) });
+    onFieldsChange({ terms: terms.filter((term) => term !== field) });
   };
 
   render() {

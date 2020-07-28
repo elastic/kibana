@@ -6,7 +6,7 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
-import { CustomSelectionTable } from '../custom_selection_table';
+import { CustomSelectionTable } from '../../custom_selection_table';
 import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar';
 
@@ -38,12 +38,12 @@ export function JobSelectorTable({
       sortablePropertyItems = [
         {
           name: 'job_id',
-          getValue: item => item.job_id.toLowerCase(),
+          getValue: (item) => item.job_id.toLowerCase(),
           isAscending: true,
         },
         {
           name: 'groups',
-          getValue: item => (item.groups && item.groups[0] ? item.groups[0].toLowerCase() : ''),
+          getValue: (item) => (item.groups && item.groups[0] ? item.groups[0].toLowerCase() : ''),
           isAscending: true,
         },
       ];
@@ -52,7 +52,7 @@ export function JobSelectorTable({
       sortablePropertyItems = [
         {
           name: 'id',
-          getValue: item => item.id.toLowerCase(),
+          getValue: (item) => item.id.toLowerCase(),
           isAscending: true,
         },
       ];
@@ -81,7 +81,7 @@ export function JobSelectorTable({
   ];
 
   function getGroupOptions() {
-    return groupsList.map(g => ({
+    return groupsList.map((g) => ({
       value: g.id,
       view: (
         <Fragment>
@@ -107,7 +107,7 @@ export function JobSelectorTable({
         id: 'checkbox',
         isCheckbox: true,
         textOnly: false,
-        width: '24px',
+        width: '32px',
       },
       {
         label: 'job ID',
@@ -121,7 +121,9 @@ export function JobSelectorTable({
         isSortable: true,
         alignment: LEFT_ALIGNMENT,
         render: ({ groups = [] }) =>
-          groups.map(group => <JobSelectorBadge key={`${group}-key`} id={group} isGroup={true} />),
+          groups.map((group) => (
+            <JobSelectorBadge key={`${group}-key`} id={group} isGroup={true} />
+          )),
       },
       {
         label: 'time range',
@@ -154,7 +156,10 @@ export function JobSelectorTable({
         filters={filters}
         filterDefaultFields={!singleSelection ? JOB_FILTER_FIELDS : undefined}
         items={jobs}
-        onTableChange={selectionFromTable => onSelection({ selectionFromTable })}
+        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
+        radioDisabledCheck={(item) => {
+          return timeseriesOnly && item.isSingleMetricViewerJob === false;
+        }}
         selectedIds={selectedIds}
         singleSelection={singleSelection}
         sortableProperties={sortableProperties}
@@ -200,7 +205,7 @@ export function JobSelectorTable({
         columns={groupColumns}
         filterDefaultFields={!singleSelection ? GROUP_FILTER_FIELDS : undefined}
         items={groupsList}
-        onTableChange={selectionFromTable => onSelection({ selectionFromTable })}
+        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
         selectedIds={selectedIds}
         sortableProperties={sortableProperties}
       />
@@ -213,7 +218,7 @@ export function JobSelectorTable({
         size="s"
         tabs={tabs}
         initialSelectedTab={tabs[0]}
-        onTabClick={tab => {
+        onTabClick={(tab) => {
           setCurrentTab(tab.id);
         }}
       />

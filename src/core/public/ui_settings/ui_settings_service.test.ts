@@ -38,7 +38,7 @@ describe('#stop', () => {
   it('stops the uiSettingsClient and uiSettingsApi', async () => {
     const service = new UiSettingsService();
     let loadingCount$: Rx.Observable<unknown>;
-    defaultDeps.http.addLoadingCountSource.mockImplementation(obs$ => (loadingCount$ = obs$));
+    defaultDeps.http.addLoadingCountSource.mockImplementation((obs$) => (loadingCount$ = obs$));
     const client = service.setup(defaultDeps);
 
     service.stop();

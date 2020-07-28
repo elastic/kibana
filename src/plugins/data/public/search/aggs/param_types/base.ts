@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionAstFunction } from 'src/plugins/expressions/public';
+import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';
 import { FetchOptions } from '../../fetch';
@@ -82,7 +82,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
     this.toExpressionAst = config.toExpressionAst;
     this.options = config.options;
     this.modifyAggConfigOnSearchRequestStart =
-      config.modifyAggConfigOnSearchRequestStart || function() {};
+      config.modifyAggConfigOnSearchRequestStart || function () {};
     this.valueType = config.valueType || config.type;
   }
 }

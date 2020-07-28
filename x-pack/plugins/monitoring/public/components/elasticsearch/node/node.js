@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { get } from 'lodash';
 import {
   EuiPage,
   EuiPageContent,
@@ -20,17 +21,33 @@ import { Logs } from '../../logs/';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertsCallout } from '../../../alerts/callout';
 
 export const Node = ({
   nodeSummary,
   metrics,
   logs,
+  alerts,
   nodeId,
   clusterUuid,
   scope,
-  kbnUrl,
   ...props
 }) => {
+  if (alerts) {
+    for (const alertTypeId of Object.keys(alerts)) {
+      const alertInstance = alerts[alertTypeId];
+      for (const { meta } of alertInstance.states) {
+        const metricList = get(meta, 'metrics', []);
+        for (const metric of metricList) {
+          if (metrics[metric]) {
+            metrics[metric].alerts = metrics[metric].alerts || {};
+            metrics[metric].alerts[alertTypeId] = alertInstance;
+          }
+        }
+      }
+    }
+  }
+
   const metricsToShow = [
     metrics.node_jvm_mem,
     metrics.node_mem,
@@ -40,6 +57,7 @@ export const Node = ({
     metrics.node_latency,
     metrics.node_segment_count,
   ];
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -52,9 +70,14 @@ export const Node = ({
           </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
-          <NodeDetailStatus stats={nodeSummary} />
+          <NodeDetailStatus
+            stats={nodeSummary}
+            alerts={alerts}
+            alertsStateFilter={(state) => state.nodeId === nodeId}
+          />
         </EuiPanel>
         <EuiSpacer size="m" />
+        <AlertsCallout alerts={alerts} stateFilter={(state) => state.nodeId === nodeId} />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
@@ -71,7 +94,7 @@ export const Node = ({
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPanel>
-          <ShardAllocation scope={scope} kbnUrl={kbnUrl} />
+          <ShardAllocation scope={scope} />
         </EuiPanel>
       </EuiPageBody>
     </EuiPage>

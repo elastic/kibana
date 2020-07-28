@@ -14,7 +14,7 @@ export function encode(data: any | null, type = 'text/plain') {
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = err => reject(err);
+      reader.onerror = (err) => reject(err);
       reader.readAsDataURL(data);
     });
   }

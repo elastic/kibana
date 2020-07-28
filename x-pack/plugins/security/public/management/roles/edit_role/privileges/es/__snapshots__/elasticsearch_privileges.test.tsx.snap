@@ -13,7 +13,7 @@ exports[`it renders without crashing 1`] = `
           id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
           values={Object {}}
         />
-        <ForwardRef
+        <EuiLink
           className="editRole__learnMore"
           href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#privileges-list-cluster"
           target="_blank"
@@ -23,7 +23,7 @@ exports[`it renders without crashing 1`] = `
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
-        </ForwardRef>
+        </EuiLink>
       </p>
     }
     title={
@@ -76,7 +76,7 @@ exports[`it renders without crashing 1`] = `
           id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
           values={Object {}}
         />
-        <ForwardRef
+        <EuiLink
           className="editRole__learnMore"
           href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-privileges.html#_run_as_privilege"
           target="_blank"
@@ -86,7 +86,7 @@ exports[`it renders without crashing 1`] = `
             id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
-        </ForwardRef>
+        </EuiLink>
       </p>
     }
     title={

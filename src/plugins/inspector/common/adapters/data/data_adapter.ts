@@ -35,7 +35,7 @@ class DataAdapter extends EventEmitter {
       return Promise.resolve({ data: null, options: {} });
     }
     const options = this.tabularOptions;
-    return Promise.resolve(this.tabular()).then(data => ({ data, options }));
+    return Promise.resolve(this.tabular()).then((data) => ({ data, options }));
   }
 }
 

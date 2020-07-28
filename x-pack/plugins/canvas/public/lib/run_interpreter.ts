@@ -6,32 +6,7 @@
 
 import { fromExpression, getType } from '@kbn/interpreter/common';
 import { ExpressionValue, ExpressionAstExpression } from 'src/plugins/expressions/public';
-import { notifyService } from '../services';
-
-import { CanvasStartDeps, CanvasSetupDeps } from '../plugin';
-
-let expressionsStarting: Promise<CanvasStartDeps['expressions']> | undefined;
-
-export const initInterpreter = function(
-  expressionsStart: CanvasStartDeps['expressions'],
-  expressionsSetup: CanvasSetupDeps['expressions']
-) {
-  expressionsStarting = startExpressions(expressionsStart, expressionsSetup);
-
-  return expressionsStarting;
-};
-
-async function startExpressions(
-  expressionsStart: CanvasStartDeps['expressions'],
-  expressionsSetup: CanvasSetupDeps['expressions']
-) {
-  await expressionsSetup.__LEGACY.loadLegacyServerFunctionWrappers();
-  return expressionsStart;
-}
-
-export const resetInterpreter = function() {
-  expressionsStarting = undefined;
-};
+import { notifyService, expressionsService } from '../services';
 
 interface Options {
   castToRender?: boolean;
@@ -40,13 +15,12 @@ interface Options {
 /**
  * Meant to be a replacement for plugins/interpreter/interpretAST
  */
-export async function interpretAst(ast: ExpressionAstExpression): Promise<ExpressionValue> {
-  if (!expressionsStarting) {
-    throw new Error('Interpreter has not been initialized');
-  }
-
-  const expressions = await expressionsStarting;
-  return await expressions.execute(ast).getData();
+export async function interpretAst(
+  ast: ExpressionAstExpression,
+  variables: Record<string, any>
+): Promise<ExpressionValue> {
+  const context = { variables };
+  return await expressionsService.getService().execute(ast, null, context).getData();
 }
 
 /**
@@ -54,6 +28,7 @@ export async function interpretAst(ast: ExpressionAstExpression): Promise<Expres
  *
  * @param {object} ast - Executable AST
  * @param {any} input - Initial input for AST execution
+ * @param {object} variables - Variables to pass in to the intrepreter context
  * @param {object} options
  * @param {boolean} options.castToRender - try to cast to a type: render object?
  * @returns {promise}
@@ -61,23 +36,20 @@ export async function interpretAst(ast: ExpressionAstExpression): Promise<Expres
 export async function runInterpreter(
   ast: ExpressionAstExpression,
   input: ExpressionValue,
+  variables: Record<string, any>,
   options: Options = {}
 ): Promise<ExpressionValue> {
-  if (!expressionsStarting) {
-    throw new Error('Interpreter has not been initialized');
-  }
-
-  const expressions = await expressionsStarting;
+  const context = { variables };
 
   try {
-    const renderable = await expressions.execute(ast, input).getData();
+    const renderable = await expressionsService.getService().execute(ast, input, context).getData();
 
     if (getType(renderable) === 'render') {
       return renderable;
     }
 
     if (options.castToRender) {
-      return runInterpreter(fromExpression('render'), renderable, {
+      return runInterpreter(fromExpression('render'), renderable, variables, {
         castToRender: false,
       });
     }

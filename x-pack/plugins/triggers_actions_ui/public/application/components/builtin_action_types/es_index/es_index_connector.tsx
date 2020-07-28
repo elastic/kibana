@@ -13,6 +13,7 @@ import {
   EuiSelect,
   EuiTitle,
   EuiIconTip,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +29,7 @@ import {
 
 const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EsIndexActionConnector
->> = ({ action, editActionConfig, errors, http }) => {
+>> = ({ action, editActionConfig, errors, http, readOnly, docLinks }) => {
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null
@@ -77,10 +78,22 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         isInvalid={errors.index.length > 0 && index !== undefined}
         error={errors.index}
         helpText={
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.howToBroadenSearchQueryDescription"
-            defaultMessage="Use * to broaden your query."
-          />
+          <>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.howToBroadenSearchQueryDescription"
+              defaultMessage="Use * to broaden your query."
+            />
+            <EuiSpacer size="s" />
+            <EuiLink
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html`}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.configureIndexHelpLabel"
+                defaultMessage="Configuring index connector."
+              />
+            </EuiLink>
+          </>
         }
       >
         <EuiComboBox
@@ -102,9 +115,10 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 ]
               : []
           }
+          isDisabled={readOnly}
           onChange={async (selected: EuiComboBoxOptionOption[]) => {
             editActionConfig('index', selected.length > 0 ? selected[0].value : '');
-            const indices = selected.map(s => s.value as string);
+            const indices = selected.map((s) => s.value as string);
 
             // reset time field and expression fields if indices are deleted
             if (indices.length === 0) {
@@ -116,7 +130,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 
             setTimeFieldOptions([firstFieldOption, ...timeFields]);
           }}
-          onSearchChange={async search => {
+          onSearchChange={async (search) => {
             setIsIndiciesLoading(true);
             setIndexOptions(await getIndexOptions(http!, search, indexPatterns));
             setIsIndiciesLoading(false);
@@ -132,7 +146,8 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
       <EuiSwitch
         data-test-subj="indexRefreshCheckbox"
         checked={refresh || false}
-        onChange={e => {
+        disabled={readOnly}
+        onChange={(e) => {
           editActionConfig('refresh', e.target.checked);
         }}
         label={
@@ -159,6 +174,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
       <EuiSwitch
         data-test-subj="hasTimeFieldCheckbox"
         checked={hasTimeFieldCheckbox || false}
+        disabled={readOnly}
         onChange={() => {
           setTimeFieldCheckboxState(!hasTimeFieldCheckbox);
           // if changing from checked to not checked (hasTimeField === true),
@@ -186,9 +202,9 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           </>
         }
       />
-      <EuiSpacer size="m" />
       {hasTimeFieldCheckbox ? (
         <>
+          <EuiSpacer size="m" />
           <EuiFormRow
             id="executionTimeField"
             fullWidth
@@ -205,7 +221,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               name="executionTimeField"
               data-test-subj="executionTimeFieldSelect"
               value={executionTimeField ?? ''}
-              onChange={e => {
+              onChange={(e) => {
                 editActionConfig('executionTimeField', nullableString(e.target.value));
               }}
               onBlur={() => {

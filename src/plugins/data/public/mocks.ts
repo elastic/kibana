@@ -19,13 +19,19 @@
 
 import { Plugin, IndexPatternsContract } from '.';
 import { fieldFormatsServiceMock } from './field_formats/mocks';
-import { searchSetupMock, searchStartMock } from './search/mocks';
+import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
+import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
-const autocompleteMock: any = {
+const automcompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
+  addQuerySuggestionProvider: jest.fn(),
+  getQuerySuggestions: jest.fn(),
+};
+
+const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
   getValueSuggestions: jest.fn(),
   getQuerySuggestions: jest.fn(),
   hasQuerySuggestions: jest.fn(),
@@ -34,8 +40,8 @@ const autocompleteMock: any = {
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
   return {
-    autocomplete: autocompleteMock,
-    search: searchSetupMock,
+    autocomplete: automcompleteSetupMock,
+    search: searchServiceMock.createSetupContract(),
     fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
   };
@@ -48,8 +54,8 @@ const createStartContract = (): Start => {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
       createFiltersFromRangeSelectAction: jest.fn(),
     },
-    autocomplete: autocompleteMock,
-    search: searchStartMock,
+    autocomplete: autocompleteStartMock,
+    search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     ui: {

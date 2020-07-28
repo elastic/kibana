@@ -101,7 +101,7 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
 
     async clearToastNotifications() {
       const toasts = await testSubjects.findAll('toastCloseButton');
-      await Promise.all(toasts.map(async t => await t.click()));
+      await Promise.all(toasts.map(async (t) => await t.click()));
     }
 
     async getQueueReportError() {

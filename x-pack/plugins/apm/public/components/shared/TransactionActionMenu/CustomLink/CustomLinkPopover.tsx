@@ -8,7 +8,7 @@ import {
   EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -24,17 +24,17 @@ const ScrollableContainer = styled.div`
   overflow: scroll;
 `;
 
-export const CustomLinkPopover = ({
+export function CustomLinkPopover({
   customLinks,
   onCreateCustomLinkClick,
   onClose,
-  transaction
+  transaction,
 }: {
   customLinks: CustomLink[];
   onCreateCustomLinkClick: () => void;
   onClose: () => void;
   transaction: Transaction;
-}) => {
+}) {
   return (
     <>
       <EuiPopoverTitle>
@@ -51,7 +51,7 @@ export const CustomLinkPopover = ({
               {i18n.translate(
                 'xpack.apm.transactionActionMenu.customLink.popover.title',
                 {
-                  defaultMessage: 'CUSTOM LINKS'
+                  defaultMessage: 'CUSTOM LINKS',
                 }
               )}
             </EuiButtonEmpty>
@@ -71,4 +71,4 @@ export const CustomLinkPopover = ({
       </ScrollableContainer>
     </>
   );
-};
+}

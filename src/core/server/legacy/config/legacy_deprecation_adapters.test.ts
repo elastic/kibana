@@ -27,7 +27,7 @@ jest.spyOn(configDeprecationFactory, 'unusedFromRoot');
 jest.spyOn(configDeprecationFactory, 'renameFromRoot');
 
 const executeHandlers = (handlers: ConfigDeprecation[]) => {
-  handlers.forEach(handler => {
+  handlers.forEach((handler) => {
     handler({}, '', () => null);
   });
 };
@@ -99,7 +99,7 @@ describe('convertLegacyDeprecationProvider', () => {
 
     const migrated = applyDeprecations(
       rawConfig,
-      handlers.map(handler => ({ deprecation: handler, path: '' }))
+      handlers.map((handler) => ({ deprecation: handler, path: '' }))
     );
     expect(migrated).toEqual({ new: 'oldvalue', goodValue: 'good' });
   });

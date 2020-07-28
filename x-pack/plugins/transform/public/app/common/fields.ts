@@ -18,13 +18,13 @@ export interface EsDoc extends Dictionary<any> {
 export function getFlattenedFields(obj: EsDocSource): EsFieldName[] {
   const flatDocFields: EsFieldName[] = [];
   const newDocFields = Object.keys(obj);
-  newDocFields.forEach(f => {
+  newDocFields.forEach((f) => {
     const fieldValue = obj[f];
     if (typeof fieldValue !== 'object' || fieldValue === null || Array.isArray(fieldValue)) {
       flatDocFields.push(f);
     } else {
       const innerFields = getFlattenedFields(fieldValue);
-      const flattenedFields = innerFields.map(d => `${f}.${d}`);
+      const flattenedFields = innerFields.map((d) => `${f}.${d}`);
       flatDocFields.push(...flattenedFields);
     }
   });
@@ -48,9 +48,9 @@ export const getDefaultSelectableFields = (docs: EsDocSource[]): EsFieldName[] =
 
   const newDocFields = getFlattenedFields(docs[0]);
   newDocFields.sort();
-  return newDocFields.filter(k => {
+  return newDocFields.filter((k) => {
     let value = false;
-    docs.forEach(row => {
+    docs.forEach((row) => {
       const source = row;
       if (source[k] !== null) {
         value = true;

@@ -4,18 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId }) {
-  return styles.map(style => {
-    return (
-      <Fragment key={style.getStyleName()}>
-        {style.renderLegendDetailRow({
-          isLinesOnly,
-          isPointsOnly,
-          symbolId,
-        })}
-      </Fragment>
+  const legendRows = [];
+
+  for (let i = 0; i < styles.length; i++) {
+    const row = styles[i].renderLegendDetailRow({
+      isLinesOnly,
+      isPointsOnly,
+      symbolId,
+    });
+
+    legendRows.push(
+      <div key={i} className="vectorStyleLegendSpacer">
+        {row}
+      </div>
     );
-  });
+  }
+
+  return legendRows;
 }

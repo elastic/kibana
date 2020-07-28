@@ -5,8 +5,8 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('Reporting', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Reporting', function () {
     loadTestFile(require.resolve('./screenshots'));
     loadTestFile(require.resolve('./download_csv'));
   });

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ScopedClusterClient } from '../../../../src/core/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
+import { Logger, LegacyScopedClusterClient } from '../../../../src/core/server';
+import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { getService as getServiceIndexThreshold } from './alert_types/index_threshold';
 
 export { Logger, IRouter } from '../../../../src/core/server';
@@ -14,11 +14,13 @@ export {
   PluginSetupContract as AlertingSetup,
   AlertType,
   AlertExecutorOptions,
-} from '../../alerting/server';
+} from '../../alerts/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
 // this plugin's dependendencies
 export interface AlertingBuiltinsDeps {
-  alerting: AlertingSetup;
+  alerts: AlertingSetup;
+  features: FeaturesPluginSetup;
 }
 
 // external service exposed through plugin setup/start
@@ -31,4 +33,4 @@ export interface Service extends IService {
   logger: Logger;
 }
 
-export type CallCluster = ScopedClusterClient['callAsCurrentUser'];
+export type CallCluster = LegacyScopedClusterClient['callAsCurrentUser'];

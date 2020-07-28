@@ -42,6 +42,8 @@ export type PipelineFormTestSubjects =
   | 'submitButton'
   | 'pageTitle'
   | 'savePipelineError'
+  | 'savePipelineError.showErrorsButton'
+  | 'savePipelineError.hideErrorsButton'
   | 'pipelineForm'
   | 'versionToggle'
   | 'versionField'

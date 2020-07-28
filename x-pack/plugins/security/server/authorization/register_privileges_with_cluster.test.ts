@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, Logger } from 'kibana/server';
+import { ILegacyClusterClient, Logger } from 'kibana/server';
 import { RawKibanaPrivileges } from '../../common/model';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 
-import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (
@@ -32,7 +32,7 @@ const registerPrivilegesWithClusterTest = (
   }
 ) => {
   const createExpectUpdatedPrivileges = (
-    mockClusterClient: jest.Mocked<IClusterClient>,
+    mockClusterClient: jest.Mocked<ILegacyClusterClient>,
     mockLogger: jest.Mocked<Logger>,
     error: Error
   ) => {
@@ -49,7 +49,7 @@ const registerPrivilegesWithClusterTest = (
       });
       for (const deletedPrivilege of deletedPrivileges) {
         expect(mockLogger.debug).toHaveBeenCalledWith(
-          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticearch for ${application}`
+          `Deleting Kibana Privilege ${deletedPrivilege} from Elasticsearch for ${application}`
         );
         expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith(
           'shield.deletePrivilege',
@@ -67,7 +67,7 @@ const registerPrivilegesWithClusterTest = (
   };
 
   const createExpectDidntUpdatePrivileges = (
-    mockClusterClient: jest.Mocked<IClusterClient>,
+    mockClusterClient: jest.Mocked<ILegacyClusterClient>,
     mockLogger: Logger,
     error: Error
   ) => {
@@ -82,7 +82,7 @@ const registerPrivilegesWithClusterTest = (
         `Registering Kibana Privileges with Elasticsearch for ${application}`
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        `Kibana Privileges already registered with Elasticearch for ${application}`
+        `Kibana Privileges already registered with Elasticsearch for ${application}`
       );
     };
   };
@@ -100,8 +100,8 @@ const registerPrivilegesWithClusterTest = (
   };
 
   test(description, async () => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    mockClusterClient.callAsInternalUser.mockImplementation(async api => {
+    const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+    mockClusterClient.callAsInternalUser.mockImplementation(async (api) => {
       switch (api) {
         case 'shield.getPrivilege': {
           if (throwErrorWhenGettingPrivileges) {
@@ -130,7 +130,7 @@ const registerPrivilegesWithClusterTest = (
         }
       }
     });
-    const mockLogger = loggingServiceMock.create().get() as jest.Mocked<Logger>;
+    const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
     let error;
     try {

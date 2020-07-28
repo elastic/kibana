@@ -20,8 +20,8 @@
 import { uiModules } from '../../modules';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 
-const createService = function(type) {
-  return function($window) {
+const createService = function (type) {
+  return function ($window) {
     return new Storage($window[type]);
   };
 };

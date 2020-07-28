@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 import { useFormContext } from '../form_context';
 
@@ -83,36 +83,42 @@ export const UseArray = ({
 
   const [items, setItems] = useState<ArrayItem[]>(initialState);
 
-  const updatePaths = (_rows: ArrayItem[]) =>
-    _rows.map(
-      (row, index) =>
-        ({
-          ...row,
-          path: `${path}[${index}]`,
-        } as ArrayItem)
-    );
+  const updatePaths = useCallback(
+    (_rows: ArrayItem[]) => {
+      return _rows.map(
+        (row, index) =>
+          ({
+            ...row,
+            path: `${path}[${index}]`,
+          } as ArrayItem)
+      );
+    },
+    [path]
+  );
 
   const addItem = () => {
-    setItems(previousItems => {
+    setItems((previousItems) => {
       const itemIndex = previousItems.length;
       return [...previousItems, getNewItemAtIndex(itemIndex)];
     });
   };
 
   const removeItem = (id: number) => {
-    setItems(previousItems => {
-      const updatedItems = previousItems.filter(item => item.id !== id);
+    setItems((previousItems) => {
+      const updatedItems = previousItems.filter((item) => item.id !== id);
       return updatePaths(updatedItems);
     });
   };
 
   useEffect(() => {
     if (didMountRef.current) {
-      setItems(updatePaths(items));
+      setItems((prev) => {
+        return updatePaths(prev);
+      });
     } else {
       didMountRef.current = true;
     }
-  }, [path]);
+  }, [path, updatePaths]);
 
   return children({ items, addItem, removeItem });
 };

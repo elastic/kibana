@@ -17,14 +17,5 @@
  * under the License.
  */
 
-export const mockReaddir = jest.fn();
-export const mockReadFile = jest.fn();
-export const mockStat = jest.fn();
-jest.mock('fs', () => ({
-  readdir: mockReaddir,
-  readFile: mockReadFile,
-  stat: mockStat,
-}));
-
 export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 jest.mock('../../../../../package.json', () => mockPackage);

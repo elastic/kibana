@@ -52,10 +52,10 @@ export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true)
   }
 };
 
-export const isGteInterval = interval => GTE_INTERVAL_RE.test(interval);
-export const isAutoInterval = interval => !interval || interval === AUTO_INTERVAL;
+export const isGteInterval = (interval) => GTE_INTERVAL_RE.test(interval);
+export const isAutoInterval = (interval) => !interval || interval === AUTO_INTERVAL;
 
-export const validateReInterval = intervalValue => {
+export const validateReInterval = (intervalValue) => {
   const validationResult = {};
 
   try {

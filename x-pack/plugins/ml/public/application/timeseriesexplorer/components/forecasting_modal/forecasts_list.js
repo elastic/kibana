@@ -25,7 +25,7 @@ function getColumns(viewForecast) {
         defaultMessage: 'Created',
       }),
       dataType: 'date',
-      render: date => formatHumanReadableDateTimeSeconds(date),
+      render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true,
     },
     {
@@ -34,7 +34,7 @@ function getColumns(viewForecast) {
         defaultMessage: 'From',
       }),
       dataType: 'date',
-      render: date => formatHumanReadableDateTimeSeconds(date),
+      render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true,
     },
     {
@@ -43,7 +43,7 @@ function getColumns(viewForecast) {
         defaultMessage: 'To',
       }),
       dataType: 'date',
-      render: date => formatHumanReadableDateTimeSeconds(date),
+      render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true,
     },
     {
@@ -51,7 +51,7 @@ function getColumns(viewForecast) {
         defaultMessage: 'View',
       }),
       width: '60px',
-      render: forecast => {
+      render: (forecast) => {
         const viewForecastAriaLabel = i18n.translate(
           'xpack.ml.timeSeriesExplorer.forecastsList.viewForecastAriaLabel',
           {

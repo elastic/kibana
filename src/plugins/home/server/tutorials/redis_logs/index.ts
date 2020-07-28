@@ -37,6 +37,7 @@ export function redisLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.redisLogs.nameTitle', {
       defaultMessage: 'Redis logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.redisLogs.shortDescription', {
       defaultMessage: 'Collect and parse error and slow logs created by Redis.',

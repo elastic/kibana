@@ -39,13 +39,13 @@ export function ContextChartMask(contextGroup, data, drawBounds, swimlaneHeight)
   this._y = null;
 }
 
-ContextChartMask.prototype.style = function(prop, val) {
+ContextChartMask.prototype.style = function (prop, val) {
   this.leftGroup.style(prop, val);
   this.rightGroup.style(prop, val);
   return this;
 };
 
-ContextChartMask.prototype.x = function(f) {
+ContextChartMask.prototype.x = function (f) {
   if (f == null) {
     return this._x;
   }
@@ -53,7 +53,7 @@ ContextChartMask.prototype.x = function(f) {
   return this;
 };
 
-ContextChartMask.prototype.y = function(f) {
+ContextChartMask.prototype.y = function (f) {
   if (f == null) {
     return this._y;
   }
@@ -61,7 +61,7 @@ ContextChartMask.prototype.y = function(f) {
   return this;
 };
 
-ContextChartMask.prototype.redraw = function() {
+ContextChartMask.prototype.redraw = function () {
   const yDomain = this._y.domain();
   const minY = yDomain[0];
   const maxY = yDomain[1];
@@ -71,11 +71,11 @@ ContextChartMask.prototype.redraw = function() {
 
   const that = this;
 
-  const leftData = this.data.filter(function(d) {
+  const leftData = this.data.filter(function (d) {
     return d.date < that.from;
   });
 
-  const rightData = this.data.filter(function(d) {
+  const rightData = this.data.filter(function (d) {
     return d.date > that.to;
   });
 
@@ -83,29 +83,29 @@ ContextChartMask.prototype.redraw = function() {
   if (this.drawBounds === true) {
     const boundedArea = d3.svg
       .area()
-      .x(function(d) {
+      .x(function (d) {
         return that._x(d.date) || 1;
       })
-      .y0(function(d) {
+      .y0(function (d) {
         return that._y(Math.min(maxY, Math.max(d.lower, minY)));
       })
-      .y1(function(d) {
+      .y1(function (d) {
         return that._y(Math.max(minY, Math.min(d.upper, maxY)));
       })
-      .defined(d => d.lower !== null && d.upper !== null);
+      .defined((d) => d.lower !== null && d.upper !== null);
     this.leftGroup.select('.left.area.bounds').attr('d', boundedArea(leftData));
     this.rightGroup.select('.right.area.bounds').attr('d', boundedArea(rightData));
   }
 
   const valuesLine = d3.svg
     .line()
-    .x(function(d) {
+    .x(function (d) {
       return that._x(d.date);
     })
-    .y(function(d) {
+    .y(function (d) {
       return that._y(d.value);
     })
-    .defined(d => d.value !== null);
+    .defined((d) => d.value !== null);
 
   this.leftGroup.select('.left.values-line').attr('d', valuesLine(leftData));
   drawLineChartDots(leftData, this.leftGroup, valuesLine, 1);
@@ -168,7 +168,7 @@ ContextChartMask.prototype.redraw = function() {
   return this;
 };
 
-ContextChartMask.prototype.reveal = function(extent) {
+ContextChartMask.prototype.reveal = function (extent) {
   this.from = extent[0];
   this.to = extent[1];
   this.redraw();

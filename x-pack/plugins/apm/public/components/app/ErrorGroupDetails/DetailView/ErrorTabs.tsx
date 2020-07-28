@@ -16,8 +16,8 @@ export interface ErrorTab {
 export const logStacktraceTab: ErrorTab = {
   key: 'log_stacktrace',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.logStacktraceLabel', {
-    defaultMessage: 'Log stack trace'
-  })
+    defaultMessage: 'Log stack trace',
+  }),
 };
 
 export const exceptionStacktraceTab: ErrorTab = {
@@ -25,16 +25,16 @@ export const exceptionStacktraceTab: ErrorTab = {
   label: i18n.translate(
     'xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel',
     {
-      defaultMessage: 'Exception stack trace'
+      defaultMessage: 'Exception stack trace',
     }
-  )
+  ),
 };
 
 export const metadataTab: ErrorTab = {
   key: 'metadata',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
-    defaultMessage: 'Metadata'
-  })
+    defaultMessage: 'Metadata',
+  }),
 };
 
 export function getTabs(error: APMError) {
@@ -42,6 +42,6 @@ export function getTabs(error: APMError) {
   return [
     ...(hasLogStacktrace ? [logStacktraceTab] : []),
     exceptionStacktraceTab,
-    metadataTab
+    metadataTab,
   ];
 }

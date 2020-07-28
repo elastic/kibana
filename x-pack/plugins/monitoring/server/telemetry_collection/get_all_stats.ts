@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, merge } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get, merge } from 'lodash';
 
 import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
 import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
@@ -31,7 +32,7 @@ export const getAllStats: StatsGetter<CustomContext> = async (
   { callCluster, start, end },
   { maxBucketSize }
 ) => {
-  const clusterUuids = clustersDetails.map(clusterDetails => clusterDetails.clusterUuid);
+  const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
     getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
@@ -65,7 +66,7 @@ export function handleAllStats(
     beats: PromiseReturnType<typeof getBeatsStats>;
   }
 ) {
-  return clusters.map(cluster => {
+  return clusters.map((cluster) => {
     const stats = {
       ...cluster,
       stack_stats: {

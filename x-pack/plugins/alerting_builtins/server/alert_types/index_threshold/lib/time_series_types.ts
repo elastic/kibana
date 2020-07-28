@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { parseDuration } from '../../../../../alerting/server';
+import { parseDuration } from '../../../../../alerts/server';
 import { MAX_INTERVALS } from '../index';
 import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import {

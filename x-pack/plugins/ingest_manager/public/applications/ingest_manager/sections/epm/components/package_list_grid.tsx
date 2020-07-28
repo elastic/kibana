@@ -20,22 +20,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Loading } from '../../../components';
 import { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../hooks';
-import { BadgeProps, PackageCard } from './package_card';
+import { PackageCard } from './package_card';
 
-type ListProps = {
+interface ListProps {
   isLoading?: boolean;
   controls?: ReactNode;
   title: string;
   list: PackageList;
-} & BadgeProps;
+}
 
-export function PackageListGrid({
-  isLoading,
-  controls,
-  title,
-  list,
-  showInstalledBadge,
-}: ListProps) {
+export function PackageListGrid({ isLoading, controls, title, list }: ListProps) {
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
   const [query, setQuery] = useState<Query | null>(initialQuery);
@@ -65,13 +59,13 @@ export function PackageListGrid({
     gridContent = <Loading />;
   } else {
     const filteredList = searchTerm
-      ? list.filter(item =>
+      ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as PackageList)
-            .map(match => match[searchIdField])
+            .map((match) => match[searchIdField])
             .includes(item[searchIdField])
         )
       : list;
-    gridContent = <GridColumn list={filteredList} showInstalledBadge={showInstalledBadge} />;
+    gridContent = <GridColumn list={filteredList} />;
   }
 
   return (
@@ -108,22 +102,22 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiFlexGroup>
-        <EuiFlexItem grow={2}>{controls}</EuiFlexItem>
+        <EuiFlexItem grow={4}>{controls}</EuiFlexItem>
         <EuiFlexItem grow={1} />
       </EuiFlexGroup>
     </Fragment>
   );
 }
 
-type GridColumnProps = {
+interface GridColumnProps {
   list: PackageList;
-} & BadgeProps;
+}
 
 function GridColumn({ list }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
-        list.map(item => (
+        list.map((item) => (
           <EuiFlexItem key={`${item.name}-${item.version}`}>
             <PackageCard {...item} />
           </EuiFlexItem>

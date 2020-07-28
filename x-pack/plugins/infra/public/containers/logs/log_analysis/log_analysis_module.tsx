@@ -27,7 +27,7 @@ export const useLogAnalysisModule = <JobType extends string>({
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
         return await moduleDescriptor.getJobSummary(spaceId, sourceId);
       },
-      onResolve: jobResponse => {
+      onResolve: (jobResponse) => {
         dispatchModuleStatus({
           type: 'fetchedJobStatuses',
           payload: jobResponse,
@@ -111,14 +111,6 @@ export const useLogAnalysisModule = <JobType extends string>({
     [cleanUpModule, dispatchModuleStatus, setUpModule]
   );
 
-  const viewSetupForReconfiguration = useCallback(() => {
-    dispatchModuleStatus({ type: 'requestedJobConfigurationUpdate' });
-  }, [dispatchModuleStatus]);
-
-  const viewSetupForUpdate = useCallback(() => {
-    dispatchModuleStatus({ type: 'requestedJobDefinitionUpdate' });
-  }, [dispatchModuleStatus]);
-
   const viewResults = useCallback(() => {
     dispatchModuleStatus({ type: 'viewedResults' });
   }, [dispatchModuleStatus]);
@@ -143,7 +135,5 @@ export const useLogAnalysisModule = <JobType extends string>({
     setupStatus: moduleStatus.setupStatus,
     sourceConfiguration,
     viewResults,
-    viewSetupForReconfiguration,
-    viewSetupForUpdate,
   };
 };

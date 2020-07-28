@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { EsArchiver } from 'src/es_archiver';
+import { EsArchiver } from '@kbn/es-archiver';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
@@ -125,7 +125,7 @@ export function copyToSpaceTestSuiteFactory(
       b1.key < b2.key ? -1 : 1;
     const { buckets } = await collectSpaceContents();
 
-    const spaceBucket = buckets.find(b => b.key === spaceId);
+    const spaceBucket = buckets.find((b) => b.key === spaceId);
 
     if (!spaceBucket) {
       expect(Object.keys(expectedCounts).length).to.eql(0);

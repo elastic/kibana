@@ -14,7 +14,7 @@ function OfflineCell() {
   return <div className="monTableCell__number monTableCell__offline">N/A</div>;
 }
 
-const getSlopeArrow = slope => {
+const getSlopeArrow = (slope) => {
   if (slope || slope === 0) {
     return slope > 0 ? 'up' : 'down';
   }

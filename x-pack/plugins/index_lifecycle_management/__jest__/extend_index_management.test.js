@@ -23,7 +23,7 @@ import { init as initUiMetric } from '../public/application/services/ui_metric';
 // We need to init the http with a mock for any tests that depend upon the http service.
 // For example, add_lifecycle_confirm_modal makes an API request in its componentDidMount
 // lifecycle method. If we don't mock this, CI will fail with "Call retries were exceeded".
-initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
+initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
 initUiMetric({ reportUiStats: () => {} });
 
 jest.mock('../../../plugins/index_management/public', async () => {
@@ -115,6 +115,10 @@ const indexWithLifecycleError = {
 
 moment.tz.setDefault('utc');
 
+const getUrlForApp = (appId, options) => {
+  return appId + '/' + (options ? options.path : '');
+};
+
 describe('extend index management', () => {
   describe('retry lifecycle action extension', () => {
     test('should return null when no indices have index lifecycle policy', () => {
@@ -171,13 +175,17 @@ describe('extend index management', () => {
 
   describe('add lifecycle policy action extension', () => {
     test('should return null when index has index lifecycle policy', () => {
-      const extension = addLifecyclePolicyActionExtension({ indices: [indexWithLifecyclePolicy] });
+      const extension = addLifecyclePolicyActionExtension(
+        { indices: [indexWithLifecyclePolicy] },
+        getUrlForApp
+      );
       expect(extension).toBeNull();
     });
 
     test('should return null when more than one index is passed', () => {
       const extension = addLifecyclePolicyActionExtension({
         indices: [indexWithoutLifecyclePolicy, indexWithoutLifecyclePolicy],
+        getUrlForApp,
       });
       expect(extension).toBeNull();
     });
@@ -185,6 +193,7 @@ describe('extend index management', () => {
     test('should return extension when one index is passed and it does not have lifecycle policy', () => {
       const extension = addLifecyclePolicyActionExtension({
         indices: [indexWithoutLifecyclePolicy],
+        getUrlForApp,
       });
       expect(extension.renderConfirmModal).toBeDefined;
       const component = extension.renderConfirmModal(jest.fn());
@@ -220,20 +229,20 @@ describe('extend index management', () => {
 
   describe('ilm summary extension', () => {
     test('should render null when index has no index lifecycle policy', () => {
-      const extension = ilmSummaryExtension(indexWithoutLifecyclePolicy);
+      const extension = ilmSummaryExtension(indexWithoutLifecyclePolicy, getUrlForApp);
       const rendered = mountWithIntl(extension);
       expect(rendered.isEmptyRender()).toBeTruthy();
     });
 
     test('should return extension when index has lifecycle policy', () => {
-      const extension = ilmSummaryExtension(indexWithLifecyclePolicy);
+      const extension = ilmSummaryExtension(indexWithLifecyclePolicy, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
       expect(rendered).toMatchSnapshot();
     });
 
     test('should return extension when index has lifecycle error', () => {
-      const extension = ilmSummaryExtension(indexWithLifecycleError);
+      const extension = ilmSummaryExtension(indexWithLifecycleError, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
       expect(rendered).toMatchSnapshot();

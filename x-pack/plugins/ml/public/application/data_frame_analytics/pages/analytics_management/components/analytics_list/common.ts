@@ -9,7 +9,11 @@ import { Query, Ast } from '@elastic/eui';
 import { DATA_FRAME_TASK_STATE } from './data_frame_task_state';
 export { DATA_FRAME_TASK_STATE };
 
-import { DataFrameAnalyticsId, DataFrameAnalyticsConfig } from '../../../../common';
+import {
+  DataFrameAnalyticsId,
+  DataFrameAnalyticsConfig,
+  ANALYSIS_CONFIG_TYPE,
+} from '../../../../common';
 
 export enum DATA_FRAME_MODE {
   BATCH = 'batch',
@@ -98,10 +102,15 @@ export function getDataFrameAnalyticsProgressPhase(
 }
 
 export interface DataFrameAnalyticsListRow {
-  id: DataFrameAnalyticsId;
   checkpointing: object;
   config: DataFrameAnalyticsConfig;
+  id: DataFrameAnalyticsId;
+  job_type:
+    | ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+    | ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
+    | ANALYSIS_CONFIG_TYPE.REGRESSION;
   mode: string;
+  state: DataFrameAnalyticsStats['state'];
   stats: DataFrameAnalyticsStats;
 }
 
@@ -122,5 +131,5 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
 }
 
 export function getResultsUrl(jobId: string, analysisType: string) {
-  return `ml#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
+  return `#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
 }

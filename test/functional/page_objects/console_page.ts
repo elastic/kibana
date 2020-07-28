@@ -27,7 +27,7 @@ export function ConsolePageProvider({ getService }: FtrProviderContext) {
   class ConsolePage {
     public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
       const lines = await editor.findAllByClassName('ace_line_group');
-      const linesText = await Promise.all(lines.map(async line => await line.getVisibleText()));
+      const linesText = await Promise.all(lines.map(async (line) => await line.getVisibleText()));
       return linesText.join('\n');
     }
 

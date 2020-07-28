@@ -19,7 +19,7 @@
 
 export function DomLocationProvider($window) {
   return {
-    reload: function(forceFetch) {
+    reload: function (forceFetch) {
       $window.location.reload(forceFetch);
     },
 

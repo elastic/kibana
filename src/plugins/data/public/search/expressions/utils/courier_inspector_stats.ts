@@ -26,12 +26,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
-import { RequestInspectorStats } from './types';
+import { RequestStatistics } from 'src/plugins/inspector/common';
 import { ISearchSource } from '../../search_source';
 
 /** @public */
 export function getRequestInspectorStats(searchSource: ISearchSource) {
-  const stats: RequestInspectorStats = {};
+  const stats: RequestStatistics = {};
   const index = searchSource.getField('index');
 
   if (index) {
@@ -61,11 +61,12 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
 
 /** @public */
 export function getResponseInspectorStats(
-  searchSource: ISearchSource,
-  resp: SearchResponse<unknown>
+  resp: SearchResponse<unknown>,
+  searchSource?: ISearchSource
 ) {
-  const lastRequest = searchSource.history && searchSource.history[searchSource.history.length - 1];
-  const stats: RequestInspectorStats = {};
+  const lastRequest =
+    searchSource?.history && searchSource.history[searchSource.history.length - 1];
+  const stats: RequestStatistics = {};
 
   if (resp && resp.took) {
     stats.queryTime = {

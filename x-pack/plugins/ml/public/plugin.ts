@@ -5,9 +5,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreStart, CoreSetup, AppMountParameters } from 'kibana/public';
+import {
+  Plugin,
+  CoreStart,
+  CoreSetup,
+  AppMountParameters,
+  PluginInitializerContext,
+} from 'kibana/public';
 import { ManagementSetup } from 'src/plugins/management/public';
-import { SharePluginStart } from 'src/plugins/share/public';
+import { SharePluginSetup, SharePluginStart, UrlGeneratorState } from 'src/plugins/share/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -22,12 +28,16 @@ import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 import { registerFeature } from './register_feature';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerEmbeddables } from './embeddables';
-import { UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { registerMlUiActions } from './ui_actions';
+import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
+import { MlUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
+  kibanaLegacy: KibanaLegacyStart;
+  uiActions: UiActionsStart;
 }
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
@@ -38,10 +48,31 @@ export interface MlSetupDependencies {
   home: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
+  kibanaVersion: string;
+  share: SharePluginSetup;
 }
 
+declare module '../../../../src/plugins/share/public' {
+  export interface UrlGeneratorStateMapping {
+    [ML_APP_URL_GENERATOR]: UrlGeneratorState<MlUrlGeneratorState>;
+  }
+}
+
+export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
+
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
-  setup(core: CoreSetup<MlStartDependencies, MlPluginStart>, pluginsSetup: MlSetupDependencies) {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
+  setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies) {
+    const baseUrl = core.http.basePath.prepend('/app/ml');
+
+    pluginsSetup.share.urlGenerators.registerUrlGenerator(
+      new MlUrlGenerator({
+        appBasePath: baseUrl,
+        useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      })
+    );
+
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
@@ -53,12 +84,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        const kibanaVersion = this.initializerContext.env.packageInfo.version;
         const { renderApp } = await import('./application/app');
         return renderApp(
           coreStart,
           {
             data: pluginsStart.data,
             share: pluginsStart.share,
+            kibanaLegacy: pluginsStart.kibanaLegacy,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
@@ -66,7 +99,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
             embeddable: pluginsSetup.embeddable,
-            uiActions: pluginsSetup.uiActions,
+            uiActions: pluginsStart.uiActions,
+            kibanaVersion,
           },
           {
             element: params.element,
@@ -81,10 +115,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     registerFeature(pluginsSetup.home);
 
     initManagementSection(pluginsSetup, core);
-
-    registerMlUiActions(pluginsSetup.uiActions, core);
-
     registerEmbeddables(pluginsSetup.embeddable, core);
+    registerMlUiActions(pluginsSetup.uiActions, core);
 
     return {};
   }
@@ -98,6 +130,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
     return {};
   }
+
   public stop() {}
 }
 

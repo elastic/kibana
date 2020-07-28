@@ -1,15 +1,15 @@
 [[start-stop]]
-== Starting and stopping Kibana
+== Start and stop {kib}
 
-The method for starting and stopping {kib} varies depending on how you installed 
-it. 
+The method for starting and stopping {kib} varies depending on how you installed
+it.
 
 [float]
 [[start-start-targz]]
 === Archive packages (`.tar.gz`)
 
-If you installed {kib} on Linux or Darwin with a `.tar.gz` package, you can 
-start and stop {kib} from the command line.  
+If you installed {kib} on Linux or Darwin with a `.tar.gz` package, you can
+start and stop {kib} from the command line.
 
 [float]
 include::install/targz-running.asciidoc[]
@@ -18,8 +18,8 @@ include::install/targz-running.asciidoc[]
 [[start-stop-zip]]
 === Archive packages (`.zip`)
 
-If you installed {kib} on Windows with a `.zip` package, you can 
-stop and start {kib} from the command line.  
+If you installed {kib} on Windows with a `.zip` package, you can
+stop and start {kib} from the command line.
 
 [float]
 include::install/windows-running.asciidoc[]

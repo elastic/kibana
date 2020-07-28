@@ -8,28 +8,33 @@ import React, { FC } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
-import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 
-export const CreateAnalyticsButton: FC<CreateAnalyticsFormProps> = props => {
-  const { disabled } = props.state;
-  const { openModal } = props.actions;
+interface Props {
+  isDisabled: boolean;
+  setIsSourceIndexModalVisible: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const CreateAnalyticsButton: FC<Props> = ({ isDisabled, setIsSourceIndexModalVisible }) => {
+  const handleClick = () => {
+    setIsSourceIndexModalVisible(true);
+  };
 
   const button = (
     <EuiButton
-      disabled={disabled}
+      disabled={isDisabled}
       fill
-      onClick={openModal}
+      onClick={handleClick}
       iconType="plusInCircle"
       size="s"
       data-test-subj="mlAnalyticsButtonCreate"
     >
       {i18n.translate('xpack.ml.dataframe.analyticsList.createDataFrameAnalyticsButton', {
-        defaultMessage: 'Create analytics job',
+        defaultMessage: 'Create job',
       })}
     </EuiButton>
   );
 
-  if (disabled) {
+  if (isDisabled) {
     return (
       <EuiToolTip
         position="top"

@@ -20,7 +20,7 @@ import React from 'react';
 import { useUiSetting } from '../ui_settings';
 import { CodeEditor as BaseEditor, Props } from './code_editor';
 
-export const CodeEditor: React.FunctionComponent<Props> = props => {
+export const CodeEditor: React.FunctionComponent<Props> = (props) => {
   const darkMode = useUiSetting<boolean>('theme:darkMode');
 
   return <BaseEditor {...props} useDarkTheme={darkMode} />;

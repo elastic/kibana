@@ -7,7 +7,7 @@
 import { ESSearchRequest, ESSearchBody } from '../../typings/elasticsearch';
 import {
   AggregationOptionsByType,
-  AggregationInputMap
+  AggregationInputMap,
 } from '../../typings/elasticsearch/aggregations';
 
 export type Projection = Omit<ESSearchRequest, 'body'> & {
@@ -28,5 +28,6 @@ export enum PROJECTION {
   TRANSACTIONS = 'transactions',
   METRICS = 'metrics',
   ERROR_GROUPS = 'errorGroups',
-  SERVICE_NODES = 'serviceNodes'
+  SERVICE_NODES = 'serviceNodes',
+  RUM_OVERVIEW = 'rumOverview',
 }

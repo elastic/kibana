@@ -40,7 +40,7 @@ export function getOpsStatsCollector(
   metrics$: Observable<OpsMetrics>
 ) {
   let lastMetrics: OpsStatsMetrics | null = null;
-  metrics$.subscribe(_metrics => {
+  metrics$.subscribe((_metrics) => {
     const metrics = cloneDeep(_metrics);
     // Ensure we only include the same data that Metricbeat collection would get
     delete metrics.process.pid;

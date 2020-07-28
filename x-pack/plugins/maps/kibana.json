@@ -14,8 +14,15 @@
     "navigation",
     "visualizations",
     "embeddable",
-    "mapsLegacy"
+    "mapsLegacy",
+    "usageCollection"
   ],
   "ui": true,
-  "server": true
+  "server": true,
+  "extraPublicDirs": ["common/constants"],
+  "requiredBundles": [
+    "kibanaReact",
+    "kibanaUtils",
+    "savedObjects"
+  ]
 }

@@ -28,7 +28,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const es = getService('legacyEs');
@@ -38,12 +38,12 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
 
   describe('index version conflict', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       await browser.setWindowSize(1200, 800);
       await esArchiver.load('discover');
     });
 
-    it('Should be able to surface version conflict notification while creating scripted field', async function() {
+    it('Should be able to surface version conflict notification while creating scripted field', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
@@ -62,13 +62,13 @@ export default function({ getService, getPageObjects }) {
       expect(response.result).to.be('updated');
       await PageObjects.settings.setFieldFormat('url');
       await PageObjects.settings.clickSaveScriptedField();
-      await retry.try(async function() {
+      await retry.try(async function () {
         const message = await PageObjects.common.closeToast();
         expect(message).to.contain('Unable');
       });
     });
 
-    it('Should be able to surface version conflict notification while changing field format', async function() {
+    it('Should be able to surface version conflict notification while changing field format', async function () {
       const fieldName = 'geo.srcdest';
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
@@ -87,7 +87,7 @@ export default function({ getService, getPageObjects }) {
       log.debug(JSON.stringify(response));
       expect(response.result).to.be('updated');
       await PageObjects.settings.controlChangeSave();
-      await retry.try(async function() {
+      await retry.try(async function () {
         //await PageObjects.common.sleep(2000);
         const message = await PageObjects.common.closeToast();
         expect(message).to.contain('Unable');

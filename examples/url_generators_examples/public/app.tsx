@@ -67,7 +67,7 @@ export const Routes: React.FC<{}> = () => {
 
 export const LinksExample: React.FC<{
   appBasePath: string;
-}> = props => {
+}> = (props) => {
   const history = React.useMemo(
     () =>
       createBrowserHistory({

@@ -31,7 +31,7 @@ interface SearchHit {
   };
 }
 
-interface TelemetryResponse {
+export interface TelemetryResponse {
   installed: string[];
   uninstalled: string[];
   last_install_date: moment.Moment | null;

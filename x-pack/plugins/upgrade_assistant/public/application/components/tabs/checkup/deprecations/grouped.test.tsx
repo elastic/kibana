@@ -97,10 +97,7 @@ describe('GroupedDeprecations', () => {
       const wrapper = mountWithIntl(<GroupedDeprecations {...defaultProps} />);
 
       // Open a single deprecation
-      wrapper
-        .find('button.euiAccordion__button')
-        .first()
-        .simulate('click');
+      wrapper.find('button.euiAccordion__button').first().simulate('click');
       expectNumOpen(wrapper, 1);
 
       // Test expand all
@@ -108,10 +105,7 @@ describe('GroupedDeprecations', () => {
       expectNumOpen(wrapper, 2);
 
       // Close a single deprecation
-      wrapper
-        .find('button.euiAccordion__button')
-        .first()
-        .simulate('click');
+      wrapper.find('button.euiAccordion__button').first().simulate('click');
       expectNumOpen(wrapper, 1);
 
       // Test collapse all
@@ -123,7 +117,7 @@ describe('GroupedDeprecations', () => {
   describe('pagination', () => {
     const paginationProps = {
       ...defaultProps,
-      allDeprecations: range(0, 40).map(i => ({
+      allDeprecations: range(0, 40).map((i) => ({
         message: `Message ${i}`,
         level: 'warning',
       })) as DeprecationInfo[],
@@ -216,11 +210,6 @@ describe('DeprecationAccordion', () => {
 
   test('shows indices count badge', () => {
     const wrapper = mountWithIntl(<DeprecationAccordion {...defaultProps} />);
-    expect(
-      wrapper
-        .find(EuiBadge)
-        .find('[data-test-subj="indexCount"]')
-        .text()
-    ).toEqual('2');
+    expect(wrapper.find(EuiBadge).find('[data-test-subj="indexCount"]').text()).toEqual('2');
   });
 });

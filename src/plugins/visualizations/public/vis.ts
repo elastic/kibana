@@ -29,6 +29,7 @@
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
 import { Assign } from '@kbn/utility-types';
+import { i18n } from '@kbn/i18n';
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
 import { VisType } from './vis_types';
@@ -105,7 +106,13 @@ export class Vis {
   private getType(visType: string) {
     const type = getTypes().get(visType);
     if (!type) {
-      throw new Error(`Invalid type "${visType}"`);
+      const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
+        defaultMessage: 'Invalid visualization type "{visType}"',
+        values: {
+          visType,
+        },
+      });
+      throw new Error(errorMessage);
     }
     return type;
   }
@@ -150,7 +157,13 @@ export class Vis {
       const configStates = this.initializeDefaultsFromSchemas(aggs, this.type.schemas.all || []);
       if (!this.data.indexPattern) {
         if (aggs.length) {
-          throw new Error('trying to initialize aggs without index pattern');
+          const errorMessage = i18n.translate(
+            'visualizations.initializeWithoutIndexPatternErrorMessage',
+            {
+              defaultMessage: 'Trying to initialize aggs without index pattern',
+            }
+          );
+          throw new Error(errorMessage);
         }
         return;
       }
@@ -173,7 +186,7 @@ export class Vis {
   }
 
   serialize(): SerializedVis {
-    const aggs = this.data.aggs ? this.data.aggs.aggs.map(agg => agg.toJSON()) : [];
+    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.toJSON()) : [];
     return {
       id: this.id,
       title: this.title,
@@ -211,7 +224,9 @@ export class Vis {
     const newConfigs = [...configStates];
     schemas
       .filter((schema: any) => Array.isArray(schema.defaults) && schema.defaults.length > 0)
-      .filter((schema: any) => !configStates.find(agg => agg.schema && agg.schema === schema.name))
+      .filter(
+        (schema: any) => !configStates.find((agg) => agg.schema && agg.schema === schema.name)
+      )
       .forEach((schema: any) => {
         const defaultSchemaConfig = schema.defaults.slice(0, schema.max);
         defaultSchemaConfig.forEach((d: any) => newConfigs.push(d));

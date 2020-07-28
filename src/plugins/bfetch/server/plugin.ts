@@ -24,6 +24,8 @@ import {
   Plugin,
   Logger,
   KibanaRequest,
+  RouteMethod,
+  RequestHandler,
 } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
@@ -35,6 +37,7 @@ import {
   removeLeadingSlash,
   normalizeError,
 } from '../common';
+import { StreamingRequestHandler } from './types';
 import { createNDJSONStream } from './streaming';
 
 // eslint-disable-next-line
@@ -47,6 +50,7 @@ export interface BatchProcessingRouteParams<BatchItemData, BatchItemResult> {
   onBatchItem: (data: BatchItemData) => Promise<BatchItemResult>;
 }
 
+/** @public */
 export interface BfetchServerSetup {
   addBatchProcessingRoute: <BatchItemData extends object, BatchItemResult extends object>(
     path: string,
@@ -56,10 +60,47 @@ export interface BfetchServerSetup {
     path: string,
     params: (request: KibanaRequest) => StreamingResponseHandler<Payload, Response>
   ) => void;
+  /**
+   * Create a streaming request handler to be able to use an Observable to return chunked content to the client.
+   * This is meant to be used with the `fetchStreaming` API of the `bfetch` client-side plugin.
+   *
+   * @example
+   * ```ts
+   * setup({ http }: CoreStart, { bfetch }: SetupDeps) {
+   *   const router = http.createRouter();
+   *   router.post(
+   *   {
+   *     path: '/api/my-plugin/stream-endpoint,
+   *     validate: {
+   *       body: schema.object({
+   *         term: schema.string(),
+   *       }),
+   *     }
+   *   },
+   *   bfetch.createStreamingResponseHandler(async (ctx, req) => {
+   *     const { term } = req.body;
+   *     const results$ = await myApi.getResults$(term);
+   *     return results$;
+   *   })
+   * )}
+   *
+   * ```
+   *
+   * @param streamHandler
+   */
+  createStreamingRequestHandler: <Response, P, Q, B, Method extends RouteMethod = any>(
+    streamHandler: StreamingRequestHandler<Response, P, Q, B, Method>
+  ) => RequestHandler<P, Q, B, Method>;
 }
 
 // eslint-disable-next-line
 export interface BfetchServerStart {}
+
+const streamingHeaders = {
+  'Content-Type': 'application/x-ndjson',
+  Connection: 'keep-alive',
+  'Transfer-Encoding': 'chunked',
+};
 
 export class BfetchServerPlugin
   implements
@@ -76,10 +117,12 @@ export class BfetchServerPlugin
     const router = core.http.createRouter();
     const addStreamingResponseRoute = this.addStreamingResponseRoute({ router, logger });
     const addBatchProcessingRoute = this.addBatchProcessingRoute(addStreamingResponseRoute);
+    const createStreamingRequestHandler = this.createStreamingRequestHandler({ logger });
 
     return {
       addBatchProcessingRoute,
       addStreamingResponseRoute,
+      createStreamingRequestHandler,
     };
   }
 
@@ -106,17 +149,28 @@ export class BfetchServerPlugin
       async (context, request, response) => {
         const handlerInstance = handler(request);
         const data = request.body;
-        const headers = {
-          'Content-Type': 'application/x-ndjson',
-          Connection: 'keep-alive',
-          'Transfer-Encoding': 'chunked',
-        };
         return response.ok({
-          headers,
-          body: createNDJSONStream(data, handlerInstance, logger),
+          headers: streamingHeaders,
+          body: createNDJSONStream(handlerInstance.getResponseStream(data), logger),
         });
       }
     );
+  };
+
+  private createStreamingRequestHandler = ({
+    logger,
+  }: {
+    logger: Logger;
+  }): BfetchServerSetup['createStreamingRequestHandler'] => (streamHandler) => async (
+    context,
+    request,
+    response
+  ) => {
+    const response$ = await streamHandler(context, request);
+    return response.ok({
+      headers: streamingHeaders,
+      body: createNDJSONStream(response$, logger),
+    });
   };
 
   private addBatchProcessingRoute = (
@@ -132,7 +186,7 @@ export class BfetchServerPlugin
     addStreamingResponseRoute<
       BatchRequestData<BatchItemData>,
       BatchResponseItem<BatchItemResult, E>
-    >(path, request => {
+    >(path, (request) => {
       const handlerInstance = handler(request);
       return {
         getResponseStream: ({ batch }) => {

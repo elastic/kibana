@@ -8,7 +8,7 @@ import { ActionTypeRegistryContract } from '../types';
 
 const createActionTypeRegistryMock = () => {
   const mocked: jest.Mocked<ActionTypeRegistryContract> = {
-    has: jest.fn(x => true),
+    has: jest.fn((x) => true),
     register: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),

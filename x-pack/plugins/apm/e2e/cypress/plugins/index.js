@@ -21,20 +21,22 @@
 const wp = require('@cypress/webpack-preprocessor');
 const fs = require('fs');
 
-module.exports = on => {
+module.exports = (on) => {
   const options = {
-    webpackOptions: require('../webpack.config.js')
+    webpackOptions: require('../webpack.config.js'),
   };
   on('file:preprocessor', wp(options));
 
   // readFileMaybe
   on('task', {
+    // ESLint thinks this is a react component for some reason.
+    // eslint-disable-next-line react/function-component-definition
     readFileMaybe(filename) {
       if (fs.existsSync(filename)) {
         return fs.readFileSync(filename, 'utf8');
       }
 
       return null;
-    }
+    },
   });
 };

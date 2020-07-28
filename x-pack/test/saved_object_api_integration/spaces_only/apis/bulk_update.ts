@@ -33,7 +33,7 @@ const createTestCases = (spaceId: string) => [
   { ...CASES.DOES_NOT_EXIST, ...fail404() },
 ];
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 

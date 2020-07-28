@@ -13,7 +13,7 @@ import { ALLOWED_DATA_UNITS } from '../constants/validation';
 export function maxLengthValidator(
   maxLength: number
 ): (value: string) => { maxLength: { requiredLength: number; actualLength: number } } | null {
-  return value =>
+  return (value) =>
     value && value.length > maxLength
       ? {
           maxLength: {
@@ -31,7 +31,7 @@ export function maxLengthValidator(
 export function patternValidator(
   pattern: RegExp
 ): (value: string) => { pattern: { matchPattern: string } } | null {
-  return value =>
+  return (value) =>
     pattern.test(value)
       ? null
       : {
@@ -48,7 +48,7 @@ export function patternValidator(
 export function composeValidators(
   ...validators: Array<(value: any) => { [key: string]: any } | null>
 ): (value: any) => { [key: string]: any } | null {
-  return value => {
+  return (value) => {
     const validationResult = validators.reduce((acc, validator) => {
       return {
         ...acc,
@@ -64,6 +64,10 @@ export function requiredValidator() {
     return value === '' || value === undefined || value === null ? { required: true } : null;
   };
 }
+
+export type ValidationResult = object | null;
+
+export type MemoryInputValidatorResult = { invalidUnits: { allowedUnits: string } } | null;
 
 export function memoryInputValidator(allowedUnits = ALLOWED_DATA_UNITS) {
   return (value: any) => {

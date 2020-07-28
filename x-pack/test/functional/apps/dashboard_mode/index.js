@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('dashboard mode', function() {
+export default function ({ loadTestFile }) {
+  describe('dashboard mode', function () {
     this.tags('ciGroup7');
 
     loadTestFile(require.resolve('./dashboard_view_mode'));

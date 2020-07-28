@@ -40,7 +40,7 @@ export const createGetterRoute = ({
         params: schema.object({ urlId: schema.string() }),
       },
     },
-    router.handleLegacyErrors(async function(context, request, response) {
+    router.handleLegacyErrors(async function (context, request, response) {
       const url = await shortUrlLookup.getUrl(request.params.urlId, {
         savedObjects: context.core.savedObjects.client,
       });

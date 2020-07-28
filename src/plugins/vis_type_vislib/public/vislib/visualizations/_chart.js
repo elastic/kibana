@@ -96,7 +96,7 @@ export class Chart {
       return datum[labelProp];
     }
 
-    selection.each(function(datum) {
+    selection.each(function (datum) {
       const label = resolveLabel(datum);
       if (label != null) dataLabel(this, label);
     });
@@ -110,7 +110,7 @@ export class Chart {
   destroy() {
     const selection = d3.select(this.chartEl);
     this.events.removeAllListeners();
-    this.tooltips.forEach(function(tooltip) {
+    this.tooltips.forEach(function (tooltip) {
       tooltip.destroy();
     });
     selection.remove();

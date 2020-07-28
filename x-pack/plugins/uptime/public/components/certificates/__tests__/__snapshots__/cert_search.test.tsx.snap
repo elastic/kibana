@@ -2,34 +2,38 @@
 
 exports[`CertificatesSearch renders expected elements for valid props 1`] = `
 .c0 {
-  min-width: 700px;
+  max-width: 700px;
 }
 
 <div
-  class="euiFormControlLayout"
+  class="c0"
 >
   <div
-    class="euiFormControlLayout__childrenWrapper"
+    class="euiFormControlLayout euiFormControlLayout--fullWidth"
   >
-    <input
-      aria-label="Search certificates"
-      class="euiFieldSearch c0"
-      data-test-subj="uptimeCertSearch"
-      placeholder="Search certificates"
-      type="search"
-    />
     <div
-      class="euiFormControlLayoutIcons"
+      class="euiFormControlLayout__childrenWrapper"
     >
-      <span
-        class="euiFormControlLayoutCustomIcon"
+      <input
+        aria-label="Search certificates"
+        class="euiFieldSearch euiFieldSearch--fullWidth"
+        data-test-subj="uptimeCertSearch"
+        placeholder="Search certificates"
+        type="search"
+      />
+      <div
+        class="euiFormControlLayoutIcons"
       >
-        <div
-          aria-hidden="true"
-          class="euiFormControlLayoutCustomIcon__icon"
-          data-euiicon-type="search"
-        />
-      </span>
+        <span
+          class="euiFormControlLayoutCustomIcon"
+        >
+          <div
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="search"
+          />
+        </span>
+      </div>
     </div>
   </div>
 </div>
@@ -86,8 +90,43 @@ exports[`CertificatesSearch shallow renders expected elements for valid props 1`
     }
   }
 >
-  <CertificateSearch
-    setSearch={[MockFunction]}
-  />
+  <ContextProvider
+    value={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <CertificateSearch
+      setSearch={[MockFunction]}
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

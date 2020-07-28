@@ -87,9 +87,9 @@ function getAggParamsToRender({
       // should be refactored in the future to provide a more general way
       // for visualization to override some agg config settings
       if (agg.type.name === 'top_hits' && param.name === 'field') {
-        const allowStrings = _.get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
+        const allowStrings = get(schema, `aggSettings[${agg.type.name}].allowStrings`, false);
         if (!allowStrings) {
-          availableFields = availableFields.filter(field => field.type === 'number');
+          availableFields = availableFields.filter((field) => field.type === 'number');
         }
       }
       fields = filterAggTypeFields(availableFields, agg);
@@ -111,7 +111,11 @@ function getAggParamsToRender({
       const aggType = agg.type.type;
       const aggName = agg.type.name;
       const aggParams = get(aggParamsMap, [aggType, aggName], {});
-      paramEditor = get(aggParams, param.name) || get(aggParamsMap, ['common', param.type]);
+      paramEditor = get(aggParams, param.name);
+    }
+
+    if (!paramEditor) {
+      paramEditor = get(aggParamsMap, ['common', param.type]);
     }
 
     // show params with an editor component
@@ -163,13 +167,13 @@ function isInvalidParamsTouched(
     return aggTypeState.touched;
   }
 
-  const invalidParams = Object.values(aggParams).filter(param => !param.valid);
+  const invalidParams = Object.values(aggParams).filter((param) => !param.valid);
 
   if (isEmpty(invalidParams)) {
     return false;
   }
 
-  return invalidParams.every(param => param.touched);
+  return invalidParams.every((param) => param.touched);
 }
 
 function buildAggDescription(agg: IAggConfig) {

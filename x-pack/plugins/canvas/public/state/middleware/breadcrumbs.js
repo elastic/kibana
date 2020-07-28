@@ -7,7 +7,7 @@
 import { getWorkpad } from '../selectors/workpad';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb, setBreadcrumb } from '../../lib/breadcrumbs';
 
-export const breadcrumbs = ({ getState }) => next => action => {
+export const breadcrumbs = ({ getState }) => (next) => (action) => {
   // capture the current workpad
   const currentWorkpad = getWorkpad(getState());
 

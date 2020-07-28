@@ -44,7 +44,7 @@ export const Tabs: React.FunctionComponent<Props> = ({
 
   return (
     <EuiTabs>
-      {tabs.map(tab => (
+      {tabs.map((tab) => (
         <EuiTab
           onClick={() => onTabChange(tab.id)}
           isSelected={tab.id === selectedTab}

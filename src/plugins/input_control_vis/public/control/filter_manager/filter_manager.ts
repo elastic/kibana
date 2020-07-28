@@ -54,7 +54,7 @@ export abstract class FilterManager {
       this.queryFilter.getAppFilters(),
       this.queryFilter.getGlobalFilters(),
     ]);
-    return kbnFilters.filter(kbnFilter => {
+    return kbnFilters.filter((kbnFilter) => {
       return _.get(kbnFilter, 'meta.controlledBy') === this.controlId;
     });
   }

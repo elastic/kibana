@@ -18,7 +18,7 @@ export const routes = [
       {
         name: 'exportWorkpad',
         path: '/pdf/:id/page/:page',
-        action: dispatch => async ({ params, router }) => {
+        action: (dispatch) => async ({ params, router }) => {
           // load workpad if given a new id via url param
           const fetchedWorkpad = await workpadService.get(params.id);
           const pageNumber = parseInt(params.page, 10);

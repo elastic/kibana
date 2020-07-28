@@ -37,16 +37,20 @@ export class IndexLifecycleManagementPlugin {
       initUiMetric(usageCollection);
       initNotification(toasts, fatalErrors);
 
-      management.sections.getSection('elasticsearch')!.registerApp({
+      management.sections.section.data.registerApp({
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
-        order: 3,
-        mount: async ({ element }) => {
+        order: 2,
+        mount: async ({ element, history }) => {
           const [coreStart] = await getStartServices();
           const {
+            chrome: { docTitle },
             i18n: { Context: I18nContext },
             docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+            application: { navigateToApp },
           } = coreStart;
+
+          docTitle.change(PLUGIN.TITLE);
 
           // Initialize additional services.
           initDocumentation(
@@ -54,7 +58,12 @@ export class IndexLifecycleManagementPlugin {
           );
 
           const { renderApp } = await import('./application');
-          return renderApp(element, I18nContext);
+          const unmountAppCallback = renderApp(element, I18nContext, history, navigateToApp);
+
+          return () => {
+            docTitle.reset();
+            unmountAppCallback();
+          };
         },
       });
 

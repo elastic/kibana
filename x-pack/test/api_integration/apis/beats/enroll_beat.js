@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { ES_INDEX_NAME } from './constants';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const randomness = getService('randomness');
   const es = getService('legacyEs');
@@ -44,9 +44,7 @@ export default function({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: validEnrollmentToken,
-            expires_on: moment()
-              .add(4, 'hours')
-              .toJSON(),
+            expires_on: moment().add(4, 'hours').toJSON(),
           },
         },
       });
@@ -117,9 +115,7 @@ export default function({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: expiredEnrollmentToken,
-            expires_on: moment()
-              .subtract(1, 'minute')
-              .toJSON(),
+            expires_on: moment().subtract(1, 'minute').toJSON(),
           },
         },
       });
@@ -169,9 +165,7 @@ export default function({ getService }) {
           type: 'enrollment_token',
           enrollment_token: {
             token: validEnrollmentToken,
-            expires_on: moment()
-              .add(4, 'hours')
-              .toJSON(),
+            expires_on: moment().add(4, 'hours').toJSON(),
           },
         },
       });

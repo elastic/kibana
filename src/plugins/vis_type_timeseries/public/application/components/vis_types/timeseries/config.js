@@ -44,7 +44,7 @@ import { QueryBarWrapper } from '../../query_bar_wrapper';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 
-export const TimeseriesConfig = injectI18n(function(props) {
+export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const defaults = {
@@ -93,7 +93,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
       disabled: isPercentDisabled(props.seriesQuantity[model.id]),
     },
   ];
-  const selectedStackedOption = stackedOptions.find(option => {
+  const selectedStackedOption = stackedOptions.find((option) => {
     return model.stacked === option.value;
   });
 
@@ -113,7 +113,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
       value: 'left',
     },
   ];
-  const selectedAxisPosOption = positionOptions.find(option => {
+  const selectedAxisPosOption = positionOptions.find((option) => {
     return model.axis_position === option.value;
   });
 
@@ -133,7 +133,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
       value: 'line',
     },
   ];
-  const selectedChartTypeOption = chartTypeOptions.find(option => {
+  const selectedChartTypeOption = chartTypeOptions.find((option) => {
     return model.chart_type === option.value;
   });
 
@@ -160,7 +160,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
       value: 'gradient',
     },
   ];
-  const selectedSplitColorOption = splitColorOptions.find(option => {
+  const selectedSplitColorOption = splitColorOptions.find((option) => {
     return model.split_color_mode === option.value;
   });
 
@@ -410,7 +410,7 @@ export const TimeseriesConfig = injectI18n(function(props) {
                   : getDefaultQueryLanguage(),
               query: model.filter && model.filter.query ? model.filter.query : '',
             }}
-            onChange={filter => props.onChange({ filter })}
+            onChange={(filter) => props.onChange({ filter })}
             indexPatterns={[seriesIndexPattern]}
           />
         </EuiFormRow>

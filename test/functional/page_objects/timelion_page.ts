@@ -47,7 +47,7 @@ export function TimelionPageProvider({ getService, getPageObjects }: FtrProvider
     public async updateExpression(updates: string) {
       const input = await testSubjects.find('timelionExpressionTextArea');
       await input.type(updates);
-      await PageObjects.common.sleep(500);
+      await PageObjects.common.sleep(1000);
     }
 
     public async getExpression() {
@@ -57,10 +57,10 @@ export function TimelionPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async getSuggestionItemsText() {
       const elements = await testSubjects.findAll('timelionSuggestionListItem');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      return await Promise.all(elements.map(async (element) => await element.getVisibleText()));
     }
 
-    public async clickSuggestion(suggestionIndex = 0, waitTime = 500) {
+    public async clickSuggestion(suggestionIndex = 0, waitTime = 1000) {
       const elements = await testSubjects.findAll('timelionSuggestionListItem');
       if (suggestionIndex > elements.length) {
         throw new Error(

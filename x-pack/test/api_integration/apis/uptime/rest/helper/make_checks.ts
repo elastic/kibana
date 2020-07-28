@@ -20,19 +20,14 @@ interface CheckProps {
 }
 
 const getRandomMonitorId = () => {
-  return (
-    'monitor-' +
-    Math.random()
-      .toString(36)
-      .substring(7)
-  );
+  return 'monitor-' + Math.random().toString(36).substring(7);
 };
 export const makeCheck = async ({
   es,
   monitorId = getRandomMonitorId(),
   numIps = 1,
   fields = {},
-  mogrify = d => d,
+  mogrify = (d) => d,
   refresh = true,
   tls = false,
 }: CheckProps): Promise<{ monitorId: string; docs: any }> => {
@@ -76,7 +71,7 @@ export const makeChecks = async (
   numIps: number = 1,
   every: number = 10000, // number of millis between checks
   fields: { [key: string]: any } = {},
-  mogrify: (doc: any) => any = d => d,
+  mogrify: (doc: any) => any = (d) => d,
   refresh: boolean = true
 ) => {
   const checks = [];
@@ -113,7 +108,7 @@ export const makeChecksWithStatus = async (
   every: number,
   fields: { [key: string]: any } = {},
   status: 'up' | 'down',
-  mogrify: (doc: any) => any = d => d,
+  mogrify: (doc: any) => any = (d) => d,
   refresh: boolean = true
 ) => {
   const oppositeStatus = status === 'up' ? 'down' : 'up';
@@ -125,7 +120,7 @@ export const makeChecksWithStatus = async (
     numIps,
     every,
     fields,
-    d => {
+    (d) => {
       d.monitor.status = status;
       if (d.summary) {
         d.summary[status] += d.summary[oppositeStatus];
@@ -145,7 +140,7 @@ export const getChecksDateRange = (checks: any[]) => {
 
   let startTime = 1 / 0;
   let endTime = -1 / 0;
-  flattened.forEach(c => {
+  flattened.forEach((c) => {
     const ts = Date.parse(c['@timestamp']);
 
     if (ts < startTime) {

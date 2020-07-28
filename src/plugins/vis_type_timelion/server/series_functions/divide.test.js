@@ -30,7 +30,7 @@ describe('divide.js', () => {
   });
 
   it('divides by a single number', () => {
-    return invoke(fn, [seriesList, 2]).then(r => {
+    return invoke(fn, [seriesList, 2]).then((r) => {
       expect(_.map(r.output.list[1].data, 1)).to.eql([50, 25, 25, 10]);
     });
   });

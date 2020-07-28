@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { sortByOrder } from 'lodash';
+import { orderBy } from 'lodash';
 
 export function sortPipelines(pipelines, sort) {
   if (!sort) {
     return pipelines;
   }
 
-  return sortByOrder(pipelines, pipeline => pipeline[sort.field], sort.direction);
+  return orderBy(pipelines, (pipeline) => pipeline[sort.field], sort.direction);
 }

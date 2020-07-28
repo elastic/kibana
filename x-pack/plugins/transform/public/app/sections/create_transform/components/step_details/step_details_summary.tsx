@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { StepDetailsExposedState } from './step_details_form';
 
@@ -21,6 +21,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo(
     transformDescription,
     destinationIndex,
     touched,
+    indexPatternDateField,
   }) => {
     if (touched === false) {
       return null;
@@ -56,6 +57,21 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo(
         >
           <EuiFieldText defaultValue={destinationIndex} disabled={true} />
         </EuiFormRow>
+        <EuiFormRow
+          helpText={i18n.translate(
+            'xpack.transform.stepDetailsSummary.indexPatternTimeFilterLabel',
+            {
+              defaultMessage: 'Time filter',
+            }
+          )}
+        >
+          <EuiSelect
+            options={[{ text: indexPatternDateField }]}
+            value={indexPatternDateField}
+            disabled={true}
+          />
+        </EuiFormRow>
+
         {isContinuousModeEnabled && (
           <EuiFormRow
             label={i18n.translate(

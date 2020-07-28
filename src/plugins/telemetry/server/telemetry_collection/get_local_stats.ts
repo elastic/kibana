@@ -24,6 +24,8 @@ import {
 import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
+import { getNodesUsage } from './get_nodes_usage';
+import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get_data_telemetry';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the
@@ -38,6 +40,7 @@ export function handleLocalStats(
   { cluster_name, cluster_uuid, version }: ESClusterInfo,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
   kibana: KibanaUsageStats,
+  dataTelemetry: DataTelemetryPayload,
   context: StatsCollectionContext
 ) {
   return {
@@ -48,6 +51,7 @@ export function handleLocalStats(
     cluster_stats: clusterStats,
     collection: 'local',
     stack_stats: {
+      [DATA_TELEMETRY_ID]: dataTelemetry,
       kibana: handleKibanaStats(context, kibana),
     },
   };
@@ -66,13 +70,24 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
   const { callCluster, usageCollection } = config;
 
   return await Promise.all(
-    clustersDetails.map(async clustersDetail => {
-      const [clusterInfo, clusterStats, kibana] = await Promise.all([
+    clustersDetails.map(async (clustersDetail) => {
+      const [clusterInfo, clusterStats, nodesUsage, kibana, dataTelemetry] = await Promise.all([
         getClusterInfo(callCluster), // cluster info
         getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
+        getNodesUsage(callCluster), // nodes_usage info
         getKibana(usageCollection, callCluster),
+        getDataTelemetry(callCluster),
       ]);
-      return handleLocalStats(clusterInfo, clusterStats, kibana, context);
+      return handleLocalStats(
+        clusterInfo,
+        {
+          ...clusterStats,
+          nodes: { ...clusterStats.nodes, usage: nodesUsage },
+        },
+        kibana,
+        dataTelemetry,
+        context
+      );
     })
   );
 };

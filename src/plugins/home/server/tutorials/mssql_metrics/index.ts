@@ -36,6 +36,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.mssqlMetrics.nameTitle', {
       defaultMessage: 'Microsoft SQL Server Metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mssqlMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from a Microsoft SQL Server instance',

@@ -11,7 +11,7 @@ let updateSetupModeData;
 let setSetupModeMenuItem;
 
 jest.mock('./ajax_error_handler', () => ({
-  ajaxErrorHandlersProvider: err => {
+  ajaxErrorHandlersProvider: (err) => {
     throw err;
   },
 }));
@@ -34,7 +34,7 @@ const injectorModulesMock = {
   globalState: {
     save: jest.fn(),
   },
-  Private: module => module,
+  Private: (module) => module,
   $http: {
     post: jest.fn().mockImplementation(() => {
       return { data };
@@ -47,13 +47,13 @@ const injectorModulesMock = {
 
 const angularStateMock = {
   injector: {
-    get: module => {
+    get: (module) => {
       return injectorModulesMock[module] || {};
     },
   },
   scope: {
-    $apply: fn => fn && fn(),
-    $evalAsync: fn => fn && fn(),
+    $apply: (fn) => fn && fn(),
+    $evalAsync: (fn) => fn && fn(),
   },
 };
 
@@ -121,7 +121,7 @@ describe('setup_mode', () => {
       data = {};
     });
 
-    it('should not fetch data if the user does not have sufficient permissions', async done => {
+    it('should not fetch data if the user does not have sufficient permissions', async (done) => {
       const addDanger = jest.fn();
       jest.doMock('../legacy_shims', () => ({
         Legacy: {
@@ -151,7 +151,7 @@ describe('setup_mode', () => {
       });
     });
 
-    it('should set the newly discovered cluster uuid', async done => {
+    it('should set the newly discovered cluster uuid', async (done) => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {
@@ -174,7 +174,7 @@ describe('setup_mode', () => {
       });
     });
 
-    it('should fetch data for a given cluster', async done => {
+    it('should fetch data for a given cluster', async (done) => {
       const clusterUuid = '1ajy';
       data = {
         _meta: {

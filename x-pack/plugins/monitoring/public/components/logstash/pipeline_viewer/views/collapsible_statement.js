@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import './collapsible_statement.scss';
 
 function getToggleIconType(isCollapsed) {
   return isCollapsed ? 'arrowRight' : 'arrowDown';
@@ -29,7 +30,7 @@ export function CollapsibleStatement(props) {
       responsive={false}
       gutterSize="none"
       alignItems="center"
-      className="monPipelineViewer__statement"
+      className="monPipelineViewer__collapsibleStatement"
     >
       <EuiFlexItem key={id} grow={false}>
         <EuiButtonIcon

@@ -10,7 +10,7 @@ import { EditUserPage } from './edit_user_page';
 import React from 'react';
 import { User, Role } from '../../../../common/model';
 import { ReactWrapper } from 'enzyme';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
@@ -103,6 +103,8 @@ function expectMissingSaveButton(wrapper: ReactWrapper<any, any>) {
 }
 
 describe('EditUserPage', () => {
+  const history = scopedHistoryMock.create();
+
   it('allows reserved users to be viewed', async () => {
     const user = createUser('reserved_user');
     const { apiClient, rolesAPIClient } = buildClients(user);
@@ -114,6 +116,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -136,6 +139,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -158,6 +162,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -182,6 +187,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -204,6 +210,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 

@@ -19,6 +19,12 @@ export interface Stats {
   avg_length: number;
 }
 
+export interface Usage {
+  last_24_hours: {
+    hits: UptimeTelemetry;
+  };
+}
+
 export interface UptimeTelemetry {
   overview_page: number;
   monitor_page: number;

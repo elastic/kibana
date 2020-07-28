@@ -9,13 +9,13 @@ import {
   OpenFlyoutAddDrilldownParams,
 } from './flyout_create_drilldown';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { drilldownsPluginMock } from '../../../../../../drilldowns/public/mocks';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
 import { TriggerContextMapping } from '../../../../../../../../src/plugins/ui_actions/public';
 import { MockEmbeddable, enhanceEmbeddable } from '../test_helpers';
+import { uiActionsEnhancedPluginMock } from '../../../../../../ui_actions_enhanced/public/mocks';
 
 const overlays = coreMock.createStart().overlays;
-const drilldowns = drilldownsPluginMock.createStartContract();
+const uiActionsEnhanced = uiActionsEnhancedPluginMock.createStartContract();
 
 const actionParams: OpenFlyoutAddDrilldownParams = {
   start: () => ({
@@ -23,7 +23,7 @@ const actionParams: OpenFlyoutAddDrilldownParams = {
       overlays,
     } as any,
     plugins: {
-      drilldowns,
+      uiActionsEnhanced,
     },
     self: {},
   }),

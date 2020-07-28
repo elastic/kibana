@@ -97,6 +97,7 @@ describe('deserializeSnapshotDetails', () => {
       version: 'version',
       // Indices are sorted.
       indices: ['index1', 'index2', 'index3'],
+      dataStreams: [],
       includeGlobalState: false,
       // Failures are grouped and sorted by index, and the failures themselves are sorted by shard.
       indexFailures: [

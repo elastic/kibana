@@ -7,7 +7,7 @@
 import squel from 'squel';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 /* eslint-disable */
-// @ts-ignore untyped local
+// @ts-expect-error untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
 /* eslint-enable */
 import { ExpressionValueFilter } from '../../../types';
@@ -93,12 +93,12 @@ export function esdocs(): ExpressionFunctionDefinition<
       }
 
       if (fields) {
-        const allFields = fields.split(',').map(field => field.trim());
-        allFields.forEach(field => (query = query.field(field)));
+        const allFields = fields.split(',').map((field) => field.trim());
+        allFields.forEach((field) => (query = query.field(field)));
       }
 
       if (sort) {
-        const [sortField, sortOrder] = sort.split(',').map(str => str.trim());
+        const [sortField, sortOrder] = sort.split(',').map((str) => str.trim());
         if (sortField) {
           query.order(`"${sortField}"`, sortOrder === 'asc');
         }

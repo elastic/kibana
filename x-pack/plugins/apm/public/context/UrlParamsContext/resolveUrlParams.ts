@@ -13,10 +13,9 @@ import {
   getEnd,
   toBoolean,
   toNumber,
-  toString
+  toString,
 } from './helpers';
 import { toQuery } from '../../components/shared/Links/url_helpers';
-import { TIMEPICKER_DEFAULTS } from './constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../../common/utils/pick_keys';
@@ -32,7 +31,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     serviceName,
     serviceNodeName,
     errorGroupId,
-    traceId: traceIdLink
+    traceId: traceIdLink,
   } = getPathParams(location.pathname);
 
   const query = toQuery(location.search);
@@ -51,12 +50,12 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     sortDirection,
     sortField,
     kuery,
-    refreshPaused = TIMEPICKER_DEFAULTS.refreshPaused,
-    refreshInterval = TIMEPICKER_DEFAULTS.refreshInterval,
-    rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
-    rangeTo = TIMEPICKER_DEFAULTS.rangeTo,
+    refreshPaused,
+    refreshInterval,
+    rangeFrom,
+    rangeTo,
     environment,
-    searchTerm
+    searchTerm,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -67,8 +66,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     end: getEnd(state, rangeTo),
     rangeFrom,
     rangeTo,
-    refreshPaused: toBoolean(refreshPaused),
-    refreshInterval: toNumber(refreshInterval),
+    refreshPaused: refreshPaused ? toBoolean(refreshPaused) : undefined,
+    refreshInterval: refreshInterval ? toNumber(refreshInterval) : undefined,
 
     // query params
     sortDirection,
@@ -97,6 +96,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
 
     // ui filters
     environment,
-    ...localUIFilters
+    ...localUIFilters,
   });
 }

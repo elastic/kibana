@@ -24,12 +24,12 @@ import { getEnvOptions } from '../config/__mocks__/env';
 import { HttpService } from './http_service';
 import { CoreContext } from '../core_context';
 import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(getEnvOptions());
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(
@@ -45,6 +45,7 @@ configService.atPath.mockReturnValue(
       disableProtection: true,
       whitelist: [],
     },
+    customResponseHeaders: {},
   } as any)
 );
 

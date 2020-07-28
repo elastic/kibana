@@ -126,7 +126,7 @@ describe('Graph', () => {
       expect(vertices1).to.be.an(Array);
       expect(vertices1.length).to.be(5);
 
-      vertices1.forEach(vertex1 => {
+      vertices1.forEach((vertex1) => {
         expect(vertex1).to.be.a(Vertex);
       });
 
@@ -141,7 +141,7 @@ describe('Graph', () => {
       expect(processorVertices).to.be.an(Array);
       expect(processorVertices.length).to.be(2);
 
-      processorVertices.forEach(processorVertex => {
+      processorVertices.forEach((processorVertex) => {
         expect(processorVertex).to.be.a(Vertex);
         expect(processorVertex).to.be.a(PluginVertex);
         expect(processorVertex.isProcessor).to.be(true);
@@ -153,7 +153,7 @@ describe('Graph', () => {
       expect(edges).to.be.an(Array);
       expect(edges.length).to.be(4);
 
-      edges.forEach(edge => {
+      edges.forEach((edge) => {
         expect(edge).to.be.an(Edge);
       });
     });
@@ -197,11 +197,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(2);
         expect(graph.edges.length).to.be(1);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(1);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(1);
         expect(graph.hasQueueVertex).to.be(true);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -229,11 +229,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(1);
         expect(graph.edges.length).to.be(0);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -261,11 +261,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(1);
         expect(graph.edges.length).to.be(0);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(1);
       });
     });
 
@@ -320,11 +320,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(3);
         expect(graph.edges.length).to.be(2);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(1);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(1);
         expect(graph.hasQueueVertex).to.be(true);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -379,11 +379,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(3);
         expect(graph.edges.length).to.be(2);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(1);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(1);
         expect(graph.hasQueueVertex).to.be(true);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(1);
       });
     });
 
@@ -426,11 +426,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(2);
         expect(graph.edges.length).to.be(1);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(1);
       });
     });
 
@@ -499,11 +499,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(4);
         expect(graph.edges.length).to.be(3);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(1);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(1);
         expect(graph.hasQueueVertex).to.be(true);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(1);
       });
     });
 
@@ -546,11 +546,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(2);
         expect(graph.edges.length).to.be(1);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(2);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -593,11 +593,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(2);
         expect(graph.edges.length).to.be(1);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(2);
       });
     });
 
@@ -666,11 +666,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(4);
         expect(graph.edges.length).to.be(3);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(1);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(1);
         expect(graph.hasQueueVertex).to.be(true);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(2);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -739,11 +739,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(4);
         expect(graph.edges.length).to.be(3);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(1);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(1);
         expect(graph.hasQueueVertex).to.be(true);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(2);
       });
     });
 
@@ -821,11 +821,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(4);
         expect(graph.edges.length).to.be(4);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(2);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(2);
       });
     });
 
@@ -929,11 +929,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(6);
         expect(graph.edges.length).to.be(6);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(1);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(1);
         expect(graph.hasQueueVertex).to.be(true);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(2);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(2);
       });
     });
 
@@ -988,11 +988,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(3);
         expect(graph.edges.length).to.be(2);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(2);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(2);
         expect(graph.hasQueueVertex).to.be(true);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -1035,11 +1035,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(2);
         expect(graph.edges.length).to.be(1);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(2);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -1075,11 +1075,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(2);
         expect(graph.edges.length).to.be(0);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(2);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(2);
       });
     });
 
@@ -1136,11 +1136,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(3);
         expect(graph.edges.length).to.be(2);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(3);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(3);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -1218,11 +1218,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(4);
         expect(graph.edges.length).to.be(4);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(4);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(4);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -1273,11 +1273,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(3);
         expect(graph.edges.length).to.be(1);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(3);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(3);
       });
     });
 
@@ -1336,11 +1336,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(4);
         expect(graph.edges.length).to.be(1);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(4);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(4);
       });
     });
 
@@ -1514,11 +1514,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(10);
         expect(graph.edges.length).to.be(12);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(1);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(2);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(1);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(2);
         expect(graph.hasQueueVertex).to.be(true);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(3);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(4);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(3);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(4);
       });
     });
 
@@ -1576,11 +1576,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(3);
         expect(graph.edges.length).to.be(2);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(3);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(3);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -1637,11 +1637,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(3);
         expect(graph.edges.length).to.be(2);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(3);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(3);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
 
@@ -1698,11 +1698,11 @@ describe('Graph', () => {
         expect(graph.getVertices().length).to.be(3);
         expect(graph.edges.length).to.be(2);
 
-        expect(graph.getVertices().filter(v => !v.pipelineStage).length).to.be(0);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'input').length).to.be(0);
+        expect(graph.getVertices().filter((v) => !v.pipelineStage).length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'input').length).to.be(0);
         expect(graph.hasQueueVertex).to.be(false);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'filter').length).to.be(3);
-        expect(graph.getVertices().filter(v => v.pipelineStage === 'output').length).to.be(0);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'filter').length).to.be(3);
+        expect(graph.getVertices().filter((v) => v.pipelineStage === 'output').length).to.be(0);
       });
     });
   });

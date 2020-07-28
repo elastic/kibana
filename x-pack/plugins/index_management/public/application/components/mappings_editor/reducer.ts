@@ -3,112 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { OnFormUpdateArg, FormHook } from './shared_imports';
-import { Field, NormalizedFields, NormalizedField, FieldsEditor, SearchResult } from './types';
+import { Field, NormalizedFields, NormalizedField, State, Action } from './types';
 import {
   getFieldMeta,
   getUniqueId,
   shouldDeleteChildFieldsAfterTypeChange,
   getAllChildFields,
   getMaxNestedDepth,
-  isStateValid,
   normalize,
   updateFieldsPathAfterFieldNameChange,
   searchFields,
 } from './lib';
 import { PARAMETERS_DEFINITION } from './constants';
-
-export interface MappingsConfiguration {
-  enabled?: boolean;
-  throwErrorsForUnmappedFields?: boolean;
-  date_detection: boolean;
-  numeric_detection: boolean;
-  dynamic_date_formats: string[];
-  _source: {
-    enabled?: boolean;
-    includes?: string[];
-    excludes?: string[];
-  };
-  _meta?: string;
-}
-
-export interface MappingsTemplates {
-  dynamic_templates: DynamicTemplate[];
-}
-
-interface DynamicTemplate {
-  [key: string]: {
-    mapping: {
-      [key: string]: any;
-    };
-    match_mapping_type?: string;
-    match?: string;
-    unmatch?: string;
-    match_pattern?: string;
-    path_match?: string;
-    path_unmatch?: string;
-  };
-}
-
-export interface MappingsFields {
-  [key: string]: any;
-}
-
-type DocumentFieldsStatus = 'idle' | 'editingField' | 'creatingField';
-
-interface DocumentFieldsState {
-  status: DocumentFieldsStatus;
-  editor: FieldsEditor;
-  fieldToEdit?: string;
-  fieldToAddFieldTo?: string;
-}
-
-interface ConfigurationFormState extends OnFormUpdateArg<MappingsConfiguration> {
-  defaultValue: MappingsConfiguration;
-  submitForm?: FormHook<MappingsConfiguration>['submit'];
-}
-
-interface TemplatesFormState extends OnFormUpdateArg<MappingsTemplates> {
-  defaultValue: MappingsTemplates;
-  submitForm?: FormHook<MappingsTemplates>['submit'];
-}
-
-export interface State {
-  isValid: boolean | undefined;
-  configuration: ConfigurationFormState;
-  documentFields: DocumentFieldsState;
-  fields: NormalizedFields;
-  fieldForm?: OnFormUpdateArg<any>;
-  fieldsJsonEditor: {
-    format(): MappingsFields;
-    isValid: boolean;
-  };
-  search: {
-    term: string;
-    result: SearchResult[];
-  };
-  templates: TemplatesFormState;
-}
-
-export type Action =
-  | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
-  | { type: 'configuration.update'; value: Partial<ConfigurationFormState> }
-  | { type: 'configuration.save'; value: MappingsConfiguration }
-  | { type: 'templates.update'; value: Partial<State['templates']> }
-  | { type: 'templates.save'; value: MappingsTemplates }
-  | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
-  | { type: 'field.add'; value: Field }
-  | { type: 'field.remove'; value: string }
-  | { type: 'field.edit'; value: Field }
-  | { type: 'field.toggleExpand'; value: { fieldId: string; isExpanded?: boolean } }
-  | { type: 'documentField.createField'; value?: string }
-  | { type: 'documentField.editField'; value: string }
-  | { type: 'documentField.changeStatus'; value: DocumentFieldsStatus }
-  | { type: 'documentField.changeEditor'; value: FieldsEditor }
-  | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
-  | { type: 'search:update'; value: string };
-
-export type Dispatch = (action: Action) => void;
 
 export const addFieldToState = (field: Field, state: State): State => {
   const updatedFields = { ...state.fields };
@@ -164,7 +70,7 @@ export const addFieldToState = (field: Field, state: State): State => {
 
   return {
     ...state,
-    isValid: isStateValid(state),
+    isValid: true,
     fields: updatedFields,
   };
 };
@@ -180,7 +86,7 @@ const updateAliasesReferences = (
    */
   if (previousTargetPath && updatedAliases[previousTargetPath]) {
     updatedAliases[previousTargetPath] = updatedAliases[previousTargetPath].filter(
-      id => id !== field.id
+      (id) => id !== field.id
     );
   }
 
@@ -217,7 +123,7 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
 
     if (parentField) {
       // If the parent exist, update its childFields Array
-      const childFields = parentField.childFields!.filter(childId => childId !== fieldId);
+      const childFields = parentField.childFields!.filter((childId) => childId !== fieldId);
 
       updatedById[parentId] = {
         ...parentField,
@@ -233,7 +139,7 @@ const removeFieldFromMap = (fieldId: string, fields: NormalizedFields): Normaliz
   } else {
     // If there are no parentId it means that we have deleted a top level field
     // We need to update the root level fields Array
-    rootLevelFields = rootLevelFields.filter(childId => childId !== fieldId);
+    rootLevelFields = rootLevelFields.filter((childId) => childId !== fieldId);
   }
 
   let updatedFields = {
@@ -277,7 +183,7 @@ export const reducer = (state: State, action: Action): State => {
         },
         documentFields: {
           ...state.documentFields,
-          status: 'idle',
+          ...action.value.documentFields,
           fieldToAddFieldTo: undefined,
           fieldToEdit: undefined,
         },
@@ -293,8 +199,7 @@ export const reducer = (state: State, action: Action): State => {
         configuration: { ...state.configuration, ...action.value },
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
       return nextState;
     }
     case 'configuration.save': {
@@ -317,8 +222,7 @@ export const reducer = (state: State, action: Action): State => {
         templates: { ...state.templates, ...action.value },
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -342,8 +246,7 @@ export const reducer = (state: State, action: Action): State => {
         fieldForm: action.value,
       };
 
-      const isValid = isStateValid(nextState);
-      nextState.isValid = isValid;
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -410,7 +313,7 @@ export const reducer = (state: State, action: Action): State => {
         const allChildFields = getAllChildFields(field, state.fields.byId);
 
         // Remove all of its children
-        allChildFields!.forEach(childField => {
+        allChildFields!.forEach((childField) => {
           updatedFields = removeFieldFromMap(childField.id, updatedFields);
         });
       }
@@ -423,7 +326,7 @@ export const reducer = (state: State, action: Action): State => {
         const targetId = field.source.path as string;
         updatedFields.aliases = {
           ...updatedFields.aliases,
-          [targetId]: updatedFields.aliases[targetId].filter(aliasId => aliasId !== id),
+          [targetId]: updatedFields.aliases[targetId].filter((aliasId) => aliasId !== id),
         };
       }
 
@@ -491,7 +394,7 @@ export const reducer = (state: State, action: Action): State => {
             ...updatedFields.aliases,
             [previousField.source.path as string]: updatedFields.aliases[
               previousField.source.path as string
-            ].filter(aliasId => aliasId !== fieldToEdit),
+            ].filter((aliasId) => aliasId !== fieldToEdit),
           };
         } else {
           const nextTypeCanHaveAlias = !PARAMETERS_DEFINITION.path.targetTypesNotAllowed.includes(
@@ -499,7 +402,7 @@ export const reducer = (state: State, action: Action): State => {
           );
 
           if (!nextTypeCanHaveAlias && updatedFields.aliases[fieldToEdit]) {
-            updatedFields.aliases[fieldToEdit].forEach(aliasId => {
+            updatedFields.aliases[fieldToEdit].forEach((aliasId) => {
               updatedFields = removeFieldFromMap(aliasId, updatedFields);
             });
             delete updatedFields.aliases[fieldToEdit];
@@ -508,7 +411,7 @@ export const reducer = (state: State, action: Action): State => {
 
         if (shouldDeleteChildFields && previousField.childFields) {
           const allChildFields = getAllChildFields(previousField, updatedFields.byId);
-          allChildFields!.forEach(childField => {
+          allChildFields!.forEach((childField) => {
             updatedFields = removeFieldFromMap(childField.id, updatedFields);
           });
         }
@@ -529,7 +432,7 @@ export const reducer = (state: State, action: Action): State => {
 
       return {
         ...state,
-        isValid: isStateValid(state),
+        isValid: true,
         fieldForm: undefined,
         fields: updatedFields,
         documentFields: {
@@ -577,7 +480,7 @@ export const reducer = (state: State, action: Action): State => {
         },
       };
 
-      nextState.isValid = isStateValid(nextState);
+      nextState.isValid = action.value.isValid;
 
       return nextState;
     }
@@ -588,6 +491,12 @@ export const reducer = (state: State, action: Action): State => {
           term: action.value,
           result: searchFields(action.value, state.fields.byId),
         },
+      };
+    }
+    case 'validity:update': {
+      return {
+        ...state,
+        isValid: action.value,
       };
     }
     default:

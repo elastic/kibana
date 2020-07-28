@@ -93,74 +93,76 @@ export interface FieldCapsResponse {
  */
 export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): FieldDescriptor[] {
   const capsByNameThenType = fieldCapsResponse.fields;
-  const kibanaFormattedCaps: FieldDescriptor[] = Object.keys(capsByNameThenType).map(fieldName => {
-    const capsByType = capsByNameThenType[fieldName];
-    const types = Object.keys(capsByType);
+  const kibanaFormattedCaps: FieldDescriptor[] = Object.keys(capsByNameThenType).map(
+    (fieldName) => {
+      const capsByType = capsByNameThenType[fieldName];
+      const types = Object.keys(capsByType);
 
-    // If a single type is marked as searchable or aggregatable, all the types are searchable or aggregatable
-    const isSearchable = types.some(type => {
-      return (
-        !!capsByType[type].searchable ||
-        (!!capsByType[type].non_searchable_indices &&
-          capsByType[type].non_searchable_indices!.length > 0)
-      );
-    });
+      // If a single type is marked as searchable or aggregatable, all the types are searchable or aggregatable
+      const isSearchable = types.some((type) => {
+        return (
+          !!capsByType[type].searchable ||
+          (!!capsByType[type].non_searchable_indices &&
+            capsByType[type].non_searchable_indices!.length > 0)
+        );
+      });
 
-    const isAggregatable = types.some(type => {
-      return (
-        !!capsByType[type].aggregatable ||
-        (!!capsByType[type].non_aggregatable_indices &&
-          capsByType[type].non_aggregatable_indices!.length > 0)
-      );
-    });
+      const isAggregatable = types.some((type) => {
+        return (
+          !!capsByType[type].aggregatable ||
+          (!!capsByType[type].non_aggregatable_indices &&
+            capsByType[type].non_aggregatable_indices!.length > 0)
+        );
+      });
 
-    // If there are multiple types but they all resolve to the same kibana type
-    // ignore the conflict and carry on (my wayward son)
-    const uniqueKibanaTypes = uniq(types.map(castEsToKbnFieldTypeName));
-    if (uniqueKibanaTypes.length > 1) {
+      // If there are multiple types but they all resolve to the same kibana type
+      // ignore the conflict and carry on (my wayward son)
+      const uniqueKibanaTypes = uniq(types.map(castEsToKbnFieldTypeName));
+      if (uniqueKibanaTypes.length > 1) {
+        return {
+          name: fieldName,
+          type: 'conflict',
+          esTypes: types,
+          searchable: isSearchable,
+          aggregatable: isAggregatable,
+          readFromDocValues: false,
+          conflictDescriptions: types.reduce(
+            (acc, esType) => ({
+              ...acc,
+              [esType]: capsByType[esType].indices,
+            }),
+            {}
+          ),
+        };
+      }
+
+      const esType = types[0];
       return {
         name: fieldName,
-        type: 'conflict',
+        type: castEsToKbnFieldTypeName(esType),
         esTypes: types,
         searchable: isSearchable,
         aggregatable: isAggregatable,
-        readFromDocValues: false,
-        conflictDescriptions: types.reduce(
-          (acc, esType) => ({
-            ...acc,
-            [esType]: capsByType[esType].indices,
-          }),
-          {}
-        ),
+        readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
       };
     }
-
-    const esType = types[0];
-    return {
-      name: fieldName,
-      type: castEsToKbnFieldTypeName(esType),
-      esTypes: types,
-      searchable: isSearchable,
-      aggregatable: isAggregatable,
-      readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
-    };
-  });
+  );
 
   // Get all types of sub fields. These could be multi fields or children of nested/object types
-  const subFields = kibanaFormattedCaps.filter(field => {
+  const subFields = kibanaFormattedCaps.filter((field) => {
     return field.name.includes('.');
   });
 
   // Determine the type of each sub field.
-  subFields.forEach(field => {
+  subFields.forEach((field) => {
     const parentFieldNames = field.name
       .split('.')
       .slice(0, -1)
       .map((_, index, parentFieldNameParts) => {
         return parentFieldNameParts.slice(0, index + 1).join('.');
       });
-    const parentFieldCaps = parentFieldNames.map(parentFieldName => {
-      return kibanaFormattedCaps.find(caps => caps.name === parentFieldName);
+    const parentFieldCaps = parentFieldNames.map((parentFieldName) => {
+      return kibanaFormattedCaps.find((caps) => caps.name === parentFieldName);
     });
     const parentFieldCapsAscending = parentFieldCaps.reverse();
 
@@ -174,7 +176,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
 
       // We need to know if any parent field is nested
       const nestedParentCaps = parentFieldCapsAscending.find(
-        parentCaps => parentCaps && parentCaps.type === 'nested'
+        (parentCaps) => parentCaps && parentCaps.type === 'nested'
       );
       if (nestedParentCaps) {
         subType = { ...subType, nested: { path: nestedParentCaps.name } };
@@ -186,7 +188,7 @@ export function readFieldCapsResponse(fieldCapsResponse: FieldCapsResponse): Fie
     }
   });
 
-  return kibanaFormattedCaps.filter(field => {
+  return kibanaFormattedCaps.filter((field) => {
     return !['object', 'nested'].includes(field.type);
   });
 }

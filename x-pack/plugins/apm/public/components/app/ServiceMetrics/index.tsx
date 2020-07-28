@@ -9,7 +9,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiFlexGroup
+  EuiFlexGroup,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
@@ -34,10 +34,10 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
       filterNames: ['host', 'containerId', 'podName', 'serviceVersion'],
       params: {
         serviceName,
-        serviceNodeName
+        serviceNodeName,
       },
       projection: PROJECTION.METRICS,
-      showCount: false
+      showCount: false,
     }),
     [serviceName, serviceNodeName]
   );
@@ -52,7 +52,7 @@ export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
             <EuiFlexGrid columns={2} gutterSize="s">
-              {data.charts.map(chart => (
+              {data.charts.map((chart) => (
                 <EuiFlexItem key={chart.key}>
                   <EuiPanel>
                     <MetricsChart start={start} end={end} chart={chart} />

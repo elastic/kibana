@@ -3,25 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreSetup, Logger } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
+  CoreSetup,
+  Logger,
+  SavedObjectsErrorHelpers,
+} from '../../../../../../src/core/server';
+import { APMConfig } from '../..';
+import {
+  TaskManagerSetupContract,
   TaskManagerStartContract,
-  TaskManagerSetupContract
 } from '../../../../task_manager/server';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
-  APM_TELEMETRY_SAVED_OBJECT_TYPE
+  APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
+import { getApmTelemetryMapping } from '../../../common/apm_telemetry';
+import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   collectDataTelemetry,
-  CollectTelemetryParams
+  CollectTelemetryParams,
 } from './collect_data_telemetry';
-import { APMConfig } from '../..';
-import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
@@ -30,7 +35,7 @@ export async function createApmTelemetry({
   config$,
   usageCollector,
   taskManager,
-  logger
+  logger,
 }: {
   core: CoreSetup;
   config$: Observable<APMConfig>;
@@ -47,21 +52,22 @@ export async function createApmTelemetry({
           run: async () => {
             await collectAndStore();
           },
-          cancel: async () => {}
+          cancel: async () => {},
         };
-      }
-    }
+      },
+    },
   });
 
   const savedObjectsClient = await getInternalSavedObjectsClient(core);
 
   const collectAndStore = async () => {
     const config = await config$.pipe(take(1)).toPromise();
-    const esClient = core.elasticsearch.dataClient;
+    const [{ elasticsearch }] = await core.getStartServices();
+    const esClient = elasticsearch.legacy.client;
 
     const indices = await getApmIndices({
       config,
-      savedObjectsClient
+      savedObjectsClient,
     });
 
     const search = esClient.callAsInternalUser.bind(
@@ -84,7 +90,7 @@ export async function createApmTelemetry({
       indices,
       logger,
       indicesStats,
-      transportRequest
+      transportRequest,
     });
 
     await savedObjectsClient.create(
@@ -96,6 +102,7 @@ export async function createApmTelemetry({
 
   const collector = usageCollector.makeUsageCollector({
     type: 'apm',
+    schema: getApmTelemetryMapping(),
     fetch: async () => {
       try {
         const data = (
@@ -107,19 +114,19 @@ export async function createApmTelemetry({
 
         return data;
       } catch (err) {
-        if (err.output?.statusCode === 404) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
           // task has not run yet, so no saved object to return
           return {};
         }
         throw err;
       }
     },
-    isReady: () => true
+    isReady: () => true,
   });
 
   usageCollector.registerCollector(collector);
 
-  core.getStartServices().then(([coreStart, pluginsStart]) => {
+  core.getStartServices().then(([_coreStart, pluginsStart]) => {
     const { taskManager: taskManagerStart } = pluginsStart as {
       taskManager: TaskManagerStartContract;
     };
@@ -128,11 +135,11 @@ export async function createApmTelemetry({
       id: APM_TELEMETRY_TASK_NAME,
       taskType: APM_TELEMETRY_TASK_NAME,
       schedule: {
-        interval: '720m'
+        interval: '720m',
       },
       scope: ['apm'],
       params: {},
-      state: {}
+      state: {},
     });
   });
 }

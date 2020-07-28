@@ -215,7 +215,7 @@ export function FieldEditor({
                   })}
                 >
                   <EuiComboBox
-                    onChange={choices => {
+                    onChange={(choices) => {
                       // value is always defined because it's an unclearable single selection
                       const newFieldName = choices[0].value!;
 
@@ -260,7 +260,7 @@ export function FieldEditor({
                 >
                   <EuiColorPicker
                     color={color}
-                    onChange={newColor => {
+                    onChange={(newColor) => {
                       updateProp('color', newColor);
                     }}
                     compressed
@@ -286,7 +286,7 @@ export function FieldEditor({
                         </span>
                       );
                     }}
-                    options={iconChoices.map(currentIcon => ({
+                    options={iconChoices.map((currentIcon) => ({
                       label: currentIcon.label,
                       value: currentIcon,
                     }))}
@@ -296,7 +296,7 @@ export function FieldEditor({
                         value: icon,
                       },
                     ]}
-                    onChange={choices => {
+                    onChange={(choices) => {
                       updateProp('icon', choices[0].value!);
                     }}
                     compressed
@@ -378,7 +378,7 @@ function toOptions(
   currentField: WorkspaceField
 ): Array<{ label: string; value: string; type: ButtonHTMLAttributes<HTMLButtonElement>['type'] }> {
   return fields
-    .filter(field => !field.selected || field === currentField)
+    .filter((field) => !field.selected || field === currentField)
     .map(({ name, type }) => ({
       label: name,
       value: name,

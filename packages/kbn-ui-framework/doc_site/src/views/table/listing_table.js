@@ -137,7 +137,7 @@ export class ListingTable extends Component {
     ];
   }
 
-  onItemSelectionChanged = selectedRowIds => {
+  onItemSelectionChanged = (selectedRowIds) => {
     this.setState({ selectedRowIds });
   };
 

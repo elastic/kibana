@@ -34,7 +34,7 @@ export function MultiIndexGeoFieldSelect({ fields, onChange, selectedField }: Pr
   function onFieldSelect(selectedOptionId: string) {
     const { indexPatternId, geoFieldName } = splitOptionId(selectedOptionId);
 
-    const newSelectedField = fields.find(field => {
+    const newSelectedField = fields.find((field) => {
       return field.indexPatternId === indexPatternId && field.geoFieldName === geoFieldName;
     });
     onChange(newSelectedField);

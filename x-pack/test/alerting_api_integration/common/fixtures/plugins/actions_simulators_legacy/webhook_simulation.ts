@@ -23,11 +23,11 @@ export async function initPlugin(server: Hapi.Server, path: string) {
       async authenticate(request: Hapi.Request, h: Hapi.ResponseToolkit) {
         const credentials = pipe(
           fromNullable(request.headers.authorization),
-          map(authorization => authorization.split(/\s+/)),
-          filter(parts => parts.length > 1),
-          map(parts => Buffer.from(parts[1], 'base64').toString()),
-          filter(credentialsPart => credentialsPart.indexOf(':') !== -1),
-          map(credentialsPart => {
+          map((authorization) => authorization.split(/\s+/)),
+          filter((parts) => parts.length > 1),
+          map((parts) => Buffer.from(parts[1], 'base64').toString()),
+          filter((credentialsPart) => credentialsPart.indexOf(':') !== -1),
+          map((credentialsPart) => {
             const [username, password] = credentialsPart.split(':');
             return { username, password };
           }),
@@ -108,8 +108,5 @@ function validateRequestUsesMethod(
 }
 
 function htmlResponse(h: any, code: number, text: string) {
-  return h
-    .response(text)
-    .type('text/html')
-    .code(code);
+  return h.response(text).type('text/html').code(code);
 }

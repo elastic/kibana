@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiButton, EuiToolTip, EuiText } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon } from '../../../../../kibana_react/public';
@@ -108,6 +108,13 @@ export function DiscoverField({
     }
   };
 
+  function wrapOnDot(str?: string) {
+    // u200B is a non-width white-space character, which allows
+    // the browser to efficiently word-wrap right after the dot
+    // without us having to draw a lot of extra DOM elements, etc
+    return str ? str.replace(/\./g, '.\u200B') : '';
+  }
+
   return (
     <>
       <div
@@ -124,17 +131,12 @@ export function DiscoverField({
             scripted={field.scripted}
           />
         </span>
-        <span className="dscSidebarField__name eui-textTruncate">
-          <EuiToolTip
-            position="top"
-            content={field.name}
-            delay="long"
-            anchorClassName="eui-textTruncate"
-          >
-            <EuiText size="xs" data-test-subj={`field-${field.name}`} className="eui-textTruncate">
-              {useShortDots ? shortenDottedString(field.name) : field.displayName}
-            </EuiText>
-          </EuiToolTip>
+        <span
+          data-test-subj={`field-${field.name}`}
+          title={field.name}
+          className="dscSidebarField__name"
+        >
+          {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
         </span>
         <span>
           {field.name !== '_source' && !selected && (

@@ -81,10 +81,10 @@ async function compareScreenshots() {
   fs.mkdirSync(DIFF_SCREENSHOTS_DIR, { recursive: true });
   fs.mkdirSync(SESSION_SCREENSHOTS_DIR, { recursive: true });
   const files = await readDirAsync(SESSION_SCREENSHOTS_DIR);
-  const screenshots = files.filter(file => file.indexOf('.png') !== -1);
+  const screenshots = files.filter((file) => file.indexOf('.png') !== -1);
 
   // We'll use this data to build a screenshot gallery in HTML.
-  return await bluebird.map(screenshots, async screenshot => {
+  return await bluebird.map(screenshots, async (screenshot) => {
     // We're going to load image data and cache it in this object.
     const comparison = {
       name: screenshot,
@@ -138,13 +138,13 @@ async function compareScreenshots() {
 
 export function run(done) {
   compareScreenshots().then(
-    screenshotComparisons => {
+    (screenshotComparisons) => {
       // Once all of the data has been loaded, we can build the gallery.
       buildGallery(screenshotComparisons).then(() => {
         done();
       });
     },
-    error => {
+    (error) => {
       console.error(error);
       done(false);
     }

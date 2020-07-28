@@ -13,12 +13,12 @@ export const transactionByTraceIdRoute = createRoute(() => ({
   path: '/api/apm/transaction/{traceId}',
   params: {
     path: t.type({
-      traceId: t.string
-    })
+      traceId: t.string,
+    }),
   },
   handler: async ({ context, request }) => {
     const { traceId } = context.params.path;
     const setup = await setupRequest(context, request);
     return getRootTransactionByTraceId(traceId, setup);
-  }
+  },
 }));

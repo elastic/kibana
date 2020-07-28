@@ -59,8 +59,8 @@ class NewCalendarUI extends Component {
     try {
       const { jobIds, groupIds, calendars } = await getCalendarSettingsData();
 
-      const jobIdOptions = jobIds.map(jobId => ({ label: jobId }));
-      const groupIdOptions = groupIds.map(groupId => ({ label: groupId }));
+      const jobIdOptions = jobIds.map((jobId) => ({ label: jobId }));
+      const groupIdOptions = groupIds.map((groupId) => ({ label: groupId }));
 
       const selectedJobOptions = [];
       const selectedGroupOptions = [];
@@ -71,7 +71,7 @@ class NewCalendarUI extends Component {
 
       // Editing existing calendar.
       if (this.props.calendarId !== undefined) {
-        selectedCalendar = calendars.find(cal => cal.calendar_id === this.props.calendarId);
+        selectedCalendar = calendars.find((cal) => cal.calendar_id === this.props.calendarId);
 
         if (selectedCalendar) {
           formCalendarId = selectedCalendar.calendar_id;
@@ -80,10 +80,10 @@ class NewCalendarUI extends Component {
           if (selectedCalendar.job_ids.includes(GLOBAL_CALENDAR)) {
             isGlobalCalendar = true;
           } else {
-            selectedCalendar.job_ids.forEach(id => {
-              if (jobIds.find(jobId => jobId === id)) {
+            selectedCalendar.job_ids.forEach((id) => {
+              if (jobIds.find((jobId) => jobId === id)) {
                 selectedJobOptions.push({ label: id });
-              } else if (groupIds.find(groupId => groupId === id)) {
+              } else if (groupIds.find((groupId) => groupId === id)) {
                 selectedGroupOptions.push({ label: id });
               }
             });
@@ -195,12 +195,12 @@ class NewCalendarUI extends Component {
     const allIds = isGlobalCalendar
       ? [GLOBAL_CALENDAR]
       : [
-          ...selectedJobOptions.map(option => option.label),
-          ...selectedGroupOptions.map(option => option.label),
+          ...selectedJobOptions.map((option) => option.label),
+          ...selectedGroupOptions.map((option) => option.label),
         ];
 
     // Reduce events to fields expected by api
-    const eventsToSave = events.map(event => ({
+    const eventsToSave = events.map((event) => ({
       description: event.description,
       start_time: event.start_time,
       end_time: event.end_time,
@@ -217,12 +217,12 @@ class NewCalendarUI extends Component {
     return calendar;
   };
 
-  onCreateGroupOption = newGroup => {
+  onCreateGroupOption = (newGroup) => {
     const newOption = {
       label: newGroup,
     };
     // Select the option.
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       selectedGroupOptions: prevState.selectedGroupOptions.concat(newOption),
     }));
   };
@@ -233,19 +233,19 @@ class NewCalendarUI extends Component {
     });
   };
 
-  onJobSelection = selectedJobOptions => {
+  onJobSelection = (selectedJobOptions) => {
     this.setState({
       selectedJobOptions,
     });
   };
 
-  onGroupSelection = selectedGroupOptions => {
+  onGroupSelection = (selectedGroupOptions) => {
     this.setState({
       selectedGroupOptions,
     });
   };
 
-  onCalendarIdChange = e => {
+  onCalendarIdChange = (e) => {
     const isValid = validateCalendarId(e.target.value);
 
     this.setState({
@@ -254,14 +254,14 @@ class NewCalendarUI extends Component {
     });
   };
 
-  onDescriptionChange = e => {
+  onDescriptionChange = (e) => {
     this.setState({
       description: e.target.value,
     });
   };
 
   showImportModal = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isImportModalVisible: !prevState.isImportModalVisible,
     }));
   };
@@ -272,9 +272,9 @@ class NewCalendarUI extends Component {
     });
   };
 
-  onEventDelete = eventId => {
-    this.setState(prevState => ({
-      events: prevState.events.filter(event => event.event_id !== eventId),
+  onEventDelete = (eventId) => {
+    this.setState((prevState) => ({
+      events: prevState.events.filter((event) => event.event_id !== eventId),
     }));
   };
 
@@ -286,15 +286,15 @@ class NewCalendarUI extends Component {
     this.setState({ isNewEventModalVisible: true });
   };
 
-  addEvent = event => {
-    this.setState(prevState => ({
+  addEvent = (event) => {
+    this.setState((prevState) => ({
       events: [...prevState.events, event],
       isNewEventModalVisible: false,
     }));
   };
 
-  addImportedEvents = events => {
-    this.setState(prevState => ({
+  addImportedEvents = (events) => {
+    this.setState((prevState) => ({
       events: [...prevState.events, ...events],
       isImportModalVisible: false,
     }));

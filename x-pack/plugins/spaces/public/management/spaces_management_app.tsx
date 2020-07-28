@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
+import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { SecurityLicense } from '../../../security/public';
@@ -28,11 +28,11 @@ export const spacesManagementApp = Object.freeze({
   create({ getStartServices, spacesManager, securityLicense }: CreateParams) {
     return {
       id: this.id,
-      order: 10,
+      order: 2,
       title: i18n.translate('xpack.spaces.displayName', {
         defaultMessage: 'Spaces',
       }),
-      async mount({ basePath, element, setBreadcrumbs }) {
+      async mount({ element, setBreadcrumbs, history }) {
         const [
           { notifications, i18n: i18nStart, application },
           { features },
@@ -42,7 +42,7 @@ export const spacesManagementApp = Object.freeze({
             text: i18n.translate('xpack.spaces.management.breadcrumb', {
               defaultMessage: 'Spaces',
             }),
-            href: `#${basePath}`,
+            href: `/`,
           },
         ];
 
@@ -54,6 +54,8 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              history={history}
+              getUrlForApp={application.getUrlForApp}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
@@ -75,6 +77,8 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              history={history}
+              getUrlForApp={application.getUrlForApp}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
@@ -88,7 +92,7 @@ export const spacesManagementApp = Object.freeze({
               ...spacesBreadcrumbs,
               {
                 text: space.name,
-                href: `#${basePath}/edit/${encodeURIComponent(space.id)}`,
+                href: `/edit/${encodeURIComponent(space.id)}`,
               },
             ]);
           };
@@ -101,6 +105,8 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
+              history={history}
+              getUrlForApp={application.getUrlForApp}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
@@ -108,9 +114,9 @@ export const spacesManagementApp = Object.freeze({
 
         render(
           <i18nStart.Context>
-            <Router basename={basePath}>
+            <Router history={history}>
               <Switch>
-                <Route path="/" exact>
+                <Route path={['', '/']} exact>
                   <SpacesGridPageWithBreadcrumbs />
                 </Route>
                 <Route path="/create">

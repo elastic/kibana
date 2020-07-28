@@ -9,7 +9,6 @@
 import _ from 'lodash';
 import { map } from 'rxjs/operators';
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ml } from './ml_api_service';
 
 // Gets a basic summary of the most recently run forecasts for the specified
@@ -48,27 +47,27 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
       filterCriteria.push(query);
     }
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: maxResults,
-      rest_total_hits_as_int: true,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
+    ml.results
+      .anomalySearch({
+        size: maxResults,
+        rest_total_hits_as_int: true,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
+            },
           },
+          sort: [{ forecast_create_timestamp: { order: 'desc' } }],
         },
-        sort: [{ forecast_create_timestamp: { order: 'desc' } }],
-      },
-    })
-      .then(resp => {
+      })
+      .then((resp) => {
         if (resp.hits.total !== 0) {
-          obj.forecasts = resp.hits.hits.map(hit => hit._source);
+          obj.forecasts = resp.hits.hits.map((hit) => hit._source);
         }
 
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -106,30 +105,30 @@ function getForecastDateRange(job, forecastId) {
     // TODO - add in criteria for detector index and entity fields (by, over, partition)
     // once forecasting with these parameters is supported.
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
-          },
-        },
-        aggs: {
-          earliest: {
-            min: {
-              field: 'timestamp',
+    ml.results
+      .anomalySearch({
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
             },
           },
-          latest: {
-            max: {
-              field: 'timestamp',
+          aggs: {
+            earliest: {
+              min: {
+                field: 'timestamp',
+              },
+            },
+            latest: {
+              max: {
+                field: 'timestamp',
+              },
             },
           },
         },
-      },
-    })
-      .then(resp => {
+      })
+      .then((resp) => {
         obj.earliest = _.get(resp, 'aggregations.earliest.value', null);
         obj.latest = _.get(resp, 'aggregations.latest.value', null);
         if (obj.earliest === null || obj.latest === null) {
@@ -138,7 +137,7 @@ function getForecastDateRange(job, forecastId) {
           resolve(obj);
         }
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });
@@ -223,7 +222,7 @@ function getForecastData(
   ];
 
   // Add in term queries for each of the specified criteria.
-  _.each(criteriaFields, criteria => {
+  _.each(criteriaFields, (criteria) => {
     filterCriteria.push({
       term: {
         [criteria.fieldName]: criteria.fieldValue,
@@ -243,9 +242,8 @@ function getForecastData(
           min: aggType.min,
         };
 
-  return ml
-    .esSearch$({
-      index: ML_RESULTS_INDEX_PATTERN,
+  return ml.results
+    .anomalySearch$({
       size: 0,
       body: {
         query: {
@@ -282,9 +280,9 @@ function getForecastData(
       },
     })
     .pipe(
-      map(resp => {
+      map((resp) => {
         const aggregationsByTime = _.get(resp, ['aggregations', 'times', 'buckets'], []);
-        _.each(aggregationsByTime, dataForTime => {
+        _.each(aggregationsByTime, (dataForTime) => {
           const time = dataForTime.key;
           obj.results[time] = {
             prediction: _.get(dataForTime, ['prediction', 'value']),
@@ -306,10 +304,10 @@ function runForecast(jobId, duration) {
       jobId,
       duration,
     })
-      .then(resp => {
+      .then((resp) => {
         resolve(resp);
       })
-      .catch(err => {
+      .catch((err) => {
         reject(err);
       });
   });
@@ -343,25 +341,25 @@ function getForecastRequestStats(job, forecastId) {
       },
     ];
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 1,
-      rest_total_hits_as_int: true,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
+    ml.results
+      .anomalySearch({
+        size: 1,
+        rest_total_hits_as_int: true,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
+            },
           },
         },
-      },
-    })
-      .then(resp => {
+      })
+      .then((resp) => {
         if (resp.hits.total !== 0) {
           obj.stats = _.first(resp.hits.hits)._source;
         }
         resolve(obj);
       })
-      .catch(resp => {
+      .catch((resp) => {
         reject(resp);
       });
   });

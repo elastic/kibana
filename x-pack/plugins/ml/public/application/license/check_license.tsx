@@ -5,6 +5,7 @@
  */
 
 import { LicensingPluginSetup } from '../../../../licensing/public';
+import { MlLicense } from '../../../common/license';
 import { MlClientLicense } from './ml_client_license';
 
 let mlLicense: MlClientLicense | null = null;
@@ -16,9 +17,12 @@ let mlLicense: MlClientLicense | null = null;
  * @param {LicensingPluginSetup} licensingSetup
  * @returns {MlClientLicense}
  */
-export function setLicenseCache(licensingSetup: LicensingPluginSetup) {
+export function setLicenseCache(
+  licensingSetup: LicensingPluginSetup,
+  postInitFunctions?: Array<(lic: MlLicense) => void>
+) {
   mlLicense = new MlClientLicense();
-  mlLicense.setup(licensingSetup.license$);
+  mlLicense.setup(licensingSetup.license$, postInitFunctions);
   return mlLicense;
 }
 

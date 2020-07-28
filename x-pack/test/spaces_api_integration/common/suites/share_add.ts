@@ -45,7 +45,7 @@ export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<a
     const { id, failure, fail400Param, fail403Param } = testCase;
     const object = response.body;
     if (failure === 403) {
-      await expectResponses.forbidden(fail403Param!)(TYPE)(response);
+      await expectResponses.forbiddenTypes(fail403Param!)(TYPE)(response);
     } else if (failure) {
       let error: any;
       if (failure === 400) {
@@ -73,9 +73,9 @@ export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<a
     let cases = Array.isArray(testCases) ? testCases : [testCases];
     if (forbidden) {
       // override the expected result in each test case
-      cases = cases.map(x => ({ ...x, failure: 403, fail403Param: options?.fail403Param }));
+      cases = cases.map((x) => ({ ...x, failure: 403, fail403Param: options?.fail403Param }));
     }
-    return cases.map(x => ({
+    return cases.map((x) => ({
       title: getTestTitle(x),
       responseStatusCode: x.failure ?? 204,
       request: createRequest(x),

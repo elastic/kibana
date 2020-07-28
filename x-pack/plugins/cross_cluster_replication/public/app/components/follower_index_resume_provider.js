@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiLink, EuiOverlayMask } from '@elastic/eui';
-
+import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
 import { routing } from '../services/routing';
 import { resumeFollowerIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
@@ -25,13 +25,13 @@ class FollowerIndexResumeProviderUi extends PureComponent {
     ids: null,
   };
 
-  onMouseOverModal = event => {
+  onMouseOverModal = (event) => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
   };
 
-  resumeFollowerIndex = id => {
+  resumeFollowerIndex = (id) => {
     this.setState({ isModalOpen: true, ids: arrify(id) });
   };
 
@@ -97,7 +97,13 @@ class FollowerIndexResumeProviderUi extends PureComponent {
                   custom advanced settings, {editLink}."
                 values={{
                   editLink: (
-                    <EuiLink href={routing.getFollowerIndexPath(ids[0])} data-test-subj="editLink">
+                    <EuiLink
+                      {...reactRouterNavigate(
+                        routing._reactRouter.history,
+                        routing.getFollowerIndexPath(ids[0])
+                      )}
+                      data-test-subj="editLink"
+                    >
                       <FormattedMessage
                         id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
                         defaultMessage="edit the follower index"
@@ -124,7 +130,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
               </p>
 
               <ul>
-                {ids.map(id => (
+                {ids.map((id) => (
                   <li key={id}>{id}</li>
                 ))}
               </ul>
@@ -148,8 +154,8 @@ class FollowerIndexResumeProviderUi extends PureComponent {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
-  resumeFollowerIndex: id => dispatch(resumeFollowerIndex(id)),
+const mapDispatchToProps = (dispatch) => ({
+  resumeFollowerIndex: (id) => dispatch(resumeFollowerIndex(id)),
 });
 
 export const FollowerIndexResumeProvider = connect(
