@@ -95,16 +95,15 @@ function buildQueryBody(
           },
         }
       : null;
-  const filterStatusAgents =
-    statusAgentIDs && statusAgentIDs.length > 0
-      ? {
-          must: {
-            terms: {
-              'elastic.agent.id': statusAgentIDs,
-            },
+  const filterStatusAgents = statusAgentIDs
+    ? {
+        must: {
+          terms: {
+            'elastic.agent.id': statusAgentIDs,
           },
-        }
-      : null;
+        },
+      }
+    : null;
 
   const idFilter = {
     bool: {
