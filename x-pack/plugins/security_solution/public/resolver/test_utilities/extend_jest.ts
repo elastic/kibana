@@ -34,7 +34,7 @@ expect.extend({
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
     const matcherName = 'toSometimesYieldEqualTo';
-    const options = {
+    const options: jest.MatcherHintOptions = {
       comment: 'deep equality with any yielded value',
       isNot: this.isNot,
       promise: this.promise,
@@ -63,8 +63,8 @@ expect.extend({
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
-            this.utils.stringify(expected) !== this.utils.stringify(received[0]!)
-              ? `Received:     ${this.utils.printReceived(received[0])}`
+            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1]!)
+              ? `Received:     ${this.utils.printReceived(received[received.length - 1])}`
               : ''
           }`
       : () =>
