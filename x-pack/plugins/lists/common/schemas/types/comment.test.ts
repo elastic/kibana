@@ -10,56 +10,79 @@ import { left } from 'fp-ts/lib/Either';
 import { DATE_NOW } from '../../constants.mock';
 import { foldLeftRight, getPaths } from '../../siem_common_deps';
 
-import { getCommentsArrayMock, getCommentsMock } from './comments.mock';
+import { getCommentsArrayMock, getCommentsMock } from './comment.mock';
 import {
-  Comments,
+  Comment,
   CommentsArray,
   CommentsArrayOrUndefined,
-  comments,
+  comment,
   commentsArray,
   commentsArrayOrUndefined,
-} from './comments';
+} from './comment';
 
-describe('Comments', () => {
-  describe('comments', () => {
-    test('it should validate a comments', () => {
-      const payload = getCommentsMock();
-      const decoded = comments.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
-    });
-
-    test('it should validate with "updated_at" and "updated_by"', () => {
-      const payload = getCommentsMock();
-      payload.updated_at = DATE_NOW;
-      payload.updated_by = 'someone';
-      const decoded = comments.decode(payload);
-      const message = pipe(decoded, foldLeftRight);
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
-    });
-
-    test('it should not validate when undefined', () => {
-      const payload = undefined;
-      const decoded = comments.decode(payload);
+describe('Comment', () => {
+  describe('comment', () => {
+    test('it fails validation when "id" is undefined', () => {
+      const payload = { ...getCommentsMock(), id: undefined };
+      const decoded = comment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)"',
-        'Invalid value "undefined" supplied to "({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)"',
+        'Invalid value "undefined" supplied to "id"',
       ]);
       expect(message.schema).toEqual({});
     });
 
-    test('it should not validate when "comment" is not a string', () => {
-      const payload: Omit<Comments, 'comment'> & { comment: string[] } = {
+    test('it passes validation with a typical comment', () => {
+      const payload = getCommentsMock();
+      const decoded = comment.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('it passes validation with "updated_at" and "updated_by" fields included', () => {
+      const payload = getCommentsMock();
+      payload.updated_at = DATE_NOW;
+      payload.updated_by = 'someone';
+      const decoded = comment.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('it fails validation when undefined', () => {
+      const payload = undefined;
+      const decoded = comment.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)"',
+        'Invalid value "undefined" supplied to "({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it fails validation when "comment" is an empty string', () => {
+      const payload: Omit<Comment, 'comment'> & { comment: string } = {
+        ...getCommentsMock(),
+        comment: '',
+      };
+      const decoded = comment.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "comment"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it fails validation when "comment" is not a string', () => {
+      const payload: Omit<Comment, 'comment'> & { comment: string[] } = {
         ...getCommentsMock(),
         comment: ['some value'],
       };
-      const decoded = comments.decode(payload);
+      const decoded = comment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
@@ -68,12 +91,12 @@ describe('Comments', () => {
       expect(message.schema).toEqual({});
     });
 
-    test('it should not validate when "created_at" is not a string', () => {
-      const payload: Omit<Comments, 'created_at'> & { created_at: number } = {
+    test('it fails validation when "created_at" is not a string', () => {
+      const payload: Omit<Comment, 'created_at'> & { created_at: number } = {
         ...getCommentsMock(),
         created_at: 1,
       };
-      const decoded = comments.decode(payload);
+      const decoded = comment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
@@ -82,12 +105,12 @@ describe('Comments', () => {
       expect(message.schema).toEqual({});
     });
 
-    test('it should not validate when "created_by" is not a string', () => {
-      const payload: Omit<Comments, 'created_by'> & { created_by: number } = {
+    test('it fails validation when "created_by" is not a string', () => {
+      const payload: Omit<Comment, 'created_by'> & { created_by: number } = {
         ...getCommentsMock(),
         created_by: 1,
       };
-      const decoded = comments.decode(payload);
+      const decoded = comment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
@@ -96,12 +119,12 @@ describe('Comments', () => {
       expect(message.schema).toEqual({});
     });
 
-    test('it should not validate when "updated_at" is not a string', () => {
-      const payload: Omit<Comments, 'updated_at'> & { updated_at: number } = {
+    test('it fails validation when "updated_at" is not a string', () => {
+      const payload: Omit<Comment, 'updated_at'> & { updated_at: number } = {
         ...getCommentsMock(),
         updated_at: 1,
       };
-      const decoded = comments.decode(payload);
+      const decoded = comment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
@@ -110,12 +133,12 @@ describe('Comments', () => {
       expect(message.schema).toEqual({});
     });
 
-    test('it should not validate when "updated_by" is not a string', () => {
-      const payload: Omit<Comments, 'updated_by'> & { updated_by: number } = {
+    test('it fails validation when "updated_by" is not a string', () => {
+      const payload: Omit<Comment, 'updated_by'> & { updated_by: number } = {
         ...getCommentsMock(),
         updated_by: 1,
       };
-      const decoded = comments.decode(payload);
+      const decoded = comment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
@@ -125,11 +148,11 @@ describe('Comments', () => {
     });
 
     test('it should strip out extra keys', () => {
-      const payload: Comments & {
+      const payload: Comment & {
         extraKey?: string;
       } = getCommentsMock();
       payload.extraKey = 'some value';
-      const decoded = comments.decode(payload);
+      const decoded = comment.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -138,7 +161,7 @@ describe('Comments', () => {
   });
 
   describe('commentsArray', () => {
-    test('it should validate an array of comments', () => {
+    test('it passes validation an array of Comment', () => {
       const payload = getCommentsArrayMock();
       const decoded = commentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
@@ -147,7 +170,7 @@ describe('Comments', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should validate when a comments includes "updated_at" and "updated_by"', () => {
+    test('it passes validation when a Comment includes "updated_at" and "updated_by"', () => {
       const commentsPayload = getCommentsMock();
       commentsPayload.updated_at = DATE_NOW;
       commentsPayload.updated_by = 'someone';
@@ -159,32 +182,32 @@ describe('Comments', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should not validate when undefined', () => {
+    test('it fails validation when undefined', () => {
       const payload = undefined;
       const decoded = commentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "undefined" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
 
-    test('it should not validate when array includes non comments types', () => {
+    test('it fails validation when array includes non Comment types', () => {
       const payload = ([1] as unknown) as CommentsArray;
       const decoded = commentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
-        'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
   });
 
   describe('commentsArrayOrUndefined', () => {
-    test('it should validate an array of comments', () => {
+    test('it passes validation an array of Comment', () => {
       const payload = getCommentsArrayMock();
       const decoded = commentsArrayOrUndefined.decode(payload);
       const message = pipe(decoded, foldLeftRight);
@@ -193,7 +216,7 @@ describe('Comments', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should validate when undefined', () => {
+    test('it passes validation when undefined', () => {
       const payload = undefined;
       const decoded = commentsArrayOrUndefined.decode(payload);
       const message = pipe(decoded, foldLeftRight);
@@ -202,14 +225,14 @@ describe('Comments', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should not validate when array includes non comments types', () => {
+    test('it fails validation when array includes non Comment types', () => {
       const payload = ([1] as unknown) as CommentsArrayOrUndefined;
       const decoded = commentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
-        'Invalid value "1" supplied to "Array<({| comment: string, created_at: string, created_by: string |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
+        'Invalid value "1" supplied to "Array<({| comment: NonEmptyString, created_at: string, created_by: string, id: NonEmptyString |} & Partial<{| updated_at: string, updated_by: string |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });

@@ -161,7 +161,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiDescriptionList onClick={showSavedViewMenu}>
+                <EuiDescriptionList compressed={true} onClick={showSavedViewMenu}>
                   <EuiDescriptionListTitle>
                     <FormattedMessage
                       defaultMessage="Current view"
