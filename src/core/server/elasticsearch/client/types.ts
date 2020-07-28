@@ -124,9 +124,11 @@ export interface DeleteDocumentResponse {
 }
 
 /**
+ * Request context extended by the Client specific one.
+ * We use Client specific context to attach runtime dependencies.
  * @internal
  */
-export interface ESRequestContext {
+export interface ElasticsearchRequestContext {
   auditor?: Auditor;
   type?: 'internalUser' | 'currentUser';
   [key: string]: any;

@@ -23,7 +23,7 @@ import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { isResponseError } from './errors';
-import { ESRequestContext } from './types';
+import { ElasticsearchRequestContext } from './types';
 
 export const configureClient = (
   config: ElasticsearchClientConfig,
@@ -39,7 +39,7 @@ export const configureClient = (
 
 const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
   client.on('response', (error, event) => {
-    const context = event.meta.context as ESRequestContext | null;
+    const context = event.meta.context as ElasticsearchRequestContext | null;
     if (context?.auditor) {
       context.auditor.add({
         message: `${event.meta.request.params.method} ${event.meta.request.params.path}`,
