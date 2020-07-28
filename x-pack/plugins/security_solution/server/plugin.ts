@@ -178,6 +178,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             'alerting-read',
             'alerting-all',
             'lists-all',
+            'lists-read',
           ],
           savedObject: {
             all: [
