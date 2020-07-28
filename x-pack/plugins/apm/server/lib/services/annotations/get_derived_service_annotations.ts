@@ -26,13 +26,10 @@ export async function getDerivedServiceAnnotations({
 }) {
   const { start, end, apmEventClient } = setup;
 
-  const filter: ESFilter[] = [{ term: { [SERVICE_NAME]: serviceName } }];
-
-  const environmentFilter = getEnvironmentUiFilterES(environment);
-
-  if (environmentFilter) {
-    filter.push(environmentFilter);
-  }
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    ...getEnvironmentUiFilterES(environment),
+  ];
 
   const versions =
     (
@@ -44,7 +41,7 @@ export async function getDerivedServiceAnnotations({
           size: 0,
           query: {
             bool: {
-              filter: filter.concat({ range: rangeFilter(start, end) }),
+              filter: [...filter, { range: rangeFilter(start, end) }],
             },
           },
           aggs: {
@@ -71,11 +68,7 @@ export async function getDerivedServiceAnnotations({
           size: 0,
           query: {
             bool: {
-              filter: filter.concat({
-                term: {
-                  [SERVICE_VERSION]: version,
-                },
-              }),
+              filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
             },
           },
           aggs: {

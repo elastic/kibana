@@ -61,13 +61,13 @@ describe('useQuery', () => {
       });
       const TestComponent = () => {
         result = useQuery({
-          endDate: 100,
+          endDate: '2020-07-07T08:20:00.000Z',
           errorMessage: 'fakeErrorMsg',
           filterQuery: '',
           histogramType: HistogramType.alerts,
           isInspected: false,
           stackByField: 'fakeField',
-          startDate: 0,
+          startDate: '2020-07-07T08:08:00.000Z',
         });
 
         return <div />;
@@ -85,8 +85,8 @@ describe('useQuery', () => {
           sourceId: 'default',
           timerange: {
             interval: '12h',
-            from: 0,
-            to: 100,
+            from: '2020-07-07T08:08:00.000Z',
+            to: '2020-07-07T08:20:00.000Z',
           },
           defaultIndex: 'mockDefaultIndex',
           inspect: false,
@@ -123,13 +123,13 @@ describe('useQuery', () => {
       });
       const TestComponent = () => {
         result = useQuery({
-          endDate: 100,
+          endDate: '2020-07-07T08:20:18.966Z',
           errorMessage: 'fakeErrorMsg',
           filterQuery: '',
           histogramType: HistogramType.alerts,
           isInspected: false,
           stackByField: 'fakeField',
-          startDate: 0,
+          startDate: '2020-07-08T08:20:18.966Z',
         });
 
         return <div />;

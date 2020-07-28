@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionAstFunction } from 'src/plugins/expressions/public';
+import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';
 import { FetchOptions } from '../../fetch';

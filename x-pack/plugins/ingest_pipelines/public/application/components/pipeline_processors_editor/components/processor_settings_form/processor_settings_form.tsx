@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 
 import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
-import { usePipelineProcessorsContext } from '../../context';
 import { ProcessorInternal } from '../../types';
 
 import { DocumentationButton } from './documentation_button';
@@ -35,6 +34,7 @@ export interface Props {
   form: FormHook;
   onClose: () => void;
   onOpen: () => void;
+  esDocsBasePath: string;
 }
 
 const updateButtonLabel = i18n.translate(
@@ -52,11 +52,7 @@ const cancelButtonLabel = i18n.translate(
 );
 
 export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
-  ({ processor, form, isOnFailure, onClose, onOpen }) => {
-    const {
-      links: { esDocsBasePath },
-    } = usePipelineProcessorsContext();
-
+  ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
     const flyoutTitleContent = isOnFailure ? (
       <FormattedMessage
         id="xpack.ingestPipelines.settingsFormOnFailureFlyout.title"

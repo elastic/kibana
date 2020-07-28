@@ -225,6 +225,19 @@ const specialAggs: AggSelectOption[] = [
   },
 ];
 
+const FILTER_RATIO_AGGS = [
+  'avg',
+  'cardinality',
+  'count',
+  'positive_rate',
+  'max',
+  'min',
+  'sum',
+  'value_count',
+];
+
+const HISTOGRAM_AGGS = ['avg', 'count', 'sum', 'value_count'];
+
 const allAggOptions = [...metricAggs, ...pipelineAggs, ...siblingAggs, ...specialAggs];
 
 function filterByPanelType(panelType: string) {
@@ -257,6 +270,10 @@ export function AggSelect(props: AggSelectUiProps) {
   let options: EuiComboBoxOptionOption[];
   if (panelType === 'metrics') {
     options = metricAggs;
+  } else if (panelType === 'filter_ratio') {
+    options = metricAggs.filter((m) => FILTER_RATIO_AGGS.includes(`${m.value}`));
+  } else if (panelType === 'histogram') {
+    options = metricAggs.filter((m) => HISTOGRAM_AGGS.includes(`${m.value}`));
   } else {
     const disableSiblingAggs = (agg: AggSelectOption) => ({
       ...agg,

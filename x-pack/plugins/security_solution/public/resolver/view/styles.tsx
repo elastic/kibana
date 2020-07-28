@@ -48,6 +48,8 @@ export const StyledPanel = styled(Panel)`
   overflow: auto;
   width: 25em;
   max-width: 50%;
+  border-radius: 0;
+  border-top: none;
 `;
 
 /**

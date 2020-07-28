@@ -60,7 +60,7 @@ export const manageOldSiemRoutes = async (coreStart: CoreStart) => {
       });
       break;
     case 'detections':
-      application.navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+      application.navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
         replace: true,
         path,
       });

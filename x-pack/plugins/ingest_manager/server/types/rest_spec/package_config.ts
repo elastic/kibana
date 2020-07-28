@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { NewPackageConfigSchema } from '../models';
+import { NewPackageConfigSchema, UpdatePackageConfigSchema } from '../models';
 import { ListWithKuerySchema } from './index';
 
 export const GetPackageConfigsRequestSchema = {
@@ -23,7 +23,7 @@ export const CreatePackageConfigRequestSchema = {
 
 export const UpdatePackageConfigRequestSchema = {
   ...GetOnePackageConfigRequestSchema,
-  body: NewPackageConfigSchema,
+  body: UpdatePackageConfigSchema,
 };
 
 export const DeletePackageConfigsRequestSchema = {

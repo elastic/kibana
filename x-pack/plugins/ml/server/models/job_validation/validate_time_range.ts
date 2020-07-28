@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-// @ts-ignore
 import { validateJobObject } from './validate_job_object';
 
 interface ValidateTimeRangeMessage {
@@ -27,7 +26,10 @@ const BUCKET_SPAN_COMPARE_FACTOR = 25;
 const MIN_TIME_SPAN_MS = 7200000;
 const MIN_TIME_SPAN_READABLE = '2 hours';
 
-export async function isValidTimeField(callAsCurrentUser: LegacyAPICaller, job: CombinedJob) {
+export async function isValidTimeField(
+  { callAsCurrentUser }: ILegacyScopedClusterClient,
+  job: CombinedJob
+) {
   const index = job.datafeed_config.indices.join(',');
   const timeField = job.data_description.time_field;
 
@@ -45,7 +47,7 @@ export async function isValidTimeField(callAsCurrentUser: LegacyAPICaller, job: 
 }
 
 export async function validateTimeRange(
-  callAsCurrentUser: LegacyAPICaller,
+  mlClientCluster: ILegacyScopedClusterClient,
   job: CombinedJob,
   timeRange?: Partial<TimeRange>
 ) {
@@ -54,7 +56,7 @@ export async function validateTimeRange(
   validateJobObject(job);
 
   // check if time_field is a date type
-  if (!(await isValidTimeField(callAsCurrentUser, job))) {
+  if (!(await isValidTimeField(mlClientCluster, job))) {
     messages.push({
       id: 'time_field_invalid',
       timeField: job.data_description.time_field,

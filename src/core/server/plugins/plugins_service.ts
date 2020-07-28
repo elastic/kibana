@@ -228,6 +228,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
           if (plugin.includesUiPlugin) {
             this.uiPluginInternalInfo.set(plugin.name, {
+              requiredBundles: plugin.requiredBundles,
               publicTargetDir: Path.resolve(plugin.path, 'target/public'),
               publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
             });
@@ -239,6 +240,21 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       .toPromise();
 
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
+      // validate that `requiredBundles` ids point to a discovered plugin which `includesUiPlugin`
+      for (const requiredBundleId of plugin.requiredBundles) {
+        if (!pluginEnableStatuses.has(requiredBundleId)) {
+          throw new Error(
+            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${pluginName}" but it is missing.`
+          );
+        }
+
+        if (!pluginEnableStatuses.get(requiredBundleId)!.plugin.includesUiPlugin) {
+          throw new Error(
+            `Plugin bundle with id "${requiredBundleId}" is required by plugin "${pluginName}" but it doesn't have a UI bundle.`
+          );
+        }
+      }
+
       const pluginEnablement = this.shouldEnablePlugin(pluginName, pluginEnableStatuses);
 
       if (pluginEnablement.enabled) {

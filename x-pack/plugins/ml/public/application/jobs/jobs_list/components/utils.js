@@ -9,8 +9,10 @@ import { mlMessageBarService } from '../../../components/messagebar';
 import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { ml } from '../../../services/ml_api_service';
 import { getToastNotifications } from '../../../util/dependency_cache';
+import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { i18n } from '@kbn/i18n';
@@ -157,8 +159,9 @@ function showResults(resp, action) {
 
   if (failures.length > 0) {
     failures.forEach((f) => {
-      mlMessageBarService.notify.error(f.result.error);
-      toastNotifications.addDanger(
+      const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
+      toastNotificationService.displayErrorToast(
+        f.result.error,
         i18n.translate('xpack.ml.jobsList.actionFailedNotificationMessage', {
           defaultMessage: '{failureId} failed to {actionText}',
           values: {
@@ -348,14 +351,6 @@ export function checkForAutoStartDatafeed() {
       datafeedId,
     };
   }
-}
-
-function stringMatch(str, substr) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
 }
 
 function jobProperty(job, prop) {

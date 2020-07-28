@@ -19,7 +19,7 @@ Array [
             },
           },
           "composite": Object {
-            "size": 101,
+            "size": 10000,
             "sources": Array [
               Object {
                 "service.name": Object {
@@ -103,7 +103,7 @@ Array [
             },
           },
           "composite": Object {
-            "size": 101,
+            "size": 10000,
             "sources": Array [
               Object {
                 "service.name": Object {
@@ -170,7 +170,7 @@ Array [
             },
           },
           "composite": Object {
-            "size": 101,
+            "size": 10000,
             "sources": Array [
               Object {
                 "service.name": Object {

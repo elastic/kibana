@@ -11,10 +11,8 @@ import styled from 'styled-components';
 import * as i18n from '../translations';
 import { ExceptionItem } from './exception_item';
 import { AndOrBadge } from '../../and_or_badge';
-import {
-  ExceptionIdentifiers,
-  ExceptionListItemSchema,
-} from '../../../../../public/lists_plugin_deps';
+import { ExceptionListItemSchema } from '../../../../../public/lists_plugin_deps';
+import { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
@@ -37,9 +35,9 @@ interface ExceptionsViewerItemsProps {
   showEmpty: boolean;
   isInitLoading: boolean;
   exceptions: ExceptionListItemSchema[];
-  loadingItemIds: ExceptionIdentifiers[];
+  loadingItemIds: ExceptionListItemIdentifiers[];
   commentsAccordionId: string;
-  onDeleteException: (arg: ExceptionIdentifiers) => void;
+  onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
 }
 

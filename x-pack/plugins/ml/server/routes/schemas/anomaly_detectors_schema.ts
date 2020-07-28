@@ -70,6 +70,7 @@ export const anomalyDetectionUpdateJobSchema = schema.object({
   ),
   groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
   model_snapshot_retention_days: schema.maybe(schema.number()),
+  daily_model_snapshot_retention_after_days: schema.maybe(schema.number()),
 });
 
 export const analysisConfigSchema = schema.object({

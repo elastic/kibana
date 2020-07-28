@@ -34,7 +34,7 @@ export const getListItemByValues = async ({
     },
     ignoreUnavailable: true,
     index: listItemIndex,
-    size: value.length, // This has a limit on the number which is 10k
+    size: 10000, // TODO: This has a limit on the number which is 10,000 the default of Elastic but we might want to provide a way to increase that number
   });
   return transformElasticToListItem({ response, type });
 };

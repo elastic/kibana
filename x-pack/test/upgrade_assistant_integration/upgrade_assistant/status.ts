@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { ClusterStateAPIResponse } from '../../../plugins/upgrade_assistant/common/types';
 import { getIndexStateFromClusterState } from '../../../plugins/upgrade_assistant/common/get_index_state_from_cluster_state';
 
 // eslint-disable-next-line import/no-default-export
@@ -28,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('the _cluster/state endpoint is still what we expect', async () => {
       await esArchiver.load('upgrade_assistant/reindex');
       await es.indices.close({ index: '7.0-data' });
-      const result = await es.cluster.state({
+      const result = await es.cluster.state<ClusterStateAPIResponse>({
         index: '7.0-data',
         metric: 'metadata',
       });

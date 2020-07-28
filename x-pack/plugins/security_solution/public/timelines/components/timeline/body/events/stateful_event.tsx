@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
-import { BrowserFields } from '../../../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { TimelineDetailsQuery } from '../../../../containers/details';
 import { TimelineItem, DetailItem, TimelineNonEcsData } from '../../../../../graphql/types';
-import { requestIdleCallbackViaScheduler } from '../../../../../common/lib/helpers/scheduler';
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
@@ -43,12 +42,13 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
+  disableSensorVisibility: boolean;
+  docValueFields: DocValueFields[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
-  maxDelay?: number;
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
@@ -108,13 +108,14 @@ const StatefulEventComponent: React.FC<Props> = ({
   containerElementRef,
   columnHeaders,
   columnRenderers,
+  disableSensorVisibility = true,
+  docValueFields,
   event,
   eventIdToNoteIds,
   getNotesByIds,
   isEventViewer = false,
   isEventPinned = false,
   loadingEventIds,
-  maxDelay = 0,
   onColumnResized,
   onPinEvent,
   onRowSelected,
@@ -128,7 +129,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   updateNote,
 }) => {
   const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
-  const [initialRender, setInitialRender] = useState(false);
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const timeline = useSelector<StoreState, TimelineModel>((state) => {
     return state.timeline.timelineById['timeline-1'];
@@ -158,38 +158,8 @@ const StatefulEventComponent: React.FC<Props> = ({
     [addNoteToEvent, event, isEventPinned, onPinEvent]
   );
 
-  /**
-   * Incrementally loads the events when it mounts by trying to
-   * see if it resides within a window frame and if it is it will
-   * indicate to React that it should render its self by setting
-   * its initialRender to true.
-   */
-  useEffect(() => {
-    let _isMounted = true;
-
-    requestIdleCallbackViaScheduler(
-      () => {
-        if (!initialRender && _isMounted) {
-          setInitialRender(true);
-        }
-      },
-      { timeout: maxDelay }
-    );
-    return () => {
-      _isMounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Number of current columns plus one for actions.
   const columnCount = columnHeaders.length + 1;
-
-  // If we are not ready to render yet, just return null
-  // see useEffect() for when it schedules the first
-  // time this stateful component should be rendered.
-  if (!initialRender) {
-    return <SkeletonRow cellCount={columnCount} />;
-  }
 
   return (
     <VisibilitySensor
@@ -199,9 +169,10 @@ const StatefulEventComponent: React.FC<Props> = ({
       offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
     >
       {({ isVisible }) => {
-        if (isVisible) {
+        if (isVisible || disableSensorVisibility) {
           return (
             <TimelineDetailsQuery
+              docValueFields={docValueFields}
               sourceId="default"
               indexName={event._index!}
               eventId={event._id}
@@ -277,6 +248,7 @@ const StatefulEventComponent: React.FC<Props> = ({
                         event={detailsData || emptyDetails}
                         forceExpand={!!expanded[event._id] && !loading}
                         id={event._id}
+                        onEventToggled={onToggleExpanded}
                         onUpdateColumns={onUpdateColumns}
                         timelineId={timelineId}
                         toggleColumn={toggleColumn}
@@ -290,8 +262,8 @@ const StatefulEventComponent: React.FC<Props> = ({
         } else {
           // Height place holder for visibility detection as well as re-rendering sections.
           const height =
-            divElement.current != null && divElement.current.clientHeight
-              ? `${divElement.current.clientHeight}px`
+            divElement.current != null && divElement.current!.clientHeight
+              ? `${divElement.current!.clientHeight}px`
               : DEFAULT_ROW_HEIGHT;
 
           return <SkeletonRow cellCount={columnCount} rowHeight={height} />;

@@ -109,7 +109,6 @@ export const Page: FC<Props> = ({ jobId }) => {
         />
       ),
       status: currentStep >= ANALYTICS_STEPS.ADVANCED ? undefined : ('incomplete' as EuiStepStatus),
-      'data-test-subj': 'mlAnalyticsCreateJobWizardAdvancedStep',
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.creation.detailsStepTitle', {
@@ -124,7 +123,6 @@ export const Page: FC<Props> = ({ jobId }) => {
         />
       ),
       status: currentStep >= ANALYTICS_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
-      'data-test-subj': 'mlAnalyticsCreateJobWizardDetailsStep',
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.creation.createStepTitle', {
@@ -132,7 +130,6 @@ export const Page: FC<Props> = ({ jobId }) => {
       }),
       children: <CreateStep {...createAnalyticsForm} step={currentStep} />,
       status: currentStep >= ANALYTICS_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
-      'data-test-subj': 'mlAnalyticsCreateJobWizardCreateStep',
     },
   ];
 

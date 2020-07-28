@@ -1,0 +1,73 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule detects network events that may indicate the use of RDP traffic from the Internet. RDP is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or back-door vector.",
+  "false_positives": [
+    "Some network security policies allow RDP directly from the Internet but usage that is unfamiliar to server or network owners can be unexpected and suspicious. RDP services may be exposed directly to the Internet in some networks such as cloud environments. In such cases, only RDP gateways, bastions or jump servers may be expected expose RDP directly to the Internet and can be exempted from this rule. RDP may be required by some work-flows such as remote access and support for specialized software products and servers. Such work-flows are usually known and not unexpected."
+  ],
+  "index": [
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "RDP (Remote Desktop Protocol) from the Internet",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:3389 or event.dataset:zeek.rdp) and not source.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and destination.ip:(10.0.0.0/8 or 127.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or \"::1\")",
+  "risk_score": 47,
+  "rule_id": "8c1bdde8-4204-45c0-9e0c-c85ca3902488",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1043",
+          "name": "Commonly Used Port",
+          "reference": "https://attack.mitre.org/techniques/T1043/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 4
+}

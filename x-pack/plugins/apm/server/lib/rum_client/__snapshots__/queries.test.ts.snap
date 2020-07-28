@@ -74,6 +74,9 @@ Object {
       "durPercentiles": Object {
         "percentiles": Object {
           "field": "transaction.duration.us",
+          "hdr": Object {
+            "number_of_significant_value_digits": 3,
+          },
           "percents": Array [
             50,
             75,
@@ -139,6 +142,57 @@ Object {
         "auto_date_histogram": Object {
           "buckets": 50,
           "field": "@timestamp",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
+            },
+          },
+          Object {
+            "term": Object {
+              "my.custom.ui.filter": "foo-bar",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
+exports[`rum client dashboard queries fetches rum services 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "services": Object {
+        "terms": Object {
+          "field": "service.name",
+          "size": 1000,
         },
       },
     },

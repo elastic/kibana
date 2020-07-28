@@ -75,7 +75,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
-    const { user, admin } = getPluginPrivileges();
+    const { admin, user } = getPluginPrivileges();
 
     plugins.features.registerFeature({
       id: PLUGIN_ID,
@@ -87,7 +87,13 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID],
-      privileges: null,
+      management: {
+        insightsAndAlerting: ['jobsListLink'],
+      },
+      privileges: {
+        all: admin,
+        read: user,
+      },
       reserved: {
         description: i18n.translate('xpack.ml.feature.reserved.description', {
           defaultMessage:
@@ -96,29 +102,11 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         privileges: [
           {
             id: 'ml_user',
-            privilege: {
-              api: user.api,
-              app: [PLUGIN_ID, 'kibana'],
-              catalogue: [PLUGIN_ID],
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: user.ui,
-            },
+            privilege: user,
           },
           {
             id: 'ml_admin',
-            privilege: {
-              api: admin.api,
-              app: [PLUGIN_ID, 'kibana'],
-              catalogue: [PLUGIN_ID],
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: admin.ui,
-            },
+            privilege: admin,
           },
         ],
       },

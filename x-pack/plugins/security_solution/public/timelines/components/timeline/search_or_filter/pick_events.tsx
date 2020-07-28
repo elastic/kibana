@@ -38,8 +38,8 @@ const WarningEuiHealth = styled(EuiHealth)`
 
 const PickEventContainer = styled.div`
   .euiSuperSelect {
-    width: 155px;
-    max-width: 155px;
+    width: 170px;
+    max-width: 170px;
     button.euiSuperSelectControl {
       padding-top: 3px;
     }
@@ -61,7 +61,7 @@ export const eventTypeOptions: EventTypeOptionItem[] = [
   },
   {
     value: 'alert',
-    inputDisplay: <EuiHealth color="warning">{i18n.ALERT_EVENT}</EuiHealth>,
+    inputDisplay: <EuiHealth color="warning">{i18n.DETECTION_ALERTS_EVENT}</EuiHealth>,
   },
 ];
 

@@ -3,14 +3,8 @@
 cd "$KIBANA_DIR"
 source src/dev/ci_setup/setup_env.sh
 
-echo " -> building examples separate from test plugins"
+echo " -> building kibana platform plugins"
 node scripts/build_kibana_platform_plugins \
-  --examples \
-  --verbose;
-
-echo " -> building test plugins"
-node scripts/build_kibana_platform_plugins \
-  --no-examples \
   --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \
   --scan-dir "$XPACK_DIR/test/plugin_functional/plugins" \
   --scan-dir "$XPACK_DIR/test/functional_with_es_ssl/fixtures/plugins" \

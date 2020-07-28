@@ -12,13 +12,10 @@ import {
 } from '../../../../common/http_api/log_analysis';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
-import {
-  getLogEntryCategoryExamples,
-  NoLogAnalysisResultsIndexError,
-} from '../../../lib/log_analysis';
+import { getLogEntryCategoryExamples } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
-export const initGetLogEntryCategoryExamplesRoute = ({ framework }: InfraBackendLibs) => {
+export const initGetLogEntryCategoryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -37,6 +34,11 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework }: InfraBackend
         },
       } = request.body;
 
+      const sourceConfiguration = await sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        sourceId
+      );
+
       try {
         assertHasInfraMlPlugins(requestContext);
 
@@ -46,7 +48,8 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework }: InfraBackend
           startTime,
           endTime,
           categoryId,
-          exampleCount
+          exampleCount,
+          sourceConfiguration
         );
 
         return response.ok({
@@ -60,10 +63,6 @@ export const initGetLogEntryCategoryExamplesRoute = ({ framework }: InfraBackend
       } catch (error) {
         if (Boom.isBoom(error)) {
           throw error;
-        }
-
-        if (error instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message: error.message } });
         }
 
         return response.customError({

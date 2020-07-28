@@ -157,8 +157,10 @@ describe('AddFilterToGlobalSearchBar Component', () => {
       </TestProviders>
     );
 
+    wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
+    wrapper.update();
+
     wrapper
-      .simulate('mouseenter')
       .find('[data-test-subj="hover-actions-container"] [data-euiicon-type]')
       .first()
       .simulate('click');

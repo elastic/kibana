@@ -42,7 +42,7 @@ describe('usePostPushToService', () => {
     updateCase,
   };
   const sampleServiceRequestData = {
-    caseId: pushedCase.id,
+    savedObjectId: pushedCase.id,
     createdAt: pushedCase.createdAt,
     createdBy: serviceConnectorUser,
     comments: [

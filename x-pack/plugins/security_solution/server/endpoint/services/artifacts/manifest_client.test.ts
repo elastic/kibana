@@ -14,7 +14,7 @@ import { ManifestClient } from './manifest_client';
 describe('manifest_client', () => {
   describe('ManifestClient sanity checks', () => {
     test('can create ManifestClient', () => {
-      const manifestClient = new ManifestClient(savedObjectsClientMock.create(), '1.0.0');
+      const manifestClient = new ManifestClient(savedObjectsClientMock.create(), 'v1');
       expect(manifestClient).toBeInstanceOf(ManifestClient);
     });
 
@@ -38,7 +38,10 @@ describe('manifest_client', () => {
       await manifestClient.createManifest(manifest);
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         ManifestConstants.SAVED_OBJECT_TYPE,
-        manifest,
+        {
+          ...manifest,
+          created: expect.any(Number),
+        },
         { id: manifestClient.getManifestId() }
       );
     });

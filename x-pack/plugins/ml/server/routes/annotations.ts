@@ -60,9 +60,7 @@ export function annotationRoutes(
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { getAnnotations } = annotationServiceProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { getAnnotations } = annotationServiceProvider(context.ml!.mlClient);
         const resp = await getAnnotations(request.body);
 
         return response.ok({
@@ -96,19 +94,17 @@ export function annotationRoutes(
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(
-          context.ml!.mlClient.callAsCurrentUser
+          context.ml!.mlClient
         );
         if (annotationsFeatureAvailable === false) {
           throw getAnnotationsFeatureUnavailableErrorMessage();
         }
 
-        const { indexAnnotation } = annotationServiceProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { indexAnnotation } = annotationServiceProvider(context.ml!.mlClient);
 
         const currentUser =
           securityPlugin !== undefined ? securityPlugin.authc.getCurrentUser(request) : {};
-        // @ts-ignore username doesn't exist on {}
+        // @ts-expect-error username doesn't exist on {}
         const username = currentUser?.username ?? ANNOTATION_USER_UNKNOWN;
         const resp = await indexAnnotation(request.body, username);
 
@@ -143,16 +139,14 @@ export function annotationRoutes(
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(
-          context.ml!.mlClient.callAsCurrentUser
+          context.ml!.mlClient
         );
         if (annotationsFeatureAvailable === false) {
           throw getAnnotationsFeatureUnavailableErrorMessage();
         }
 
         const annotationId = request.params.annotationId;
-        const { deleteAnnotation } = annotationServiceProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { deleteAnnotation } = annotationServiceProvider(context.ml!.mlClient);
         const resp = await deleteAnnotation(annotationId);
 
         return response.ok({

@@ -14,6 +14,7 @@ import {
   exceptionListItemSchema,
   updateExceptionListItemSchema,
 } from '../../common/schemas';
+import { updateExceptionListItemValidate } from '../../common/schemas/request/update_exception_list_item_validation';
 
 import { getExceptionListClient } from '.';
 
@@ -21,7 +22,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
   router.put(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_ITEM_URL,
       validate: {
@@ -33,6 +34,11 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const validationErrors = updateExceptionListItemValidate(request.body);
+      if (validationErrors.length) {
+        return siemResponse.error({ body: validationErrors, statusCode: 400 });
+      }
+
       try {
         const {
           description,
@@ -41,6 +47,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           meta,
           type,
           _tags,
+          _version,
           comments,
           entries,
           item_id: itemId,
@@ -50,6 +57,7 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
         const exceptionLists = getExceptionListClient(context);
         const exceptionListItem = await exceptionLists.updateExceptionListItem({
           _tags,
+          _version,
           comments,
           description,
           entries,
@@ -62,10 +70,17 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
           type,
         });
         if (exceptionListItem == null) {
-          return siemResponse.error({
-            body: `list item id: "${id}" not found`,
-            statusCode: 404,
-          });
+          if (id != null) {
+            return siemResponse.error({
+              body: `list item id: "${id}" not found`,
+              statusCode: 404,
+            });
+          } else {
+            return siemResponse.error({
+              body: `list item item_id: "${itemId}" not found`,
+              statusCode: 404,
+            });
+          }
         } else {
           const [validated, errors] = validate(exceptionListItem, exceptionListItemSchema);
           if (errors != null) {

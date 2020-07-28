@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { indices } from '../../../../../../src/plugins/es_ui_shared/public';
+
+import { indices } from '../../shared_imports';
 
 const isEmpty = (value) => {
   return !value || !value.trim().length;

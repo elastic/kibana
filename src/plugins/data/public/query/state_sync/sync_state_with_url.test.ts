@@ -72,7 +72,11 @@ describe('sync_query_state_with_url', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
     });
-    queryServiceStart = queryService.start(startMock.savedObjects);
+    queryServiceStart = queryService.start({
+      uiSettings: startMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+      savedObjectsClient: startMock.savedObjects.client,
+    });
     filterManager = queryServiceStart.filterManager;
     timefilter = queryServiceStart.timefilter.timefilter;
 

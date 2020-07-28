@@ -16,6 +16,7 @@
         }
       },
       "Endpoint": {
+        "status": "enrolled",
         "policy": {
           "applied": {
             "name": "Default",
@@ -25,11 +26,23 @@
         }
       },
       "event": {
-        "created": 1579881969541
+        "created": 1579881969541,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d14",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86",
         "hostname": "cadmann-4.example.com",
+        "name": "cadmann-4.example.com",
         "id": "1fb3e58f-6ab0-4406-9d2a-91911207a712",
         "ip": [
           "10.192.213.130",
@@ -43,6 +56,8 @@
         "os": {
           "full": "Windows 10",
           "name": "windows 10.0",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "10.0",
           "Ext": {
             "variant" : "Windows Pro"
@@ -71,6 +86,7 @@
         }
       },
       "Endpoint": {
+        "status": "enrolled",
         "policy": {
           "applied": {
             "name": "Default",
@@ -80,11 +96,23 @@
         }
       },
       "event": {
-        "created": 1579881969541
+        "created": 1579881969541,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d15",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86_64",
         "hostname": "thurlow-9.example.com",
+        "name": "thurlow-9.example.com",
         "id": "2f735e3d-be14-483b-9822-bad06e9045ca",
         "ip": [
           "10.46.229.234"
@@ -97,6 +125,8 @@
         "os": {
           "full": "Windows Server 2016",
           "name": "windows 10.0",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "10.0",
           "Ext": {
             "variant" : "Windows Server"
@@ -125,6 +155,7 @@
         }
       },
       "Endpoint": {
+        "status": "enrolled",
         "policy": {
           "applied": {
             "name": "Default",
@@ -134,10 +165,22 @@
         }
       },
       "event": {
-        "created": 1579881969541
+        "created": 1579881969541,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d16",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "hostname": "rezzani-7.example.com",
+        "name": "rezzani-7.example.com",
         "id": "fc0ff548-feba-41b6-8367-65e8790d0eaf",
         "ip": [
           "10.101.149.26",
@@ -149,6 +192,8 @@
         "os": {
           "full": "Windows 10",
           "name": "windows 10.0",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "10.0",
           "Ext": {
             "variant" : "Windows Pro"
@@ -177,6 +222,7 @@
         }
       },
       "Endpoint": {
+        "status": "enrolled",
         "policy": {
           "applied": {
             "name": "Default",
@@ -186,11 +232,23 @@
         }
       },
       "event": {
-        "created": 1579878369541
+        "created": 1579878369541,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d18",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86",
         "hostname": "cadmann-4.example.com",
+        "name": "cadmann-4.example.com",
         "id": "1fb3e58f-6ab0-4406-9d2a-91911207a712",
         "ip": [
           "10.192.213.130",
@@ -204,6 +262,8 @@
         "os": {
           "full": "Windows Server 2016",
           "name": "windows 10.0",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "10.0",
           "Ext": {
             "variant" : "Windows Server 2016"
@@ -232,6 +292,7 @@
         }
       },
       "Endpoint": {
+        "status": "enrolled",
         "policy": {
           "applied": {
             "name": "Default",
@@ -241,10 +302,22 @@
         }
       },
       "event": {
-        "created": 1579878369541
+        "created": 1579878369541,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d19",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "hostname": "thurlow-9.example.com",
+        "name": "thurlow-9.example.com",
         "id": "2f735e3d-be14-483b-9822-bad06e9045ca",
         "ip": [
           "10.46.229.234"
@@ -257,6 +330,8 @@
         "os": {
           "full": "Windows Server 2012",
           "name": "windows 6.2",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "6.2",
           "Ext": {
             "variant" : "Windows Server 2012"
@@ -285,6 +360,7 @@
         }
       },
       "Endpoint": {
+        "status": "enrolled",
         "policy": {
           "applied": {
             "name": "With Eventing",
@@ -294,11 +370,23 @@
         }
       },
       "event": {
-        "created": 1579878369541
+        "created": 1579878369541,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d39",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86",
         "hostname": "rezzani-7.example.com",
+        "name": "rezzani-7.example.com",
         "id": "fc0ff548-feba-41b6-8367-65e8790d0eaf",
         "ip": [
           "10.101.149.26",
@@ -310,6 +398,8 @@
         "os": {
           "full": "Windows Server 2012",
           "name": "windows 6.2",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "6.2",
           "Ext": {
             "variant" : "Windows Server 2012"
@@ -338,6 +428,7 @@
         }
       },
       "Endpoint": {
+        "status": "enrolled",
         "policy": {
           "applied": {
             "name": "With Eventing",
@@ -347,10 +438,22 @@
         }
       },
       "event": {
-        "created": 1579874769541
+        "created": 1579874769541,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d31",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "hostname": "cadmann-4.example.com",
+        "name": "cadmann-4.example.com",
         "id": "1fb3e58f-6ab0-4406-9d2a-91911207a712",
         "ip": [
           "10.192.213.130",
@@ -364,6 +467,8 @@
         "os": {
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "6.3",
           "Ext": {
             "variant" : "Windows Server 2012 R2"
@@ -392,6 +497,7 @@
         }
       },
       "Endpoint": {
+        "status": "enrolled",
         "policy": {
           "applied": {
             "name": "Default",
@@ -401,10 +507,22 @@
         }
       },
       "event": {
-        "created": 1579874769541
+        "created": 1579874769541,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d23",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "hostname": "thurlow-9.example.com",
+        "name": "thurlow-9.example.com",
         "id": "2f735e3d-be14-483b-9822-bad06e9045ca",
         "ip": [
           "10.46.229.234"
@@ -417,6 +535,8 @@
         "os": {
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "6.3",
           "Ext": {
             "variant" : "Windows Server 2012 R2"
@@ -445,6 +565,7 @@
         }
       },
       "Endpoint": {
+        "status": "enrolled",
         "policy": {
           "applied": {
             "name": "With Eventing",
@@ -454,11 +575,23 @@
         }
       },
       "event": {
-        "created": 1579874769541
+        "created": 1579874769541,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d35",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86",
         "hostname": "rezzani-7.example.com",
+        "name": "rezzani-7.example.com",
         "id": "fc0ff548-feba-41b6-8367-65e8790d0eaf",
         "ip": [
           "10.101.149.26",
@@ -471,6 +604,8 @@
           "full": "Windows Server 2012",
           "name": "windows 6.2",
           "version": "6.2",
+          "platform": "Windows",
+          "family": "Windows",
           "Ext": {
             "variant" : "Windows Server 2012"
           }

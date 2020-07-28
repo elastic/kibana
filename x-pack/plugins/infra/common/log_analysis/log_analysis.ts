@@ -14,18 +14,10 @@ export type JobStatus =
   | 'finished'
   | 'failed';
 
-export type SetupStatusRequiredReason =
-  | 'missing' // jobs are missing
-  | 'reconfiguration' // the configurations don't match the source configurations
-  | 'update'; // the definitions don't match the module definitions
-
 export type SetupStatus =
   | { type: 'initializing' } // acquiring job statuses to determine setup status
   | { type: 'unknown' } // job status could not be acquired (failed request etc)
-  | {
-      type: 'required';
-      reason: SetupStatusRequiredReason;
-    } // setup required
+  | { type: 'required' } // setup required
   | { type: 'pending' } // In the process of setting up the module for the first time or retrying, waiting for response
   | { type: 'succeeded' } // setup succeeded, notifying user
   | {
@@ -35,7 +27,7 @@ export type SetupStatus =
   | {
       type: 'skipped';
       newlyCreated?: boolean;
-    }; // setup is hidden
+    }; // setup is not necessary
 
 /**
  * Maps a job status to the possibility that results have already been produced

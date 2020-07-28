@@ -26,13 +26,13 @@ const COMPONENT_TEMPLATE: ComponentTemplateDeserialized = {
   },
   version: 1,
   _meta: { description: 'component template test' },
-  _kbnMeta: { usedBy: ['template_1'] },
+  _kbnMeta: { usedBy: ['template_1'], isManaged: false },
 };
 
 const COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS: ComponentTemplateDeserialized = {
   name: 'comp-base',
   template: {},
-  _kbnMeta: { usedBy: [] },
+  _kbnMeta: { usedBy: [], isManaged: false },
 };
 
 describe('<ComponentTemplateDetails />', () => {
@@ -61,11 +61,10 @@ describe('<ComponentTemplateDetails />', () => {
       const { exists, find, actions, component } = testBed;
 
       // Verify flyout exists with correct title
-      expect(exists('componentTemplateDetails')).toBe(true);
-      expect(find('componentTemplateDetails.title').text()).toBe(COMPONENT_TEMPLATE.name);
+      expect(find('title').text()).toBe(COMPONENT_TEMPLATE.name);
 
       // Verify footer does not display since "actions" prop was not provided
-      expect(exists('componentTemplateDetails.footer')).toBe(false);
+      expect(exists('footer')).toBe(false);
 
       // Verify tabs exist
       expect(exists('settingsTab')).toBe(true);
@@ -185,7 +184,7 @@ describe('<ComponentTemplateDetails />', () => {
       const { exists, actions, component, find } = testBed;
 
       // Verify footer exists
-      expect(exists('componentTemplateDetails.footer')).toBe(true);
+      expect(exists('footer')).toBe(true);
       expect(exists('manageComponentTemplateButton')).toBe(true);
 
       // Click manage button and verify actions

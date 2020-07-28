@@ -26,30 +26,36 @@ import {
  * actions the endpoint took to apply the policy configuration.
  */
 const PolicyResponseConfigAccordion = styled(EuiAccordion)`
-  > .euiAccordion__triggerWrapper {
+  .euiAccordion__triggerWrapper {
     padding: ${(props) => props.theme.eui.paddingSizes.s};
   }
+
   &.euiAccordion-isOpen {
     background-color: ${(props) => props.theme.eui.euiFocusBackgroundColor};
   }
+
   .euiAccordion__childWrapper {
     background-color: ${(props) => props.theme.eui.euiColorLightestShade};
   }
+
   .policyResponseAttentionBadge {
     background-color: ${(props) => props.theme.eui.euiColorDanger};
     color: ${(props) => props.theme.eui.euiColorEmptyShade};
   }
+
   .euiAccordion__button {
     :hover,
     :focus {
       text-decoration: none;
     }
   }
+
   :hover:not(.euiAccordion-isOpen) {
     background-color: ${(props) => props.theme.eui.euiColorLightestShade};
   }
 
   .policyResponseActionsAccordion {
+    .euiAccordion__iconWrapper,
     svg {
       height: ${(props) => props.theme.eui.euiIconSizes.small};
       width: ${(props) => props.theme.eui.euiIconSizes.small};
@@ -58,6 +64,10 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
 
   .policyResponseStatusHealth {
     width: 100px;
+  }
+
+  .policyResponseMessage {
+    padding-left: ${(props) => props.theme.eui.paddingSizes.l};
   }
 `;
 
@@ -105,7 +115,7 @@ const ResponseActions = memo(
               }
             >
               <EuiText size="xs" data-test-subj="policyResponseMessage">
-                <p>{statuses.message}</p>
+                <p className="policyResponseMessage">{statuses.message}</p>
               </EuiText>
             </EuiAccordion>
           );

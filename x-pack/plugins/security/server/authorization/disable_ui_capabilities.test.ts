@@ -20,6 +20,9 @@ const mockRequest = httpServerMock.createKibanaRequest();
 
 const createMockAuthz = (options: MockAuthzOptions) => {
   const mock = authorizationMock.create({ version: '1.0.0-zeta1' });
+  // plug actual ui actions into mock Actions with
+  mock.actions = actions;
+
   mock.checkPrivilegesDynamicallyWithRequest.mockImplementation((request) => {
     expect(request).toBe(mockRequest);
 
@@ -50,7 +53,7 @@ describe('usingPrivileges', () => {
           new Feature({
             id: 'fooFeature',
             name: 'Foo Feature',
-            app: [],
+            app: ['fooApp'],
             navLinkId: 'foo',
             privileges: null,
           }),
@@ -63,6 +66,7 @@ describe('usingPrivileges', () => {
         Object.freeze({
           navLinks: {
             foo: true,
+            fooApp: true,
             bar: true,
           },
           management: {
@@ -85,6 +89,7 @@ describe('usingPrivileges', () => {
       expect(result).toEqual({
         navLinks: {
           foo: false,
+          fooApp: false,
           bar: true,
         },
         management: {

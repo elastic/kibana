@@ -36,6 +36,7 @@ export function systemMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.systemMetrics.nameTitle', {
       defaultMessage: 'System metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.systemMetrics.shortDescription', {
       defaultMessage: 'Collect CPU, memory, network, and disk statistics from the host.',

@@ -198,6 +198,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           capabilities: application.capabilities,
           reloadConnectors,
           docLinks,
+          consumer: 'case',
         }}
       >
         <ConnectorAddFlyout

@@ -18,16 +18,11 @@ import { DeepPartial } from '../../../common/types/common';
 
 import { jobSelectionActionCreator } from './actions';
 import { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
-import { DRAG_SELECT_ACTION, EXPLORER_ACTION } from './explorer_constants';
+import { EXPLORER_ACTION } from './explorer_constants';
 import { AppStateSelectedCells, TimeRangeBounds } from './explorer_utils';
 import { explorerReducer, getExplorerDefaultState, ExplorerState } from './reducers';
 
 export const ALLOW_CELL_RANGE_SELECTION = true;
-
-export const dragSelect$ = new Subject<{
-  action: typeof DRAG_SELECT_ACTION[keyof typeof DRAG_SELECT_ACTION];
-  elements?: any[];
-}>();
 
 type ExplorerAction = Action | Observable<ActionPayload>;
 export const explorerAction$ = new Subject<ExplorerAction>();
@@ -54,7 +49,7 @@ const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
   shareReplay(1)
 );
 
-interface ExplorerAppState {
+export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: string;
     selectedLanes?: string[];

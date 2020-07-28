@@ -11,8 +11,6 @@ import { IndexPatternAttributes } from 'src/plugins/data/common';
 
 export type IndexPatternTitle = string;
 
-export type callWithRequestType = (action: string, params?: any) => Promise<any>;
-
 export interface Route {
   id: string;
   k7Breadcrumbs: () => any;

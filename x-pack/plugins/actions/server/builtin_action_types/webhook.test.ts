@@ -114,6 +114,17 @@ describe('config validation', () => {
     });
   });
 
+  test('config validation failed when a url is invalid', () => {
+    const config: Record<string, string> = {
+      url: 'example.com/do-something',
+    };
+    expect(() => {
+      validateConfig(actionType, config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"error validating action type config: error configuring webhook action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+    );
+  });
+
   test('config validation passes when valid headers are provided', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

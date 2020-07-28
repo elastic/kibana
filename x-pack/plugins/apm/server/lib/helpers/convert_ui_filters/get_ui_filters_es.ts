@@ -27,22 +27,19 @@ export function getUiFiltersES(uiFilters: UIFilters) {
       };
     }) as ESFilter[];
 
-  // remove undefined items from list
   const esFilters = [
-    getKueryUiFilterES(uiFilters.kuery),
-    getEnvironmentUiFilterES(uiFilters.environment),
-  ]
-    .filter((filter) => !!filter)
-    .concat(mappedFilters) as ESFilter[];
+    ...getKueryUiFilterES(uiFilters.kuery),
+    ...getEnvironmentUiFilterES(uiFilters.environment),
+  ].concat(mappedFilters) as ESFilter[];
 
   return esFilters;
 }
 
 function getKueryUiFilterES(kuery?: string) {
   if (!kuery) {
-    return;
+    return [];
   }
 
   const ast = esKuery.fromKueryExpression(kuery);
-  return esKuery.toElasticsearchQuery(ast) as ESFilter;
+  return [esKuery.toElasticsearchQuery(ast) as ESFilter];
 }

@@ -15,7 +15,9 @@ import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { wait } from '../../../common/lib/helpers';
+
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
@@ -84,10 +86,11 @@ describe('AddComment ', () => {
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
 
     wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
-    await wait();
-    expect(onCommentSaving).toBeCalled();
-    expect(postComment).toBeCalledWith(sampleData, onCommentPosted);
-    expect(formHookMock.reset).toBeCalled();
+    await waitFor(() => {
+      expect(onCommentSaving).toBeCalled();
+      expect(postComment).toBeCalledWith(sampleData, onCommentPosted);
+      expect(formHookMock.reset).toBeCalled();
+    });
   });
 
   it('should render spinner and disable submit when loading', () => {

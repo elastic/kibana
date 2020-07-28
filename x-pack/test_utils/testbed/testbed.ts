@@ -244,8 +244,7 @@ export const registerTestBed = <T extends string = string>(
         const formInput = findTestSubject(comboBox, 'comboBoxSearchInput');
         setInputValue(formInput, value);
 
-        // keyCode 13 === ENTER
-        comboBox.simulate('keydown', { keyCode: 13 });
+        comboBox.simulate('keydown', { key: 'Enter' });
         component.update();
       };
 

@@ -31,10 +31,66 @@
   &--isEmpty {
     border-bottom: none;
   }
+
+  .canvasSidebar__expandable:last-child {
+    .canvasSidebar__accordion {
+      margin-bottom: (-$euiSizeS);
+    }
+
+    .canvasSidebar__accordion:after {
+      content: none;
+    }
+
+    .canvasSidebar__accordion.euiAccordion-isOpen:after {
+      display: none;
+    }
+  }
 }
 
 .canvasSidebar__panel-noMinWidth .euiButton {
   min-width: 0;
+}
+
+.canvasSidebar__expandable + .canvasSidebar__expandable {
+  margin-top: 0;
+
+  .canvasSidebar__accordion:before {
+    display: none;
+  }
+}
+
+.canvasSidebar__accordion {
+  padding: $euiSizeM;
+  margin: 0 (-$euiSizeM);
+  background: $euiColorLightestShade;
+  position: relative;
+
+  &.euiAccordion-isOpen {
+    background: transparent;
+  }
+
+  &:before,
+  &:after {
+    content: '';
+    height: 1px;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background: $euiColorLightShade;
+  }
+
+  &:before {
+    top: 0;
+  }
+
+  &:after {
+    bottom: 0;
+  }
+}
+
+.canvasSidebar__accordionContent {
+  padding-top: $euiSize;
+  padding-left: $euiSizeXS + $euiSizeS + $euiSize;
 }
 
 @keyframes sidebarPop {

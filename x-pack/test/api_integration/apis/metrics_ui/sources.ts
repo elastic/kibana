@@ -40,8 +40,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         // shipped default values
         expect(sourceConfiguration.name).to.be('Default');
-        expect(sourceConfiguration.metricAlias).to.be('metricbeat-*');
-        expect(sourceConfiguration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
+        expect(sourceConfiguration.metricAlias).to.be('metrics-*,metricbeat-*');
+        expect(sourceConfiguration.logAlias).to.be('logs-*,filebeat-*,kibana_sample_data_logs*');
         expect(sourceConfiguration.fields.container).to.be('container.id');
         expect(sourceConfiguration.fields.host).to.be('host.name');
         expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.uid');
@@ -125,8 +125,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updatedAt).to.be.greaterThan(0);
         expect(configuration.name).to.be('NAME');
         expect(configuration.description).to.be('');
-        expect(configuration.metricAlias).to.be('metricbeat-*');
-        expect(configuration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
+        expect(configuration.metricAlias).to.be('metrics-*,metricbeat-*');
+        expect(configuration.logAlias).to.be('logs-*,filebeat-*,kibana_sample_data_logs*');
         expect(configuration.fields.container).to.be('container.id');
         expect(configuration.fields.host).to.be('host.name');
         expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
@@ -283,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
         expect(configuration.metricAlias).to.be('metricbeat-**');
-        expect(configuration.logAlias).to.be('filebeat-*,kibana_sample_data_logs*');
+        expect(configuration.logAlias).to.be('logs-*,filebeat-*,kibana_sample_data_logs*');
         expect(status.logIndicesExist).to.be(true);
         expect(status.metricIndicesExist).to.be(true);
       });

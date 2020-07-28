@@ -12,6 +12,7 @@ import { scoreIntervalToDateTime } from '../../../common/components/ml/score/sco
 import { Anomaly } from '../../../common/components/ml/types';
 import { HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
 
 import { HostDetailsTabsProps } from './types';
@@ -27,18 +28,15 @@ import {
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
+    docValueFields,
     pageFilters,
-    deleteQuery,
     filterQuery,
-    from,
-    isInitializing,
     detailName,
     setAbsoluteRangeDatePicker,
-    setQuery,
-    to,
     indexPattern,
     hostDetailsPagePath,
   }) => {
+    const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
     const narrowDateRange = useCallback(
       (score: Anomaly, interval: string) => {
         const fromTo = scoreIntervalToDateTime(score, interval);
@@ -57,7 +55,11 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
           return;
         }
         const [min, max] = x;
-        setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: new Date(min).toISOString(),
+          to: new Date(max).toISOString(),
+        });
       },
       [setAbsoluteRangeDatePicker]
     );
@@ -79,7 +81,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody {...tabProps} />
+          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />

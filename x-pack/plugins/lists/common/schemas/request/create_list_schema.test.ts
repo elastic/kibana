@@ -43,6 +43,26 @@ describe('create_list_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should accept an undefined for serializer', () => {
+    const payload = getCreateListSchemaMock();
+    delete payload.serializer;
+    const decoded = createListSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should accept an undefined for deserializer', () => {
+    const payload = getCreateListSchemaMock();
+    delete payload.deserializer;
+    const decoded = createListSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('it should not allow an extra key to be sent in', () => {
     const payload: CreateListSchema & { extraKey?: string } = getCreateListSchemaMock();
     payload.extraKey = 'some new value';

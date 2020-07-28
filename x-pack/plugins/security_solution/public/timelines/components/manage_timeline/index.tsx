@@ -6,6 +6,7 @@
 
 import React, { createContext, useCallback, useContext, useReducer } from 'react';
 import { noop } from 'lodash/fp';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FilterManager } from '../../../../../../../src/plugins/data/public/query/filter_manager';
 import { TimelineRowAction } from '../timeline/body/actions';
@@ -13,17 +14,25 @@ import { SubsetTimelineModel } from '../../store/timeline/model';
 import * as i18n from '../../../common/components/events_viewer/translations';
 import * as i18nF from '../timeline/footer/translations';
 import { timelineDefaults as timelineDefaultModel } from '../../store/timeline/defaults';
+import { Ecs, TimelineNonEcsData } from '../../../graphql/types';
 
 interface ManageTimelineInit {
   documentType?: string;
   defaultModel?: SubsetTimelineModel;
+  filterManager?: FilterManager;
   footerText?: string;
   id: string;
   indexToAdd?: string[] | null;
   loadingText?: string;
   selectAll?: boolean;
+  timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
   title?: string;
   unit?: (totalCount: number) => string;
+}
+
+export interface TimelineRowActionArgs {
+  ecsData: Ecs;
+  nonEcsData: TimelineNonEcsData[];
 }
 
 interface ManageTimeline {
@@ -37,7 +46,7 @@ interface ManageTimeline {
   loadingText: string;
   queryFields: string[];
   selectAll: boolean;
-  timelineRowActions: TimelineRowAction[];
+  timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
   title: string;
   unit: (totalCount: number) => string;
 }
@@ -65,27 +74,26 @@ type ActionManageTimeline =
   | {
       type: 'SET_TIMELINE_ACTIONS';
       id: string;
-      payload: { queryFields?: string[]; timelineRowActions: TimelineRowAction[] };
-    }
-  | {
-      type: 'SET_TIMELINE_FILTER_MANAGER';
-      id: string;
-      payload: { filterManager: FilterManager };
+      payload: {
+        queryFields?: string[];
+        timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
+      };
     };
 
-export const timelineDefaults = {
+export const getTimelineDefaults = (id: string) => ({
   indexToAdd: null,
   defaultModel: timelineDefaultModel,
   loadingText: i18n.LOADING_EVENTS,
   footerText: i18nF.TOTAL_COUNT_OF_EVENTS,
   documentType: i18nF.TOTAL_COUNT_OF_EVENTS,
   selectAll: false,
+  id,
   isLoading: false,
   queryFields: [],
-  timelineRowActions: [],
+  timelineRowActions: () => [],
   title: i18n.EVENTS,
   unit: (n: number) => i18n.UNIT(n),
-};
+});
 const reducerManageTimeline = (
   state: ManageTimelineById,
   action: ActionManageTimeline
@@ -95,7 +103,7 @@ const reducerManageTimeline = (
       return {
         ...state,
         [action.id]: {
-          ...timelineDefaults,
+          ...getTimelineDefaults(action.id),
           ...state[action.id],
           ...action.payload,
         },
@@ -109,7 +117,6 @@ const reducerManageTimeline = (
         },
       } as ManageTimelineById;
     case 'SET_TIMELINE_ACTIONS':
-    case 'SET_TIMELINE_FILTER_MANAGER':
       return {
         ...state,
         [action.id]: {
@@ -130,7 +137,8 @@ const reducerManageTimeline = (
   }
 };
 
-interface UseTimelineManager {
+export interface UseTimelineManager {
+  getIndexToAddById: (id: string) => string[] | null;
   getManageTimelineById: (id: string) => ManageTimeline;
   getTimelineFilterManager: (id: string) => FilterManager | undefined;
   initializeTimeline: (newTimeline: ManageTimelineInit) => void;
@@ -140,12 +148,13 @@ interface UseTimelineManager {
   setTimelineRowActions: (actionsArgs: {
     id: string;
     queryFields?: string[];
-    timelineRowActions: TimelineRowAction[];
+    timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
   }) => void;
-  setTimelineFilterManager: (filterArgs: { id: string; filterManager: FilterManager }) => void;
 }
 
-const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseTimelineManager => {
+export const useTimelineManager = (
+  manageTimelineForTesting?: ManageTimelineById
+): UseTimelineManager => {
   const [state, dispatch] = useReducer<
     (state: ManageTimelineById, action: ActionManageTimeline) => ManageTimelineById
   >(reducerManageTimeline, manageTimelineForTesting ?? initManageTimeline);
@@ -166,23 +175,12 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     }: {
       id: string;
       queryFields?: string[];
-      timelineRowActions: TimelineRowAction[];
+      timelineRowActions: ({ ecsData, nonEcsData }: TimelineRowActionArgs) => TimelineRowAction[];
     }) => {
       dispatch({
         type: 'SET_TIMELINE_ACTIONS',
         id,
         payload: { queryFields, timelineRowActions },
-      });
-    },
-    []
-  );
-
-  const setTimelineFilterManager = useCallback(
-    ({ id, filterManager }: { id: string; filterManager: FilterManager }) => {
-      dispatch({
-        type: 'SET_TIMELINE_FILTER_MANAGER',
-        id,
-        payload: { filterManager },
       });
     },
     []
@@ -216,14 +214,24 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
       if (state[id] != null) {
         return state[id];
       }
-      initializeTimeline({ id });
-      return { ...timelineDefaults, id };
+      initializeTimeline({ id, timelineRowActions: () => [] });
+      return getTimelineDefaults(id);
     },
     [initializeTimeline, state]
+  );
+  const getIndexToAddById = useCallback(
+    (id: string): string[] | null => {
+      if (state[id] != null) {
+        return state[id].indexToAdd;
+      }
+      return getTimelineDefaults(id).indexToAdd;
+    },
+    [state]
   );
   const isManagedTimeline = useCallback((id: string): boolean => state[id] != null, [state]);
 
   return {
+    getIndexToAddById,
     getManageTimelineById,
     getTimelineFilterManager,
     initializeTimeline,
@@ -231,20 +239,20 @@ const useTimelineManager = (manageTimelineForTesting?: ManageTimelineById): UseT
     setIndexToAdd,
     setIsTimelineLoading,
     setTimelineRowActions,
-    setTimelineFilterManager,
   };
 };
 
 const init = {
-  getManageTimelineById: (id: string) => ({ ...timelineDefaults, id }),
+  getIndexToAddById: (id: string) => null,
+  getManageTimelineById: (id: string) => getTimelineDefaults(id),
   getTimelineFilterManager: () => undefined,
-  setIndexToAdd: () => undefined,
-  isManagedTimeline: () => false,
   initializeTimeline: () => noop,
+  isManagedTimeline: () => false,
+  setIndexToAdd: () => undefined,
   setIsTimelineLoading: () => noop,
   setTimelineRowActions: () => noop,
-  setTimelineFilterManager: () => noop,
 };
+
 const ManageTimelineContext = createContext<UseTimelineManager>(init);
 
 export const useManageTimeline = () => useContext(ManageTimelineContext);

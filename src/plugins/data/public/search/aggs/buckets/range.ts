@@ -45,66 +45,63 @@ export interface AggParamsRange extends BaseAggParams {
 export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDependencies) => {
   const keyCaches = new WeakMap();
 
-  return new BucketAggType(
-    {
-      name: BUCKET_TYPES.RANGE,
-      title: rangeTitle,
-      createFilter: createFilterRange(getInternalStartServices),
-      makeLabel(aggConfig) {
-        return i18n.translate('data.search.aggs.aggTypesLabel', {
-          defaultMessage: '{fieldName} ranges',
-          values: {
-            fieldName: aggConfig.getFieldDisplayName(),
-          },
-        });
-      },
-      getKey(bucket, key, agg) {
-        let keys = keyCaches.get(agg);
-
-        if (!keys) {
-          keys = new Map();
-          keyCaches.set(agg, keys);
-        }
-
-        const id = RangeKey.idBucket(bucket);
-
-        key = keys.get(id);
-        if (!key) {
-          key = new RangeKey(bucket);
-          keys.set(id, key);
-        }
-
-        return key;
-      },
-      getSerializedFormat(agg) {
-        const format = agg.params.field ? agg.params.field.format.toJSON() : {};
-        return {
-          id: 'range',
-          params: {
-            id: format.id,
-            params: format.params,
-          },
-        };
-      },
-      params: [
-        {
-          name: 'field',
-          type: 'field',
-          filterFieldTypes: [KBN_FIELD_TYPES.NUMBER],
+  return new BucketAggType({
+    name: BUCKET_TYPES.RANGE,
+    title: rangeTitle,
+    createFilter: createFilterRange(getInternalStartServices),
+    makeLabel(aggConfig) {
+      return i18n.translate('data.search.aggs.aggTypesLabel', {
+        defaultMessage: '{fieldName} ranges',
+        values: {
+          fieldName: aggConfig.getFieldDisplayName(),
         },
-        {
-          name: 'ranges',
-          default: [
-            { from: 0, to: 1000 },
-            { from: 1000, to: 2000 },
-          ],
-          write(aggConfig, output) {
-            output.params.ranges = aggConfig.params.ranges;
-            output.params.keyed = true;
-          },
-        },
-      ],
+      });
     },
-    { getInternalStartServices }
-  );
+    getKey(bucket, key, agg) {
+      let keys = keyCaches.get(agg);
+
+      if (!keys) {
+        keys = new Map();
+        keyCaches.set(agg, keys);
+      }
+
+      const id = RangeKey.idBucket(bucket);
+
+      key = keys.get(id);
+      if (!key) {
+        key = new RangeKey(bucket);
+        keys.set(id, key);
+      }
+
+      return key;
+    },
+    getSerializedFormat(agg) {
+      const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+      return {
+        id: 'range',
+        params: {
+          id: format.id,
+          params: format.params,
+        },
+      };
+    },
+    params: [
+      {
+        name: 'field',
+        type: 'field',
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER],
+      },
+      {
+        name: 'ranges',
+        default: [
+          { from: 0, to: 1000 },
+          { from: 1000, to: 2000 },
+        ],
+        write(aggConfig, output) {
+          output.params.ranges = aggConfig.params.ranges;
+          output.params.keyed = true;
+        },
+      },
+    ],
+  });
 };

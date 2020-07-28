@@ -157,7 +157,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -170,7 +169,7 @@ import {
   TruncateFormat,
 } from '../common/field_formats';
 
-import { DateFormat } from './field_formats';
+import { DateNanosFormat, DateFormat } from './field_formats';
 export { baseFormattersPublic } from './field_formats';
 
 // Field formats helpers namespace:
@@ -306,6 +305,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
+  Ipv4Address,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -313,7 +313,7 @@ import {
   toAbsoluteDates,
 } from '../common';
 
-export { ParsedInterval } from '../common';
+export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
 
 export {
   // aggs
@@ -335,18 +335,13 @@ export {
   OptionedValueProp,
   // search
   ES_SEARCH_STRATEGY,
-  SYNC_SEARCH_STRATEGY,
   getEsPreference,
   getSearchErrorType,
-  ISearchStrategy,
   ISearch,
   ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
   ISearchGeneric,
   IEsSearchResponse,
   IEsSearchRequest,
-  ISyncSearchRequest,
   IKibanaSearchResponse,
   IKibanaSearchRequest,
   SearchRequest,
@@ -366,6 +361,7 @@ export {
   TabbedAggRow,
   TabbedTable,
   SearchInterceptor,
+  SearchInterceptorDeps,
   RequestTimeoutError,
 } from './search';
 
@@ -377,6 +373,7 @@ export const search = {
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
+    Ipv4Address,
     isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,
@@ -421,7 +418,6 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
-  getQueryLog,
   getDefaultQuery,
   FilterManager,
   SavedQuery,
@@ -441,6 +437,8 @@ export {
 } from '../common';
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+
+export { ApplyGlobalFilterActionContext } from './actions';
 
 export * from '../common/field_mapping';
 

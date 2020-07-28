@@ -8,8 +8,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer } from '@elastic/eui';
 import { Error } from '../../../components';
-import { AgentConfig, PackageInfo } from '../../../types';
-import { useGetOneAgentConfig, useGetPackages, sendGetPackageInfoByKey } from '../../../hooks';
+import { AgentConfig, PackageInfo, PackageConfig, GetPackagesResponse } from '../../../types';
+import {
+  useGetOneAgentConfig,
+  useGetPackages,
+  useGetLimitedPackages,
+  sendGetPackageInfoByKey,
+} from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 
 export const StepSelectPackage: React.FunctionComponent<{
@@ -17,7 +22,14 @@ export const StepSelectPackage: React.FunctionComponent<{
   updateAgentConfig: (config: AgentConfig | undefined) => void;
   packageInfo?: PackageInfo;
   updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
-}> = ({ agentConfigId, updateAgentConfig, packageInfo, updatePackageInfo }) => {
+  setIsLoadingSecondStep: (isLoading: boolean) => void;
+}> = ({
+  agentConfigId,
+  updateAgentConfig,
+  packageInfo,
+  updatePackageInfo,
+  setIsLoadingSecondStep,
+}) => {
   // Selected package state
   const [selectedPkgKey, setSelectedPkgKey] = useState<string | undefined>(
     packageInfo ? `${packageInfo.name}-${packageInfo.version}` : undefined
@@ -25,15 +37,34 @@ export const StepSelectPackage: React.FunctionComponent<{
   const [selectedPkgError, setSelectedPkgError] = useState<Error>();
 
   // Fetch agent config info
-  const { data: agentConfigData, error: agentConfigError } = useGetOneAgentConfig(agentConfigId);
+  const {
+    data: agentConfigData,
+    error: agentConfigError,
+    isLoading: isAgentConfigsLoading,
+  } = useGetOneAgentConfig(agentConfigId);
 
   // Fetch packages info
+  // Filter out limited packages already part of selected agent config
+  const [packages, setPackages] = useState<GetPackagesResponse['response']>([]);
   const {
     data: packagesData,
     error: packagesError,
     isLoading: isPackagesLoading,
   } = useGetPackages();
-  const packages = packagesData?.response || [];
+  const {
+    data: limitedPackagesData,
+    isLoading: isLimitedPackagesLoading,
+  } = useGetLimitedPackages();
+  useEffect(() => {
+    if (packagesData?.response && limitedPackagesData?.response && agentConfigData?.item) {
+      const allPackages = packagesData.response;
+      const limitedPackages = limitedPackagesData.response;
+      const usedLimitedPackages = (agentConfigData.item.package_configs as PackageConfig[])
+        .map((packageConfig) => packageConfig.package?.name || '')
+        .filter((pkgName) => limitedPackages.includes(pkgName));
+      setPackages(allPackages.filter((pkg) => !usedLimitedPackages.includes(pkg.name)));
+    }
+  }, [packagesData, limitedPackagesData, agentConfigData]);
 
   // Update parent agent config state
   useEffect(() => {
@@ -46,6 +77,7 @@ export const StepSelectPackage: React.FunctionComponent<{
   useEffect(() => {
     const fetchPackageInfo = async () => {
       if (selectedPkgKey) {
+        setIsLoadingSecondStep(true);
         const { data, error } = await sendGetPackageInfoByKey(selectedPkgKey);
         if (error) {
           setSelectedPkgError(error);
@@ -54,6 +86,7 @@ export const StepSelectPackage: React.FunctionComponent<{
           setSelectedPkgError(undefined);
           updatePackageInfo(data.response);
         }
+        setIsLoadingSecondStep(false);
       } else {
         setSelectedPkgError(undefined);
         updatePackageInfo(undefined);
@@ -62,7 +95,7 @@ export const StepSelectPackage: React.FunctionComponent<{
     if (!packageInfo || selectedPkgKey !== `${packageInfo.name}-${packageInfo.version}`) {
       fetchPackageInfo();
     }
-  }, [selectedPkgKey, packageInfo, updatePackageInfo]);
+  }, [selectedPkgKey, packageInfo, updatePackageInfo, setIsLoadingSecondStep]);
 
   // Display agent config error if there is one
   if (agentConfigError) {
@@ -101,7 +134,7 @@ export const StepSelectPackage: React.FunctionComponent<{
           searchable
           allowExclusions={false}
           singleSelection={true}
-          isLoading={isPackagesLoading}
+          isLoading={isPackagesLoading || isLimitedPackagesLoading || isAgentConfigsLoading}
           options={packages.map(({ title, name, version, icons }) => {
             const pkgkey = `${name}-${version}`;
             return {
@@ -134,7 +167,9 @@ export const StepSelectPackage: React.FunctionComponent<{
           onChange={(options) => {
             const selectedOption = options.find((option) => option.checked === 'on');
             if (selectedOption) {
-              setSelectedPkgKey(selectedOption.key);
+              if (selectedOption.key !== selectedPkgKey) {
+                setSelectedPkgKey(selectedOption.key);
+              }
             } else {
               setSelectedPkgKey(undefined);
             }

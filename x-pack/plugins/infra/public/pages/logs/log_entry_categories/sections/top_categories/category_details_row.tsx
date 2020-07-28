@@ -45,9 +45,13 @@ export const CategoryDetailsRow: React.FunctionComponent<{
       {logEntryCategoryExamples.map((example, exampleIndex) => (
         <CategoryExampleMessage
           key={exampleIndex}
+          id={example.id}
           dataset={example.dataset}
           message={example.message}
+          timeRange={timeRange}
           timestamp={example.timestamp}
+          tiebreaker={example.tiebreaker}
+          context={example.context}
         />
       ))}
     </LogEntryExampleMessages>

@@ -189,9 +189,7 @@ describe('useCamera on an unpainted element', () => {
           throw new Error('failed to create tree');
         }
         const processes: ResolverEvent[] = [
-          ...selectors
-            .processNodePositionsAndEdgeLineSegments(store.getState())
-            .processNodePositions.keys(),
+          ...selectors.layout(store.getState()).processNodePositions.keys(),
         ];
         process = processes[processes.length - 1];
         if (!process) {

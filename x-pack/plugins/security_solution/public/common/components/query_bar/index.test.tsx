@@ -214,15 +214,18 @@ describe('QueryBar ', () => {
         />
       );
 
-      const queryInput = wrapper.find(QueryBar).find('input[data-test-subj="queryInput"]');
+      let queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
       queryInput.simulate('change', { target: { value: 'host.name:*' } });
 
-      expect(queryInput.html()).toContain('value="host.name:*"');
+      wrapper.update();
+      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
+      expect(queryInput.props().children).toBe('host.name:*');
 
       wrapper.setProps({ filterQueryDraft: null });
       wrapper.update();
+      queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
 
-      expect(queryInput.html()).toContain('value=""');
+      expect(queryInput.props().children).toBe('');
     });
   });
 
@@ -258,7 +261,7 @@ describe('QueryBar ', () => {
       const onSubmitQueryRef = searchBarProps.onQuerySubmit;
       const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
 
-      const queryInput = wrapper.find(QueryBar).find('input[data-test-subj="queryInput"]');
+      const queryInput = wrapper.find(QueryBar).find('textarea[data-test-subj="queryInput"]');
       queryInput.simulate('change', { target: { value: 'hello: world' } });
       wrapper.update();
 

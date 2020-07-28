@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies use of the SysInternals tool PsExec.exe making a network connection. This could be an indication of lateral movement.",
+  "false_positives": [
+    "PsExec is a dual-use tool that can be used for benign or malicious activity. It's important to baseline your environment to determine the amount of noise to expect from this tool."
+  ],
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "PsExec Network Connection",
+  "query": "event.category:network and event.type:connection and process.name:PsExec.exe",
+  "risk_score": 21,
+  "rule_id": "55d551c6-333b-4665-ab7e-5d14a59715ce",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1035",
+          "name": "Service Execution",
+          "reference": "https://attack.mitre.org/techniques/T1035/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1035",
+          "name": "Service Execution",
+          "reference": "https://attack.mitre.org/techniques/T1035/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 3
+}

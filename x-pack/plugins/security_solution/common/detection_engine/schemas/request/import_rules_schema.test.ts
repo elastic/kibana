@@ -1643,10 +1643,12 @@ describe('import rules schema', () => {
           {
             id: 'some_uuid',
             namespace_type: 'single',
+            type: 'detection',
           },
           {
             id: 'some_uuid',
             namespace_type: 'agnostic',
+            type: 'endpoint',
           },
         ],
       };
@@ -1728,6 +1730,7 @@ describe('import rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,type"',
         'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
       ]);
       expect(message.schema).toEqual({});

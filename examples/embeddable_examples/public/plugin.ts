@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import { EmbeddableSetup, EmbeddableStart } from '../../../src/plugins/embeddable/public';
-import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  CONTEXT_MENU_TRIGGER,
+} from '../../../src/plugins/embeddable/public';
+import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
+import {
+  HelloWorldEmbeddableFactory,
   HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddableFactoryDefinition,
-  HelloWorldEmbeddableFactory,
 } from './hello_world';
 import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoEmbeddableFactoryDefinition } from './todo';
+
 import {
   MULTI_TASK_TODO_EMBEDDABLE,
   MultiTaskTodoEmbeddableFactory,
@@ -46,9 +51,17 @@ import {
   TodoRefEmbeddableFactory,
   TodoRefEmbeddableFactoryDefinition,
 } from './todo/todo_ref_embeddable_factory';
+import { ACTION_EDIT_BOOK, createEditBookAction } from './book/edit_book_action';
+import { BookEmbeddable, BOOK_EMBEDDABLE } from './book/book_embeddable';
+import {
+  BookEmbeddableFactory,
+  BookEmbeddableFactoryDefinition,
+} from './book/book_embeddable_factory';
+import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
+  uiActions: UiActionsStart;
 }
 
 export interface EmbeddableExamplesStartDependencies {
@@ -62,11 +75,18 @@ interface ExampleEmbeddableFactories {
   getListContainerEmbeddableFactory: () => ListContainerFactory;
   getTodoEmbeddableFactory: () => TodoEmbeddableFactory;
   getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
+  getBookEmbeddableFactory: () => BookEmbeddableFactory;
 }
 
 export interface EmbeddableExamplesStart {
   createSampleData: () => Promise<void>;
   factories: ExampleEmbeddableFactories;
+}
+
+declare module '../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_EDIT_BOOK]: { embeddable: BookEmbeddable };
+  }
 }
 
 export class EmbeddableExamplesPlugin
@@ -121,6 +141,20 @@ export class EmbeddableExamplesPlugin
         getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
       }))
     );
+    this.exampleEmbeddableFactories.getBookEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
+      BOOK_EMBEDDABLE,
+      new BookEmbeddableFactoryDefinition(async () => ({
+        getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
+        openModal: (await core.getStartServices())[0].overlays.openModal,
+      }))
+    );
+
+    const editBookAction = createEditBookAction(async () => ({
+      getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
+      openModal: (await core.getStartServices())[0].overlays.openModal,
+    }));
+    deps.uiActions.registerAction(editBookAction);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);
   }
 
   public start(

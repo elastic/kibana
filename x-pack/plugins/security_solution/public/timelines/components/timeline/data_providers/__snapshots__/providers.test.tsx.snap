@@ -5,7 +5,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-0"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -18,13 +17,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -42,18 +41,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-1"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -66,13 +67,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -90,18 +91,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-2"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -114,13 +117,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -138,18 +141,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-3"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -162,13 +167,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -186,18 +191,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-4"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -210,13 +217,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -234,18 +241,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-5"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -258,13 +267,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -282,18 +291,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-6"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -306,13 +317,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -330,18 +341,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-7"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -354,13 +367,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -378,18 +391,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-8"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -402,13 +417,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -426,18 +441,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-9"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -450,13 +467,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -474,18 +491,20 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
   <EuiFlexGroup
     alignItems="center"
     gutterSize="none"
-    key="droppable-10"
   >
     <Styled(EuiFlexItem)
       grow={false}
@@ -498,13 +517,13 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         />
       </styled.div>
     </Styled(EuiFlexItem)>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         (
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
     <EuiFlexItem
       grow={false}
     >
@@ -522,13 +541,17 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         <Component />
       </Connect(Droppable)>
     </EuiFlexItem>
-    <EuiFlexItem
+    <Styled(EuiFlexItem)
       grow={false}
     >
       <styled.span>
         )
       </styled.span>
-    </EuiFlexItem>
+    </Styled(EuiFlexItem)>
+    <AddDataProviderPopover
+      browserFields={Object {}}
+      timelineId="foo"
+    />
   </EuiFlexGroup>
 </div>
 `;

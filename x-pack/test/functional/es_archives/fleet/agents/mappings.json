@@ -1839,6 +1839,12 @@
             "config_id": {
               "type": "keyword"
             },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "type": "keyword"
+            },
             "description": {
               "type": "text"
             },
@@ -1847,6 +1853,7 @@
             },
             "inputs": {
               "type": "nested",
+              "enabled": false,
               "properties": {
                 "config": {
                   "type": "flattened"
@@ -1854,28 +1861,29 @@
                 "enabled": {
                   "type": "boolean"
                 },
-                "processors": {
-                  "type": "keyword"
-                },
                 "streams": {
                   "type": "nested",
                   "properties": {
-                    "agent_stream": {
+                    "compiled_stream": {
                       "type": "flattened"
                     },
                     "config": {
                       "type": "flattened"
                     },
                     "dataset": {
-                      "type": "keyword"
+                      "properties": {
+                        "name": {
+                          "type": "keyword"
+                        },
+                        "type": {
+                          "type": "keyword"
+                        }
+                      }
                     },
                     "enabled": {
                       "type": "boolean"
                     },
                     "id": {
-                      "type": "keyword"
-                    },
-                    "processors": {
                       "type": "keyword"
                     },
                     "vars": {
@@ -1915,6 +1923,12 @@
             },
             "revision": {
               "type": "integer"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "type": "keyword"
             }
           }
         },

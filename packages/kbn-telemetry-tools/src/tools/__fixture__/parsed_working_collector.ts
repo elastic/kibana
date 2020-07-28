@@ -40,6 +40,13 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
             type: 'boolean',
           },
         },
+        my_array: {
+          total: {
+            type: 'number',
+          },
+          type: { type: 'boolean' },
+        },
+        my_str_array: { type: 'keyword' },
       },
     },
     fetch: {
@@ -62,6 +69,20 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
             kind: SyntaxKind.BooleanKeyword,
             type: 'BooleanKeyword',
           },
+        },
+        my_array: {
+          total: {
+            kind: SyntaxKind.NumberKeyword,
+            type: 'NumberKeyword',
+          },
+          type: {
+            kind: SyntaxKind.BooleanKeyword,
+            type: 'BooleanKeyword',
+          },
+        },
+        my_str_array: {
+          kind: SyntaxKind.StringKeyword,
+          type: 'StringKeyword',
         },
       },
     },

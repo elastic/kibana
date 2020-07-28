@@ -12,6 +12,7 @@ interface Props {
   mappings: boolean;
   settings: boolean;
   aliases: boolean;
+  contentWhenEmpty?: JSX.Element | null;
 }
 
 const texts = {
@@ -26,8 +27,17 @@ const texts = {
   }),
 };
 
-export const TemplateContentIndicator = ({ mappings, settings, aliases }: Props) => {
+export const TemplateContentIndicator = ({
+  mappings,
+  settings,
+  aliases,
+  contentWhenEmpty = null,
+}: Props) => {
   const getColor = (flag: boolean) => (flag ? 'primary' : 'hollow');
+
+  if (!mappings && !settings && !aliases) {
+    return contentWhenEmpty;
+  }
 
   return (
     <>

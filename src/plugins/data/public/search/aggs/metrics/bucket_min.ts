@@ -23,15 +23,10 @@ import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
 import { AggConfigSerialized, BaseAggParams } from '../types';
-import { GetInternalStartServicesFn } from '../../../types';
 
 export interface AggParamsBucketMin extends BaseAggParams {
   customMetric?: AggConfigSerialized;
   customBucket?: AggConfigSerialized;
-}
-
-export interface BucketMinMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
 }
 
 const overallMinLabel = i18n.translate('data.search.aggs.metrics.overallMinLabel', {
@@ -42,22 +37,15 @@ const minBucketTitle = i18n.translate('data.search.aggs.metrics.minBucketTitle',
   defaultMessage: 'Min Bucket',
 });
 
-export const getBucketMinMetricAgg = ({
-  getInternalStartServices,
-}: BucketMinMetricAggDependencies) => {
+export const getBucketMinMetricAgg = () => {
   const { subtype, params, getSerializedFormat } = siblingPipelineAggHelper;
 
-  return new MetricAggType(
-    {
-      name: METRIC_TYPES.MIN_BUCKET,
-      title: minBucketTitle,
-      makeLabel: (agg) => makeNestedLabel(agg, overallMinLabel),
-      subtype,
-      params: [...params()],
-      getSerializedFormat,
-    },
-    {
-      getInternalStartServices,
-    }
-  );
+  return new MetricAggType({
+    name: METRIC_TYPES.MIN_BUCKET,
+    title: minBucketTitle,
+    makeLabel: (agg) => makeNestedLabel(agg, overallMinLabel),
+    subtype,
+    params: [...params()],
+    getSerializedFormat,
+  });
 };

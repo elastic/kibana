@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiBetaBadge,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import {
@@ -208,18 +209,20 @@ export function InnerWorkspacePanel({
             />{' '}
             <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
           </p>
-          <EuiButtonEmpty
-            href="https://www.elastic.co/products/kibana/feedback"
-            iconType="popout"
-            iconSide="right"
-            size="xs"
-            target="_blank"
-          >
-            <FormattedMessage
-              id="xpack.lens.editorFrame.goToForums"
-              defaultMessage="Make requests and give feedback"
-            />
-          </EuiButtonEmpty>
+          <p>
+            <small>
+              <EuiLink
+                href="https://www.elastic.co/products/kibana/feedback"
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.lens.editorFrame.goToForums"
+                  defaultMessage="Make requests and give feedback"
+                />
+              </EuiLink>
+            </small>
+          </p>
         </EuiText>
       </div>
     );

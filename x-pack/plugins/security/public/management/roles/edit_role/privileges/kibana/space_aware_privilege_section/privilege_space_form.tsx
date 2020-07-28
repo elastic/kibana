@@ -88,7 +88,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiOverlayMask>
+      <EuiOverlayMask headerZindexLocation="below">
         <EuiFlyout onClose={this.closeFlyout} size="m" maxWidth={true}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">

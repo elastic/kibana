@@ -11,6 +11,15 @@ installDir="$PARENT_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
+# cd "$KIBANA_DIR"
+# source "test/scripts/jenkins_xpack_page_load_metrics.sh"
+
+cd "$KIBANA_DIR"
+source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
+
+cd "$KIBANA_DIR"
+source "test/scripts/jenkins_xpack_saved_objects_field_metrics.sh"
+
 echo " -> running visual regression tests from x-pack directory"
 cd "$XPACK_DIR"
 yarn percy exec -t 10000 -- -- \
@@ -18,6 +27,3 @@ yarn percy exec -t 10000 -- -- \
     --debug --bail \
     --kibana-install-dir "$installDir" \
     --config test/visual_regression/config.ts;
-
-# cd "$KIBANA_DIR"
-# source "test/scripts/jenkins_xpack_page_load_metrics.sh"

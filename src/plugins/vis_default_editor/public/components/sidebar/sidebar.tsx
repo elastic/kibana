@@ -20,7 +20,7 @@
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
 import { get, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { keyCodes, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
 
 import {
@@ -119,7 +119,7 @@ function DefaultEditorSideBar({
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     (event) => {
-      if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
+      if (event.ctrlKey && event.key === keys.ENTER) {
         event.preventDefault();
         event.stopPropagation();
 

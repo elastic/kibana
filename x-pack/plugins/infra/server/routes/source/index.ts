@@ -37,26 +37,56 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
       try {
         const { type, sourceId } = request.params;
 
-        const source = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          sourceId
-        );
+        const [source, logIndicesExist, metricIndicesExist, indexFields] = await Promise.all([
+          libs.sources.getSourceConfiguration(requestContext.core.savedObjects.client, sourceId),
+          libs.sourceStatus.hasLogIndices(requestContext, sourceId),
+          libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
+          libs.fields.getFields(requestContext, sourceId, typeToInfraIndexType(type)),
+        ]);
+
         if (!source) {
           return response.notFound();
         }
 
         const status = {
-          logIndicesExist: await libs.sourceStatus.hasLogIndices(requestContext, sourceId),
-          metricIndicesExist: await libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-          indexFields: await libs.fields.getFields(
-            requestContext,
-            sourceId,
-            typeToInfraIndexType(type)
-          ),
+          logIndicesExist,
+          metricIndicesExist,
+          indexFields,
         };
 
         return response.ok({
           body: SourceResponseRuntimeType.encode({ source, status }),
+        });
+      } catch (error) {
+        return response.internalError({
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  framework.registerRoute(
+    {
+      method: 'get',
+      path: '/api/metrics/source/{sourceId}/{type}/hasData',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+          type: schema.string(),
+        }),
+      },
+    },
+    async (requestContext, request, response) => {
+      try {
+        const { type, sourceId } = request.params;
+
+        const hasData =
+          type === 'metrics'
+            ? await libs.sourceStatus.hasMetricIndices(requestContext, sourceId)
+            : await libs.sourceStatus.hasLogIndices(requestContext, sourceId);
+
+        return response.ok({
+          body: { hasData },
         });
       } catch (error) {
         return response.internalError({

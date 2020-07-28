@@ -12,15 +12,29 @@ interface AlertExpressionPopoverProps {
   content: React.ReactElement;
   description: string;
   'data-test-subj': string;
+  isEnabled?: boolean;
   id: string;
-  value: string;
+  value: string | JSX.Element;
+  isInvalid?: boolean;
 }
+
+const getColor = (
+  isOpen: boolean,
+  isEnabled?: boolean,
+  isInvalid?: boolean
+): 'primary' | 'secondary' | 'subdued' | 'danger' => {
+  if (isInvalid === true) return 'danger';
+  if (isEnabled === false) return 'subdued';
+  return isOpen ? 'primary' : 'secondary';
+};
 
 export const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
   'aria-label': ariaLabel,
   content,
   'data-test-subj': dataTestSubj,
   description,
+  isEnabled,
+  isInvalid,
   id,
   value,
 }) => {
@@ -32,11 +46,11 @@ export const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
       button={
         <EuiExpression
           aria-label={ariaLabel}
-          color={isOpen ? 'primary' : 'secondary'}
+          color={getColor(isOpen, isEnabled, isInvalid)}
           data-test-subj={dataTestSubj}
           description={description}
           isActive={isOpen}
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={isEnabled ? () => setIsOpen(!isOpen) : undefined}
           value={value}
         />
       }

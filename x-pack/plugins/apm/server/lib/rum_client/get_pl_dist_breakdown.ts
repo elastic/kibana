@@ -19,6 +19,7 @@ import {
   USER_AGENT_OS,
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
+import { MICRO_TO_SEC, microToSec } from './get_page_load_distribution';
 
 export const getBreakdownField = (breakdown: string) => {
   switch (breakdown) {
@@ -40,7 +41,9 @@ export const getPageLoadDistBreakdown = async (
   maxDuration: number,
   breakdown: string
 ) => {
-  const stepValue = (maxDuration - minDuration) / 50;
+  // convert secs to micros
+  const stepValue =
+    (maxDuration * MICRO_TO_SEC - minDuration * MICRO_TO_SEC) / 50;
   const stepValues = [];
 
   for (let i = 1; i < 51; i++) {
@@ -69,6 +72,9 @@ export const getPageLoadDistBreakdown = async (
                 field: TRANSACTION_DURATION,
                 values: stepValues,
                 keyed: false,
+                hdr: {
+                  number_of_significant_value_digits: 3,
+                },
               },
             },
           },
@@ -88,7 +94,7 @@ export const getPageLoadDistBreakdown = async (
       name: String(key),
       data: pageDist.values?.map(({ key: pKey, value }, index: number, arr) => {
         return {
-          x: Math.round(pKey / 1000),
+          x: microToSec(pKey),
           y: index === 0 ? value : value - arr[index - 1].value,
         };
       }),
