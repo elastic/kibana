@@ -63,8 +63,8 @@ expect.extend({
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
-            this.utils.stringify(expected) !== this.utils.stringify(received!)
-              ? `Received:     ${this.utils.printReceived(received)}`
+            this.utils.stringify(expected) !== this.utils.stringify(received[0]!)
+              ? `Received:     ${this.utils.printReceived(received[0])}`
               : ''
           }`
       : () =>
