@@ -17,11 +17,12 @@
  * under the License.
  */
 
-export function ComboBoxProvider({ getService }) {
+export function ComboBoxProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
+  const PageObjects = getPageObjects(['common']);
 
   // wrapper around EuiComboBox interactions
   class ComboBox {
@@ -55,6 +56,7 @@ export function ComboBoxProvider({ getService }) {
 
     async _waitForOptionsListLoading(comboBoxElement) {
       await comboBoxElement.waitForDeletedByClassName('euiLoadingSpinner');
+      await PageObjects.common.sleep(1000);
     }
 
     async getOptionsList(comboBoxSelector) {
