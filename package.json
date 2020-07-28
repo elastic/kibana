@@ -455,7 +455,7 @@
     "jest-cli": "^25.5.4",
     "jest-environment-jsdom-thirteen": "^1.0.1",
     "jest-raw-loader": "^1.0.1",
-    "jimp": "^0.9.6",
+    "jimp": "^0.14.0",
     "json5": "^1.0.1",
     "license-checker": "^16.0.0",
     "listr": "^0.14.1",
