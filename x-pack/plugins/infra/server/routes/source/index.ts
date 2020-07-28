@@ -91,7 +91,6 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
           type === 'metrics' ? source.configuration.metricAlias : source.configuration.logAlias;
         const results = await hasData(indexPattern, client);
 
-
         return response.ok({
           body: { hasData: results },
         });
