@@ -93,7 +93,7 @@ export const AlertsList: React.FunctionComponent = () => {
   useEffect(() => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, searchText, typesFilter, actionTypesFilter]);
+  }, [alertTypesState, page, searchText, typesFilter, actionTypesFilter]);
 
   useEffect(() => {
     (async () => {
@@ -136,30 +136,33 @@ export const AlertsList: React.FunctionComponent = () => {
   }, []);
 
   async function loadAlertsData() {
-    setAlertsState({ ...alertsState, isLoading: true });
-    try {
-      const alertsResponse = await loadAlerts({
-        http,
-        page,
-        searchText,
-        typesFilter,
-        actionTypesFilter,
-      });
-      setAlertsState({
-        isLoading: false,
-        data: alertsResponse.data,
-        totalItemCount: alertsResponse.total,
-      });
-    } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage',
-          {
-            defaultMessage: 'Unable to load alerts',
-          }
-        ),
-      });
-      setAlertsState({ ...alertsState, isLoading: false });
+    const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
+    if (hasAnyAuthorizedAlertType) {
+      setAlertsState({ ...alertsState, isLoading: true });
+      try {
+        const alertsResponse = await loadAlerts({
+          http,
+          page,
+          searchText,
+          typesFilter,
+          actionTypesFilter,
+        });
+        setAlertsState({
+          isLoading: false,
+          data: alertsResponse.data,
+          totalItemCount: alertsResponse.total,
+        });
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage',
+            {
+              defaultMessage: 'Unable to load alerts',
+            }
+          ),
+        });
+        setAlertsState({ ...alertsState, isLoading: false });
+      }
     }
   }
 
