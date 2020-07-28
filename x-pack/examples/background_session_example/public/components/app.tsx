@@ -5,8 +5,6 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
@@ -112,9 +110,7 @@ export const BackgroundSessionExampleApp = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiButtonEmpty onClick={startNewSession}>
-            <FormattedMessage id="backgroundSessionExample.generateId" defaultMessage="New" />
-          </EuiButtonEmpty>
+          <EuiButtonEmpty onClick={startNewSession}>New</EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGrid>
     );
@@ -210,10 +206,7 @@ export const BackgroundSessionExampleApp = ({
             {/* <EuiFlexItem grow={true}>{getSessionSelector()}</EuiFlexItem> */}
             <EuiFlexItem grow={false}>
               <EuiButton type="primary" onClick={onSearchSourceSearch}>
-                <FormattedMessage
-                  id="backgroundSessionExample.searchSOurce"
-                  defaultMessage="Use Search Source"
-                />
+                Use Search Source
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGrid>
@@ -233,10 +226,7 @@ export const BackgroundSessionExampleApp = ({
             {/* <EuiFlexItem grow={true}>{getSessionSelector()}</EuiFlexItem> */}
             <EuiFlexItem grow={false}>
               <EuiButton type="primary" onClick={onAsyncSearch}>
-                <FormattedMessage
-                  id="backgroundSessionExample.asyncSearch"
-                  defaultMessage="Use Async Search"
-                />
+                Use Async Search
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGrid>
@@ -268,10 +258,7 @@ export const BackgroundSessionExampleApp = ({
             </EuiFormRow>
             <EuiFormRow>
               <EuiButton type="primary" onClick={onBackgroundSession}>
-                <FormattedMessage
-                  id="backgroundSessionExample.backgroundSessionService"
-                  defaultMessage="Use Background Session Service directly"
-                />
+                Use Background Session Service directly
               </EuiButton>
             </EuiFormRow>
           </EuiFlexItem>
@@ -284,66 +271,48 @@ export const BackgroundSessionExampleApp = ({
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
     <Router basename={basename}>
-      <I18nProvider>
-        <>
-          <navigation.ui.TopNavMenu appName={PLUGIN_ID} showSearchBar={true} />
-          <EuiPage restrictWidth="1000px">
-            <EuiPageBody>
-              <EuiPageHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="backgroundSessionExample.helloWorldText"
-                      defaultMessage="{name}"
-                      values={{ name: PLUGIN_NAME }}
-                    />
-                  </h1>
+      <>
+        <navigation.ui.TopNavMenu appName={PLUGIN_ID} showSearchBar={true} />
+        <EuiPage restrictWidth="1000px">
+          <EuiPageBody>
+            <EuiPageHeader>
+              <EuiTitle size="l">
+                <h1>{PLUGIN_NAME}</h1>
+              </EuiTitle>
+            </EuiPageHeader>
+            <EuiPageContent>
+              <EuiPageContentHeader>
+                <EuiTitle>
+                  <h2>How can I incorporate Background Sessions into my solution?</h2>
                 </EuiTitle>
-              </EuiPageHeader>
-              <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="backgroundSessionExample.congratulationsTitle"
-                        defaultMessage="How can I incorporate Background Sessions into my solution?"
+              </EuiPageContentHeader>
+              <EuiPageContentBody>
+                <EuiText>
+                  <EuiFlexGrid columns={1}>
+                    <EuiFlexItem>
+                      <IndexPatternSelect
+                        savedObjectsClient={savedObjectsClient}
+                        placeholder="Select index pattern"
+                        indexPatternId={indexPatternId || ''}
+                        onChange={(newIndexPatternId: any) => {
+                          setIndexPatternId(newIndexPatternId);
+                        }}
+                        isClearable={false}
                       />
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
-                  <EuiText>
-                    <EuiFlexGrid columns={1}>
-                      <EuiFlexItem>
-                        <IndexPatternSelect
-                          savedObjectsClient={savedObjectsClient}
-                          placeholder={i18n.translate(
-                            'backgroundSessionExample.selectIndexPatternPlaceholder',
-                            {
-                              defaultMessage: 'Select index pattern',
-                            }
-                          )}
-                          indexPatternId={indexPatternId || ''}
-                          onChange={(newIndexPatternId: any) => {
-                            setIndexPatternId(newIndexPatternId);
-                          }}
-                          isClearable={false}
-                        />
-                      </EuiFlexItem>
+                    </EuiFlexItem>
 
-                      <EuiFlexItem grow={true}>{getSessionSelector()}</EuiFlexItem>
+                    <EuiFlexItem grow={true}>{getSessionSelector()}</EuiFlexItem>
 
-                      <EuiFlexItem grow={false}>
-                        <EuiSteps steps={backgroundOptions} />
-                      </EuiFlexItem>
-                    </EuiFlexGrid>
-                  </EuiText>
-                </EuiPageContentBody>
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
-        </>
-      </I18nProvider>
+                    <EuiFlexItem grow={false}>
+                      <EuiSteps steps={backgroundOptions} />
+                    </EuiFlexItem>
+                  </EuiFlexGrid>
+                </EuiText>
+              </EuiPageContentBody>
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      </>
     </Router>
   );
 };
