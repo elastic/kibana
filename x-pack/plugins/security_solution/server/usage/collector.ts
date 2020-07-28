@@ -11,7 +11,7 @@ import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
-  detections: DetectionsUsage | {};
+  detections: DetectionsUsage;
   endpoints: EndpointUsage | {};
 }
 
