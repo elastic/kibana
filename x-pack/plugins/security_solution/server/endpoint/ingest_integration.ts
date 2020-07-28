@@ -10,7 +10,7 @@ import { factory as policyConfigFactory } from '../../common/endpoint/models/pol
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
 import { Manifest } from './lib/artifacts';
-import { reportErrors, ManifestConstants } from './lib/artifacts/common';
+import { reportErrors } from './lib/artifacts/common';
 import { InternalArtifactCompleteSchema } from './schemas/artifacts';
 import { manifestDispatchSchema } from '../../common/endpoint/schema/manifest';
 
@@ -18,14 +18,14 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
   let manifest: Manifest | null = null;
 
   try {
-    manifest = await manifestManager.getLastComputedManifest(ManifestConstants.SCHEMA_VERSION);
+    manifest = await manifestManager.getLastComputedManifest();
 
     // If we have not yet computed a manifest, then we have to do so now. This should only happen
     // once.
     if (manifest == null) {
       // New computed manifest based on current state of exception list
-      const newManifest = await manifestManager.buildNewManifest(ManifestConstants.SCHEMA_VERSION);
-      const diffs = newManifest.diff(Manifest.getDefault(ManifestConstants.SCHEMA_VERSION));
+      const newManifest = await manifestManager.buildNewManifest();
+      const diffs = newManifest.diff(Manifest.getDefault());
 
       // Compress new artifacts
       const adds = diffs.filter((diff) => diff.type === 'add').map((diff) => diff.id);
@@ -63,7 +63,7 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
     logger.error(err);
   }
 
-  return manifest ?? Manifest.getDefault(ManifestConstants.SCHEMA_VERSION);
+  return manifest ?? Manifest.getDefault();
 };
 
 /**
