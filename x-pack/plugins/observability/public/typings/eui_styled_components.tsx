@@ -16,23 +16,25 @@ export interface EuiTheme {
   darkMode: boolean;
 }
 
-const EuiThemeProvider = <
+function EuiThemeProvider<
   OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme
 >({
   darkMode = false,
   ...otherProps
 }: Omit<ThemeProviderProps<OuterTheme, OuterTheme & EuiTheme>, 'theme'> & {
   darkMode?: boolean;
-}) => (
-  <ThemeProvider
-    {...otherProps}
-    theme={(outerTheme?: OuterTheme) => ({
-      ...outerTheme,
-      eui: darkMode ? euiDarkVars : euiLightVars,
-      darkMode,
-    })}
-  />
-);
+}) {
+  return (
+    <ThemeProvider
+      {...otherProps}
+      theme={(outerTheme?: OuterTheme) => ({
+        ...outerTheme,
+        eui: darkMode ? euiDarkVars : euiLightVars,
+        darkMode,
+      })}
+    />
+  );
+}
 
 const {
   default: euiStyled,
