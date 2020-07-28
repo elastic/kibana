@@ -21,12 +21,12 @@ describe('manifest_manager', () => {
       expect(newManifest.diff(oldManifest!)).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           type: 'delete',
         },
         {
           id:
-            'endpoint-exceptionlist-linux-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
+            'endpoint-exceptionlist-macos-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
           type: 'add',
         },
       ]);
@@ -41,12 +41,12 @@ describe('manifest_manager', () => {
       expect(diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           type: 'delete',
         },
         {
           id:
-            'endpoint-exceptionlist-linux-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
+            'endpoint-exceptionlist-macos-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
           type: 'add',
         },
       ]);
@@ -125,7 +125,7 @@ describe('manifest_manager', () => {
         manifest_version: '1.0.1',
         schema_version: 'v1',
         artifacts: {
-          'endpoint-exceptionlist-linux-v1': {
+          'endpoint-exceptionlist-macos-v1': {
             compression_algorithm: 'zlib',
             encryption_algorithm: 'none',
             decoded_sha256: '0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
@@ -133,17 +133,7 @@ describe('manifest_manager', () => {
             decoded_size: 292,
             encoded_size: 131,
             relative_url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
-          },
-          'endpoint-exceptionlist-macos-v1': {
-            compression_algorithm: 'zlib',
-            encryption_algorithm: 'none',
-            decoded_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
-            encoded_sha256: '975382ab55d019cbab0bbac207a54e2a7d489fad6e8f6de34fc6402e5ef37b1e',
-            decoded_size: 432,
-            encoded_size: 147,
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
           },
           'endpoint-exceptionlist-windows-v1': {
             compression_algorithm: 'zlib',
