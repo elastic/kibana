@@ -80,7 +80,7 @@ describe('config_schema', () => {
       importTimeout: moment.duration(1, 'hour').add(1, 'second'),
     };
     expect(() => ConfigSchema.validate(mock)).toThrow(
-      '[importTimeout]: duration cannot be greater than 1 hour'
+      '[importTimeout]: duration cannot be greater than 30 minutes'
     );
   });
 });

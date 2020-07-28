@@ -4,13 +4,10 @@
 
 ## RouteConfigOptions.timeout property
 
-Timeouts for processing durations. Default value: { server: false }
+Timeouts for processing durations. Response timeout is in milliseconds. Default value: 2 minutes
 
 <b>Signature:</b>
 
 ```typescript
-timeout?: {
-        server?: false | number;
-        socket?: false | number;
-    };
+timeout?: number;
 ```

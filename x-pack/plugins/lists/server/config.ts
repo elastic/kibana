@@ -14,8 +14,8 @@ export const ConfigSchema = schema.object({
     validate: (value) => {
       if (value.asMinutes() < 2) {
         throw new Error('duration cannot be less than 2 minutes');
-      } else if (value.asHours() > 1) {
-        throw new Error('duration cannot be greater than 1 hour');
+      } else if (value.asMinutes() > 30) {
+        throw new Error('duration cannot be greater than 30 minutes');
       }
     },
   }),
