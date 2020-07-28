@@ -15,7 +15,7 @@ import { LegacyAPICaller } from '../../../../../src/core/server';
 interface Args {
   count: number;
   query: string;
-  timezone: string;
+  timezone?: string;
   filter: any;
 }
 
