@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-import { UpdateCommentsArray, updateCommentsArray } from './update_comments';
+import { UpdateCommentsArray, updateCommentsArray } from './update_comment';
 
 /**
  * Types the DefaultCommentsUpdate as:
