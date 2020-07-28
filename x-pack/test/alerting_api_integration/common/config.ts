@@ -87,6 +87,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
+          '--xpack.task_manager.max_workers=100',
+          '--xpack.task_manager.poll_interval=1000',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {
               actionTypeId: '.slack',
