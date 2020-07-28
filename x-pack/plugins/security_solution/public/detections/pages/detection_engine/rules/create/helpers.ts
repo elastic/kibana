@@ -12,6 +12,7 @@ import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/const
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import { RuleType } from '../../../../../../common/detection_engine/types';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
 import { NewRule, Rule } from '../../../../containers/detection_engine/rules';
@@ -57,7 +58,7 @@ export interface RuleFields {
 }
 type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
 type ThresholdRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
-type MlRuleFields<T> = Omit<T, 'queryBar' | 'index'>;
+type MlRuleFields<T> = Omit<T, 'queryBar' | 'index' | 'threshold'>;
 
 const isMlFields = <T>(
   fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
@@ -69,9 +70,9 @@ const isThresholdFields = <T>(
 
 export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
   if (isMlRule(type)) {
-    const { index, queryBar, ...mlRuleFields } = fields;
+    const { index, queryBar, threshold, ...mlRuleFields } = fields;
     return mlRuleFields;
-  } else if (type === 'threshold') {
+  } else if (isThresholdRule(type)) {
     const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
     return thresholdRuleFields;
   } else {
