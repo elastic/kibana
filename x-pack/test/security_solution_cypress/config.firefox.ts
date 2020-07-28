@@ -10,7 +10,7 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
-import { SecuritySolutionChromeTestRunner } from './runner';
+import { SecuritySolutionFirefoxTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -23,10 +23,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...kibanaCommonTestsConfig.getAll(),
 
-    testRunner: SecuritySolutionChromeTestRunner,
+    testRunner: SecuritySolutionFirefoxTestRunner,
 
     esArchiver: {
       directory: resolve(__dirname, 'es_archives'),
+    },
+
+    browser: {
+      type: 'firefox',
+      acceptInsecureCerts: true,
     },
 
     esTestCluster: {
@@ -46,6 +51,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        '--xpack.ingestManager.enabled=true',
+        '--xpack.ingestManager.fleet.enabled=true',
       ],
     },
   };

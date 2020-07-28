@@ -2,10 +2,10 @@
 
 source test/scripts/jenkins_test_setup_xpack.sh
 
-echo " -> Running security solution cypress tests"
+echo " -> Running security solution chrome tests"
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "Security solution Cypress Tests" \
+checks-reporter-with-killswitch "Security Solution Chrome Tests" \
  node scripts/functional_tests \
    --debug --bail \
    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
