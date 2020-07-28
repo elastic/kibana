@@ -22,12 +22,12 @@ export interface BreakdownGroupProps {
   onChange: (values: BreakdownItem[]) => void;
 }
 
-export const BreakdownGroup = ({
+export function BreakdownGroup({
   id,
   disabled,
   onChange,
   items,
-}: BreakdownGroupProps) => {
+}: BreakdownGroupProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [activeItems, setActiveItems] = useState<BreakdownItem[]>(items);
@@ -97,4 +97,4 @@ export const BreakdownGroup = ({
       </EuiPopover>
     </EuiFilterGroup>
   );
-};
+}
