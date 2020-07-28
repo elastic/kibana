@@ -524,9 +524,9 @@ WARNING: Missing README.
 See Configuring security in Kibana.
 
 
-- {kib-repo}blob/{branch}/x-pack/plugins/security_solution[securitySolution]
+- {kib-repo}blob/{branch}/x-pack/plugins/security_solution/README.md[securitySolution]
 
-WARNING: Missing README.
+Welcome to the Kibana Security Solution plugin! This README will go over getting started with development and testing.
 
 
 - {kib-repo}blob/{branch}/x-pack/plugins/snapshot_restore/README.md[snapshotRestore]
