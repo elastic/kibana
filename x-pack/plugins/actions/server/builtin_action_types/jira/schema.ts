@@ -5,18 +5,78 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ExternalIncidentServiceConfiguration } from '../case/schema';
+import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from './case_schema';
 
-export const JiraPublicConfiguration = {
+export const ExternalIncidentServiceConfiguration = {
+  apiUrl: schema.string(),
   projectKey: schema.string(),
-  ...ExternalIncidentServiceConfiguration,
+  // TODO: to remove - set it optional for the current stage to support Case ServiceNow implementation
+  incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
+  isCaseOwned: schema.maybe(schema.boolean()),
 };
 
-export const JiraPublicConfigurationSchema = schema.object(JiraPublicConfiguration);
+export const ExternalIncidentServiceConfigurationSchema = schema.object(
+  ExternalIncidentServiceConfiguration
+);
 
-export const JiraSecretConfiguration = {
+export const ExternalIncidentServiceSecretConfiguration = {
   email: schema.string(),
   apiToken: schema.string(),
 };
 
-export const JiraSecretConfigurationSchema = schema.object(JiraSecretConfiguration);
+export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
+  ExternalIncidentServiceSecretConfiguration
+);
+
+export const ExecutorSubActionSchema = schema.oneOf([
+  schema.literal('getIncident'),
+  schema.literal('pushToService'),
+  schema.literal('handshake'),
+  schema.literal('getCreateIssueMetadata'),
+  schema.literal('getCapabilities'),
+]);
+
+export const ExecutorSubActionPushParamsSchema = schema.object({
+  savedObjectId: schema.string(),
+  title: schema.string(),
+  description: schema.nullable(schema.string()),
+  externalId: schema.nullable(schema.string()),
+  issueType: schema.nullable(schema.string()),
+  priority: schema.nullable(schema.string()),
+  labels: schema.nullable(schema.arrayOf(schema.string())),
+  // TODO: remove later  - need for support Case push multiple comments
+  comments: schema.maybe(schema.arrayOf(CommentSchema)),
+  ...EntityInformation,
+});
+
+export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
+  externalId: schema.string(),
+});
+
+// Reserved for future implementation
+export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
+export const ExecutorSubActionCreateIssueMetadataParamsSchema = schema.object({});
+export const ExecutorSubActionGetCapabilitiesParamsSchema = schema.object({});
+
+export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('getIncident'),
+    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('handshake'),
+    subActionParams: ExecutorSubActionHandshakeParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('pushToService'),
+    subActionParams: ExecutorSubActionPushParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('getCreateIssueMetadata'),
+    subActionParams: ExecutorSubActionCreateIssueMetadataParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('getCapabilities'),
+    subActionParams: ExecutorSubActionGetCapabilitiesParamsSchema,
+  }),
+]);
