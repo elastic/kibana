@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         expect(await testSubjects.getVisibleText('policyDetailsSuccessMessage')).to.equal(
-          `Policy ${policyInfo.packageConfig.name} has been updated.`
+          `Integration ${policyInfo.packageConfig.name} has been updated.`
         );
       });
       it('should persist update on the screen', async () => {

@@ -88,7 +88,7 @@ export const PolicyDetails = React.memo(() => {
             <span data-test-subj="policyDetailsSuccessMessage">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
-                defaultMessage="Policy {name} has been updated."
+                defaultMessage="Integration {name} has been updated."
                 values={{ name: policyName }}
               />
             </span>
