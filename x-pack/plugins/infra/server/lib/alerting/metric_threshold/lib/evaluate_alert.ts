@@ -172,7 +172,7 @@ const getValuesFromAggregations = (
     }
     return buckets.map((bucket) => ({
       key: bucket.key_as_string,
-      value: bucket.aggregatedValue?.value,
+      value: bucket.aggregatedValue?.value ?? null,
     }));
   } catch (e) {
     return NaN; // Error state
