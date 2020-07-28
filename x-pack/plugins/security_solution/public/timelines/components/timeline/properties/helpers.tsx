@@ -193,17 +193,19 @@ export const NewCase = React.memo<NewCaseProps>(
     ]);
 
     return (
-      <EuiButtonEmpty
-        data-test-subj="attach-timeline-case"
-        color={compact ? undefined : 'text'}
-        iconSide="left"
-        iconType="paperClip"
-        disabled={timelineStatus === TimelineStatus.draft}
-        onClick={handleClick}
-        size={compact ? 'xs' : undefined}
-      >
-        {buttonText}
-      </EuiButtonEmpty>
+      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
+        <EuiButtonEmpty
+          data-test-subj="attach-timeline-case"
+          color={compact ? undefined : 'text'}
+          iconSide="left"
+          iconType="paperClip"
+          disabled={timelineStatus === TimelineStatus.draft}
+          onClick={handleClick}
+          size={compact ? 'xs' : undefined}
+        >
+          {buttonText}
+        </EuiButtonEmpty>
+      </EuiToolTip>
     );
   }
 );
@@ -226,7 +228,7 @@ export const ExistingCase = React.memo<ExistingCaseProps>(
       : i18n.ATTACH_TIMELINE_TO_EXISTING_CASE;
 
     return (
-      <>
+      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
         <EuiButtonEmpty
           data-test-subj="attach-timeline-existing-case"
           color={compact ? undefined : 'text'}
@@ -238,7 +240,7 @@ export const ExistingCase = React.memo<ExistingCaseProps>(
         >
           {buttonText}
         </EuiButtonEmpty>
-      </>
+      </EuiToolTip>
     );
   }
 );
