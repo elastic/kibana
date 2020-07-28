@@ -37,7 +37,7 @@ describe('OverviewEmpty', () => {
       expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
         beats: {
           description:
-            'Leightweight Beats can send data from hundreds or thousands of machines and systems',
+            'Lightweight Beats can send data from hundreds or thousands of machines and systems',
           label: 'Add data with Beats',
           url: '/app/home#/tutorial_directory/security',
         },
@@ -70,7 +70,7 @@ describe('OverviewEmpty', () => {
       expect(wrapper.find('[data-test-subj="empty-page"]').prop('actions')).toEqual({
         beats: {
           description:
-            'Leightweight Beats can send data from hundreds or thousands of machines and systems',
+            'Lightweight Beats can send data from hundreds or thousands of machines and systems',
           label: 'Add data with Beats',
           url: '/app/home#/tutorial_directory/security',
         },

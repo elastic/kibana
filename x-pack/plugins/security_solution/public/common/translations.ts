@@ -36,7 +36,7 @@ export const EMPTY_ACTION_BEATS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.pages.common.emptyActionBeatsDescription',
   {
     defaultMessage:
-      'Leightweight Beats can send data from hundreds or thousands of machines and systems',
+      'Lightweight Beats can send data from hundreds or thousands of machines and systems',
   }
 );
 
