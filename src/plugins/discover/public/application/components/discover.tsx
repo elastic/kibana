@@ -80,10 +80,10 @@ export function Discover({
   }
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch } = opts;
-  const [toggle4On, setToggle4On] = useState(true);
+  const [toggleOn, setToggleOn] = useState(true);
 
-  const onToggle4Change = (e) => {
-    setToggle4On(e.target.checked);
+  const onToggleChange = (e) => {
+    setToggleOn(e.target.checked);
   };
 
   return (
@@ -159,29 +159,43 @@ export function Discover({
                     {resultState === 'ready' && (
                       <div className="dscWrapper__content">
                         <div className="dscResultCount">
-                          <div className="dscResuntCount__title eui-textTruncate eui-textNoWrap">
-                            <HitsCounter
-                              hits={hits > 0 ? hits : 0}
-                              showResetButton={!!(savedSearch && savedSearch.id)}
-                              onResetQuery={resetQuery}
-                            />
-                          </div>
-                          <div className="dscResultCount__actions eui-textTruncate eui-textNoWrap">
-                            <TimechartHeader
-                              from={toMoment(timeRange.from)}
-                              to={toMoment(timeRange.to)}
-                              options={intervalOptions}
-                              onChangeInterval={onChangeInterval}
-                              stateInterval={state.interval}
-                              showScaledInfo={bucketInterval.scaled}
-                              bucketIntervalDescription={bucketInterval.description}
-                              bucketIntervalScale={bucketInterval.scale}
-                            />
-                          </div>
+                          <EuiFlexGroup justifyContent="spaceBetween">
+                            <EuiFlexItem
+                              grow={false}
+                              className="dscResuntCount__title eui-textTruncate eui-textNoWrap"
+                            >
+                              <HitsCounter
+                                hits={hits > 0 ? hits : 0}
+                                showResetButton={!!(savedSearch && savedSearch.id)}
+                                onResetQuery={resetQuery}
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem className="dscResultCount__actions eui-textTruncate eui-textNoWrap">
+                              <TimechartHeader
+                                from={toMoment(timeRange.from)}
+                                to={toMoment(timeRange.to)}
+                                options={intervalOptions}
+                                onChangeInterval={onChangeInterval}
+                                stateInterval={state.interval}
+                                showScaledInfo={bucketInterval.scaled}
+                                bucketIntervalDescription={bucketInterval.description}
+                                bucketIntervalScale={bucketInterval.scale}
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonToggle
+                                label={toggleOn ? 'Hide chart' : 'Show chart'}
+                                iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                                onChange={onToggleChange}
+                                isSelected={toggleOn}
+                                isEmpty
+                              />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
                         </div>
 
                         <div className="dscResults">
-                          {opts.timefield && (
+                          {opts.timefield && toggleOn && (
                             <section
                               aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
                               className="dscTimechart"
