@@ -5,17 +5,10 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import {
-  INGEST_API_AGENT_CONFIGS,
-  INGEST_API_EPM_PACKAGES,
-  INGEST_API_PACKAGE_CONFIGS,
-} from './services/ingest';
+import { INGEST_API_EPM_PACKAGES, INGEST_API_PACKAGE_CONFIGS } from './services/ingest';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 import { GetPolicyListResponse } from '../../types';
-import {
-  GetAgentConfigsResponse,
-  GetPackagesResponse,
-} from '../../../../../../../ingest_manager/common';
+import { GetPackagesResponse } from '../../../../../../../ingest_manager/common';
 
 const generator = new EndpointDocGenerator('policy-list');
 
@@ -81,31 +74,9 @@ export const mockPolicyResultList: (options?: {
  * returns that API's result value
  */
 export const policyListApiPathHandlers = (totalPolicies: number = 1) => {
-  let lastResponseForPolicyResultList: undefined | GetPolicyListResponse;
-
   return {
     [INGEST_API_PACKAGE_CONFIGS]: () => {
-      return (lastResponseForPolicyResultList = mockPolicyResultList({ total: totalPolicies }));
-    },
-    /**
-     * Returns the list of agent configuration with IDs that were also included in the call to
-     * Policy Package Configs API
-     */
-    [INGEST_API_AGENT_CONFIGS]: (): GetAgentConfigsResponse => {
-      const items = lastResponseForPolicyResultList
-        ? lastResponseForPolicyResultList.items.map((policy) => {
-            const agentConfig = generator.generateAgentConfig();
-            agentConfig.id = policy.config_id;
-            return agentConfig;
-          })
-        : [generator.generateAgentConfig()];
-      return {
-        items,
-        page: 1,
-        perPage: 10,
-        success: true,
-        total: items.length,
-      };
+      return mockPolicyResultList({ total: totalPolicies });
     },
     [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
