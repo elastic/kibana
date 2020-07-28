@@ -233,7 +233,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
     async dataTableRowCount(expectedCount: number) {
       log.debug(`DashboardExpect.dataTableRowCount(${expectedCount})`);
       await retry.try(async () => {
-        const dataTableRows = await PageObjects.visChart.getTableVisData();
+        const dataTableRows = await PageObjects.visChart.getTableVisContent();
         expect(dataTableRows.length).to.be(expectedCount);
       });
     }

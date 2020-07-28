@@ -99,7 +99,7 @@ export const createTableVisCell = (
           <EuiToolTip content={filterForToolTipText}>
             <EuiButtonIcon
               aria-label={filterForToolTipText}
-              data-test-subj="filterForCellValue"
+              data-test-subj="tbvChartCell__filterForCellValue"
               onClick={() => onFilterClick(false)}
               iconType="magnifyWithPlus"
             />

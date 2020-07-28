@@ -26,21 +26,6 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
 
   class DataGrid {
     /**
-     * Finds data grid and returns data in the nested array format
-     * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-     * @param gridDataTestSubj data-test-subj selector of your grid component wrapper
-     * @param cellDataTestSubj data-test-subj selector of your grid grid cell
-     */
-
-    public async getDataFromTestSubj(
-      gridDataTestSubj: string,
-      cellDataTestSubj: string
-    ): Promise<string[][]> {
-      const table = await testSubjects.find(`${gridDataTestSubj}>dataGridWrapper`);
-      return await this.getDataFromElement(table, cellDataTestSubj);
-    }
-
-    /**
      * Converts the data grid data into nested array
      * [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
      * @param element table
@@ -54,7 +39,7 @@ export function DataGridProvider({ getService }: FtrProviderContext) {
         .toArray()
         .map((row) =>
           $(row)
-            .findTestSubject('dataGridRowCell')
+            .findTestSubjects('dataGridRowCell')
             .toArray()
             .map((cell) =>
               $(cell)

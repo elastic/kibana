@@ -46,7 +46,6 @@ import { InspectorProvider } from './inspector';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
-import { TableProvider } from './table';
 import { ToastsProvider } from './toasts';
 import { PieChartProvider, ElasticChartProvider } from './visualizations';
 import { ListingTableProvider } from './listing_table';
@@ -76,7 +75,6 @@ export const services = {
   comboBox: ComboBoxProvider,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
-  table: TableProvider,
   browser: BrowserProvider,
   pieChart: PieChartProvider,
   inspector: InspectorProvider,

@@ -56,10 +56,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         await retry.try(async () => {
-          const data = await PageObjects.visChart.getTableVisData();
+          const data = await PageObjects.visChart.getTableVisContent();
           expect(data.length).to.eql(10);
-          const bucketStart = parseInt(data[0][0].replace(/,/g, ''), 10);
-          const bucketEnd = parseInt(data[1][0].replace(/,/g, ''), 10);
+          const bucketStart = parseInt((data[0][0] as string).replace(/,/g, ''), 10);
+          const bucketEnd = parseInt((data[1][0] as string).replace(/,/g, ''), 10);
           const actualInterval = bucketEnd - bucketStart;
           expect(actualInterval).to.eql(providedInterval);
         });
@@ -72,10 +72,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
         await PageObjects.common.sleep(1000); // fix this
         await retry.try(async () => {
-          const data = await PageObjects.visChart.getTableVisData();
+          const data = await PageObjects.visChart.getTableVisContent();
           expect(data.length).to.eql(10);
-          const bucketStart = parseInt(data[0][0].replace(/,/g, ''), 10);
-          const bucketEnd = parseInt(data[1][0].replace(/,/g, ''), 10);
+          const bucketStart = parseInt((data[0][0] as string).replace(/,/g, ''), 10);
+          const bucketEnd = parseInt((data[1][0] as string).replace(/,/g, ''), 10);
           const actualInterval = bucketEnd - bucketStart;
           expect(actualInterval).to.eql(1200000000);
         });
