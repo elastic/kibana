@@ -16,8 +16,7 @@ export function useAppStateSyncing(appStateManager) {
   const { query } = getData();
 
   // Filter manager state persists across applications
-  // clear app state filters to prevent application filters from other applications
-  // from being transfered to maps
+  // clear app state filters to prevent application filters from other applications being transfered to maps
   query.filterManager.setAppFilters([]);
 
   const stateContainer = {
