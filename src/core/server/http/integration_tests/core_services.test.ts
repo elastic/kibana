@@ -54,8 +54,10 @@ describe('http service', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 
   beforeEach(async () => {
+    const parentEsClient = elasticsearchClientMock.createInternalClient();
     esClient = elasticsearchClientMock.createInternalClient();
-    MockElasticsearchClient.mockImplementation(() => esClient);
+    parentEsClient.child.mockReturnValue(esClient);
+    MockElasticsearchClient.mockImplementation(() => parentEsClient);
   }, 30000);
 
   afterEach(async () => {
