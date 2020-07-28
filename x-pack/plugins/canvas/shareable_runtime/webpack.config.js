@@ -55,7 +55,6 @@ module.exports = {
         options: {
           presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
         },
-        sideEffects: false,
       },
       {
         test: /\.tsx?$/,
@@ -92,6 +91,7 @@ module.exports = {
             },
           },
         ],
+        sideEffects: true,
       },
       {
         test: /\.module\.s(a|c)ss$/,
