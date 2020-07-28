@@ -34,6 +34,8 @@ const fnList = [
   'timelion',
   'to',
   'font',
+  'var',
+  'var_set',
   // ignore unsupported embeddables functions for now
 ].filter((fn) => !['savedSearch'].includes(fn));
 
