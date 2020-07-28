@@ -90,6 +90,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
             onClick={() => {
               onReassignClick();
             }}
+            disabled={!agent.active}
             key="reassignConfig"
           >
             <FormattedMessage
@@ -97,11 +98,10 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
               defaultMessage="Assign new agent config"
             />
           </EuiContextMenuItem>,
-
           <AgentUnenrollProvider forceUnenroll={isUnenrolling}>
             {(unenrollAgentsPrompt) => (
               <EuiContextMenuItem
-                disabled={!hasWriteCapabilites}
+                disabled={!hasWriteCapabilites || !agent.active}
                 icon="cross"
                 onClick={() => {
                   unenrollAgentsPrompt([agent.id], 1, () => {
