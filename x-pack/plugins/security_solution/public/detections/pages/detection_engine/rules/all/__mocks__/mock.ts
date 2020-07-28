@@ -9,6 +9,7 @@ import { Rule, RuleError } from '../../../../../containers/detection_engine/rule
 import { List } from '../../../../../../../common/detection_engine/schemas/types';
 import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
+import { fillEmptySeverityMappings } from '../../helpers';
 
 export const mockQueryBar: FieldValueQueryBar = {
   query: {
@@ -175,8 +176,8 @@ export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   license: 'Elastic License',
   name: 'Query with rule-id',
   description: '24/7',
-  severity: { value: 'low', mapping: [] },
-  riskScore: { value: 21, mapping: [] },
+  riskScore: { value: 21, mapping: [], isMappingChecked: false },
+  severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
   references: ['www.test.co'],
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],
