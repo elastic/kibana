@@ -24,6 +24,7 @@ import { ExpandableSectionAnalytics, ExpandableSectionResults } from '../expanda
 import { ExplorationQueryBar } from '../exploration_query_bar';
 
 import { getFeatureCount } from './common';
+import { ScatterplotMatrix } from './scatterplot_matrix';
 import { useOutlierData } from './use_outlier_data';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
 import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
@@ -122,6 +123,9 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           </>
         )}
       {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
+      {columnsWithCharts.length > 0 && tableItems.length > 0 && (
+        <ScatterplotMatrix {...outlierData} />
+      )}
       {showLegacyFeatureInfluenceFormatCallout && (
         <>
           <EuiCallOut

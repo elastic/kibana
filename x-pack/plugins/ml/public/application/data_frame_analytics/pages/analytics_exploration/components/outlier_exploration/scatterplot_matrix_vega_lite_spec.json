@@ -1,0 +1,55 @@
+{
+  "config": {"view": {"continuousWidth": 400, "continuousHeight": 300}},
+  "repeat": {
+    "column": [],
+    "row": []
+  },
+  "spec": {
+    "data": { "values": [] },
+    "mark": "point",
+    "encoding": {
+      "color": {
+        "condition": {
+          "value": "red",
+          "test": "(datum['ml.outlier_score'] >= SelectorName.cutoff)"
+        },
+        "value": "gray"
+      },
+      "opacity": {
+        "condition": {
+          "value": 0.75,
+          "test": "(datum['ml.outlier_score'] >= SelectorName.cutoff)"
+        },
+        "value": 0.25
+      },
+      "size": {
+        "condition": {
+          "value": 28,
+          "test": "(datum['ml.outlier_score'] >= SelectorName.cutoff)"
+        },
+        "value": 2
+      },
+      "tooltip": [{"type": "quantitative", "field": "ml.outlier_score"}],
+      "x": {"type": "quantitative", "field": {"repeat": "column"}},
+      "y": {"type": "quantitative", "field": {"repeat": "row"}}
+    },
+    "height": 100,
+    "selection": {
+      "SelectorName": {
+        "type": "single",
+        "fields": ["cutoff"],
+        "bind": {
+          "input": "range",
+          "max": 1,
+          "min": 0,
+          "name": "Outlier score Threshold:",
+          "step": 0.01
+        },
+        "init": {"cutoff": 0.8}
+      }
+    },
+    "transform": [],
+    "width": 100
+  },
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json"
+}
