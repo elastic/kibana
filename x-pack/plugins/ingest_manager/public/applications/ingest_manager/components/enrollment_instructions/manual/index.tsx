@@ -5,15 +5,7 @@
  */
 
 import React from 'react';
-import {
-  EuiText,
-  EuiSpacer,
-  EuiCode,
-  EuiTitle,
-  EuiCodeBlock,
-  EuiCopy,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiCode, EuiTitle, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EnrollmentAPIKey } from '../../../types';
 
@@ -65,16 +57,6 @@ systemctl start elastic-agent`;
       <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
         <pre style={{ overflow: 'scroll' }}>{windowsCommand}</pre>
       </EuiCodeBlock>
-      <EuiSpacer size="l" />
-      <EuiText>
-        <FormattedMessage
-          id="xpack.ingestManager.enrollmentInstructions.windowsInstructions"
-          defaultMessage="Alternatively, you can use {command} to start the agent; however, the resulting process will not persist after a system reboot."
-          values={{
-            command: <EuiCode>./elastic-agent run</EuiCode>,
-          }}
-        />
-      </EuiText>
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h4>
