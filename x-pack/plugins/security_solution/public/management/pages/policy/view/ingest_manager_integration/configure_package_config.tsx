@@ -50,6 +50,7 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
 
     return (
       <>
+        {/*
         <EuiTitle size="xs">
           <h4>
             <FormattedMessage
@@ -58,16 +59,19 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
             />
           </h4>
         </EuiTitle>
+        */}
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj={`endpointPackageConfig_${from === 'edit' ? 'edit' : 'create'}`}
           iconType="iInCircle"
+          /*
           title={i18n.translate(
             'xpack.securitySolution.endpoint.ingestManager.policyConfiguration.calloutTitle',
             {
               defaultMessage: 'Manage Policy configuration in the Security app',
             }
           )}
+          */
         >
           <EuiText size="s">
             <p>
@@ -95,7 +99,7 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.ingestManager.createPackageConfig.endpointConfiguration"
-                  defaultMessage="Any agents that use this agent configuration will use a basic policy. You can make changes to this policy in the Security app, and Fleet will deploy those changes to your agents."
+                  defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint Security integration within your agent configuration."
                 />
               )}
             </p>

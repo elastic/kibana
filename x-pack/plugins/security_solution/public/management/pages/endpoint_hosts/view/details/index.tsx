@@ -158,7 +158,7 @@ const PolicyResponseFlyoutPanel = memo<{
           <h4>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.host.policyResponse.title"
-              defaultMessage="Policy Response"
+              defaultMessage="Configuration Response"
             />
           </h4>
         </EuiText>
