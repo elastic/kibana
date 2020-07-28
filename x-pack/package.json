@@ -283,7 +283,7 @@
     "jsonwebtoken": "^8.5.1",
     "jsts": "^1.6.2",
     "kea": "^2.0.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "lz-string": "^1.4.4",
     "mapbox-gl": "^1.10.0",
     "mapbox-gl-draw-rectangle-mode": "^1.0.4",

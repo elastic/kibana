@@ -46,7 +46,7 @@
     "globby": "^8.0.1",
     "has-ansi": "^3.0.0",
     "is-path-inside": "^3.0.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "log-symbols": "^2.2.0",
     "multimatch": "^4.0.0",
     "ncp": "^2.0.0",

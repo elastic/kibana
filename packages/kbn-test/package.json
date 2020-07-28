@@ -28,7 +28,7 @@
     "getopts": "^2.2.4",
     "glob": "^7.1.2",
     "joi": "^13.5.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "parse-link-header": "^1.0.1",
     "rxjs": "^6.5.5",
     "strip-ansi": "^5.2.0",
