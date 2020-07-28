@@ -138,7 +138,7 @@ export const useWithSource = (
     docValueFields: EMPTY_DOCVALUE_FIELD,
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
-    indicesExist: null,
+    indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
     loading: true,
   });
 

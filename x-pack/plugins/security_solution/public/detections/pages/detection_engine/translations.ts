@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const BREADCRUMB_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.detectionsBreadcrumbTitle',
+  {
+    defaultMessage: 'Detections',
+  }
+);
+
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.detectionsPageTitle',
   {
