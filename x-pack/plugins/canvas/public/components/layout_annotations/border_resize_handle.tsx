@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
+import { TransformMatrix3d } from '../../lib/aeroelastic';
 
-export const BorderResizeHandle = ({ transformMatrix, zoomScale }) => (
+interface Props {
+  transformMatrix: TransformMatrix3d;
+  zoomScale?: number;
+}
+
+export const BorderResizeHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => (
   <div
     className="canvasBorderResizeHandle canvasLayoutAnnotation"
     style={{
@@ -19,4 +25,5 @@ export const BorderResizeHandle = ({ transformMatrix, zoomScale }) => (
 
 BorderResizeHandle.propTypes = {
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
+  zoomScale: PropTypes.number,
 };
