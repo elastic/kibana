@@ -42,34 +42,50 @@ export type ElasticsearchClient = Omit<
   };
 };
 
-interface ShardsResponse {
+/**
+ * All response typings are maintained until elasticsearch-js provides them out of the box
+ * https://github.com/elastic/elasticsearch-js/pull/970
+ */
+
+/**
+ * @public
+ */
+export interface ShardsResponse {
   total: number;
   successful: number;
   failed: number;
   skipped: number;
 }
 
-interface Explanation {
+/**
+ * @public
+ */
+export interface Explanation {
   value: number;
   description: string;
   details: Explanation[];
 }
 
-interface ShardsInfo {
+/**
+ * @public
+ */
+export interface ShardsInfo {
   total: number;
   successful: number;
   skipped: number;
   failed: number;
 }
 
+/**
+ * @public
+ */
 export interface CountResponse {
   _shards: ShardsInfo;
   count: number;
 }
 
 /**
- * Maintained until elasticsearch provides response typings out of the box
- * https://github.com/elastic/elasticsearch-js/pull/970
+ * @public
  */
 export interface SearchResponse<T = unknown> {
   took: number;
@@ -97,6 +113,9 @@ export interface SearchResponse<T = unknown> {
   aggregations?: any;
 }
 
+/**
+ * @public
+ */
 export interface GetResponse<T> {
   _index: string;
   _type: string;
@@ -109,6 +128,9 @@ export interface GetResponse<T> {
   _primary_term: number;
 }
 
+/**
+ * @public
+ */
 export interface DeleteDocumentResponse {
   _shards: ShardsResponse;
   found: boolean;

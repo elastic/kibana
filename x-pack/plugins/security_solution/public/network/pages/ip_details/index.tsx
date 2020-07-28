@@ -90,7 +90,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
     <div data-test-subj="ip-details-page">
       {indicesExist ? (
         <StickyContainer>
-          <FiltersGlobal>
+          <FiltersGlobal globalFullScreen={false}>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 

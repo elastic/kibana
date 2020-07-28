@@ -156,7 +156,10 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       {indicesExist ? (
         <StickyContainer>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal
+            globalFullScreen={globalFullScreen}
+            show={showGlobalFilters({ globalFullScreen, graphEventId })}
+          >
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 

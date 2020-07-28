@@ -15,12 +15,11 @@ import { ContentSection } from './';
 const props = {
   children: <div className="children" />,
   testSubj: 'contentSection',
-  className: 'test',
 };
 
 describe('ContentSection', () => {
   it('renders', () => {
-    const wrapper = shallow(<ContentSection {...props} />);
+    const wrapper = shallow(<ContentSection {...props} className="test" />);
 
     expect(wrapper.prop('data-test-subj')).toEqual('contentSection');
     expect(wrapper.prop('className')).toEqual('test');
