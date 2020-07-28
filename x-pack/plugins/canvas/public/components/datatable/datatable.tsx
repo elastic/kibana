@@ -11,7 +11,9 @@ import moment from 'moment';
 import { Paginate } from '../paginate';
 import { Datatable as DatatableType, DatatableColumn } from '../../../types';
 
-const getIcon = (type: any) => {
+type IconType = 'string' | 'number' | 'date' | 'boolean' | 'null';
+
+const getIcon = (type: IconType) => {
   if (type === null) {
     return;
   }
