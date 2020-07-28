@@ -232,7 +232,7 @@ describe('Policy Details', () => {
         );
         expect(warningCallout).toHaveLength(1);
         expect(warningCallout.text()).toEqual(
-          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this policy'
+          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this agent configuration.'
         );
       });
       it('should close dialog if cancel button is clicked', () => {
