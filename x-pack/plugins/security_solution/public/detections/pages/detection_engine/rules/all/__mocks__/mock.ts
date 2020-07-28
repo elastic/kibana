@@ -6,6 +6,7 @@
 
 import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
+import { List } from '../../../../../../../common/detection_engine/schemas/types';
 import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
 
@@ -153,6 +154,10 @@ export const mockRuleWithEverything = (id: string): Rule => ({
       ],
     },
   ],
+  threshold: {
+    field: 'host.name',
+    value: 50,
+  },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
   note: '# this is some markdown documentation',
@@ -163,6 +168,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
 export const mockAboutStepRule = (isNew = false): AboutStepRule => ({
   isNew,
   author: ['Elastic'],
+  isAssociatedToEndpointList: false,
   isBuildingBlock: false,
   timestampOverride: '',
   ruleNameOverride: '',
@@ -213,6 +219,10 @@ export const mockDefineStepRule = (isNew = false): DefineStepRule => ({
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
     title: 'Titled timeline',
   },
+  threshold: {
+    field: [''],
+    value: '100',
+  },
 });
 
 export const mockScheduleStepRule = (isNew = false): ScheduleStepRule => ({
@@ -231,3 +241,9 @@ export const mockRules: Rule[] = [
   mockRule('abe6c564-050d-45a5-aaf0-386c37dd1f61'),
   mockRule('63f06f34-c181-4b2d-af35-f2ace572a1ee'),
 ];
+
+export const mockExceptionsList: List = {
+  namespace_type: 'single',
+  id: '75cd4380-cc5e-11ea-9101-5b34f44aeb44',
+  type: 'detection',
+};

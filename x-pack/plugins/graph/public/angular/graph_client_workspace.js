@@ -107,7 +107,7 @@ function UnGroupOperation(parent, child) {
 // The main constructor for our GraphWorkspace
 function GraphWorkspace(options) {
   const self = this;
-  this.blacklistedNodes = [];
+  this.blocklistedNodes = [];
   this.options = options;
   this.undoLog = [];
   this.redoLog = [];
@@ -379,7 +379,7 @@ function GraphWorkspace(options) {
     this.redoLog = [];
     this.nodesMap = {};
     this.edgesMap = {};
-    this.blacklistedNodes = [];
+    this.blocklistedNodes = [];
     this.selectedNodes = [];
     this.lastResponse = null;
   };
@@ -630,11 +630,11 @@ function GraphWorkspace(options) {
     self.runLayout();
   };
 
-  this.unblacklist = function (node) {
-    self.arrRemove(self.blacklistedNodes, node);
+  this.unblocklist = function (node) {
+    self.arrRemove(self.blocklistedNodes, node);
   };
 
-  this.blacklistSelection = function () {
+  this.blocklistSelection = function () {
     const selection = self.getAllSelectedNodes();
     const danglingEdges = [];
     self.edges.forEach(function (edge) {
@@ -645,7 +645,7 @@ function GraphWorkspace(options) {
     });
     selection.forEach((node) => {
       delete self.nodesMap[node.id];
-      self.blacklistedNodes.push(node);
+      self.blocklistedNodes.push(node);
       node.isSelected = false;
     });
     self.arrRemoveAll(self.nodes, selection);
@@ -671,10 +671,10 @@ function GraphWorkspace(options) {
     }
     let step = {};
 
-    //Add any blacklisted nodes to exclusion list
+    //Add any blocklisted nodes to exclusion list
     const excludeNodesByField = {};
     const nots = [];
-    const avoidNodes = this.blacklistedNodes;
+    const avoidNodes = this.blocklistedNodes;
     for (let i = 0; i < avoidNodes.length; i++) {
       const n = avoidNodes[i];
       let arr = excludeNodesByField[n.data.field];
@@ -914,8 +914,8 @@ function GraphWorkspace(options) {
     const nodesByField = {};
     const excludeNodesByField = {};
 
-    //Add any blacklisted nodes to exclusion list
-    const avoidNodes = this.blacklistedNodes;
+    //Add any blocklisted nodes to exclusion list
+    const avoidNodes = this.blocklistedNodes;
     for (let i = 0; i < avoidNodes.length; i++) {
       const n = avoidNodes[i];
       let arr = excludeNodesByField[n.data.field];
@@ -1320,12 +1320,12 @@ function GraphWorkspace(options) {
     allExistingNodes.forEach((existingNode) => {
       addTermToFieldList(excludeNodesByField, existingNode.data.field, existingNode.data.term);
     });
-    const blacklistedNodes = self.blacklistedNodes;
-    blacklistedNodes.forEach((blacklistedNode) => {
+    const blocklistedNodes = self.blocklistedNodes;
+    blocklistedNodes.forEach((blocklistedNode) => {
       addTermToFieldList(
         excludeNodesByField,
-        blacklistedNode.data.field,
-        blacklistedNode.data.term
+        blocklistedNode.data.field,
+        blocklistedNode.data.term
       );
     });
 

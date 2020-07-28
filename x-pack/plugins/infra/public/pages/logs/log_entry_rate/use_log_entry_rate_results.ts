@@ -41,11 +41,13 @@ export const useLogEntryRateResults = ({
   startTime,
   endTime,
   bucketDuration = 15 * 60 * 1000,
+  filteredDatasets,
 }: {
   sourceId: string;
   startTime: number;
   endTime: number;
   bucketDuration: number;
+  filteredDatasets?: string[];
 }) => {
   const [logEntryRate, setLogEntryRate] = useState<LogEntryRateResults | null>(null);
 
@@ -53,7 +55,13 @@ export const useLogEntryRateResults = ({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callGetLogEntryRateAPI(sourceId, startTime, endTime, bucketDuration);
+        return await callGetLogEntryRateAPI(
+          sourceId,
+          startTime,
+          endTime,
+          bucketDuration,
+          filteredDatasets
+        );
       },
       onResolve: ({ data }) => {
         setLogEntryRate({
@@ -68,7 +76,7 @@ export const useLogEntryRateResults = ({
         setLogEntryRate(null);
       },
     },
-    [sourceId, startTime, endTime, bucketDuration]
+    [sourceId, startTime, endTime, bucketDuration, filteredDatasets]
   );
 
   const isLoading = useMemo(() => getLogEntryRateRequest.state === 'pending', [

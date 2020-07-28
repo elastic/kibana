@@ -177,8 +177,6 @@ describe('<ComponentTemplateCreate />', () => {
           template: {
             settings: SETTINGS,
             mappings: {
-              _source: {},
-              _meta: {},
               properties: {
                 [BOOLEAN_MAPPING_FIELD.name]: {
                   type: BOOLEAN_MAPPING_FIELD.type,
@@ -187,7 +185,7 @@ describe('<ComponentTemplateCreate />', () => {
             },
             aliases: ALIASES,
           },
-          _kbnMeta: { usedBy: [] },
+          _kbnMeta: { usedBy: [], isManaged: false },
         };
 
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);

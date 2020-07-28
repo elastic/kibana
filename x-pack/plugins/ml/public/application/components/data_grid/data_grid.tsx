@@ -20,9 +20,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
+
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
@@ -193,21 +196,31 @@ export const DataGrid: FC<Props> = memo(
               ...(chartsButtonVisible
                 ? {
                     additionalControls: (
-                      <EuiButtonEmpty
-                        aria-checked={chartsVisible}
-                        className={`euiDataGrid__controlBtn${
-                          chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
-                        }`}
-                        data-test-subj={`${dataTestSubj}HistogramButton`}
-                        size="xs"
-                        iconType="visBarVertical"
-                        color="text"
-                        onClick={toggleChartVisibility}
-                      >
-                        {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
-                          defaultMessage: 'Histogram charts',
+                      <EuiToolTip
+                        content={i18n.translate('xpack.ml.dataGrid.histogramButtonToolTipContent', {
+                          defaultMessage:
+                            'Queries run to fetch histogram chart data will use a sample size per shard of {samplerShardSize} documents.',
+                          values: {
+                            samplerShardSize: DEFAULT_SAMPLER_SHARD_SIZE,
+                          },
                         })}
-                      </EuiButtonEmpty>
+                      >
+                        <EuiButtonEmpty
+                          aria-checked={chartsVisible}
+                          className={`euiDataGrid__controlBtn${
+                            chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
+                          }`}
+                          data-test-subj={`${dataTestSubj}HistogramButton`}
+                          size="xs"
+                          iconType="visBarVertical"
+                          color="text"
+                          onClick={toggleChartVisibility}
+                        >
+                          {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
+                            defaultMessage: 'Histogram charts',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiToolTip>
                     ),
                   }
                 : {}),

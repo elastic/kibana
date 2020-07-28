@@ -23,6 +23,7 @@ import { useApolloClient } from '../../../common/utils/apollo_context';
 import { allTimelinesQuery } from './index.gql_query';
 import * as i18n from '../../pages/translations';
 import {
+  TimelineType,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
   TemplateTimelineTypeLiteralWithNull,
@@ -74,6 +75,7 @@ export const getAllTimeline = memoizeOne(
               return acc;
             }, {})
           : null,
+      excludedRowRendererIds: timeline.excludedRowRendererIds,
       favorite: timeline.favorite,
       noteIds: timeline.noteIds,
       notes:
@@ -92,6 +94,7 @@ export const getAllTimeline = memoizeOne(
       title: timeline.title,
       updated: timeline.updated,
       updatedBy: timeline.updatedBy,
+      timelineType: timeline.timelineType ?? TimelineType.default,
     }))
 );
 

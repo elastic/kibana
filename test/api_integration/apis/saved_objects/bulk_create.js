@@ -76,6 +76,7 @@ export default function ({ getService }) {
                     dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
                   },
                   references: [],
+                  namespaces: ['default'],
                 },
               ],
             });
@@ -121,6 +122,7 @@ export default function ({ getService }) {
                     title: 'An existing visualization',
                   },
                   references: [],
+                  namespaces: ['default'],
                   migrationVersion: {
                     visualization: resp.body.saved_objects[0].migrationVersion.visualization,
                   },
@@ -134,6 +136,7 @@ export default function ({ getService }) {
                     title: 'A great new dashboard',
                   },
                   references: [],
+                  namespaces: ['default'],
                   migrationVersion: {
                     dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
                   },

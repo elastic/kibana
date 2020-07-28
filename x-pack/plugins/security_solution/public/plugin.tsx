@@ -22,7 +22,7 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import { jiraActionType } from './common/lib/connectors';
+import { jiraActionType, resilientActionType } from './common/lib/connectors';
 import {
   PluginSetup,
   PluginStart,
@@ -84,6 +84,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
+    plugins.triggers_actions_ui.actionTypeRegistry.register(resilientActionType());
 
     const mountSecurityFactory = async () => {
       const storage = new Storage(localStorage);
@@ -280,7 +281,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     core.application.register({
-      id: `${APP_ID}:${SecurityPageName.management}`,
+      id: `${APP_ID}:${SecurityPageName.administration}`,
       title: ADMINISTRATION,
       order: 9002,
       euiIconType: APP_ICON,
@@ -323,10 +324,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
-    plugins.ingestManager.registerPackageConfigComponent(
-      'endpoint',
-      ConfigureEndpointPackageConfig
-    );
+    if (plugins.ingestManager) {
+      plugins.ingestManager.registerPackageConfigComponent(
+        'endpoint',
+        ConfigureEndpointPackageConfig
+      );
+    }
 
     return {};
   }

@@ -12,5 +12,8 @@
     "painless_lab"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "kibanaReact"
+  ]
 }

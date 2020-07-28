@@ -13,7 +13,7 @@ import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 
-export const PageViewsTrend = () => {
+export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end, serviceName } = urlParams;
@@ -39,6 +39,7 @@ export const PageViewsTrend = () => {
           },
         });
       }
+      return Promise.resolve(undefined);
     },
     [end, start, serviceName, uiFilters, breakdowns]
   );
@@ -67,4 +68,4 @@ export const PageViewsTrend = () => {
       <PageViewsChart data={data} loading={status !== 'success'} />
     </div>
   );
-};
+}

@@ -149,7 +149,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             "euiIconType": "logoSecurity",
             "id": "security",
             "label": "Security",
-            "order": 3000,
+            "order": 4000,
           },
           "data-test-subj": "siem",
           "href": "siem",
@@ -164,7 +164,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             "euiIconType": "logoObservability",
             "id": "observability",
             "label": "Observability",
-            "order": 2000,
+            "order": 3000,
           },
           "data-test-subj": "metrics",
           "href": "metrics",
@@ -233,7 +233,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             "euiIconType": "logoObservability",
             "id": "observability",
             "label": "Observability",
-            "order": 2000,
+            "order": 3000,
           },
           "data-test-subj": "logs",
           "href": "logs",
@@ -372,12 +372,13 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       handler={[Function]}
     />
     <EuiOverlayMask
+      headerZindexLocation="below"
       onClick={[Function]}
     >
       <Portal
         containerInfo={
           <div
-            class="euiOverlayMask"
+            class="euiOverlayMask euiOverlayMask--belowHeader"
           />
         }
       />
@@ -3908,16 +3909,9 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       handler={[Function]}
     />
     <EuiOverlayMask
+      headerZindexLocation="below"
       onClick={[Function]}
-    >
-      <Portal
-        containerInfo={
-          <div
-            class="euiOverlayMask"
-          />
-        }
-      />
-    </EuiOverlayMask>
+    />
     <EuiFocusTrap
       clickOutsideDisables={true}
       disabled={false}

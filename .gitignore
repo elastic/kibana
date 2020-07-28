@@ -2,6 +2,7 @@
 .signing-config.json
 .ackrc
 /.es
+/.chromium
 .DS_Store
 .node_binaries
 .native_modules
@@ -30,6 +31,7 @@ disabledPlugins
 webpackstats.json
 /config/*
 !/config/kibana.yml
+!/config/node.options
 coverage
 selenium
 .babel_register_cache.json

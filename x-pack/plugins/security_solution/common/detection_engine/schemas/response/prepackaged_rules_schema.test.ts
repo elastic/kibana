@@ -6,14 +6,22 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { PrePackagedRulesSchema, prePackagedRulesSchema } from './prepackaged_rules_schema';
+import {
+  PrePackagedRulesAndTimelinesSchema,
+  prePackagedRulesAndTimelinesSchema,
+} from './prepackaged_rules_schema';
 import { exactCheck } from '../../../exact_check';
 import { foldLeftRight, getPaths } from '../../../test_utils';
 
 describe('prepackaged_rules_schema', () => {
   test('it should validate an empty prepackaged response with defaults', () => {
-    const payload: PrePackagedRulesSchema = { rules_installed: 0, rules_updated: 0 };
-    const decoded = prePackagedRulesSchema.decode(payload);
+    const payload: PrePackagedRulesAndTimelinesSchema = {
+      rules_installed: 0,
+      rules_updated: 0,
+      timelines_installed: 0,
+      timelines_updated: 0,
+    };
+    const decoded = prePackagedRulesAndTimelinesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -22,12 +30,14 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should not validate an extra invalid field added', () => {
-    const payload: PrePackagedRulesSchema & { invalid_field: string } = {
+    const payload: PrePackagedRulesAndTimelinesSchema & { invalid_field: string } = {
       rules_installed: 0,
       rules_updated: 0,
       invalid_field: 'invalid',
+      timelines_installed: 0,
+      timelines_updated: 0,
     };
-    const decoded = prePackagedRulesSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -36,8 +46,13 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_installed" number', () => {
-    const payload: PrePackagedRulesSchema = { rules_installed: -1, rules_updated: 0 };
-    const decoded = prePackagedRulesSchema.decode(payload);
+    const payload: PrePackagedRulesAndTimelinesSchema = {
+      rules_installed: -1,
+      rules_updated: 0,
+      timelines_installed: 0,
+      timelines_updated: 0,
+    };
+    const decoded = prePackagedRulesAndTimelinesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -48,8 +63,13 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_updated"', () => {
-    const payload: PrePackagedRulesSchema = { rules_installed: 0, rules_updated: -1 };
-    const decoded = prePackagedRulesSchema.decode(payload);
+    const payload: PrePackagedRulesAndTimelinesSchema = {
+      rules_installed: 0,
+      rules_updated: -1,
+      timelines_installed: 0,
+      timelines_updated: 0,
+    };
+    const decoded = prePackagedRulesAndTimelinesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -60,9 +80,14 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response if "rules_installed" is not there', () => {
-    const payload: PrePackagedRulesSchema = { rules_installed: 0, rules_updated: 0 };
+    const payload: PrePackagedRulesAndTimelinesSchema = {
+      rules_installed: 0,
+      rules_updated: 0,
+      timelines_installed: 0,
+      timelines_updated: 0,
+    };
     delete payload.rules_installed;
-    const decoded = prePackagedRulesSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -73,9 +98,14 @@ describe('prepackaged_rules_schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response if "rules_updated" is not there', () => {
-    const payload: PrePackagedRulesSchema = { rules_installed: 0, rules_updated: 0 };
+    const payload: PrePackagedRulesAndTimelinesSchema = {
+      rules_installed: 0,
+      rules_updated: 0,
+      timelines_installed: 0,
+      timelines_updated: 0,
+    };
     delete payload.rules_updated;
-    const decoded = prePackagedRulesSchema.decode(payload);
+    const decoded = prePackagedRulesAndTimelinesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 

@@ -26,17 +26,6 @@ describe('delete_exception_list_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  // TODO It does allow an id of undefined, is this wanted behavior?
-  test.skip('it should NOT accept an undefined for an id', () => {
-    const payload = getDeleteExceptionListSchemaMock();
-    delete payload.id;
-    const decoded = deleteExceptionListSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "undefined" supplied to "id"']);
-    expect(message.schema).toEqual({});
-  });
-
   test('it should accept an undefined for "namespace_type" but default to "single"', () => {
     const payload = getDeleteExceptionListSchemaMock();
     delete payload.namespace_type;

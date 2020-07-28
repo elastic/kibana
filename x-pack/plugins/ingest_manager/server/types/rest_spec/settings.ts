@@ -13,5 +13,6 @@ export const PutSettingsRequestSchema = {
     package_auto_upgrade: schema.maybe(schema.boolean()),
     kibana_url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     kibana_ca_sha256: schema.maybe(schema.string()),
+    has_seen_add_data_notice: schema.maybe(schema.boolean()),
   }),
 };

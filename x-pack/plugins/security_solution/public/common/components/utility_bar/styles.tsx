@@ -14,6 +14,14 @@ export interface BarProps {
   border?: boolean;
 }
 
+export interface BarSectionProps {
+  grow?: boolean;
+}
+
+export interface BarGroupProps {
+  grow?: boolean;
+}
+
 export const Bar = styled.aside.attrs({
   className: 'siemUtilityBar',
 })<BarProps>`
@@ -36,8 +44,8 @@ Bar.displayName = 'Bar';
 
 export const BarSection = styled.div.attrs({
   className: 'siemUtilityBar__section',
-})`
-  ${({ theme }) => css`
+})<BarSectionProps>`
+  ${({ grow, theme }) => css`
     & + & {
       margin-top: ${theme.eui.euiSizeS};
     }
@@ -53,14 +61,18 @@ export const BarSection = styled.div.attrs({
         margin-left: ${theme.eui.euiSize};
       }
     }
+    ${grow &&
+    css`
+      flex: 1;
+    `}
   `}
 `;
 BarSection.displayName = 'BarSection';
 
 export const BarGroup = styled.div.attrs({
   className: 'siemUtilityBar__group',
-})`
-  ${({ theme }) => css`
+})<BarGroupProps>`
+  ${({ grow, theme }) => css`
     align-items: flex-start;
     display: flex;
     flex-wrap: wrap;
@@ -93,6 +105,10 @@ export const BarGroup = styled.div.attrs({
         margin-right: 0;
       }
     }
+    ${grow &&
+    css`
+      flex: 1;
+    `}
   `}
 `;
 BarGroup.displayName = 'BarGroup';
@@ -118,3 +134,12 @@ export const BarAction = styled.div.attrs({
   `}
 `;
 BarAction.displayName = 'BarAction';
+
+export const BarSpacer = styled.div.attrs({
+  className: 'siemUtilityBar__spacer',
+})`
+  ${() => css`
+    flex: 1;
+  `}
+`;
+BarSpacer.displayName = 'BarSpacer';

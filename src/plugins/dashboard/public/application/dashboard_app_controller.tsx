@@ -25,8 +25,8 @@ import React, { useState, ReactElement } from 'react';
 import ReactDOM from 'react-dom';
 import angular from 'angular';
 
-import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, pipe, Subscription } from 'rxjs';
+import { filter, map, mapTo, startWith, switchMap } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
@@ -60,6 +60,7 @@ import {
   ViewMode,
   ContainerOutput,
   EmbeddableInput,
+  SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
@@ -252,11 +253,7 @@ export class DashboardAppController {
       navActions[TopNavIds.VISUALIZE]();
     };
 
-    const updateIndexPatterns = (container?: DashboardContainer) => {
-      if (!container || isErrorEmbeddable(container)) {
-        return;
-      }
-
+    function getDashboardIndexPatterns(container: DashboardContainer): IndexPattern[] {
       let panelIndexPatterns: IndexPattern[] = [];
       Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
@@ -266,19 +263,34 @@ export class DashboardAppController {
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
       panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+      return panelIndexPatterns;
+    }
 
-      if (panelIndexPatterns && panelIndexPatterns.length > 0) {
-        $scope.$evalAsync(() => {
-          $scope.indexPatterns = panelIndexPatterns;
+    const updateIndexPatternsOperator = pipe(
+      filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
+      map(getDashboardIndexPatterns),
+      // using switchMap for previous task cancellation
+      switchMap((panelIndexPatterns: IndexPattern[]) => {
+        return new Observable((observer) => {
+          if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+            $scope.$evalAsync(() => {
+              if (observer.closed) return;
+              $scope.indexPatterns = panelIndexPatterns;
+              observer.complete();
+            });
+          } else {
+            indexPatterns.getDefault().then((defaultIndexPattern) => {
+              if (observer.closed) return;
+              $scope.$evalAsync(() => {
+                if (observer.closed) return;
+                $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
+                observer.complete();
+              });
+            });
+          }
         });
-      } else {
-        indexPatterns.getDefault().then((defaultIndexPattern) => {
-          $scope.$evalAsync(() => {
-            $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
-          });
-        });
-      }
-    };
+      })
+    );
 
     const getEmptyScreenProps = (
       shouldShowEditHelp: boolean,
@@ -383,11 +395,17 @@ export class DashboardAppController {
               ) : null;
             };
 
-            updateIndexPatterns(dashboardContainer);
-
-            outputSubscription = dashboardContainer.getOutput$().subscribe(() => {
-              updateIndexPatterns(dashboardContainer);
-            });
+            outputSubscription = new Subscription();
+            outputSubscription.add(
+              dashboardContainer
+                .getOutput$()
+                .pipe(
+                  mapTo(dashboardContainer),
+                  startWith(dashboardContainer), // to trigger initial index pattern update
+                  updateIndexPatternsOperator
+                )
+                .subscribe()
+            );
 
             inputSubscription = dashboardContainer.getInput$().subscribe(() => {
               let dirty = false;
@@ -431,7 +449,7 @@ export class DashboardAppController {
               .getIncomingEmbeddablePackage();
             if (incomingState) {
               if ('id' in incomingState) {
-                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, {
+                container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
                   savedObjectId: incomingState.id,
                 });
               } else if ('input' in incomingState) {
@@ -440,7 +458,7 @@ export class DashboardAppController {
                 const explicitInput = {
                   savedVis: input,
                 };
-                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
+                container.addOrUpdateEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
               }
             }
           }

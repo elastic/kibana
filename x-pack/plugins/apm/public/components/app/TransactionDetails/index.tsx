@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiFlexGrid } from '@elastic/eui';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
@@ -29,6 +30,7 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
+import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -84,12 +86,18 @@ export function TransactionDetails() {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
-            <TransactionBreakdown />
+            <EuiFlexGrid columns={2} gutterSize="s">
+              <EuiFlexItem>
+                <TransactionBreakdown />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ErroneousTransactionsRateChart />
+              </EuiFlexItem>
+            </EuiFlexGrid>
 
             <EuiSpacer size="s" />
 
             <TransactionCharts
-              hasMLJob={false}
               charts={transactionChartsData}
               urlParams={urlParams}
               location={location}

@@ -69,7 +69,7 @@ export async function getLimitedPackages(options: {
       });
     })
   );
-  return installedPackagesInfo.filter((pkgInfo) => isPackageLimited).map((pkgInfo) => pkgInfo.name);
+  return installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
 }
 
 export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {

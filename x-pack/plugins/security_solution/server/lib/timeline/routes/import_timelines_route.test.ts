@@ -83,10 +83,8 @@ describe('import timelines', () => {
       };
     });
 
-    jest.doMock('./utils/import_timelines', () => {
-      const originalModule = jest.requireActual('./utils/import_timelines');
+    jest.doMock('./utils/get_timelines_from_stream', () => {
       return {
-        ...originalModule,
         getTupleDuplicateErrorsAndUniqueTimeline: mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue(
           [mockDuplicateIdErrors, mockUniqueParsedObjects]
         ),
@@ -173,6 +171,8 @@ describe('import timelines', () => {
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
         errors: [
           {
             id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
@@ -295,6 +295,8 @@ describe('import timelines', () => {
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
         errors: [
           {
             id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
@@ -322,6 +324,8 @@ describe('import timelines', () => {
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
         errors: [
           {
             id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
@@ -349,6 +353,8 @@ describe('import timelines', () => {
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
         errors: [
           {
             id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
@@ -409,7 +415,7 @@ describe('import timelines', () => {
   });
 });
 
-describe('import template timelines', () => {
+describe('import timeline templates', () => {
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let securitySetup: SecurityPluginSetup;
@@ -458,10 +464,8 @@ describe('import template timelines', () => {
       };
     });
 
-    jest.doMock('./utils/import_timelines', () => {
-      const originalModule = jest.requireActual('./utils/import_timelines');
+    jest.doMock('./utils/get_timelines_from_stream', () => {
       return {
-        ...originalModule,
         getTupleDuplicateErrorsAndUniqueTimeline: mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue(
           [mockDuplicateIdErrors, mockUniqueParsedTemplateTimelineObjects]
         ),
@@ -473,7 +477,7 @@ describe('import template timelines', () => {
     }));
   });
 
-  describe('Import a new template timeline', () => {
+  describe('Import a new timeline template', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
@@ -596,7 +600,7 @@ describe('import template timelines', () => {
     });
   });
 
-  describe('Import a template timeline already exist', () => {
+  describe('Import a timeline template already exist', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
@@ -704,7 +708,7 @@ describe('import template timelines', () => {
       expect(response.status).toEqual(200);
     });
 
-    test('should throw error if with given template timeline version conflict', async () => {
+    test('should throw error if with given timeline template version conflict', async () => {
       mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
         mockDuplicateIdErrors,
         [
@@ -719,6 +723,8 @@ describe('import template timelines', () => {
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
         errors: [
           {
             id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
@@ -746,6 +752,8 @@ describe('import template timelines', () => {
       expect(response.body).toEqual({
         success: false,
         success_count: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
         errors: [
           {
             id: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',

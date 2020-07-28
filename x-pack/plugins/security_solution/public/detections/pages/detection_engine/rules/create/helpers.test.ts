@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { List } from '../../../../../../common/detection_engine/schemas/types';
+import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
 import { NewRule } from '../../../../containers/detection_engine/rules';
+
 import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
@@ -26,11 +29,18 @@ import {
 } from './helpers';
 import {
   mockDefineStepRule,
+  mockExceptionsList,
   mockQueryBar,
   mockScheduleStepRule,
   mockAboutStepRule,
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
+
+const ENDPOINT_LIST = {
+  id: ENDPOINT_LIST_ID,
+  namespace_type: 'agnostic',
+  type: 'endpoint',
+} as List;
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -348,7 +358,6 @@ describe('helpers', () => {
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
-        rule_name_override: '',
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
@@ -369,10 +378,56 @@ describe('helpers', () => {
             ],
           },
         ],
-        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with endpoint exceptions_list', () => {
+      const result: AboutStepRuleJson = formatAboutStepData(
+        {
+          ...mockData,
+          isAssociatedToEndpointList: true,
+        },
+        []
+      );
+      expect(result.exceptions_list).toEqual([
+        { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
+      ]);
+    });
+
+    test('returns formatted object with detections exceptions_list', () => {
+      const result: AboutStepRuleJson = formatAboutStepData(mockData, [mockExceptionsList]);
+      expect(result.exceptions_list).toEqual([mockExceptionsList]);
+    });
+
+    test('returns formatted object with both exceptions_lists', () => {
+      const result: AboutStepRuleJson = formatAboutStepData(
+        {
+          ...mockData,
+          isAssociatedToEndpointList: true,
+        },
+        [mockExceptionsList]
+      );
+      expect(result.exceptions_list).toEqual([ENDPOINT_LIST, mockExceptionsList]);
+    });
+
+    test('returns formatted object with pre-existing exceptions lists', () => {
+      const exceptionsLists: List[] = [ENDPOINT_LIST, mockExceptionsList];
+      const result: AboutStepRuleJson = formatAboutStepData(
+        {
+          ...mockData,
+          isAssociatedToEndpointList: true,
+        },
+        exceptionsLists
+      );
+      expect(result.exceptions_list).toEqual(exceptionsLists);
+    });
+
+    test('returns formatted object with pre-existing endpoint exceptions list disabled', () => {
+      const exceptionsLists: List[] = [ENDPOINT_LIST, mockExceptionsList];
+      const result: AboutStepRuleJson = formatAboutStepData(mockData, exceptionsLists);
+      expect(result.exceptions_list).toEqual([mockExceptionsList]);
     });
 
     test('returns formatted object with empty falsePositive and references filtered out', () => {
@@ -392,7 +447,6 @@ describe('helpers', () => {
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
-        rule_name_override: '',
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
@@ -413,7 +467,6 @@ describe('helpers', () => {
             ],
           },
         ],
-        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
@@ -434,7 +487,6 @@ describe('helpers', () => {
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
-        rule_name_override: '',
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
@@ -455,7 +507,6 @@ describe('helpers', () => {
             ],
           },
         ],
-        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);
@@ -508,7 +559,6 @@ describe('helpers', () => {
         references: ['www.test.co'],
         risk_score: 21,
         risk_score_mapping: [],
-        rule_name_override: '',
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
@@ -519,7 +569,6 @@ describe('helpers', () => {
             technique: [{ id: '456', name: 'technique1', reference: 'technique reference' }],
           },
         ],
-        timestamp_override: '',
       };
 
       expect(result).toEqual(expected);

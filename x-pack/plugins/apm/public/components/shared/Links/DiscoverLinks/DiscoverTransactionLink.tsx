@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
@@ -32,10 +32,14 @@ export function getDiscoverQuery(transaction: Transaction) {
   };
 }
 
-export const DiscoverTransactionLink: React.FC<{
+export function DiscoverTransactionLink({
+  transaction,
+  children,
+}: {
   readonly transaction: Transaction;
-}> = ({ transaction, children }) => {
+  children?: ReactNode;
+}) {
   return (
     <DiscoverLink query={getDiscoverQuery(transaction)} children={children} />
   );
-};
+}

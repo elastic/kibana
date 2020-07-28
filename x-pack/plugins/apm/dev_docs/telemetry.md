@@ -55,19 +55,15 @@ The mapping for the telemetry data is here under `stack_stats.kibana.plugins.apm
 
 The mapping used there can be generated with the output of the [`getTelemetryMapping`](../common/apm_telemetry.ts) function.
 
-To make a change to the mapping, edit this function, run the tests to update the snapshots, then use the `merge_telemetry_mapping` script to merge the data into the telemetry repository.
+The `schema` property of the `makeUsageCollector` call in the [`createApmTelemetry` function](../server/lib/apm_telemetry/index.ts) contains the output of `getTelemetryMapping`.
 
-If the [telemetry repository](https://github.com/elastic/telemetry) is cloned as a sibling to the kibana directory, you can run the following from x-pack/plugins/apm:
-
-```bash
-node ./scripts/merge-telemetry-mapping.js ../../../../telemetry/config/templates/xpack-phone-home.json
-```
-
-this will replace the contents of the mapping in the repository checkout with the updated mapping. You can then [follow the telemetry team's instructions](https://github.com/elastic/telemetry#mappings) for opening a pull request with the mapping changes.
+When adding a task, the key of the task and the `took` properties need to be added under the `tasks` properties in the mapping, as when tasks run they report the time they took.
 
 The queries for the stats are in the [collect data telemetry tasks](../server/lib/apm_telemetry/collect_data_telemetry/tasks.ts).
 
 The collection tasks also use the [`APMDataTelemetry` type](../server/lib/apm_telemetry/types.ts) which also needs to be updated with any changes to the fields.
+
+Running `node scripts/telemetry_check --fix` from the root Kibana directory will update the schemas which schema should automatically notify the Telemetry team when a pull request is opened so they can update the mapping in the telemetry clusters. (At the time of this writing the APM schema is excluded. #70180 is open to remove these exclusions so at this time any pull requests with mapping changes will have to manually request the Telemetry team as a reviewer.)
 
 ## Behavioral Telemetry
 

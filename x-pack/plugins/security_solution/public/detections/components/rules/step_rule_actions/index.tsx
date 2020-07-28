@@ -14,9 +14,8 @@ import {
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
-import deepEqual from 'fast-deep-equal';
 
-import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
+import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import {
   RuleStep,
   RuleStepProps,
@@ -35,11 +34,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './schema';
 import * as I18n from './translations';
 import { APP_ID } from '../../../../../common/constants';
-import { SecurityPageName } from '../../../../app/types';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
-  actionMessageParams: string[];
+  actionMessageParams: ActionVariable[];
 }
 
 const stepActionsDefaultValue = {
@@ -71,7 +69,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   setForm,
   actionMessageParams,
 }) => {
-  const [myStepData, setMyStepData] = useState<ActionsStepRule>(stepActionsDefaultValue);
+  const initialState = defaultValues ?? stepActionsDefaultValue;
+  const [myStepData, setMyStepData] = useState<ActionsStepRule>(initialState);
   const {
     services: {
       application,
@@ -81,56 +80,39 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   const schema = useMemo(() => getSchema({ actionTypeRegistry }), [actionTypeRegistry]);
 
   const { form } = useForm({
-    defaultValue: myStepData,
+    defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
+  const { submit } = form;
 
-  // TO DO need to make sure that logic is still valid
-  const kibanaAbsoluteUrl = useMemo(() => {
-    const url = application.getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
-      absolute: true,
-    });
-    if (url != null && url.includes('app/security/alerts')) {
-      return url.replace('app/security/alerts', 'app/security');
-    }
-    return url;
-  }, [application]);
+  const kibanaAbsoluteUrl = useMemo(
+    () =>
+      application.getUrlForApp(`${APP_ID}`, {
+        absolute: true,
+      }),
+    [application]
+  );
 
   const onSubmit = useCallback(
     async (enabled: boolean) => {
       if (setStepData) {
         setStepData(RuleStep.ruleActions, null, false);
-        const { isValid: newIsValid, data } = await form.submit();
+        const { isValid: newIsValid, data } = await submit();
         if (newIsValid) {
           setStepData(RuleStep.ruleActions, { ...data, enabled }, newIsValid);
           setMyStepData({ ...data, isNew: false } as ActionsStepRule);
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [form]
+    [setStepData, submit]
   );
 
   useEffect(() => {
-    const { isNew, ...initDefaultValue } = myStepData;
-    if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
-      const myDefaultValues = {
-        ...defaultValues,
-        isNew: false,
-      };
-      setMyStepData(myDefaultValues);
-      setFieldValue(form, schema, myDefaultValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValues]);
-
-  useEffect(() => {
-    if (setForm != null) {
+    if (setForm) {
       setForm(RuleStep.ruleActions, form);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [form, setForm]);
 
   const updateThrottle = useCallback((throttle) => setMyStepData({ ...myStepData, throttle }), [
     myStepData,

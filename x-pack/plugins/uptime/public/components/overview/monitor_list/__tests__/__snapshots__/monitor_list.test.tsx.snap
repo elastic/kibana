@@ -813,7 +813,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
 }
 
 .c1 {
-  margin-left: auto;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+}
+
+.c0 {
+  position: relative;
 }
 
 .c4 {
@@ -825,26 +831,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
 @media (max-width:574px) {
   .c2 {
     min-width: 230px;
-  }
-}
-
-@media only screen and (max-width:768px) {
-  .c0.c0 > :first-child {
-    -webkit-flex-basis: 40% !important;
-    -ms-flex-preferred-size: 40% !important;
-    flex-basis: 40% !important;
-  }
-
-  .c0.c0 > :nth-child(2) {
-    -webkit-order: 3;
-    -ms-flex-order: 3;
-    order: 3;
-  }
-
-  .c0.c0 > :nth-child(3) {
-    -webkit-flex-basis: 60% !important;
-    -ms-flex-preferred-size: 60% !important;
-    flex-basis: 60% !important;
   }
 }
 
@@ -936,20 +922,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
         </button>
       </div>
     </div>
-    <div
-      class="euiFlexItem"
+    <a
+      class="c1"
+      data-test-subj="uptimeCertificatesLink"
+      href="/certificates"
     >
-      <h5
-        class="euiTitle euiTitle--xsmall c1"
-      >
-        <a
-          data-test-subj="uptimeCertificatesLink"
-          href="/certificates"
-        >
-          Certificates status
-        </a>
-      </h5>
-    </div>
+      Certificates status
+    </a>
   </div>
   <div
     class="euiSpacer euiSpacer--m"
@@ -975,6 +954,8 @@ exports[`MonitorList component renders the monitor list 1`] = `
       </div>
       <table
         class="euiTable euiTable--responsive"
+        id="generated-id"
+        tabindex="-1"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"
@@ -1132,7 +1113,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1898 Yr ago
+                            5m ago
                           </div>
                         </div>
                       </span>
@@ -1309,7 +1290,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1896 Yr ago
+                            5m ago
                           </div>
                         </div>
                       </span>

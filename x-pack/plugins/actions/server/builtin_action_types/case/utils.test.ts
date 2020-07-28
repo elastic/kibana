@@ -243,7 +243,7 @@ describe('transformFields', () => {
     });
   });
 
-  test('add newline character to descripton', () => {
+  test('add newline character to description', () => {
     const fields = prepareFieldsForTransformation({
       externalCase: fullParams.externalCase,
       mapping: finalMapping,

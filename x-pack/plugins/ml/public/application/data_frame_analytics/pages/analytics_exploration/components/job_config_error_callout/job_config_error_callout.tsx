@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { EuiCallOut, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -31,6 +31,23 @@ export const JobConfigErrorCallout: FC<Props> = ({
   jobConfigErrorMessage,
   title,
 }) => {
+  const containsIndexPatternLink =
+    typeof jobCapsServiceErrorMessage === 'string' &&
+    jobCapsServiceErrorMessage.includes('locate that index-pattern') &&
+    jobCapsServiceErrorMessage.includes('click here to re-create');
+
+  const message = (
+    <p>{jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage}</p>
+  );
+
+  const calloutBody = containsIndexPatternLink ? (
+    <EuiLink href="management/kibana/indexPatterns" target="_blank">
+      {message}
+    </EuiLink>
+  ) : (
+    message
+  );
+
   return (
     <EuiPanel grow={false}>
       <ExplorationTitle title={title} />
@@ -40,7 +57,7 @@ export const JobConfigErrorCallout: FC<Props> = ({
         color="danger"
         iconType="cross"
       >
-        <p>{jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage}</p>
+        {calloutBody}
       </EuiCallOut>
     </EuiPanel>
   );

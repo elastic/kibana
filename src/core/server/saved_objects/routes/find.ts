@@ -45,11 +45,18 @@ export const registerFindRoute = (router: IRouter) => {
           ),
           fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filter: schema.maybe(schema.string()),
+          namespaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const query = req.query;
+
+      const namespaces =
+        typeof req.query.namespaces === 'string' ? [req.query.namespaces] : req.query.namespaces;
+
       const result = await context.core.savedObjects.client.find({
         perPage: query.per_page,
         page: query.page,
@@ -62,6 +69,7 @@ export const registerFindRoute = (router: IRouter) => {
         hasReference: query.has_reference,
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
+        namespaces,
       });
 
       return res.ok({ body: result });

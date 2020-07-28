@@ -13,6 +13,7 @@ import { timelineQuery } from '../../containers/index.gql_query';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { Direction } from '../../../graphql/types';
 import { defaultHeaders, mockTimelineData, mockIndexPattern } from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 
 import {
@@ -24,7 +25,7 @@ import { TimelineComponent, Props as TimelineComponentProps } from './timeline';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./properties/properties_right');
@@ -59,8 +60,8 @@ describe('Timeline', () => {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
-  const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
-  const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
+  const startDate = '2018-03-23T18:49:23.132Z';
+  const endDate = '2018-03-24T03:33:52.253Z';
 
   const indexPattern = mockIndexPattern;
 
@@ -76,12 +77,15 @@ describe('Timeline', () => {
       columns: defaultHeaders,
       id: 'foo',
       dataProviders: mockDataProviders,
+      docValueFields: [],
       end: endDate,
       eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
       indexPattern,
       indexToAdd: [],
       isLive: false,
+      isLoadingSource: false,
+      isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
@@ -93,6 +97,7 @@ describe('Timeline', () => {
       onDataProviderRemoved: jest.fn(),
       onToggleDataProviderEnabled: jest.fn(),
       onToggleDataProviderExcluded: jest.fn(),
+      onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
       start: startDate,
@@ -100,6 +105,7 @@ describe('Timeline', () => {
       status: TimelineStatus.active,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
+      timelineType: TimelineType.default,
     };
   });
 
@@ -152,6 +158,42 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
     });
 
+    test('it does NOT render the timeline table when the source is loading', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} isLoadingSource={true} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+    });
+
+    test('it does NOT render the timeline table when start is empty', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} start={''} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+    });
+
+    test('it does NOT render the timeline table when end is empty', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} end={''} />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(false);
+    });
+
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
       const wrapper = mount(
         <TestProviders>
@@ -164,7 +206,7 @@ describe('Timeline', () => {
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
     });
 
-    test('it defaults to showing `All events`', () => {
+    test('it defaults to showing `All`', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocks}>
@@ -173,9 +215,35 @@ describe('Timeline', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual(
-        'All events'
+      expect(wrapper.find('[data-test-subj="pick-event-type"] button').text()).toEqual('All');
+    });
+
+    it('it shows the timeline footer', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <TimelineComponent {...props} />
+          </MockedProvider>
+        </TestProviders>
       );
+
+      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
+    });
+    describe('when there is a graphEventId', () => {
+      beforeEach(() => {
+        props.graphEventId = 'graphEventId'; // any string w/ length > 0 works
+      });
+      it('should not show the timeline footer', () => {
+        const wrapper = mount(
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <TimelineComponent {...props} />
+            </MockedProvider>
+          </TestProviders>
+        );
+
+        expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(false);
+      });
     });
   });
 
@@ -298,9 +366,9 @@ describe('Timeline', () => {
         );
 
         const andProviderBadgesText = andProviderBadges.map((node) => node.text()).join(' ');
-        expect(andProviderBadges.length).toEqual(6);
+        expect(andProviderBadges.length).toEqual(3);
         expect(andProviderBadgesText).toEqual(
-          'name:  "Provider 1" name:  "Provider 2" name:  "Provider 3"'
+          'name: "Provider 1" name: "Provider 2" name: "Provider 3"'
         );
       });
 

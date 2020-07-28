@@ -78,9 +78,10 @@ export class ElasticsearchService
 
     this.getAuthHeaders = deps.http.getAuthHeaders;
     this.legacyClient = this.createLegacyClusterClient('data', config);
+    this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
-      callWithInternalUser: this.legacyClient.callAsInternalUser,
+      internalClient: this.client.asInternalUser,
       log: this.log,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
@@ -109,7 +110,6 @@ export class ElasticsearchService
     }
 
     const config = await this.config$.pipe(first()).toPromise();
-    this.client = this.createClusterClient('data', config);
 
     const createClient = (
       type: string,
@@ -120,7 +120,7 @@ export class ElasticsearchService
     };
 
     return {
-      client: this.client,
+      client: this.client!,
       createClient,
       legacy: {
         client: this.legacyClient,
@@ -133,7 +133,7 @@ export class ElasticsearchService
     this.log.debug('Stopping elasticsearch service');
     this.stop$.next();
     if (this.client) {
-      this.client.close();
+      await this.client.close();
     }
     if (this.legacyClient) {
       this.legacyClient.close();

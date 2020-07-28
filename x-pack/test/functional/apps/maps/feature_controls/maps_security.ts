@@ -16,8 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/38414
-  describe.skip('security feature controls', () => {
+  describe('maps security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');
@@ -25,6 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('maps/kibana');
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      await PageObjects.security.forceLogout();
     });
 
     describe('global maps all privileges', () => {
@@ -66,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows maps navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Maps');
+        expect(navLinks).to.eql(['Maps', 'Stack Management']);
       });
 
       it(`allows a map to be created`, async () => {
@@ -83,35 +84,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await globalNav.badgeMissingOrFail();
       });
 
-      it('allows saving via the saved query management component popover with no query loaded', async () => {
+      it('allows saving via the saved query management component popover with no saved query loaded', async () => {
         await PageObjects.maps.openNewMap();
         await queryBar.setQuery('response:200');
         await savedQueryManagementComponent.saveNewQuery('foo', 'bar', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail('foo');
-      });
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
 
-      it('allows saving a currently loaded saved query as a new query via the saved query management component ', async () => {
-        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
-          'foo2',
-          'bar2',
-          true,
-          false
-        );
-        await savedQueryManagementComponent.savedQueryExistOrFail('foo2');
+        await savedQueryManagementComponent.deleteSavedQuery('foo');
+        await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
       });
 
       it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await queryBar.setQuery('response:404');
-        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('bar2', false, false);
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
+          'new description',
+          true,
+          false
+        );
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
-        await savedQueryManagementComponent.loadSavedQuery('foo2');
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:404');
+
+        // Reset after changing
+        await queryBar.setQuery('response:200');
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
+          'Ok responses for jpg files',
+          true,
+          false
+        );
       });
 
-      it('allows deleting saved queries in the saved query management component ', async () => {
-        await savedQueryManagementComponent.deleteSavedQuery('foo2');
-        await savedQueryManagementComponent.savedQueryMissingOrFail('foo2');
+      it('allow saving currently loaded query as a copy', async () => {
+        await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
+        await savedQueryManagementComponent.saveCurrentlyLoadedAsNewQuery(
+          'ok2',
+          'description',
+          true,
+          false
+        );
+        await savedQueryManagementComponent.savedQueryExistOrFail('ok2');
+        await savedQueryManagementComponent.deleteSavedQuery('ok2');
       });
     });
 
@@ -144,6 +159,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+
+        await PageObjects.maps.gotoMapListingPage();
       });
 
       after(async () => {
@@ -153,20 +170,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Maps navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Maps');
+        expect(navLinks).to.eql(['Maps', 'Stack Management']);
       });
 
       it(`does not show create new button`, async () => {
-        await PageObjects.maps.gotoMapListingPage();
         await PageObjects.maps.expectMissingCreateNewButton();
       });
 
       it(`does not allow a map to be deleted`, async () => {
-        await PageObjects.maps.gotoMapListingPage();
         await testSubjects.missingOrFail('checkboxSelectAll');
       });
 
-      it(`shows read-only badge`, async () => {
+      // This behavior was removed when the Maps app was migrated to NP
+      it.skip(`shows read-only badge`, async () => {
         await globalNav.badgeExistsOrFail('Read only');
       });
 
@@ -248,7 +264,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show Maps navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover', 'Stack Management']);
+        expect(navLinks).to.not.contain('Maps');
       });
 
       it(`returns a 404`, async () => {

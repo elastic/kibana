@@ -368,8 +368,8 @@ describe.skip('<TemplateCreate />', () => {
           aliases: ALIASES,
         },
         _kbnMeta: {
+          type: 'default',
           isLegacy: false,
-          isManaged: false,
         },
       };
 

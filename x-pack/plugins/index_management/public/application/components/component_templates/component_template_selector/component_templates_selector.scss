@@ -6,7 +6,7 @@
   height: 480px;
 
   &__selection {
-    @include euiBottomShadowFlat;
+    border: $euiBorderThin;
 
    padding: 0 $euiSize $euiSize;
    color: $euiColorDarkShade;
@@ -31,6 +31,10 @@
     &__count {
       font-weight: 600;
     }
+   }
+
+   &__content {
+     mask-image: none;
    }
   }
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as _ from 'lodash';
+import { defaultsDeep } from 'lodash';
 import ace from 'brace';
 import 'brace/mode/json';
 
@@ -176,7 +176,7 @@ export function XJsonHighlightRules(this: any) {
 oop.inherits(XJsonHighlightRules, JsonHighlightRules);
 
 export function addToRules(otherRules: any, embedUnder: any) {
-  otherRules.$rules = _.defaultsDeep(otherRules.$rules, jsonRules(embedUnder));
+  otherRules.$rules = defaultsDeep(otherRules.$rules, jsonRules(embedUnder));
   otherRules.embedRules(ScriptHighlightRules, 'script-', [
     {
       token: 'punctuation.end_triple_quote',

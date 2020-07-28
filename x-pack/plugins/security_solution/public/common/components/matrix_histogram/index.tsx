@@ -115,8 +115,8 @@ export const MatrixHistogramComponent: React.FC<
           const [min, max] = x;
           dispatchSetAbsoluteRangeDatePicker({
             id: setAbsoluteRangeDatePickerTarget,
-            from: min,
-            to: max,
+            from: new Date(min).toISOString(),
+            to: new Date(max).toISOString(),
           });
         },
         yTickFormatter,

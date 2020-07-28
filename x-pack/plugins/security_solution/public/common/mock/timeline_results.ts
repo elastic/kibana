@@ -2091,13 +2091,14 @@ export const mockTimelineModel: TimelineModel = {
   ],
   dataProviders: [],
   dateRange: {
-    end: 1584539558929,
-    start: 1584539198929,
+    end: '2020-03-18T13:52:38.929Z',
+    start: '2020-03-18T13:46:38.929Z',
   },
   deletedEventIds: [],
   description: 'This is a sample rule description',
   eventIdToNoteIds: {},
   eventType: 'all',
+  excludedRowRendererIds: [],
   filters: [
     {
       $state: {
@@ -2137,7 +2138,6 @@ export const mockTimelineModel: TimelineModel = {
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
-  showRowRenderers: true,
   sort: {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
@@ -2154,7 +2154,7 @@ export const mockTimelineModel: TimelineModel = {
 export const mockTimelineResult: TimelineResult = {
   savedObjectId: 'ef579e40-jibber-jabber',
   columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
-  dateRange: { start: 1584539198929, end: 1584539558929 },
+  dateRange: { start: '2020-03-18T13:46:38.929Z', end: '2020-03-18T13:52:38.929Z' },
   description: 'This is a sample rule description',
   eventType: 'all',
   filters: [
@@ -2188,7 +2188,7 @@ export const mockTimelineApolloResult = {
 };
 
 export const defaultTimelineProps: CreateTimelineProps = {
-  from: 1541444305937,
+  from: '2018-11-05T18:58:25.937Z',
   timeline: {
     columns: [
       { columnHeaderType: 'not-filtered', id: '@timestamp', width: 190 },
@@ -2212,11 +2212,12 @@ export const defaultTimelineProps: CreateTimelineProps = {
         queryMatch: { field: '_id', operator: ':', value: '1' },
       },
     ],
-    dateRange: { end: 1541444605937, start: 1541444305937 },
+    dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',
     eventIdToNoteIds: {},
     eventType: 'all',
+    excludedRowRendererIds: [],
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
@@ -2241,7 +2242,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     selectedEventIds: {},
     show: false,
     showCheckboxes: false,
-    showRowRenderers: true,
     sort: { columnId: '@timestamp', sortDirection: Direction.desc },
     status: TimelineStatus.draft,
     title: '',
@@ -2251,6 +2251,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     version: null,
     width: 1100,
   },
-  to: 1541444605937,
+  to: '2018-11-05T19:03:25.937Z',
   ruleNote: '# this is some markdown documentation',
 };

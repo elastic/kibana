@@ -34,6 +34,8 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./vector_styling'));
       loadTestFile(require.resolve('./saved_object_management'));
       loadTestFile(require.resolve('./sample_data'));
+      loadTestFile(require.resolve('./auto_fit_to_bounds'));
+      loadTestFile(require.resolve('./layer_visibility'));
       loadTestFile(require.resolve('./feature_controls/maps_security'));
       loadTestFile(require.resolve('./feature_controls/maps_spaces'));
       loadTestFile(require.resolve('./full_screen_mode'));

@@ -254,6 +254,19 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('invalid time range in URL', function () {
+      it('should get the default timerange', async function () {
+        const prevTime = await PageObjects.timePicker.getTimeConfig();
+        await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
+          useActualUrl: true,
+        });
+        await PageObjects.header.awaitKibanaChrome();
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be(prevTime.start);
+        expect(time.end).to.be(prevTime.end);
+      });
+    });
+
     describe('empty query', function () {
       it('should update the histogram timerange when the query is resubmitted', async function () {
         await kibanaServer.uiSettings.update({
@@ -265,17 +278,6 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
         const refreshedTimeString = await PageObjects.discover.getChartTimespan();
         expect(refreshedTimeString).not.to.be(initialTimeString);
-      });
-    });
-
-    describe('invalid time range in URL', function () {
-      it('should display a "Invalid time range toast"', async function () {
-        await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
-          useActualUrl: true,
-        });
-        await PageObjects.header.awaitKibanaChrome();
-        const toastMessage = await PageObjects.common.closeToast();
-        expect(toastMessage).to.be('Invalid time range');
       });
     });
 

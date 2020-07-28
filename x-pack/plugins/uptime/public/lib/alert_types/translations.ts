@@ -8,11 +8,10 @@ import { i18n } from '@kbn/i18n';
 
 export const MonitorStatusTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
-    defaultMessage: '{contextMessage}\nLast triggered at: {lastTriggered}\n{downMonitors}',
+    defaultMessage: '{contextMessage}\nLast triggered at: {lastTriggered}\n',
     values: {
       contextMessage: '{{context.message}}',
       lastTriggered: '{{state.lastTriggeredAt}}',
-      downMonitors: '{{context.downMonitorsWithGeo}}',
     },
   }),
   name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
@@ -27,7 +26,7 @@ export const TlsTranslations = {
 {expiringConditionalOpen}
 Expiring cert count: {expiringCount}
 Expiring Certificates: {expiringCommonNameAndDate}
-{expiringConditionalClose}    
+{expiringConditionalClose}
 
 {agingConditionalOpen}
 Aging cert count: {agingCount}
@@ -48,5 +47,25 @@ Aging Certificates: {agingCommonNameAndDate}
   }),
   name: i18n.translate('xpack.uptime.alerts.tls.clientName', {
     defaultMessage: 'Uptime TLS',
+  }),
+};
+
+export const DurationAnomalyTranslations = {
+  defaultActionMessage: i18n.translate('xpack.uptime.alerts.durationAnomaly.defaultActionMessage', {
+    defaultMessage: `Abnormal ({severity} level) response time detected on {monitor} with url {monitorUrl} at {anomalyStartTimestamp}. Anomaly severity score is {severityScore}.
+Response times as high as {slowestAnomalyResponse} have been detected from location {observerLocation}. Expected response time is {expectedResponseTime}.`,
+    values: {
+      severity: '{{state.severity}}',
+      anomalyStartTimestamp: '{{state.anomalyStartTimestamp}}',
+      monitor: '{{state.monitor}}',
+      monitorUrl: '{{{state.monitorUrl}}}',
+      slowestAnomalyResponse: '{{state.slowestAnomalyResponse}}',
+      expectedResponseTime: '{{state.expectedResponseTime}}',
+      severityScore: '{{state.severityScore}}',
+      observerLocation: '{{state.observerLocation}}',
+    },
+  }),
+  name: i18n.translate('xpack.uptime.alerts.durationAnomaly.clientName', {
+    defaultMessage: 'Uptime Duration Anomaly',
   }),
 };

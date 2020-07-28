@@ -10,10 +10,10 @@ set -e
 ./check_env_variables.sh
 
 # Uses a defaults if no argument is specified
-LIST_ID=${1:-list-ip}
+LIST_ID=${1:-ip_list}
 FILE=${2:-./lists/files/ips.txt}
 
-# ./import_list_items.sh list-ip ./lists/files/ips.txt
+# ./import_list_items.sh ip_list ./lists/files/ips.txt
 curl -s -k \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \

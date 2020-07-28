@@ -97,7 +97,7 @@ describe('update_exception_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "entries" but return an array', () => {
+  test('it should NOT accept an undefined for "entries"', () => {
     const inputPayload = getUpdateExceptionListItemSchemaMock();
     const outputPayload = getUpdateExceptionListItemSchemaMock();
     delete inputPayload.entries;
@@ -105,8 +105,10 @@ describe('update_exception_list_item_schema', () => {
     const decoded = updateExceptionListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "entries"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('it should accept an undefined for "namespace_type" but return enum "single"', () => {
@@ -143,20 +145,6 @@ describe('update_exception_list_item_schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(outputPayload);
-  });
-
-  // TODO: Is it expected behavior for it not to auto-generate a uui or throw
-  // error if item_id is not passed in?
-  test.skip('it should accept an undefined for "item_id" and auto generate a uuid', () => {
-    const inputPayload = getUpdateExceptionListItemSchemaMock();
-    delete inputPayload.item_id;
-    const decoded = updateExceptionListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as UpdateExceptionListItemSchema).item_id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-    );
   });
 
   test('it should accept an undefined for "item_id" and generate a correct body not counting the uuid', () => {

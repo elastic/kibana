@@ -29,13 +29,8 @@ export async function getDerivedServiceAnnotations({
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
+    ...getEnvironmentUiFilterES(environment),
   ];
-
-  const environmentFilter = getEnvironmentUiFilterES(environment);
-
-  if (environmentFilter) {
-    filter.push(environmentFilter);
-  }
 
   const versions =
     (

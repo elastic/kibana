@@ -30,10 +30,12 @@ import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
 import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 export interface DataSetupDependencies {
   expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface DataStartDependencies {

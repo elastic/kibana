@@ -99,13 +99,15 @@ export const AgentConfigCopyProvider: React.FunctionComponent<Props> = ({ childr
       <EuiOverlayMask>
         <EuiConfirmModal
           title={
-            <FormattedMessage
-              id="xpack.ingestManager.copyAgentConfig.confirmModal.copyConfigTitle"
-              defaultMessage="Copy '{name}' agent configuration"
-              values={{
-                name: agentConfig.name,
-              }}
-            />
+            <span className="eui-textBreakWord">
+              <FormattedMessage
+                id="xpack.ingestManager.copyAgentConfig.confirmModal.copyConfigTitle"
+                defaultMessage="Copy '{name}' agent configuration"
+                values={{
+                  name: agentConfig.name,
+                }}
+              />
+            </span>
           }
           onCancel={closeModal}
           onConfirm={copyAgentConfig}

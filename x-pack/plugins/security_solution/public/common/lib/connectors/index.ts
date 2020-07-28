@@ -5,3 +5,4 @@
  */
 
 export { getActionType as jiraActionType } from './jira';
+export { getActionType as resilientActionType } from './resilient';

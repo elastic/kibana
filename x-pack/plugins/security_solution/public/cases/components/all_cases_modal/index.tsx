@@ -12,6 +12,7 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
 } from '@elastic/eui';
+
 import { useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
 import { AllCases } from '../all_cases';
 import * as i18n from './translations';
@@ -19,7 +20,7 @@ import * as i18n from './translations';
 interface AllCasesModalProps {
   onCloseCaseModal: () => void;
   showCaseModal: boolean;
-  onRowClick: (id: string) => void;
+  onRowClick: (id?: string) => void;
 }
 
 export const AllCasesModalComponent = ({

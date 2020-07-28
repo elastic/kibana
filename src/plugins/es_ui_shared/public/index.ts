@@ -23,6 +23,8 @@
  */
 import * as Forms from './forms';
 import * as Monaco from './monaco';
+import * as ace from './ace';
+import * as GlobalFlyout from './global_flyout';
 
 export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
 
@@ -40,8 +42,6 @@ export {
 } from './request/np_ready_request';
 
 export { indices } from './indices';
-
-export { useUIAceKeyboardMode } from './use_ui_ace_keyboard_mode';
 
 export {
   installXJsonMode,
@@ -66,7 +66,7 @@ export {
   useAuthorizationContext,
 } from './authorization';
 
-export { Monaco, Forms };
+export { Monaco, Forms, ace, GlobalFlyout };
 
 export { extractQueryParams } from './url';
 

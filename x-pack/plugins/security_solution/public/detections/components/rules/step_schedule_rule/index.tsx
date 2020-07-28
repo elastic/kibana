@@ -5,10 +5,7 @@
  */
 
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import deepEqual from 'fast-deep-equal';
-import styled from 'styled-components';
 
-import { setFieldValue } from '../../../pages/detection_engine/rules/helpers';
 import {
   RuleStep,
   RuleStepProps,
@@ -24,10 +21,6 @@ import { schema } from './schema';
 interface StepScheduleRuleProps extends RuleStepProps {
   defaultValues?: ScheduleStepRule | null;
 }
-
-const RestrictedWidthContainer = styled.div`
-  max-width: 300px;
-`;
 
 const stepScheduleDefaultValue = {
   interval: '5m',
@@ -45,45 +38,32 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   setStepData,
   setForm,
 }) => {
-  const [myStepData, setMyStepData] = useState<ScheduleStepRule>(stepScheduleDefaultValue);
+  const initialState = defaultValues ?? stepScheduleDefaultValue;
+  const [myStepData, setMyStepData] = useState<ScheduleStepRule>(initialState);
 
   const { form } = useForm({
-    defaultValue: myStepData,
+    defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
+  const { submit } = form;
 
   const onSubmit = useCallback(async () => {
     if (setStepData) {
       setStepData(RuleStep.scheduleRule, null, false);
-      const { isValid: newIsValid, data } = await form.submit();
+      const { isValid: newIsValid, data } = await submit();
       if (newIsValid) {
         setStepData(RuleStep.scheduleRule, { ...data }, newIsValid);
         setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [setStepData, submit]);
 
   useEffect(() => {
-    const { isNew, ...initDefaultValue } = myStepData;
-    if (defaultValues != null && !deepEqual(initDefaultValue, defaultValues)) {
-      const myDefaultValues = {
-        ...defaultValues,
-        isNew: false,
-      };
-      setMyStepData(myDefaultValues);
-      setFieldValue(form, schema, myDefaultValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValues]);
-
-  useEffect(() => {
-    if (setForm != null) {
+    if (setForm) {
       setForm(RuleStep.scheduleRule, form);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [form, setForm]);
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
@@ -93,29 +73,25 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
         <Form form={form} data-test-subj="stepScheduleRule">
-          <RestrictedWidthContainer>
-            <UseField
-              path="interval"
-              component={ScheduleItem}
-              componentProps={{
-                idAria: 'detectionEngineStepScheduleRuleInterval',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
-              }}
-            />
-          </RestrictedWidthContainer>
-          <RestrictedWidthContainer>
-            <UseField
-              path="from"
-              component={ScheduleItem}
-              componentProps={{
-                idAria: 'detectionEngineStepScheduleRuleFrom',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
-                minimumValue: 1,
-              }}
-            />
-          </RestrictedWidthContainer>
+          <UseField
+            path="interval"
+            component={ScheduleItem}
+            componentProps={{
+              idAria: 'detectionEngineStepScheduleRuleInterval',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
+            }}
+          />
+          <UseField
+            path="from"
+            component={ScheduleItem}
+            componentProps={{
+              idAria: 'detectionEngineStepScheduleRuleFrom',
+              isDisabled: isLoading,
+              dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
+              minimumValue: 1,
+            }}
+          />
         </Form>
       </StepContentWrapper>
 
