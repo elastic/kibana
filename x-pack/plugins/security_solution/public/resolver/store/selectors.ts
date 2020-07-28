@@ -54,6 +54,14 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
 /**
+ * Whether or not a given entity id is in the set of termination events.
+ */
+export const isProcessTerminated = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isProcessTerminated
+);
+
+/**
  * Given a nodeID (aka entity_id) get the indexed process event.
  * Legacy functions take process events instead of nodeID, use this to get
  * process events for them.
