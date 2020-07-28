@@ -69,7 +69,7 @@ function normalize(
 
 // The ES API only supports sort scripts of type 'number' and 'string'
 function castSortType(type: string) {
-  if (['number', 'string'].includes(type)) {
+  if (['number'].includes(type)) {
     return 'number';
   } else if (['string', 'boolean'].includes(type)) {
     return 'string';

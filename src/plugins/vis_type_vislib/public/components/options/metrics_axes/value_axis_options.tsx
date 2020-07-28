@@ -187,7 +187,7 @@ function ValueAxisOptions({
 
           <LabelOptions
             axisLabels={axis.labels}
-            axisFilterCheckboxName={`yAxisFilterLabelsCheckbox${axis.id}`}
+            axisFilterCheckboxName={`yAxisFilterLabelsCheckbox-${axis.id}`}
             setAxisLabel={setAxisLabel}
           />
         </>
