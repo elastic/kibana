@@ -106,7 +106,10 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
         {indicesExist ? (
           <StickyContainer>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+            <FiltersGlobal
+              globalFullScreen={globalFullScreen}
+              show={showGlobalFilters({ globalFullScreen, graphEventId })}
+            >
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
