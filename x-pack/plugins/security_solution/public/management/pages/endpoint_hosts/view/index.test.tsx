@@ -492,7 +492,7 @@ describe('when on the hosts page', () => {
       it('should include the sub-panel title', async () => {
         expect(
           (await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutTitle')).textContent
-        ).toBe('Policy Response');
+        ).toBe('Configuration Response');
       });
 
       it('should show a configuration section for each protection', async () => {
