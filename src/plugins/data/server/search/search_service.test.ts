@@ -28,7 +28,10 @@ describe('Search service', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<object, DataPluginStart>>;
 
   beforeEach(() => {
-    plugin = new SearchService(coreMock.createPluginInitializerContext({}));
+    const mockLogger: any = {
+      info: () => {},
+    };
+    plugin = new SearchService(coreMock.createPluginInitializerContext({}), mockLogger);
     mockCoreSetup = coreMock.createSetup();
   });
 
