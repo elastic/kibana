@@ -19,10 +19,10 @@ import { MapsTopNavMenu } from '../../page_elements/top_nav_menu';
 import {
   getGlobalState,
   updateGlobalState,
-  useGlobalStateSyncing,
+  startGlobalStateSyncing,
 } from '../../state_syncing/global_sync';
 import { AppStateManager } from '../../state_syncing/app_state_manager';
-import { useAppStateSyncing } from '../../state_syncing/app_sync';
+import { startAppStateSyncing } from '../../state_syncing/app_sync';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { GisMap } from '../../../connected_components/gis_map';
 import { goToSpecifiedPath } from '../../maps_router';
@@ -50,20 +50,9 @@ export class MapsAppView extends React.Component {
   }
 
   componentDidMount() {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    this._globalSyncUnsubscribe = useGlobalStateSyncing();
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    this._appSyncUnsubscribe = useAppStateSyncing(this._appStateManager);
-    this._globalSyncChangeMonitorSubscription = getData().query.state$.subscribe(
-      this._updateFromGlobalState
-    );
-
-    const initAppState = this._appStateManager.getAppState();
-    if (initAppState.savedQuery) {
-      this._updateStateFromSavedQuery(initAppState.savedQuery);
-    }
-
     this._initMap();
+
+    this._initSubscriptions();
 
     this._setBreadcrumbs();
 
@@ -101,6 +90,19 @@ export class MapsAppView extends React.Component {
     });
 
     getCoreChrome().setBreadcrumbs([]);
+  }
+
+  async _initSubscriptions() {
+    this._globalSyncUnsubscribe = startGlobalStateSyncing();
+    this._appSyncUnsubscribe = startAppStateSyncing(this._appStateManager);
+    this._globalSyncChangeMonitorSubscription = getData().query.state$.subscribe(
+      this._updateFromGlobalState
+    );
+
+    const initAppState = this._appStateManager.getAppState();
+    if (initAppState.savedQuery) {
+      this._updateStateFromSavedQuery(initAppState.savedQuery);
+    }
   }
 
   _hasUnsavedChanges() {
