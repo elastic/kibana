@@ -76,26 +76,25 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
           <EuiText size="s">
             <p>
               {from === 'edit' ? (
-                <>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.endpointConfiguration"
-                    defaultMessage="You can make changes to the Policy Configuration in the Security app. Fleet will deploy changes to your agents whenever your Policy changes."
-                  />
-                  <EuiSpacer />
-                  <LinkToApp
-                    data-test-subj="editLinkToPolicyDetails"
-                    asButton={true}
-                    appId={MANAGEMENT_APP_ID}
-                    className="editLinkToPolicyDetails"
-                    appPath={policyUrl}
-                    appState={policyDetailRouteState}
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.configurePolicyLink"
-                      defaultMessage="Configure Policy"
-                    />
-                  </LinkToApp>
-                </>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.endpointConfiguration"
+                  defaultMessage="Click {advancedConfigOptionsLink} to edit advanced configuration options."
+                  values={{
+                    advancedConfigOptionsLink: (
+                      <LinkToApp
+                        data-test-subj="editLinkToPolicyDetails"
+                        appId={MANAGEMENT_APP_ID}
+                        appPath={policyUrl}
+                        appState={policyDetailRouteState}
+                      >
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.endpointConfigurationLink"
+                          defaultMessage="here"
+                        />
+                      </LinkToApp>
+                    ),
+                  }}
+                />
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.ingestManager.createPackageConfig.endpointConfiguration"
