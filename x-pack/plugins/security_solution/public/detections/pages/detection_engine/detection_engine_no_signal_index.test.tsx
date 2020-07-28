@@ -12,7 +12,9 @@ jest.mock('../../../common/lib/kibana');
 
 describe('DetectionEngineNoIndex', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<DetectionEngineNoIndex />);
+    const wrapper = shallow(
+      <DetectionEngineNoIndex needsSignalsIndex={true} needsListsIndex={false} />
+    );
 
     expect(wrapper.find('EmptyPage')).toHaveLength(1);
   });

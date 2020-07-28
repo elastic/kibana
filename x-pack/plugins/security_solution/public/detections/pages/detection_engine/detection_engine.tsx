@@ -144,7 +144,10 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     return (
       <WrapperPage>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-        <DetectionEngineNoIndex />
+        <DetectionEngineNoIndex
+          needsSignalsIndex={isSignalIndexExists === false}
+          needsListsIndex={needsListsConfiguration}
+        />
       </WrapperPage>
     );
   }
