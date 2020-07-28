@@ -34,9 +34,6 @@ kibanaPipeline(timeoutMinutes: 180) {
           if (NEED_BUILD) {
             if (!IS_XPACK) {
               kibanaPipeline.buildOss()
-              if (CI_GROUP == '1') {
-                runbld("./test/scripts/jenkins_build_kbn_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
-              }
             } else {
               kibanaPipeline.buildXpack()
             }
