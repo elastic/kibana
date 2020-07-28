@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
 import tinycolor from 'tinycolor2';
+
 import { ColorManager, Props as ColorManagerProps } from '../color_manager';
 import { ColorPalette } from '../color_palette';
 
@@ -18,7 +19,7 @@ export interface Props extends ColorManagerProps {
   colors?: string[];
 }
 
-export const ColorPicker: FunctionComponent<Props> = ({
+export const ColorPicker: FC<Props> = ({
   colors = [],
   hasButtons = false,
   onAddColor,
