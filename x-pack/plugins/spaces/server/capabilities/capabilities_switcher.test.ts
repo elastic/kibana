@@ -23,7 +23,7 @@ const features = ([
     id: 'feature_2',
     name: 'Feature 2',
     navLinkId: 'feature2',
-    app: [],
+    app: ['feature2'],
     catalogue: ['feature2Entry'],
     management: {
       kibana: ['somethingElse'],

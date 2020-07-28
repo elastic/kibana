@@ -176,7 +176,9 @@ export const getMlJobsUsage = async (ml: MlPluginSetup | undefined): Promise<MlJ
         .modulesProvider(internalMlClient, fakeRequest, fakeSOClient)
         .listModules();
       const moduleJobs = modules.flatMap((module) => module.jobs);
-      const jobs = await ml.jobServiceProvider(internalMlClient, fakeRequest).jobsSummary(['siem']);
+      const jobs = await ml
+        .jobServiceProvider(internalMlClient, fakeRequest)
+        .jobsSummary(['siem', 'security']);
 
       jobsUsage = jobs.reduce((usage, job) => {
         const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);

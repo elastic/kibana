@@ -17,7 +17,7 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import { SharedGlobalConfig } from 'kibana/server';
+import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { SearchUsage } from '../collectors/usage';
@@ -25,10 +25,12 @@ import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
+  logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
+      logger.info(`search ${JSON.stringify(request.params)}`);
       const config = await config$.pipe(first()).toPromise();
       const defaultParams = getDefaultSearchParams(config);
 

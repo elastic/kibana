@@ -28,7 +28,7 @@ export interface SearchUsage {
   trackSuccess(duration: number): Promise<void>;
 }
 
-export function usageProvider(core: CoreSetup<object, DataPluginStart>): SearchUsage {
+export function usageProvider(core: CoreSetup<DataPluginStart>): SearchUsage {
   const getTracker = (eventType: keyof Usage) => {
     return async (duration: number) => {
       const repository = await core

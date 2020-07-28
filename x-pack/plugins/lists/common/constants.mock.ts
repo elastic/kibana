@@ -6,6 +6,7 @@
 import { EntriesArray } from './schemas/types';
 
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
+export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';
 export const USER = 'some user';
 export const LIST_INDEX = '.lists';
 export const LIST_ITEM_INDEX = '.items';
