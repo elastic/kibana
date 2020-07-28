@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Config {
-  dashboardId?: string;
-  useCurrentFilters: boolean;
-  useCurrentDateRange: boolean;
-}
+export { Typeahead } from './typehead';

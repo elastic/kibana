@@ -90,6 +90,7 @@ export const WithHoverActions = React.memo<Props>(
           hasArrow={false}
           isOpen={isOpen}
           panelPaddingSize={!alwaysShow ? 's' : 'none'}
+          panelClassName="withHoverActions__popover"
         >
           {isOpen ? <>{hoverContent}</> : null}
         </WithHoverActionsPopover>
