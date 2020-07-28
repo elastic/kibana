@@ -19,8 +19,8 @@
   transform-style: preserve-3d;
   display: block;
   position: absolute;
-  height: 8px;
-  width: 8px;
+  height: $euiSizeS;
+  width: $euiSizeS;
   margin-left: -4px;
   margin-top: -4px;
   background-color: $euiColorEmptyShade;
@@ -50,7 +50,7 @@
   transform-style: preserve-3d;
   display: block;
   position: absolute;
-  height: 24px;
+  height: $euiSizeL;
   width: 0;
   margin-left: -1px;
   margin-top: -12px;
