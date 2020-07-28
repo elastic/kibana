@@ -48,8 +48,9 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const { http } = useKibana().services;
   const { start: findLists, ...lists } = useFindLists();
   const { start: deleteList, result: deleteResult } = useDeleteList();
-  const [exportListId, setExportListId] = useState<string>();
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
+  const [exportingListIds, setExportingListIds] = useState<string[]>([]);
+  const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const { addError, addSuccess } = useAppToasts();
 
   const fetchLists = useCallback(() => {
@@ -65,19 +66,23 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   );
 
   useEffect(() => {
-    if (deleteResult != null && deletingListIds.length > 0) {
-      setDeletingListIds([...deletingListIds.filter((id) => id !== deleteResult.id)]);
+    if (deleteResult != null) {
+      setDeletingListIds((ids) => [...ids.filter((id) => id !== deleteResult.id)]);
       fetchLists();
     }
-  }, [deleteResult, deletingListIds, fetchLists]);
+  }, [deleteResult, fetchLists]);
 
   const handleExport = useCallback(
-    async ({ ids }: { ids: string[] }) =>
-      exportList({ http, listId: ids[0], signal: new AbortController().signal }),
+    ({ id }: { id: string }) => {
+      setExportingListIds((ids) => [...ids, id]);
+      exportList({ http, listId: id, signal: new AbortController().signal })
+        .then((blob) => {
+          setExportDownload({ name: id, blob });
+        })
+        .finally(() => setExportingListIds((ids) => [...ids.filter((_id) => _id !== id)]));
+    },
     [http]
   );
-  const handleExportClick = useCallback(({ id }: { id: string }) => setExportListId(id), []);
-  const handleExportComplete = useCallback(() => setExportListId(undefined), []);
 
   const handleTableChange = useCallback(
     ({ page: { index, size } }: { page: { index: number; size: number } }) => {
@@ -124,8 +129,8 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
 
   const tableItems = (lists.result?.data ?? []).map((item) => ({
     ...item,
-    isExporting: item.id === exportListId,
     isDeleting: deletingListIds.includes(item.id),
+    isExporting: exportingListIds.includes(item.id),
   }));
 
   const pagination = {
@@ -134,7 +139,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     totalItemCount: lists.result?.total ?? 0,
     hidePerPageOptions: true,
   };
-  const columns = buildColumns(handleExportClick, handleDelete);
+  const columns = buildColumns(handleExport, handleDelete);
 
   return (
     <EuiOverlayMask onClick={onClose}>
@@ -164,13 +169,15 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
-      <GenericDownloader
-        filename={exportListId ?? 'download.txt'}
-        ids={exportListId != null ? [exportListId] : undefined}
-        onExportSuccess={handleExportComplete}
-        onExportFailure={handleExportComplete}
-        exportSelectedData={handleExport}
-      />
+      {exportDownload.name && exportDownload.blob && (
+        <GenericDownloader
+          filename={exportDownload.name}
+          ids={[exportDownload.name]}
+          onExportSuccess={() => setExportDownload({})}
+          onExportFailure={() => setExportDownload({})}
+          exportSelectedData={async () => exportDownload.blob!}
+        />
+      )}
     </EuiOverlayMask>
   );
 };
