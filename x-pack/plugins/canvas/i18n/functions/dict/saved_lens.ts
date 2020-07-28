@@ -11,17 +11,17 @@ import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof savedLens>> = {
   help: i18n.translate('xpack.canvas.functions.savedLensHelpText', {
-    defaultMessage: `Returns an embeddable for a saved lens object`,
+    defaultMessage: `Returns an embeddable for a saved Lens visualization object.`,
   }),
   args: {
     id: i18n.translate('xpack.canvas.functions.savedLens.args.idHelpText', {
-      defaultMessage: `The ID of the Saved Lens Object`,
+      defaultMessage: `The ID of the saved Lens visualization object`,
     }),
     timerange: i18n.translate('xpack.canvas.functions.savedLens.args.timerangeHelpText', {
       defaultMessage: `The timerange of data that should be included`,
     }),
     title: i18n.translate('xpack.canvas.functions.savedLens.args.titleHelpText', {
-      defaultMessage: `The title for the lens emebeddable`,
+      defaultMessage: `The title for the Lens visualization object`,
     }),
   },
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FC } from 'react';
 import { AnyExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { EuiButtonEmpty } from '@elastic/eui';
 // @ts-ignore untyped lib
@@ -12,6 +12,7 @@ import pluralize from 'pluralize';
 import copy from 'copy-to-clipboard';
 import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../../../canvas_plugin_src/functions/server';
+import { functions as externalFunctions } from '../../../canvas_plugin_src/functions/external';
 import { ArgumentType } from '../../../types';
 import { notifyService } from '../../services';
 import { isValidDataUrl, DATATABLE_COLUMN_TYPES } from '../../../common/lib';
@@ -30,10 +31,10 @@ const fnList = [
   ...serverFunctions.map((fn) => fn().name),
   'asset',
   'filters',
-  'font',
   'timelion',
   'to',
-  // ignore embeddables functions for now
+  'font',
+  // ignore unsupported embeddables functions for now
 ].filter((fn) => !['savedSearch'].includes(fn));
 
 interface FunctionDictionary {
@@ -41,6 +42,7 @@ interface FunctionDictionary {
 }
 
 const wrapInBackTicks = (str: string) => `\`${str}\``;
+const wrapInDoubleQuotes = (str: string) => (str.charAt(0) === '"' ? str : `"${str}"`);
 const stringSorter = (a: string, b: string) => {
   if (a < b) {
     return -1;
@@ -51,14 +53,14 @@ const stringSorter = (a: string, b: string) => {
   return 0;
 };
 
-const addFunctionLinks = (help: string, options?: { blacklist?: string[] }) => {
-  const { blacklist = [] } = options || {};
+const addFunctionLinks = (help: string, options?: { ignoreList?: string[] }) => {
+  const { ignoreList = [] } = options || {};
   fnList.forEach((name: string) => {
     const nameWithBackTicks = wrapInBackTicks(name);
 
     // ignore functions with the same name as data types, i.e. string, date
     if (
-      !blacklist.includes(name) &&
+      !ignoreList.includes(name) &&
       !DATATABLE_COLUMN_TYPES.includes(name) &&
       help.includes(nameWithBackTicks)
     ) {
@@ -181,12 +183,16 @@ const getArgsTable = (args: { [key: string]: ArgumentType<any> }) => {
       const arg = args[argName];
       const types = arg.types;
       const aliases = arg.aliases ? [...arg.aliases] : [];
-      const defaultValue =
-        typeof arg.default === 'string'
-          ? arg.default.replace('{', '${').replace(/[\r\n/]+/g, '')
-          : arg.default;
+      let defaultValue = arg.default;
       const requiredAnnotation = arg.required === true ? ` ${REQUIRED_ARG_ANNOTATION}` : '';
       const multiAnnotation = arg.multi === true ? ` ${MULTI_ARG_ANNOTATION}` : '';
+
+      if (typeof defaultValue === 'string') {
+        defaultValue = defaultValue.replace('{', '${').replace(/[\r\n/]+/g, '');
+        if (types && types.includes('string')) {
+          defaultValue = wrapInDoubleQuotes(defaultValue);
+        }
+      }
 
       let displayName = '';
 
@@ -222,7 +228,7 @@ ${arg.default}
 
       return `|${displayName}${requiredAnnotation}${multiAnnotation}${aliasList}
 |${types && types.length ? types.map(wrapInBackTicks).join(', ') : ANY_TYPE}
-|${arg.help ? addFunctionLinks(arg.help, { blacklist: argNames }) : ''}${defaultBlock}`;
+|${arg.help ? addFunctionLinks(arg.help, { ignoreList: argNames }) : ''}${defaultBlock}`;
     })
     .join('\n\n');
 };
@@ -230,34 +236,34 @@ ${arg.default}
 const getExamplesBlock = (examples: FunctionExample) => {
   const { syntax, usage } = examples;
   const { expression, help } = usage || {};
-  const syntaxBlock = !syntax
-    ? ''
-    : `\n*Expression syntax*
+  const syntaxBlock = syntax
+    ? `\n*Expression syntax*
 [source,js]
 ----
 ${syntax}
-----\n`;
+----\n`
+    : '';
 
-  const codeBlock = !expression
-    ? ''
-    : `\n*Code example*
+  const codeBlock = expression
+    ? `\n*Code example*
 [source,text]
 ----
 ${expression}
-----\n`;
+----\n`
+    : '';
 
-  const codeHelp = !help ? '' : `${help}\n`;
+  const codeHelp = help ? `${help}\n` : '';
 
   return `${syntaxBlock}${codeBlock}${codeHelp}`;
 };
 
 interface Props {
-  functionDefinitions: AnyExpressionFunctionDefinition[];
+  functionRegistry: Record<string, AnyExpressionFunctionDefinition>;
 }
 
-export const FunctionReferenceGenerator: FunctionComponent<Props> = ({
-  functionDefinitions = [],
-}) => {
+export const FunctionReferenceGenerator: FC<Props> = ({ functionRegistry }) => {
+  const functionDefinitions = Object.values(functionRegistry);
+
   const copyDocs = () => {
     copy(createDocs(functionDefinitions));
     notifyService

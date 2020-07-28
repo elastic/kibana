@@ -80,7 +80,7 @@ as name="bar"`,
 | render`,
       help: `\`as\` casts any primitive value (\`string\`, \`number\`, \`date\`, \`null\`) into a \`datatable\` with a single row and a single column with the given name (or defaults to \`"value"\` if no name is provided). This is useful when piping a primitive value into a function that only takes \`datatable\` as an input.
 
-In the example above, \`ply\` expects each \`fn\` subexpression to return a \`datatable\` in order to merge the results of each \`fn\` back into a \`datatable\`, but using a \`math\` aggregation in the subexpressions returns a single \`math\` value, which is then cast into a \`datatable\` using \`as\`.`,
+In the example, \`ply\` expects each \`fn\` subexpression to return a \`datatable\` in order to merge the results of each \`fn\` back into a \`datatable\`, but using a \`math\` aggregation in the subexpressions returns a single \`math\` value, which is then cast into a \`datatable\` using \`as\`.`,
     },
   },
   asset: {
@@ -315,7 +315,7 @@ esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"`,
   palette={palette "#7ECAE3" "#003A4D" gradient=true}
 | render`,
       help:
-        'This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.',
+        'This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.',
     },
   },
   essql: {

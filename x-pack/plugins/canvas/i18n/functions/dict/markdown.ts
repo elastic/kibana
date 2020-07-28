@@ -39,7 +39,7 @@ export const help: FunctionHelp<FunctionFactory<typeof markdown>> = {
     }),
     openLinksInNewTab: i18n.translate('xpack.canvas.functions.markdown.args.openLinkHelpText', {
       defaultMessage:
-        'A true/false value for opening links in a new tab. Default value is false. Setting to true will open all links in a new tab.',
+        'A true or false value for opening links in a new tab. The default value is `false`. Setting to `true` opens all links in a new tab.',
     }),
   },
 };

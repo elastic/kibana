@@ -11,7 +11,7 @@ import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof mapCenter>> = {
   help: i18n.translate('xpack.canvas.functions.mapCenterHelpText', {
-    defaultMessage: `Returns an object with the center coordinates and zoom level of the map`,
+    defaultMessage: `Returns an object with the center coordinates and zoom level of the map.`,
   }),
   args: {
     lat: i18n.translate('xpack.canvas.functions.mapCenter.args.latHelpText', {
@@ -21,7 +21,7 @@ export const help: FunctionHelp<FunctionFactory<typeof mapCenter>> = {
       defaultMessage: `Longitude for the center of the map`,
     }),
     zoom: i18n.translate('xpack.canvas.functions.savedMap.args.zoomHelpText', {
-      defaultMessage: `The zoom level of the map`,
+      defaultMessage: `Zoom level of the map`,
     }),
   },
 };

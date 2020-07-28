@@ -129,7 +129,10 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode) => {
-      ReactDOM.render(<HelpMenu />, domNode);
+      ReactDOM.render(
+        <HelpMenu functionRegistry={services.expressions.getService().getFunctions()} />,
+        domNode
+      );
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });

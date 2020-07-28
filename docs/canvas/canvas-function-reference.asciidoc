@@ -184,7 +184,7 @@ filters
 ----
 `as` casts any primitive value (`string`, `number`, `date`, `null`) into a `datatable` with a single row and a single column with the given name (or defaults to `"value"` if no name is provided). This is useful when piping a primitive value into a function that only takes `datatable` as an input.
 
-In the example above, `ply` expects each `fn` subexpression to return a `datatable` in order to merge the results of each `fn` back into a `datatable`, but using a `math` aggregation in the subexpressions returns a single `math` value, which is then cast into a `datatable` using `as`.
+In the example, `ply` expects each `fn` subexpression to return a `datatable` in order to merge the results of each `fn` back into a `datatable`, but using a `math` aggregation in the subexpressions returns a single `math` value, which is then cast into a `datatable` using `as`.
 
 *Accepts:* `string`, `boolean`, `number`, `null`
 
@@ -897,7 +897,7 @@ Default: `"-_index:.kibana"`
 |`string`
 |An index or index pattern. For example, `"logstash-*"`.
 
-Default: `_all`
+Default: `"_all"`
 |===
 
 *Returns:* `number`
@@ -965,7 +965,7 @@ Default: `1000`
 |`string`
 |An index or index pattern. For example, `"logstash-*"`.
 
-Default: `_all`
+Default: `"_all"`
 
 |`metaFields`
 |`string`
@@ -1026,7 +1026,7 @@ Alias: `tz`
 |`string`
 |The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.
 
-Default: `UTC`
+Default: `"UTC"`
 |===
 
 *Returns:* `datatable`
@@ -1238,7 +1238,7 @@ filters
 |`string`
 |The horizontal text alignment.
 
-Default: `left`
+Default: `"left"`
 
 |`color`
 |`string`
@@ -1280,7 +1280,7 @@ Default: `false`
 |`string`
 |The font weight. For example, `"normal"`, `"bold"`, `"bolder"`, `"lighter"`, `"100"`, `"200"`, `"300"`, `"400"`, `"500"`, `"600"`, `"700"`, `"800"`, or `"900"`.
 
-Default: `normal`
+Default: `"normal"`
 |===
 
 *Returns:* `style`
@@ -2402,74 +2402,6 @@ Returns an embeddable for a saved visualization object.
 
 
 [float]
-[[savedMap_fn]]
-=== `savedMap`
-
-Returns an embeddable for a saved map object
-
-*Accepts:* `any`
-
-[cols="3*^<"]
-|===
-|Argument |Type |Description
-
-|`center`
-|`mapCenter`
-|The center and zoom level the map should have
-
-|`hideLayer` †
-|`string`
-|The IDs of map layers that should be hidden
-
-|`id`
-|`string`
-|The ID of the Saved Map Object
-
-|`timerange`
-|`timerange`
-|The timerange of data that should be included
-
-|`title`
-|`string`
-|The title for the map
-|===
-
-*Returns:* `embeddable`
-
-
-[float]
-[[savedVisualization_fn]]
-=== `savedVisualization`
-
-Returns an embeddable for a saved visualization object
-
-*Accepts:* `any`
-
-[cols="3*^<"]
-|===
-|Argument |Type |Description
-
-|`colors` †
-|`seriesStyle`
-|Define the color to use for a specific series
-
-|`hideLegend`
-|`boolean`
-|Should the legend be hidden
-
-|`id`
-|`string`
-|The ID of the Saved Visualization Object
-
-|`timerange`
-|`timerange`
-|The timerange of data that should be included
-|===
-
-*Returns:* `embeddable`
-
-
-[float]
 [[seriesStyle_fn]]
 === `seriesStyle`
 
@@ -2537,7 +2469,7 @@ Alias: `shape`
 |`string`
 |Pick a shape.
 
-Default: `square`
+Default: `"square"`
 
 |`border`
 
@@ -2800,7 +2732,7 @@ Aliases: `c`, `field`
 |`string`
 |The column or field that you want to filter.
 
-Default: `@timestamp`
+Default: `"@timestamp"`
 
 |`compact`
 |`boolean`

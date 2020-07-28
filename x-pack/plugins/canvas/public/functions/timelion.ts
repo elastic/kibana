@@ -68,27 +68,27 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
           types: ['string'],
           aliases: ['_', 'q'],
           help: argHelp.query,
-          default: '".es(*)"',
+          default: '.es(*)',
         },
         interval: {
           types: ['string'],
           help: argHelp.interval,
-          default: '"auto"',
+          default: 'auto',
         },
         from: {
           types: ['string'],
           help: argHelp.from,
-          default: '"now-1y"',
+          default: 'now-1y',
         },
         to: {
           types: ['string'],
           help: argHelp.to,
-          default: '"now"',
+          default: 'now',
         },
         timezone: {
           types: ['string'],
           help: argHelp.timezone,
-          default: '"UTC"',
+          default: 'UTC',
         },
       },
       fn: (input, args): Promise<Datatable> => {

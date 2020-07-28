@@ -11,22 +11,22 @@ import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<typeof savedVisualization>> = {
   help: i18n.translate('xpack.canvas.functions.savedVisualizationHelpText', {
-    defaultMessage: `Returns an embeddable for a saved visualization object`,
+    defaultMessage: `Returns an embeddable for a saved visualization object.`,
   }),
   args: {
     id: i18n.translate('xpack.canvas.functions.savedVisualization.args.idHelpText', {
-      defaultMessage: `The ID of the Saved Visualization Object`,
+      defaultMessage: `The ID of the saved visualization object`,
     }),
     timerange: i18n.translate('xpack.canvas.functions.savedVisualization.args.timerangeHelpText', {
       defaultMessage: `The timerange of data that should be included`,
     }),
     colors: i18n.translate('xpack.canvas.functions.savedVisualization.args.colorsHelpText', {
-      defaultMessage: `Define the color to use for a specific series`,
+      defaultMessage: `Defines the color to use for a specific series`,
     }),
     hideLegend: i18n.translate(
       'xpack.canvas.functions.savedVisualization.args.hideLegendHelpText',
       {
-        defaultMessage: `Should the legend be hidden`,
+        defaultMessage: `Specifies the option to hide the legend`,
       }
     ),
   },

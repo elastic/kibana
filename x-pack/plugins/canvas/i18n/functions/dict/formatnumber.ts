@@ -12,7 +12,7 @@ import { NUMERALJS } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof formatnumber>> = {
   help: i18n.translate('xpack.canvas.functions.formatnumberHelpText', {
-    defaultMessage: 'Formats a number into a formatted number string using {NUMERALJS}.',
+    defaultMessage: 'Formats a number into a formatted number string using the {NUMERALJS}.',
     values: {
       NUMERALJS,
     },

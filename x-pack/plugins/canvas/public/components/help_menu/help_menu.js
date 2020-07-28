@@ -12,7 +12,7 @@ import { FunctionReferenceGenerator } from '../function_reference_generator';
 
 const { HelpMenu: strings } = ComponentStrings;
 
-export const HelpMenu = () => {
+export const HelpMenu = ({ functionRegistry }) => {
   const [isFlyoutVisible, setFlyoutVisible] = useState(false);
 
   const showFlyout = () => {
@@ -33,7 +33,7 @@ export const HelpMenu = () => {
       {isDevelopment && (
         <Fragment>
           <EuiSpacer size="s" />
-          <FunctionReferenceGenerator />
+          <FunctionReferenceGenerator functionRegistry={functionRegistry} />
         </Fragment>
       )}
       {isFlyoutVisible && (
