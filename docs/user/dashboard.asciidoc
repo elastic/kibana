@@ -172,8 +172,8 @@ From the *Share* menu, you can:
 * Embed the code in a web page. Users must have {kib} access
 to view an embedded dashboard.
 * Share a direct link to a {kib} dashboard
-* Generate a PDF report
-* Generate a PNG report
+* Generate a PDF report https://www.elastic.co/subscriptions[(only available with Gold licence and above)]
+* Generate a PNG report https://www.elastic.co/subscriptions[(only available with Gold licence and above)]
 
 TIP: To create a link to a dashboard by title, use: +
 `${domain}/${basepath?}/app/kibana#/dashboards?title=${yourdashboardtitle}`
