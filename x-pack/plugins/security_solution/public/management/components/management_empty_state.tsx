@@ -205,7 +205,7 @@ const HostsEmptyState = React.memo<{
                   <EuiSelectableMessage>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.hostList.loadingPolicies"
-                      defaultMessage="Loading policy configs"
+                      defaultMessage="Loading integrations"
                     />
                   </EuiSelectableMessage>
                 ) : selectionOptions.length ? (
@@ -213,7 +213,7 @@ const HostsEmptyState = React.memo<{
                 ) : (
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.hostList.noPolicies"
-                    defaultMessage="There are no policies."
+                    defaultMessage="There are no integrations."
                   />
                 );
               }}

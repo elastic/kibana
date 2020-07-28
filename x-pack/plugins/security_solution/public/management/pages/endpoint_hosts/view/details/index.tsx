@@ -167,7 +167,7 @@ const PolicyResponseFlyoutPanel = memo<{
             title={
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostDetails.noPolicyResponse"
-                defaultMessage="No policy response available"
+                defaultMessage="No configuration response available"
               />
             }
           />
