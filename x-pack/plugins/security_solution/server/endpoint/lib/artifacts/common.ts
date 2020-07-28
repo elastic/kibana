@@ -13,7 +13,7 @@ import {
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact',
-  SUPPORTED_OPERATING_SYSTEMS: ['linux', 'macos', 'windows'],
+  SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows'],
 };
 
 export const ManifestConstants = {
