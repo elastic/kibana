@@ -13,12 +13,35 @@ def dividerBlock() {
   return [ type: "divider" ]
 }
 
+// If a message is longer than the limit, split it up by '\n' into parts, and return as many parts as will fit within the limit
+def shortenMessage(message, sizeLimit = 3000) {
+  if (message.size() <= sizeLimit) {
+    return message
+  }
+
+  def truncatedMessage = "[...truncated...]"
+
+  def parts = message.split("\n")
+  message = ""
+
+  for(def part in parts) {
+    if ((message.size() + part.size() + truncatedMessage.size() + 1) > sizeLimit) {
+      break;
+    }
+    message += part+"\n"
+  }
+
+  message += truncatedMessage
+
+  return message.size() <= sizeLimit ? message : truncatedMessage
+}
+
 def markdownBlock(message) {
   return [
     type: "section",
     text: [
       type: "mrkdwn",
-      text: message,
+      text: shortenMessage(message, 3000), // 3000 is max text length for `section`s only
     ],
   ]
 }
@@ -29,7 +52,7 @@ def contextBlock(message) {
     elements: [
       [
         type: 'mrkdwn',
-        text: message,
+        text: message, // Not sure what the size limit is here, I tried 10000s of characters and it still worked
       ]
     ]
   ]
@@ -62,7 +85,7 @@ def getTestFailures() {
   def messages = []
   messages << "*Test Failures*"
 
-  def list = failures.collect {
+  def list = failures.take(10).collect {
     def name = it
       .fullDisplayName
       .split(/\./, 2)[-1]
@@ -73,7 +96,9 @@ def getTestFailures() {
 
     return "• <${it.url}|${name}>"
   }.join("\n")
-  return "*Test Failures*\n${list}"
+
+  def moreText = failures.size() > 10 ? "\n• ...and ${failures.size()-10} more" : ""
+  return "*Test Failures*\n${list}${moreText}"
 }
 
 def getDefaultDisplayName() {
@@ -98,6 +123,10 @@ def getStatusIcon() {
   return ':broken_heart:'
 }
 
+def getBackupMessage(config) {
+  return "${getStatusIcon()} ${config.title}\n\nFirst attempt at sending this notification failed. Please check the build."
+}
+
 def sendFailedBuild(Map params = [:]) {
   def config = [
     channel: '#kibana-operations-alerts',
@@ -117,7 +146,7 @@ def sendFailedBuild(Map params = [:]) {
   blocks << dividerBlock()
   blocks << config.context
 
-  slackSend(
+  def resp = slackSend(
     channel: config.channel,
     username: config.username,
     iconEmoji: config.icon,
@@ -125,6 +154,17 @@ def sendFailedBuild(Map params = [:]) {
     message: message,
     blocks: blocks
   )
+
+  if (!resp) {
+    slackSend(
+      channel: config.channel,
+      username: config.username,
+      iconEmoji: config.icon,
+      color: config.color,
+      message: message,
+      blocks: [markdownBlock(getBackupMessage(config))]
+    )
+  }
 }
 
 def onFailure(Map options = [:]) {
