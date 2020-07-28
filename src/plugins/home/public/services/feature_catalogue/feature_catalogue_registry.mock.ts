@@ -28,6 +28,13 @@ const createSetupMock = (): jest.Mocked<FeatureCatalogueRegistrySetup> => {
   };
   return setup;
 };
+const createStartMock = (): jest.Mocked<FeatureCatalogueRegistryStart> => {
+  const start = {
+    showOnHomePage: jest.fn(),
+    hideFromHomePage: jest.fn(),
+  };
+  return start;
+};
 
 const createMock = (): jest.Mocked<PublicMethodsOf<FeatureCatalogueRegistry>> => {
   const service = {
@@ -36,10 +43,12 @@ const createMock = (): jest.Mocked<PublicMethodsOf<FeatureCatalogueRegistry>> =>
     get: jest.fn(() => []),
   };
   service.setup.mockImplementation(createSetupMock);
+  service.start.mockImplementation(createStartMock);
   return service;
 };
 
 export const featureCatalogueRegistryMock = {
   createSetup: createSetupMock,
+  createStart: createStartMock,
   create: createMock,
 };

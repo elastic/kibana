@@ -22,6 +22,8 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { ChangeHomeRoute } from './change_home_route';
 import { SolutionsPanel } from './solutions_panel';
+import { ManageData } from './manage_data';
+import { AddData } from './add_data';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -29,7 +31,6 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -150,13 +151,23 @@ export class Home extends Component {
       'home_tutorial_directory',
       'ingestManager',
       'ml_file_data_visualizer',
-    ].map(this.renderDirectory);
+    ]
+      .map(this.renderDirectory)
+      .filter((card) => card);
+
     const manageDataFeatureCards = [
       'security',
       'monitoring',
       'snapshot_restore',
       'index_lifecycle_management',
-    ].map(this.renderDirectory);
+    ]
+      .map(this.renderDirectory)
+      .filter((card) => card);
+
+    // Show card for console if none of the manage data plugins are available, most likely in OSS
+    if (manageDataFeatureCards.length < 1) {
+      manageDataFeatureCards.push(this.renderDirectory('console'));
+    }
 
     return (
       <div className="homPageContainer">
@@ -216,69 +227,28 @@ export class Home extends Component {
           <main className="homPageMain" data-test-subj="homeApp">
             <SolutionsPanel addBasePath={addBasePath} findDirectoryById={this.findDirectoryById} />
 
-            <div className="homAddData">
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
-                <EuiFlexItem grow={1}>
-                  <EuiTitle size="s">
-                    <h3>
-                      {i18n.translate('home.addData.sectionTitle', {
-                        defaultMessage: 'Add your data',
-                      })}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {sampleData ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconType={sampleData.icon}
-                      href={sampleData.path}
-                      size="xs"
-                      flush="right"
-                    >
-                      <FormattedMessage
-                        id="home.addData.sampleDataButtonLabel"
-                        defaultMessage="Try our sample data"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-
-              <EuiSpacer />
-
+            {/* If there is only one card in each add and manage data section, this displays the two sections side by side */}
+            {addDataFeatureCards.length === 1 && manageDataFeatureCards.length === 1 ? (
               <EuiFlexGroup>
-                <EuiFlexItem grow={1}>
-                  <EuiFlexGroup justifyContent="spaceAround">{addDataFeatureCards}</EuiFlexGroup>
+                <EuiFlexItem>
+                  <AddData sampleData={sampleData} cards={addDataFeatureCards} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <ManageData
+                    cards={
+                      manageDataFeatureCards.length
+                        ? manageDataFeatureCards
+                        : this.renderDirectory('devTools')
+                    }
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </div>
-
-            {manageDataFeatureCards.length ? (
+            ) : (
               <Fragment>
-                <EuiHorizontalRule margin="xl" />
-                <EuiSpacer size="s" />
-
-                <div className="homManageData">
-                  <EuiTitle size="s">
-                    <h3>
-                      {i18n.translate('home.manageData.sectionTitle', {
-                        defaultMessage: 'Manage your data',
-                      })}
-                    </h3>
-                  </EuiTitle>
-
-                  <EuiSpacer />
-
-                  <EuiFlexGroup
-                    className="homManageData__container"
-                    justifyContent="spaceAround"
-                    wrap
-                  >
-                    {manageDataFeatureCards}
-                  </EuiFlexGroup>
-                </div>
+                <AddData sampleData={sampleData} cards={addDataFeatureCards} />
+                <ManageData cards={manageDataFeatureCards} />
               </Fragment>
-            ) : null}
+            )}
 
             <EuiHorizontalRule margin="xl" />
 
