@@ -1180,6 +1180,17 @@ const request = client.asCurrentUser.ping({}, {
 });
 ```
 
+- the new client doesn't provide exhaustive typings for the response object yet. You might have to copy
+response type definitions from the Legacy Elasticsearch library until https://github.com/elastic/elasticsearch-js/pull/970 merged.
+
+```ts
+// platform provides a few typings for internal purposes
+import { SearchResponse } from 'src/core/server';
+const { body } = await client.search<SearchResponse<any>>(...)
+interface Info {...}
+const { body } = await client.info<Info>(...)
+```
+
 - Functional tests are subject to migration to the new client as well.
 before:
 ```ts
