@@ -9,7 +9,6 @@ import {
   loadingIndicator as defaultLoadingIndicator,
   LoadingIndicatorInterface,
 } from '../../lib/loading_indicator';
-// @ts-expect-error
 import { convert } from '../../lib/modify_path';
 
 interface InFlightMiddlewareOptions {

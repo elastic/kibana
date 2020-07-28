@@ -58,6 +58,7 @@ import {
   changeTimeFilter,
   mapAndFlattenFilters,
   extractTimeFilter,
+  extractTimeRange,
   convertRangeFilterToTimeRangeString,
 } from './query';
 
@@ -99,6 +100,7 @@ export const esFilters = {
   convertRangeFilterToTimeRangeString,
   mapAndFlattenFilters,
   extractTimeFilter,
+  extractTimeRange,
 };
 
 export {
