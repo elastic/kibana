@@ -11,7 +11,7 @@ import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
-  detections: DetectionsUsage;
+  detections: DetectionsUsage | {};
   endpoints: EndpointUsage | {};
 }
 
@@ -76,9 +76,14 @@ export const registerCollector: RegisterCollector = ({
     isReady: () => kibanaIndex.length > 0,
     fetch: async (callCluster: LegacyAPICaller): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
+      const [detections, endpoints] = await Promise.allSettled([
+        fetchDetectionsUsage(kibanaIndex, callCluster, ml),
+        getEndpointTelemetryFromFleet(savedObjectsClient),
+      ]);
+
       return {
-        detections: await fetchDetectionsUsage(kibanaIndex, callCluster, ml),
-        endpoints: await getEndpointTelemetryFromFleet(savedObjectsClient),
+        detections: detections.status === 'fulfilled' ? detections.value : {},
+        endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
       };
     },
   });
