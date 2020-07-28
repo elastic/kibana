@@ -96,7 +96,7 @@ export const NEEDS_SIGNALS_INDEX = i18n.translate(
 export const NEEDS_LISTS_INDEXES = i18n.translate(
   'xpack.securitySolution.detectionEngine.needsListsIndexesMessage',
   {
-    defaultMessage: 'You need permissions for the lists indexes.',
+    defaultMessage: 'You need permissions for the lists indices.',
   }
 );
 
