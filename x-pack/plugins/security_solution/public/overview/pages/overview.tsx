@@ -71,7 +71,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
     <>
       {indicesExist ? (
         <StickyContainer>
-          <FiltersGlobal>
+          <FiltersGlobal globalFullScreen={false}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 

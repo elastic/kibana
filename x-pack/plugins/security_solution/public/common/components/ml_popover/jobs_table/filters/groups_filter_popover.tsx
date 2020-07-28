@@ -25,8 +25,8 @@ interface GroupsFilterPopoverProps {
 
 /**
  * Popover for selecting which SiemJob groups to filter on. Component extracts unique groups and
- * their counts from the provided SiemJobs. The 'siem' group is filtered out as all jobs will be
- * siem jobs
+ * their counts from the provided SiemJobs. The 'siem' & 'security' groups are filtered out as all jobs will be
+ * siem/security jobs
  *
  * @param siemJobs jobs to fetch groups from to display for filtering
  * @param onSelectedGroupsChanged change listener to be notified when group selection changes
@@ -41,7 +41,7 @@ export const GroupsFilterPopoverComponent = ({
   const groups = siemJobs
     .map((j) => j.groups)
     .flat()
-    .filter((g) => g !== 'siem');
+    .filter((g) => g !== 'siem' && g !== 'security');
   const uniqueGroups = Array.from(new Set(groups));
 
   useEffect(() => {
