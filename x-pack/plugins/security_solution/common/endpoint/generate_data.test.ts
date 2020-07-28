@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import _ from 'lodash';
 import {
   EndpointDocGenerator,
   Event,
@@ -79,9 +80,9 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const processEvent = generator.generateEvent({ timestamp });
     expect(processEvent['@timestamp']).toEqual(timestamp);
-    expect(processEvent.event.category).toEqual('process');
+    expect(processEvent.event.category).toEqual(['process']);
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('start');
+    expect(processEvent.event.type).toEqual(['start']);
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
@@ -94,7 +95,7 @@ describe('data generator', () => {
     expect(processEvent['@timestamp']).toEqual(timestamp);
     expect(processEvent.event.category).toEqual('dns');
     expect(processEvent.event.kind).toEqual('event');
-    expect(processEvent.event.type).toEqual('start');
+    expect(processEvent.event.type).toEqual(['start']);
     expect(processEvent.agent).not.toBeNull();
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
@@ -332,6 +333,12 @@ describe('data generator', () => {
   describe('creates alert ancestor tree', () => {
     let events: Event[];
 
+    const isCategoryProcess = (event: Event) => {
+      return (
+        _.isEqual(event.event.category, ['process']) || _.isEqual(event.event.category, 'process')
+      );
+    };
+
     beforeEach(() => {
       events = generator.createAlertEventAncestry({
         ancestors: 3,
@@ -343,11 +350,7 @@ describe('data generator', () => {
     it('with n-1 process events', () => {
       for (let i = events.length - 2; i > 0; ) {
         const parentEntityIdOfChild = events[i].process.parent?.entity_id;
-        for (
-          ;
-          --i >= -1 && (events[i].event.kind !== 'event' || events[i].event.category !== 'process');
-
-        ) {
+        for (; --i >= -1 && (events[i].event.kind !== 'event' || !isCategoryProcess(events[i])); ) {
           // related event - skip it
         }
         expect(i).toBeGreaterThanOrEqual(0);
@@ -361,7 +364,7 @@ describe('data generator', () => {
         ;
         previousProcessEventIndex >= -1 &&
         (events[previousProcessEventIndex].event.kind !== 'event' ||
-          events[previousProcessEventIndex].event.category !== 'process');
+          !isCategoryProcess(events[previousProcessEventIndex]));
         previousProcessEventIndex--
       ) {
         // related event - skip it
