@@ -18,7 +18,8 @@ import {
   formatOperatingSystems,
   getEntryValue,
   formatExceptionItemForUpdate,
-  enrichExceptionItemsWithComments,
+  enrichNewExceptionItemsWithComments,
+  enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
   entryHasListType,
   entryHasNonEcsType,
@@ -35,14 +36,14 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from '../autocomplete/operators';
-import { OperatorTypeEnum, OperatorEnum, EntryNested } from '../../../lists_plugin_deps';
+import { OperatorTypeEnum, OperatorEnum, EntryNested } from '../../../shared_imports';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../../lists/common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../../lists/common/schemas/types/entry_match_any.mock';
 import { getEntryExistsMock } from '../../../../../lists/common/schemas/types/entry_exists.mock';
 import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
-import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comments.mock';
-import { ENTRIES } from '../../../../../lists/common/constants.mock';
+import { getCommentsArrayMock } from '../../../../../lists/common/schemas/types/comment.mock';
+import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '../../../../../lists/common/constants.mock';
 import {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -410,12 +411,52 @@ describe('Exception helpers', () => {
       expect(result).toEqual(expected);
     });
   });
+  describe('#enrichExistingExceptionItemWithComments', () => {
+    test('it should return exception item with comments stripped of "created_by", "created_at", "updated_by", "updated_at" fields', () => {
+      const payload = getExceptionListItemSchemaMock();
+      const comments = [
+        {
+          comment: 'Im an existing comment',
+          created_at: OLD_DATE_RELATIVE_TO_DATE_NOW,
+          created_by: 'lily',
+          id: '1',
+        },
+        {
+          comment: 'Im another existing comment',
+          created_at: OLD_DATE_RELATIVE_TO_DATE_NOW,
+          created_by: 'lily',
+          id: '2',
+        },
+        {
+          comment: 'Im a new comment',
+        },
+      ];
+      const result = enrichExistingExceptionItemWithComments(payload, comments);
+      const expected = {
+        ...getExceptionListItemSchemaMock(),
+        comments: [
+          {
+            comment: 'Im an existing comment',
+            id: '1',
+          },
+          {
+            comment: 'Im another existing comment',
+            id: '2',
+          },
+          {
+            comment: 'Im a new comment',
+          },
+        ],
+      };
+      expect(result).toEqual(expected);
+    });
+  });
 
-  describe('#enrichExceptionItemsWithComments', () => {
+  describe('#enrichNewExceptionItemsWithComments', () => {
     test('it should add comments to an exception item', () => {
       const payload = [getExceptionListItemSchemaMock()];
       const comments = getCommentsArrayMock();
-      const result = enrichExceptionItemsWithComments(payload, comments);
+      const result = enrichNewExceptionItemsWithComments(payload, comments);
       const expected = [
         {
           ...getExceptionListItemSchemaMock(),
@@ -428,7 +469,7 @@ describe('Exception helpers', () => {
     test('it should add comments to multiple exception items', () => {
       const payload = [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()];
       const comments = getCommentsArrayMock();
-      const result = enrichExceptionItemsWithComments(payload, comments);
+      const result = enrichNewExceptionItemsWithComments(payload, comments);
       const expected = [
         {
           ...getExceptionListItemSchemaMock(),
