@@ -58,6 +58,7 @@ import {
   changeTimeFilter,
   mapAndFlattenFilters,
   extractTimeFilter,
+  extractTimeRange,
   convertRangeFilterToTimeRangeString,
   extractTimeRange,
 } from './query';
