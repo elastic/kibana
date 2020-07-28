@@ -49,11 +49,7 @@ describe('service_settings (FKA tile_map test)', function () {
   };
 
   const defaultTilemapConfig = {
-    deprecated: {
-      config: {
-        options: {},
-      },
-    },
+    options: {},
   };
 
   function makeServiceSettings(mapConfigOptions = {}, tilemapOptions = {}) {
