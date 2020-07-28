@@ -6,14 +6,13 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { fetchExceptionListItemsByListId } from '../api';
-import { ExceptionList, Pagination, UseExceptionListProps } from '../types';
+import { fetchExceptionListsItemsByListIds } from '../api';
+import { Pagination, UseExceptionListProps } from '../types';
 import { ExceptionListItemSchema } from '../../../common/schemas';
 
 type Func = () => void;
 export type ReturnExceptionListAndItems = [
   boolean,
-  ExceptionList[],
   ExceptionListItemSchema[],
   Pagination,
   Func | null
@@ -42,35 +41,33 @@ export const useExceptionList = ({
   onError,
   onSuccess,
 }: UseExceptionListProps): ReturnExceptionListAndItems => {
-  const [exceptionLists, setExceptionLists] = useState<ExceptionList[]>([]);
   const [exceptionItems, setExceptionListItems] = useState<ExceptionListItemSchema[]>([]);
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
-  const fetchExceptionList = useRef<Func | null>(null);
-  const [loading, setLoading] = useState(false);
-  const listIds = useMemo((): string => lists.map(({ id }) => id).join(','), [lists]);
-  const namespaceTypes = useMemo(
-    (): string => lists.map(({ namespaceType }) => namespaceType).join(','),
+  const fetchExceptionListItems = useRef<Func | null>(null);
+  const [loading, setLoading] = useState(true);
+  const listIds = useMemo(
+    () =>
+      lists
+        .map(({ listId }) => listId)
+        .sort()
+        .join(),
     [lists]
   );
-  const listFilters = useMemo(
-    (): string =>
+  const filters = useMemo(
+    () =>
       filterOptions
-        .map((filter, index) => {
-          const namespaces = namespaceTypes.split(',');
-          const namespace = namespaces[index];
-          const listFilter = [
-            ...(filter.filter.length
-              ? [`${namespace}.attributes.entries.field:${filter.filter}*`]
-              : []),
-            ...(filter.tags.length
-              ? filter.tags.map((t) => `${namespace}.attributes.tags:${t}`)
-              : []),
-          ];
-
-          return listFilter.join(' AND ');
-        })
-        .join(','),
-    [filterOptions, namespaceTypes]
+        .map(({ filter }) => filter)
+        .sort()
+        .join(),
+    [filterOptions]
+  );
+  const filterTags = useMemo(
+    () =>
+      filterOptions
+        .map(({ tags }) => tags)
+        .sort()
+        .join(),
+    [filterOptions]
   );
 
   useEffect(
@@ -81,46 +78,42 @@ export const useExceptionList = ({
         try {
           setLoading(true);
 
-          const fetchListItemsResult = await fetchExceptionListItemsByListId({
-            filterOptions: listFilters,
+          const { data, page, per_page: perPage, total } = await fetchExceptionListsItemsByListIds({
+            filterOptions,
             http,
-            listIds,
-            namespaceTypes,
+            listIds: lists.map(({ listId }) => listId),
+            namespaceTypes: lists.map(({ namespaceType }) => namespaceType),
             pagination,
             signal: abortCtrl.signal,
           });
 
           if (isSubscribed) {
             setPagination({
-              page: fetchListItemsResult.page,
-              perPage: fetchListItemsResult.per_page,
-              total: fetchListItemsResult.total,
+              page,
+              perPage,
+              total,
             });
-            setExceptionListItems(fetchListItemsResult.data);
+            setExceptionListItems(data);
 
             if (onSuccess != null) {
               onSuccess({
-                exceptions: exceptionItems,
+                exceptions: data,
                 pagination: {
-                  page: fetchListItemsResult.page,
-                  perPage: fetchListItemsResult.per_page,
-                  total: fetchListItemsResult.total,
+                  page,
+                  perPage,
+                  total,
                 },
               });
             }
-
-            setLoading(false);
           }
         } catch (error) {
           if (isSubscribed) {
-            setExceptionLists([]);
             setExceptionListItems([]);
             setPagination({
               page: 1,
               perPage: 20,
               total: 0,
             });
-            setLoading(false);
             if (onError != null) {
               onError(error);
             }
@@ -128,27 +121,18 @@ export const useExceptionList = ({
         }
       };
 
-      if (listIds !== '' && namespaceTypes !== '') {
+      if (lists.length > 0) {
         fetchData();
       }
 
-      fetchExceptionList.current = fetchData;
+      fetchExceptionListItems.current = fetchData;
       return (): void => {
         isSubscribed = false;
         abortCtrl.abort();
       };
     }, // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      http,
-      listIds,
-      namespaceTypes,
-      setExceptionLists,
-      setExceptionListItems,
-      pagination.page,
-      pagination.perPage,
-      listFilters,
-    ]
+    [http, listIds, setExceptionListItems, pagination.page, pagination.perPage, filters, filterTags]
   );
 
-  return [loading, exceptionLists, exceptionItems, paginationInfo, fetchExceptionList.current];
+  return [loading, exceptionItems, paginationInfo, fetchExceptionListItems.current];
 };

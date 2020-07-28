@@ -366,9 +366,10 @@ describe('Exceptions Lists API', () => {
 
     test('it invokes "fetchExceptionListItemsByListId" with expected url and body values', async () => {
       await fetchExceptionListItemsByListId({
+        filterOptions: [],
         http: mockKibanaHttpService(),
-        listId: 'myList',
-        namespaceType: 'single',
+        listIds: ['myList', 'myOtherListId'],
+        namespaceTypes: ['single', 'single'],
         pagination: {
           page: 1,
           perPage: 20,
@@ -379,8 +380,8 @@ describe('Exceptions Lists API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
         method: 'GET',
         query: {
-          list_id: 'myList',
-          namespace_type: 'single',
+          list_id: 'myList,myOtherListId',
+          namespace_type: 'single,single',
           page: '1',
           per_page: '20',
         },
@@ -390,13 +391,15 @@ describe('Exceptions Lists API', () => {
 
     test('it invokes with expected url and body values when a filter exists and "namespaceType" of "single"', async () => {
       await fetchExceptionListItemsByListId({
-        filterOptions: {
-          filter: 'hello world',
-          tags: [],
-        },
+        filterOptions: [
+          {
+            filter: 'hello world',
+            tags: [],
+          },
+        ],
         http: mockKibanaHttpService(),
-        listId: 'myList',
-        namespaceType: 'single',
+        listIds: ['myList'],
+        namespaceTypes: ['single'],
         pagination: {
           page: 1,
           perPage: 20,
@@ -419,13 +422,15 @@ describe('Exceptions Lists API', () => {
 
     test('it invokes with expected url and body values when a filter exists and "namespaceType" of "agnostic"', async () => {
       await fetchExceptionListItemsByListId({
-        filterOptions: {
-          filter: 'hello world',
-          tags: [],
-        },
+        filterOptions: [
+          {
+            filter: 'hello world',
+            tags: [],
+          },
+        ],
         http: mockKibanaHttpService(),
-        listId: 'myList',
-        namespaceType: 'agnostic',
+        listIds: ['myList'],
+        namespaceTypes: ['agnostic'],
         pagination: {
           page: 1,
           perPage: 20,
@@ -448,13 +453,15 @@ describe('Exceptions Lists API', () => {
 
     test('it invokes with expected url and body values when tags exists', async () => {
       await fetchExceptionListItemsByListId({
-        filterOptions: {
-          filter: '',
-          tags: ['malware'],
-        },
+        filterOptions: [
+          {
+            filter: '',
+            tags: ['malware'],
+          },
+        ],
         http: mockKibanaHttpService(),
-        listId: 'myList',
-        namespaceType: 'agnostic',
+        listIds: ['myList'],
+        namespaceTypes: ['agnostic'],
         pagination: {
           page: 1,
           perPage: 20,
@@ -477,13 +484,15 @@ describe('Exceptions Lists API', () => {
 
     test('it invokes with expected url and body values when filter and tags exists', async () => {
       await fetchExceptionListItemsByListId({
-        filterOptions: {
-          filter: 'host.name',
-          tags: ['malware'],
-        },
+        filterOptions: [
+          {
+            filter: 'host.name',
+            tags: ['malware'],
+          },
+        ],
         http: mockKibanaHttpService(),
-        listId: 'myList',
-        namespaceType: 'agnostic',
+        listIds: ['myList'],
+        namespaceTypes: ['agnostic'],
         pagination: {
           page: 1,
           perPage: 20,
@@ -507,9 +516,10 @@ describe('Exceptions Lists API', () => {
 
     test('it returns expected format when call succeeds', async () => {
       const exceptionResponse = await fetchExceptionListItemsByListId({
+        filterOptions: [],
         http: mockKibanaHttpService(),
-        listId: 'endpoint_list_id',
-        namespaceType: 'single',
+        listIds: ['endpoint_list_id'],
+        namespaceTypes: ['single'],
         pagination: {
           page: 1,
           perPage: 20,
@@ -521,9 +531,10 @@ describe('Exceptions Lists API', () => {
 
     test('it returns error and does not make request if request payload fails decode', async () => {
       const payload = ({
+        filterOptions: [],
         http: mockKibanaHttpService(),
-        listId: '1',
-        namespaceType: 'not a namespace type',
+        listIds: ['myList'],
+        namespaceTypes: ['not a namespace type'],
         pagination: {
           page: 1,
           perPage: 20,
@@ -542,9 +553,10 @@ describe('Exceptions Lists API', () => {
 
       await expect(
         fetchExceptionListItemsByListId({
+          filterOptions: [],
           http: mockKibanaHttpService(),
-          listId: 'myList',
-          namespaceType: 'single',
+          listIds: ['myList'],
+          namespaceTypes: ['single'],
           pagination: {
             page: 1,
             perPage: 20,

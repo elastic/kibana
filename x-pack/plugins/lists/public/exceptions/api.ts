@@ -6,6 +6,8 @@
 import {
   ENDPOINT_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   EXCEPTION_LIST_URL,
 } from '../../common/constants';
 import {
@@ -255,7 +257,7 @@ export const fetchExceptionListById = async ({
  *
  * @throws An error if response is not OK
  */
-export const fetchExceptionListItemsByListId = async ({
+export const fetchExceptionListsItemsByListIds = async ({
   http,
   listIds,
   namespaceTypes,
@@ -263,12 +265,28 @@ export const fetchExceptionListItemsByListId = async ({
   pagination,
   signal,
 }: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> => {
+  const filters: string[] = filterOptions.map<string>((filter, index) => {
+    const namespace = namespaceTypes[index];
+    const filterNamespace =
+      namespace === 'agnostic' ? EXCEPTION_LIST_NAMESPACE_AGNOSTIC : EXCEPTION_LIST_NAMESPACE;
+    const formattedFilters = [
+      ...(filter.filter.length
+        ? [`${filterNamespace}.attributes.entries.field:${filter.filter}*`]
+        : []),
+      ...(filter.tags.length
+        ? filter.tags.map((t) => `${filterNamespace}.attributes.tags:${t}`)
+        : []),
+    ];
+
+    return formattedFilters.join(' AND ');
+  });
+
   const query = {
-    list_id: listIds,
-    namespace_type: namespaceTypes,
+    list_id: listIds.join(','),
+    namespace_type: namespaceTypes.join(','),
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
-    ...(filterOptions != null ? { filtering: filterOptions } : {}),
+    ...(filters.length ? { filter: filters.join(',') } : {}),
   };
   const [validatedRequest, errorsRequest] = validate(query, findExceptionListItemSchema);
 
