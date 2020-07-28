@@ -52,8 +52,8 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     border: none;
   }
 
-  /* hide open popovers when a modal is being displayed to prevent them from covering the modal */
-  body.euiBody-hasOverlayMask .euiPopover__panel-isOpen {
+  /* hide open draggable popovers when a modal is being displayed to prevent them from covering the modal */
+  body.euiBody-hasOverlayMask .withHoverActions__popover.euiPopover__panel-isOpen{
     visibility: hidden !important;
   }
 
