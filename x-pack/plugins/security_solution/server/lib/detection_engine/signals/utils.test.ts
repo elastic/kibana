@@ -724,7 +724,7 @@ describe('utils', () => {
           unit: 's',
         });
       } catch (exc) {
-        expect(exc.message).to.eql(
+        expect(exc.message).toEqual(
           'failed to parse from and to dates on rule. Check lookback / interval'
         );
       }
