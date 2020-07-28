@@ -54,6 +54,9 @@ export interface UseExceptionListProps {
   onError?: (arg: string[]) => void;
   filterOptions: FilterExceptionsOptions[];
   pagination?: Pagination;
+  showDetectionsListsOnly: boolean;
+  showEndpointListsOnly: boolean;
+  matchFilters: boolean;
   onSuccess?: (arg: UseExceptionListSuccess) => void;
 }
 
@@ -85,6 +88,16 @@ export interface ApiCallMemoProps {
   namespaceType: NamespaceType;
   onError: (arg: string[]) => void;
   onSuccess: () => void;
+}
+
+export interface ApiCallFindListsItemsMemoProps {
+  lists: ExceptionIdentifiers[];
+  filterOptions: FilterExceptionsOptions[];
+  pagination: Partial<Pagination>;
+  showDetectionsListsOnly: boolean;
+  showEndpointListsOnly: boolean;
+  onError: (arg: string[]) => void;
+  onSuccess: (arg: UseExceptionListSuccess) => void;
 }
 
 export interface AddExceptionListProps {

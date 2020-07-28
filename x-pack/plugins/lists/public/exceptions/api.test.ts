@@ -26,7 +26,7 @@ import {
   deleteExceptionListItemById,
   fetchExceptionListById,
   fetchExceptionListItemById,
-  fetchExceptionListItemsByListId,
+  fetchExceptionListsItemsByListIds,
   updateExceptionList,
   updateExceptionListItem,
 } from './api';
@@ -358,14 +358,14 @@ describe('Exceptions Lists API', () => {
     });
   });
 
-  describe('#fetchExceptionListItemsByListId', () => {
+  describe('#fetchExceptionListsItemsByListIds', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(getFoundExceptionListItemSchemaMock());
     });
 
-    test('it invokes "fetchExceptionListItemsByListId" with expected url and body values', async () => {
-      await fetchExceptionListItemsByListId({
+    test('it invokes "fetchExceptionListsItemsByListIds" with expected url and body values', async () => {
+      await fetchExceptionListsItemsByListIds({
         filterOptions: [],
         http: mockKibanaHttpService(),
         listIds: ['myList', 'myOtherListId'],
@@ -390,7 +390,7 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it invokes with expected url and body values when a filter exists and "namespaceType" of "single"', async () => {
-      await fetchExceptionListItemsByListId({
+      await fetchExceptionListsItemsByListIds({
         filterOptions: [
           {
             filter: 'hello world',
@@ -421,7 +421,7 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it invokes with expected url and body values when a filter exists and "namespaceType" of "agnostic"', async () => {
-      await fetchExceptionListItemsByListId({
+      await fetchExceptionListsItemsByListIds({
         filterOptions: [
           {
             filter: 'hello world',
@@ -452,7 +452,7 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it invokes with expected url and body values when tags exists', async () => {
-      await fetchExceptionListItemsByListId({
+      await fetchExceptionListsItemsByListIds({
         filterOptions: [
           {
             filter: '',
@@ -483,7 +483,7 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it invokes with expected url and body values when filter and tags exists', async () => {
-      await fetchExceptionListItemsByListId({
+      await fetchExceptionListsItemsByListIds({
         filterOptions: [
           {
             filter: 'host.name',
@@ -515,7 +515,7 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it returns expected format when call succeeds', async () => {
-      const exceptionResponse = await fetchExceptionListItemsByListId({
+      const exceptionResponse = await fetchExceptionListsItemsByListIds({
         filterOptions: [],
         http: mockKibanaHttpService(),
         listIds: ['endpoint_list_id'],
@@ -541,7 +541,7 @@ describe('Exceptions Lists API', () => {
         },
         signal: abortCtrl.signal,
       } as unknown) as ApiCallByListIdProps & { listId: number };
-      await expect(fetchExceptionListItemsByListId(payload)).rejects.toEqual(
+      await expect(fetchExceptionListsItemsByListIds(payload)).rejects.toEqual(
         'Invalid value "not a namespace type" supplied to "namespace_type"'
       );
     });
@@ -552,7 +552,7 @@ describe('Exceptions Lists API', () => {
       fetchMock.mockResolvedValue(badPayload);
 
       await expect(
-        fetchExceptionListItemsByListId({
+        fetchExceptionListsItemsByListIds({
           filterOptions: [],
           http: mockKibanaHttpService(),
           listIds: ['myList'],

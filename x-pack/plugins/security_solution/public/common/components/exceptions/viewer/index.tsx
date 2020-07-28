@@ -31,23 +31,23 @@ import { EditExceptionModal } from '../edit_exception_modal';
 import { AddExceptionModal } from '../add_exception_modal';
 
 const initialState: State = {
-  filterOptions: { filter: '', showEndpointList: false, showDetectionsList: false, tags: [] },
+  filterOptions: { filter: '', tags: [] },
   pagination: {
     pageIndex: 0,
     pageSize: 20,
     totalItemCount: 0,
     pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
   },
-  allExceptions: [],
   exceptions: [],
   exceptionToEdit: null,
-  loadingLists: [],
   loadingItemIds: [],
   isInitLoading: true,
   currentModal: null,
   exceptionListTypeToEdit: null,
   totalEndpointItems: 0,
   totalDetectionsItems: 0,
+  showEndpointListsOnly: false,
+  showDetectionsListsOnly: false,
 };
 
 interface ExceptionsViewerProps {
@@ -90,7 +90,6 @@ const ExceptionsViewerComponent = ({
       exceptions,
       filterOptions,
       pagination,
-      loadingLists,
       loadingItemIds,
       isInitLoading,
       currentModal,
@@ -98,10 +97,12 @@ const ExceptionsViewerComponent = ({
       exceptionListTypeToEdit,
       totalEndpointItems,
       totalDetectionsItems,
+      showDetectionsListsOnly,
+      showEndpointListsOnly,
     },
     dispatch,
-  ] = useReducer(allExceptionItemsReducer(), { ...initialState, loadingLists: exceptionListsMeta });
-  const { deleteExceptionItem } = useApi(services.http);
+  ] = useReducer(allExceptionItemsReducer(), { ...initialState });
+  const { deleteExceptionItem, getExceptionListsItems } = useApi(services.http);
 
   const setExceptions = useCallback(
     ({ exceptions: newExceptions, pagination: newPagination }: UseExceptionListSuccess): void => {
@@ -116,13 +117,17 @@ const ExceptionsViewerComponent = ({
   );
   const [loadingList, , , fetchListItems] = useExceptionList({
     http: services.http,
-    lists: loadingLists,
-    filterOptions: [filterOptions],
+    lists: exceptionListsMeta,
+    filterOptions:
+      filterOptions.filter !== '' || filterOptions.tags.length > 0 ? [filterOptions] : [],
     pagination: {
       page: pagination.pageIndex + 1,
       perPage: pagination.pageSize,
       total: pagination.totalItemCount,
     },
+    showDetectionsListsOnly,
+    showEndpointListsOnly,
+    matchFilters: true,
     onSuccess: setExceptions,
     onError: onDispatchToaster({
       color: 'danger',
@@ -141,6 +146,17 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
+  const setExceptionItemTotals = useCallback(
+    (endpointItemTotals: number | null, detectionItemTotals: number | null): void => {
+      dispatch({
+        type: 'setExceptionItemTotals',
+        totalEndpointItems: endpointItemTotals,
+        totalDetectionsItems: detectionItemTotals,
+      });
+    },
+    [dispatch]
+  );
+
   const handleFetchList = useCallback((): void => {
     if (fetchListItems != null) {
       fetchListItems();
@@ -148,15 +164,13 @@ const ExceptionsViewerComponent = ({
   }, [fetchListItems]);
 
   const handleFilterChange = useCallback(
-    ({ filter, pagination: pag }: Filter): void => {
+    (filters: Partial<Filter>): void => {
       dispatch({
         type: 'updateFilterOptions',
-        filterOptions: filter,
-        pagination: pag,
-        allLists: exceptionListsMeta,
+        filters,
       });
     },
-    [dispatch, exceptionListsMeta]
+    [dispatch]
   );
 
   const handleAddException = useCallback(
@@ -174,12 +188,13 @@ const ExceptionsViewerComponent = ({
     (exception: ExceptionListItemSchema): void => {
       dispatch({
         type: 'updateExceptionToEdit',
+        lists: exceptionListsMeta,
         exception,
       });
 
       setCurrentModal('editModal');
     },
-    [setCurrentModal]
+    [setCurrentModal, exceptionListsMeta]
   );
 
   const handleOnCancelExceptionModal = useCallback((): void => {
@@ -238,6 +253,61 @@ const ExceptionsViewerComponent = ({
     }
   }, [isInitLoading, exceptions, loadingList, dispatch]);
 
+  // TO-DO - update exception list routes to return item totals, this will
+  // avoid doing these fetches of all items for totals
+  useEffect((): void => {
+    const fetchData = async () => {
+      await getExceptionListsItems({
+        lists: exceptionListsMeta,
+        filterOptions: [],
+        pagination: {
+          page: 0,
+          perPage: 1,
+          total: 0,
+        },
+        showDetectionsListsOnly: true,
+        showEndpointListsOnly: false,
+        onSuccess: ({ pagination: detectionPagination }) => {
+          setExceptionItemTotals(null, detectionPagination.total ?? 0);
+        },
+        onError: () => {
+          const dispatchToasterError = onDispatchToaster({
+            color: 'danger',
+            title: i18n.TOTAL_ITEMS_FETCH_ERROR,
+            iconType: 'alert',
+          });
+
+          dispatchToasterError();
+        },
+      });
+      await getExceptionListsItems({
+        lists: exceptionListsMeta,
+        filterOptions: [],
+        pagination: {
+          page: 0,
+          perPage: 1,
+          total: 0,
+        },
+        showDetectionsListsOnly: false,
+        showEndpointListsOnly: true,
+        onSuccess: ({ pagination: endpointPagination }) => {
+          setExceptionItemTotals(endpointPagination.total ?? 0, null);
+        },
+        onError: () => {
+          const dispatchToasterError = onDispatchToaster({
+            color: 'danger',
+            title: i18n.TOTAL_ITEMS_FETCH_ERROR,
+            iconType: 'alert',
+          });
+
+          dispatchToasterError();
+        },
+      });
+    };
+
+    fetchData();
+  }, [setExceptionItemTotals, exceptionListsMeta, getExceptionListsItems, onDispatchToaster]);
+
   // Used in utility bar info text
   const ruleSettingsUrl = useMemo((): string => {
     return services.application.getUrlForApp(
@@ -246,8 +316,12 @@ const ExceptionsViewerComponent = ({
   }, [ruleId, services.application]);
 
   const showEmpty = useMemo((): boolean => {
-    return !isInitLoading && !loadingList && exceptions.length === 0;
-  }, [isInitLoading, exceptions.length, loadingList]);
+    return !isInitLoading && !loadingList && totalEndpointItems === 0 && totalDetectionsItems === 0;
+  }, [isInitLoading, totalEndpointItems, totalDetectionsItems, loadingList]);
+
+  const showNoResults = useMemo((): boolean => {
+    return exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
+  }, [exceptions.length, totalEndpointItems, totalDetectionsItems]);
 
   return (
     <>
@@ -301,6 +375,7 @@ const ExceptionsViewerComponent = ({
 
         <ExceptionsViewerItems
           showEmpty={showEmpty}
+          showNoResults={showNoResults}
           isInitLoading={isInitLoading}
           exceptions={exceptions}
           loadingItemIds={loadingItemIds}

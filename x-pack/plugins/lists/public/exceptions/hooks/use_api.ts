@@ -8,8 +8,12 @@ import { useMemo } from 'react';
 
 import * as Api from '../api';
 import { HttpStart } from '../../../../../../src/core/public';
-import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
-import { ApiCallMemoProps } from '../types';
+import {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+  NamespaceType,
+} from '../../../common/schemas';
+import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps } from '../types';
 
 export interface ExceptionsApi {
   deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
@@ -20,6 +24,7 @@ export interface ExceptionsApi {
   getExceptionList: (
     arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }
   ) => Promise<void>;
+  getExceptionListsItems: (arg: ApiCallFindListsItemsMemoProps) => Promise<void>;
 }
 
 export const useApi = (http: HttpStart): ExceptionsApi => {
@@ -101,6 +106,62 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
             signal: abortCtrl.signal,
           });
           onSuccess(list);
+        } catch (error) {
+          onError(error);
+        }
+      },
+      async getExceptionListsItems({
+        lists,
+        filterOptions,
+        pagination,
+        showDetectionsListsOnly,
+        showEndpointListsOnly,
+        onSuccess,
+        onError,
+      }: ApiCallFindListsItemsMemoProps): Promise<void> {
+        const abortCtrl = new AbortController();
+        const { ids, namespaces } = lists
+          .filter((list) => {
+            if (showDetectionsListsOnly) {
+              return list.type === 'detection';
+            } else if (showEndpointListsOnly) {
+              return list.type === 'endpoint';
+            } else {
+              return true;
+            }
+          })
+          .reduce<{ ids: string[]; namespaces: NamespaceType[] }>(
+            (acc, { listId, namespaceType }) => ({
+              ids: [...acc.ids, listId],
+              namespaces: [...acc.namespaces, namespaceType],
+            }),
+            { ids: [], namespaces: [] }
+          );
+
+        try {
+          if (ids.length > 0 && namespaces.length > 0) {
+            const {
+              data,
+              page,
+              per_page: perPage,
+              total,
+            } = await Api.fetchExceptionListsItemsByListIds({
+              filterOptions,
+              http,
+              listIds: ids,
+              namespaceTypes: namespaces,
+              pagination,
+              signal: abortCtrl.signal,
+            });
+            onSuccess({
+              exceptions: data,
+              pagination: {
+                page,
+                perPage,
+                total,
+              },
+            });
+          }
         } catch (error) {
           onError(error);
         }

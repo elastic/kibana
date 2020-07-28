@@ -20,7 +20,7 @@ import { ExceptionsPagination, Filter } from '../types';
 
 interface ExceptionsViewerPaginationProps {
   pagination: ExceptionsPagination;
-  onPaginationChange: (arg: Filter) => void;
+  onPaginationChange: (arg: Partial<Filter>) => void;
 }
 
 const ExceptionsViewerPaginationComponent = ({
@@ -39,9 +39,8 @@ const ExceptionsViewerPaginationComponent = ({
   const handlePageClick = useCallback(
     (pageIndex: number): void => {
       onPaginationChange({
-        filter: {},
         pagination: {
-          pageIndex: pageIndex + 1,
+          pageIndex,
           pageSize: pagination.pageSize,
           totalItemCount: pagination.totalItemCount,
         },
@@ -57,7 +56,6 @@ const ExceptionsViewerPaginationComponent = ({
         icon="empty"
         onClick={() => {
           onPaginationChange({
-            filter: {},
             pagination: {
               pageIndex: pagination.pageIndex,
               pageSize: rows,

@@ -1,9 +1,61 @@
 {
-  "name": "Changes only the name to this new value",
-  "description": "Query with a rule_id that acts like an external id",
-  "rule_id": "query-rule-id",
-  "risk_score": 1,
-  "severity": "high",
+  "author": [],
+  "actions": [],
+  "description": "asdfasf",
+  "enabled": true,
+  "false_positives": [],
+  "filters": [],
+  "from": "now-90s",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "logs-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
+  "interval": "30s",
+  "rule_id": "8396b498-eeb9-45e8-b706-bf62ffe40237",
+  "language": "kuery",
+  "license": "",
+  "output_index": ".siem-signals-ytercero-default",
+  "max_signals": 100,
+  "risk_score": 50,
+  "risk_score_mapping": [],
+  "name": "test viewer",
+  "query": "host.name: * ",
+  "references": [],
+  "meta": {
+    "from": "1m",
+    "kibana_siem_app_url": "http://localhost:5601/app/security"
+  },
+  "severity": "low",
+  "severity_mapping": [],
+  "tags": [],
+  "to": "now",
   "type": "query",
-  "query": "user.name: root or user.name: admin"
+  "threat": [],
+  "throttle": "no_actions",
+  "version": 2,
+  "exceptions_list": [
+    {
+      "list_id": "endpoint_list",
+      "namespace_type": "agnostic",
+      "id": "endpoint_list",
+      "type": "endpoint"
+    },
+    {
+      "id": "4b6709b0-d0ea-11ea-a86c-ab242639b44c",
+      "list_id": "simple_list",
+      "namespace_type": "single",
+      "type": "detection"
+    },
+    {
+      "list_id": "138401a4-2abe-429f-8abc-d0a8620734fe",
+      "namespace_type": "single",
+      "id": "1d65d490-d0f1-11ea-b151-73b086dff44c",
+      "type": "detection"
+    }
+  ]
 }

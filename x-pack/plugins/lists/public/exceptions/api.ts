@@ -265,28 +265,30 @@ export const fetchExceptionListsItemsByListIds = async ({
   pagination,
   signal,
 }: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> => {
-  const filters: string[] = filterOptions.map<string>((filter, index) => {
-    const namespace = namespaceTypes[index];
-    const filterNamespace =
-      namespace === 'agnostic' ? EXCEPTION_LIST_NAMESPACE_AGNOSTIC : EXCEPTION_LIST_NAMESPACE;
-    const formattedFilters = [
-      ...(filter.filter.length
-        ? [`${filterNamespace}.attributes.entries.field:${filter.filter}*`]
-        : []),
-      ...(filter.tags.length
-        ? filter.tags.map((t) => `${filterNamespace}.attributes.tags:${t}`)
-        : []),
-    ];
+  const filters: string = filterOptions
+    .map<string>((filter, index) => {
+      const namespace = namespaceTypes[index];
+      const filterNamespace =
+        namespace === 'agnostic' ? EXCEPTION_LIST_NAMESPACE_AGNOSTIC : EXCEPTION_LIST_NAMESPACE;
+      const formattedFilters = [
+        ...(filter.filter.length
+          ? [`${filterNamespace}.attributes.entries.field:${filter.filter}*`]
+          : []),
+        ...(filter.tags.length
+          ? filter.tags.map((t) => `${filterNamespace}.attributes.tags:${t}`)
+          : []),
+      ];
 
-    return formattedFilters.join(' AND ');
-  });
+      return formattedFilters.join(' AND ');
+    })
+    .join(',');
 
   const query = {
     list_id: listIds.join(','),
     namespace_type: namespaceTypes.join(','),
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
-    ...(filters.length ? { filter: filters.join(',') } : {}),
+    ...(filters.trim() !== '' ? { filter: filters } : {}),
   };
   const [validatedRequest, errorsRequest] = validate(query, findExceptionListItemSchema);
 
