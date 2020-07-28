@@ -79,7 +79,6 @@ export async function getFullEndpointExceptionList(
   schemaVersion: string
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
-  let numResponses = 0;
   let page = 1;
   let paging = true;
 
@@ -95,13 +94,11 @@ export async function getFullEndpointExceptionList(
     });
 
     if (response?.data !== undefined) {
-      numResponses = response.data.length;
-
       exceptions.entries = exceptions.entries.concat(
         translateToEndpointExceptions(response, schemaVersion)
       );
 
-      paging = page * response.data.length < response.total;
+      paging = (page - 1) * 100 + response.data.length < response.total;
       page++;
     } else {
       break;

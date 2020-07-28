@@ -269,8 +269,7 @@ export class ManifestManager {
           errors.push(new Error(`Package config ${id} has no config.`));
         }
       }
-
-      paging = page * items.length < total;
+      paging = (page - 1) * 20 + items.length < total;
       page++;
     }
 
