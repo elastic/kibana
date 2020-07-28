@@ -80,26 +80,20 @@ export const esRawResponse: EsRawResponseExpressionTypeDefinition = {
         ? Object.keys(rows[0]).map((key) => ({
             id: key,
             name: key,
-            type: typeof rows[0][key],
+            meta: {
+              type: typeof rows[0][key],
+              field: key,
+              params: {},
+            },
           }))
         : [];
 
       return {
         type: 'datatable',
-        columns,
-        rows,
-      };
-    },
-    kibana_datatable: (context: EsRawResponse) => {
-      const rows = convertResult(context.body);
-      const columns = Object.keys(rows[0]).map((key) => ({
-        id: key,
-        name: key,
-        meta: {},
-      }));
-
-      return {
-        type: 'datatable',
+        meta: {
+          type: 'esdsl',
+          source: '*',
+        },
         columns,
         rows,
       };
