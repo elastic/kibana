@@ -248,6 +248,13 @@ export class MapsAppView extends React.Component {
     );
   }
 
+  _onTopNavRefreshConfig = ({ isPaused, refreshInterval }) => {
+    this._onRefreshConfigChange({
+      isPaused,
+      interval: refreshInterval,
+    });
+  };
+
   _updateStateFromSavedQuery(savedQuery) {
     if (!savedQuery) {
       this.setState({ savedQuery: '' });
@@ -304,7 +311,7 @@ export class MapsAppView extends React.Component {
         savedMap={this.props.savedMap}
         savedQuery={this.state.savedQuery}
         onQueryChange={this._onQueryChange}
-        onRefreshConfigChange={this._onRefreshConfigChange}
+        onRefreshConfigChange={this._onTopNavRefreshConfig}
         indexPatterns={this.state.indexPatterns}
         onFiltersChange={this._onFiltersChange}
         onQuerySaved={(query) => {

@@ -30,10 +30,11 @@ export function getGeoTileAggNotSupportedReason(field: IFieldType): string | nul
 export async function getIndexPatternsFromIds(
   indexPatternIds: string[] = []
 ): Promise<IndexPattern[]> {
-  const promises = indexPatternIds.map(async (indexPatternId) => {
+  const promises: IndexPattern[] = [];
+  indexPatternIds.forEach(async (indexPatternId) => {
     try {
       // @ts-ignore
-      return await getIndexPatternService().get(indexPatternId);
+      promises.push(getIndexPatternService().get(indexPatternId));
     } catch (error) {
       // Unable to load index pattern, better to not throw error so map can render
       // Error will be surfaced by layer since it too will be unable to locate the index pattern
