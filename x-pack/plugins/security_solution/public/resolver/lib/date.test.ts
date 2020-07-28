@@ -14,7 +14,7 @@ describe('date', () => {
   const month = day * 30;
   const year = day * 365;
 
-  describe('getUnixtime', () => {
+  describe('getUnixTime', () => {
     const unixTime = new Date('6/1/2020').getTime();
     const unixStringTime = String(unixTime);
     const isoTime = new Date('6/1/2020').toISOString();
