@@ -80,3 +80,12 @@ This page was deleted. See <<development-visualize-index>>.
 == Developing Visualizations
 
 This page was deleted. See <<development-visualize-index>>.
+
+[role="exclude",id="errors-alerts-with-watcher"]
+== Error reports with Watcher
+
+Watcher error reports have been removed and replaced with Kibana's <<apm-alerts,alerting and actions>> feature.
+
+To recreate your watches with this new tool, select **Alerts** - **Create threshold alert** - **Error rate**.
+
+Additional information is available in <<apm-alerts>>.
