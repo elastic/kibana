@@ -5,7 +5,7 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { HostResultList } from '../../../../../common/endpoint/types';
+import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareFactory } from '../../../../common/store';
 import {
