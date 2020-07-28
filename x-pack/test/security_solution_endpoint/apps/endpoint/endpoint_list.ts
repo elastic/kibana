@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { deleteMetadataStream } from '../../../api_integration/apis/endpoint/data_stream_helper';
+import { deleteMetadataStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
