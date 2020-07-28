@@ -18,7 +18,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../common/runtime_types';
