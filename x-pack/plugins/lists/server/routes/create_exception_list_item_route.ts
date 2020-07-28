@@ -6,13 +6,14 @@
 
 import { IRouter } from 'kibana/server';
 
-import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
+import { EXCEPTION_LIST_ITEM_URL, MAX_EXCEPTION_LIST_SIZE } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
 import { validate } from '../../common/siem_common_deps';
 import {
   CreateExceptionListItemSchemaDecoded,
   createExceptionListItemSchema,
   exceptionListItemSchema,
+  foundExceptionListItemSchema,
 } from '../../common/schemas';
 
 import { getExceptionListClient } from './utils/get_exception_list_client';
@@ -104,7 +105,65 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
-              return response.ok({ body: validated ?? {} });
+              const exceptionListItems = await exceptionLists.findExceptionListItem({
+                filter: undefined,
+                listId,
+                namespaceType,
+                page: undefined,
+                perPage: undefined,
+                sortField: undefined,
+                sortOrder: undefined,
+              });
+              if (exceptionListItems == null) {
+                // If exceptionListItems is null then we couldn't find the list so it may have been deleted -
+                // delete the item we just created
+                await exceptionLists.deleteExceptionListItemById({
+                  id: createdList.id,
+                  namespaceType,
+                });
+                return siemResponse.error({
+                  body: `Unable to find list id: ${listId} to verify max exception list size`,
+                  statusCode: 500,
+                });
+              }
+              const [validatedItems, err] = validate(
+                exceptionListItems,
+                foundExceptionListItemSchema
+              );
+              if (err != null) {
+                await exceptionLists.deleteExceptionListItemById({
+                  id: createdList.id,
+                  namespaceType,
+                });
+                return siemResponse.error({
+                  body: err,
+                  statusCode: 500,
+                });
+              }
+              // Unnecessary since validatedItems comes from exceptionListItems which is already checked for null, but
+              // typescript fails to detect that
+              if (validatedItems == null) {
+                await exceptionLists.deleteExceptionListItemById({
+                  id: createdList.id,
+                  namespaceType,
+                });
+                return siemResponse.error({
+                  body: `Unable to find list id: ${listId} to verify max exception list size`,
+                  statusCode: 500,
+                });
+              }
+              if (validatedItems.total > MAX_EXCEPTION_LIST_SIZE) {
+                await exceptionLists.deleteExceptionListItemById({
+                  id: createdList.id,
+                  namespaceType,
+                });
+                return siemResponse.error({
+                  body: `Failed to add exception item, exception list would exceed max size of ${MAX_EXCEPTION_LIST_SIZE}`,
+                  statusCode: 400,
+                });
+              } else {
+                return response.ok({ body: validated ?? {} });
+              }
             }
           }
         }
