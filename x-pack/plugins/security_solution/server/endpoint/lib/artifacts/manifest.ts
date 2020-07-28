@@ -16,11 +16,7 @@ import {
   SemanticVersion,
   semanticVersion,
 } from '../../../../common/endpoint/schema/common';
-import {
-  manifestSchema,
-  ManifestDispatchSchema,
-  ManifestSchema,
-} from '../../../../common/endpoint/schema/manifest';
+import { manifestSchema, ManifestSchema } from '../../../../common/endpoint/schema/manifest';
 import { ManifestEntry } from './manifest_entry';
 import { maybeCompressArtifact, isCompressed } from './lists';
 import { getArtifactId } from './common';
@@ -173,7 +169,7 @@ export class Manifest {
       throw new Error(errors);
     }
 
-    return validated as ManifestDispatchSchema;
+    return validated as ManifestSchema;
   }
 
   public toSavedObject(): InternalManifestSchema {

@@ -32,7 +32,7 @@ export const relativeUrl = t.string;
 
 export const sha256 = t.string;
 
-export const semanticVersion = t.string; // TODO: make type
+export const semanticVersion = t.string;
 export type SemanticVersion = t.TypeOf<typeof semanticVersion>;
 
 export const size = t.number;
