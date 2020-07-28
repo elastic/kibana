@@ -19,11 +19,11 @@
 
 import { stringify } from 'querystring';
 import { Client } from '@elastic/elasticsearch';
-import { Auditor } from 'src/core/server';
 
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { isResponseError } from './errors';
+import { ESRequestContext } from './types';
 
 export const configureClient = (
   config: ElasticsearchClientConfig,
@@ -36,11 +36,6 @@ export const configureClient = (
 
   return client;
 };
-
-interface ESRequestContext {
-  auditor?: Auditor;
-  type?: 'internalUser' | 'currentUser';
-}
 
 const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
   client.on('response', (error, event) => {

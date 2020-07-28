@@ -24,6 +24,7 @@ import type {
   TransportRequestParams,
   TransportRequestPromise,
 } from '@elastic/elasticsearch/lib/Transport';
+import { Auditor } from 'src/core/server';
 
 /**
  * Client used to query the elasticsearch cluster.
@@ -120,4 +121,13 @@ export interface DeleteDocumentResponse {
   error?: {
     type: string;
   };
+}
+
+/**
+ * @internal
+ */
+export interface ESRequestContext {
+  auditor?: Auditor;
+  type?: 'internalUser' | 'currentUser';
+  [key: string]: any;
 }

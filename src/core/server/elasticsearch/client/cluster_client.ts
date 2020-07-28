@@ -27,6 +27,7 @@ import { ElasticsearchClient } from './types';
 import { configureClient } from './configure_client';
 import { ElasticsearchClientConfig } from './client_config';
 import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
+import { ESRequestContext } from './types';
 
 const noop = () => undefined;
 
@@ -81,10 +82,10 @@ export class ClusterClient implements ICustomClusterClient {
     const auditor = this.getScopedAuditor(request);
     const scopedClient = this.rootScopedClient.child({
       headers: this.getScopedHeaders(request),
-      context: { auditor, type: 'currentUser' },
+      context: { auditor, type: 'currentUser' } as ESRequestContext,
     });
     const internalClient = this.asInternalUser.child({
-      context: { auditor, type: 'internalUser' },
+      context: { auditor, type: 'internalUser' } as ESRequestContext,
     });
 
     return new ScopedClusterClient(internalClient, scopedClient);
