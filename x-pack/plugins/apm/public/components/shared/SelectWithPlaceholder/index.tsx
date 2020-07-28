@@ -19,6 +19,7 @@ const DEFAULT_PLACEHOLDER = i18n.translate('xpack.apm.selectPlaceholder', {
  * with `hasNoInitialSelection`. It uses the `placeholder` prop to populate
  * the first option as the initial, not selected option.
  */
+// eslint-disable-next-line react/function-component-definition
 export const SelectWithPlaceholder: typeof EuiSelect = (props) => {
   const placeholder = props.placeholder || DEFAULT_PLACEHOLDER;
   return (

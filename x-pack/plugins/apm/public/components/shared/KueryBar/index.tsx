@@ -112,7 +112,6 @@ export function KueryBar() {
 
       setState({ ...state, suggestions, isLoadingSuggestions: false });
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error('Error while fetching suggestions', e);
     }
   }
