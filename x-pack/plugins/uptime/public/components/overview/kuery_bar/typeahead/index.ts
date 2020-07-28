@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Feature {
-  app: string[];
-}
-
-export interface Features {
-  [key: string]: Feature;
-}
+export { Typeahead } from './typehead';
