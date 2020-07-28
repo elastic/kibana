@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiIcon, EuiPagination } from '@elastic/eui';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
+import { EuiIcon, EuiPagination } from '@elastic/eui';
 import moment from 'moment';
 import { Paginate } from '../paginate';
+import { Datatable as DatatableType, DatatableColumn } from '../../../types';
 
-const getIcon = (type) => {
+type IconType = 'string' | 'number' | 'date' | 'boolean' | 'null';
+
+const getIcon = (type: IconType) => {
   if (type === null) {
     return;
   }
@@ -36,19 +39,31 @@ const getIcon = (type) => {
   return <EuiIcon type={icon} color="subdued" />;
 };
 
-const getColumnName = (col) => (typeof col === 'string' ? col : col.name);
+const getColumnName = (col: DatatableColumn) => (typeof col === 'string' ? col : col.name);
 
-const getColumnType = (col) => col.type || null;
+const getColumnType = (col: DatatableColumn) => col.type || null;
 
-const getFormattedValue = (val, type) => {
+const getFormattedValue = (val: any, type: any) => {
   if (type === 'date') {
     return moment(val).format();
   }
   return String(val);
 };
 
-export const Datatable = ({ datatable, perPage, paginate, showHeader }) => (
-  <Paginate rows={datatable.rows} perPage={perPage || 10}>
+interface Props {
+  datatable: DatatableType;
+  paginate?: boolean;
+  perPage?: number;
+  showHeader?: boolean;
+}
+
+export const Datatable: FC<Props> = ({
+  datatable,
+  paginate = false,
+  perPage = 10,
+  showHeader = false,
+}) => (
+  <Paginate rows={datatable.rows} perPage={perPage}>
     {({ rows, setPage, pageNumber, totalPages }) => (
       <div className="canvasDataTable">
         <div className="canvasDataTable__tableWrapper">
@@ -91,7 +106,7 @@ export const Datatable = ({ datatable, perPage, paginate, showHeader }) => (
 
 Datatable.propTypes = {
   datatable: PropTypes.object.isRequired,
-  perPage: PropTypes.number,
   paginate: PropTypes.bool,
+  perPage: PropTypes.number,
   showHeader: PropTypes.bool,
 };
