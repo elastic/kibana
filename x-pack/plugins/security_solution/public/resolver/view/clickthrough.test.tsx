@@ -45,7 +45,7 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
           graphLoadingElements: simulator.graphLoadingElement().length,
           graphErrorElements: simulator.graphErrorElement().length,
         }))
-      ).toSometimesYieldEqualTo({
+      ).toYieldEqualTo({
         // it should have 1 graph element, an no error or loading elements.
         graphElements: 1,
         graphLoadingElements: 0,
@@ -85,7 +85,7 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
               originLooksUnselected: simulator.processNodeElementLooksUnselected(entityIDs.origin),
             };
           })
-        ).toSometimesYieldEqualTo({
+        ).toYieldEqualTo({
           // Just the second child should be marked as selected in the query string
           queryStringSelectedNode: [entityIDs.secondChild],
           // The second child is rendered and has `[aria-selected]`

@@ -316,7 +316,7 @@ const UnstyledProcessEventDot = React.memo(
             () => {
               handleFocus();
               handleClick();
-            } /* a11y note: this is strictly an alternate to the button, so no tabindex  is necessary*/
+            } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
           }
           role="img"
           aria-labelledby={labelHTMLID}

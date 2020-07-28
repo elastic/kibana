@@ -11,13 +11,12 @@
  * order to be correct, the code that the `declare` declares needs to be available on import as well.
  */
 export {};
+
 declare global {
   /* eslint-disable @typescript-eslint/no-namespace */
   namespace jest {
     interface Matchers<R, T> {
-      toSometimesYieldEqualTo(
-        expectedYield: T extends AsyncIterable<infer E> ? E : never
-      ): Promise<R>;
+      toYieldEqualTo(expectedYield: T extends AsyncIterable<infer E> ? E : never): Promise<R>;
     }
   }
 }
@@ -28,7 +27,7 @@ expect.extend({
    * If any yielded value deep-equals the expected value, the matcher will pass.
    * If the generator ends with none of the yielded values matching, it will fail.
    */
-  async toSometimesYieldEqualTo<T>(
+  async toYieldEqualTo<T>(
     this: jest.MatcherContext,
     receivedIterable: AsyncIterable<T>,
     expected: T
@@ -41,17 +40,17 @@ expect.extend({
       promise: this.promise,
     };
     // The last value received: Used in printing the message
-    let lastReceived: T | undefined;
+    const received: T[] = [];
 
     // Set to true if the test passes.
     let pass: boolean = false;
 
     // Async iterate over the iterable
-    for await (const received of receivedIterable) {
-      // keep track of the last value. Used in both pass and fail messages
-      lastReceived = received;
+    for await (const next of receivedIterable) {
+      // keep track of all received values. Used in pass and fail messages
+      received.push(next);
       // Use deep equals to compare the value to the expected value
-      if (this.equals(received, expected)) {
+      if (this.equals(next, expected)) {
         // If the value is equal, break
         pass = true;
         break;
@@ -64,23 +63,25 @@ expect.extend({
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
-            this.utils.stringify(expected) !== this.utils.stringify(lastReceived!)
-              ? `Received:     ${this.utils.printReceived(lastReceived)}`
+            this.utils.stringify(expected) !== this.utils.stringify(received!)
+              ? `Received:     ${this.utils.printReceived(received)}`
               : ''
           }`
       : () =>
-          `${this.utils.matcherHint(
-            matcherName,
-            undefined,
-            undefined,
-            options
-          )}\n\n${this.utils.printDiffOrStringify(
-            expected,
-            lastReceived,
-            'Expected',
-            'Received',
-            this.expand
-          )}`;
+          `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\nCompared ${
+            received.length
+          } yields.\n\n${received
+            .map(
+              (next, index) =>
+                `yield ${index + 1}:\n\n${this.utils.printDiffOrStringify(
+                  expected,
+                  next,
+                  'Expected',
+                  'Received',
+                  this.expand
+                )}`
+            )
+            .join(`\n\n`)}`;
 
     return { message, pass };
   },

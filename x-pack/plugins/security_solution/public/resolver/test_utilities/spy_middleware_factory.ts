@@ -25,25 +25,29 @@ export const spyMiddlewareFactory: () => SpyMiddleware = () => {
 
   return {
     middleware: (api) => (next) => (action: ResolverAction) => {
+      // handle the action first so we get the state after the reducer
+      next(action);
+
       const state = api.getState();
+
+      // Resolving these promises may cause code to await the next result. That will add more resolve functions to `resolvers`.
+      // For this reason, copy all the existing resolvers to an array and clear the set.
       const oldResolvers = [...resolvers];
       resolvers.clear();
       for (const resolve of oldResolvers) {
         resolve({ action, state });
       }
-
-      next(action);
     },
     actions,
     debugActions() {
       let stop: boolean = false;
       (async () => {
-        for await (const action of actions()) {
+        for await (const actionStatePair of actions()) {
           if (stop) {
             break;
           }
           // eslint-disable-next-line no-console
-          console.log('action', action);
+          console.log('action', actionStatePair.action, 'state', actionStatePair.state);
         }
       })();
       return () => {
