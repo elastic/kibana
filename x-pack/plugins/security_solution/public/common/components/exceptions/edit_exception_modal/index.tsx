@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiModal,
@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -34,7 +35,7 @@ import { ExceptionBuilder } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
-  enrichExceptionItemsWithComments,
+  enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
   getOperatingSystems,
   entryHasListType,
@@ -88,6 +89,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 }: EditExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
+  const [hasVersionConflict, setHasVersionConflict] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
@@ -106,8 +108,12 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
   const onError = useCallback(
     (error) => {
-      addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
-      onCancel();
+      if (error.message.includes('Conflict')) {
+        setHasVersionConflict(true);
+      } else {
+        addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
+        onCancel();
+      }
     },
     [addError, onCancel]
   );
@@ -146,6 +152,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     }
   }, [shouldDisableBulkClose]);
 
+  const isSubmitButtonDisabled = useMemo(
+    () => exceptionItemsToAdd.every((item) => item.entries.length === 0) || hasVersionConflict,
+    [exceptionItemsToAdd, hasVersionConflict]
+  );
+
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
@@ -172,11 +183,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   );
 
   const enrichExceptionItems = useCallback(() => {
-    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
-    enriched = enrichExceptionItemsWithComments(exceptionItemsToAdd, [
-      ...(exceptionItem.comments ? exceptionItem.comments : []),
-      ...(comment !== '' ? [{ comment }] : []),
-    ]);
+    const [exceptionItemToEdit] = exceptionItemsToAdd;
+    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [
+      {
+        ...enrichExistingExceptionItemWithComments(exceptionItemToEdit, [
+          ...exceptionItem.comments,
+          ...(comment.trim() !== '' ? [{ comment }] : []),
+        ]),
+      },
+    ];
     if (exceptionListType === 'endpoint') {
       const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
@@ -217,8 +232,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 listId={exceptionItem.list_id}
                 listNamespaceType={exceptionItem.namespace_type}
                 ruleName={ruleName}
-                isOrDisabled={false}
+                isOrDisabled
                 isAndDisabled={false}
+                isNestedDisabled={false}
                 data-test-subj="edit-exception-modal-builder"
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
@@ -257,10 +273,23 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           </>
         )}
 
+        {hasVersionConflict && (
+          <ModalBodySection>
+            <EuiCallOut title={i18n.VERSION_CONFLICT_ERROR_TITLE} color="danger" iconType="alert">
+              <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
+            </EuiCallOut>
+          </ModalBodySection>
+        )}
+
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
-          <EuiButton onClick={onEditExceptionConfirm} isLoading={addExceptionIsLoading} fill>
+          <EuiButton
+            onClick={onEditExceptionConfirm}
+            isLoading={addExceptionIsLoading}
+            isDisabled={isSubmitButtonDisabled}
+            fill
+          >
             {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
           </EuiButton>
         </EuiModalFooter>

@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
-import { validateParams, getGenericComboBoxProps } from './helpers';
+import { paramIsValid, getGenericComboBoxProps } from './helpers';
 import { OperatorTypeEnum } from '../../../lists_plugin_deps';
 import { GetGenericComboBoxPropsReturn } from './types';
 import * as i18n from './translations';
@@ -82,16 +82,28 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     });
   };
 
-  const isValid = useMemo((): boolean => validateParams(selectedValue, selectedField), [
-    selectedField,
-    selectedValue,
+  const isValid = useMemo(
+    (): boolean => paramIsValid(selectedValue, selectedField, isRequired, touched),
+    [selectedField, selectedValue, isRequired, touched]
+  );
+
+  const setIsTouchedValue = useCallback((): void => setIsTouched(true), [setIsTouched]);
+
+  const inputPlaceholder = useMemo(
+    (): string => (isLoading || isLoadingSuggestions ? i18n.LOADING : placeholder),
+    [isLoading, isLoadingSuggestions, placeholder]
+  );
+
+  const isLoadingState = useMemo((): boolean => isLoading || isLoadingSuggestions, [
+    isLoading,
+    isLoadingSuggestions,
   ]);
 
   return (
     <EuiComboBox
-      placeholder={isLoading || isLoadingSuggestions ? i18n.LOADING : placeholder}
+      placeholder={inputPlaceholder}
       isDisabled={isDisabled}
-      isLoading={isLoading || isLoadingSuggestions}
+      isLoading={isLoadingState}
       isClearable={isClearable}
       options={comboOptions}
       selectedOptions={selectedComboOptions}
@@ -99,8 +111,8 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
       singleSelection={{ asPlainText: true }}
       onSearchChange={onSearchChange}
       onCreateOption={onChange}
-      isInvalid={isRequired ? touched && !isValid : false}
-      onFocus={() => setIsTouched(true)}
+      isInvalid={!isValid}
+      onFocus={setIsTouchedValue}
       sortMatchesBy="startsWith"
       data-test-subj="valuesAutocompleteComboBox matchComboxBox"
       style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
