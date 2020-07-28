@@ -13,7 +13,7 @@ import { createNewTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
 
-describe('timeline flyout button', () => {
+describe.skip('timeline flyout button', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
