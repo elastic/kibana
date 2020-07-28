@@ -157,7 +157,9 @@ export class CodeEditor extends React.Component<Props, {}> {
     editor.addCommand(
       monaco.KeyCode.Escape,
       () => {
-        document.activeElement.blur();
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
       },
       '!suggestWidgetVisible'
     );
