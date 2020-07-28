@@ -81,7 +81,7 @@ export class BaseWatch {
   get displayName() {
     if (this.isNew) {
       return i18n.translate('xpack.watcher.models.baseWatch.displayName', {
-        defaultMessage: 'New Watch',
+        defaultMessage: this.name,
       });
     } else if (this.name) {
       return this.name;
