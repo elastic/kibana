@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ColorPickerPopover } from './color_picker_popover';
+export { ColorPickerPopover, Props } from './color_picker_popover';

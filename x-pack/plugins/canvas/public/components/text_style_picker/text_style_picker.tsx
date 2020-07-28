@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { FontValue } from 'src/plugins/expressions';
@@ -30,54 +30,60 @@ interface Props extends BaseProps {
   onChange: (props: BaseProps) => void;
 }
 
-export const TextStylePicker: FC<Props> = ({
-  align = 'left',
-  color,
-  colors,
-  family = '',
-  italic = false,
-  onChange,
-  size = 14,
-  underline = false,
-  weight = 'normal',
-}) => {
-  const alignmentButtons = [
-    {
-      id: 'left',
-      label: strings.getAlignLeftOption(),
-      iconType: 'editorAlignLeft',
-    },
-    {
-      id: 'center',
-      label: strings.getAlignCenterOption(),
-      iconType: 'editorAlignCenter',
-    },
-    {
-      id: 'right',
-      label: strings.getAlignRightOption(),
-      iconType: 'editorAlignRight',
-    },
-  ];
+type StyleType = 'bold' | 'italic' | 'underline';
 
-  const styleButtons = [
-    {
-      id: 'bold',
-      label: strings.getStyleBoldOption(),
-      iconType: 'editorBold',
-    },
-    {
-      id: 'italic',
-      label: strings.getStyleItalicOption(),
-      iconType: 'editorItalic',
-    },
-    {
-      id: 'underline',
-      label: strings.getStyleUnderlineOption(),
-      iconType: 'editorUnderline',
-    },
-  ];
+const alignmentButtons = [
+  {
+    id: 'left',
+    label: strings.getAlignLeftOption(),
+    iconType: 'editorAlignLeft',
+  },
+  {
+    id: 'center',
+    label: strings.getAlignCenterOption(),
+    iconType: 'editorAlignCenter',
+  },
+  {
+    id: 'right',
+    label: strings.getAlignRightOption(),
+    iconType: 'editorAlignRight',
+  },
+];
 
-  const stylesSelectedMap: Record<string, boolean> = {
+const styleButtons = [
+  {
+    id: 'bold',
+    label: strings.getStyleBoldOption(),
+    iconType: 'editorBold',
+  },
+  {
+    id: 'italic',
+    label: strings.getStyleItalicOption(),
+    iconType: 'editorItalic',
+  },
+  {
+    id: 'underline',
+    label: strings.getStyleUnderlineOption(),
+    iconType: 'editorUnderline',
+  },
+];
+
+export const TextStylePicker: FC<Props> = (props) => {
+  const [style, setStyle] = useState<Props>(props);
+
+  const {
+    align = 'left',
+    color,
+    colors,
+    family,
+    italic = false,
+    onChange,
+    size = 14,
+    underline = false,
+    weight = 'normal',
+  } = style;
+
+  const stylesSelectedMap: Record<StyleType, boolean> = {
     ['bold']: weight === 'bold',
     ['italic']: Boolean(italic),
     ['underline']: Boolean(underline),
@@ -88,31 +94,22 @@ export const TextStylePicker: FC<Props> = ({
     fontSizes.sort((a, b) => a - b);
   }
 
-  const doChange = (propName: string, value: string | boolean | number) => {
-    onChange({
-      family,
-      size,
-      align,
-      color,
-      weight: weight || 'normal',
-      underline: underline || false,
-      italic: italic || false,
-      [propName]: value,
-    });
+  useEffect(() => onChange(style), [onChange, style]);
+
+  const doChange = (propName: keyof Props, value: string | boolean | number) => {
+    setStyle({ ...style, [propName]: value });
   };
 
-  const onAlignmentChange = (optionId: string) => doChange('align', optionId);
-
   const onStyleChange = (optionId: string) => {
-    let prop;
+    let prop: 'weight' | 'italic' | 'underline';
     let value;
 
     if (optionId === 'bold') {
       prop = 'weight';
       value = !stylesSelectedMap[optionId] ? 'bold' : 'normal';
     } else {
-      prop = optionId;
-      value = !stylesSelectedMap[optionId];
+      prop = optionId as 'italic' | 'underline';
+      value = !stylesSelectedMap[prop];
     }
 
     doChange(prop, value);
@@ -122,7 +119,11 @@ export const TextStylePicker: FC<Props> = ({
     <div className="canvasTextStylePicker">
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <FontPicker value={family} onSelect={(value) => doChange('family', value)} />
+          {family ? (
+            <FontPicker value={family} onSelect={(value) => doChange('family', value)} />
+          ) : (
+            <FontPicker onSelect={(value) => doChange('family', value)} />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
@@ -163,7 +164,7 @@ export const TextStylePicker: FC<Props> = ({
             buttonSize="compressed"
             isIconOnly
             idSelected={align}
-            onChange={onAlignmentChange}
+            onChange={(optionId: string) => doChange('align', optionId)}
             className="canvasSidebar__buttonGroup"
           />
         </EuiFlexItem>
@@ -175,9 +176,9 @@ export const TextStylePicker: FC<Props> = ({
 TextStylePicker.propTypes = {
   family: PropTypes.string,
   size: PropTypes.number,
-  align: PropTypes.string,
+  align: PropTypes.oneOf(['left', 'center', 'right']),
   color: PropTypes.string,
-  weight: PropTypes.string,
+  weight: PropTypes.oneOf(['normal', 'bold']),
   underline: PropTypes.bool,
   italic: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
@@ -187,4 +188,5 @@ TextStylePicker.propTypes = {
 TextStylePicker.defaultProps = {
   align: 'left',
   size: 14,
+  weight: 'normal',
 };
