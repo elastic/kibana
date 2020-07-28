@@ -34,7 +34,6 @@ import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { MlUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
 import { isMlEnabled, isFullLicense } from '../common/license';
-import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
