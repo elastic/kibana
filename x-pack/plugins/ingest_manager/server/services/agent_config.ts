@@ -233,16 +233,14 @@ class AgentConfigService {
     if (baseAgentConfig.package_configs.length) {
       const newPackageConfigs = (baseAgentConfig.package_configs as PackageConfig[]).map(
         (packageConfig: PackageConfig) => {
-          const { id: packageConfigId, ...newPackageConfig } = packageConfig;
+          const { id: packageConfigId, version, ...newPackageConfig } = packageConfig;
           return newPackageConfig;
         }
       );
-      await packageConfigService.bulkCreate(
-        soClient,
-        newPackageConfigs,
-        newAgentConfig.id,
-        options
-      );
+      await packageConfigService.bulkCreate(soClient, newPackageConfigs, newAgentConfig.id, {
+        ...options,
+        bumpConfigRevision: false,
+      });
     }
 
     // Get updated config
