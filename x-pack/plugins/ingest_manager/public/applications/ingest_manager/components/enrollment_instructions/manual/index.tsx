@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import styled from 'styled-components';
 import { EuiText, EuiSpacer, EuiCode, EuiTitle, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EnrollmentAPIKey } from '../../../types';
@@ -15,6 +16,11 @@ interface Props {
   kibanaCASha256?: string;
 }
 
+// Otherwise the copy button is over the text
+const CommandCode = styled.pre({
+  overflow: 'scroll',
+});
+
 export const ManualInstructions: React.FunctionComponent<Props> = ({
   kibanaUrl,
   apiKey,
@@ -23,17 +29,14 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
   const enrollArgs = `${kibanaUrl} ${apiKey.api_key}${
     kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
   }`;
-  const macOsLinuxTarCommand = `
-./elastic-agent enroll ${enrollArgs}
+  const macOsLinuxTarCommand = `./elastic-agent enroll ${enrollArgs}
 ./elastic-agent run`;
 
-  const linuxDebRpmCommand = `
-./elastic-agent enroll ${enrollArgs}
+  const linuxDebRpmCommand = `./elastic-agent enroll ${enrollArgs}
 systemctl enable elastic-agent
 systemctl start elastic-agent`;
 
-  const windowsCommand = `
-./elastic-agent enroll ${enrollArgs}
+  const windowsCommand = `./elastic-agent enroll ${enrollArgs}
 ./install-service-elastic-agent.ps1`;
 
   return (
@@ -54,8 +57,8 @@ systemctl start elastic-agent`;
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-        <pre style={{ overflow: 'scroll' }}>{windowsCommand}</pre>
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m" whiteSpace="pre">
+        <CommandCode>{windowsCommand}</CommandCode>
       </EuiCodeBlock>
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
@@ -68,7 +71,7 @@ systemctl start elastic-agent`;
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-        <pre style={{ overflow: 'scroll' }}>{linuxDebRpmCommand}</pre>
+        <CommandCode>{linuxDebRpmCommand}</CommandCode>
       </EuiCodeBlock>
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
@@ -80,11 +83,7 @@ systemctl start elastic-agent`;
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-        <pre style={{ overflow: 'scroll' }}>{macOsLinuxTarCommand}</pre>
-      </EuiCodeBlock>
-      <EuiSpacer size="l" />
-      <EuiText>
+      <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.macLinuxTarInstructions"
           defaultMessage="You will need to run {command} if the agent’s system reboots. This is a known limitiation in 7.9."
@@ -93,6 +92,10 @@ systemctl start elastic-agent`;
           }}
         />
       </EuiText>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+        <CommandCode>{macOsLinuxTarCommand}</CommandCode>
+      </EuiCodeBlock>
     </>
   );
 };
