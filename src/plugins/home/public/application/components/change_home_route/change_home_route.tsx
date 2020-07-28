@@ -63,8 +63,7 @@ export const ChangeHomeRoute: FunctionComponent<{}> = () => (
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      {/* TODO: Hook up link to app directory */}
-      <EuiButtonEmpty href={''} size="xs" flush="right" iconType="apps">
+      <EuiButtonEmpty href="#/feature_directory" size="xs" flush="right" iconType="apps">
         <FormattedMessage
           id="home.appDirectory.appDirectoryButtonLabel"
           defaultMessage="View app directory"
