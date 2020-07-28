@@ -59,4 +59,67 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
       args.blocks[2].text.text.toString()
     )
   }
+
+  @Test
+  void 'sendFailedBuild() should call slackSend() with a backup message when first attempt fails'() {
+    mockFailureBuild()
+    def counter = 0
+    helper.registerAllowedMethod('slackSend', [Map.class], { ++counter > 1 })
+    slackNotifications.sendFailedBuild()
+
+    def args = fnMocks('slackSend')[1].args[0]
+
+    def expected = [
+      channel: '#kibana-operations-alerts',
+      username: 'Kibana Operations',
+      iconEmoji: ':jenkins:',
+      color: 'danger',
+      message: ':broken_heart: elastic / kibana # master #1',
+    ]
+
+    expected.each {
+      assertEquals(it.value.toString(), args[it.key].toString())
+    }
+
+    assertEquals(
+      ":broken_heart: *<http://jenkins.localhost:8080/job/elastic+kibana+master/1/|elastic / kibana # master #1>*" +
+        "\n\nFirst attempt at sending this notification failed. Please check the build.",
+      args.blocks[0].text.text.toString()
+    )
+  }
+
+  @Test
+  void 'getTestFailures() should truncate list of failures to 10'() {
+    prop('testUtils', [
+      getFailures: {
+        return (1..12).collect {
+          return [
+            url: Mocks.TEST_FAILURE_URL,
+            fullDisplayName: "Failure #${it}",
+          ]
+        }
+      },
+    ])
+
+    def message = (String) slackNotifications.getTestFailures()
+
+    assertTrue("Message ends with truncated indicator", message.endsWith("...and 2 more"))
+    assertTrue("Message contains Failure #10", message.contains("Failure #10"))
+    assertTrue("Message does not contain Failure #11", !message.contains("Failure #11"))
+  }
+
+  @Test
+  void 'shortenMessage() should truncate a long message, but leave parts that fit'() {
+    assertEquals('Hello\nHello\n[...truncated...]', slackNotifications.shortenMessage('Hello\nHello\nthis is a long string', 29))
+  }
+
+  @Test
+  void 'shortenMessage() should not modify a short message'() {
+    assertEquals('Hello world', slackNotifications.shortenMessage('Hello world', 11))
+  }
+
+  @Test
+  void 'shortenMessage() should truncate an entire message with only one part'() {
+    assertEquals('[...truncated...]', slackNotifications.shortenMessage('Hello world this is a really long message', 40))
+  }
 }
