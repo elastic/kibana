@@ -94,27 +94,8 @@ discover-app {
 }
 
 .dscResultCount {
-  //   display: flex;
-  //   justify-content: space-between;
   padding: 0 $euiSizeS;
-  //   flex-grow: 0;
 }
-
-// .dscResultCount__title {
-//   flex-grow: 0;
-//   flex-basis: auto;
-// }
-
-// .dscResultCount__actions {
-//   flex-grow: 0;
-//   flex-basis: auto;
-//   display: flex;
-//   align-items: center;
-
-//   > *:not(:first-child) {
-//     margin-left: $euiSizeS;
-//   }
-// }
 
 .dscTimechart__header {
   display: flex;
