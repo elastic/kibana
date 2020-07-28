@@ -5,7 +5,7 @@
  */
 
 interface Feature {
-  navLinkId: string;
+  app: string[];
 }
 
 export interface Features {

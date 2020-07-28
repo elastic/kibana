@@ -17,12 +17,15 @@ export const METRICS_FEATURE = {
   order: 700,
   icon: 'metricsApp',
   navLinkId: 'metrics',
-  app: ['infra', 'kibana'],
+  app: ['infra', 'metrics', 'kibana'],
   catalogue: ['infraops'],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
   privileges: {
     all: {
-      app: ['infra', 'kibana'],
+      app: ['infra', 'metrics', 'kibana'],
       catalogue: ['infraops'],
       api: ['infra'],
       savedObject: {
@@ -32,10 +35,13 @@ export const METRICS_FEATURE = {
       alerting: {
         all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
-      ui: ['show', 'configureSource', 'save', 'alerting:show'],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      ui: ['show', 'configureSource', 'save'],
     },
     read: {
-      app: ['infra', 'kibana'],
+      app: ['infra', 'metrics', 'kibana'],
       catalogue: ['infraops'],
       api: ['infra'],
       savedObject: {
@@ -45,7 +51,10 @@ export const METRICS_FEATURE = {
       alerting: {
         all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
-      ui: ['show', 'alerting:show'],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      ui: ['show'],
     },
   },
 };
@@ -58,12 +67,12 @@ export const LOGS_FEATURE = {
   order: 800,
   icon: 'logsApp',
   navLinkId: 'logs',
-  app: ['infra', 'kibana'],
+  app: ['infra', 'logs', 'kibana'],
   catalogue: ['infralogging'],
   alerting: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
   privileges: {
     all: {
-      app: ['infra', 'kibana'],
+      app: ['infra', 'logs', 'kibana'],
       catalogue: ['infralogging'],
       api: ['infra'],
       savedObject: {
@@ -76,7 +85,7 @@ export const LOGS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
-      app: ['infra', 'kibana'],
+      app: ['infra', 'logs', 'kibana'],
       catalogue: ['infralogging'],
       api: ['infra'],
       alerting: {
