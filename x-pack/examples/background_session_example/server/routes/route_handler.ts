@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-expect-error
 import fetch from 'node-fetch';
 import uuid from 'uuid';
 import { KibanaRequest, KibanaResponseFactory } from '../../../../../src/core/server';
@@ -26,7 +25,7 @@ const getData = async (wordCount: number) => {
 };
 
 export async function backgroundSessionRouteHandler(
-  sessionService: DataEnhancedStart['sessionService'],
+  sessionService: DataEnhancedStart['search']['session'],
   request: KibanaRequest<unknown, unknown, DemoBody>,
   response: KibanaResponseFactory
 ) {

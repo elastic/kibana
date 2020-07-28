@@ -60,19 +60,28 @@ export const enhancedEsSearchStrategyProvider = (
   return { search, cancel };
 };
 
+function checkRequest(
+  request: IEnhancedEsSearchRequest,
+  options?: ISearchOptions,
+  context?: IEnhancedSearchContext
+): boolean {
+  return !!(
+    context &&
+    context.backgroundSearchService &&
+    options?.rawRequest &&
+    !!request.sessionId &&
+    !request.id
+  );
+}
+
 async function getBackgroundSession(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions,
   context?: IEnhancedSearchContext
 ) {
-  if (
-    context?.backgroundSearchService &&
-    options?.rawRequest &&
-    !!request.sessionId &&
-    !request.id
-  ) {
+  if (checkRequest(request, options, context)) {
     return await context.backgroundSearchService.getId(
-      options?.rawRequest,
+      options!.rawRequest,
       request.sessionId,
       request.params?.body
     );
@@ -85,16 +94,9 @@ function trackBackgroundSearch(
   options?: ISearchOptions,
   context?: IEnhancedSearchContext
 ) {
-  if (
-    context &&
-    context.backgroundSearchService &&
-    options?.rawRequest &&
-    !!request.sessionId &&
-    !!asyncId &&
-    !request.id
-  ) {
+  if (checkRequest(request, options, context)) {
     context.backgroundSearchService.trackId(
-      options.rawRequest,
+      options!.rawRequest,
       request.sessionId,
       request.params?.body,
       asyncId
@@ -130,6 +132,7 @@ async function asyncSearch(
     ...request.params,
   };
 
+  // Distinguisj between an ID we retrieved from a session to an
   const storedAsyncId = await getBackgroundSession(request, options, context);
   const asyncId = request.id ? request.id : storedAsyncId;
 
