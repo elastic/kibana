@@ -39,9 +39,9 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
       try {
         const { type, sourceId } = request.params;
 
-        const [source, logIndicesExist, metricIndicesExist, indexFields] = await Promise.all([
+        const [source, logIndexStatus, metricIndicesExist, indexFields] = await Promise.all([
           libs.sources.getSourceConfiguration(requestContext.core.savedObjects.client, sourceId),
-          libs.sourceStatus.hasLogIndices(requestContext, sourceId),
+          libs.sourceStatus.getLogIndexStatus(requestContext, sourceId),
           libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
           libs.fields.getFields(requestContext, sourceId, typeToInfraIndexType(type)),
         ]);
@@ -51,7 +51,7 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
         }
 
         const status = {
-          logIndicesExist,
+          logIndicesExist: logIndexStatus !== 'missing',
           metricIndicesExist,
           indexFields,
         };
@@ -90,6 +90,7 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
         const indexPattern =
           type === 'metrics' ? source.configuration.metricAlias : source.configuration.logAlias;
         const results = await hasData(indexPattern, client);
+
 
         return response.ok({
           body: { hasData: results },

@@ -28,13 +28,9 @@ exports.getWebpackConfig = function (kibanaPath, projectRoot, config) {
   const alias = {
     // Kibana defaults https://github.com/elastic/kibana/blob/6998f074542e8c7b32955db159d15661aca253d7/src/legacy/ui/ui_bundler_env.js#L30-L36
     ui: fromKibana('src/legacy/ui/public'),
-    test_harness: fromKibana('src/test_harness/public'),
 
     // Dev defaults for test bundle https://github.com/elastic/kibana/blob/6998f074542e8c7b32955db159d15661aca253d7/src/core_plugins/tests_bundle/index.js#L73-L78
     ng_mock$: fromKibana('src/test_utils/public/ng_mock'),
-    'angular-mocks$': fromKibana(
-      'src/legacy/core_plugins/tests_bundle/webpackShims/angular-mocks.js'
-    ),
     fixtures: fromKibana('src/fixtures'),
     test_utils: fromKibana('src/test_utils/public'),
   };
