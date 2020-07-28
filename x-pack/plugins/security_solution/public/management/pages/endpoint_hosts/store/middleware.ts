@@ -28,6 +28,8 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
+
+    // Host list
     if (
       action.type === 'userChangedUrl' &&
       isOnHostPage(state) &&
@@ -132,6 +134,8 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
         });
       }
     }
+
+    // Host Details
     if (action.type === 'userChangedUrl' && hasSelectedHost(state) === true) {
       dispatch({
         type: 'serverCancelledPolicyItemsLoading',

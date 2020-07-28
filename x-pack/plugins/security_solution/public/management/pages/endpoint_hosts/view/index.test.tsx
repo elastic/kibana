@@ -8,7 +8,11 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 
 import { HostList } from './index';
-import { mockHostDetailsApiResult, mockHostResultList } from '../store/mock_host_result_list';
+import {
+  mockHostDetailsApiResult,
+  mockHostResultList,
+  setHostListApiMockImplementation,
+} from '../store/mock_host_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   HostInfo,
@@ -17,7 +21,6 @@ import {
   HostStatus,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { AppAction } from '../../../../common/store/actions';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
 
@@ -31,27 +34,13 @@ describe('when on the hosts page', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
 
-  const dispatchHostsExist = () => {
-    reactTestingLibrary.act(() =>
-      store.dispatch({
-        type: 'serverReturnedHostExistValue',
-        payload: true,
-      })
-    );
-  };
-  const dispatchHostsDoNotExist = () => {
-    reactTestingLibrary.act(() =>
-      store.dispatch({
-        type: 'serverReturnedHostExistValue',
-        payload: false,
-      })
-    );
-  };
-
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
     render = () => mockedContext.render(<HostList />);
+    reactTestingLibrary.act(() => {
+      history.push('/hosts');
+    });
   });
 
   it('should NOT display timeline', async () => {
@@ -60,36 +49,29 @@ describe('when on the hosts page', () => {
     expect(timelineFlyout).toBeNull();
   });
 
-  it('should show the empty state when there are no hosts or polices', async () => {
-    const renderResult = render();
-    dispatchHostsDoNotExist();
-    // Initially, there are no hosts or policies, so we prompt to add policies first.
-    const table = await renderResult.findByTestId('emptyPolicyTable');
-    expect(table).not.toBeNull();
+  describe('when there are no hosts or polices', () => {
+    beforeEach(() => {
+      setHostListApiMockImplementation(coreStart.http, {
+        hostsResults: [],
+      });
+    });
+
+    it('should show the empty state when there are no hosts or polices', async () => {
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      // Initially, there are no hosts or policies, so we prompt to add policies first.
+      const table = await renderResult.findByTestId('emptyPolicyTable');
+      expect(table).not.toBeNull();
+    });
   });
 
   describe('when there are policies, but no hosts', () => {
-    beforeEach(() => {
-      reactTestingLibrary.act(() => {
-        const hostListData = mockHostResultList({ total: 0 });
-        coreStart.http.get.mockReturnValue(Promise.resolve(hostListData));
-        const hostAction: AppAction = {
-          type: 'serverReturnedHostList',
-          payload: hostListData,
-        };
-        store.dispatch(hostAction);
-
-        jest.clearAllMocks();
-
-        const policyListData = mockPolicyResultList({ total: 3 });
-        coreStart.http.get.mockReturnValue(Promise.resolve(policyListData));
-        const policyAction: AppAction = {
-          type: 'serverReturnedPoliciesForOnboarding',
-          payload: {
-            policyItems: policyListData.items,
-          },
-        };
-        store.dispatch(policyAction);
+    beforeEach(async () => {
+      setHostListApiMockImplementation(coreStart.http, {
+        hostsResults: [],
+        ingestPackageConfigs: mockPolicyResultList({ total: 3 }).items,
       });
     });
     afterEach(() => {
@@ -98,21 +80,27 @@ describe('when on the hosts page', () => {
 
     it('should show the no hosts empty state', async () => {
       const renderResult = render();
-      dispatchHostsDoNotExist();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
       const emptyHostsTable = await renderResult.findByTestId('emptyHostsTable');
       expect(emptyHostsTable).not.toBeNull();
     });
 
     it('should display the onboarding steps', async () => {
       const renderResult = render();
-      dispatchHostsDoNotExist();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
       expect(onboardingSteps).not.toBeNull();
     });
 
     it('should show policy selection', async () => {
       const renderResult = render();
-      dispatchHostsDoNotExist();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
       const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
       expect(onboardingPolicySelect).not.toBeNull();
     });
@@ -133,39 +121,54 @@ describe('when on the hosts page', () => {
       let firstPolicyID: string;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
-          const hostListData = mockHostResultList({ total: 4 });
-          firstPolicyID = hostListData.hosts[0].metadata.Endpoint.policy.applied.id;
+          const hostListData = mockHostResultList({ total: 4 }).hosts;
+
+          firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
+
           [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE, HostStatus.UNENROLLING].forEach(
             (status, index) => {
-              hostListData.hosts[index] = {
-                metadata: hostListData.hosts[index].metadata,
+              hostListData[index] = {
+                metadata: hostListData[index].metadata,
                 host_status: status,
               };
             }
           );
-          hostListData.hosts.forEach((item, index) => {
+          hostListData.forEach((item, index) => {
             generatedPolicyStatuses[index] = item.metadata.Endpoint.policy.applied.status;
           });
-          const action: AppAction = {
-            type: 'serverReturnedHostList',
-            payload: hostListData,
-          };
-          store.dispatch(action);
+
+          // Make sure that the first policy id in the host result is not set as non-existent
+          const ingestPackageConfigs = mockPolicyResultList({ total: 1 }).items;
+          ingestPackageConfigs[0].id = firstPolicyID;
+
+          setHostListApiMockImplementation(coreStart.http, {
+            hostsResults: hostListData,
+            ingestPackageConfigs,
+          });
         });
       });
 
       it('should display rows in the table', async () => {
         const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedHostList');
+        });
         const rows = await renderResult.findAllByRole('row');
         expect(rows).toHaveLength(5);
       });
       it('should show total', async () => {
         const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedHostList');
+        });
         const total = await renderResult.findByTestId('hostListTableTotal');
         expect(total.textContent).toEqual('4 Hosts');
       });
       it('should display correct status', async () => {
         const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedHostList');
+        });
         const hostStatuses = await renderResult.findAllByTestId('rowHostStatus');
 
         expect(hostStatuses[0].textContent).toEqual('Error');
@@ -189,6 +192,9 @@ describe('when on the hosts page', () => {
 
       it('should display correct policy status', async () => {
         const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedHostList');
+        });
         const policyStatuses = await renderResult.findAllByTestId('rowPolicyStatus');
 
         policyStatuses.forEach((status, index) => {
@@ -205,6 +211,9 @@ describe('when on the hosts page', () => {
 
       it('should display policy name as a link', async () => {
         const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedHostList');
+        });
         const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
         expect(firstPolicyName).not.toBeNull();
         expect(firstPolicyName.getAttribute('href')).toContain(`policy/${firstPolicyID}`);
@@ -213,17 +222,10 @@ describe('when on the hosts page', () => {
       describe('when the user clicks the first hostname in the table', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
-          const hostDetailsApiResponse = mockHostDetailsApiResult();
-
-          coreStart.http.get.mockReturnValue(Promise.resolve(hostDetailsApiResponse));
-          reactTestingLibrary.act(() => {
-            store.dispatch({
-              type: 'serverReturnedHostDetails',
-              payload: hostDetailsApiResponse,
-            });
-          });
-
           renderResult = render();
+          await reactTestingLibrary.act(async () => {
+            await middlewareSpy.waitForAction('serverReturnedHostList');
+          });
           const hostNameLinks = await renderResult.findAllByTestId('hostnameCellLink');
           if (hostNameLinks.length) {
             reactTestingLibrary.fireEvent.click(hostNameLinks[0]);

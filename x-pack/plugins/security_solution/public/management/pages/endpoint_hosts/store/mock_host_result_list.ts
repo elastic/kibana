@@ -4,10 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpFetchOptions, HttpResponse, HttpStart } from 'kibana/public';
-import { HostInfo, HostResultList, HostStatus } from '../../../../../common/endpoint/types';
+import { HttpStart } from 'kibana/public';
+import {
+  HostInfo,
+  HostPolicyResponse,
+  HostResultList,
+  HostStatus,
+} from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { INGEST_API_EPM_PACKAGES } from '../../policy/store/policy_list/services/ingest';
+import {
+  INGEST_API_AGENT_CONFIGS,
+  INGEST_API_EPM_PACKAGES,
+  INGEST_API_PACKAGE_CONFIGS,
+} from '../../policy/store/policy_list/services/ingest';
+import {
+  GetAgentConfigsResponse,
+  GetPackagesResponse,
+} from '../../../../../../ingest_manager/common/types/rest_spec';
+import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
+import { GetPolicyListResponse } from '../../policy/types';
 
 const generator = new EndpointDocGenerator('seed');
 
@@ -55,43 +70,100 @@ export const mockHostDetailsApiResult = (): HostInfo => {
 };
 
 /**
- * Mock API handlers used by the Endpoint Host list
+ * Mock API handlers used by the Endpoint Host list. It also provides a list of
+ * API GET requests for Host details based on a list of Host results.
  */
-const hostListApiPathHandlerMocks = () => {
-  return {
-    // list
-    '/api/endpoint/metadata': (
-      fetchOptions?: HttpFetchOptions = {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: 0 }, { page_size: 10 }],
-        }),
-      }
-    ): HostResultList => {
-      const params = JSON.stringify(fetchOptions.body);
-
+const hostListApiPathHandlerMocks = ({
+  hostsResults = mockHostResultList({ total: 3 }).hosts,
+  epmPackages = [generator.generateEpmPackage()],
+  ingestPackageConfigs = mockPolicyResultList({ total: 0 }).items,
+  policyResponse = generator.generatePolicyResponse(),
+}: {
+  hostsResults?: HostResultList['hosts'];
+  epmPackages?: GetPackagesResponse['response'];
+  ingestPackageConfigs?: GetPolicyListResponse['items'];
+  policyResponse?: HostPolicyResponse;
+} = {}) => {
+  const apiHandlers = {
+    // endpoint package info
+    [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
-        hosts: [],
-        request_page_index: params.page_index,
-        request_page_size: params.page_size,
-        total: params.page_size,
+        response: epmPackages,
+        success: true,
       };
     },
 
-    // endpoint package info
-    [INGEST_API_EPM_PACKAGES]: (fetchOptions?: HttpFetchOptions) => {},
-
     // Do policies referenced in host list exist
-    [INGEST_API_EPM_PACKAGES]: (fetchOptions?: HttpFetchOptions) => {},
+    // just returns 1 single agent config that includes all of the packageConfig IDs provided
+    [INGEST_API_AGENT_CONFIGS]: (): GetAgentConfigsResponse => {
+      const agentConfig = generator.generateAgentConfig();
+      (agentConfig.package_configs as string[]).push(
+        ...ingestPackageConfigs.map((packageConfig) => packageConfig.id)
+      );
+      return {
+        items: [agentConfig],
+        total: 10,
+        success: true,
+        perPage: 10,
+        page: 1,
+      };
+    },
 
     // Policy Response
-    '/api/endpoint/policy_response': (fetchOptions?: HttpFetchOptions) => {},
+    '/api/endpoint/policy_response': () => {
+      return policyResponse;
+    },
+
+    // List of Policies (package configs) for onboarding
+    [INGEST_API_PACKAGE_CONFIGS]: (): GetPolicyListResponse => {
+      return {
+        items: ingestPackageConfigs,
+        page: 1,
+        perPage: 10,
+        total: ingestPackageConfigs?.length,
+        success: true,
+      };
+    },
   };
+
+  // Build a GET route handler for each host details based on the list of Hosts passed on input
+  if (hostsResults) {
+    hostsResults.forEach((host) => {
+      apiHandlers[`/api/endpoint/metadata/${host.metadata.host.id}`] = () => host;
+    });
+  }
+
+  return apiHandlers;
 };
 
 export const setHostListApiMockImplementation = (
-  mockedHttpService: jest.Mocked<HttpStart>
+  mockedHttpService: jest.Mocked<HttpStart>,
+  {
+    hostsResults = mockHostResultList({ total: 3 }).hosts,
+    ...pathHandlersOptions
+  }: Parameters<typeof hostListApiPathHandlerMocks>[0] & {
+    hostsResults?: HostResultList['hosts'];
+  } = {}
 ): void => {
-  const apiHandlers = hostListApiPathHandlerMocks();
+  const apiHandlers = hostListApiPathHandlerMocks(pathHandlersOptions);
+  const hostApiResponse: HostResultList = {
+    hosts: hostsResults,
+    request_page_size: 10,
+    request_page_index: 0,
+    total: hostsResults?.length,
+  };
+  mockedHttpService.post
+    .mockImplementation(async (...args) => {
+      throw new Error(`un-expected call to http.post: ${args}`);
+    })
+    // First time called, return list of hosts
+    .mockResolvedValueOnce(hostApiResponse);
+
+  // If the hosts list results is zero, then mock the second call to `/metadata` to return
+  // empty list - indicating there are no hosts currently present on the system
+  if (!hostsResults.length) {
+    mockedHttpService.post.mockResolvedValueOnce(hostApiResponse);
+  }
 
   mockedHttpService.get.mockImplementation(async (...args) => {
     const [path] = args;
