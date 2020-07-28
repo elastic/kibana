@@ -8,7 +8,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useContext, useCallback, useEffect } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useEffectOnce } from 'react-use';
 import { EuiLoadingSpinner } from '@elastic/eui';
