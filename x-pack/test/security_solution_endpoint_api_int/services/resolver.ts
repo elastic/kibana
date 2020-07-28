@@ -51,7 +51,10 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
   const client = getService('es');
 
   return {
-    async createEvents(events: Event[], eventsIndex: string = processIndex) {
+    async insertEvents(
+      events: Event[],
+      eventsIndex: string = processIndex
+    ): Promise<GeneratedEvents> {
       const body = events.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
         array.push({ create: { _index: eventsIndex } }, doc);
         return array;
