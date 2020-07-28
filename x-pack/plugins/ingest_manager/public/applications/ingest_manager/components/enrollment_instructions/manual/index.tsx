@@ -52,7 +52,7 @@ systemctl start elastic-agent`;
           defaultMessage="From the agent’s directory, run the appropriate commands to enroll and start an Elastic Agent. You can reuse these commands to setup agents on more than one machine."
         />
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage
@@ -65,7 +65,7 @@ systemctl start elastic-agent`;
       <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
         <pre style={{ overflow: 'scroll' }}>{windowsCommand}</pre>
       </EuiCodeBlock>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.windowsInstructions"
@@ -75,7 +75,7 @@ systemctl start elastic-agent`;
           }}
         />
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage
@@ -88,7 +88,7 @@ systemctl start elastic-agent`;
       <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
         <pre style={{ overflow: 'scroll' }}>{linuxDebRpmCommand}</pre>
       </EuiCodeBlock>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h4>
           <FormattedMessage
@@ -101,7 +101,7 @@ systemctl start elastic-agent`;
       <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
         <pre style={{ overflow: 'scroll' }}>{macOsLinuxTarCommand}</pre>
       </EuiCodeBlock>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.macLinuxTarInstructions"
