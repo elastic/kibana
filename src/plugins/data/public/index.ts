@@ -60,7 +60,6 @@ import {
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRangeString,
-  extractTimeRange,
 } from './query';
 
 // Filter helpers namespace:
