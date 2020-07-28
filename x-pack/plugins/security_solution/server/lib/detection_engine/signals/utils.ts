@@ -183,7 +183,7 @@ export const getExceptions = async ({
                   listId: foundList.list_id,
                   namespaceType,
                   page: 1,
-                  perPage: 5000,
+                  perPage: 10000,
                   filter: undefined,
                   sortOrder: undefined,
                   sortField: undefined,
