@@ -22,9 +22,9 @@ class AppContextService {
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
-  private isProductionMode: boolean = false;
-  private kibanaVersion: string | undefined;
-  private kibanaBranch: string | undefined;
+  private isProductionMode: IngestManagerAppContext['isProductionMode'] = false;
+  private kibanaVersion: IngestManagerAppContext['kibanaVersion'] | undefined;
+  private kibanaBranch: IngestManagerAppContext['kibanaBranch'] | undefined;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
