@@ -55,7 +55,7 @@ describe('OverviewEmpty', () => {
           fill: false,
           label: 'Add Elastic Endpoint Security',
           onClick: undefined,
-          url: 'ingestUrl',
+          url: '/app/home#/tutorial_directory/security',
         },
       });
     });

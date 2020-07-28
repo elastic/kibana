@@ -41,7 +41,7 @@ const OverviewEmptyComponent: React.FC = () => {
       },
       endpoint: {
         label: i18nCommon.EMPTY_ACTION_ENDPOINT,
-        url: ingestUrl,
+        url: `${basePath}${ADD_DATA_PATH}`,
         description: i18nCommon.EMPTY_ACTION_ENDPOINT_DESCRIPTION,
         onClick: handleOnClick,
         fill: false,
