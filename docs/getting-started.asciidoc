@@ -142,7 +142,7 @@ curl -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
 
 These commands may take some time to execute, depending on the computing resources available.
 
-NOTE: These commands assume your Elasticsearch cluster is not using the {shield}[Shield] security plugin. If your
+NOTE: These commands assume your Elasticsearch cluster is not using the {shield-13}[Shield] security plugin. If your
 Elasticsearch cluster has Shield configured, provide suitable credentials with the `-k` and `-u` options.
 
 Verify successful loading with the following command:

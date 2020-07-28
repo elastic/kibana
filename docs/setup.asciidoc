@@ -10,7 +10,7 @@ All you need is:
 ** Which Elasticsearch indices you want to search.
 
 NOTE: If your Elasticsearch installation is protected by http://www.elastic.co/overview/shield/[Shield] see
-{shield}/kibana.html#using-kibana4-with-shield[Shield with Kibana 4] for additional setup instructions.
+{shield-13}kibana.html#using-kibana4-with-shield[Shield with Kibana 4] for additional setup instructions.
 
 [float]
 [[install]]
