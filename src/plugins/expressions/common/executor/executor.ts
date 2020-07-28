@@ -245,7 +245,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public migrate(ast: ExpressionAstExpression, version: string) {
-    this.walkAst(ast, (fn, link) => {
+    return this.walkAst(ast, (fn, link) => {
       const newLink = fn.migrate(link, version);
       link.function = newLink.function;
       link.arguments = newLink.arguments;

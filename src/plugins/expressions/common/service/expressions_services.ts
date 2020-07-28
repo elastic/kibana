@@ -257,14 +257,30 @@ export class ExpressionsService {
     return fork;
   };
 
+  /**
+   * Migrates expression AST to the latest version. This function should be called whenever expression is read from any place where expression could be from previous kibana version.
+   * @param state old version of expression AST
+   * @param version kibana version of expression AST passed in
+   */
   public readonly migrate = (state: ExpressionAstExpression, version: string) => {
     return this.executor.migrate(state, version);
   };
 
+  /**
+   * Extracts saved object references from expression AST
+   * @param state expression AST to extract references from
+   * @returns new expression AST with references removed and array of references
+   */
   public readonly extract = (state: ExpressionAstExpression) => {
     return this.executor.extract(state);
   };
 
+  /**
+   * Injects saved object references into expression AST
+   * @param state expression AST to update
+   * @param references array of saved object references
+   * @returns new expression AST with references injected
+   */
   public readonly inject = (state: ExpressionAstExpression, references: SavedObjectReference[]) => {
     return this.executor.inject(state, references);
   };

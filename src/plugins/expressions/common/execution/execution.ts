@@ -216,8 +216,12 @@ export class Execution<
       const { function: fnName, arguments: fnArgs } = link;
       const fn = getByAlias(this.state.get().functions, fnName);
 
-      if (!fn || fn.disabled) {
+      if (!fn) {
         return createError({ message: `Function ${fnName} could not be found.` });
+      }
+
+      if (fn.disabled) {
+        return createError({ message: `Function ${fnName} is disabled.` });
       }
 
       let args: Record<string, ExpressionValue> = {};
