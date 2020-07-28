@@ -86,7 +86,7 @@ systemctl start elastic-agent`;
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.macLinuxTarInstructions"
-          defaultMessage="You will need to run {command} if the agent’s system reboots. This is a known limitiation in 7.9."
+          defaultMessage="You will need to run {command} if the agent’s system reboots."
           values={{
             command: <EuiCode>./elastic-agent run</EuiCode>,
           }}
