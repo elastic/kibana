@@ -6,8 +6,8 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiText, /* EuiTitle,*/ EuiSpacer } from '@elastic/eui';
+// import { i18n } from '@kbn/i18n';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import {
   CustomConfigurePackageConfigContent,
