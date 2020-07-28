@@ -61,6 +61,7 @@ export function registerDownloadExceptionListRoute(
         }
       }
 
+      const validateDownload = (await endpointContext.config()).validateArtifactDownloads;
       const buildAndValidateResponse = (artName: string, body: Buffer): IKibanaResponse => {
         const artifact: HttpResponseOptions = {
           body,
@@ -70,10 +71,10 @@ export function registerDownloadExceptionListRoute(
           },
         };
 
-        if (downloadArtifactResponseSchema.is(artifact)) {
-          return res.ok(artifact);
-        } else {
+        if (validateDownload && !downloadArtifactResponseSchema.is(artifact)) {
           return res.internalError({ body: 'Artifact failed to validate.' });
+        } else {
+          return res.ok(artifact);
         }
       };
 

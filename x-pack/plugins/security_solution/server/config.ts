@@ -34,6 +34,7 @@ export const configSchema = schema.object({
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
+  validateArtifactDownloads: schema.boolean({ defaultValue: true }),
 });
 
 export const createConfig$ = (context: PluginInitializerContext) =>
