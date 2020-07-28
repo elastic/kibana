@@ -31,10 +31,7 @@ const Description = styled.span`
   }
 `;
 
-const KpiDescription: React.FC<{
-  name: string;
-  color: string;
-}> = ({ name, color }) => {
+function KpiDescription({ name, color }: { name: string; color: string }) {
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -52,9 +49,9 @@ const KpiDescription: React.FC<{
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}
 
-const TransactionBreakdownKpiList: React.FC<Props> = ({ kpis }) => {
+function TransactionBreakdownKpiList({ kpis }: Props) {
   return (
     <EuiFlexGrid>
       {kpis.map((kpi) => (
@@ -73,6 +70,6 @@ const TransactionBreakdownKpiList: React.FC<Props> = ({ kpis }) => {
       ))}
     </EuiFlexGrid>
   );
-};
+}
 
 export { TransactionBreakdownKpiList };
