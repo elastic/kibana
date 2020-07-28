@@ -31,7 +31,7 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonTooltip',
   {
     defaultMessage:
-      'Use value lists to create an exception when a field value matches a value found in a list.',
+      'Use value lists to create an exception when a field value matches a value found in a list',
   }
 );
 

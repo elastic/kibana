@@ -154,7 +154,7 @@ export const ATTACH_TO_EXISTING_CASE = i18n.translate(
 export const ATTACH_TIMELINE_TO_CASE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.timeline.properties.attachTimelineToCaseTooltip',
   {
-    defaultMessage: 'Please provide a title for your timeline in order to attach it to a case.',
+    defaultMessage: 'Please provide a title for your timeline in order to attach it to a case',
   }
 );
 
