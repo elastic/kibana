@@ -15,6 +15,7 @@ import {
   getModifiedAboutDetailsData,
   determineDetailsValue,
   userHasNoPermissions,
+  fillEmptySeverityMappings,
 } from './helpers';
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
@@ -95,9 +96,9 @@ describe('rule helpers', () => {
         name: 'Query with rule-id',
         note: '# this is some markdown documentation',
         references: ['www.test.co'],
-        riskScore: { value: 21, mapping: [] },
+        riskScore: { value: 21, mapping: [], isMappingChecked: false },
         ruleNameOverride: 'message',
-        severity: { value: 'low', mapping: [] },
+        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
         tags: ['tag1', 'tag2'],
         threat: [
           {
