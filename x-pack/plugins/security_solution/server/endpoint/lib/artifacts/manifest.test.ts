@@ -45,16 +45,6 @@ describe('manifest', () => {
     test('Empty manifest transforms correctly to expected endpoint format', async () => {
       expect(emptyManifest.toEndpointFormat()).toStrictEqual({
         artifacts: {
-          'endpoint-exceptionlist-linux-v1': {
-            compression_algorithm: 'zlib',
-            encryption_algorithm: 'none',
-            decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-            encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-            decoded_size: 14,
-            encoded_size: 22,
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-          },
           'endpoint-exceptionlist-macos-v1': {
             compression_algorithm: 'zlib',
             encryption_algorithm: 'none',
@@ -84,16 +74,6 @@ describe('manifest', () => {
     test('Manifest transforms correctly to expected endpoint format', async () => {
       expect(manifest1.toEndpointFormat()).toStrictEqual({
         artifacts: {
-          'endpoint-exceptionlist-linux-v1': {
-            compression_algorithm: 'zlib',
-            encryption_algorithm: 'none',
-            decoded_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
-            encoded_sha256: '975382ab55d019cbab0bbac207a54e2a7d489fad6e8f6de34fc6402e5ef37b1e',
-            decoded_size: 432,
-            encoded_size: 147,
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
-          },
           'endpoint-exceptionlist-macos-v1': {
             compression_algorithm: 'zlib',
             encryption_algorithm: 'none',
@@ -125,7 +105,6 @@ describe('manifest', () => {
         schemaVersion: 'v1',
         semanticVersion: '1.0.0',
         ids: [
-          'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           'endpoint-exceptionlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
         ],
@@ -137,12 +116,12 @@ describe('manifest', () => {
       expect(diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           type: 'delete',
         },
         {
           id:
-            'endpoint-exceptionlist-linux-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
+            'endpoint-exceptionlist-macos-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
           type: 'add',
         },
       ]);
@@ -158,7 +137,6 @@ describe('manifest', () => {
       const entries = manifest1.getEntries();
       const keys = Object.keys(entries);
       expect(keys).toEqual([
-        'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
         'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
         'endpoint-exceptionlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
       ]);
@@ -174,11 +152,6 @@ describe('manifest', () => {
     test('Manifest can be created from list of artifacts', async () => {
       const oldManifest = new Manifest();
       const manifest = Manifest.fromArtifacts(artifacts, oldManifest);
-      expect(
-        manifest.contains(
-          'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
-        )
-      ).toEqual(true);
       expect(
         manifest.contains(
           'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'

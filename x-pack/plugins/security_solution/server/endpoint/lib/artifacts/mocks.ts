@@ -29,7 +29,7 @@ export const getMockArtifactsWithDiff = async (opts?: { compress: boolean }) => 
   return Promise.all(
     ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
-        if (os === 'linux') {
+        if (os === 'macos') {
           return getInternalArtifactMockWithDiffs(os, 'v1');
         }
         return getInternalArtifactMock(os, 'v1', opts);
@@ -74,16 +74,6 @@ export const createPackageConfigWithInitialManifestMock = (): PackageConfig => {
   packageConfig.inputs[0].config!.artifact_manifest = {
     value: {
       artifacts: {
-        'endpoint-exceptionlist-linux-v1': {
-          compression_algorithm: 'zlib',
-          encryption_algorithm: 'none',
-          decoded_sha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-          encoded_sha256: 'f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda',
-          decoded_size: 14,
-          encoded_size: 22,
-          relative_url:
-            '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
-        },
         'endpoint-exceptionlist-macos-v1': {
           compression_algorithm: 'zlib',
           encryption_algorithm: 'none',
@@ -117,16 +107,6 @@ export const createPackageConfigWithManifestMock = (): PackageConfig => {
   packageConfig.inputs[0].config!.artifact_manifest = {
     value: {
       artifacts: {
-        'endpoint-exceptionlist-linux-v1': {
-          compression_algorithm: 'zlib',
-          encryption_algorithm: 'none',
-          decoded_sha256: '0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
-          encoded_sha256: '57941169bb2c5416f9bd7224776c8462cb9a2be0fe8b87e6213e77a1d29be824',
-          decoded_size: 292,
-          encoded_size: 131,
-          relative_url:
-            '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
-        },
         'endpoint-exceptionlist-macos-v1': {
           compression_algorithm: 'zlib',
           encryption_algorithm: 'none',
