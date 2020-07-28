@@ -39,13 +39,7 @@ jest.mock('fs', () => {
   };
 });
 
-import {
-  FTR_REPORT,
-  JEST_REPORT,
-  MOCHA_REPORT,
-  KARMA_REPORT,
-  CYPRESS_REPORT,
-} from './__fixtures__';
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, CYPRESS_REPORT } from './__fixtures__';
 import { parseTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 
@@ -334,82 +328,6 @@ it('rewrites cypress reports with minimal changes', async () => {
        ‹/testsuite›
     -‹/testsuites›
     +‹/testsuites›
-    \\ No newline at end of file
-
-  `);
-});
-
-it('rewrites karma reports with minimal changes', async () => {
-  const xml = await addMessagesToReport({
-    report: await parseTestReport(KARMA_REPORT),
-    messages: [
-      {
-        name:
-          'CoordinateMapsVisualizationTest CoordinateMapsVisualization - basics should initialize OK',
-        classname: 'Browser Unit Tests.CoordinateMapsVisualizationTest',
-        message: 'foo bar',
-      },
-    ],
-    log,
-    reportPath: Path.resolve(__dirname, './__fixtures__/karma_report.xml'),
-  });
-
-  expect(createPatch('karma.xml', KARMA_REPORT, xml, { context: 0 })).toMatchInlineSnapshot(`
-    Index: karma.xml
-    ===================================================================
-    --- karma.xml	[object Object]
-    +++ karma.xml
-    @@ -1,5 +1,5 @@
-    -‹?xml version="1.0"?›
-    +‹?xml version="1.0" encoding="utf-8"?›
-     ‹testsuite name="Chrome 75.0.3770 (Mac OS X 10.14.5)" package="" timestamp="2019-07-02T19:53:21" id="0" hostname="spalger.lan" tests="648" errors="0" failures="4" time="1.759"›
-       ‹properties›
-         ‹property name="browser.fullName" value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"/›
-       ‹/properties›
-    @@ -7,27 +7,31 @@
-       ‹testcase name="Vis-Editor-Agg-Params plugin directive should hide custom label parameter" time="0" classname="Browser Unit Tests.Vis-Editor-Agg-Params plugin directive"›
-         ‹skipped/›
-       ‹/testcase›
-       ‹testcase name="CoordinateMapsVisualizationTest CoordinateMapsVisualization - basics should initialize OK" time="0.265" classname="Browser Unit Tests.CoordinateMapsVisualizationTest"›
-    -    ‹failure type=""›Error: expected 7069 to be below 64
-    -    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.assert (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:13671:11)
-    -    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.lessThan.Assertion.below (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:13891:8)
-    -    at Function.lessThan (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:14078:15)
-    -    at _callee3$ (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:158985:60)
-    +    ‹failure type=""›‹![CDATA[Error: expected 7069 to be below 64
-    +    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.assert (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:13671:11)
-    +    at Assertion.__kbnBundles__.tests../packages/kbn-expect/expect.js.Assertion.lessThan.Assertion.below (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:13891:8)
-    +    at Function.lessThan (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:14078:15)
-    +    at _callee3$ (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158985:60)
-         at tryCatch (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:62:40)
-         at Generator.invoke [as _invoke] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:288:22)
-    -    at Generator.prototype.&lt;computed&gt; [as next] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:114:21)
-    -    at asyncGeneratorStep (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:158772:103)
-    -    at _next (http://localhost:5610/bundles/tests.bundle.js?shards=4&amp;shard_num=1:158774:194)
-    -‹/failure›
-    +    at Generator.prototype.‹computed› [as next] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:114:21)
-    +    at asyncGeneratorStep (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158772:103)
-    +    at _next (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158774:194)
-    +]]›‹/failure›
-    +    ‹system-out›Failed Tests Reporter:
-    +  - foo bar
-    +
-    +‹/system-out›
-       ‹/testcase›
-       ‹testcase name="CoordinateMapsVisualizationTest CoordinateMapsVisualization - basics should toggle to Heatmap OK" time="0.055" classname="Browser Unit Tests.CoordinateMapsVisualizationTest"/›
-       ‹testcase name="VegaParser._parseSchema should warn on vega-lite version too new to be supported" time="0.001" classname="Browser Unit Tests.VegaParser·_parseSchema"/›
-       ‹system-out›
-    -    ‹![CDATA[Chrome 75.0.3770 (Mac OS X 10.14.5) LOG: 'ready to load tests for shard 1 of 4'
-    +    Chrome 75.0.3770 (Mac OS X 10.14.5) LOG: 'ready to load tests for shard 1 of 4'
-     ,Chrome 75.0.3770 (Mac OS X 10.14.5) WARN: 'Unmatched GET to http://localhost:9876/api/interpreter/fns'
-     ...
-
-    -]]›
-    +
-       ‹/system-out›
-       ‹system-err/›
-    -‹/testsuite›
-    +‹/testsuite›
     \\ No newline at end of file
 
   `);

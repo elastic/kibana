@@ -3,17 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { CoreStart } from 'kibana/public';
 import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { CoreStart } from 'kibana/public';
-import { getLogsHasDataFetcher } from './logs_overview_fetchers';
-import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
+import { InfraClientStartDeps, InfraClientStartExports } from '../types';
+import { getLogsHasDataFetcher } from './logs_overview_fetchers';
 
-// Note
-// Calls to `.mock*` functions will fail the typecheck because how jest does the mocking.
-// The calls will be preluded with a `@ts-expect-error`
 jest.mock('../containers/logs/log_source/api/fetch_log_source_status');
+const mockedCallFetchLogSourceStatusAPI = callFetchLogSourceStatusAPI as jest.MockedFunction<
+  typeof callFetchLogSourceStatusAPI
+>;
 
 function setup() {
   const core = coreMock.createStart();
@@ -33,36 +34,47 @@ function setup() {
 describe('Logs UI Observability Homepage Functions', () => {
   describe('getLogsHasDataFetcher()', () => {
     beforeEach(() => {
-      // @ts-expect-error
-      callFetchLogSourceStatusAPI.mockReset();
+      mockedCallFetchLogSourceStatusAPI.mockReset();
     });
-    it('should return true when some index is present', async () => {
+    it('should return true when non-empty indices exist', async () => {
       const { mockedGetStartServices } = setup();
 
-      // @ts-expect-error
-      callFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndicesExist: true },
+      mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
+        data: { logIndexFields: [], logIndexStatus: 'available' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
       const response = await hasData();
 
-      expect(callFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
+      expect(mockedCallFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
       expect(response).toBe(true);
     });
 
-    it('should return false when no index is present', async () => {
+    it('should return false when only empty indices exist', async () => {
       const { mockedGetStartServices } = setup();
 
-      // @ts-expect-error
-      callFetchLogSourceStatusAPI.mockResolvedValue({
-        data: { logIndexFields: [], logIndicesExist: false },
+      mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
+        data: { logIndexFields: [], logIndexStatus: 'empty' },
       });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
       const response = await hasData();
 
-      expect(callFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
+      expect(mockedCallFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
+      expect(response).toBe(false);
+    });
+
+    it('should return false when no index exists', async () => {
+      const { mockedGetStartServices } = setup();
+
+      mockedCallFetchLogSourceStatusAPI.mockResolvedValue({
+        data: { logIndexFields: [], logIndexStatus: 'missing' },
+      });
+
+      const hasData = getLogsHasDataFetcher(mockedGetStartServices);
+      const response = await hasData();
+
+      expect(mockedCallFetchLogSourceStatusAPI).toHaveBeenCalledTimes(1);
       expect(response).toBe(false);
     });
   });
