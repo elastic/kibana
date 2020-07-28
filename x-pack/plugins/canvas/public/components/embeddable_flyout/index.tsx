@@ -14,8 +14,6 @@ import { AddEmbeddableFlyout, Props } from './flyout';
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
-import { WithKibanaProps } from '../../index';
-import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {
@@ -74,10 +72,10 @@ const mergeProps = (
   };
 };
 
-export class EmbeddableFlyoutPortal extends React.Component<Props & WithKibanaProps> {
+export class EmbeddableFlyoutPortal extends React.Component<Props> {
   el?: HTMLElement;
 
-  constructor(props: Props & WithKibanaProps) {
+  constructor(props: Props) {
     super(props);
 
     this.el = document.createElement('div');
@@ -103,9 +101,6 @@ export class EmbeddableFlyoutPortal extends React.Component<Props & WithKibanaPr
         <AddEmbeddableFlyout
           {...this.props}
           availableEmbeddables={Object.keys(allowedEmbeddables)}
-          savedObjects={this.props.kibana.services.savedObjects}
-          uiSettings={this.props.kibana.services.uiSettings}
-          getEmbeddableFactories={this.props.kibana.services.embeddable.getEmbeddableFactories}
         />,
         this.el
       );
@@ -113,7 +108,6 @@ export class EmbeddableFlyoutPortal extends React.Component<Props & WithKibanaPr
   }
 }
 
-export const AddEmbeddablePanel = compose<Props & WithKibanaProps, { onClose: () => void }>(
-  connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withKibana
+export const AddEmbeddablePanel = compose<Props, { onClose: () => void }>(
+  connect(mapStateToProps, mapDispatchToProps, mergeProps)
 )(EmbeddableFlyoutPortal);

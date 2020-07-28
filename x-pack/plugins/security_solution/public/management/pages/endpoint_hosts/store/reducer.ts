@@ -28,6 +28,7 @@ export const initialHostListState: Immutable<HostState> = {
   selectedPolicyId: undefined,
   policyItemsLoading: false,
   endpointPackageInfo: undefined,
+  nonExistingPolicies: {},
 };
 
 /* eslint-disable-next-line complexity */
@@ -56,6 +57,14 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       ...state,
       error: action.payload,
       loading: false,
+    };
+  } else if (action.type === 'serverReturnedHostNonExistingPolicies') {
+    return {
+      ...state,
+      nonExistingPolicies: {
+        ...state.nonExistingPolicies,
+        ...action.payload,
+      },
     };
   } else if (action.type === 'serverReturnedHostDetails') {
     return {

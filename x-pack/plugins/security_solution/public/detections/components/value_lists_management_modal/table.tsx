@@ -35,6 +35,7 @@ export const ValueListsTableComponent: React.FC<ValueListsTableProps> = ({
         <h2>{i18n.TABLE_TITLE}</h2>
       </EuiText>
       <EuiBasicTable
+        data-test-subj="value-lists-table"
         columns={columns}
         items={items}
         loading={loading}
