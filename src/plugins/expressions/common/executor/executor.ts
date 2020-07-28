@@ -244,9 +244,9 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return { ast: newAst, references: allReferences };
   }
 
-  public migrate(ast: ExpressionAstExpression, version: string) {
+  public migrate(ast: ExpressionAstExpression) {
     return this.walkAst(ast, (fn, link) => {
-      const newLink = fn.migrate(link, version);
+      const newLink = fn.migrate(link);
       link.function = newLink.function;
       link.arguments = newLink.arguments;
     });

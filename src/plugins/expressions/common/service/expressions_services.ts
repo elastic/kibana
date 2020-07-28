@@ -262,8 +262,8 @@ export class ExpressionsService {
    * @param state old version of expression AST
    * @param version kibana version of expression AST passed in
    */
-  public readonly migrate = (state: ExpressionAstExpression, version: string) => {
-    return this.executor.migrate(state, version);
+  public readonly migrate = (state: ExpressionAstExpression) => {
+    return this.executor.migrate(state);
   };
 
   /**

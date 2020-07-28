@@ -64,7 +64,7 @@ export class ExpressionFunction {
   inputTypes: string[] | undefined;
 
   disabled: boolean;
-  migrate: (state: ExpressionAstFunction, version: string) => ExpressionAstFunction;
+  migrate: (state: ExpressionAstFunction) => ExpressionAstFunction;
   extract: (
     state: ExpressionAstFunction['arguments']
   ) => { args: ExpressionAstFunction['arguments']; references: SavedObjectReference[] };
