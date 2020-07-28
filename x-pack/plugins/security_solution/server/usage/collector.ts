@@ -6,7 +6,7 @@
 
 import { LegacyAPICaller, CoreSetup } from '../../../../../src/core/server';
 import { CollectorDependencies } from './types';
-import { DetectionsUsage, fetchDetectionsUsage } from './detections';
+import { DetectionsUsage, fetchDetectionsUsage, defaultDetectionsUsage } from './detections';
 import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
@@ -82,7 +82,7 @@ export const registerCollector: RegisterCollector = ({
       ]);
 
       return {
-        detections: detections.status === 'fulfilled' ? detections.value : {},
+        detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,
         endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
       };
     },

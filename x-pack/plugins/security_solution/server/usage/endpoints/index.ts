@@ -217,35 +217,37 @@ export const getEndpointTelemetryFromFleet = async (
   let policyTracker: PoliciesTelemetry = { malware: { active: 0, inactive: 0, failure: 0 } };
 
   for (let i = 0; i < endpointAgentsCount; i += 1) {
-    const { attributes: metadataAttributes } = endpointAgents[i];
-    const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
-    const { host, os, elastic } = localMetadata as AgentLocalMetadata; // AgentMetadata is just an empty blob, casting for our  use case
+    try {
+      const { attributes: metadataAttributes } = endpointAgents[i];
+      const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
+      const { host, os, elastic } = localMetadata as AgentLocalMetadata; // AgentMetadata is just an empty blob, casting for our  use case
 
-    if (!uniqueHostIds.has(host.id)) {
-      uniqueHostIds.add(host.id);
-      const agentId = elastic?.agent?.id;
-      osTracker = updateEndpointOSTelemetry(os, osTracker);
+      if (!uniqueHostIds.has(host.id)) {
+        uniqueHostIds.add(host.id);
+        const agentId = elastic?.agent?.id;
+        osTracker = updateEndpointOSTelemetry(os, osTracker);
 
-      if (agentId) {
-        let agentEvents;
-        try {
-          const response = await getLatestFleetEndpointEvent(soClient, agentId);
-          agentEvents = response.saved_objects;
-        } catch (error) {
-          // If the request fails we do not obtain `active within last 24 hours for this agent` or policy specifics
-        }
-
-        // AgentEvents will have a max length of 1
-        if (agentEvents && agentEvents.length > 0) {
-          const latestEndpointEvent = agentEvents[0];
-          dailyActiveCount = updateEndpointDailyActiveCount(
-            latestEndpointEvent,
-            lastCheckin,
-            dailyActiveCount
+        if (agentId) {
+          const { saved_objects: agentEvents } = await getLatestFleetEndpointEvent(
+            soClient,
+            agentId
           );
-          policyTracker = updateEndpointPolicyTelemetry(latestEndpointEvent, policyTracker);
+
+          // AgentEvents will have a max length of 1
+          if (agentEvents && agentEvents.length > 0) {
+            const latestEndpointEvent = agentEvents[0];
+            dailyActiveCount = updateEndpointDailyActiveCount(
+              latestEndpointEvent,
+              lastCheckin,
+              dailyActiveCount
+            );
+            policyTracker = updateEndpointPolicyTelemetry(latestEndpointEvent, policyTracker);
+          }
         }
       }
+    } catch (error) {
+      // continue with the loop if any unexpected errors happen
+      // We will not get policy specifics or 24 hour activity for this iteration of the loop
     }
   }
 

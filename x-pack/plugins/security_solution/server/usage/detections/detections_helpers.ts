@@ -23,7 +23,7 @@ interface DetectionsMetric {
 
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
 
-const initialRulesUsage: DetectionRulesUsage = {
+export const initialRulesUsage: DetectionRulesUsage = {
   custom: {
     enabled: 0,
     disabled: 0,
@@ -34,7 +34,7 @@ const initialRulesUsage: DetectionRulesUsage = {
   },
 };
 
-const initialMlJobsUsage: MlJobsUsage = {
+export const initialMlJobsUsage: MlJobsUsage = {
   custom: {
     enabled: 0,
     disabled: 0,
