@@ -9,7 +9,7 @@ def call(script, label, enableJunitProcessing = false) {
 
 def junit() {
   sh(
-    script: "/usr/local/bin/runbld --config ${env.WORKSPACE}/kibana/.ci/runbld_junit.yml -d '${pwd()}' ${env.WORKSPACE}/kibana/test/scripts/jenkins_runbld_junit.sh",
+    script: "/usr/local/bin/runbld -d '${pwd()}' ${env.WORKSPACE}/kibana/test/scripts/jenkins_runbld_junit.sh",
     label: "Process JUnit reports with runbld"
   )
 }

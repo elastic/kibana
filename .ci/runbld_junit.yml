@@ -1,4 +1,0 @@
-profiles:
-- ".*": # Match any job
-    tests:
-      junit-filename-pattern: target/junit/**/*.xml
