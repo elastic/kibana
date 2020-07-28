@@ -24,66 +24,52 @@ import { HOME_APP_BASE_PATH } from '../../../../common/constants';
 import { getServices } from '../../kibana_services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 
-interface Props {
-  defaultRoute?: string;
-}
-
-export const ChangeHomeRoute: FunctionComponent<Props> = ({ defaultRoute }) => {
-  const { uiSettings } = getServices();
-  const changeDefaultRoute = () => uiSettings.set('defaultRoute', defaultRoute);
-
-  return (
-    <EuiFlexGroup
-      className="homPageFooter"
-      alignItems="center"
-      gutterSize="s"
-      justifyContent="spaceBetween"
-    >
-      <EuiFlexItem grow={1}>
-        <EuiFlexGroup
-          className="homPageFooter__mainAction"
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="home.changeHomeRouteText"
-                  defaultMessage="Would you prefer an alternate landing page? "
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="home"
-              // onClick={changeDefaultRoute}
-              onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
-              size="xs"
-            >
+export const ChangeHomeRoute: FunctionComponent<{}> = () => (
+  <EuiFlexGroup
+    className="homPageFooter"
+    alignItems="center"
+    gutterSize="s"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem grow={1}>
+      <EuiFlexGroup
+        className="homPageFooter__mainAction"
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            <p>
               <FormattedMessage
-                id="home.changeHomeRouteLink"
-                defaultMessage="Change the landing page for this space"
+                id="home.changeHomeRouteText"
+                defaultMessage="Would you prefer an alternate landing page? "
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {/* TODO: Hook up link to app directory */}
-        <EuiButtonEmpty href={''} size="xs" flush="right" iconType="apps">
-          <FormattedMessage
-            id="home.appDirectory.appDirectoryButtonLabel"
-            defaultMessage="View app directory"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-ChangeHomeRoute.defaultProps = {
-  defaultRoute: HOME_APP_BASE_PATH,
-};
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="home"
+            onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
+            size="xs"
+          >
+            <FormattedMessage
+              id="home.changeHomeRouteLink"
+              defaultMessage="Change the landing page for this space"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      {/* TODO: Hook up link to app directory */}
+      <EuiButtonEmpty href={''} size="xs" flush="right" iconType="apps">
+        <FormattedMessage
+          id="home.appDirectory.appDirectoryButtonLabel"
+          defaultMessage="View app directory"
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
