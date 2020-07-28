@@ -6,13 +6,19 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
+import styled from 'styled-components';
 import { Ping } from '../../../../../common/runtime_types';
 import { PingRedirects } from '../../ping_list/ping_redirects';
+import { MonListDescription, MonListTitle } from './status_bar';
 
 interface Props {
   monitorStatus: Ping | null;
 }
+
+const RedirectBtn = styled.span`
+  cursor: pointer;
+`;
 
 export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
   const list = monitorStatus?.http?.response?.redirects;
@@ -20,28 +26,33 @@ export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
-    <EuiButtonEmpty
-      flush="left"
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      data-test-subj="uptimeMonitorRedirectInfo"
-    >
-      {i18n.translate('xpack.uptime.monitorList.redirects.title.number', {
-        defaultMessage: 'Heartbeat followed {number} redirects while executing ping.',
-        values: {
-          number: list?.length ?? 0,
-        },
-      })}
-    </EuiButtonEmpty>
+    <MonListDescription>
+      <RedirectBtn
+        className="euiLink euiLink--primary"
+        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        data-test-subj="uptimeMonitorRedirectInfo"
+      >
+        {i18n.translate('xpack.uptime.monitorList.redirects.title.number', {
+          defaultMessage: '{number}',
+          values: {
+            number: list?.length ?? 0,
+          },
+        })}
+      </RedirectBtn>
+    </MonListDescription>
   );
 
   return list ? (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      anchorPosition="downLeft"
-      closePopover={() => setIsPopoverOpen(false)}
-    >
-      <PingRedirects monitorStatus={monitorStatus} />
-    </EuiPopover>
+    <>
+      <MonListTitle>Redirects</MonListTitle>
+      <EuiPopover
+        button={button}
+        isOpen={isPopoverOpen}
+        anchorPosition="downLeft"
+        closePopover={() => setIsPopoverOpen(false)}
+      >
+        <PingRedirects monitorStatus={monitorStatus} />
+      </EuiPopover>
+    </>
   ) : null;
 };

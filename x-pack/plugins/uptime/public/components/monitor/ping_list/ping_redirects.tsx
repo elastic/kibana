@@ -7,35 +7,38 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { Ping } from '../../../../common/runtime_types/ping';
 
 const StyledLink = styled(EuiLink)`
   margin-right: 5px;
   margin-left: 5px;
+  display: block;
 `;
 
 interface Props {
   monitorStatus: Ping | null;
-  showDescription?: boolean;
+  showTitle?: boolean;
 }
 
-export const PingRedirects: React.FC<Props> = ({ monitorStatus, showDescription }) => {
+export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => {
   const monitorUrl = monitorStatus?.url?.full;
 
   const list = monitorStatus?.http?.response?.redirects;
 
   return list ? (
     <div data-test-subj="uptimeMonitorPingListRedirectInfo">
-      <EuiText size="xs">
-        <h3>
-          {i18n.translate('xpack.uptime.monitorList.redirects.title', {
-            defaultMessage: 'Redirects',
-          })}
-        </h3>
-      </EuiText>
+      {showTitle && (
+        <EuiText size="xs">
+          <h3>
+            {i18n.translate('xpack.uptime.monitorList.redirects.title', {
+              defaultMessage: 'Redirects',
+            })}
+          </h3>
+        </EuiText>
+      )}
       <EuiSpacer size="xs" />
-      {showDescription && (
+      {
         <EuiText>
           {i18n.translate('xpack.uptime.monitorList.redirects.description', {
             defaultMessage: 'Heartbeat followed {number} redirects while executing ping.',
@@ -44,19 +47,17 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showDescription 
             },
           })}
         </EuiText>
-      )}
+      }
       <EuiSpacer size="s" />
-      <StyledLink href={monitorUrl}>{monitorUrl}</StyledLink>
-      {list?.map((url: string) => {
-        return (
-          <div>
-            <div>
-              <EuiIcon type="sortDown" />
-            </div>
+      <EuiCodeBlock paddingSize="m">
+        <StyledLink href={monitorUrl}>{monitorUrl}</StyledLink>
+        {list?.map((url: string, ind: number) => (
+          <div key={ind}>
+            <EuiIcon type="sortDown" />
             <StyledLink href={url}>{url}</StyledLink>
           </div>
-        );
-      })}
+        ))}
+      </EuiCodeBlock>
     </div>
   ) : null;
 };

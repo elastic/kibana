@@ -82,7 +82,7 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
     <EuiFlexGroup direction="column">
       {ping?.http?.response?.redirects && (
         <EuiFlexItem>
-          <PingRedirects monitorStatus={ping} showDescription={true} />
+          <PingRedirects monitorStatus={ping} showTitle={true} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
