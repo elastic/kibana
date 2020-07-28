@@ -135,4 +135,12 @@ export const dataFrameAnalytics = {
       method: 'GET',
     });
   },
+  getAnalyticsBaseline(analyticsId, destinationIndex, predictionField) {
+    const body = JSON.stringify({ destinationIndex, predictionField });
+    return http<any>({
+      path: `${basePath()}/data_frame/analytics/baseline`,
+      method: 'POST',
+      body,
+    });
+  },
 };

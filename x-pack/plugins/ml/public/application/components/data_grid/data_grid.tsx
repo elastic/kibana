@@ -5,8 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, FC } from 'react';
-
+import React, { memo, useEffect, FC, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -24,13 +23,16 @@ import {
 } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
+import { useMlKibana } from '../../contexts/kibana/kibana_context';
 
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 
-import { INDEX_STATUS } from '../../data_frame_analytics/common';
+import { DataFrameAnalyticsConfig, INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
 import { UseIndexDataReturnType } from './types';
+import { DecisionPathPopover } from './feature_importance/decision_path_popover';
+
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
 
@@ -41,6 +43,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 );
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
+  jobConfig?: DataFrameAnalyticsConfig;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
 }
@@ -60,6 +63,7 @@ type Props = PropsWithHeader | PropsWithoutHeader;
 export const DataGrid: FC<Props> = memo(
   (props) => {
     const {
+      jobConfig,
       chartsVisible,
       chartsButtonVisible,
       columnsWithCharts,
@@ -81,6 +85,11 @@ export const DataGrid: FC<Props> = memo(
       toggleChartVisibility,
       visibleColumns,
     } = props;
+    const {
+      services: {
+        mlServices: { mlApiServices },
+      },
+    } = useMlKibana();
 
     // TODO Fix row hovering + bar highlighting
     // const getRowProps = (item: any) => {
@@ -89,6 +98,29 @@ export const DataGrid: FC<Props> = memo(
     //     onMouseLeave: () => hoveredRow$.next(null),
     //   };
     // };
+
+    const [baseline, setBaseLine] = useState();
+
+    const getAnalyticsBaseline = useCallback(async () => {
+      try {
+        const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(
+          jobConfig.id,
+          jobConfig.dest.index,
+          jobConfig.analysis.classification?.prediction_field_name ??
+            jobConfig.analysis.regression?.prediction_field_name
+        );
+        if (result?.baseline) {
+          setBaseLine(result.baseline);
+        }
+      } catch (e) {
+        // eslint-disable-next-line
+        console.error(e);
+      }
+    }, [mlApiServices, jobConfig]);
+
+    useEffect(() => {
+      getAnalyticsBaseline();
+    }, [jobConfig]);
 
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {
@@ -224,6 +256,19 @@ export const DataGrid: FC<Props> = memo(
                     ),
                   }
                 : {}),
+            }}
+            popoverContents={{
+              featureImportance: ({ cellContentsElement }) => {
+                const stringContents = cellContentsElement.textContent;
+                const parsedFIArray = stringContents ? JSON.parse(stringContents) : [];
+                return (
+                  <DecisionPathPopover
+                    analyticsId={jobConfig.id}
+                    baseline={baseline}
+                    featureImportance={parsedFIArray}
+                  />
+                );
+              },
             }}
             pagination={{
               ...pagination,

@@ -52,7 +52,6 @@ export const useExplorationResults = (
       )
     );
   }
-
   const dataGrid = useDataGrid(
     columns,
     25,

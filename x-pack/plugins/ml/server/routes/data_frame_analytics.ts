@@ -16,6 +16,7 @@ import {
   analyticsIdSchema,
   stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
+  getDataFrameAnalyticsBaselineSchema,
 } from './schemas/data_analytics_schema';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
@@ -556,6 +557,66 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         const results = await getAnalyticsAuditMessages(analyticsId);
         return response.ok({
           body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/baseline Get analytics's feature importance baseline
+   * @apiName GetDataFrameAnalyticsBaseline
+   * @apiDescription Returns the baseline for data frame analytics job.
+   *
+   * @apiSchema (params) getDataFrameAnalyticsBaselineSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/baseline',
+      validate: {
+        body: getDataFrameAnalyticsBaselineSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+      try {
+        const { destinationIndex, predictionField } = request.body;
+        const params = {
+          index: destinationIndex,
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    term: {
+                      'ml.is_training': true,
+                    },
+                  },
+                ],
+              },
+            },
+            aggs: {
+              featureImportanceBaseline: {
+                avg: {
+                  field: `ml.${predictionField}`,
+                },
+              },
+            },
+          },
+        };
+        let baseline;
+        const aggregationResult = await context.ml!.mlClient.callAsCurrentUser('search', params);
+        if (aggregationResult) {
+          baseline = aggregationResult.aggregations.featureImportanceBaseline.value;
+        }
+        return response.ok({
+          body: { baseline },
         });
       } catch (e) {
         return response.customError(wrapError(e));

@@ -181,6 +181,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DataGrid
+                jobConfig={jobConfig}
                 {...classificationData}
                 dataTestSubj="mlExplorationDataGrid"
                 toastNotifications={getToastNotifications()}
