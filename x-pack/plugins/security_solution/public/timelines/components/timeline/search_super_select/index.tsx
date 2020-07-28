@@ -4,19 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiInputPopover, EuiSelectableOption, EuiSuperSelect } from '@elastic/eui';
+import { EuiInputPopover, EuiSelectableOption, EuiFieldText } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { createGlobalStyle } from 'styled-components';
+import styled from 'styled-components';
 
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
 import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 
-const SearchTimelineSuperSelectGlobalStyle = createGlobalStyle`
-  .euiPopover__panel.euiPopover__panel-isOpen.timeline-search-super-select-popover__popoverPanel {
-    visibility: hidden;
-    z-index: 0;
+const StyledEuiFieldText = styled(EuiFieldText)`
+  padding-left: 12px;
+  padding-right: 40px;
+
+  &[readonly] {
+    cursor: pointer;
+  }
+
+  & + .euiFormControlLayoutIcons {
+    left: unset;
+    right: 12px;
   }
 `;
 
@@ -28,13 +35,6 @@ interface SearchTimelineSuperSelectProps {
   timelineType?: TimelineTypeLiteral;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
 }
-
-const basicSuperSelectOptions = [
-  {
-    value: '-1',
-    inputDisplay: i18n.DEFAULT_TIMELINE_TITLE,
-  },
-];
 
 const getBasicSelectableOptions = (timelineId: string) => [
   {
@@ -61,37 +61,22 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
     setIsPopoverOpen(false);
   }, []);
 
-  const handleOpenPopover = useCallback((e) => {
-    e.preventDefault();
+  const handleOpenPopover = useCallback(() => {
     setIsPopoverOpen(true);
   }, []);
 
   const superSelect = useMemo(
     () => (
-      // https://github.com/elastic/siem-team/issues/789
-      // EuiSuperSelect.onFocus cannot be triggered properly in Safari and Firefox
-      <a href="#" onClick={handleOpenPopover}>
-        <EuiSuperSelect
-          disabled={isDisabled}
-          options={
-            timelineId == null
-              ? basicSuperSelectOptions
-              : [
-                  {
-                    value: timelineId,
-                    inputDisplay: timelineTitle,
-                  },
-                ]
-          }
-          valueOfSelected={timelineId == null ? '-1' : timelineId}
-          itemLayoutAlign="top"
-          hasDividers={false}
-          popoverClassName="timeline-search-super-select-popover"
-          style={{ width: 398 }}
-        />
-      </a>
+      <StyledEuiFieldText
+        readOnly
+        disabled={isDisabled}
+        onFocus={handleOpenPopover}
+        onClick={handleOpenPopover}
+        value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
+        icon="arrowDown"
+      />
     ),
-    [handleOpenPopover, isDisabled, timelineId, timelineTitle]
+    [handleOpenPopover, isDisabled, timelineTitle]
   );
 
   const handleGetSelectableOptions = useCallback(
@@ -131,7 +116,6 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onTimelineChange={onTimelineChange}
         timelineType={timelineType}
       />
-      <SearchTimelineSuperSelectGlobalStyle />
     </EuiInputPopover>
   );
 };
