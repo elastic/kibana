@@ -26,47 +26,30 @@ import { createAppNavigationHandler } from '../app_navigation_handler';
 
 export const ChangeHomeRoute: FunctionComponent<{}> = () => (
   <EuiFlexGroup
-    className="homPageFooter"
+    className="homPageFooter__mainAction"
     alignItems="center"
     gutterSize="s"
-    justifyContent="spaceBetween"
+    responsive={false}
   >
-    <EuiFlexItem grow={1}>
-      <EuiFlexGroup
-        className="homPageFooter__mainAction"
-        alignItems="center"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="home.changeHomeRouteText"
-                defaultMessage="Would you prefer an alternate landing page? "
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="home"
-            onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
-            size="xs"
-          >
-            <FormattedMessage
-              id="home.changeHomeRouteLink"
-              defaultMessage="Change the landing page for this space"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" color="subdued">
+        <p>
+          <FormattedMessage
+            id="home.changeHomeRouteText"
+            defaultMessage="Would you prefer an alternate landing page? "
+          />
+        </p>
+      </EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty href="#/feature_directory" size="xs" flush="right" iconType="apps">
+      <EuiButtonEmpty
+        iconType="home"
+        onClick={createAppNavigationHandler('/app/management/kibana/settings#defaultRoute')}
+        size="xs"
+      >
         <FormattedMessage
-          id="home.appDirectory.appDirectoryButtonLabel"
-          defaultMessage="View app directory"
+          id="home.changeHomeRouteLink"
+          defaultMessage="Change the landing page for this space"
         />
       </EuiButtonEmpty>
     </EuiFlexItem>

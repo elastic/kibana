@@ -139,7 +139,7 @@ export class Home extends Component {
   };
 
   renderNormal() {
-    const { addBasePath, directories } = this.props;
+    const { addBasePath } = this.props;
 
     const devTools = this.findDirectoryById('console');
     const stackManagement = this.findDirectoryById('stack-management');
@@ -157,8 +157,6 @@ export class Home extends Component {
       'snapshot_restore',
       'index_lifecycle_management',
     ].map(this.renderDirectory);
-
-    console.log({ directories });
 
     return (
       <div className="homPageContainer">
@@ -209,13 +207,6 @@ export class Home extends Component {
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   ) : null}
-                  {/* <EuiFlexItem>
-                    <EuiButtonEmpty href="#/feature_directory" iconType="apps">
-                      {i18n.translate('home.pageHeader.appDirectoryButtonLabel', {
-                        defaultMessage: 'App directory',
-                      })}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem> */}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -289,12 +280,26 @@ export class Home extends Component {
               </Fragment>
             ) : null}
 
-            {advancedSettings && (
-              <Fragment>
-                <EuiHorizontalRule margin="xl" />
-                <ChangeHomeRoute defaultRoute={HOME_APP_BASE_PATH} />
-              </Fragment>
-            )}
+            <EuiHorizontalRule margin="xl" />
+
+            <EuiFlexGroup
+              className="homPageFooter"
+              alignItems="center"
+              gutterSize="s"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem grow={1}>
+                {advancedSettings && <ChangeHomeRoute defaultRoute={HOME_APP_BASE_PATH} />}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty href="#/feature_directory" size="xs" flush="right" iconType="apps">
+                  <FormattedMessage
+                    id="home.appDirectory.appDirectoryButtonLabel"
+                    defaultMessage="View app directory"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </main>
         </div>
       </div>
