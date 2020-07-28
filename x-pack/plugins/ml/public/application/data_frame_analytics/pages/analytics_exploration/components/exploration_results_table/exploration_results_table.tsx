@@ -36,6 +36,7 @@ import { ExplorationQueryBar } from '../exploration_query_bar';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 import { useExplorationResults } from './use_exploration_results';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 const showingDocs = i18n.translate(
   'xpack.ml.dataframe.analytics.explorationResults.documentsShownHelpText',
@@ -70,6 +71,11 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     setEvaluateSearchQuery,
     title,
   }) => {
+    const {
+      services: {
+        mlServices: { mlApiServices },
+      },
+    } = useMlKibana();
     const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
 
     useEffect(() => {
@@ -80,8 +86,10 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
       indexPattern,
       jobConfig,
       searchQuery,
-      getToastNotifications()
+      getToastNotifications(),
+      mlApiServices
     );
+
     const docFieldsCount = classificationData.columnsWithCharts.length;
     const {
       columnsWithCharts,
@@ -94,7 +102,6 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
-
     // if it's a searchBar syntax error leave the table visible so they can try again
     if (status === INDEX_STATUS.ERROR && !errorMessage.includes('failed to create query')) {
       return (
@@ -181,7 +188,6 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DataGrid
-                jobConfig={jobConfig}
                 {...classificationData}
                 dataTestSubj="mlExplorationDataGrid"
                 toastNotifications={getToastNotifications()}

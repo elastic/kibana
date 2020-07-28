@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from 'src/core/public';
 
+import { MlApiServices } from '../../../../../services/ml_api_service';
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
@@ -23,7 +24,6 @@ import {
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import {
   DEFAULT_RESULTS_FIELD,
@@ -36,8 +36,11 @@ export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: SavedSearchQuery,
-  toastNotifications: CoreSetup['notifications']['toasts']
+  toastNotifications: CoreSetup['notifications']['toasts'],
+  mlApiServices: MlApiServices
 ): UseIndexDataReturnType => {
+  const [baseline, setBaseLine] = useState();
+
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
 
@@ -109,6 +112,29 @@ export const useExplorationResults = (
     JSON.stringify([searchQuery, dataGrid.visibleColumns]),
   ]);
 
+  const getAnalyticsBaseline = useCallback(async () => {
+    try {
+      if (jobConfig) {
+        const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(
+          jobConfig.id,
+          jobConfig.dest.index,
+          jobConfig.analysis.classification?.prediction_field_name ??
+            jobConfig.analysis.regression?.prediction_field_name
+        );
+        if (result?.baseline) {
+          setBaseLine(result.baseline);
+        }
+      }
+    } catch (e) {
+      // eslint-disable-next-line
+      console.error(e);
+    }
+  }, [mlApiServices, jobConfig]);
+
+  useEffect(() => {
+    getAnalyticsBaseline();
+  }, [jobConfig]);
+
   const renderCellValue = useRenderCellValue(
     indexPattern,
     dataGrid.pagination,
@@ -119,5 +145,7 @@ export const useExplorationResults = (
   return {
     ...dataGrid,
     renderCellValue,
+    baseline,
+    analyticsId: jobConfig.id,
   };
 };
