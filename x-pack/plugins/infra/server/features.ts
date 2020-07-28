@@ -25,7 +25,11 @@ export const METRICS_FEATURE = {
   alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
   privileges: {
     all: {
+<<<<<<< HEAD
       app: ['infra', 'metrics', 'kibana'],
+=======
+      app: ['infra', 'kibana'],
+>>>>>>> Fixed merge conflict
       catalogue: ['infraops', 'metrics'],
       api: ['infra'],
       savedObject: {
@@ -41,7 +45,11 @@ export const METRICS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
+<<<<<<< HEAD
       app: ['infra', 'metrics', 'kibana'],
+=======
+      app: ['infra', 'kibana'],
+>>>>>>> Fixed merge conflict
       catalogue: ['infraops', 'metrics'],
       api: ['infra'],
       savedObject: {
