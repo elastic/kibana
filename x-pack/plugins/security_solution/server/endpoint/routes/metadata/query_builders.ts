@@ -88,7 +88,7 @@ function buildQueryBody(
   const filterUnenrolledAgents =
     unerolledAgentIds && unerolledAgentIds.length > 0
       ? {
-          must: {
+          must_not: {
             terms: {
               'elastic.agent.id': unerolledAgentIds,
             },
@@ -98,7 +98,7 @@ function buildQueryBody(
   const filterStatusAgents =
     statusAgentIDs && statusAgentIDs.length > 0
       ? {
-          must_not: {
+          must: {
             terms: {
               'elastic.agent.id': statusAgentIDs,
             },
