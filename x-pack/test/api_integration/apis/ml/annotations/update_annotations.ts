@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   }));
   const jobIds = testSetupJobConfigs.map((j) => j.job_id);
 
-  const createAnnotationRequestBody = (jobId) => {
+  const createAnnotationRequestBody = (jobId: string) => {
     return {
       timestamp: Date.now(),
       end_timestamp: Date.now(),
@@ -103,12 +103,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.result).to.eql('updated');
 
       const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
-      expect(updatedAnnotation.annotation).to.eql(annotationUpdateRequestBody.annotation);
-      expect(updatedAnnotation.detector_index).to.eql(annotationUpdateRequestBody.detector_index);
-      expect(updatedAnnotation.event).to.eql(annotationUpdateRequestBody.event);
-      expect(updatedAnnotation.partition_field_value).to.eql(
-        annotationUpdateRequestBody.partition_field_value
-      );
+      expect(updatedAnnotation?.annotation).to.eql(annotationUpdateRequestBody.annotation);
+      expect(updatedAnnotation?.detector_index).to.eql(annotationUpdateRequestBody.detector_index);
+      expect(updatedAnnotation?.event).to.eql(annotationUpdateRequestBody.event);
     });
 
     it('should correctly update annotation for user with viewer permission', async () => {
@@ -137,12 +134,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.result).to.eql('updated');
 
       const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
-      expect(updatedAnnotation.annotation).to.eql(annotationUpdateRequestBody.annotation);
-      expect(updatedAnnotation.detector_index).to.eql(annotationUpdateRequestBody.detector_index);
-      expect(updatedAnnotation.event).to.eql(annotationUpdateRequestBody.event);
-      expect(updatedAnnotation.partition_field_value).to.eql(
-        originalAnnotation.partition_field_value
-      );
+      expect(updatedAnnotation?.annotation).to.eql(annotationUpdateRequestBody.annotation);
+      expect(updatedAnnotation?.detector_index).to.eql(annotationUpdateRequestBody.detector_index);
+      expect(updatedAnnotation?.event).to.eql(annotationUpdateRequestBody.event);
     });
 
     it('should not update annotation for unauthorized user', async () => {

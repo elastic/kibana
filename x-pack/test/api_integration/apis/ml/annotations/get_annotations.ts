@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
   }));
   const jobIds = testSetupJobConfigs.map((j) => j.job_id);
 
-  const createAnnotationRequestBody = (jobId) => {
+  const createAnnotationRequestBody = (jobId: string) => {
     return {
       timestamp: Date.now(),
       end_timestamp: Date.now(),

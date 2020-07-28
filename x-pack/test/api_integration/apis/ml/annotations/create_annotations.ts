@@ -72,11 +72,11 @@ export default ({ getService }: FtrProviderContext) => {
       const annotationId = body._id;
 
       const fetchedAnnotation = await ml.api.getAnnotationById(annotationId);
-      expect(fetchedAnnotation.annotation).to.eql(annotationRequestBody.annotation);
-      expect(fetchedAnnotation.job_id).to.eql(annotationRequestBody.job_id);
-      expect(fetchedAnnotation.event).to.eql(annotationRequestBody.event);
-      expect(fetchedAnnotation.user).to.eql(annotationRequestBody.user);
-      expect(fetchedAnnotation.create_username).to.eql(USER.ML_POWERUSER);
+      expect(fetchedAnnotation).to.not.be(undefined);
+      expect(fetchedAnnotation?.annotation).to.eql(annotationRequestBody.annotation);
+      expect(fetchedAnnotation?.job_id).to.eql(annotationRequestBody.job_id);
+      expect(fetchedAnnotation?.event).to.eql(annotationRequestBody.event);
+      expect(fetchedAnnotation?.create_username).to.eql(USER.ML_POWERUSER);
     });
 
     it('should successfully create annotation for user without required permission', async () => {
@@ -88,11 +88,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       const annotationId = body._id;
       const fetchedAnnotation = await ml.api.getAnnotationById(annotationId);
-      expect(fetchedAnnotation.annotation).to.eql(annotationRequestBody.annotation);
-      expect(fetchedAnnotation.job_id).to.eql(annotationRequestBody.job_id);
-      expect(fetchedAnnotation.event).to.eql(annotationRequestBody.event);
-      expect(fetchedAnnotation.user).to.eql(annotationRequestBody.user);
-      expect(fetchedAnnotation.create_username).to.eql(USER.ML_VIEWER);
+      expect(fetchedAnnotation).to.not.be(undefined);
+      expect(fetchedAnnotation?.annotation).to.eql(annotationRequestBody.annotation);
+      expect(fetchedAnnotation?.job_id).to.eql(annotationRequestBody.job_id);
+      expect(fetchedAnnotation?.event).to.eql(annotationRequestBody.event);
+      expect(fetchedAnnotation?.create_username).to.eql(USER.ML_VIEWER);
     });
 
     it('should not allow to create annotation for unauthorized user', async () => {

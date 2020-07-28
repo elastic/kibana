@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { IndexDocumentParams } from 'elasticsearch';
 import { Calendar, CalendarEvent } from '../../../../plugins/ml/server/models/calendar/index';
 import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
@@ -17,7 +18,16 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../../plugins/ml/common/constants/index_patterns';
-import { IndexParams } from '../../../../plugins/ml/server/models/annotation_service/annotation';
+
+interface EsIndexResult {
+  _index: string;
+  _id: string;
+  _version: number;
+  result: string;
+  _shards: any;
+  _seq_no: number;
+  _primary_term: number;
+}
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
@@ -644,7 +654,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async getAnnotations(jobId: string) {
       log.debug(`Fetching annotations for job '${jobId}'...`);
 
-      const results = await es.search({
+      const results = await es.search<Annotation>({
         index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
         body: {
           size: 1,
@@ -660,7 +670,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return results.hits.hits;
     },
 
-    async getAnnotationById(annotationId: string) {
+    async getAnnotationById(annotationId: string): Promise<Annotation | undefined> {
       log.debug(`Fetching annotation '${annotationId}'...`);
 
       const result = await es.search({
@@ -674,21 +684,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           },
         },
       });
+      // @ts-ignore due to outdated type for hits.total
       if (result.hits.total.value === 1) {
-        return result?.hits?.hits[0]?._source;
+        return result?.hits?.hits[0]?._source as Annotation;
       }
       return undefined;
     },
 
     async indexAnnotation(annotationRequestBody: Annotation) {
       log.debug(`Indexing annotation '${JSON.stringify(annotationRequestBody)}'...`);
-      const params: IndexParams = {
+      // @ts-ignore due to outdated type for IndexDocumentParams.type
+      const params: IndexDocumentParams<Annotation> = {
         index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
         body: annotationRequestBody,
         refresh: 'wait_for',
       };
-      const results = await es.index(params);
-
+      const results: EsIndexResult = await es.index(params);
       await this.waitForAnnotationToExist(results._id);
       return results;
     },
