@@ -14,24 +14,26 @@ export async function findAgentIDsByStatus(
   soClient: SavedObjectsClientContract,
   status: string[],
   pageSize: number = 1000
-): Promise<string[]> {
-  const helpers = status
-    .map((s) => {
-      switch (s) {
-        case 'online':
-          return AgentStatusKueryHelper.buildKueryForOnlineAgents();
-        case 'enrolling':
-          return AgentStatusKueryHelper.buildKueryForEnrollingAgents();
-        case 'offline':
-          return AgentStatusKueryHelper.buildKueryForOfflineAgents();
-        case 'error':
-          return AgentStatusKueryHelper.buildKueryForErrorAgents();
-        case 'unenrolling':
-          return AgentStatusKueryHelper.buildKueryForUnenrollingAgents();
-      }
-      return '';
-    })
-    .filter((s) => s.length);
+): Promise<string[] | undefined> {
+  const helpers = status.map((s) => {
+    switch (s) {
+      case 'online':
+        return AgentStatusKueryHelper.buildKueryForOnlineAgents();
+      case 'enrolling':
+        return AgentStatusKueryHelper.buildKueryForEnrollingAgents();
+      case 'offline':
+        return AgentStatusKueryHelper.buildKueryForOfflineAgents();
+      case 'error':
+        return AgentStatusKueryHelper.buildKueryForErrorAgents();
+      case 'unenrolling':
+        return AgentStatusKueryHelper.buildKueryForUnenrollingAgents();
+    }
+    return 'INVALID';
+  });
+
+  if (helpers.indexOf('INVALID') !== -1) {
+    return undefined;
+  }
 
   const searchOptions = (pageNum: number) => {
     return {

@@ -115,6 +115,9 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
               req.body?.agent_status
             )
           : null;
+        if (statusIDs === undefined) {
+          return res.badRequest({ body: 'invalid status' });
+        }
 
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
