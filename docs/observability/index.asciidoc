@@ -3,14 +3,14 @@
 [[observability]]
 = Observability
 
-Observability in {kib} enables you to add and monitor your logs, system
+Observability enables you to add and monitor your logs, system
 metrics, uptime data, and application traces, as a single stack. 
 
-On the *Observability Overview* page you have:
+With *Observability*, you have:
 
 * A central place to add and configure your data sources.
 * A variety of charts displaying analytics relating to each data source.
-* *View in app* options to drill-down and anaylze data in the {logs-app}, {metrics-app}, {uptime-app}, and the APM app. 
+* *View in app* options to drill down and analyze data in the {logs-app}, {metrics-app}, {uptime-app}, and the APM app. 
 * An alerts chart to keep you informed of any issues that you may need to resolve quickly.
 
 [role="screenshot"]
