@@ -24,7 +24,7 @@ import styled from 'styled-components';
 import { AgentConfig, AgentConfigDetailsDeployAgentAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { useGetOneAgentConfig, useLink, useBreadcrumbs, useCore } from '../../../hooks';
-import { Loading } from '../../../components';
+import { Loading, Error } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { LinkedAgentCount, AgentConfigActionMenu } from '../components';
@@ -76,14 +76,18 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText className="eui-textBreakWord">
             <h1>
-              {(agentConfig && agentConfig.name) || (
-                <FormattedMessage
-                  id="xpack.ingestManager.configDetails.configDetailsTitle"
-                  defaultMessage="Config '{id}'"
-                  values={{
-                    id: configId,
-                  }}
-                />
+              {isLoading ? (
+                <Loading size="xxl" />
+              ) : (
+                (agentConfig && agentConfig.name) || (
+                  <FormattedMessage
+                    id="xpack.ingestManager.configDetails.configDetailsTitle"
+                    defaultMessage="Config '{id}'"
+                    values={{
+                      id: configId,
+                    }}
+                  />
+                )
               )}
             </h1>
           </EuiText>
@@ -99,7 +103,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         ) : null}
       </EuiFlexGroup>
     ),
-    [getHref, agentConfig, configId]
+    [getHref, isLoading, agentConfig, configId]
   );
 
   const enrollmentCancelClickHandler = useCallback(() => {
@@ -109,97 +113,98 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   }, [routeState, navigateToApp]);
 
   const headerRightContent = useMemo(
-    () => (
-      <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
-        {[
-          {
-            label: i18n.translate('xpack.ingestManager.configDetails.summary.revision', {
-              defaultMessage: 'Revision',
-            }),
-            content: agentConfig?.revision ?? 0,
-          },
-          { isDivider: true },
-          {
-            label: i18n.translate('xpack.ingestManager.configDetails.summary.package_configs', {
-              defaultMessage: 'Integrations',
-            }),
-            content: (
-              <EuiI18nNumber
-                value={
-                  (agentConfig &&
-                    agentConfig.package_configs &&
-                    agentConfig.package_configs.length) ||
-                  0
-                }
-              />
-            ),
-          },
-          { isDivider: true },
-          {
-            label: i18n.translate('xpack.ingestManager.configDetails.summary.usedBy', {
-              defaultMessage: 'Used by',
-            }),
-            content: (
-              <LinkedAgentCount
-                count={(agentStatus && agentStatus.total) || 0}
-                agentConfigId={(agentConfig && agentConfig.id) || ''}
-              />
-            ),
-          },
-          { isDivider: true },
-          {
-            label: i18n.translate('xpack.ingestManager.configDetails.summary.lastUpdated', {
-              defaultMessage: 'Last updated on',
-            }),
-            content:
-              (agentConfig && (
-                <FormattedDate
-                  value={agentConfig?.updated_at}
-                  year="numeric"
-                  month="short"
-                  day="2-digit"
+    () =>
+      agentConfig ? (
+        <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
+          {[
+            {
+              label: i18n.translate('xpack.ingestManager.configDetails.summary.revision', {
+                defaultMessage: 'Revision',
+              }),
+              content: agentConfig?.revision ?? 0,
+            },
+            { isDivider: true },
+            {
+              label: i18n.translate('xpack.ingestManager.configDetails.summary.package_configs', {
+                defaultMessage: 'Integrations',
+              }),
+              content: (
+                <EuiI18nNumber
+                  value={
+                    (agentConfig &&
+                      agentConfig.package_configs &&
+                      agentConfig.package_configs.length) ||
+                    0
+                  }
                 />
-              )) ||
-              '',
-          },
-          { isDivider: true },
-          {
-            content: agentConfig && (
-              <AgentConfigActionMenu
-                config={agentConfig}
-                fullButton={true}
-                onCopySuccess={(newAgentConfig: AgentConfig) => {
-                  history.push(getPath('configuration_details', { configId: newAgentConfig.id }));
-                }}
-                enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
-                onCancelEnrollment={
-                  routeState && routeState.onDoneNavigateTo
-                    ? enrollmentCancelClickHandler
-                    : undefined
-                }
-              />
-            ),
-          },
-        ].map((item, index) => (
-          <EuiFlexItem grow={false} key={index}>
-            {item.isDivider ?? false ? (
-              <Divider />
-            ) : item.label ? (
-              <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
-                <EuiDescriptionListTitle className="eui-textNoWrap">
-                  {item.label}
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription className="eui-textNoWrap">
-                  {item.content}
-                </EuiDescriptionListDescription>
-              </EuiDescriptionList>
-            ) : (
-              item.content
-            )}
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    ),
+              ),
+            },
+            { isDivider: true },
+            {
+              label: i18n.translate('xpack.ingestManager.configDetails.summary.usedBy', {
+                defaultMessage: 'Used by',
+              }),
+              content: (
+                <LinkedAgentCount
+                  count={(agentStatus && agentStatus.total) || 0}
+                  agentConfigId={(agentConfig && agentConfig.id) || ''}
+                />
+              ),
+            },
+            { isDivider: true },
+            {
+              label: i18n.translate('xpack.ingestManager.configDetails.summary.lastUpdated', {
+                defaultMessage: 'Last updated on',
+              }),
+              content:
+                (agentConfig && (
+                  <FormattedDate
+                    value={agentConfig?.updated_at}
+                    year="numeric"
+                    month="short"
+                    day="2-digit"
+                  />
+                )) ||
+                '',
+            },
+            { isDivider: true },
+            {
+              content: agentConfig && (
+                <AgentConfigActionMenu
+                  config={agentConfig}
+                  fullButton={true}
+                  onCopySuccess={(newAgentConfig: AgentConfig) => {
+                    history.push(getPath('configuration_details', { configId: newAgentConfig.id }));
+                  }}
+                  enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
+                  onCancelEnrollment={
+                    routeState && routeState.onDoneNavigateTo
+                      ? enrollmentCancelClickHandler
+                      : undefined
+                  }
+                />
+              ),
+            },
+          ].map((item, index) => (
+            <EuiFlexItem grow={false} key={index}>
+              {item.isDivider ?? false ? (
+                <Divider />
+              ) : item.label ? (
+                <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
+                  <EuiDescriptionListTitle className="eui-textNoWrap">
+                    {item.label}
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription className="eui-textNoWrap">
+                    {item.content}
+                  </EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              ) : (
+                item.content
+              )}
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ) : null,
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [agentConfig, configId, agentStatus]
   );
@@ -225,45 +230,44 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     ];
   }, [getHref, configId, tabId]);
 
-  if (redirectToAgentConfigList) {
-    return <Redirect to="/" />;
-  }
+  const content = useMemo(() => {
+    if (redirectToAgentConfigList) {
+      return <Redirect to="/" />;
+    }
 
-  if (isLoading) {
-    return <Loading />;
-  }
+    if (isLoading) {
+      return <Loading />;
+    }
 
-  if (error) {
-    return (
-      <WithHeaderLayout>
-        <EuiCallOut
+    if (error) {
+      return (
+        <Error
           title={i18n.translate('xpack.ingestManager.configDetails.unexceptedErrorTitle', {
             defaultMessage: 'An error happened while loading the config',
           })}
-          color="danger"
-          iconType="alert"
-        >
-          <p>
-            <EuiText>{error.message}</EuiText>
-          </p>
-        </EuiCallOut>
-      </WithHeaderLayout>
-    );
-  }
-
-  if (!agentConfig) {
-    return (
-      <WithHeaderLayout>
-        <FormattedMessage
-          id="xpack.ingestManager.configDetails.configNotFoundErrorTitle"
-          defaultMessage="Config '{id}' not found"
-          values={{
-            id: configId,
-          }}
+          error={error}
         />
-      </WithHeaderLayout>
-    );
-  }
+      );
+    }
+
+    if (!agentConfig) {
+      return (
+        <Error
+          title={i18n.translate('xpack.ingestManager.configDetails.unexceptedErrorTitle', {
+            defaultMessage: 'An error happened while loading the config',
+          })}
+          error={i18n.translate('xpack.ingestManager.configDetails.configNotFoundErrorTitle', {
+            defaultMessage: "Config '{id}' not found",
+            values: {
+              id: configId,
+            },
+          })}
+        />
+      );
+    }
+
+    return <AgentConfigDetailsContent agentConfig={agentConfig} />;
+  }, [agentConfig, configId, error, isLoading, redirectToAgentConfigList]);
 
   return (
     <ConfigRefreshContext.Provider value={{ refresh: refreshAgentConfig }}>
@@ -273,7 +277,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           rightColumn={headerRightContent}
           tabs={(headerTabs as unknown) as EuiTabProps[]}
         >
-          <AgentConfigDetailsContent agentConfig={agentConfig} />
+          {content}
         </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>
     </ConfigRefreshContext.Provider>
