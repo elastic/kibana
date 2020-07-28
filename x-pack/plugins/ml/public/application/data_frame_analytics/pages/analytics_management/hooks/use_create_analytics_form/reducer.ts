@@ -548,6 +548,7 @@ export function reducer(state: State, action: Action): State {
         ...state,
         advancedEditorRawString: JSON.stringify(jobConfig, null, 2),
         isAdvancedEditorEnabled: true,
+        hasSwitchedToEditor: true,
         jobConfig,
       });
 
