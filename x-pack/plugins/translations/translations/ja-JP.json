@@ -8177,8 +8177,6 @@
     "xpack.ingestManager.editPackageConfig.updatedNotificationTitle": "正常に'{packageConfigName}'を更新しました",
     "xpack.ingestManager.enrollemntAPIKeyList.emptyMessage": "登録トークンが見つかりません。",
     "xpack.ingestManager.enrollemntAPIKeyList.loadingTokensMessage": "登録トークンを読み込んでいます...",
-    "xpack.ingestManager.enrollmentInstructions.copyButton": "コマンドをコピー",
-    "xpack.ingestManager.enrollmentInstructions.descriptionText": "エージェントのディレクトリから、これらのコマンドを実行して、Elasticエージェントを登録して起動します。{enrollCommand}はエージェントの構成ファイルに書き込み、正しい設定になるようにします。このコマンドを使用すると、複数のホストでエージェントを設定できます。",
     "xpack.ingestManager.enrollmentStepAgentConfig.configSelectAriaLabel": "エージェント構成",
     "xpack.ingestManager.enrollmentStepAgentConfig.configSelectLabel": "エージェント構成",
     "xpack.ingestManager.enrollmentStepAgentConfig.enrollmentTokenSelectLabel": "登録トークン",
