@@ -42,7 +42,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
 
   return (
     <div style={{ width: 300, height: 200 }}>
-      <EuiTabs display="condensed">
+      <EuiTabs>
         {tabs.map((tab) => (
           <EuiTab
             isSelected={tab.id === selectedTabId}

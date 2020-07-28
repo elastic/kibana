@@ -18,7 +18,6 @@ import {
   LineAnnotationDatum,
 } from '@elastic/charts';
 import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
 const style = {
@@ -82,14 +81,6 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
 
   return (
     <div style={{ width: 300, height: mappedFeatureImportance.length * 75 }}>
-      {baseline && (
-        <div>
-          {i18n.translate('xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline', {
-            defaultMessage: 'Baseline: {baseline}',
-            values: { baseline: baseline?.toFixed(3) },
-          })}
-        </div>
-      )}
       <Chart className="story-chart">
         <Settings rotation={90} />
         {baseline && (
