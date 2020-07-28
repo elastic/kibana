@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment-timezone';
-import React, { useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import {
   EuiDataGridCellValueElementProps,

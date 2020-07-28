@@ -135,7 +135,7 @@ export const dataFrameAnalytics = {
       method: 'GET',
     });
   },
-  getAnalyticsBaseline(analyticsId, destinationIndex, predictionField) {
+  getAnalyticsBaseline(analyticsId: string, destinationIndex: string, predictionField?: string) {
     const body = JSON.stringify({ destinationIndex, predictionField });
     return http<any>({
       path: `${basePath()}/data_frame/analytics/baseline`,

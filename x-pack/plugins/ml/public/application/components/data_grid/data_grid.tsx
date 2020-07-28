@@ -25,7 +25,7 @@ import {
 import { CoreSetup } from 'src/core/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 
-import { DataFrameAnalyticsConfig, INDEX_STATUS } from '../../data_frame_analytics/common';
+import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
 import { euiDataGridStyle, euiDataGridToolbarSettings } from './common';
 import { UseIndexDataReturnType } from './types';
@@ -41,7 +41,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 );
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
-  jobConfig?: DataFrameAnalyticsConfig;
+  baseline?: number;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
 }
@@ -62,7 +62,6 @@ export const DataGrid: FC<Props> = memo(
   (props) => {
     const {
       baseline,
-      analyticsId,
       chartsVisible,
       chartsButtonVisible,
       columnsWithCharts,
@@ -232,11 +231,7 @@ export const DataGrid: FC<Props> = memo(
                 const stringContents = cellContentsElement.textContent;
                 const parsedFIArray = stringContents ? JSON.parse(stringContents) : [];
                 return (
-                  <DecisionPathPopover
-                    analyticsId={analyticsId}
-                    baseline={baseline}
-                    featureImportance={parsedFIArray}
-                  />
+                  <DecisionPathPopover baseline={baseline} featureImportance={parsedFIArray} />
                 );
               },
             }}

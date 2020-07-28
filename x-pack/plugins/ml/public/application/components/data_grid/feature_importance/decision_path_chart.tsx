@@ -76,8 +76,8 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
     ]);
   }
 
-  const maxDomain = _.maxBy(featureImportance, (d) => d[1]);
-  const minDomain = _.minBy(featureImportance, (d) => d[1]);
+  const maxDomain = _.maxBy(mappedFeatureImportance, (d) => d[1]);
+  const minDomain = _.minBy(mappedFeatureImportance, (d) => d[1]);
 
   return (
     <div style={{ width: 300, height: mappedFeatureImportance.length * 75 }}>

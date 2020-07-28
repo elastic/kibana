@@ -74,6 +74,7 @@ export interface UseIndexDataReturnType
     | 'tableItems'
     | 'toggleChartVisibility'
     | 'visibleColumns'
+    | 'baseline'
   > {
   renderCellValue: RenderCellValue;
 }
@@ -105,4 +106,5 @@ export interface UseDataGridReturnType {
   tableItems: DataGridItem[];
   toggleChartVisibility: () => void;
   visibleColumns: ColumnId[];
+  baseline?: number;
 }

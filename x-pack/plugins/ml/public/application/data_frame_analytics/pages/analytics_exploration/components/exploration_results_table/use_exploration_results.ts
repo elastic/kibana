@@ -24,7 +24,12 @@ import {
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
+import {
+  getIndexData,
+  getIndexFields,
+  DataFrameAnalyticsConfig,
+  getPredictionFieldName,
+} from '../../../../common';
 import {
   DEFAULT_RESULTS_FIELD,
   FEATURE_IMPORTANCE,
@@ -114,12 +119,11 @@ export const useExplorationResults = (
 
   const getAnalyticsBaseline = useCallback(async () => {
     try {
-      if (jobConfig) {
+      if (jobConfig !== undefined && jobConfig.analysis !== undefined) {
         const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(
           jobConfig.id,
           jobConfig.dest.index,
-          jobConfig.analysis.classification?.prediction_field_name ??
-            jobConfig.analysis.regression?.prediction_field_name
+          getPredictionFieldName(jobConfig.analysis)
         );
         if (result?.baseline) {
           setBaseLine(result.baseline);
@@ -146,6 +150,5 @@ export const useExplorationResults = (
     ...dataGrid,
     renderCellValue,
     baseline,
-    analyticsId: jobConfig.id,
   };
 };
