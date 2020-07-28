@@ -25,8 +25,14 @@ import { installTemplates } from '../elasticsearch/template/install';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines, deletePipelines } from '../elasticsearch/ingest_pipeline/';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
-import { installKibanaAssets } from '../kibana/assets/install';
+import {
+  installKibanaAssets,
+  getKibanaAssets,
+  toAssetReference,
+  ArchiveAsset,
+} from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
+import { deleteKibanaSavedObjectsAssets } from './remove';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -124,12 +130,23 @@ export async function installPackage(options: {
       toSaveESIndexPatterns,
     });
   }
-
   const installIndexPatternPromise = installIndexPatterns(savedObjectsClient, pkgName, pkgVersion);
+  const kibanaAssets = await getKibanaAssets(paths);
+  if (installedPkg)
+    await deleteKibanaSavedObjectsAssets(
+      savedObjectsClient,
+      installedPkg.attributes.installed_kibana
+    );
+  // save new kibana refs before installing the assets
+  const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
+    savedObjectsClient,
+    pkgName,
+    kibanaAssets
+  );
   const installKibanaAssetsPromise = installKibanaAssets({
     savedObjectsClient,
     pkgName,
-    paths,
+    kibanaAssets,
     isUpdate,
   });
 
@@ -169,21 +186,16 @@ export async function installPackage(options: {
     );
   }
 
-  // get template refs to save
   const installedTemplateRefs = installedTemplates.map((template) => ({
     id: template.templateName,
     type: ElasticsearchAssetType.indexTemplate,
   }));
 
-  const [installedKibanaAssets] = await Promise.all([
-    installKibanaAssetsPromise,
-    installIndexPatternPromise,
-  ]);
+  await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
 
-  await saveInstalledKibanaRefs(savedObjectsClient, pkgName, installedKibanaAssets);
   // update to newly installed version when all assets are successfully installed
   if (isUpdate) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
-  return [...installedKibanaAssets, ...installedPipelines, ...installedTemplateRefs];
+  return [...installedKibanaAssetsRefs, ...installedPipelines, ...installedTemplateRefs];
 }
 const updateVersion = async (
   savedObjectsClient: SavedObjectsClientContract,
@@ -230,15 +242,16 @@ export async function createInstallation(options: {
   return [...installedKibana, ...installedEs];
 }
 
-export const saveInstalledKibanaRefs = async (
+export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  installedAssets: KibanaAssetReference[]
+  kibanaAssets: ArchiveAsset[]
 ) => {
+  const assetRefs = kibanaAssets.map(toAssetReference);
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_kibana: installedAssets,
+    installed_kibana: assetRefs,
   });
-  return installedAssets;
+  return assetRefs;
 };
 
 export const saveInstalledEsRefs = async (

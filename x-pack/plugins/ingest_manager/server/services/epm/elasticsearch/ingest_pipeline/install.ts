@@ -21,6 +21,9 @@ interface RewriteSubstitution {
   templateFunction: string;
 }
 
+interface DatasetByKey {
+  [key: string]: Dataset;
+}
 export const installPipelines = async (
   registryPackage: RegistryPackage,
   paths: string[],
@@ -31,25 +34,39 @@ export const installPipelines = async (
   // it can be created pointing to the new template, without removing the old one and effecting data
   // so do not remove the currently installed pipelines here
   const datasets = registryPackage.datasets;
+  if (!datasets?.length) return [];
+  const datasetsByKey = datasets.reduce<DatasetByKey>((acc, dataset) => {
+    acc[dataset.name] = dataset;
+    return acc;
+  }, {});
   const pipelinePaths = paths.filter((path) => isPipeline(path));
-  if (datasets) {
-    const pipelines = datasets.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataset) => {
-      if (dataset.ingest_pipeline) {
-        acc.push(
-          installPipelinesForDataset({
-            dataset,
-            callCluster,
-            paths: pipelinePaths,
-            pkgVersion: registryPackage.version,
-          })
-        );
-      }
-      return acc;
-    }, []);
-    const pipelinesToSave = await Promise.all(pipelines).then((results) => results.flat());
-    return saveInstalledEsRefs(savedObjectsClient, registryPackage.name, pipelinesToSave);
-  }
-  return [];
+  const pipelineParts = pipelinePaths.map((path) => Registry.pathParts(path));
+  const pipelineRefs = pipelineParts.reduce<EsAssetReference[]>((acc, parts) => {
+    if (!parts.dataset) return acc;
+    const dataset = datasetsByKey[`${registryPackage.name}.${parts.dataset}`];
+    acc.push({
+      id: `${dataset.type}-${dataset.name}-${registryPackage.version}`,
+      type: ElasticsearchAssetType.ingestPipeline,
+    });
+    return acc;
+  }, []);
+  await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, pipelineRefs);
+
+  // TODO: refactor, no need to loop through every pipeline path per dataset
+  const pipelines = datasets.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataset) => {
+    if (dataset.ingest_pipeline) {
+      acc.push(
+        installPipelinesForDataset({
+          dataset,
+          callCluster,
+          paths: pipelinePaths,
+          pkgVersion: registryPackage.version,
+        })
+      );
+    }
+    return acc;
+  }, []);
+  return await Promise.all(pipelines).then((results) => results.flat());
 };
 
 export function rewriteIngestPipeline(
