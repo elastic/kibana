@@ -76,18 +76,14 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText className="eui-textBreakWord">
             <h1>
-              {isLoading ? (
-                <Loading size="xxl" />
-              ) : (
-                (agentConfig && agentConfig.name) || (
-                  <FormattedMessage
-                    id="xpack.ingestManager.configDetails.configDetailsTitle"
-                    defaultMessage="Config '{id}'"
-                    values={{
-                      id: configId,
-                    }}
-                  />
-                )
+              {(agentConfig && agentConfig.name) || (
+                <FormattedMessage
+                  id="xpack.ingestManager.configDetails.configDetailsTitle"
+                  defaultMessage="Config '{id}'"
+                  values={{
+                    id: configId,
+                  }}
+                />
               )}
             </h1>
           </EuiText>
@@ -103,7 +99,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         ) : null}
       </EuiFlexGroup>
     ),
-    [getHref, isLoading, agentConfig, configId]
+    [getHref, agentConfig, configId]
   );
 
   const enrollmentCancelClickHandler = useCallback(() => {
