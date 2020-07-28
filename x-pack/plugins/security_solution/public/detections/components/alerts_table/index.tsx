@@ -116,7 +116,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const [addExceptionModalState, setAddExceptionModalState] = useState<AddExceptionModalBaseProps>(
     addExceptionModalInitialState
   );
-  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
+  const [{ browserFields, indexPatterns, isLoading: indexPatternsLoading }] = useFetchIndexPatterns(
     signalsIndex !== '' ? [signalsIndex] : [],
     'alerts_table'
   );
@@ -434,7 +434,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     closeAddExceptionModal,
   ]);
 
-  if (loading || isEmpty(signalsIndex)) {
+  if (loading || indexPatternsLoading || isEmpty(signalsIndex)) {
     return (
       <EuiPanel>
         <HeaderSection title="" />
