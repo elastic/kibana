@@ -117,18 +117,16 @@ export const schema: FormSchema = {
         },
       ],
     },
-    mapping: {
-      type: FIELD_TYPES.TEXT,
-    },
+    mapping: {},
+    isMappingChecked: {},
   },
   riskScore: {
     value: {
       type: FIELD_TYPES.RANGE,
       serializer: (input: string) => Number(input),
     },
-    mapping: {
-      type: FIELD_TYPES.TEXT,
-    },
+    mapping: {},
+    isMappingChecked: {},
   },
   references: {
     label: i18n.translate(
