@@ -73,15 +73,18 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   }, [deleteResult, fetchLists]);
 
   const handleExport = useCallback(
-    ({ id }: { id: string }) => {
-      setExportingListIds((ids) => [...ids, id]);
-      exportList({ http, listId: id, signal: new AbortController().signal })
-        .then((blob) => {
-          setExportDownload({ name: id, blob });
-        })
-        .finally(() => setExportingListIds((ids) => [...ids.filter((_id) => _id !== id)]));
+    async ({ id }: { id: string }) => {
+      try {
+        setExportingListIds((ids) => [...ids, id]);
+        const blob = await exportList({ http, listId: id, signal: new AbortController().signal });
+        setExportDownload({ name: id, blob });
+      } catch (error) {
+        addError(error, { title: i18n.EXPORT_ERROR });
+      } finally {
+        setExportingListIds((ids) => [...ids.filter((_id) => _id !== id)]);
+      }
     },
-    [http]
+    [addError, http]
   );
 
   const handleTableChange = useCallback(
