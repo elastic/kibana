@@ -11,4 +11,5 @@ export { TestConfigContextProvider, useTestConfigContext, TestConfig } from './t
 export {
   PipelineProcessorsContextProvider,
   usePipelineProcessorsContext,
+  Props,
 } from './processors_context';

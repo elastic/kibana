@@ -3,8 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { setup, SetupResult } from './pipeline_processors_editor.helpers';
+
+import { notificationServiceMock } from 'src/core/public/mocks';
 import { Pipeline } from '../../../../../common/types';
+import { apiService } from '../../../services';
+import { setup, SetupResult } from './pipeline_processors_editor.helpers';
 
 const testProcessors: Pick<Pipeline, 'processors'> = {
   processors: [
@@ -46,6 +49,8 @@ describe('Pipeline Editor', () => {
       links: {
         esDocsBasePath: 'test',
       },
+      toasts: notificationServiceMock.createSetupContract().toasts,
+      api: apiService,
     });
   });
 

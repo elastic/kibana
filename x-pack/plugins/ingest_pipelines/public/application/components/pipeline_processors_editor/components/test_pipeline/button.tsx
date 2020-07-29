@@ -20,7 +20,7 @@ export const TestPipelineButton: FunctionComponent = () => {
     <FlyoutProvider>
       {(openFlyout) => {
         return (
-          <EuiButton size="s" onClick={openFlyout}>
+          <EuiButton size="s" onClick={openFlyout} data-test-subj="testPipelineButton">
             {i18nTexts.buttonLabel}
           </EuiButton>
         );

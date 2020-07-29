@@ -26,15 +26,17 @@ export const ProcessorsEditorContextProvider: FunctionComponent<Props> = ({
   onFlyoutOpen,
 }: Props) => {
   return (
-    <PipelineProcessorsContextProvider
-      onFlyoutOpen={onFlyoutOpen}
-      links={links}
-      api={api}
-      toasts={toasts}
-      onUpdate={onUpdate}
-      value={value}
-    >
-      <TestConfigContextProvider>{children}</TestConfigContextProvider>
-    </PipelineProcessorsContextProvider>
+    <TestConfigContextProvider>
+      <PipelineProcessorsContextProvider
+        onFlyoutOpen={onFlyoutOpen}
+        links={links}
+        api={api}
+        toasts={toasts}
+        onUpdate={onUpdate}
+        value={value}
+      >
+        {children}
+      </PipelineProcessorsContextProvider>
+    </TestConfigContextProvider>
   );
 };
