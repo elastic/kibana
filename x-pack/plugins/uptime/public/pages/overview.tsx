@@ -45,12 +45,6 @@ export const OverviewPageComponent = React.memo(
     const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
     const { search, filters: urlFilters } = params;
 
-    const {
-      services: {
-        data: { autocomplete },
-      },
-    } = useKibana();
-
     useTrackPageview({ app: 'uptime', path: 'overview' });
     useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
@@ -86,7 +80,6 @@ export const OverviewPageComponent = React.memo(
                 aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
                   defaultMessage: 'Input filter criteria for the overview page',
                 })}
-                autocomplete={autocomplete}
                 data-test-subj="xpack.uptime.filterBar"
               />
             </EuiFlexItem>
