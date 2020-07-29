@@ -105,7 +105,7 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
         )}
 
         <Axis
-          tickFormat={(d) => `${Number(d).toFixed(3)}`}
+          tickFormat={(d) => `${Number(d).toPrecision(3)}`}
           title={'Prediction'}
           showGridLines={true}
           id="bottom"
