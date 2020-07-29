@@ -22,8 +22,8 @@ interface ViewButtonProps {
 export const ViewButton: FC<ViewButtonProps> = ({ item }) => {
   const navigateToPath = useNavigateToPath();
 
+  const { disabled, tooltipContent } = getViewLinkStatus(item);
   const analysisType = getAnalysisType(item.config.analysis);
-  const { disabled: buttonDisabled, tooltipContent } = getViewLinkStatus(item);
 
   const onClickHandler = () => navigateToPath(getResultsUrl(item.id, analysisType));
 
@@ -38,7 +38,7 @@ export const ViewButton: FC<ViewButtonProps> = ({ item }) => {
       data-test-subj="mlAnalyticsJobViewButton"
       flush="left"
       iconType="visTable"
-      isDisabled={buttonDisabled}
+      isDisabled={disabled}
       onClick={onClickHandler}
       size="xs"
     >
@@ -46,7 +46,7 @@ export const ViewButton: FC<ViewButtonProps> = ({ item }) => {
     </EuiButtonEmpty>
   );
 
-  if (buttonDisabled) {
+  if (disabled) {
     return (
       <EuiToolTip position="top" content={tooltipContent}>
         {button}
