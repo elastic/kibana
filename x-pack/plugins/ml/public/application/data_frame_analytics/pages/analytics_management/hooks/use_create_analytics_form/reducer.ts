@@ -45,6 +45,7 @@ import {
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { indexPatterns } from '../../../../../../../../../../src/plugins/data/public';
+import { isAdvancedConfig } from '../../components/action_clone/clone_button';
 
 const mmlAllowedUnitsStr = `${ALLOWED_DATA_UNITS.slice(0, ALLOWED_DATA_UNITS.length - 1).join(
   ', '
@@ -462,13 +463,16 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.SET_ADVANCED_EDITOR_RAW_STRING:
       let resultJobConfig;
+      let disableSwitchToForm = false;
       try {
         resultJobConfig = JSON.parse(collapseLiteralStrings(action.advancedEditorRawString));
+        disableSwitchToForm = isAdvancedConfig(resultJobConfig);
       } catch (e) {
         return {
           ...state,
           advancedEditorRawString: action.advancedEditorRawString,
           isAdvancedEditorValidJson: false,
+          disableSwitchToForm: true,
           advancedEditorMessages: [],
         };
       }
@@ -477,6 +481,7 @@ export function reducer(state: State, action: Action): State {
         ...validateAdvancedEditor({ ...state, jobConfig: resultJobConfig }),
         advancedEditorRawString: action.advancedEditorRawString,
         isAdvancedEditorValidJson: true,
+        disableSwitchToForm,
       };
 
     case ACTION.SET_FORM_STATE:
@@ -543,11 +548,13 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
       let { jobConfig } = state;
       jobConfig = getJobConfigFromFormState(state.form);
+      const shouldDisableSwitchToForm = isAdvancedConfig(jobConfig);
 
       return validateAdvancedEditor({
         ...state,
         advancedEditorRawString: JSON.stringify(jobConfig, null, 2),
         isAdvancedEditorEnabled: true,
+        disableSwitchToForm: shouldDisableSwitchToForm,
         hasSwitchedToEditor: true,
         jobConfig,
       });

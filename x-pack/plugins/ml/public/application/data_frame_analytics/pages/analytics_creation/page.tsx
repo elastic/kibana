@@ -48,7 +48,7 @@ export const Page: FC<Props> = ({ jobId }) => {
 
   const createAnalyticsForm = useCreateAnalyticsForm();
   const { state } = createAnalyticsForm;
-  const { isAdvancedEditorEnabled } = state;
+  const { isAdvancedEditorEnabled, disableSwitchToForm } = state;
   const { jobType } = state.form;
   const {
     initiateWizard,
@@ -178,15 +178,19 @@ export const Page: FC<Props> = ({ jobId }) => {
 
             <EuiFlexItem grow={false}>
               <EuiFormRow
-              // helpText={i18n.translate(
-              //   'xpack.ml.dataframe.analytics.create.enableJsonEditorHelpText',
-              //   {
-              //     defaultMessage: 'You cannot switch back to this form from the json editor.',
-              //   }
-              // )}
+                helpText={
+                  disableSwitchToForm &&
+                  i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.jsonEditorDisabledSwitchText',
+                    {
+                      defaultMessage:
+                        'Configuration contains advanced fields not supported by the form. You cannot switch back to the form.',
+                    }
+                  )
+                }
               >
                 <EuiSwitch
-                  disabled={jobType === undefined}
+                  disabled={jobType === undefined || disableSwitchToForm}
                   label={i18n.translate(
                     'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
                     {

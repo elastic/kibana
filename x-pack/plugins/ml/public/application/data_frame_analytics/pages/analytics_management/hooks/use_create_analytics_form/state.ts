@@ -12,6 +12,7 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
   ANALYSIS_CONFIG_TYPE,
+  defaultSearchQuery,
 } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
@@ -44,6 +45,7 @@ export interface FormMessage {
 export interface State {
   advancedEditorMessages: FormMessage[];
   advancedEditorRawString: string;
+  disableSwitchToForm: boolean;
   form: {
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
@@ -111,6 +113,7 @@ export interface State {
 export const getInitialState = (): State => ({
   advancedEditorMessages: [],
   advancedEditorRawString: '',
+  disableSwitchToForm: false,
   form: {
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
@@ -132,7 +135,7 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
-    jobConfigQuery: { match_all: {} },
+    jobConfigQuery: defaultSearchQuery,
     jobConfigQueryString: undefined,
     lambda: undefined,
     loadingFieldOptions: false,
