@@ -177,7 +177,12 @@ export const formatAboutStepData = (
     ...(isAssociatedToEndpointList
       ? {
           exceptions_list: [
-            { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
+            {
+              id: ENDPOINT_LIST_ID,
+              list_id: ENDPOINT_LIST_ID,
+              namespace_type: 'agnostic',
+              type: 'endpoint',
+            },
             ...detectionExceptionLists,
           ] as AboutStepRuleJson['exceptions_list'],
         }
