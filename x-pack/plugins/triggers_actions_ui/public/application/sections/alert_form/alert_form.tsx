@@ -9,17 +9,19 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiTitle,
+  EuiText,
+  EuiIcon,
   EuiForm,
   EuiSpacer,
   EuiFieldText,
   EuiFlexGrid,
   EuiFormRow,
   EuiComboBox,
-  EuiKeyPadMenuItem,
+  EuiCard,
   EuiFieldNumber,
   EuiSelect,
+  EuiSearchBar,
   EuiIconTip,
   EuiButtonIcon,
   EuiHorizontalRule,
@@ -190,10 +192,19 @@ export const AlertForm = ({
 
   const alertTypeNodes = alertTypeRegistryList.map(function (item, index) {
     return (
-      <EuiKeyPadMenuItem
+      <EuiCard
         key={index}
         data-test-subj={`${item.id}-SelectOption`}
-        label={item.name}
+        layout="horizontal"
+        icon={<EuiIcon type={item.iconClass} size="l" />}
+        title={item.name}
+        description={
+          <EuiText color="subdued" size="s">
+            Need to add descriptions
+          </EuiText>
+        }
+        titleSize="xs"
+        textAlign="left"
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
           setAlertTypeModel(item);
@@ -202,9 +213,7 @@ export const AlertForm = ({
             setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
           }
         }}
-      >
-        <EuiIcon size="xl" type={item.iconClass} />
-      </EuiKeyPadMenuItem>
+      />
     );
   });
 
@@ -496,18 +505,34 @@ export const AlertForm = ({
       ) : alertTypeNodes.length ? (
         <Fragment>
           <EuiHorizontalRule />
-          <EuiTitle size="s">
+
+          <EuiTitle size="xs">
             <h5 id="alertTypeTitle">
               <FormattedMessage
-                defaultMessage="Select a trigger type"
+                defaultMessage="Select alert type"
                 id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
               />
             </h5>
           </EuiTitle>
-          <EuiSpacer />
-          <EuiFlexGroup gutterSize="s" wrap>
+          {/* <EuiText size="s" grow={false} textAlign="left" color="subdued">
+            <p id="alertTypeDescription">
+              <FormattedMessage
+                defaultMessage="This is the alert description area"
+                id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeDescription"
+              />
+            </p>
+          </EuiText> */}
+          <EuiSpacer size="s" />
+          <EuiSearchBar
+            box={{
+              placeholder: 'e.g. threshold',
+            }}
+          />
+          <EuiSpacer size="m" />
+          <EuiFlexGrid gutterSize="none" style={{ gridRowGap: '0.5em' }}>
             {alertTypeNodes}
-          </EuiFlexGroup>
+          </EuiFlexGrid>
+          <EuiSpacer size="l" />
         </Fragment>
       ) : (
         <NoAuthorizedAlertTypes operation={operation} />
