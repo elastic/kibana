@@ -192,28 +192,30 @@ export const AlertForm = ({
 
   const alertTypeNodes = alertTypeRegistryList.map(function (item, index) {
     return (
-      <EuiCard
-        key={index}
-        data-test-subj={`${item.id}-SelectOption`}
-        layout="horizontal"
-        icon={<EuiIcon type={item.iconClass} size="l" />}
-        title={item.name}
-        description={
-          <EuiText color="subdued" size="s">
-            Need to add descriptions
-          </EuiText>
-        }
-        titleSize="xs"
-        textAlign="left"
-        onClick={() => {
-          setAlertProperty('alertTypeId', item.id);
-          setAlertTypeModel(item);
-          setAlertProperty('params', {});
-          if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-            setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+      <EuiFlexItem>
+        <EuiCard
+          key={index}
+          data-test-subj={`${item.id}-SelectOption`}
+          layout="horizontal"
+          icon={<EuiIcon type={item.iconClass} size="l" />}
+          title={item.name}
+          description={
+            <EuiText color="subdued" size="s">
+              Need to add descriptions
+            </EuiText>
           }
-        }}
-      />
+          titleSize="xs"
+          textAlign="left"
+          onClick={() => {
+            setAlertProperty('alertTypeId', item.id);
+            setAlertTypeModel(item);
+            setAlertProperty('params', {});
+            if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+              setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+            }
+          }}
+        />
+      </EuiFlexItem>
     );
   });
 
@@ -514,22 +516,8 @@ export const AlertForm = ({
               />
             </h5>
           </EuiTitle>
-          {/* <EuiText size="s" grow={false} textAlign="left" color="subdued">
-            <p id="alertTypeDescription">
-              <FormattedMessage
-                defaultMessage="This is the alert description area"
-                id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeDescription"
-              />
-            </p>
-          </EuiText> */}
-          <EuiSpacer size="s" />
-          <EuiSearchBar
-            box={{
-              placeholder: 'e.g. threshold',
-            }}
-          />
           <EuiSpacer size="m" />
-          <EuiFlexGrid gutterSize="none" style={{ gridRowGap: '0.5em' }}>
+          <EuiFlexGrid gutterSize="s" columns={1}>
             {alertTypeNodes}
           </EuiFlexGrid>
           <EuiSpacer size="l" />
