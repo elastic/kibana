@@ -158,6 +158,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
               <h2>{i18n.TABLE_TITLE}</h2>
             </EuiText>
             <EuiBasicTable
+              data-test-subj="value-lists-table"
               columns={columns}
               items={tableItems}
               loading={lists.loading}
