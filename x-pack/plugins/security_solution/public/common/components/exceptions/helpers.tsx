@@ -413,7 +413,7 @@ export const defaultEndpointExceptionItems = (
     data: alertData,
     fieldName: 'file.Ext.code_signature.trusted',
   });
-  const [sha1Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha1' });
+  const [sha256Hash] = getMappedNonEcsValue({ data: alertData, fieldName: 'file.hash.sha256' });
   const [eventCode] = getMappedNonEcsValue({ data: alertData, fieldName: 'event.code' });
   const namespaceType = 'agnostic';
 
@@ -446,10 +446,10 @@ export const defaultEndpointExceptionItems = (
           value: filePath ?? '',
         },
         {
-          field: 'file.hash.sha1',
+          field: 'file.hash.sha256',
           operator: 'included',
           type: 'match',
-          value: sha1Hash ?? '',
+          value: sha256Hash ?? '',
         },
         {
           field: 'event.code',
