@@ -1529,7 +1529,7 @@ https://vega.github.io/vega/docs/api/debugging/#scope[runtime scope].
 [role="screenshot"]
 image::visualize/images/vega_tutorial_inspect_data_sets.png[]
 
-Sometimes to debug more complex specs you need access to the `view` variable.  
+To debug more complex specs, access to the `view` variable.  For more information, refer to
 To debug such cases please see <<vega-browser-debugging-console, Vega browser debugging process>>
 
 ===== Asking for help with a Vega spec
