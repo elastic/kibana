@@ -156,6 +156,7 @@ const observeCompiler = (
 
         if (isConcatenatedModule(module)) {
           moduleCount += module.modules.length;
+          continue;
         }
 
         if (isExternalModule(module) || isIgnoredModule(module)) {
