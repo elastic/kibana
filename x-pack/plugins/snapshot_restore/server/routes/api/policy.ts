@@ -236,7 +236,7 @@ export function registerPolicyRoutes({
           'transport.request',
           {
             method: 'GET',
-            path: `_resolve/index/*`,
+            path: `/_resolve/index/*`,
             query: {
               expand_wildcards: 'all,hidden',
             },
