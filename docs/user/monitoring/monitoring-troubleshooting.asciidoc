@@ -24,7 +24,7 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 {stack-ref}/upgrading-elastic-stack.html[Upgrading the {stack}]. 
 
 [float]
-=== No monitoring data is visible in {kib}
+== No monitoring data is visible in {kib}
 
 *Symptoms:*
 
