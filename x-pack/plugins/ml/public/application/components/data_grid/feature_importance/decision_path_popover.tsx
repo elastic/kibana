@@ -32,7 +32,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   const tabs = [
     {
       id: DECISION_PATH_TABS.CHART,
-      name: 'Chart',
+      name: 'Decision Plot',
     },
     {
       id: DECISION_PATH_TABS.JSON,
@@ -41,8 +41,8 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   ];
 
   return (
-    <div style={{ width: 300, height: 200 }}>
-      <EuiTabs>
+    <>
+      <EuiTabs size={'s'} style={{ width: 250 }}>
         {tabs.map((tab) => (
           <EuiTab
             isSelected={tab.id === selectedTabId}
@@ -59,6 +59,6 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
       {selectedTabId === DECISION_PATH_TABS.JSON && (
         <DecisionPathJSONViewer featureImportance={featureImportance} />
       )}
-    </div>
+    </>
   );
 };

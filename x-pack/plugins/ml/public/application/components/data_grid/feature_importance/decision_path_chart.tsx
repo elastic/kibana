@@ -65,22 +65,30 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
       difference: Math.abs(d[FEATURE_IMPORTANCE] - baseline),
     }));
 
-    // sort so decision path goes from bottom to top
+    // sort so importance so it goes from bottom (baseline) to top
     mappedFeatureImportance = mappedFeatureImportance
       .sort((a, b) => b.difference - a.difference)
       .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
+
+    // start at the baseline and end at predicted value
+    let cumulativeSum = 0;
+    for (let i = mappedFeatureImportance.length - 1; i >= 0; i--) {
+      cumulativeSum += mappedFeatureImportance[i][1];
+      mappedFeatureImportance[i][2] = cumulativeSum;
+    }
   } else {
-    mappedFeatureImportance = mappedFeatureImportance.map((d) => [
-      d[FEATURE_NAME],
-      d[FEATURE_IMPORTANCE],
-    ]);
+    // sort so most positive importance on top -> most negative importance at bottom
+    mappedFeatureImportance = mappedFeatureImportance
+      .sort((a, b) => b[FEATURE_IMPORTANCE] - a[FEATURE_IMPORTANCE])
+      .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
   }
 
   const maxDomain = _.maxBy(mappedFeatureImportance, (d) => d[1]);
   const minDomain = _.minBy(mappedFeatureImportance, (d) => d[1]);
-
+  // adjust the height so it's compact for items with more features
+  const heightMultiplier = mappedFeatureImportance.length > 3 ? 20 : 50;
   return (
-    <div style={{ width: 300, height: mappedFeatureImportance.length * 75 }}>
+    <div style={{ height: mappedFeatureImportance.length * heightMultiplier }}>
       <Chart className="story-chart">
         <Settings rotation={90} />
         {baseline && (
@@ -94,6 +102,8 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
         )}
 
         <Axis
+          title={'Prediction'}
+          showGridLines={true}
           id="bottom"
           position={Position.Bottom}
           showOverlappingTicks
@@ -106,13 +116,13 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
               : undefined
           }
         />
-        <Axis id="left" position={Position.Left} />
+        <Axis showGridLines={true} id="left" position={Position.Left} />
         <LineSeries
           id="importance"
           xScaleType={ScaleType.Ordinal}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
-          yAccessors={[1]}
+          yAccessors={baseline ? [2] : [1]} // if baseline exist then shows the decision path else show in order of descending importance
           data={mappedFeatureImportance}
         />
       </Chart>
