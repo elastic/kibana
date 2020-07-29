@@ -1523,7 +1523,7 @@ image::visualize/images/vega_tutorial_inspect_requests.png[]
 
 With the *Vega debug* view, you can inspect the *Data sets* and *Signal Values* runtime data. 
  
-The data that we visualize on these tabs we read from the 
+The runtime data is read from the 
 https://vega.github.io/vega/docs/api/debugging/#scope[runtime scope]. 
 
 [role="screenshot"]
