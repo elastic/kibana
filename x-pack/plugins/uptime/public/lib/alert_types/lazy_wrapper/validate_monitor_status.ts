@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isRight } from 'fp-ts/lib/Either';
 import {
   AtomicStatusCheckParamsType,
   StatusCheckParamsType,
   MonitorAvailabilityType,
 } from '../../../../common/runtime_types';
+import { ValidationResult } from '../../../../../triggers_actions_ui/public';
 
-export const validateMonitorStatusParams = (alertParams: any) => {
+export function validateMonitorStatusParams(alertParams: any): ValidationResult {
   const errors: Record<string, any> = {};
   const decoded = AtomicStatusCheckParamsType.decode(alertParams);
   const oldDecoded = StatusCheckParamsType.decode(alertParams);
@@ -52,4 +53,4 @@ export const validateMonitorStatusParams = (alertParams: any) => {
   }
 
   return { errors };
-};
+}
