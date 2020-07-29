@@ -27,15 +27,14 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      async function enter() {
+      it('should exist', async () => {
         expect(await setupMode.doesSetupModeBtnAppear()).to.be(true);
+      });
+
+      it('should be clickable and show the bottom bar', async () => {
         await setupMode.clickSetupModeBtn();
         await PageObjects.common.sleep(1000); // bottom drawer animation
         expect(await setupMode.doesBottomBarAppear()).to.be(true);
-      }
-
-      it('should exist and be clickable', async () => {
-        await enter();
       });
 
       it('should not show metricbeat migration if cloud', async () => {
