@@ -12,11 +12,10 @@ import { AutoDownload } from './auto_download';
 
 describe('AutoDownload', () => {
   beforeEach(() => {
-    // our DOM environment lacks this function that our component needs
-    Object.defineProperty(globalNode.window.URL, 'revokeObjectURL', {
-      writable: true,
-      value: jest.fn(),
-    });
+    if (typeof globalNode.window.URL?.revokeObjectURL === 'undefined') {
+      // jsdom doesn't implement this method but AutoDownload calls it
+      Object.defineProperty(globalNode.window.URL, 'revokeObjectURL', { value: jest.fn() });
+    }
   });
 
   it('calls onDownload once if a blob is provided', () => {
