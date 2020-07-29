@@ -13,7 +13,6 @@ import {
   getIndexPatternService,
   getToasts,
   getData,
-  getUiSettings,
   getCoreChrome,
 } from '../../../kibana_services';
 import { copyPersistentState } from '../../../reducers/util';
@@ -274,6 +273,7 @@ export class MapsAppView extends React.Component {
 
   _initQueryTimeRefresh() {
     const { setRefreshConfig, savedMap } = this.props;
+    const { queryString } = getData().query;
     // TODO: Handle null when converting to TS
     const globalState = getGlobalState();
     const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
@@ -281,7 +281,6 @@ export class MapsAppView extends React.Component {
       query: getInitialQuery({
         mapStateJSON,
         appState: this._appStateManager.getAppState(),
-        userQueryLanguage: getUiSettings().get('search:queryLanguage'),
       }),
       time: getInitialTimeFilters({
         mapStateJSON,
@@ -292,6 +291,8 @@ export class MapsAppView extends React.Component {
         globalState,
       }),
     };
+
+    if (newState.query) queryString.setQuery(newState.query);
     this.setState({ query: newState.query, time: newState.time });
     updateGlobalState(
       {

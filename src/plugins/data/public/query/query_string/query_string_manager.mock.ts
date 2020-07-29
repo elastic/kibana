@@ -16,9 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { QueryStart } from '../../../query';
 
-export const clearStateFromSavedQuery = (queryService: QueryStart) => {
-  queryService.filterManager.removeAll();
-  queryService.queryString.clearQuery();
+import { QueryStringContract } from '.';
+
+const createSetupContractMock = () => {
+  const queryStringManagerMock: jest.Mocked<QueryStringContract> = {
+    getQuery: jest.fn(),
+    setQuery: jest.fn(),
+    getUpdates$: jest.fn(),
+    getDefaultQuery: jest.fn(),
+    formatQuery: jest.fn(),
+    clearQuery: jest.fn(),
+  };
+  return queryStringManagerMock;
+};
+
+export const queryStringManagerMock = {
+  createSetupContract: createSetupContractMock,
+  createStartContract: createSetupContractMock,
 };
