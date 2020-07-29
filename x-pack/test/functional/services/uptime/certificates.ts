@@ -11,6 +11,8 @@ export function UptimeCertProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
+  const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
+
   const changeSearchField = async (text: string) => {
     const input = await testSubjects.find('uptimeCertSearch');
     await input.clearValueWithKeyboard();
@@ -61,6 +63,7 @@ export function UptimeCertProvider({ getService }: FtrProviderContext) {
       const self = this;
       return retry.tryForTime(60 * 1000, async () => {
         await changeSearchField(monId);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await self.hasCertificates(1);
       });
     },
