@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiCodeBlock, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { Ping } from '../../../../common/runtime_types/ping';
 
 const StyledLink = styled(EuiLink)`
