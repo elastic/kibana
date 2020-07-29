@@ -157,6 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.deleteIndices(cloneDestIndex);
           await ml.api.deleteIndices(testData.job.dest!.index as string);
           await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
+          await ml.testResources.deleteIndexPatternByTitle(cloneDestIndex);
         });
 
         it('should open the wizard with a proper header', async () => {
