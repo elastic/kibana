@@ -83,7 +83,7 @@ export function openCustomUrlWindow(url: string, urlConfig: UrlConfig, basePath:
   if (/^(?:[a-z]+:)?\/\//i.test(urlConfig.url_value) === false) {
     // If `url` is a relative path, we need to prefix the base path.
     if (url.charAt(0) !== '/') {
-      url = `${basePath}${isKibanaUrl(urlConfig) ? '/app/' : ''}${url}`;
+      url = `${basePath}${isKibanaUrl(urlConfig) ? '/app/' : '/'}${url}`;
     }
 
     window.open(url, '_blank');
