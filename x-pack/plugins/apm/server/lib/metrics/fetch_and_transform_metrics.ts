@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Unionize } from 'utility-types';
+import { Unionize, Overwrite } from 'utility-types';
+import { ESSearchRequest } from '../../../typings/elasticsearch';
 import {
   Setup,
   SetupTimeRange,
@@ -17,14 +18,28 @@ import { getMetricsProjection } from '../../../common/projections/metrics';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 
-interface Aggs {
-  [key: string]: Unionize<{
-    min: AggregationOptionsByType['min'];
-    max: AggregationOptionsByType['max'];
-    sum: AggregationOptionsByType['sum'];
-    avg: AggregationOptionsByType['avg'];
-  }>;
-}
+type MetricsAggregationMap = Unionize<{
+  min: AggregationOptionsByType['min'];
+  max: AggregationOptionsByType['max'];
+  sum: AggregationOptionsByType['sum'];
+  avg: AggregationOptionsByType['avg'];
+}>;
+
+type MetricAggs = Record<string, MetricsAggregationMap>;
+
+export type GenericMetricsRequest = Overwrite<
+  ESSearchRequest,
+  {
+    body: {
+      aggs: {
+        timeseriesData: {
+          date_histogram: AggregationOptionsByType['date_histogram'];
+          aggs: MetricAggs;
+        };
+      } & MetricAggs;
+    };
+  }
+>;
 
 interface Filter {
   exists?: {
@@ -35,7 +50,7 @@ interface Filter {
   };
 }
 
-export async function fetchAndTransformMetrics<T extends Aggs>({
+export async function fetchAndTransformMetrics<T extends MetricAggs>({
   setup,
   serviceName,
   serviceNodeName,
@@ -58,7 +73,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
     serviceNodeName,
   });
 
-  const params = mergeProjection(projection, {
+  const params: GenericMetricsRequest = mergeProjection(projection, {
     body: {
       size: 0,
       query: {
