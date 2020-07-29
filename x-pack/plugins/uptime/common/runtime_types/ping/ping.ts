@@ -196,6 +196,9 @@ export const PingType = t.intersection([
       port: t.number,
       scheme: t.string,
     }),
+    service: t.partial({
+      name: t.string,
+    }),
   }),
 ]);
 
