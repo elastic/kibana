@@ -93,6 +93,7 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
       observer: {
         geo: { name: summaryPings.map((p) => p.observer?.geo?.name ?? '').filter((n) => n !== '') },
       },
+      service: summaryPings.find((p) => p.service?.name)?.service,
     },
   };
 };
