@@ -14,6 +14,7 @@ import {
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
   mockTreeWithAllProcessesTerminated,
+  mockTreeWithNoProcessEvents,
 } from '../mocks/resolver_tree';
 import { uniquePidForProcess } from '../../models/process_event';
 import { EndpointEvent } from '../../../../common/endpoint/types';
@@ -406,6 +407,28 @@ describe('data state', () => {
     });
     it('should have 4 graphable processes', () => {
       expect(selectors.graphableProcesses(state()).length).toBe(4);
+    });
+  });
+  describe('with a tree with no process events', () => {
+    beforeEach(() => {
+      const tree = mockTreeWithNoProcessEvents();
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: tree,
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should return an empty layout', () => {
+      expect(selectors.layout(state())).toMatchInlineSnapshot(`
+        Object {
+          "ariaLevels": Map {},
+          "edgeLineSegments": Array [],
+          "processNodePositions": Map {},
+        }
+      `);
     });
   });
 });
