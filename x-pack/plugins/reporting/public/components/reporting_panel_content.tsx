@@ -7,7 +7,6 @@
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
-import url from 'url';
 import { ToastsSetup } from 'src/core/public';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
@@ -28,7 +27,10 @@ interface Props {
 
 interface State {
   isStale: boolean;
-  absoluteUrl: string;
+  curlParams: {
+    url: string;
+    payload: string;
+  };
   layoutId: string;
 }
 
@@ -40,24 +42,32 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
     this.state = {
       isStale: false,
-      absoluteUrl: this.getAbsoluteReportGenerationUrl(props),
+      curlParams: this.getReportGenerationCurl(props),
       layoutId: '',
     };
   }
+  /*
+    curl --request POST 'http://u:p@localhost:5601/api/reporting/generate/printablePdf' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "jobParams": "(browserTimezone:America/Los_Angeles,layout:(dimensions:(height:2024,width:1440),id:preserve_layout),objectType:dashboard,relativeUrls:!('\''/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(filters:!!(),refreshInterval:(pause:!!f,value:900000),time:(from:now-7d,to:now))&_a=(description:!'\''Analyze%20mock%20eCommerce%20orders%20and%20revenue!'\'',filters:!!(),fullScreenMode:!!f,options:(hidePanelTitles:!!f,useMargins:!!t),query:(language:kuery,query:!'\''!'\''),timeRestore:!!t,title:!'\''%5BeCommerce%5D%20Revenue%20Dashboard!'\'',viewMode:view)'\''),title:'\''[eCommerce] Revenue Dashboard'\'')"
+  }'
+  */
 
-  private getAbsoluteReportGenerationUrl = (props: Props) => {
-    const relativePath = this.props.apiClient.getReportingJobPath(
+  private getReportGenerationCurl = (props: Props) => {
+    const { url, payload } = this.props.apiClient.getReportingJobPath(
       props.reportType,
       props.getJobParams()
     );
-    return url.resolve(window.location.href, relativePath);
+
+    return { url, payload };
   };
 
   public componentDidUpdate(prevProps: Props, prevState: State) {
     if (this.props.layoutId && this.props.layoutId !== prevState.layoutId) {
       this.setState({
         ...prevState,
-        absoluteUrl: this.getAbsoluteReportGenerationUrl(this.props),
+        curlParams: this.getReportGenerationCurl(this.props),
         layoutId: this.props.layoutId,
       });
     }
@@ -129,7 +139,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
         </EuiText>
         <EuiSpacer size="s" />
 
-        <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+        <EuiCopy
+          textToCopy={`curl -X POST --header "Content-Type: application/json" --data-raw ${this.state.curlParams.payload} ${this.state.curlParams.url}`}
+          anchorClassName="eui-displayBlock"
+        >
           {(copy) => (
             <EuiButton fullWidth onClick={copy} size="s">
               <FormattedMessage
@@ -191,8 +204,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
     if (!this.mounted) {
       return;
     }
-    const absoluteUrl = this.getAbsoluteReportGenerationUrl(this.props);
-    this.setState({ absoluteUrl });
+    const curlParams = this.getReportGenerationCurl(this.props);
+    this.setState({ curlParams });
   };
 
   private createReportingJob = () => {
