@@ -1537,7 +1537,7 @@ To debug such cases please see <<vega-browser-debugging-console, Vega browser de
 
 Because of the dynamic nature of the data in {es}, it is hard to help you with 
 Vega specs unless you can share a dataset. To do this, open the *Inspector > Vega debug* view 
-and navigate to *Spec* tab:
+then select the *Spec* tab:
 
 [role="screenshot"]
 image::visualize/images/vega_tutorial_getting_help.png[]
