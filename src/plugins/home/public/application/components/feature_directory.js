@@ -157,7 +157,7 @@ FeatureDirectory.propTypes = {
       path: PropTypes.string.isRequired,
       homePageSection: PropTypes.string,
       category: PropTypes.string.isRequired,
-      solution: PropTypes.object,
+      solution: PropTypes.string,
       order: PropTypes.number,
     })
   ),
