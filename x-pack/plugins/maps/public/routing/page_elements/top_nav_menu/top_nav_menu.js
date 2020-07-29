@@ -14,7 +14,6 @@ import {
   getToasts,
   getCoreI18n,
   getData,
-  getUiSettings,
 } from '../../../kibana_services';
 import {
   SavedObjectSaveModal,
@@ -46,16 +45,13 @@ export function MapsTopNavMenu({
   isOpenSettingsDisabled,
 }) {
   const { TopNavMenu } = getNavigation().ui;
-  const { filterManager } = getData().query;
+  const { filterManager, queryString } = getData().query;
   const showSaveQuery = getMapsCapabilities().saveQuery;
   const onClearSavedQuery = () => {
     onQuerySaved(undefined);
     onQueryChange({
       filters: filterManager.getGlobalFilters(),
-      query: {
-        query: '',
-        language: getUiSettings().get('search:queryLanguage'),
-      },
+      query: queryString.getDefaultQuery(),
     });
   };
 
