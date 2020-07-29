@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { EmptyPage } from '../../../common/components/empty_page';
 import * as i18n from './translations';
@@ -27,16 +27,24 @@ const DetectionEngineNoIndexComponent: React.FC<{
   needsSignalsIndex: boolean;
 }> = ({ needsListsIndex, needsSignalsIndex }) => {
   const docLinks = useKibana().services.docLinks;
+  const actions = useMemo(
+    () => ({
+      detections: {
+        icon: 'documents',
+        label: i18n.GO_TO_DOCUMENTATION,
+        url: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/detection-engine-overview.html#detections-permissions`,
+        target: '_blank',
+      },
+    }),
+    [docLinks]
+  );
   const message = buildMessage(needsListsIndex, needsSignalsIndex);
 
   return (
     <EmptyPage
-      actionPrimaryIcon="documents"
-      actionPrimaryLabel={i18n.GO_TO_DOCUMENTATION}
-      actionPrimaryUrl={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/detection-engine-overview.html#detections-permissions`}
-      actionPrimaryTarget="_blank"
-      message={message}
+      actions={actions}
       data-test-subj="no_index"
+      message={message}
       title={i18n.NO_INDEX_TITLE}
     />
   );
