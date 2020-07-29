@@ -31,6 +31,7 @@ Today when encryption key changes we can no longer decrypt Saved Objects attribu
 
 * If consumers explicitly request decryption via  `getDecryptedAsInternalUser()` we abort operation and throw exception.
 * If consumers fetch Saved Objects with encrypted attributes that should be automatically decrypted (the ones with `dangerouslyExposeValue: true` marker) via standard Saved Objects APIs we don't abort operation, but rather strip all encrypted attributes from the response and record decryption error in the `error` Saved Object field.
+* If Kibana tries to migrate encrypted Saved Objects at the start up time we abort operation and throw exception. 
 
 In both of these cases we throw or record error with the specific type to allow consumers to gracefully handle this scenario and either drop Saved Objects with unrecoverable encrypted attributes or facilitate the process of re-entering and re-encryption of the new values.
 
@@ -97,7 +98,7 @@ As for any other encryption or decryption operation we'll record relevant bits i
 
 # Drawbacks
 
-* Multiple decryption attempts affect performance. See [the performance test results](https://github.com/elastic/kibana/pull/72420#issue-453400211) for more details, but making two decryption attempts is basically twice as slow as with a single attempt. Although it's only relevant for the batch operations that perform automatic decryption (only for the Saved Objects registered with `dangerouslyExposeValue: true` marker) and that nobody is using this functionality in Kibana right now, we may have this use case in the future.
+* Multiple decryption attempts affect performance. See [the performance test results](https://github.com/elastic/kibana/pull/72420#issue-453400211) for more details, but making two decryption attempts is basically twice as slow as with a single attempt. Although it's only relevant for the encrypted Saved Objects migration performed at the start up time and batch operations that trigger automatic decryption (only for the Saved Objects registered with `dangerouslyExposeValue: true` marker that nobody is using in Kibana right now), we may have more use cases in the future.
 * Historically we supported Kibana features with either configuration or dedicated UI, but in this case we want to introduce an API endpoint that _should be_ used directly. We may have a key management UI in the future though.
 
 # Alternatives
