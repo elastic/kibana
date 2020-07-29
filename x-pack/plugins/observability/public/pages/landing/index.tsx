@@ -27,7 +27,7 @@ const EuiCardWithoutPadding = styled(EuiCard)`
   padding: 0;
 `;
 
-export const LandingPage = () => {
+export function LandingPage() {
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
 
@@ -124,4 +124,4 @@ export const LandingPage = () => {
       </EuiFlexGroup>
     </WithHeaderLayout>
   );
-};
+}

@@ -45,7 +45,7 @@ import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
 import { GenericParams } from 'elasticsearch';
 import { GetParams } from 'elasticsearch';
-import { GetResponse } from 'elasticsearch';
+import { GetResponse as GetResponse_2 } from 'elasticsearch';
 import { GetScriptParams } from 'elasticsearch';
 import { GetSourceParams } from 'elasticsearch';
 import { GetTemplateParams } from 'elasticsearch';
@@ -121,7 +121,7 @@ import { ResponseToolkit } from 'hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
-import { SearchResponse } from 'elasticsearch';
+import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
 import { Server } from 'hapi';
@@ -532,6 +532,14 @@ export interface CoreStatus {
     savedObjects: ServiceStatus;
 }
 
+// @public (undocumented)
+export interface CountResponse {
+    // (undocumented)
+    count: number;
+    // (undocumented)
+    _shards: ShardsInfo;
+}
+
 // @public
 export class CspConfig implements ICspConfig {
     // @internal
@@ -593,6 +601,28 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
 }>;
 
 // @public (undocumented)
+export interface DeleteDocumentResponse {
+    // (undocumented)
+    error?: {
+        type: string;
+    };
+    // (undocumented)
+    found: boolean;
+    // (undocumented)
+    _id: string;
+    // (undocumented)
+    _index: string;
+    // (undocumented)
+    result: string;
+    // (undocumented)
+    _shards: ShardsResponse;
+    // (undocumented)
+    _type: string;
+    // (undocumented)
+    _version: number;
+}
+
+// @public (undocumented)
 export interface DeprecationAPIClientParams extends GenericParams {
     // (undocumented)
     method: 'GET';
@@ -641,6 +671,13 @@ export interface DiscoveredPlugin {
     readonly requiredBundles: readonly PluginName[];
     readonly requiredPlugins: readonly PluginName[];
 }
+
+// @public
+export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {
+    transport: {
+        request(params: TransportRequestParams, options?: TransportRequestOptions): TransportRequestPromise<ApiResponse>;
+    };
+};
 
 // @public
 export class ElasticsearchConfig {
@@ -709,6 +746,16 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+// @public (undocumented)
+export interface Explanation {
+    // (undocumented)
+    description: string;
+    // (undocumented)
+    details: Explanation[];
+    // (undocumented)
+    value: number;
+}
+
 // @public
 export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
 
@@ -735,6 +782,28 @@ export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest)
 export function getFlattenedObject(rootValue: Record<string, any>): {
     [key: string]: any;
 };
+
+// @public (undocumented)
+export interface GetResponse<T> {
+    // (undocumented)
+    found: boolean;
+    // (undocumented)
+    _id: string;
+    // (undocumented)
+    _index: string;
+    // (undocumented)
+    _primary_term: number;
+    // (undocumented)
+    _routing?: string;
+    // (undocumented)
+    _seq_no: number;
+    // (undocumented)
+    _source: T;
+    // (undocumented)
+    _type: string;
+    // (undocumented)
+    _version: number;
+}
 
 // @public
 export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
@@ -1042,7 +1111,7 @@ export interface LegacyAPICaller {
     // (undocumented)
     (endpoint: 'fieldStats', params: FieldStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['fieldStats']>;
     // (undocumented)
-    <T>(endpoint: 'get', params: GetParams, options?: LegacyCallAPIOptions): Promise<GetResponse<T>>;
+    <T>(endpoint: 'get', params: GetParams, options?: LegacyCallAPIOptions): Promise<GetResponse_2<T>>;
     // (undocumented)
     (endpoint: 'getScript', params: GetScriptParams, options?: LegacyCallAPIOptions): ReturnType<Client['getScript']>;
     // (undocumented)
@@ -1074,9 +1143,9 @@ export interface LegacyAPICaller {
     // (undocumented)
     (endpoint: 'renderSearchTemplate', params: RenderSearchTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['renderSearchTemplate']>;
     // (undocumented)
-    <T>(endpoint: 'scroll', params: ScrollParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+    <T>(endpoint: 'scroll', params: ScrollParams, options?: LegacyCallAPIOptions): Promise<SearchResponse_2<T>>;
     // (undocumented)
-    <T>(endpoint: 'search', params: SearchParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+    <T>(endpoint: 'search', params: SearchParams, options?: LegacyCallAPIOptions): Promise<SearchResponse_2<T>>;
     // (undocumented)
     (endpoint: 'searchShards', params: SearchShardsParams, options?: LegacyCallAPIOptions): ReturnType<Client['searchShards']>;
     // (undocumented)
@@ -1790,6 +1859,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean | 'optional';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
+    timeout?: number;
     xsrfRequired?: Method extends 'get' ? never : boolean;
 }
 
@@ -2082,7 +2152,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
 
 // @public (undocumented)
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
-    refresh?: MutatingOperationRefreshSetting;
+    refresh?: boolean;
 }
 
 // @public (undocumented)
@@ -2396,7 +2466,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: LegacyAPICaller, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
@@ -2412,7 +2482,7 @@ export class SavedObjectsRepository {
         attributes: any;
     }>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
-    }
+}
 
 // @public
 export interface SavedObjectsRepositoryFactory {
@@ -2552,6 +2622,39 @@ export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
 
+// @public (undocumented)
+export interface SearchResponse<T = unknown> {
+    // (undocumented)
+    aggregations?: any;
+    // (undocumented)
+    hits: {
+        total: number;
+        max_score: number;
+        hits: Array<{
+            _index: string;
+            _type: string;
+            _id: string;
+            _score: number;
+            _source: T;
+            _version?: number;
+            _explanation?: Explanation;
+            fields?: any;
+            highlight?: any;
+            inner_hits?: any;
+            matched_queries?: string[];
+            sort?: string[];
+        }>;
+    };
+    // (undocumented)
+    _scroll_id?: string;
+    // (undocumented)
+    _shards: ShardsResponse;
+    // (undocumented)
+    timed_out: boolean;
+    // (undocumented)
+    took: number;
+}
+
 // @public
 export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> {
     detail?: string;
@@ -2610,6 +2713,30 @@ export interface SessionStorageCookieOptions<T> {
 export interface SessionStorageFactory<T> {
     // (undocumented)
     asScoped: (request: KibanaRequest) => SessionStorage<T>;
+}
+
+// @public (undocumented)
+export interface ShardsInfo {
+    // (undocumented)
+    failed: number;
+    // (undocumented)
+    skipped: number;
+    // (undocumented)
+    successful: number;
+    // (undocumented)
+    total: number;
+}
+
+// @public (undocumented)
+export interface ShardsResponse {
+    // (undocumented)
+    failed: number;
+    // (undocumented)
+    skipped: number;
+    // (undocumented)
+    successful: number;
+    // (undocumented)
+    total: number;
 }
 
 // @public (undocumented)
