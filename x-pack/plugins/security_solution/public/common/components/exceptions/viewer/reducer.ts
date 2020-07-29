@@ -81,11 +81,11 @@ export const allExceptionItemsReducer = () => (state: State, action: Action): St
         ...state,
         filterOptions: {
           ...state.filterOptions,
-          ...(filter ?? {}),
+          ...filter,
         },
         pagination: {
           ...state.pagination,
-          ...(pagination ?? {}),
+          ...pagination,
         },
         showEndpointListsOnly: showEndpointListsOnly ?? state.showEndpointListsOnly,
         showDetectionsListsOnly: showDetectionsListsOnly ?? state.showDetectionsListsOnly,

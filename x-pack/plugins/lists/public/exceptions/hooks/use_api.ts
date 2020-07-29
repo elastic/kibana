@@ -8,12 +8,9 @@ import { useMemo } from 'react';
 
 import * as Api from '../api';
 import { HttpStart } from '../../../../../../src/core/public';
-import {
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  NamespaceType,
-} from '../../../common/schemas';
+import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
 import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps } from '../types';
+import { getIdsAndNamespaces } from '../utils';
 
 export interface ExceptionsApi {
   deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
@@ -120,23 +117,11 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         onError,
       }: ApiCallFindListsItemsMemoProps): Promise<void> {
         const abortCtrl = new AbortController();
-        const { ids, namespaces } = lists
-          .filter((list) => {
-            if (showDetectionsListsOnly) {
-              return list.type === 'detection';
-            } else if (showEndpointListsOnly) {
-              return list.type === 'endpoint';
-            } else {
-              return true;
-            }
-          })
-          .reduce<{ ids: string[]; namespaces: NamespaceType[] }>(
-            (acc, { listId, namespaceType }) => ({
-              ids: [...acc.ids, listId],
-              namespaces: [...acc.namespaces, namespaceType],
-            }),
-            { ids: [], namespaces: [] }
-          );
+        const { ids, namespaces } = getIdsAndNamespaces({
+          lists,
+          showDetection: showDetectionsListsOnly,
+          showEndpoint: showEndpointListsOnly,
+        });
 
         try {
           if (ids.length > 0 && namespaces.length > 0) {
@@ -166,7 +151,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
               exceptions: [],
               pagination: {
                 page: 0,
-                perPage: pagination.perPage,
+                perPage: pagination.perPage ?? 0,
                 total: 0,
               },
             });

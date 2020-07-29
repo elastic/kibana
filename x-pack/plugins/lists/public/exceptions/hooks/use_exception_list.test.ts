@@ -93,6 +93,8 @@ describe('useExceptionList', () => {
           showEndpointListsOnly: false,
         })
       );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
       await waitForNextUpdate();
       await waitForNextUpdate();
 
@@ -151,6 +153,8 @@ describe('useExceptionList', () => {
             showEndpointListsOnly: false,
           })
       );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
       await waitForNextUpdate();
       await waitForNextUpdate();
 
@@ -199,6 +203,8 @@ describe('useExceptionList', () => {
             showEndpointListsOnly: true,
           })
       );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
       await waitForNextUpdate();
       await waitForNextUpdate();
 
@@ -243,6 +249,8 @@ describe('useExceptionList', () => {
           showEndpointListsOnly: true,
         })
       );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
       await waitForNextUpdate();
       await waitForNextUpdate();
 
@@ -294,6 +302,8 @@ describe('useExceptionList', () => {
             showEndpointListsOnly: false,
           })
       );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
       await waitForNextUpdate();
       await waitForNextUpdate();
 
@@ -364,7 +374,11 @@ describe('useExceptionList', () => {
           },
         }
       );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
       await waitForNextUpdate();
+      await waitForNextUpdate();
+
       rerender({
         filterOptions: [],
         http: mockKibanaHttpService,
@@ -382,6 +396,7 @@ describe('useExceptionList', () => {
         showDetectionsListsOnly: false,
         showEndpointListsOnly: false,
       });
+      // NOTE: Only need one call here because hook already initilaized
       await waitForNextUpdate();
 
       expect(spyOnfetchExceptionListsItemsByListIds).toHaveBeenCalledTimes(2);
@@ -415,6 +430,8 @@ describe('useExceptionList', () => {
           showEndpointListsOnly: false,
         })
       );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
       await waitForNextUpdate();
       await waitForNextUpdate();
 
@@ -423,7 +440,7 @@ describe('useExceptionList', () => {
       if (result.current[3] != null) {
         result.current[3]();
       }
-
+      // NOTE: Only need one call here because hook already initilaized
       await waitForNextUpdate();
 
       expect(spyOnfetchExceptionListsItemsByListIds).toHaveBeenCalledTimes(2);
@@ -455,6 +472,8 @@ describe('useExceptionList', () => {
             showEndpointListsOnly: false,
           })
       );
+      // NOTE: First `waitForNextUpdate` is initialization
+      // Second call applies the params
       await waitForNextUpdate();
       await waitForNextUpdate();
 

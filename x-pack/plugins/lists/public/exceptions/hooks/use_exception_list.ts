@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { fetchExceptionListsItemsByListIds } from '../api';
 import { FilterExceptionsOptions, Pagination, UseExceptionListProps } from '../types';
-import { ExceptionListItemSchema, NamespaceType } from '../../../common/schemas';
+import { ExceptionListItemSchema } from '../../../common/schemas';
+import { getIdsAndNamespaces } from '../utils';
 
 type Func = () => void;
 export type ReturnExceptionListAndItems = [
@@ -52,42 +53,17 @@ export const useExceptionList = ({
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
   const fetchExceptionListsItems = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
-  const { ids, namespaces } = useMemo(
-    (): { ids: string[]; namespaces: NamespaceType[] } =>
-      lists
-        .filter((list) => {
-          if (showDetectionsListsOnly) {
-            return list.type === 'detection';
-          } else if (showEndpointListsOnly) {
-            return list.type === 'endpoint';
-          } else {
-            return true;
-          }
-        })
-        .reduce<{ ids: string[]; namespaces: NamespaceType[] }>(
-          (acc, { listId, namespaceType }) => ({
-            ids: [...acc.ids, listId],
-            namespaces: [...acc.namespaces, namespaceType],
-          }),
-          { ids: [], namespaces: [] }
-        ),
-    [lists, showDetectionsListsOnly, showEndpointListsOnly]
-  );
-  const filters = useMemo(
-    (): FilterExceptionsOptions[] =>
-      matchFilters && filterOptions.length > 0 ? ids.map(() => filterOptions[0]) : filterOptions,
-    [matchFilters, filterOptions, ids]
-  );
-  const idsAsString = useMemo((): string => ids.join(), [ids]);
-  const namespacesAsString = useMemo((): string => namespaces.join(), [namespaces]);
-  const filterAsString = useMemo(
-    (): string => filterOptions.map(({ filter }) => filter).join(','),
-    [filterOptions]
-  );
-  const filterTagsAsString = useMemo(
-    (): string => filterOptions.map(({ tags }) => tags.join(',')).join(),
-    [filterOptions]
-  );
+  const { ids, namespaces } = getIdsAndNamespaces({
+    lists,
+    showDetection: showDetectionsListsOnly,
+    showEndpoint: showEndpointListsOnly,
+  });
+  const filters: FilterExceptionsOptions[] =
+    matchFilters && filterOptions.length > 0 ? ids.map(() => filterOptions[0]) : filterOptions;
+  const idsAsString: string = ids.join(',');
+  const namespacesAsString: string = namespaces.join(',');
+  const filterAsString: string = filterOptions.map(({ filter }) => filter).join(',');
+  const filterTagsAsString: string = filterOptions.map(({ tags }) => tags.join(',')).join(',');
 
   useEffect(
     () => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
@@ -305,19 +305,15 @@ const ExceptionsViewerComponent = ({
   }, [handleGetTotals, isInitLoading, exceptions, loadingList, dispatch]);
 
   // Used in utility bar info text
-  const ruleSettingsUrl = useMemo((): string => {
-    return services.application.getUrlForApp(
-      `security/detections/rules/id/${encodeURI(ruleId)}/edit`
-    );
-  }, [ruleId, services.application]);
+  const ruleSettingsUrl = services.application.getUrlForApp(
+    `security/detections/rules/id/${encodeURI(ruleId)}/edit`
+  );
 
-  const showEmpty = useMemo((): boolean => {
-    return !isInitLoading && !loadingList && totalEndpointItems === 0 && totalDetectionsItems === 0;
-  }, [isInitLoading, totalEndpointItems, totalDetectionsItems, loadingList]);
+  const showEmpty: boolean =
+    !isInitLoading && !loadingList && totalEndpointItems === 0 && totalDetectionsItems === 0;
 
-  const showNoResults = useMemo((): boolean => {
-    return exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
-  }, [exceptions.length, totalEndpointItems, totalDetectionsItems]);
+  const showNoResults: boolean =
+    exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
 
   return (
     <>
