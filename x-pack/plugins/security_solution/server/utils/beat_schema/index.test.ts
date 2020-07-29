@@ -401,6 +401,7 @@ describe('Schema Beat', () => {
       const result = getIndexAlias([leadingWildcardIndex], leadingWildcardIndex);
       expect(result).toBe(leadingWildcardIndex);
     });
+
     test('getIndexAlias no match returns "unknown" string', () => {
       const index = 'auditbeat-*';
       const result = getIndexAlias([index], 'hello');
