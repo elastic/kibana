@@ -10,6 +10,11 @@ import styled from 'styled-components';
 
 import { IS_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
 
+/**
+ * To avoid expensive changes to the DOM, delay showing the popover menu
+ */
+const HOVER_INTENT_DELAY = 100; // ms
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const WithHoverActionsPopover = (styled(EuiPopover as any)`
   .euiPopover__anchor {
@@ -51,18 +56,27 @@ export const WithHoverActions = React.memo<Props>(
   ({ alwaysShow = false, closePopOverTrigger, hoverContent, render }) => {
     const [isOpen, setIsOpen] = useState(hoverContent != null && alwaysShow);
     const [showHoverContent, setShowHoverContent] = useState(false);
+    const [hoverTimeout, setHoverTimeout] = useState<number | undefined>(undefined);
+
     const onMouseEnter = useCallback(() => {
-      // NOTE: the following read from the DOM is expensive, but not as
-      // expensive as the default behavior, which adds a div to the body,
-      // which-in turn performs a more expensive change to the layout
-      if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
-        setShowHoverContent(true);
-      }
-    }, []);
+      setHoverTimeout(
+        Number(
+          setTimeout(() => {
+            // NOTE: the following read from the DOM is expensive, but not as
+            // expensive as the default behavior, which adds a div to the body,
+            // which-in turn performs a more expensive change to the layout
+            if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
+              setShowHoverContent(true);
+            }
+          }, HOVER_INTENT_DELAY)
+        )
+      );
+    }, [setHoverTimeout, setShowHoverContent]);
 
     const onMouseLeave = useCallback(() => {
+      clearTimeout(hoverTimeout);
       setShowHoverContent(false);
-    }, []);
+    }, [hoverTimeout, setShowHoverContent]);
 
     const content = useMemo(
       () => (
@@ -90,6 +104,7 @@ export const WithHoverActions = React.memo<Props>(
           hasArrow={false}
           isOpen={isOpen}
           panelPaddingSize={!alwaysShow ? 's' : 'none'}
+          panelClassName="withHoverActions__popover"
         >
           {isOpen ? <>{hoverContent}</> : null}
         </WithHoverActionsPopover>
