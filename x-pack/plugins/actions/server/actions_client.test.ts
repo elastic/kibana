@@ -893,7 +893,7 @@ describe('update()', () => {
         },
         references: [],
       });
-      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: 'my-action',
         type: 'action',
         attributes: {
@@ -946,7 +946,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -972,16 +972,19 @@ describe('update()', () => {
       name: 'my name',
       config: {},
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
-        "my-action",
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {},
           "name": "my name",
           "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
         },
       ]
     `);
@@ -1043,7 +1046,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
@@ -1081,11 +1084,10 @@ describe('update()', () => {
         c: true,
       },
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
-        "my-action",
         Object {
           "actionTypeId": "my-action-type",
           "config": Object {
@@ -1095,6 +1097,10 @@ describe('update()', () => {
           },
           "name": "my name",
           "secrets": Object {},
+        },
+        Object {
+          "id": "my-action",
+          "overwrite": true,
         },
       ]
     `);
@@ -1118,7 +1124,7 @@ describe('update()', () => {
       },
       references: [],
     });
-    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {

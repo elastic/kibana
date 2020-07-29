@@ -85,6 +85,21 @@ describe('#isRegistered', () => {
   });
 });
 
+describe('#allowsExplicitIDs', () => {
+  it('correctly returns allowsExplicitIDs when the specified type is registered', () => {
+    service.registerType({
+      type: 'allowsExplicitIDs-type-1',
+      attributesToEncrypt: new Set(['attr-1']),
+      allowsExplicitIDs: true,
+    });
+    expect(service.allowsExplicitIDs('allowsExplicitIDs-type-1')).toBe(true);
+  });
+
+  it('correctly defaults to false when the specified type is not registered', () => {
+    expect(service.allowsExplicitIDs('unknown-type-1')).toBe(false);
+  });
+});
+
 describe('#stripOrDecryptAttributes', () => {
   it('does not strip attributes from unknown types', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };

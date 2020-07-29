@@ -13,6 +13,7 @@ import { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_
  */
 export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
+  public readonly allowsExplicitIDs: Readonly<boolean>;
   private readonly attributesToExcludeFromAAD: ReadonlySet<string> | undefined;
   private readonly attributesToStrip: ReadonlySet<string>;
 
@@ -34,6 +35,7 @@ export class EncryptedSavedObjectAttributesDefinition {
     this.attributesToEncrypt = attributesToEncrypt;
     this.attributesToStrip = attributesToStrip;
     this.attributesToExcludeFromAAD = typeRegistration.attributesToExcludeFromAAD;
+    this.allowsExplicitIDs = typeRegistration.allowsExplicitIDs ?? false;
   }
 
   /**

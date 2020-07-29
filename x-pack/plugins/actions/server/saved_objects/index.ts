@@ -30,6 +30,7 @@ export function setupSavedObjects(
     type: ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
     attributesToExcludeFromAAD: new Set(['name']),
+    allowsExplicitIDs: true,
   });
 
   savedObjects.registerType({

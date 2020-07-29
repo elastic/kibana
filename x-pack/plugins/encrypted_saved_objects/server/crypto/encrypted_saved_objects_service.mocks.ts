@@ -13,6 +13,7 @@ import {
 function createEncryptedSavedObjectsServiceMock() {
   return ({
     isRegistered: jest.fn(),
+    allowsExplicitIDs: jest.fn(),
     stripOrDecryptAttributes: jest.fn(),
     encryptAttributes: jest.fn(),
     decryptAttributes: jest.fn(),
@@ -49,6 +50,9 @@ export const encryptedSavedObjectsServiceMock = {
       return clonedAttrs;
     }
 
+    mock.allowsExplicitIDs.mockImplementation(
+      (type) => registrations.find((r) => r.type === type)?.allowsExplicitIDs ?? false
+    );
     mock.isRegistered.mockImplementation(
       (type) => registrations.findIndex((r) => r.type === type) >= 0
     );

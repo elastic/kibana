@@ -31,6 +31,7 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
+  readonly allowsExplicitIDs?: boolean;
 }
 
 /**
@@ -119,6 +120,14 @@ export class EncryptedSavedObjectsService {
    */
   public isRegistered(type: string) {
     return this.typeDefinitions.has(type);
+  }
+
+  /**
+   * Returns whether the type allows explciit IDs when creating a saved object
+   * resolves to `false` if the type is not registered
+   */
+  public allowsExplicitIDs(type: string) {
+    return this.typeDefinitions.get(type)?.allowsExplicitIDs ?? false;
   }
 
   /**
