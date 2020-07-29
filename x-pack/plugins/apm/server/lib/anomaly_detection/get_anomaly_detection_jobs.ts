@@ -14,7 +14,7 @@ export async function getAnomalyDetectionJobs(setup: Setup, logger: Logger) {
   const { ml } = setup;
 
   if (!ml) {
-    throw Boom.serverUnavailable(ML_ERRORS.ML_NOT_AVAILABLE);
+    throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
