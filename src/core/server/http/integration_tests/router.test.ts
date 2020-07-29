@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Stream } from 'stream';
+import { Stream, PassThrough } from 'stream';
 import Boom from 'boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
@@ -305,21 +305,55 @@ describe('Options', () => {
 
   describe('timeout', () => {
     describe('payload', () => {
-      it('should timeout if configured with a small timeout value for a POST', async () => {
+      it.only('should timeout if payload takes too long to send', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
+        innerServer.listener.on('request', () => {
+          console.log('REQUEST STARTED');
+        });
+
         router.post(
-          { path: '/a', validate: false, options: { timeout: { payload: 1000 } } },
+          {
+            options: {
+              body: {
+                accepts: ['application/json'],
+              },
+              timeout: { payload: 1000, idleSocket: 120000 },
+            },
+            path: '/a',
+            validate: false,
+          },
           async (context, req, res) => {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
             return res.ok({});
           }
         );
-        router.post({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+        // router.post({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
         await server.start();
-        expect(supertest(innerServer.listener).post('/a')).rejects.toThrow('socket hang up');
-        await supertest(innerServer.listener).post('/b').expect(200, {});
+
+        // start the request
+        const request = supertest(innerServer.listener)
+          .post('/a')
+          .set('Content-Type', 'application/json');
+
+        const response = new Promise((resolve, reject) => {
+          request.on('error', (err) => {
+            reject(err);
+          });
+
+          request.on('response', (res) => {
+            resolve(res);
+          });
+        });
+
+        // start writing some JSON, and just stop
+        const stream = new PassThrough();
+        stream.pipe(request);
+        stream.write('{ ');
+
+        // we shouldn't get a socket timeout, if we do it's because the socket timeout is hit
+        await expect(response).rejects.toThrowErrorMatchingInlineSnapshot();
+        // await supertest(innerServer.listener).post('/b').expect(200, {});
       });
 
       it('should timeout if configured with a small timeout value for a PUT', async () => {
