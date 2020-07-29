@@ -39,6 +39,7 @@ import {
 import { ILayer } from '../classes/layers/layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
+// @ts-expect-error
 import { turfBboxToBounds } from '../elasticsearch_geo_utils';
 
 export type DataRequestContext = {
