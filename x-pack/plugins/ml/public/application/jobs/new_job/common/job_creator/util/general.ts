@@ -22,12 +22,7 @@ import {
   mlCategory,
 } from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import {
-  JobCreatorType,
-  isMultiMetricJobCreator,
-  isPopulationJobCreator,
-  isCategorizationJobCreator,
-} from '../index';
+import { JobCreatorType } from '../index';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {
@@ -263,15 +258,6 @@ export function convertToMultiMetricJob(
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashCombinedJob(jobCreator, true, true);
-
-  let jobType = JOB_TYPE.SINGLE_METRIC;
-  if (isMultiMetricJobCreator(jobCreator)) {
-    jobType = JOB_TYPE.MULTI_METRIC;
-  } else if (isPopulationJobCreator(jobCreator)) {
-    jobType = JOB_TYPE.POPULATION;
-  } else if (isCategorizationJobCreator(jobCreator)) {
-    jobType = JOB_TYPE.CATEGORIZATION;
-  }
 
   navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
 }
