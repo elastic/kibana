@@ -58,10 +58,7 @@ export class MapsAppView extends React.Component {
       this._updateFromGlobalState
     );
 
-    const initAppState = this._appStateManager.getAppState();
-    if (initAppState.savedQuery) {
-      this._updateStateFromSavedQuery(initAppState.savedQuery);
-    }
+    this._updateStateFromSavedQuery(this._appStateManager.getAppState().savedQuery);
 
     this._initMap();
 
@@ -141,7 +138,7 @@ export class MapsAppView extends React.Component {
   async _updateIndexPatterns() {
     const { nextIndexPatternIds } = this.props;
 
-    if (nextIndexPatternIds === this._prevIndexPatternIds) {
+    if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       return;
     }
 
@@ -205,7 +202,9 @@ export class MapsAppView extends React.Component {
       mapStateJSON,
       appState: this._appStateManager.getAppState(),
     });
-    if (query) getData().query.setQuery(query);
+    if (query) {
+      getData().query.queryString.setQuery(query);
+    }
 
     this._onQueryChange({
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
