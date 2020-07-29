@@ -86,10 +86,13 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
   const maxDomain = _.maxBy(mappedFeatureImportance, (d) => d[1]);
   const minDomain = _.minBy(mappedFeatureImportance, (d) => d[1]);
   // adjust the height so it's compact for items with more features
-  const heightMultiplier = mappedFeatureImportance.length > 3 ? 20 : 50;
+  const heightMultiplier = mappedFeatureImportance.length > 3 ? 20 : 75;
   return (
-    <div style={{ height: mappedFeatureImportance.length * heightMultiplier }}>
-      <Chart className="story-chart">
+    <>
+      <Chart
+        className="story-chart"
+        size={{ height: mappedFeatureImportance.length * heightMultiplier }}
+      >
         <Settings rotation={90} />
         {baseline && (
           <LineAnnotation
@@ -127,6 +130,6 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
           data={mappedFeatureImportance}
         />
       </Chart>
-    </div>
+    </>
   );
 };
