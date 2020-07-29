@@ -168,7 +168,7 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
-    const incomingEmbeddable = embeddable
+    let incomingEmbeddable = embeddable
       .getStateTransfer(scopedHistory())
       .getIncomingEmbeddablePackage();
 
@@ -320,10 +320,6 @@ export class DashboardAppController {
       }
       return emptyScreenProps;
     };
-
-    let incomingEmbeddable = embeddable
-      .getStateTransfer(scopedHistory())
-      .getIncomingEmbeddablePackage({ keysToRemoveAfterFetch: ['id', 'type', 'input'] });
 
     const getDashboardInput = (): DashboardContainerInput => {
       const embeddablesMap: {

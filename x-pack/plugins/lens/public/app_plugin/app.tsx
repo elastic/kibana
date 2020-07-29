@@ -95,10 +95,6 @@ export function App({
   history,
   featureFlagConfig,
 }: LensAppProps) {
-  const language =
-    storage.get('kibana.userQueryLanguage') ||
-    core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
-
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
