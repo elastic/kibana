@@ -10,7 +10,22 @@ import { EmptyPage } from '../../../common/components/empty_page';
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 
-export const DetectionEngineNoIndex = React.memo(() => {
+const buildMessage = (needsListsIndex: boolean, needsSignalsIndex: boolean): string => {
+  if (needsSignalsIndex && needsListsIndex) {
+    return i18n.NEEDS_INDEX_PERMISSIONS(i18n.NEEDS_SIGNALS_AND_LISTS_INDEXES);
+  } else if (needsSignalsIndex) {
+    return i18n.NEEDS_INDEX_PERMISSIONS(i18n.NEEDS_SIGNALS_INDEX);
+  } else if (needsListsIndex) {
+    return i18n.NEEDS_INDEX_PERMISSIONS(i18n.NEEDS_LISTS_INDEXES);
+  } else {
+    return i18n.NEEDS_INDEX_PERMISSIONS('');
+  }
+};
+
+const DetectionEngineNoIndexComponent: React.FC<{
+  needsListsIndex: boolean;
+  needsSignalsIndex: boolean;
+}> = ({ needsListsIndex, needsSignalsIndex }) => {
   const docLinks = useKibana().services.docLinks;
   const actions = useMemo(
     () => ({
@@ -23,15 +38,16 @@ export const DetectionEngineNoIndex = React.memo(() => {
     }),
     [docLinks]
   );
+  const message = buildMessage(needsListsIndex, needsSignalsIndex);
 
   return (
     <EmptyPage
       actions={actions}
-      message={i18n.NO_INDEX_MSG_BODY}
       data-test-subj="no_index"
+      message={message}
       title={i18n.NO_INDEX_TITLE}
     />
   );
-});
+};
 
-DetectionEngineNoIndex.displayName = 'DetectionEngineNoIndex';
+export const DetectionEngineNoIndex = React.memo(DetectionEngineNoIndexComponent);
