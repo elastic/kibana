@@ -39,71 +39,105 @@ export const EnrollmentStepAgentConfig: React.FC<Props> = (props) => {
     enrollmentAPIKeyId?: string;
   }>({});
 
-  useEffect(() => {
-    if (agentConfigs && agentConfigs.length && !selectedState.agentConfigId) {
-      setSelectedState({
-        ...selectedState,
-        agentConfigId: agentConfigs[0].id,
-      });
-    }
-  }, [agentConfigs, selectedState]);
+  useEffect(
+    function triggerOnConfigChangeEffect() {
+      if (onConfigChange && selectedState.agentConfigId) {
+        onConfigChange(selectedState.agentConfigId);
+      }
+    },
+    [selectedState.agentConfigId, onConfigChange]
+  );
 
-  useEffect(() => {
-    if (onConfigChange && selectedState.agentConfigId) {
-      onConfigChange(selectedState.agentConfigId);
-    }
-  }, [selectedState.agentConfigId, onConfigChange]);
+  useEffect(
+    function triggerOnKeyChangeEffect() {
+      if (!withKeySelection || !onKeyChange) {
+        return;
+      }
 
-  useEffect(() => {
-    if (!withKeySelection) {
-      return;
-    }
-    if (!selectedState.agentConfigId) {
-      setEnrollmentAPIKeys([]);
-      return;
-    }
+      if (selectedState.enrollmentAPIKeyId) {
+        onKeyChange(selectedState.enrollmentAPIKeyId);
+      }
+    },
+    [withKeySelection, onKeyChange, selectedState.enrollmentAPIKeyId]
+  );
 
-    async function fetchEnrollmentAPIKeys() {
-      try {
-        const res = await sendGetEnrollmentAPIKeys({
-          page: 1,
-          perPage: 10000,
-        });
-        if (res.error) {
-          throw res.error;
+  useEffect(
+    function useDefaultConfigEffect() {
+      if (agentConfigs && agentConfigs.length && !selectedState.agentConfigId) {
+        const defaultConfig = agentConfigs.find((config) => config.is_default);
+        if (defaultConfig) {
+          setSelectedState({
+            ...selectedState,
+            agentConfigId: defaultConfig.id,
+          });
         }
+      }
+    },
+    [agentConfigs, selectedState]
+  );
 
-        if (!res.data) {
-          throw new Error('No data while fetching enrollment API keys');
+  useEffect(
+    function useEnrollmentKeysForConfigEffect() {
+      if (!withKeySelection) {
+        return;
+      }
+      if (!selectedState.agentConfigId) {
+        setEnrollmentAPIKeys([]);
+        return;
+      }
+
+      async function fetchEnrollmentAPIKeys() {
+        try {
+          const res = await sendGetEnrollmentAPIKeys({
+            page: 1,
+            perPage: 10000,
+          });
+          if (res.error) {
+            throw res.error;
+          }
+
+          if (!res.data) {
+            throw new Error('No data while fetching enrollment API keys');
+          }
+
+          setEnrollmentAPIKeys(
+            res.data.list.filter((key) => key.config_id === selectedState.agentConfigId)
+          );
+        } catch (error) {
+          notifications.toasts.addError(error, {
+            title: 'Error',
+          });
         }
+      }
+      fetchEnrollmentAPIKeys();
+    },
+    [withKeySelection, selectedState.agentConfigId, notifications.toasts]
+  );
 
-        setEnrollmentAPIKeys(
-          res.data.list.filter((key) => key.config_id === selectedState.agentConfigId)
-        );
-      } catch (error) {
-        notifications.toasts.addError(error, {
-          title: 'Error',
+  useEffect(
+    function useDefaultEnrollmentKeyForConfigEffect() {
+      if (!withKeySelection) {
+        return;
+      }
+      if (
+        !selectedState.enrollmentAPIKeyId &&
+        enrollmentAPIKeys.length > 0 &&
+        enrollmentAPIKeys[0].config_id === selectedState.agentConfigId
+      ) {
+        const enrollmentAPIKeyId = enrollmentAPIKeys[0].id;
+        setSelectedState({
+          agentConfigId: selectedState.agentConfigId,
+          enrollmentAPIKeyId,
         });
       }
-    }
-    fetchEnrollmentAPIKeys();
-  }, [withKeySelection, selectedState.agentConfigId, notifications.toasts]);
-
-  // Select first API key when config change
-  React.useEffect(() => {
-    if (!withKeySelection || !onKeyChange) {
-      return;
-    }
-    if (!selectedState.enrollmentAPIKeyId && enrollmentAPIKeys.length > 0) {
-      const enrollmentAPIKeyId = enrollmentAPIKeys[0].id;
-      setSelectedState({
-        agentConfigId: selectedState.agentConfigId,
-        enrollmentAPIKeyId,
-      });
-      onKeyChange(enrollmentAPIKeyId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enrollmentAPIKeys, selectedState.enrollmentAPIKeyId, selectedState.agentConfigId]);
+    },
+    [
+      withKeySelection,
+      enrollmentAPIKeys,
+      selectedState.enrollmentAPIKeyId,
+      selectedState.agentConfigId,
+    ]
+  );
 
   return (
     <>
@@ -174,7 +208,6 @@ export const EnrollmentStepAgentConfig: React.FC<Props> = (props) => {
                     ...selectedState,
                     enrollmentAPIKeyId: e.target.value,
                   });
-                  onKeyChange(e.target.value);
                 }}
               />
             </>
