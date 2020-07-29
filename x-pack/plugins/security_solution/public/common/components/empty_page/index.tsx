@@ -51,16 +51,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
         .filter((a) => a.label && a.url)
         .map(
           (
-            {
-              icon,
-              label,
-              target,
-              url,
-              descriptionTitle = false,
-              description = false,
-              onClick,
-              fill = true,
-            },
+            { icon, label, target, url, descriptionTitle, description, onClick, fill = true },
             idx
           ) =>
             descriptionTitle != null || description != null ? (
@@ -70,8 +61,8 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
                 key={`empty-page-${titles[idx]}-action`}
               >
                 <EuiCard
-                  title={descriptionTitle}
-                  description={description}
+                  title={descriptionTitle ?? false}
+                  description={description ?? false}
                   footer={
                     /* eslint-disable-next-line @elastic/eui/href-or-on-click */
                     <EuiButton
