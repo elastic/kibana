@@ -334,7 +334,7 @@ class AgentConfigService {
       throw new Error('Agent configuration not found');
     }
 
-    const defaultConfigId = await this.getDefaultAgentConfigId(soClient);
+    const { id: defaultConfigId } = await this.ensureDefaultAgentConfig(soClient);
     if (id === defaultConfigId) {
       throw new Error('The default agent configuration cannot be deleted');
     }

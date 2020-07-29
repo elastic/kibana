@@ -5,7 +5,7 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import Boom from 'boom';
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { appContextService, packageConfigService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages';
 import {
@@ -48,8 +48,12 @@ export const getOnePackageConfigHandler: RequestHandler<TypeOf<
   typeof GetOnePackageConfigRequestSchema.params
 >> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const { packageConfigId } = request.params;
+  const notFoundResponse = () =>
+    response.notFound({ body: { message: `Package config ${packageConfigId} not found` } });
+
   try {
-    const packageConfig = await packageConfigService.get(soClient, request.params.packageConfigId);
+    const packageConfig = await packageConfigService.get(soClient, packageConfigId);
     if (packageConfig) {
       return response.ok({
         body: {
@@ -57,16 +61,17 @@ export const getOnePackageConfigHandler: RequestHandler<TypeOf<
         },
       });
     } else {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Package config not found' },
-      });
+      return notFoundResponse();
     }
   } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      return notFoundResponse();
+    } else {
+      return response.customError({
+        statusCode: 500,
+        body: { message: e.message },
+      });
+    }
   }
 };
 
