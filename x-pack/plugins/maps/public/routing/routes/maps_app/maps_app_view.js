@@ -24,7 +24,7 @@ import {
 import { AppStateManager } from '../../state_syncing/app_state_manager';
 import { startAppStateSyncing } from '../../state_syncing/app_sync';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
-import { GisMap } from '../../../connected_components/gis_map';
+import { MapContainer } from '../../../connected_components/map_container';
 import { goToSpecifiedPath } from '../../maps_router';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 
@@ -342,7 +342,7 @@ export class MapsAppView extends React.Component {
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
-          <GisMap
+          <MapContainer
             addFilters={(newFilters) => {
               newFilters.forEach((filter) => {
                 filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
