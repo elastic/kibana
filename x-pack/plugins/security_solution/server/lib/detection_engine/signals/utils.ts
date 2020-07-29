@@ -15,6 +15,7 @@ import { ListArrayOrUndefined } from '../../../../common/detection_engine/schema
 import { BulkResponse, BulkResponseErrorAggregation, isValidUnit } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
+import { MAX_EXCEPTION_LIST_SIZE } from '../../../../../lists/common/constants';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -183,7 +184,7 @@ export const getExceptions = async ({
                   listId: foundList.list_id,
                   namespaceType,
                   page: 1,
-                  perPage: 10000,
+                  perPage: MAX_EXCEPTION_LIST_SIZE,
                   filter: undefined,
                   sortOrder: undefined,
                   sortField: undefined,

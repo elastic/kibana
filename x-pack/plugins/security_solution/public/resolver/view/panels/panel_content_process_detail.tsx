@@ -39,7 +39,7 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
 
 /**
  * A description list view of all the Metadata that goes with a particular process event, like:
- * Created, Pid, User/Domain, etc.
+ * Created, PID, User/Domain, etc.
  */
 export const ProcessDetails = memo(function ProcessDetails({
   processEvent,
