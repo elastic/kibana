@@ -65,6 +65,10 @@ export const uploadSuccessMessage = (fileName: string) =>
     values: { fileName },
   });
 
+export const EXPORT_ERROR = i18n.translate('xpack.securitySolution.lists.valueListsExportError', {
+  defaultMessage: 'There was an error exporting the value list.',
+});
+
 export const COLUMN_FILE_NAME = i18n.translate(
   'xpack.securitySolution.lists.valueListsTable.fileNameColumn',
   {
