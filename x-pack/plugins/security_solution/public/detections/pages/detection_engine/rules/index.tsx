@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -204,14 +204,16 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="open-value-lists-modal-button"
-                iconType="importAction"
-                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
-                onClick={showValueListsModal}
-              >
-                {i18n.UPLOAD_VALUE_LISTS}
-              </EuiButton>
+              <EuiToolTip position="top" content={i18n.UPLOAD_VALUE_LISTS_TOOLTIP}>
+                <EuiButton
+                  data-test-subj="open-value-lists-modal-button"
+                  iconType="importAction"
+                  isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                  onClick={showValueListsModal}
+                >
+                  {i18n.UPLOAD_VALUE_LISTS}
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
