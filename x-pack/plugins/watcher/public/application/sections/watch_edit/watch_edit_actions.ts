@@ -67,7 +67,7 @@ export async function saveWatch(watch: BaseWatch, toasts: ToastsSetup): Promise<
     await createWatch(watch);
     toasts.addSuccess(
       i18n.translate('xpack.watcher.sections.watchEdit.json.saveSuccessNotificationText', {
-        defaultMessage: "Saved '{watchDisplayName}'",
+        defaultMessage: watch.isNew ? "Created '{watchDisplayName}'" : "Saved '{watchDisplayName}'",
         values: {
           watchDisplayName: watch.displayName,
         },
