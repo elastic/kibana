@@ -79,12 +79,10 @@ export class BaseWatch {
   };
 
   get displayName() {
-    if (this.isNew) {
-      if (this.name) {
-        return this.name;
-      } else {
-        return this.id;
-      }
+    if (this.name) {
+      return this.name;
+    } else {
+      return this.id;
     }
   }
 
