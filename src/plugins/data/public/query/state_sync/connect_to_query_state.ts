@@ -35,14 +35,23 @@ export const connectToQueryState = <S extends QueryState>(
   {
     timefilter: { timefilter },
     filterManager,
+    queryString,
     state$,
-  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'state$'>,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
   stateContainer: BaseStateContainer<S>,
-  syncConfig: { time?: boolean; refreshInterval?: boolean; filters?: FilterStateStore | boolean }
+  syncConfig: {
+    time?: boolean;
+    refreshInterval?: boolean;
+    filters?: FilterStateStore | boolean;
+    query?: boolean;
+  }
 ) => {
   const syncKeys: Array<keyof QueryStateChange> = [];
   if (syncConfig.time) {
     syncKeys.push('time');
+  }
+  if (syncConfig.query) {
+    syncKeys.push('query');
   }
   if (syncConfig.refreshInterval) {
     syncKeys.push('refreshInterval');
@@ -133,6 +142,9 @@ export const connectToQueryState = <S extends QueryState>(
           if (syncConfig.time && changes.time) {
             newState.time = timefilter.getTime();
           }
+          if (syncConfig.query && changes.query) {
+            newState.query = queryString.getQuery();
+          }
           if (syncConfig.refreshInterval && changes.refreshInterval) {
             newState.refreshInterval = timefilter.getRefreshInterval();
           }
@@ -170,6 +182,13 @@ export const connectToQueryState = <S extends QueryState>(
         const refreshInterval = state.refreshInterval || timefilter.getRefreshIntervalDefaults();
         if (!_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
           timefilter.setRefreshInterval(_.cloneDeep(refreshInterval));
+        }
+      }
+
+      if (syncConfig.query) {
+        const curQuery = state.query || queryString.getQuery();
+        if (!_.isEqual(curQuery, queryString.getQuery())) {
+          queryString.setQuery(_.cloneDeep(curQuery));
         }
       }
 

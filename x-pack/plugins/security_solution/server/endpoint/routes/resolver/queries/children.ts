@@ -75,6 +75,18 @@ export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
               },
             },
             {
+              exists: {
+                field: 'process.entity_id',
+              },
+            },
+            {
+              bool: {
+                must_not: {
+                  term: { 'process.entity_id': '' },
+                },
+              },
+            },
+            {
               term: { 'event.category': 'process' },
             },
             {
