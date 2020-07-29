@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
 import { Popover } from '../popover';
@@ -20,7 +20,7 @@ interface Props {
   ariaLabel?: string;
 }
 
-export const ShapePickerPopover = ({ shapes, onChange, value, ariaLabel }: Props) => {
+export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLabel }) => {
   const button = (handleClick: React.MouseEventHandler<any>) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
       <EuiLink aria-label={ariaLabel} style={{ fontSize: 0 }} onClick={handleClick}>
@@ -37,7 +37,8 @@ export const ShapePickerPopover = ({ shapes, onChange, value, ariaLabel }: Props
 };
 
 ShapePickerPopover.propTypes = {
+  ariaLabel: PropTypes.string,
+  onChange: PropTypes.func,
   shapes: PropTypes.object.isRequired,
   value: PropTypes.string,
-  onChange: PropTypes.func,
 };

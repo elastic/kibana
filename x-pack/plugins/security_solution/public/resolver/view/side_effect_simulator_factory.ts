@@ -11,12 +11,13 @@ import { SideEffectSimulator } from '../types';
  * Create mock `SideEffectors` for `SideEffectContext.Provider`. The `control`
  * object is used to control the mocks.
  */
-export const sideEffectSimulator: () => SideEffectSimulator = () => {
+export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
   // The set of mock `ResizeObserver` instances that currently exist
   const resizeObserverInstances: Set<MockResizeObserver> = new Set();
 
   // A map of `Element`s to their fake `DOMRect`s
-  const contentRects: Map<Element, DOMRect> = new Map();
+  // Use a `WeakMap` since elements can be removed from the DOM.
+  const contentRects: WeakMap<Element, DOMRect> = new Map();
 
   /**
    * Simulate an element's size changing. This will trigger any `ResizeObserverCallback`s which
