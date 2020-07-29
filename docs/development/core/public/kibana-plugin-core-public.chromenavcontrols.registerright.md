@@ -4,7 +4,7 @@
 
 ## ChromeNavControls.registerRight() method
 
-Register a nav control to be presented on the right side of the chrome header.
+Register a nav control to be presented on the top-right side of the chrome header.
 
 <b>Signature:</b>
 
