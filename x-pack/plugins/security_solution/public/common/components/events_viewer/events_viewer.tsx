@@ -222,6 +222,7 @@ const EventsViewerComponent: React.FC<Props> = ({
             sourceId="default"
             startDate={start}
             endDate={end}
+            queryDeduplication="events_viewer"
           >
             {({
               events,
