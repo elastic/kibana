@@ -177,7 +177,12 @@ export const formatAboutStepData = (
     ...(isAssociatedToEndpointList
       ? {
           exceptions_list: [
-            { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
+            {
+              id: ENDPOINT_LIST_ID,
+              list_id: ENDPOINT_LIST_ID,
+              namespace_type: 'agnostic',
+              type: 'endpoint',
+            },
             ...detectionExceptionLists,
           ] as AboutStepRuleJson['exceptions_list'],
         }
@@ -189,10 +194,14 @@ export const formatAboutStepData = (
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
     risk_score: riskScore.value,
-    risk_score_mapping: riskScore.mapping,
+    risk_score_mapping: riskScore.isMappingChecked
+      ? riskScore.mapping.filter((m) => m.field != null && m.field !== '')
+      : [],
     rule_name_override: ruleNameOverride !== '' ? ruleNameOverride : undefined,
     severity: severity.value,
-    severity_mapping: severity.mapping,
+    severity_mapping: severity.isMappingChecked
+      ? severity.mapping.filter((m) => m.field != null && m.field !== '' && m.value != null)
+      : [],
     threat: threat
       .filter((singleThreat) => singleThreat.tactic.name !== 'none')
       .map((singleThreat) => ({

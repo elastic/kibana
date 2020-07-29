@@ -83,7 +83,7 @@ describe('Overview', () => {
             </MemoryRouter>
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="empty-page-secondary-action"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(false);
       });
 
       it('shows Endpoint get ready button when ingest is enabled', () => {
@@ -95,7 +95,7 @@ describe('Overview', () => {
             </MemoryRouter>
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="empty-page-secondary-action"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(true);
       });
     });
 
