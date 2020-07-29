@@ -17,19 +17,17 @@
  * under the License.
  */
 import { PluginFunctionalProviderContext } from '../../services';
+import '../../plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
-  describe('core plugins', () => {
-    loadTestFile(require.resolve('./applications'));
-    loadTestFile(require.resolve('./elasticsearch_client'));
-    loadTestFile(require.resolve('./legacy_plugins'));
-    loadTestFile(require.resolve('./server_plugins'));
-    loadTestFile(require.resolve('./ui_plugins'));
-    loadTestFile(require.resolve('./ui_settings'));
-    loadTestFile(require.resolve('./top_nav'));
-    loadTestFile(require.resolve('./application_leave_confirm'));
-    loadTestFile(require.resolve('./application_status'));
-    loadTestFile(require.resolve('./rendering'));
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+  const supertest = getService('supertest');
+  describe('elasticsearch client', () => {
+    it('server plugins have access to elasticsearch client via request context', async () => {
+      await supertest.get('/api/elasticsearch_client_plugin/context/ping').expect(200, 'true');
+    });
+    it('server plugins have access to elasticsearch client via core contract', async () => {
+      await supertest.get('/api/elasticsearch_client_plugin/contract/ping').expect(200, 'true');
+    });
   });
 }
