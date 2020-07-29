@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function DiscoverPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -51,19 +49,20 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async saveSearch(searchName: string) {
-      log.debug('saveSearch');
       await this.clickSaveSearchButton();
-      await testSubjects.setValue('savedObjectTitle', searchName);
-      await testSubjects.click('confirmSaveSavedObjectButton');
-      await header.waitUntilLoadingHasFinished();
+      // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
+      await retry.waitFor(`saved search can be persisted name ${searchName}`, async () => {
+        await testSubjects.setValue('savedObjectTitle', searchName);
+        await testSubjects.click('confirmSaveSavedObjectButton');
+        return (await header.isGlobalLoadingIndicatorVisible()) === true;
+      });
       // LeeDr - this additional checking for the saved search name was an attempt
       // to cause this method to wait for the reloading of the page to complete so
       // that the next action wouldn't have to retry.  But it doesn't really solve
       // that issue.  But it does typically take about 3 retries to
       // complete with the expected searchName.
-      await retry.try(async () => {
-        const name = await this.getCurrentQueryName();
-        expect(name).to.be(searchName);
+      await retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
+        return (await this.getCurrentQueryName()) === searchName;
       });
     }
 
@@ -96,11 +95,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
       // We need this try loop here because previous actions in Discover like
       // saving a search cause reloading of the page and the "Open" menu item goes stale.
-      await retry.try(async () => {
+      await retry.waitFor('saved search panel is opened', async () => {
         await this.clickLoadSavedSearchButton();
         await header.waitUntilLoadingHasFinished();
         isOpen = await testSubjects.exists('loadSearchForm');
-        expect(isOpen).to.be(true);
+        return isOpen === true;
       });
     }
 
