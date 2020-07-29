@@ -132,6 +132,7 @@ function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataPar
       terms: {
         field: 'event.dataset',
         size: 4,
+        missing: 'unknown',
       },
       aggs: {
         series: {
