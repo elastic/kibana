@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useAlertPrefillContext } from '../../use_alert_prefill';
 import { AlertFlyout } from './alert_flyout';
+import { ManageAlertsContextMenuItem } from '../../inventory/components/manage_alerts_context_menu_item';
 
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -35,15 +36,7 @@ export const MetricsAlertDropdown = () => {
           defaultMessage="Create alert"
         />
       </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        icon="tableOfContents"
-        key="manageLink"
-        href={kibana.services?.application?.getUrlForApp(
-          'management/insightsAndAlerting/triggersActions/alerts'
-        )}
-      >
-        <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage alerts" />
-      </EuiContextMenuItem>,
+      <ManageAlertsContextMenuItem />,
     ];
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [kibana.services]);
