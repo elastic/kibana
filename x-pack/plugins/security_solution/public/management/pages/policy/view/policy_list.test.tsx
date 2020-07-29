@@ -7,10 +7,7 @@
 import React from 'react';
 import { PolicyList } from './index';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import {
-  policyListApiPathHandlers,
-  setPolicyListApiMockImplementation,
-} from '../store/policy_list/test_mock_utils';
+import { setPolicyListApiMockImplementation } from '../store/policy_list/test_mock_utils';
 
 jest.mock('../../../../common/components/link_to');
 
