@@ -9,7 +9,7 @@ import { NotificationsSetup } from 'src/core/public';
 import { OnFormUpdateArg } from '../../../shared_imports';
 import { ApiService } from '../../services';
 import { SerializeResult } from './serialize';
-import { OnActionHandler, ProcessorInfo } from './components/processors_tree';
+import { OnActionHandler, ProcessorInfo } from './components';
 import { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
 
 export interface Links {

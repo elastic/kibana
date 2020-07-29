@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiModal,
@@ -19,8 +19,8 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
-import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import {
@@ -35,15 +35,17 @@ import { ExceptionBuilder } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
-  enrichExceptionItemsWithComments,
+  enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
   getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
 } from '../helpers';
+import { Loader } from '../../loader';
 
 interface EditExceptionModalProps {
   ruleName: string;
+  ruleIndices: string[];
   exceptionItem: ExceptionListItemSchema;
   exceptionListType: ExceptionListType;
   onCancel: () => void;
@@ -57,10 +59,8 @@ const Modal = styled(EuiModal)`
 `;
 
 const ModalHeader = styled(EuiModalHeader)`
-  ${({ theme }) => css`
-    flex-direction: column;
-    align-items: flex-start;
-  `}
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const ModalHeaderSubtitle = styled.div`
@@ -81,6 +81,7 @@ const ModalBodySection = styled.section`
 
 export const EditExceptionModal = memo(function EditExceptionModal({
   ruleName,
+  ruleIndices,
   exceptionItem,
   exceptionListType,
   onCancel,
@@ -88,6 +89,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 }: EditExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
+  const [hasVersionConflict, setHasVersionConflict] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
@@ -95,15 +97,23 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const [
+    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
+  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
 
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    signalIndexName !== null ? [signalIndexName] : []
+  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    ruleIndices,
+    'rules'
   );
 
   const onError = useCallback(
     (error) => {
-      addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
-      onCancel();
+      if (error.message.includes('Conflict')) {
+        setHasVersionConflict(true);
+      } else {
+        addError(error, { title: i18n.EDIT_EXCEPTION_ERROR });
+        onCancel();
+      }
     },
     [addError, onCancel]
   );
@@ -121,18 +131,19 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   );
 
   useEffect(() => {
-    if (indexPatternLoading === false && isSignalIndexLoading === false) {
+    if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
+          exceptionItemsToAdd.length === 0
       );
     }
   }, [
     setShouldDisableBulkClose,
     exceptionItemsToAdd,
-    indexPatternLoading,
+    isSignalIndexPatternLoading,
     isSignalIndexLoading,
-    indexPatterns,
+    signalIndexPatterns,
   ]);
 
   useEffect(() => {
@@ -140,6 +151,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       setShouldBulkCloseAlert(false);
     }
   }, [shouldDisableBulkClose]);
+
+  const isSubmitButtonDisabled = useMemo(
+    () => exceptionItemsToAdd.every((item) => item.entries.length === 0) || hasVersionConflict,
+    [exceptionItemsToAdd, hasVersionConflict]
+  );
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -167,11 +183,15 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   );
 
   const enrichExceptionItems = useCallback(() => {
-    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
-    enriched = enrichExceptionItemsWithComments(exceptionItemsToAdd, [
-      ...(exceptionItem.comments ? exceptionItem.comments : []),
-      ...(comment !== '' ? [{ comment }] : []),
-    ]);
+    const [exceptionItemToEdit] = exceptionItemsToAdd;
+    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [
+      {
+        ...enrichExistingExceptionItemWithComments(exceptionItemToEdit, [
+          ...exceptionItem.comments,
+          ...(comment.trim() !== '' ? [{ comment }] : []),
+        ]),
+      },
+    ];
     if (exceptionListType === 'endpoint') {
       const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
       enriched = enrichExceptionItemsWithOS(enriched, osTypes);
@@ -187,15 +207,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     }
   }, [addOrUpdateExceptionItems, enrichExceptionItems, shouldBulkCloseAlert, signalIndexName]);
 
-  const indexPatternConfig = useCallback(() => {
-    if (exceptionListType === 'endpoint') {
-      return [alertsIndexPattern];
-    }
-    return signalIndexName ? [signalIndexName] : [];
-  }, [exceptionListType, signalIndexName]);
-
   return (
-    <EuiOverlayMask>
+    <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
           <EuiModalHeaderTitle>{i18n.EDIT_EXCEPTION_TITLE}</EuiModalHeaderTitle>
@@ -204,7 +217,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           </ModalHeaderSubtitle>
         </ModalHeader>
 
-        {!isSignalIndexLoading && (
+        {(addExceptionIsLoading || isIndexPatternLoading || isSignalIndexLoading) && (
+          <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
+        )}
+
+        {!isSignalIndexLoading && !addExceptionIsLoading && !isIndexPatternLoading && (
           <>
             <ModalBodySection className="builder-section">
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
@@ -215,13 +232,13 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 listId={exceptionItem.list_id}
                 listNamespaceType={exceptionItem.namespace_type}
                 ruleName={ruleName}
-                isLoading={false}
-                isOrDisabled={false}
+                isOrDisabled
                 isAndDisabled={false}
+                isNestedDisabled={false}
                 data-test-subj="edit-exception-modal-builder"
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
-                indexPatternConfig={indexPatternConfig()}
+                indexPatterns={indexPatterns}
               />
 
               <EuiSpacer />
@@ -256,10 +273,23 @@ export const EditExceptionModal = memo(function EditExceptionModal({
           </>
         )}
 
+        {hasVersionConflict && (
+          <ModalBodySection>
+            <EuiCallOut title={i18n.VERSION_CONFLICT_ERROR_TITLE} color="danger" iconType="alert">
+              <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
+            </EuiCallOut>
+          </ModalBodySection>
+        )}
+
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
-          <EuiButton onClick={onEditExceptionConfirm} isLoading={addExceptionIsLoading} fill>
+          <EuiButton
+            onClick={onEditExceptionConfirm}
+            isLoading={addExceptionIsLoading}
+            isDisabled={isSubmitButtonDisabled}
+            fill
+          >
             {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
           </EuiButton>
         </EuiModalFooter>

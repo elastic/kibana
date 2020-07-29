@@ -165,5 +165,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // legend item(s), so we're using a class selector here.
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
     });
+
+    it('should switch from a multi-layer stacked bar to a multi-layer line chart', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.createLayer();
+
+      expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
+
+      await PageObjects.lens.switchToVisualization('line');
+
+      expect(await PageObjects.lens.getLayerCount()).to.eql(2);
+    });
   });
 }

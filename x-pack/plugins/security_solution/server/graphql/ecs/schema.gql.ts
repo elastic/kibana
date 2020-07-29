@@ -8,6 +8,7 @@ import gql from 'graphql-tag';
 
 export const ecsSchema = gql`
   scalar ToStringArray
+  scalar ToStringArrayNoNullable
 
   type EventEcsFields {
     action: ToStringArray

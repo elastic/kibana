@@ -74,7 +74,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreSetup](./kibana-plugin-core-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-core-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [CoreStatus](./kibana-plugin-core-server.corestatus.md) | Status of core services. |
+|  [CountResponse](./kibana-plugin-core-server.countresponse.md) |  |
 |  [CustomHttpResponseOptions](./kibana-plugin-core-server.customhttpresponseoptions.md) | HTTP response parameters for a response with adjustable status code. |
+|  [DeleteDocumentResponse](./kibana-plugin-core-server.deletedocumentresponse.md) |  |
 |  [DeprecationAPIClientParams](./kibana-plugin-core-server.deprecationapiclientparams.md) |  |
 |  [DeprecationAPIResponse](./kibana-plugin-core-server.deprecationapiresponse.md) |  |
 |  [DeprecationInfo](./kibana-plugin-core-server.deprecationinfo.md) |  |
@@ -85,7 +87,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchStatusMeta](./kibana-plugin-core-server.elasticsearchstatusmeta.md) |  |
 |  [EnvironmentMode](./kibana-plugin-core-server.environmentmode.md) |  |
 |  [ErrorHttpResponseOptions](./kibana-plugin-core-server.errorhttpresponseoptions.md) | HTTP response parameters |
+|  [Explanation](./kibana-plugin-core-server.explanation.md) |  |
 |  [FakeRequest](./kibana-plugin-core-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
+|  [GetResponse](./kibana-plugin-core-server.getresponse.md) |  |
 |  [HttpAuth](./kibana-plugin-core-server.httpauth.md) |  |
 |  [HttpResources](./kibana-plugin-core-server.httpresources.md) | HttpResources service is responsible for serving static &amp; dynamic assets for Kibana application via HTTP. Provides API allowing plug-ins to respond with: - a pre-configured HTML page bootstrapping Kibana client app - custom HTML page - custom JS script file. |
 |  [HttpResourcesRenderOptions](./kibana-plugin-core-server.httpresourcesrenderoptions.md) | Allows to configure HTTP response parameters |
@@ -122,7 +126,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [OnPreResponseExtensions](./kibana-plugin-core-server.onpreresponseextensions.md) | Additional data to extend a response. |
 |  [OnPreResponseInfo](./kibana-plugin-core-server.onpreresponseinfo.md) | Response status code. |
-|  [OnPreResponseToolkit](./kibana-plugin-core-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreRouting interceptor for incoming request. |
+|  [OnPreResponseToolkit](./kibana-plugin-core-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreResponse interceptor for incoming request. |
 |  [OnPreRoutingToolkit](./kibana-plugin-core-server.onpreroutingtoolkit.md) | A tool set defining an outcome of OnPreRouting interceptor for incoming request. |
 |  [OpsMetrics](./kibana-plugin-core-server.opsmetrics.md) | Regroups metrics gathered by all the collectors. This contains metrics about the os/runtime, the kibana process and the http server. |
 |  [OpsOsMetrics](./kibana-plugin-core-server.opsosmetrics.md) | OS related metrics |
@@ -189,11 +193,14 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsTypeMappingDefinition](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) | Describe a saved object type mapping. |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-core-server.savedobjectsupdateresponse.md) |  |
+|  [SearchResponse](./kibana-plugin-core-server.searchresponse.md) |  |
 |  [ServiceStatus](./kibana-plugin-core-server.servicestatus.md) | The current status of a service at a point in time. |
 |  [SessionCookieValidationResult](./kibana-plugin-core-server.sessioncookievalidationresult.md) | Return type from a function to validate cookie contents. |
 |  [SessionStorage](./kibana-plugin-core-server.sessionstorage.md) | Provides an interface to store and retrieve data across requests. |
 |  [SessionStorageCookieOptions](./kibana-plugin-core-server.sessionstoragecookieoptions.md) | Configuration used to create HTTP session storage based on top of cookie mechanism. |
 |  [SessionStorageFactory](./kibana-plugin-core-server.sessionstoragefactory.md) | SessionStorage factory to bind one to an incoming request |
+|  [ShardsInfo](./kibana-plugin-core-server.shardsinfo.md) |  |
+|  [ShardsResponse](./kibana-plugin-core-server.shardsresponse.md) |  |
 |  [StatusServiceSetup](./kibana-plugin-core-server.statusservicesetup.md) | API for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status. |
 |  [StringValidationRegex](./kibana-plugin-core-server.stringvalidationregex.md) | StringValidation with regex object |
 |  [StringValidationRegexString](./kibana-plugin-core-server.stringvalidationregexstring.md) | StringValidation as regex string |
@@ -228,6 +235,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ConfigDeprecationProvider](./kibana-plugin-core-server.configdeprecationprovider.md) | A provider that should returns a list of [ConfigDeprecation](./kibana-plugin-core-server.configdeprecation.md)<!-- -->.<!-- -->See [ConfigDeprecationFactory](./kibana-plugin-core-server.configdeprecationfactory.md) for more usage examples. |
 |  [ConfigPath](./kibana-plugin-core-server.configpath.md) |  |
 |  [DestructiveRouteMethod](./kibana-plugin-core-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
+|  [ElasticsearchClient](./kibana-plugin-core-server.elasticsearchclient.md) | Client used to query the elasticsearch cluster. |
 |  [Freezable](./kibana-plugin-core-server.freezable.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-core-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-core-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |

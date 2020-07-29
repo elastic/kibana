@@ -22,7 +22,7 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_ITEM_URL,
       validate: {

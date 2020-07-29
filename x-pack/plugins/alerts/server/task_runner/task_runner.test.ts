@@ -14,7 +14,7 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
-import { alertsMock } from '../mocks';
+import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
@@ -25,7 +25,7 @@ const alertType = {
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   executor: jest.fn(),
-  producer: 'alerting',
+  producer: 'alerts',
 };
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -56,8 +56,8 @@ describe('Task Runner', () => {
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
   const services = alertsMock.createAlertServices();
-  const savedObjectsClient = services.savedObjectsClient;
   const actionsClient = actionsClientMock.create();
+  const alertsClient = alertsClientMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -65,6 +65,7 @@ describe('Task Runner', () => {
   } = {
     getServices: jest.fn().mockReturnValue(services),
     actionsPlugin: actionsMock.createStart(),
+    getAlertsClientWithRequest: jest.fn().mockReturnValue(alertsClient),
     encryptedSavedObjectsClient,
     logger: loggingSystemMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
@@ -74,34 +75,31 @@ describe('Task Runner', () => {
 
   const mockedAlertTypeSavedObject = {
     id: '1',
-    type: 'alert',
-    attributes: {
-      enabled: true,
-      alertTypeId: '123',
-      schedule: { interval: '10s' },
-      name: 'alert-name',
-      tags: ['alert-', '-tags'],
-      createdBy: 'alert-creator',
-      updatedBy: 'alert-updater',
-      mutedInstanceIds: [],
-      params: {
-        bar: true,
-      },
-      actions: [
-        {
-          group: 'default',
-          actionRef: 'action_0',
-          params: {
-            foo: true,
-          },
-        },
-      ],
+    consumer: 'bar',
+    createdAt: new Date('2019-02-12T21:01:22.479Z'),
+    updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+    throttle: null,
+    muteAll: false,
+    enabled: true,
+    alertTypeId: '123',
+    apiKeyOwner: 'elastic',
+    schedule: { interval: '10s' },
+    name: 'alert-name',
+    tags: ['alert-', '-tags'],
+    createdBy: 'alert-creator',
+    updatedBy: 'alert-updater',
+    mutedInstanceIds: [],
+    params: {
+      bar: true,
     },
-    references: [
+    actions: [
       {
-        name: 'action_0',
-        type: 'action',
+        group: 'default',
         id: '1',
+        actionTypeId: 'action',
+        params: {
+          foo: true,
+        },
       },
     ],
   };
@@ -109,6 +107,7 @@ describe('Task Runner', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     taskRunnerFactoryInitializerParams.getServices.mockReturnValue(services);
+    taskRunnerFactoryInitializerParams.getAlertsClientWithRequest.mockReturnValue(alertsClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
     );
@@ -126,7 +125,7 @@ describe('Task Runner', () => {
       },
       taskRunnerFactoryInitializerParams
     );
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -200,7 +199,7 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -285,7 +284,7 @@ describe('Task Runner', () => {
         ],
       },
       message:
-        "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: undefined:1",
+        "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
     });
   });
 
@@ -302,7 +301,7 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -412,7 +411,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: undefined:1",
+            "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
           },
         ],
       ]
@@ -439,7 +438,7 @@ describe('Task Runner', () => {
       },
       taskRunnerFactoryInitializerParams
     );
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -526,7 +525,7 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -548,44 +547,13 @@ describe('Task Runner', () => {
     );
   });
 
-  test('throws error if reference not found', async () => {
-    const taskRunner = new TaskRunner(
-      alertType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams
-    );
-    savedObjectsClient.get.mockResolvedValueOnce({
-      ...mockedAlertTypeSavedObject,
-      references: [],
-    });
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      references: [],
-    });
-    expect(await taskRunner.run()).toMatchInlineSnapshot(`
-      Object {
-        "runAt": 1970-01-01T00:00:10.000Z,
-        "state": Object {
-          "previousStartedAt": 1970-01-01T00:00:00.000Z,
-        },
-      }
-    `);
-    expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
-      `Executing Alert \"1\" has resulted in Error: Action reference \"action_0\" not found in alert id: 1`
-    );
-  });
-
   test('uses API key when provided', async () => {
     const taskRunner = new TaskRunner(
       alertType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -621,7 +589,7 @@ describe('Task Runner', () => {
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams
     );
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -660,7 +628,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -722,7 +690,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
 
     const runnerResult = await taskRunner.run();
 
@@ -747,7 +715,7 @@ describe('Task Runner', () => {
       taskRunnerFactoryInitializerParams
     );
 
-    savedObjectsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
+    alertsClient.get.mockResolvedValueOnce(mockedAlertTypeSavedObject);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -770,7 +738,7 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when fetching attributes', async () => {
-    savedObjectsClient.get.mockImplementation(() => {
+    alertsClient.get.mockImplementation(() => {
       throw new Error('OMG');
     });
 
@@ -802,7 +770,7 @@ describe('Task Runner', () => {
   });
 
   test('avoids rescheduling a failed Alert Task Runner when it throws due to failing to fetch the alert', async () => {
-    savedObjectsClient.get.mockImplementation(() => {
+    alertsClient.get.mockImplementation(() => {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError('task', '1');
     });
 

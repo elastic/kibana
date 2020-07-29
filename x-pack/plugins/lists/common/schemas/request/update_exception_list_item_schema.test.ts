@@ -97,7 +97,7 @@ describe('update_exception_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "entries" but return an array', () => {
+  test('it should NOT accept an undefined for "entries"', () => {
     const inputPayload = getUpdateExceptionListItemSchemaMock();
     const outputPayload = getUpdateExceptionListItemSchemaMock();
     delete inputPayload.entries;
@@ -105,8 +105,10 @@ describe('update_exception_list_item_schema', () => {
     const decoded = updateExceptionListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "entries"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('it should accept an undefined for "namespace_type" but return enum "single"', () => {

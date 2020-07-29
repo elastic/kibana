@@ -18,7 +18,7 @@ import {
 
 import { useForm, Form, FormDataProvider } from '../../../../shared_imports';
 import { EUI_SIZE } from '../../../../constants';
-import { useDispatch } from '../../../../mappings_state';
+import { useDispatch } from '../../../../mappings_state_context';
 import { fieldSerializer } from '../../../../lib';
 import { Field, NormalizedFields } from '../../../../types';
 import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
