@@ -35,7 +35,7 @@ interface EventOptions {
   timestamp?: number;
   entityID?: string;
   parentEntityID?: string;
-  eventType?: string;
+  eventType?: string | string[];
   eventCategory?: string | string[];
   processName?: string;
   ancestry?: string[];
@@ -572,9 +572,9 @@ export class EndpointDocGenerator {
       },
       ...detailRecordForEventType,
       event: {
-        category: options.eventCategory ? options.eventCategory : 'process',
+        category: options.eventCategory ? options.eventCategory : ['process'],
         kind: 'event',
-        type: options.eventType ? options.eventType : 'start',
+        type: options.eventType ? options.eventType : ['start'],
         id: this.seededUUIDv4(),
       },
       host: this.commonInfo.host,
@@ -633,7 +633,12 @@ export class EndpointDocGenerator {
 
       // place the event in the right array depending on its category
       if (event.event.kind === 'event') {
-        if (event.event.category === 'process') {
+        if (
+          (Array.isArray(event.event.category) &&
+            event.event.category.length === 1 &&
+            event.event.category[0] === 'process') ||
+          event.event.category === 'process'
+        ) {
           node.lifecycle.push(event);
         } else {
           node.relatedEvents.push(event);
@@ -812,8 +817,8 @@ export class EndpointDocGenerator {
           timestamp: timestamp + termProcessDuration * 1000,
           entityID: root.process.entity_id,
           parentEntityID: root.process.parent?.entity_id,
-          eventCategory: 'process',
-          eventType: 'end',
+          eventCategory: ['process'],
+          eventType: ['end'],
         })
       );
     }
@@ -838,8 +843,8 @@ export class EndpointDocGenerator {
             timestamp: timestamp + termProcessDuration * 1000,
             entityID: ancestor.process.entity_id,
             parentEntityID: ancestor.process.parent?.entity_id,
-            eventCategory: 'process',
-            eventType: 'end',
+            eventCategory: ['process'],
+            eventType: ['end'],
             ancestry: ancestor.process.Ext?.ancestry,
             ancestryArrayLimit: opts.ancestryArraySize,
           })
@@ -936,8 +941,8 @@ export class EndpointDocGenerator {
           timestamp: timestamp + processDuration * 1000,
           entityID: child.process.entity_id,
           parentEntityID: child.process.parent?.entity_id,
-          eventCategory: 'process',
-          eventType: 'end',
+          eventCategory: ['process'],
+          eventType: ['end'],
           ancestry: child.process.Ext?.ancestry,
           ancestryArrayLimit: opts.ancestryArraySize,
         });
@@ -1036,7 +1041,7 @@ export class EndpointDocGenerator {
           config: {
             artifact_manifest: {
               value: {
-                manifest_version: 'WzAsMF0=',
+                manifest_version: '1.0.0',
                 schema_version: 'v1',
                 artifacts: {},
               },
