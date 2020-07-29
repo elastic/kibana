@@ -23,6 +23,7 @@ export function ChangeIndexPattern({
   onChangeIndexPattern,
   trigger,
   selectableProps,
+  'data-test-subj': dataTestSubj,
 }: {
   trigger: ChangeIndexPatternTriggerProps;
   indexPatternRefs: IndexPatternRef[];
@@ -65,6 +66,7 @@ export function ChangeIndexPattern({
           </EuiPopoverTitle>
           <EuiSelectable
             {...selectableProps}
+            data-test-subj={dataTestSubj}
             searchable
             singleSelection="always"
             options={indexPatternRefs.map(({ title, id }) => ({
