@@ -5,10 +5,11 @@
  */
 
 import { getESFilter } from './get_es_filter';
+import { CanvasFilter } from '../../types';
 
-const compact = (arr) => (Array.isArray(arr) ? arr.filter((val) => Boolean(val)) : []);
+const compact = <T>(arr: T[]) => (Array.isArray(arr) ? arr.filter((val) => Boolean(val)) : []);
 
-export function buildBoolArray(canvasQueryFilterArray) {
+export function buildBoolArray(canvasQueryFilterArray: CanvasFilter[]) {
   return compact(
     canvasQueryFilterArray.map((clause) => {
       try {

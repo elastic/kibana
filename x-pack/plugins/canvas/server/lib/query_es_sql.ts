@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { map, zipObject } from 'lodash';
-// @ts-expect-error
 import { buildBoolArray } from './build_bool_array';
-// @ts-expect-error
 import { sanitizeName } from './sanitize_name';
-// @ts-expect-error
 import { normalizeType } from './normalize_type';
 import { LegacyAPICaller } from '../../../../../src/core/server';
+import { CanvasFilter } from '../../types';
 
 interface Args {
   count: number;
   query: string;
   timezone?: string;
-  filter: any;
+  filter: CanvasFilter[];
 }
 
 interface CursorResponse {

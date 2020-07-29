@@ -10,10 +10,10 @@
   filter is the abstracted canvas filter.
 */
 
-/*eslint import/namespace: ['error', { allowComputed: true }]*/
 import * as filters from './filters';
+import { CanvasFilter } from '../../types';
 
-export function getESFilter(filter) {
+export function getESFilter(filter: CanvasFilter) {
   if (!filters[filter.filterType]) {
     throw new Error(`Unknown filter type: ${filter.filterType}`);
   }
