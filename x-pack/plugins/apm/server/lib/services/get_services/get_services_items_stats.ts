@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { arrayUnionToCallable } from '../../../../common/utils/array_union_to_callable';
 import {
   PROCESSOR_EVENT,
   TRANSACTION_DURATION,
@@ -187,7 +186,7 @@ export const getTransactionRates = async ({
 
   const deltaAsMinutes = getDeltaAsMinutes(setup);
 
-  return arrayUnionToCallable(aggregations.services.buckets).map((bucket) => {
+  return aggregations.services.buckets.map((bucket) => {
     const transactionsPerMinute = bucket.doc_count / deltaAsMinutes;
     return {
       serviceName: bucket.key as string,
