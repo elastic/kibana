@@ -21,7 +21,9 @@ import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+// @ts-ignore
+import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { vega, vegaLite } from '../lib/vega';
@@ -47,7 +49,7 @@ import {
 } from './types';
 
 // Set default single color to match other Kibana visualizations
-const defaultColor: string = VISUALIZATION_COLORS[0];
+const defaultColor: string = euiPaletteColorBlind()[0];
 
 const locToDirMap: Record<string, ControlsLocation> = {
   left: 'row-reverse',
@@ -654,6 +656,15 @@ export class VegaParser {
         this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
       }
     }
+
+    // provide right colors for light and dark themes
+    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'title', 'color');
+    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'style', 'guide-label', 'fill');
+    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'style', 'guide-title', 'fill');
+    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'axis', 'tickColor');
+    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'axis', 'domainColor');
+    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'axis', 'gridColor');
+    this._setDefaultValue('transparent', 'config', 'background');
   }
 
   /**
