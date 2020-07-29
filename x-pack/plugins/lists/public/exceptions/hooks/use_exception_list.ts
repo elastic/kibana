@@ -142,6 +142,10 @@ export const useExceptionList = ({
               }
               setLoading(false);
             }
+          } else {
+            if (isSubscribed) {
+              setLoading(false);
+            }
           }
         } catch (error) {
           if (isSubscribed) {

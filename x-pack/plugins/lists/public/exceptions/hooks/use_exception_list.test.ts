@@ -221,30 +221,42 @@ describe('useExceptionList', () => {
 
     await act(async () => {
       const onSuccessMock = jest.fn();
-      const { waitForNextUpdate } = renderHook<UseExceptionListProps, ReturnExceptionListAndItems>(
-        () =>
-          useExceptionList({
-            filterOptions: [],
-            http: mockKibanaHttpService,
-            lists: [
-              { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
-            ],
-            matchFilters: false,
-            onError: onErrorMock,
-            onSuccess: onSuccessMock,
-            pagination: {
-              page: 1,
-              perPage: 20,
-              total: 0,
-            },
-            showDetectionsListsOnly: true,
-            showEndpointListsOnly: false,
-          })
+      const { result, waitForNextUpdate } = renderHook<
+        UseExceptionListProps,
+        ReturnExceptionListAndItems
+      >(() =>
+        useExceptionList({
+          filterOptions: [],
+          http: mockKibanaHttpService,
+          lists: [
+            { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
+          ],
+          matchFilters: false,
+          onError: onErrorMock,
+          onSuccess: onSuccessMock,
+          pagination: {
+            page: 1,
+            perPage: 20,
+            total: 0,
+          },
+          showDetectionsListsOnly: false,
+          showEndpointListsOnly: true,
+        })
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      expect(spyOnfetchExceptionListsItemsByListIds).not.toHaveBeenCalledWith();
+      expect(spyOnfetchExceptionListsItemsByListIds).not.toHaveBeenCalled();
+      expect(result.current).toEqual([
+        false,
+        [],
+        {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
+        result.current[3],
+      ]);
     });
   });
 
