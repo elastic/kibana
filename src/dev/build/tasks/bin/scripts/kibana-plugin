@@ -14,7 +14,7 @@ while [ -h "$SCRIPT" ] ; do
 done
 
 DIR="$(dirname "${SCRIPT}")/.."
-CONFIG_DIR=${KIBANA_PATH_CONF:-"$DIR/config"}
+CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
 NODE="${DIR}/node/bin/node"
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then
