@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-
-import { FontPicker as Component } from './font_picker';
-
-export const FontPicker = pure(Component);
+export { TextStylePicker } from './text_style_picker';

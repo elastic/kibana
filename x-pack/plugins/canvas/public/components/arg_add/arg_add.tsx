@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC, ReactEventHandler } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiDescriptionList,
@@ -12,7 +12,13 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 
-export const ArgAdd = ({ onValueAdd, displayName, help }) => {
+interface Props {
+  displayName: string;
+  help: string;
+  onValueAdd?: ReactEventHandler;
+}
+
+export const ArgAdd: FC<Props> = ({ onValueAdd = () => {}, displayName, help }) => {
   return (
     <button className="canvasArg__add" onClick={onValueAdd}>
       <EuiDescriptionList compressed>
@@ -26,7 +32,7 @@ export const ArgAdd = ({ onValueAdd, displayName, help }) => {
 };
 
 ArgAdd.propTypes = {
-  displayName: PropTypes.string,
-  help: PropTypes.string,
+  displayName: PropTypes.string.isRequired,
+  help: PropTypes.string.isRequired,
   onValueAdd: PropTypes.func,
 };
