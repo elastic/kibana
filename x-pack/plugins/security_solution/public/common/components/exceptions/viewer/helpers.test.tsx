@@ -135,6 +135,19 @@ describe('Exception viewer helpers', () => {
 
       expect(formattedEntry).toEqual(expected);
     });
+
+    test('it formats as expected when "isNested" is "true"', () => {
+      const payload = getEntryMatchMock();
+      const formattedEntry = formatEntry({ isNested: true, item: payload });
+      const expected: FormattedEntry = {
+        fieldName: 'host.name',
+        isNested: true,
+        operator: 'is',
+        value: 'some host name',
+      };
+
+      expect(formattedEntry).toEqual(expected);
+    });
   });
 
   describe('#getDescriptionListContent', () => {
