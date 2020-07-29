@@ -1,6 +1,6 @@
 [role="xpack"]
 [[monitor-troubleshooting]]
-== Troubleshooting monitoring in {kib}
+= Troubleshooting monitoring in {kib}
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ Use the information in this section to troubleshoot common problems and find
 answers for frequently asked questions related to the {kib} {monitor-features}.
 
 [float]
-=== Cannot view the cluster because the license information is invalid
+== Cannot view the cluster because the license information is invalid
 
 *Symptoms:*
 
