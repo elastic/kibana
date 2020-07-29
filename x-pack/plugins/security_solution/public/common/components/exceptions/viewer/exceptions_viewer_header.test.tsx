@@ -137,6 +137,9 @@ describe('ExceptionsViewerHeader', () => {
         filter: '',
         tags: [],
       },
+      pagination: {
+        pageIndex: 0,
+      },
       showDetectionsListsOnly: true,
       showEndpointListsOnly: false,
     });
@@ -175,6 +178,9 @@ describe('ExceptionsViewerHeader', () => {
       filter: {
         filter: '',
         tags: [],
+      },
+      pagination: {
+        pageIndex: 0,
       },
       showDetectionsListsOnly: false,
       showEndpointListsOnly: true,

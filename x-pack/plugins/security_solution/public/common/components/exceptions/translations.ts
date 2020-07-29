@@ -95,7 +95,7 @@ export const EXCEPTION_EMPTY_PROMPT_TITLE = i18n.translate(
   }
 );
 
-export const EXCEPTION_NO_SEARCH_RESULTS_PROMPT_TITLE = i18n.translate(
+export const EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.noSearchResultsPromptBody',
   {
     defaultMessage: 'No search results found.',

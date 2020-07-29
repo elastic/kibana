@@ -57,11 +57,15 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
       <EuiFlexItem grow={1}>
         <EuiEmptyPrompt
           iconType={showNoResults ? 'searchProfilerApp' : 'list'}
-          title={<h2>{showNoResults ? '' : i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>}
+          title={
+            <h2 data-test-subj="exceptionsEmptyPromptTitle">
+              {showNoResults ? '' : i18n.EXCEPTION_EMPTY_PROMPT_TITLE}
+            </h2>
+          }
           body={
-            <p>
+            <p data-test-subj="exceptionsEmptyPromptBody">
               {showNoResults
-                ? i18n.EXCEPTION_NO_SEARCH_RESULTS_PROMPT_TITLE
+                ? i18n.EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY
                 : i18n.EXCEPTION_EMPTY_PROMPT_BODY}
             </p>
           }

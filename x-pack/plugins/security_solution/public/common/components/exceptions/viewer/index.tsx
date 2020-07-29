@@ -364,7 +364,8 @@ const ExceptionsViewerComponent = ({
 
         <ExceptionsViewerUtility
           pagination={pagination}
-          filterOptions={filterOptions}
+          showEndpointListsOnly={showEndpointListsOnly}
+          showDetectionsListsOnly={showDetectionsListsOnly}
           onRefreshClick={handleFetchList}
           ruleSettingsUrl={ruleSettingsUrl}
         />

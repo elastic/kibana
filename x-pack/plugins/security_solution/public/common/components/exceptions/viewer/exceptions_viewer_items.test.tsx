@@ -9,6 +9,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
+import * as i18n from '../translations';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
 
@@ -17,7 +18,8 @@ describe('ExceptionsViewerItems', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerItems
-          showEmpty={true}
+          showEmpty
+          showNoResults={false}
           isInitLoading={false}
           exceptions={[]}
           loadingItemIds={[]}
@@ -30,6 +32,36 @@ describe('ExceptionsViewerItems', () => {
 
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="exceptionsContainer"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').text()).toEqual(
+      i18n.EXCEPTION_EMPTY_PROMPT_TITLE
+    );
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptBody"]').text()).toEqual(
+      i18n.EXCEPTION_EMPTY_PROMPT_BODY
+    );
+  });
+
+  it('it renders no search results found prompt if "showNoResults" is "true"', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ExceptionsViewerItems
+          showEmpty={false}
+          showNoResults
+          isInitLoading={false}
+          exceptions={[]}
+          loadingItemIds={[]}
+          commentsAccordionId="comments-accordion-id"
+          onDeleteException={jest.fn()}
+          onEditExceptionItem={jest.fn()}
+        />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="exceptionsContainer"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').text()).toEqual('');
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptBody"]').text()).toEqual(
+      i18n.EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY
+    );
   });
 
   it('it renders exceptions if "showEmpty" and "isInitLoading" is "false", and exceptions exist', () => {
@@ -37,6 +69,7 @@ describe('ExceptionsViewerItems', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerItems
           showEmpty={false}
+          showNoResults={false}
           isInitLoading={false}
           exceptions={[getExceptionListItemSchemaMock()]}
           loadingItemIds={[]}
@@ -56,6 +89,7 @@ describe('ExceptionsViewerItems', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerItems
           showEmpty={false}
+          showNoResults={false}
           isInitLoading={true}
           exceptions={[]}
           loadingItemIds={[]}
@@ -79,6 +113,7 @@ describe('ExceptionsViewerItems', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerItems
           showEmpty={false}
+          showNoResults={false}
           isInitLoading={false}
           exceptions={[exception1, exception2]}
           loadingItemIds={[]}
@@ -103,6 +138,7 @@ describe('ExceptionsViewerItems', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerItems
           showEmpty={false}
+          showNoResults={false}
           isInitLoading={false}
           exceptions={[exception1, exception2]}
           loadingItemIds={[]}
@@ -127,6 +163,7 @@ describe('ExceptionsViewerItems', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewerItems
           showEmpty={false}
+          showNoResults={false}
           isInitLoading={false}
           exceptions={[getExceptionListItemSchemaMock()]}
           loadingItemIds={[]}
