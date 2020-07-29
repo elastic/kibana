@@ -238,7 +238,7 @@ export function registerPolicyRoutes({
             method: 'GET',
             path: `/_resolve/index/*`,
             query: {
-              expand_wildcards: 'all,hidden',
+              expand_wildcards: 'all',
             },
           }
         );
