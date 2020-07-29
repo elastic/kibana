@@ -6,8 +6,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import {
   CustomConfigurePackageConfigContent,
@@ -50,52 +49,37 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
 
     return (
       <>
-        <EuiTitle size="xs">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.ingestManager.policyConfiguration"
-              defaultMessage="Policy Configuration"
-            />
-          </h4>
-        </EuiTitle>
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj={`endpointPackageConfig_${from === 'edit' ? 'edit' : 'create'}`}
           iconType="iInCircle"
-          title={i18n.translate(
-            'xpack.securitySolution.endpoint.ingestManager.policyConfiguration.calloutTitle',
-            {
-              defaultMessage: 'Manage Policy configuration in the Security app',
-            }
-          )}
         >
           <EuiText size="s">
             <p>
               {from === 'edit' ? (
-                <>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.endpointConfiguration"
-                    defaultMessage="You can make changes to the Policy Configuration in the Security app. Fleet will deploy changes to your agents whenever your Policy changes."
-                  />
-                  <EuiSpacer />
-                  <LinkToApp
-                    data-test-subj="editLinkToPolicyDetails"
-                    asButton={true}
-                    appId={MANAGEMENT_APP_ID}
-                    className="editLinkToPolicyDetails"
-                    appPath={policyUrl}
-                    appState={policyDetailRouteState}
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.configurePolicyLink"
-                      defaultMessage="Configure Policy"
-                    />
-                  </LinkToApp>
-                </>
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.endpointConfiguration"
+                  defaultMessage="Click {advancedConfigOptionsLink} to edit advanced configuration options."
+                  values={{
+                    advancedConfigOptionsLink: (
+                      <LinkToApp
+                        data-test-subj="editLinkToPolicyDetails"
+                        appId={MANAGEMENT_APP_ID}
+                        appPath={policyUrl}
+                        appState={policyDetailRouteState}
+                      >
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.endpointConfigurationLink"
+                          defaultMessage="here"
+                        />
+                      </LinkToApp>
+                    ),
+                  }}
+                />
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.ingestManager.createPackageConfig.endpointConfiguration"
-                  defaultMessage="Any agents that use this agent configuration will use a basic policy. You can make changes to this policy in the Security app, and Fleet will deploy those changes to your agents."
+                  defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint Security integration within your agent configuration."
                 />
               )}
             </p>

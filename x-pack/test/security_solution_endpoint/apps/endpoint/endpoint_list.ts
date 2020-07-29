@@ -36,8 +36,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           [
             'Hostname',
             'Host Status',
-            'Policy',
-            'Policy Status',
+            'Integration',
+            'Configuration Status',
             'Operating System',
             'IP Address',
             'Version',
@@ -119,7 +119,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // The integration does not work properly yet.  Skipping this test for now.
-        it.skip('navigates to ingest fleet when the Reassign Policy link is clicked', async () => {
+        it.skip('navigates to ingest fleet when the Reassign Configuration link is clicked', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
           await (await testSubjects.find('hostDetailsLinkToIngest')).click();
           await testSubjects.existOrFail('fleetAgentListTable');
@@ -145,8 +145,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'OS',
             'Last Seen',
             'Alerts',
-            'Policy',
-            'Policy Status',
+            'Integration',
+            'Configuration Status',
             'IP Address',
             'Hostname',
             'Sensor Version',
