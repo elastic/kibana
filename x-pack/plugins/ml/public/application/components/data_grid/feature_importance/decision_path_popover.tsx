@@ -5,7 +5,8 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiText, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { FeatureImportanceDecisionPath } from './decision_path_chart';
 import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import { FeatureImportance } from '../../../../../common/types/feature_importance';
@@ -32,29 +33,66 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   const tabs = [
     {
       id: DECISION_PATH_TABS.CHART,
-      name: 'Decision Plot',
+      name: (
+        <FormattedMessage
+          id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlot"
+          defaultMessage="Decision Plot"
+        />
+      ),
     },
     {
       id: DECISION_PATH_TABS.JSON,
-      name: 'JSON',
+      name: (
+        <FormattedMessage
+          id="xpack.ml.dataframe.analytics.explorationResults.decisionPathJSON"
+          defaultMessage="JSON"
+        />
+      ),
     },
   ];
 
   return (
     <>
-      <EuiTabs size={'s'} style={{ width: 250 }}>
-        {tabs.map((tab) => (
-          <EuiTab
-            isSelected={tab.id === selectedTabId}
-            onClick={() => setSelectedTabId(tab.id)}
-            key={tab.id}
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
+      <div style={{ display: 'flex', width: 300 }}>
+        <EuiTabs size={'s'}>
+          {tabs.map((tab) => (
+            <EuiTab
+              isSelected={tab.id === selectedTabId}
+              onClick={() => setSelectedTabId(tab.id)}
+              key={tab.id}
+            >
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </div>
       {selectedTabId === DECISION_PATH_TABS.CHART && (
-        <FeatureImportanceDecisionPath baseline={baseline} featureImportance={featureImportance} />
+        <>
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlotHelpText"
+              defaultMessage={`SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted values.`}
+              values={{
+                linkedFeatureImportanceValues: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/machine-learning/7.8/ml-feature-importance.html"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.monitoring.cluster.listing.incompatibleLicense.getLicenseLinkLabel"
+                      defaultMessage="feature importance values"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+
+          <FeatureImportanceDecisionPath
+            baseline={baseline}
+            featureImportance={featureImportance}
+          />
+        </>
       )}
       {selectedTabId === DECISION_PATH_TABS.JSON && (
         <DecisionPathJSONViewer featureImportance={featureImportance} />
