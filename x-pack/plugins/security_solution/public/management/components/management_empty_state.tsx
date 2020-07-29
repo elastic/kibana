@@ -77,57 +77,6 @@ const PolicyEmptyState = React.memo<{
               />
             </EuiText>
             <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center" style={{ maxWidth: '90%' }}>
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
-                    <EuiIcon type="grid" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
-                    <EuiText>
-                      <h4>
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policyList.onboardingHostTitle"
-                          defaultMessage="Hosts"
-                        />
-                      </h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.onboardingHostInfo"
-                    defaultMessage="Hosts running Elastic Endpoint Security"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false} style={{ marginRight: '10px' }}>
-                    <EuiIcon type="controlsHorizontal" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
-                    <EuiText>
-                      <h4>
-                        <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policyList.onboardingPolicyTitle"
-                          defaultMessage="Policies"
-                        />
-                      </h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.onboardingPolicyInfo"
-                    defaultMessage="View and configure protections"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
@@ -178,14 +127,14 @@ const HostsEmptyState = React.memo<{
     () => [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.hostList.stepOneTitle', {
-          defaultMessage: 'Select the policy you want to use to protect your hosts',
+          defaultMessage: 'Select the integration you want to use',
         }),
         children: (
           <>
             <EuiText color="subdued" size="m" grow={false}>
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostList.stepOne"
-                defaultMessage="Existing policies are listed below. This can be changed later."
+                defaultMessage="Select from existing integrations. This can be changed later."
               />
             </EuiText>
             <EuiSpacer size="xxl" />
@@ -203,7 +152,7 @@ const HostsEmptyState = React.memo<{
                   <EuiSelectableMessage>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.hostList.loadingPolicies"
-                      defaultMessage="Loading policy configs"
+                      defaultMessage="Loading integrations"
                     />
                   </EuiSelectableMessage>
                 ) : selectionOptions.length ? (
@@ -211,7 +160,7 @@ const HostsEmptyState = React.memo<{
                 ) : (
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.hostList.noPolicies"
-                    defaultMessage="There are no policies."
+                    defaultMessage="There are no integrations."
                   />
                 );
               }}
@@ -263,13 +212,13 @@ const HostsEmptyState = React.memo<{
       headerComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.hostList.noEndpointsPrompt"
-          defaultMessage="Enable Elastic Endpoint Security on your agents"
+          defaultMessage="Next step: Enroll an Agent with Elastic Endpoint Security"
         />
       }
       bodyComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.hostList.noEndpointsInstructions"
-          defaultMessage="You’ve created your security policy. Now you need to enable the Elastic Endpoint Security capabilities on your agents following the steps below."
+          defaultMessage="You’ve added the Endpoint Security integration. Now enroll your agents using the steps below."
         />
       }
     />
