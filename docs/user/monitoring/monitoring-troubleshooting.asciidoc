@@ -1,6 +1,6 @@
 [role="xpack"]
 [[monitor-troubleshooting]]
-== Troubleshooting monitoring in {kib}
+= Troubleshooting monitoring in {kib}
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ Use the information in this section to troubleshoot common problems and find
 answers for frequently asked questions related to the {kib} {monitor-features}.
 
 [float]
-=== Cannot view the cluster because the license information is invalid
+== Cannot view the cluster because the license information is invalid
 
 *Symptoms:*
 
@@ -24,7 +24,7 @@ To resolve this issue, upgrade {kib} to 6.3 or later. See
 {stack-ref}/upgrading-elastic-stack.html[Upgrading the {stack}]. 
 
 [float]
-=== {filebeat} index is corrupt
+== {filebeat} index is corrupt
 
 *Symptoms:*
 
@@ -41,7 +41,7 @@ text fields by default.
 
 
 [float]
-=== No monitoring data is visible in {kib}
+== No monitoring data is visible in {kib}
 
 *Symptoms:*
 
