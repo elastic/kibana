@@ -139,6 +139,11 @@ describe('configureClient', () => {
       const response = createApiResponse({
         statusCode: 400,
         headers: {},
+        params: {
+          method: 'GET',
+          path: '/foo',
+          querystring: { hello: 'dolly' },
+        },
         body: {
           error: {
             type: 'illegal_argument_exception',
@@ -151,7 +156,7 @@ describe('configureClient', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "[illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
+            "400 GET /foo [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
           ],
         ]
       `);
