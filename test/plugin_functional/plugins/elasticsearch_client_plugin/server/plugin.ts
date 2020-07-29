@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart, ICustomClusterClient } from 'src/core/server';
 
 export class ElasticsearchClientPlugin implements Plugin {
+  private client?: ICustomClusterClient;
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.get(
@@ -36,8 +37,17 @@ export class ElasticsearchClientPlugin implements Plugin {
         return res.ok({ body });
       }
     );
+    router.get(
+      { path: '/api/elasticsearch_client_plugin/custom_client/ping', validate: false },
+      async (context, req, res) => {
+        const { body } = await this.client!.asInternalUser.ping();
+        return res.ok({ body });
+      }
+    );
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    this.client = core.elasticsearch.createClient('my-custom-client-test');
+  }
   public stop() {}
 }

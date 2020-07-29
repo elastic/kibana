@@ -29,5 +29,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('server plugins have access to elasticsearch client via core contract', async () => {
       await supertest.get('/api/elasticsearch_client_plugin/contract/ping').expect(200, 'true');
     });
+    it('server plugins can create a custom elasticsearch client', async () => {
+      await supertest
+        .get('/api/elasticsearch_client_plugin/custom_client/ping')
+        .expect(200, 'true');
+    });
   });
 }
