@@ -227,22 +227,7 @@ export class TaskStore {
         difference(
           claimTasksById,
           docs.map((doc) => doc.id)
-        ).map((id) => {
-          // eslint-disable-next-line no-console
-          console.log(':::::::::::::::::::::');
-          // eslint-disable-next-line no-console
-          console.log(
-            JSON.stringify({
-              id,
-              claimOwnershipUntil,
-              claimTasksById,
-              size,
-            })
-          );
-          // eslint-disable-next-line no-console
-          console.log(':::::::::::::::::::::');
-          return asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`)));
-        })
+        ).map((id) => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
       );
     }
 
@@ -310,7 +295,7 @@ export class TaskStore {
     size: OwnershipClaimingOpts['size']
   ): Promise<ConcreteTaskInstance[]> {
     const claimedTasksQuery = tasksClaimedByOwner(this.taskManagerId);
-    const searchCriteria = {
+    const { docs } = await this.search({
       query:
         claimTasksById && claimTasksById.length
           ? asPinnedQuery(claimTasksById, claimedTasksQuery)
@@ -318,14 +303,7 @@ export class TaskStore {
       size,
       sort: SortByRunAtAndRetryAt,
       seq_no_primary_term: true,
-    };
-    // eslint-disable-next-line no-console
-    console.log(':::::::::::::::::::::');
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(searchCriteria));
-    // eslint-disable-next-line no-console
-    console.log(':::::::::::::::::::::');
-    const { docs } = await this.search(searchCriteria);
+    });
 
     return docs;
   }
