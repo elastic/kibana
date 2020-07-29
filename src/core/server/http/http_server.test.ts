@@ -1005,7 +1005,8 @@ describe('idle socket timeout', () => {
         validate: { body: schema.any() },
       },
       (context, req, res) => {
-        // net.Socket::timeout isn't documented or part of the types, yet...
+        // net.Socket#timeout isn't documented. Once https://github.com/nodejs/node/pull/34543 merges,
+        // IKibanaSocket can expose the socket timeout, so we don't have to do this ugly casting to any
         return res.ok({ body: { socketTimeout: (req.socket as any).socket.timeout } });
       }
     );
@@ -1029,7 +1030,8 @@ describe('idle socket timeout', () => {
         options: { timeout: { idleSocket: routeIdleSocketTimeout } },
       },
       (context, req, res) => {
-        // net.Socket::timeout isn't documented or part of the types, yet...
+        // net.Socket#timeout isn't documented. Once https://github.com/nodejs/node/pull/34543 merges,
+        // IKibanaSocket can expose the socket timeout, so we don't have to do this ugly casting to any
         return res.ok({ body: { socketTimeout: (req.socket as any).socket.timeout } });
       }
     );
