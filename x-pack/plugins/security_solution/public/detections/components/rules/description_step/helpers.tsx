@@ -35,6 +35,7 @@ import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 import { assertUnreachable } from '../../../../common/lib/helpers';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
+import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -236,35 +237,44 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
     title: i18nSeverity.DEFAULT_SEVERITY,
     description: <SeverityBadge value={severity.value} />,
   },
-  ...severity.mapping.map((severityItem, index) => {
-    return {
-      title: index === 0 ? i18nSeverity.SEVERITY_MAPPING : '',
-      description: (
-        <EuiFlexGroup alignItems="center">
-          <OverrideColumn>
-            <EuiToolTip
-              content={severityItem.field}
-              data-test-subj={`severityOverrideField${index}`}
-            >
-              <>{severityItem.field}</>
-            </EuiToolTip>
-          </OverrideColumn>
-          <EuiToolTip content={severityItem.value} data-test-subj={`severityOverrideValue${index}`}>
-            <>{severityItem.value}</>
-          </EuiToolTip>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={'sortRight'} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <SeverityBadge
-              data-test-subj={`severityOverrideSeverity${index}`}
-              value={severityItem.severity}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    };
-  }),
+  ...(severity.isMappingChecked
+    ? severity.mapping
+        .filter((severityItem) => severityItem.field !== '')
+        .map((severityItem, index) => {
+          return {
+            title: index === 0 ? i18nSeverity.SEVERITY_MAPPING : '',
+            description: (
+              <EuiFlexGroup alignItems="center">
+                <OverrideColumn>
+                  <EuiToolTip
+                    content={severityItem.field}
+                    data-test-subj={`severityOverrideField${index}`}
+                  >
+                    <>{`${severityItem.field}:`}</>
+                  </EuiToolTip>
+                </OverrideColumn>
+                <OverrideColumn>
+                  <EuiToolTip
+                    content={severityItem.value}
+                    data-test-subj={`severityOverrideValue${index}`}
+                  >
+                    {defaultToEmptyTag(severityItem.value)}
+                  </EuiToolTip>
+                </OverrideColumn>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={'sortRight'} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <SeverityBadge
+                    data-test-subj={`severityOverrideSeverity${index}`}
+                    value={severityItem.severity}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+          };
+        })
+    : []),
 ];
 
 export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListItems[] => [
@@ -272,27 +282,31 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
     title: i18nRiskScore.RISK_SCORE,
     description: riskScore.value,
   },
-  ...riskScore.mapping.map((riskScoreItem, index) => {
-    return {
-      title: index === 0 ? i18nRiskScore.RISK_SCORE_MAPPING : '',
-      description: (
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>
-            <EuiToolTip
-              content={riskScoreItem.field}
-              data-test-subj={`riskScoreOverrideField${index}`}
-            >
-              <>{riskScoreItem.field}</>
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={'sortRight'} />
-          </EuiFlexItem>
-          <EuiFlexItem>{'signal.rule.risk_score'}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    };
-  }),
+  ...(riskScore.isMappingChecked
+    ? riskScore.mapping
+        .filter((riskScoreItem) => riskScoreItem.field !== '')
+        .map((riskScoreItem, index) => {
+          return {
+            title: index === 0 ? i18nRiskScore.RISK_SCORE_MAPPING : '',
+            description: (
+              <EuiFlexGroup alignItems="center">
+                <OverrideColumn>
+                  <EuiToolTip
+                    content={riskScoreItem.field}
+                    data-test-subj={`riskScoreOverrideField${index}`}
+                  >
+                    <>{riskScoreItem.field}</>
+                  </EuiToolTip>
+                </OverrideColumn>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={'sortRight'} />
+                </EuiFlexItem>
+                <EuiFlexItem>{'signal.rule.risk_score'}</EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+          };
+        })
+    : []),
 ];
 
 const MyRefUrlLink = styled(EuiLink)`
