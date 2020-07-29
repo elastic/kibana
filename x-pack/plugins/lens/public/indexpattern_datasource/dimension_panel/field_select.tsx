@@ -137,10 +137,9 @@ export function FieldSelect({
   }, [
     incompatibleSelectedOperationType,
     selectedColumnOperationType,
-    selectedColumnSourceField,
-    operationFieldSupportMatrix,
     currentIndexPattern,
     fieldMap,
+    operationByField,
   ]);
 
   return (

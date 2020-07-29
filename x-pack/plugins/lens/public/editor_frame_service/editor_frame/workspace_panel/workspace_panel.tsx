@@ -162,7 +162,7 @@ export function InnerWorkspacePanel({
 
   const autoRefreshFetch$ = useMemo(
     () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
-    [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$]
+    [plugins.data.query.timefilter.timefilter]
   );
 
   useEffect(() => {
@@ -173,7 +173,7 @@ export function InnerWorkspacePanel({
         expressionBuildError: undefined,
       }));
     }
-  }, [expression]);
+  }, [expression, localState.expressionBuildError]);
 
   function onDrop() {
     if (suggestionForDraggedField) {

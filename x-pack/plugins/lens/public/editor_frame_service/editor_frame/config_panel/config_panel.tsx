@@ -36,7 +36,6 @@ function LayerPanels(
     dispatch,
     activeDatasourceId,
     datasourceMap,
-    dispatch,
   } = props;
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {

@@ -163,7 +163,13 @@ export function App({
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
     };
-  }, [data.query.filterManager, data.query.timefilter.timefilter]);
+  }, [
+    data.query.filterManager,
+    data.query.timefilter.timefilter,
+    core.uiSettings,
+    data.query,
+    history,
+  ]);
 
   useEffect(() => {
     onAppLeave((actions) => {

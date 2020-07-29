@@ -203,6 +203,7 @@ export function SuggestionPanel({
 
     return { suggestions: newSuggestions, currentStateExpression: newStateExpression };
   }, [
+    frame,
     currentDatasourceStates,
     currentVisualizationState,
     currentVisualizationId,
@@ -215,7 +216,7 @@ export function SuggestionPanel({
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent {...props} reload$={autoRefreshFetch$} />
     );
-  }, [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$, ExpressionRendererComponent]);
+  }, [plugins.data.query.timefilter.timefilter]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
@@ -226,7 +227,7 @@ export function SuggestionPanel({
     if (!stagedPreview && lastSelectedSuggestion !== -1) {
       setLastSelectedSuggestion(-1);
     }
-  }, [stagedPreview]);
+  }, [stagedPreview, lastSelectedSuggestion]);
 
   if (!activeDatasourceId) {
     return null;
