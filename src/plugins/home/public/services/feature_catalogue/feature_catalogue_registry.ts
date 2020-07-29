@@ -55,6 +55,8 @@ export interface FeatureCatalogueEntry {
   readonly order?: number;
   /** The solution id this app should be displayed under */
   readonly solution?: string;
+  /** Images to be displayed around the solution's title  */
+  readonly solutionImages?: JSX.Element[];
 }
 
 export class FeatureCatalogueRegistry {

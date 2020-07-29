@@ -31,7 +31,7 @@
       }
     }
 
-    .homSolutionsPanel__CTA {
+    .homSolutionsPanel__appDescriptions {
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -102,6 +102,8 @@
   }
 
   .homSolutionsPanel__kibana {
+    max-width: 50%;
+    
     .homSolutionsPanel__kibanaHeader {
       background-color: #006bb4;
 

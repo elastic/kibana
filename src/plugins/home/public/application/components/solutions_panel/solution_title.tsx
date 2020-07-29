@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FC } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,7 +34,7 @@ interface Props {
   iconType: IconType;
 }
 
-export const SolutionsTitle: FunctionComponent<Props> = ({ title, subtitle, iconType }) => (
+export const SolutionTitle: FC<Props> = ({ title, subtitle, iconType }) => (
   <EuiFlexGroup gutterSize="none" alignItems="center" className="homSolutionsPanel__solutionTitle">
     <EuiFlexItem className="eui-textCenter">
       <p>
