@@ -6,8 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  HomePublicPluginSetup,
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
+  HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { PLUGIN_ID } from '../common/constants/app';
 
@@ -26,17 +27,15 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
       defaultMessage: 'Machine Learning',
     }),
     description: i18n.translate('xpack.ml.machineLearningDescription', {
-      defaultMessage:
-        'Automatically model the normal behavior of your time series data to detect anomalies.',
+      defaultMessage: 'Detect anomalous events.',
     }),
     icon: 'machineLearningApp',
     path: '/app/ml',
-    showOnHomePage: true,
+    homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
     category: FeatureCatalogueCategory.DATA,
+    solutionId: 'kibana',
   });
 
-  // TODO: is it okay to register this as a separate feature in the feature catalogue?
-  // register data visualizer so it appears on the Kibana home page
   home.featureCatalogue.register({
     id: `${PLUGIN_ID}_file_data_visualizer`,
     title: i18n.translate('xpack.ml.fileDataVisualizerTitle', {
@@ -47,7 +46,8 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     }),
     icon: 'importAction',
     path: '/app/ml#/filedatavisualizer',
-    showOnHomePage: true,
+    homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,
     category: FeatureCatalogueCategory.DATA,
+    order: 300,
   });
 };

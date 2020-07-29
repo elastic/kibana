@@ -155,8 +155,10 @@ FeatureDirectory.propTypes = {
       description: PropTypes.string.isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
+      homePageSection: PropTypes.string,
       category: PropTypes.string.isRequired,
+      solutionId: PropTypes.string,
+      order: PropTypes.number,
     })
   ),
 };

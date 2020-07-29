@@ -29,6 +29,7 @@ export {
 export {
   FeatureCatalogueEntry,
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
   Environment,
   TutorialVariables,
   TutorialDirectoryNoticeComponent,

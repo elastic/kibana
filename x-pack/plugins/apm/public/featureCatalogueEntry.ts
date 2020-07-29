@@ -17,6 +17,5 @@ export const featureCatalogueEntry = {
   }),
   icon: 'apmApp',
   path: '/app/apm',
-  showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 };

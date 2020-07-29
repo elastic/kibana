@@ -29,7 +29,6 @@ const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
   description: 'Display and share a collection of visualizations and saved searches.',
   icon: 'dashboardApp',
   path: `/app/kibana#dashboard`,
-  showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 };
 

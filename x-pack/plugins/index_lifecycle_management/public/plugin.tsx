@@ -6,7 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import {
+  FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
+} from '../../../../src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
 import { init as initDocumentation } from './application/services/documentation';
@@ -75,20 +78,23 @@ export class IndexLifecycleManagementPlugin {
         },
       });
 
-      home.featureCatalogue.register({
-        id: PLUGIN.ID,
-        title: i18n.translate('xpack.indexLifecycleManagement.featureCatalogueTitle', {
-          defaultMessage: 'Manage index lifecycles',
-        }),
-        description: i18n.translate('xpack.indexLifecycleManagement.featureCatalogueTitle', {
-          defaultMessage:
-            'Attach a policy to automate when and how to transition an index through its lifecycle.',
-        }),
-        icon: 'indexSettings', // TODO: This is the same icon used for rollups in the feature catalogue. Do we need to pick a different one here?
-        path: '/app/management/data/index_lifecycle_management',
-        showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
-      });
+      if (home) {
+        home.featureCatalogue.register({
+          id: PLUGIN.ID,
+          title: i18n.translate('xpack.indexLifecycleManagement.featureCatalogueTitle', {
+            defaultMessage: 'Manage index lifecycles',
+          }),
+          description: i18n.translate('xpack.indexLifecycleManagement.featureCatalogueTitle', {
+            defaultMessage:
+              'Attach a policy to automate when and how to transition an index through its lifecycle.',
+          }),
+          icon: 'indexSettings', // TODO: This is the same icon used for rollups in the feature catalogue. Do we need to pick a different one here?
+          path: '/app/management/data/index_lifecycle_management',
+          homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
+          category: FeatureCatalogueCategory.ADMIN,
+          order: 400,
+        });
+      }
 
       if (indexManagement) {
         addAllExtensions(indexManagement.extensionsService);

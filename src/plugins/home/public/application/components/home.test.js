@@ -35,6 +35,7 @@ jest.mock('../kibana_services', () => ({
   }),
 }));
 
+// TODO: Update tests
 describe('home', () => {
   let defaultProps;
 
@@ -100,7 +101,6 @@ describe('home', () => {
         description: 'Display and share a collection of visualizations and saved searches.',
         icon: 'dashboardApp',
         path: 'dashboard_landing_page',
-        showOnHomePage: true,
         category: FeatureCatalogueCategory.DATA,
       };
 
@@ -118,7 +118,6 @@ describe('home', () => {
         description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
         icon: 'indexPatternApp',
         path: 'index_management_landing_page',
-        showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
       };
 
@@ -136,7 +135,6 @@ describe('home', () => {
         description: 'Your center console for managing the Elastic Stack.',
         icon: 'managementApp',
         path: 'management_landing_page',
-        showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
       };
 

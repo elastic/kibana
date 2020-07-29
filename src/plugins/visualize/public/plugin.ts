@@ -195,8 +195,10 @@ export class VisualizePlugin
         }),
         icon: 'visualizeApp',
         path: `/app/visualize#${VisualizeConstants.LANDING_PAGE_PATH}`,
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
         category: FeatureCatalogueCategory.DATA,
+        solutionId: 'kibana',
+        order: 200,
       });
     }
   }

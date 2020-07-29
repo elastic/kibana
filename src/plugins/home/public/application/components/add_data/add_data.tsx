@@ -22,7 +22,6 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
-  sampleData?: FeatureCatalogueEntry;
   cards?: JSX.Element[];
 }
 
@@ -36,16 +35,19 @@ export const AddData: FC<Props> = ({ sampleData, cards }) => (
           </h3>
         </EuiTitle>
       </EuiFlexItem>
-      {sampleData ? (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType={sampleData.icon} href={sampleData.path} size="xs" flush="right">
-            <FormattedMessage
-              id="home.addData.sampleDataButtonLabel"
-              defaultMessage="Try our sample data"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      ) : null}
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          iconType="tableDensityExpanded"
+          href={'#/tutorial_directory/sampleData'}
+          size="xs"
+          flush="right"
+        >
+          <FormattedMessage
+            id="home.addData.sampleDataButtonLabel"
+            defaultMessage="Try our sample data"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </EuiFlexGroup>
 
     <EuiSpacer />

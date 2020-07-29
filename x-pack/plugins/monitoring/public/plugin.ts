@@ -15,6 +15,7 @@ import {
 } from 'kibana/public';
 import {
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { UI_SETTINGS } from '../../../../src/plugins/data/public';
@@ -57,11 +58,12 @@ export class MonitoringPlugin
         title,
         icon,
         path: '/app/monitoring',
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
         category: FeatureCatalogueCategory.ADMIN,
         description: i18n.translate('xpack.monitoring.monitoringDescription', {
           defaultMessage: 'Track the real-time health and performance of your Elastic Stack.',
         }),
+        order: 200,
       });
     }
 

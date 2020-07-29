@@ -83,7 +83,6 @@ export class SavedObjectsManagementPlugin
       }),
       icon: 'savedObjectsApp',
       path: '/app/management/kibana/objects',
-      showOnHomePage: true,
       category: FeatureCatalogueCategory.ADMIN,
     });
 
