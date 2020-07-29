@@ -19,6 +19,7 @@
 
 import {
   FeatureCatalogueRegistrySetup,
+  FeatureCatalogueRegistryStart,
   FeatureCatalogueRegistry,
 } from './feature_catalogue_registry';
 

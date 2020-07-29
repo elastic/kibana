@@ -56,8 +56,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       }),
       icon: 'managementApp',
       path: '/app/management',
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: DEFAULT_APP_CATEGORIES.management,
     });
 
     core.application.register({

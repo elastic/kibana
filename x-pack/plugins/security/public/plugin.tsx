@@ -15,6 +15,7 @@ import { FeaturesPluginStart } from '../../features/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
@@ -123,8 +124,9 @@ export class SecurityPlugin
         }),
         icon: 'securityApp',
         path: '/app/management/security/users',
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
         category: FeatureCatalogueCategory.ADMIN,
+        order: 100,
       });
     }
 

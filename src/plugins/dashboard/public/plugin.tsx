@@ -56,7 +56,11 @@ import {
   KibanaLegacySetup,
   KibanaLegacyStart,
 } from '../../kibana_legacy/public';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
+import {
+  FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
+  HomePublicPluginSetup,
+} from '../../../plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import {
@@ -350,8 +354,10 @@ export class DashboardPlugin
         }),
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
         category: FeatureCatalogueCategory.DATA,
+        solutionId: 'kibana',
+        order: 100,
       });
     }
   }

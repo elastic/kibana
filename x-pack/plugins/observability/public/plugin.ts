@@ -14,8 +14,8 @@ import {
   CoreStart,
 } from '../../../../src/core/public';
 import {
+  FeatureCatalogueHomePageSection,
   HomePublicPluginSetup,
-  FeatureCatalogueCategory,
 } from '../../../../src/plugins/home/public';
 import { registerDataHandler } from './data_handler';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
@@ -62,8 +62,8 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         }),
         icon: 'logoObservability',
         path: '/app/observability',
-        showOnHomePage: true,
-        category: FeatureCatalogueCategory.DATA,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
+        category: DEFAULT_APP_CATEGORIES.observability,
       });
     }
 

@@ -18,13 +18,23 @@
  */
 
 import { Capabilities } from 'src/core/public';
+import { AppCategory } from 'src/core/types';
+
 import { IconType } from '@elastic/eui';
 
+// /** @public */
+// export enum FeatureCatalogueCategory {
+//   ADMIN = 'admin',
+//   DATA = 'data',
+//   OTHER = 'other',
+//   SOLUTION = 'solution',
+// }
+
 /** @public */
-export enum FeatureCatalogueCategory {
-  ADMIN = 'admin',
-  DATA = 'data',
-  OTHER = 'other',
+export enum FeatureCatalogueHomePageSection {
+  ADD_DATA = 'add_data',
+  MANAGE_DATA = 'manage_data',
+  SOLUTION = 'solution',
 }
 
 /** @public */
@@ -33,16 +43,18 @@ export interface FeatureCatalogueEntry {
   readonly id: string;
   /** Title of feature displayed to the user. */
   readonly title: string;
-  /** {@link FeatureCatalogueCategory} to display this feature in. */
-  readonly category: FeatureCatalogueCategory;
+  /** The solution to display this feature in. */
+  readonly category: AppCategory;
   /** One-line description of feature displayed to the user. */
   readonly description: string;
   /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
   readonly icon: IconType;
   /** URL path to link to this future. Should not include the basePath. */
   readonly path: string;
-  /** Whether or not this link should be shown on the front page of Kibana. */
-  showOnHomePage: boolean;
+  /** Indicate which home section this card should appear*/
+  homePageSection?: FeatureCatalogueHomePageSection;
+  /** An ordinal used to sort features relative to one another for display on the home page */
+  readonly order?: number;
 }
 
 export class FeatureCatalogueRegistry {
@@ -65,18 +77,19 @@ export class FeatureCatalogueRegistry {
 
   public start({ capabilities }: { capabilities: Capabilities }) {
     this.capabilities = capabilities;
+
     return {
-      showOnHomePage: (featureId: string) => {
+      showOnHomePage: (featureId: string, section: FeatureCatalogueHomePageSection) => {
         const feature = this.features.get(featureId);
         if (feature) {
-          feature.showOnHomePage = true;
+          feature.homePageSection = section;
           this.features.set(featureId, feature);
         }
       },
       hideFromHomePage: (featureId: string) => {
         const feature = this.features.get(featureId);
         if (feature) {
-          feature.showOnHomePage = false;
+          feature.homePageSection = undefined;
           this.features.set(featureId, feature);
         }
       },

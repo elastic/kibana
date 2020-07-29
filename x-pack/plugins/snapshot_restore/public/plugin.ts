@@ -9,8 +9,9 @@ import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import {
-  HomePublicPluginSetup,
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
+  HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
 
@@ -72,8 +73,9 @@ export class SnapshotRestoreUIPlugin {
         }),
         icon: 'storage',
         path: '/app/management/data/snapshot_restore',
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
         category: FeatureCatalogueCategory.ADMIN,
+        order: 300,
       });
     }
   }

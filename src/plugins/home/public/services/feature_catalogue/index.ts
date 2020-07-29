@@ -19,6 +19,7 @@
 
 export {
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
   FeatureCatalogueEntry,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,

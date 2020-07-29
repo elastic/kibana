@@ -31,6 +31,7 @@ import {
   EnvironmentService,
   EnvironmentServiceSetup,
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
   TutorialService,
@@ -127,23 +128,10 @@ export class HomePublicPlugin
         defaultMessage: 'Add data from a variety of common sources.',
       }),
       icon: 'indexOpen',
-      showOnHomePage: true,
+      homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,
       path: `${HOME_APP_BASE_PATH}#/tutorial_directory`,
-      category: FeatureCatalogueCategory.DATA, // TODO: is the correct category for this plugin?
-    });
-
-    featureCatalogue.register({
-      id: 'home_sample_data',
-      title: i18n.translate('home.sampleData.featureCatalogueTitle', {
-        defaultMessage: 'Sample Data',
-      }),
-      description: i18n.translate('home.sampleData.featureCatalogueDescription', {
-        defaultMessage: 'Load a data set and a Kibana dashboard',
-      }),
-      icon: 'tableDensityExpanded',
-      showOnHomePage: true,
-      path: `${HOME_APP_BASE_PATH}#/tutorial_directory/sampleData`,
-      category: FeatureCatalogueCategory.DATA, // TODO: is the correct category for this plugin?
+      category: FeatureCatalogueCategory.DATA,
+      order: 100,
     });
 
     return {

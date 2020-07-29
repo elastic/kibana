@@ -16,6 +16,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/pl
 import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
@@ -109,9 +110,10 @@ export class IngestManagerPlugin
           defaultMessage: 'Management for Elastic Agents and integrations.',
         }),
         icon: 'logstashInput',
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,
         path: BASE_PATH,
-        category: FeatureCatalogueCategory.ADMIN, // TODO: is the correct category for this plugin?
+        category: FeatureCatalogueCategory.ADMIN,
+        order: 200,
       });
     }
 

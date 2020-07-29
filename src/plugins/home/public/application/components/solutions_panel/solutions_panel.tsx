@@ -41,7 +41,7 @@ interface Props {
 const getActionText = ({ verb, text }: { verb: string; text: string }): JSX.Element => (
   <EuiText size="s" key={`${verb} ${text}`}>
     <p>
-      <strong>{verb}</strong> {text}
+      <span>{verb}</span> {text}
     </p>
   </EuiText>
 );
@@ -49,7 +49,7 @@ const getActionText = ({ verb, text }: { verb: string; text: string }): JSX.Elem
 // TODO: Should this live here? Should it be registered per app?
 const solutionCTAs: { [key: string]: any } = {
   enterpriseSearch: {
-    websiteSearch: {
+    enterpriseSearch: {
       verb: i18n.translate('home.solutionsPanel.enterpriseSearch.firstActionVerb', {
         defaultMessage: 'Build',
         description:
@@ -225,7 +225,7 @@ const solutionCTAs: { [key: string]: any } = {
 
 export const SolutionsPanel: FunctionComponent<Props> = ({ addBasePath, findDirectoryById }) => {
   const observability = findDirectoryById('observability');
-  const enterpriseSearch = findDirectoryById('appSearch');
+  const enterpriseSearch = findDirectoryById('enterpriseSearch');
   const securitySolution = findDirectoryById('securitySolution');
 
   const addSpacersBetweenReducer = (

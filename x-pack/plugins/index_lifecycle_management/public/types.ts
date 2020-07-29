@@ -13,7 +13,7 @@ export interface PluginsDependencies {
   usageCollection?: UsageCollectionSetup;
   management: ManagementSetup;
   indexManagement?: IndexManagementPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export interface ClientConfigType {

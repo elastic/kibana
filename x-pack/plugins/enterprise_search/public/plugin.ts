@@ -15,6 +15,7 @@ import {
 
 import {
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
@@ -76,6 +77,16 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     plugins.home.featureCatalogue.register({
+      id: 'enterpriseSearch',
+      title: 'Enterprise Search',
+      icon: AppSearchLogo,
+      description: 'Search everything',
+      path: '/app/enterprise_search/app_search', // TODO: update this link to enterprise search landing page
+      category: FeatureCatalogueCategory.SOLUTION,
+      homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
+    });
+
+    plugins.home.featureCatalogue.register({
       id: 'appSearch',
       title: 'App Search',
       icon: AppSearchLogo,
@@ -83,7 +94,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
       path: '/app/enterprise_search/app_search',
       category: FeatureCatalogueCategory.DATA,
-      showOnHomePage: true,
+      homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
+      solution: DEFAULT_APP_CATEGORIES.enterpriseSearch,
     });
 
     plugins.home.featureCatalogue.register({
@@ -94,7 +106,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         'Search all documents, files, and sources available across your virtual workplace.',
       path: '/app/enterprise_search/workplace_search',
       category: FeatureCatalogueCategory.DATA,
-      showOnHomePage: true,
+      homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
     });
   }
 

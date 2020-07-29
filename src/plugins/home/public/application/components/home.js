@@ -35,9 +35,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Welcome } from './welcome';
-import { getServices } from '../kibana_services';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
+import { FeatureCatalogueHomePageSection } from '../../services';
+import { getServices } from '../kibana_services';
+import { Welcome } from './welcome';
 import { createAppNavigationHandler } from './app_navigation_handler';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
@@ -117,27 +118,27 @@ export class Home extends Component {
     this._isMounted && this.setState({ isWelcomeEnabled: false });
   };
 
-  findDirectoryById = (id) =>
-    this.props.directories.find((directory) => directory.showOnHomePage && directory.id === id);
+  findDirectoryById = (id) => this.props.directories.find((directory) => directory.id === id);
 
-  renderDirectory = (featureId) => {
-    const { addBasePath } = this.props;
-
-    const directory = this.findDirectoryById(featureId);
-
-    return directory ? (
+  renderDirectory = (directory) =>
+    directory ? (
       <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
         <Synopsis
           onClick={createAppNavigationHandler(directory.path)}
           description={directory.description}
           iconType={directory.icon}
           title={directory.title}
-          url={addBasePath(directory.path)}
+          url={this.props.addBasePath(directory.path)}
           wrapInPanel
         />
       </EuiFlexItem>
     ) : null;
-  };
+
+  renderSectionCards = (section) =>
+    this.props.directories
+      .filter((directory) => directory.homePageSection === section)
+      .sort((directoryA, directoryB) => directoryA.order - directoryB.order)
+      .map(this.renderDirectory);
 
   renderNormal() {
     const { addBasePath } = this.props;
@@ -145,28 +146,15 @@ export class Home extends Component {
     const devTools = this.findDirectoryById('console');
     const stackManagement = this.findDirectoryById('stack-management');
     const advancedSettings = this.findDirectoryById('advanced_settings');
-    const sampleData = this.findDirectoryById('home_sample_data');
 
-    const addDataFeatureCards = [
-      'home_tutorial_directory',
-      'ingestManager',
-      'ml_file_data_visualizer',
-    ]
-      .map(this.renderDirectory)
-      .filter((card) => card);
-
-    const manageDataFeatureCards = [
-      'security',
-      'monitoring',
-      'snapshot_restore',
-      'index_lifecycle_management',
-    ]
-      .map(this.renderDirectory)
-      .filter((card) => card);
+    const addDataFeatureCards = this.renderSectionCards(FeatureCatalogueHomePageSection.ADD_DATA);
+    const manageDataFeatureCards = this.renderSectionCards(
+      FeatureCatalogueHomePageSection.MANAGE_DATA
+    );
 
     // Show card for console if none of the manage data plugins are available, most likely in OSS
-    if (manageDataFeatureCards.length < 1) {
-      manageDataFeatureCards.push(this.renderDirectory('console'));
+    if (manageDataFeatureCards.length < 1 && devTools) {
+      manageDataFeatureCards.push(this.renderDirectory(devTools));
     }
 
     return (
@@ -231,21 +219,15 @@ export class Home extends Component {
             {addDataFeatureCards.length === 1 && manageDataFeatureCards.length === 1 ? (
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <AddData sampleData={sampleData} cards={addDataFeatureCards} />
+                  <AddData cards={addDataFeatureCards} />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <ManageData
-                    cards={
-                      manageDataFeatureCards.length
-                        ? manageDataFeatureCards
-                        : this.renderDirectory('devTools')
-                    }
-                  />
+                  <ManageData cards={manageDataFeatureCards} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
               <Fragment>
-                <AddData sampleData={sampleData} cards={addDataFeatureCards} />
+                <AddData cards={addDataFeatureCards} />
                 <ManageData cards={manageDataFeatureCards} />
               </Fragment>
             )}
@@ -259,7 +241,7 @@ export class Home extends Component {
               justifyContent="spaceBetween"
             >
               <EuiFlexItem grow={1}>
-                {advancedSettings && <ChangeHomeRoute defaultRoute={HOME_APP_BASE_PATH} />}
+                {advancedSettings ? <ChangeHomeRoute defaultRoute={HOME_APP_BASE_PATH} /> : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty href="#/feature_directory" size="xs" flush="right" iconType="apps">
@@ -316,8 +298,10 @@ Home.propTypes = {
       description: PropTypes.string.isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
+      homePageSection: PropTypes.string,
       category: PropTypes.string.isRequired,
+      solutionId: PropTypes.string,
+      order: PropTypes.number,
     })
   ),
   find: PropTypes.func.isRequired,
