@@ -61,11 +61,15 @@ export const TableVisBasic = memo(({ table, vis, visParams }: TableVisBasicProps
         visibleColumns: columns.map((col) => col.id),
         setVisibleColumns: () => {},
       }}
-      toolbarVisibility={{
-        additionalControls: (
-          <TableVisControls cols={columns} rows={rows} table={table} filename={visParams.title} />
-        ),
-      }}
+      toolbarVisibility={
+        visParams.showToolbar && {
+          showColumnSelector: false,
+          showFullScreenSelector: false,
+          additionalControls: (
+            <TableVisControls cols={columns} rows={rows} table={table} filename={visParams.title} />
+          ),
+        }
+      }
       renderCellValue={renderCellValue}
       pagination={pagination}
     />

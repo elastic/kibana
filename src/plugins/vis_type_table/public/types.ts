@@ -45,6 +45,7 @@ export interface TableVisParams {
     columnIndex: number | null;
     direction: string | null;
   };
+  showToolbar: boolean;
   showTotal: boolean;
   totalFunc: AggTypes;
   percentageCol: string;

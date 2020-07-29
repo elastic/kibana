@@ -49,6 +49,7 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
           columnIndex: null,
           direction: null,
         },
+        showToolbar: false,
         showTotal: false,
         totalFunc: 'sum',
         percentageCol: '',
