@@ -9,13 +9,27 @@ import React from 'react';
 
 import { EmptyPage } from './index';
 
-test('renders correctly', () => {
-  const actions = {
-    actions: {
-      label: 'Do Something',
-      url: 'my/url/from/nowwhere',
-    },
-  };
-  const EmptyComponent = shallow(<EmptyPage actions={actions} title="My Super Title" />);
-  expect(EmptyComponent).toMatchSnapshot();
+describe('EmptyPage component', () => {
+  it('renders actions without descriptions', () => {
+    const actions = {
+      actions: {
+        label: 'Do Something',
+        url: 'my/url/from/nowwhere',
+      },
+    };
+    const EmptyComponent = shallow(<EmptyPage actions={actions} title="My Super Title" />);
+    expect(EmptyComponent).toMatchSnapshot();
+  });
+
+  it('renders actions with descriptions', () => {
+    const actions = {
+      actions: {
+        description: 'My Description',
+        label: 'Do Something',
+        url: 'my/url/from/nowwhere',
+      },
+    };
+    const EmptyComponent = shallow(<EmptyPage actions={actions} title="My Super Title" />);
+    expect(EmptyComponent).toMatchSnapshot();
+  });
 });
