@@ -143,10 +143,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const data = await PageObjects.visChart.getTableVisContent();
       expect(data).to.be.eql([
-        '≥ 0B and < 1,000B',
-        '344.094B',
-        '≥ 1,000B and < 1.953KB',
-        '1.697KB',
+        ['≥ 0B and < 1,000B', '344.094B'],
+        ['≥ 1,000B and < 1.953KB', '1.697KB'],
       ]);
     });
 
