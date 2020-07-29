@@ -74,8 +74,26 @@ export class AncestryQueryHandler implements QueryHandler<ResolverAncestry> {
     // bucket the start and end events together for a single node
     const ancestryNodes = this.toMapOfNodes(results);
 
-    // the order of this array is going to be weird, it will look like this
-    // [furthest grandparent...closer grandparent, next recursive call furthest grandparent...closer grandparent]
+    /**
+     * the order of this array is going to be weird, it will look like this
+     * [furthest grandparent...closer grandparent, next recursive call furthest grandparent...closer grandparent]
+     *
+     * Consider the following tree:
+     * A -> B -> C -> D -> E -> Origin
+     * Where A was spawn before B, which was before C, etc
+     *
+     * Let's assume the ancestry array size is 2 so Origin's array would be: [E, D]
+     * E's ancestry array would be: [D, C] etc
+     *
+     * If a request comes in to retrieve all the ancestors in this tree, the returned array will be:
+     * [D, E, B, C, A]
+     *
+     * The first iteration would retrieve D and E in that order because they are sorted in ascending order by timestamp.
+     * The next iteration would get the ancestors of D (since that's the most distant grandparent from Origin) which are
+     * [B, C]
+     * The next iteration would get the ancestors of B which is A
+     * Hence: [D, E, B, C, A]
+     */
     this.ancestry.ancestors.push(...ancestryNodes.values());
     this.ancestry.nextAncestor = parentEntityId(results[0]) || null;
     this.levels = this.levels - ancestryNodes.size;
