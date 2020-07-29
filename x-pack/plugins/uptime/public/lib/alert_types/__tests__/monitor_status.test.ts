@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { initMonitorStatusAlertType, validate } from '../monitor_status';
+import { initMonitorStatusAlertType } from '../monitor_status';
+import { validateMonitorStatusParams as validate } from '../lazy_wrapper/validate_monitor_status';
 
 describe('monitor status alert type', () => {
   describe('validate', () => {
