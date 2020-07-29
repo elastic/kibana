@@ -1513,7 +1513,7 @@ For Vega visualization two different views was implemented: *Request* view and *
 ===== Inspect Elasticsearch requests
 
 Vega visualization uses the {ref}/search-search.html[{es} search API] to get documents and aggregation 
-results from {es}.To troubleshoot these requests, open the *Inspector*, which shows the most recent requests. 
+results from {es}. To troubleshoot these requests, click *Inspect*, which shows the most recent requests. 
 In case your specification has more than one request, you can switch between them using the *Request* dropdown.
 
 [role="screenshot"]
