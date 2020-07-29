@@ -11,11 +11,8 @@ import { AutoDownload } from './auto_download';
 
 describe('AutoDownload', () => {
   beforeEach(() => {
+    // our DOM environment lacks this function that our component needs
     window.URL.revokeObjectURL = jest.fn();
-  });
-
-  afterEach(() => {
-    (window.URL.revokeObjectURL as jest.Mock).mockReset();
   });
 
   it('calls onDownload once if a blob is provided', () => {
