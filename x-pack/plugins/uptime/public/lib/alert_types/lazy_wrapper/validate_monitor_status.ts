@@ -10,7 +10,7 @@ import {
   AtomicStatusCheckParamsType,
   MonitorAvailabilityType,
   StatusCheckParamsType,
-} from '../../../../common/runtime_types';
+} from '../../../../common/runtime_types/alerts';
 import { ValidationResult } from '../../../../../triggers_actions_ui/public';
 
 export function validateMonitorStatusParams(alertParams: any): ValidationResult {
