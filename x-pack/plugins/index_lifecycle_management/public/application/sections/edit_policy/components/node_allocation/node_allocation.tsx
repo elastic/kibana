@@ -30,10 +30,9 @@ interface Props {
   isShowingErrors: boolean;
 }
 
-const learnMoreLinks = (
+const learnMoreLink = (
   <Fragment>
-    <EuiSpacer size="s" />
-    <EuiSpacer size="s" />
+    <EuiSpacer size="m" />
     <LearnMoreLink
       text={
         <FormattedMessage
@@ -66,6 +65,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
   }
 
   if (error) {
+    const { error: errorString, statusCode, message } = error;
     return (
       <Fragment>
         <EuiCallOut
@@ -76,12 +76,15 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
               defaultMessage="Unable to load node attributes."
             />
           }
-          color="warning"
+          color="danger"
         >
-          <EuiButton onClick={sendRequest} iconType="refresh" color="warning">
+          <p>
+            {statusCode}: {errorString}. {message}
+          </p>
+          <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesReloadButton"
-              defaultMessage="Try again."
+              defaultMessage="Try again"
             />
           </EuiButton>
         </EuiCallOut>
@@ -99,7 +102,12 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
   nodeOptions.sort((a, b) => a.value.localeCompare(b.value));
   if (nodeOptions.length) {
     nodeOptions = [
-      { text: "Default allocation (don't use attributes)", value: '' },
+      {
+        text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.defaultNodeAllocation', {
+          defaultMessage: "Default allocation (don't use attributes)",
+        }),
+        value: '',
+      },
       ...nodeOptions,
     ];
   }
@@ -120,7 +128,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
             id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingDescription"
             defaultMessage="You can't control shard allocation without node attributes."
           />
-          {learnMoreLinks}
+          {learnMoreLink}
         </EuiCallOut>
 
         <EuiSpacer size="xl" />
@@ -160,10 +168,8 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
             defaultMessage="View a list of nodes attached to this configuration"
           />
         </EuiButtonEmpty>
-      ) : (
-        <div />
-      )}
-      {learnMoreLinks}
+      ) : null}
+      {learnMoreLink}
       <EuiSpacer size="m" />
     </Fragment>
   );

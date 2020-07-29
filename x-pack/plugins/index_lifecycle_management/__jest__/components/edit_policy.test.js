@@ -11,8 +11,14 @@ import { Provider } from 'react-redux';
 // axios has a $http like interface so using it to simulate $http
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
+
+import { init as initHttpRequests } from './helpers/http_requests';
+import {
+  notificationServiceMock,
+  fatalErrorsServiceMock,
+} from '../../../../../src/core/public/mocks';
+import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/public/mocks';
 
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import { fetchedPolicies } from '../../public/application/store/actions';
@@ -34,21 +40,17 @@ import {
   policyNameMustBeDifferentErrorMessage,
   policyNameAlreadyUsedErrorMessage,
   maximumDocumentsRequiredMessage,
-} from '../../public/application/store/selectors/lifecycle';
+} from '../../public/application/store/selectors';
 
-initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
-initUiMetric({ reportUiStats: () => {} });
+initHttp(axios.create({ adapter: axiosXhrAdapter }));
+initUiMetric(usageCollectionPluginMock.createSetupContract());
 initNotification(
-  {
-    addDanger: () => {},
-    addSuccess: () => {},
-  },
-  {
-    add: () => {},
-  }
+  notificationServiceMock.createSetupContract().toasts,
+  fatalErrorsServiceMock.createSetupContract()
 );
 
 let server;
+let httpRequestsMockHelpers;
 let store;
 const policy = {
   phases: {
@@ -133,12 +135,9 @@ describe('edit policy', () => {
       </Provider>
     );
     store.dispatch(fetchedPolicies(policies));
-    server = sinon.fakeServer.create();
-    server.respondWith('/api/index_lifecycle_management/policies', [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(policies),
-    ]);
+    ({ server, httpRequestsMockHelpers } = initHttpRequests());
+
+    httpRequestsMockHelpers.setPoliciesResponse(policies);
   });
   describe('top level form', () => {
     test('should show error when trying to save empty form', () => {
@@ -253,11 +252,7 @@ describe('edit policy', () => {
   describe('warm phase', () => {
     beforeEach(() => {
       server.respondImmediately = true;
-      server.respondWith('/api/index_lifecycle_management/nodes/list', [
-        200,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify({}),
-      ]);
+      httpRequestsMockHelpers.setNodesListResponse({});
     });
 
     test('should show number required error when trying to save empty warm phase', async () => {
@@ -373,11 +368,7 @@ describe('edit policy', () => {
       expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', async () => {
-      server.respondWith('/api/index_lifecycle_management/nodes/list', [
-        200,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify({ 'attribute:true': ['node1'] }),
-      ]);
+      httpRequestsMockHelpers.setNodesListResponse({ 'attribute:true': ['node1'] });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -389,11 +380,7 @@ describe('edit policy', () => {
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
-      server.respondWith('/api/index_lifecycle_management/nodes/list', [
-        200,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify({ 'attribute:true': ['node1'] }),
-      ]);
+      httpRequestsMockHelpers.setNodesListResponse({ 'attribute:true': ['node1'] });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -416,11 +403,7 @@ describe('edit policy', () => {
   describe('cold phase', () => {
     beforeEach(() => {
       server.respondImmediately = true;
-      server.respondWith('/api/index_lifecycle_management/nodes/list', [
-        200,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify({}),
-      ]);
+      httpRequestsMockHelpers.setNodesListResponse({});
     });
     test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
@@ -460,11 +443,7 @@ describe('edit policy', () => {
       expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', async () => {
-      server.respondWith('/api/index_lifecycle_management/nodes/list', [
-        200,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify({ 'attribute:true': ['node1'] }),
-      ]);
+      httpRequestsMockHelpers.setNodesListResponse({ 'attribute:true': ['node1'] });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
@@ -476,11 +455,7 @@ describe('edit policy', () => {
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
     test('should show view node attributes link when attribute selected and show flyout when clicked', async () => {
-      server.respondWith('/api/index_lifecycle_management/nodes/list', [
-        200,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify({ 'attribute:true': ['node1'] }),
-      ]);
+      httpRequestsMockHelpers.setNodesListResponse({ 'attribute:true': ['node1'] });
       const rendered = mountWithIntl(component);
       noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
