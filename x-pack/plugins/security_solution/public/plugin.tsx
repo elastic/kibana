@@ -19,7 +19,10 @@ import {
   AppNavLinkStatus,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import {
+  FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
+} from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { jiraActionType, resilientActionType } from './common/lib/connectors';
@@ -80,8 +83,57 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }),
         icon: APP_ICON,
         path: APP_OVERVIEW_PATH,
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+        category: FeatureCatalogueCategory.SOLUTION,
+        order: 300,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: `${APP_ID}_detections`,
+        title: i18n.translate('xpack.securitySolution.featureCatalogue.title', {
+          defaultMessage: 'Security',
+        }),
+        description: i18n.translate('xpack.securitySolution.featureCatalogue.description', {
+          defaultMessage: 'Detect critical security events.',
+        }),
+        icon: APP_ICON,
+        path: APP_DETECTIONS_PATH,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
+        solution: APP_ID,
+        order: 100,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: `${APP_ID}_cases`,
+        title: i18n.translate('xpack.securitySolution.cases.featureCatalogue.title', {
+          defaultMessage: 'Cases',
+        }),
+        description: i18n.translate('xpack.securitySolution.cases.featureCatalogue.description', {
+          defaultMessage: 'Investigate incidents and collaborate.',
+        }),
+        icon: APP_ICON,
+        path: APP_CASES_PATH,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+        category: FeatureCatalogueCategory.DATA,
+        solution: APP_ID,
+        order: 200,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: `${APP_ID}_management`,
+        title: i18n.translate('xpack.securitySolution.cases.featureCatalogue.title', {
+          defaultMessage: 'Management',
+        }),
+        description: i18n.translate('xpack.securitySolution.cases.featureCatalogue.description', {
+          defaultMessage: 'Prevent threats autonomously.',
+        }),
+        icon: APP_ICON,
+        path: APP_MANAGEMENT_PATH, // TODO: check this!!!
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+        category: FeatureCatalogueCategory.DATA,
+        solution: APP_ID,
+        order: 300,
       });
     }
 
@@ -124,7 +176,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: OVERVIEW,
       order: 9000,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.security,
+      category: DEFAULT_APP_CATEGORIES.securitySolution,
       appRoute: APP_OVERVIEW_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -152,7 +204,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: DETECTION_ENGINE,
       order: 9001,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.security,
+      category: DEFAULT_APP_CATEGORIES.securitySolution,
       appRoute: APP_DETECTIONS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -179,7 +231,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: HOSTS,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.security,
+      category: DEFAULT_APP_CATEGORIES.securitySolution,
       appRoute: APP_HOSTS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -206,7 +258,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: NETWORK,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.security,
+      category: DEFAULT_APP_CATEGORIES.securitySolution,
       appRoute: APP_NETWORK_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -233,7 +285,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: TIMELINES,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.security,
+      category: DEFAULT_APP_CATEGORIES.securitySolution,
       appRoute: APP_TIMELINES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -260,7 +312,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: CASE,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.security,
+      category: DEFAULT_APP_CATEGORIES.securitySolution,
       appRoute: APP_CASES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -287,7 +339,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: ADMINISTRATION,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.security,
+      category: DEFAULT_APP_CATEGORIES.securitySolution,
       appRoute: APP_MANAGEMENT_PATH,
       mount: async (params: AppMountParameters) => {
         const [

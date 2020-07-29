@@ -14,6 +14,7 @@ import {
   CoreStart,
 } from '../../../../src/core/public';
 import {
+  FeatureCatalogueCategory,
   FeatureCatalogueHomePageSection,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
@@ -62,8 +63,10 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         }),
         icon: 'logoObservability',
         path: '/app/observability',
-        homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
-        category: DEFAULT_APP_CATEGORIES.observability,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+        category: FeatureCatalogueCategory.SOLUTION,
+        solution: 'observability',
+        order: 100,
       });
     }
 

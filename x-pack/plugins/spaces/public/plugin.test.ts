@@ -57,7 +57,6 @@ describe('Spaces plugin', () => {
           category: 'admin',
           icon: 'spacesApp',
           id: 'spaces',
-          showOnHomePage: true,
         })
       );
     });

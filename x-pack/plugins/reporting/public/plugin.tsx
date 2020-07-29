@@ -112,7 +112,6 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       }),
       icon: 'reportingApp',
       path: '/app/management/insightsAndAlerting/reporting',
-      showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
     management.sections.section.insightsAndAlerting.registerApp({

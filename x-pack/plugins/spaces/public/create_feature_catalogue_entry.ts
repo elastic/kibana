@@ -20,7 +20,6 @@ export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {
     description: getSpacesFeatureDescription(),
     icon: 'spacesApp',
     path: '/app/management/kibana/spaces',
-    showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN,
   };
 };

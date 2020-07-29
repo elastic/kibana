@@ -20,6 +20,7 @@
 import {
   FeatureCatalogueRegistry,
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
   FeatureCatalogueEntry,
 } from './feature_catalogue_registry';
 
@@ -29,7 +30,9 @@ const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
   description: 'Display and share a collection of visualizations and saved searches.',
   icon: 'dashboardApp',
   path: `/app/kibana#dashboard`,
+  homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
   category: FeatureCatalogueCategory.DATA,
+  solutionId: 'kibana',
 };
 
 describe('FeatureCatalogueRegistry', () => {

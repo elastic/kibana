@@ -41,7 +41,6 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
       }),
       icon: '',
       path: '/app/dev_tools#/painless_lab',
-      showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
 

@@ -5,15 +5,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import {
+  FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
+} from '../../../../src/plugins/home/public';
 
 export const featureCatalogueEntry = {
   id: 'canvas',
   title: 'Canvas',
   description: i18n.translate('xpack.canvas.appDescription', {
-    defaultMessage: 'Showcase your data in a pixel-perfect way.',
+    defaultMessage: 'Craft pixel-perfect reports.',
   }),
   icon: 'canvasApp',
   path: '/app/canvas',
+  homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
   category: FeatureCatalogueCategory.DATA,
+  solution: 'kibana',
+  order: 300,
 };

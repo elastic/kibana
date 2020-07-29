@@ -12,9 +12,9 @@ import {
   AppMountParameters,
 } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
-
 import {
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
   HomePublicPluginSetup,
 } from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
@@ -61,8 +61,10 @@ export class UptimePlugin
         description: PLUGIN.DESCRIPTION,
         icon: 'uptimeApp',
         path: '/app/uptime#/',
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
+        solution: 'observability',
+        order: 300,
       });
     }
     const getUptimeDataHelper = async () => {

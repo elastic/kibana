@@ -70,7 +70,6 @@ export class RollupPlugin implements Plugin {
         }),
         icon: 'indexRollupApp',
         path: `/app/management/data/rollup_jobs/job_list`,
-        showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
       });
     }

@@ -31,9 +31,10 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     }),
     icon: 'machineLearningApp',
     path: '/app/ml',
-    homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
+    homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
     category: FeatureCatalogueCategory.DATA,
-    solutionId: 'kibana',
+    solution: 'kibana',
+    order: 500,
   });
 
   home.featureCatalogue.register({

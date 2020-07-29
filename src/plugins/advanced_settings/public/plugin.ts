@@ -52,9 +52,9 @@ export class AdvancedSettingsPlugin
         description: i18n.translate('xpack.advancedSettings.featureCatalogueTitle', {
           defaultMessage: 'Customize your Kibana experience',
         }),
-        icon: 'gear',
+        icon: 'gear', // TODO: Do we want to use this icon here?
         path: '/app/management/kibana/settings',
-        category: DEFAULT_APP_CATEGORY.management,
+        category: FeatureCatalogueCategory.ADMIN,
       });
     }
 
