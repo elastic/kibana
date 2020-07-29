@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MapExtent } from '../common/descriptor_types';
-
-export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent;
-
-export function turfBboxToBounds(turfBbox: unknown): MapExtent;
+export { Typeahead } from './typehead';
