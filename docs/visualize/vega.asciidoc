@@ -1543,7 +1543,7 @@ then select the *Spec* tab:
 image::visualize/images/vega_tutorial_getting_help.png[]
 
 To copy the response, click the button "Copy to clipboard". Paste the copied data to 
-https://gist.github.com/[gist.github.com], possibly with a .json extension, use the [raw] button, 
+https://gist.github.com/[gist.github.com], possibly with a .json extension. Use the [raw] button, 
 and share that when asking for help.
 
 [[vega-browser-debugging-console]]
