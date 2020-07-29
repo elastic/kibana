@@ -40,7 +40,7 @@ import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
-import { scaleBounds } from '../elasticsearch_geo_utils';
+import { scaleBounds, turfBboxToBounds } from '../elasticsearch_geo_utils';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -368,13 +368,7 @@ export function fitToDataBounds() {
       return;
     }
 
-    const turfUnionBbox = turf.bbox(turf.multiPoint(corners));
-    const dataBounds = {
-      minLon: turfUnionBbox[0],
-      minLat: turfUnionBbox[1],
-      maxLon: turfUnionBbox[2],
-      maxLat: turfUnionBbox[3],
-    };
+    const dataBounds = turfBboxToBounds(turf.bbox(turf.multiPoint(corners)));
 
     dispatch(setGotoWithBounds(scaleBounds(dataBounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
   };
