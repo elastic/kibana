@@ -12,8 +12,8 @@ import { AutoDownload } from './auto_download';
 
 describe('AutoDownload', () => {
   beforeEach(() => {
-    // our DOM environment lacks this function that our component needs
     Object.defineProperty(globalNode.window.URL, 'revokeObjectURL', {
+      configurable: true,
       writable: true,
       value: jest.fn(),
     });
