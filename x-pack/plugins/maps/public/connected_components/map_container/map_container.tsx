@@ -7,27 +7,63 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { MBMapContainer } from '../map/mb';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import uuid from 'uuid/v4';
+import { Filter } from 'src/plugins/data/public';
+// @ts-expect-error
+import { MBMap } from '../map/mb';
+// @ts-expect-error
 import { WidgetOverlay } from '../widget_overlay';
+// @ts-expect-error
 import { ToolbarOverlay } from '../toolbar_overlay';
+// @ts-expect-error
 import { LayerPanel } from '../layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 import { indexPatterns as indexPatternsUtils } from '../../../../../../src/plugins/data/public';
-import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
+import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
+import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
+import { MapRefreshConfig } from '../../../common/descriptor_types';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
-export class GisMap extends Component {
-  state = {
+interface Props {
+  addFilters: ((filters: Filter[]) => void) | null;
+  areLayersLoaded: boolean;
+  cancelAllInFlightRequests: () => void;
+  exitFullScreen: () => void;
+  flyoutDisplay: FLYOUT_STATE;
+  hideToolbarOverlay: boolean;
+  isFullScreen: boolean;
+  indexPatternIds: string[];
+  mapInitError: string | null | undefined;
+  refreshConfig: MapRefreshConfig;
+  renderTooltipContent?: RenderToolTipContent;
+  triggerRefreshTimer: () => void;
+}
+
+interface State {
+  isInitialLoadRenderTimeoutComplete: boolean;
+  domId: string;
+  geoFields: GeoFieldWithIndex[];
+}
+
+export class MapContainer extends Component<Props, State> {
+  private _isMounted: boolean = false;
+  private _isInitalLoadRenderTimerStarted: boolean = false;
+  private _prevIndexPatternIds: string[] = [];
+  private _refreshTimerId: number | null = null;
+  private _prevIsPaused: boolean | null = null;
+  private _prevInterval: number | null = null;
+
+  state: State = {
     isInitialLoadRenderTimeoutComplete: false,
     domId: uuid(),
     geoFields: [],
@@ -35,7 +71,6 @@ export class GisMap extends Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this._isInitalLoadRenderTimerStarted = false;
     this._setRefreshTimer();
     registerLayerWizards();
   }
@@ -73,7 +108,7 @@ export class GisMap extends Component {
     }
   };
 
-  _loadGeoFields = async (nextIndexPatternIds) => {
+  _loadGeoFields = async (nextIndexPatternIds: string[]) => {
     if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       // all ready loaded index pattern ids
       return;
@@ -81,29 +116,24 @@ export class GisMap extends Component {
 
     this._prevIndexPatternIds = nextIndexPatternIds;
 
-    const geoFields = [];
-    try {
-      const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
-      indexPatterns.forEach((indexPattern) => {
-        indexPattern.fields.forEach((field) => {
-          if (
-            !indexPatternsUtils.isNestedField(field) &&
-            (field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
-              field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE)
-          ) {
-            geoFields.push({
-              geoFieldName: field.name,
-              geoFieldType: field.type,
-              indexPatternTitle: indexPattern.title,
-              indexPatternId: indexPattern.id,
-            });
-          }
-        });
+    const geoFields: GeoFieldWithIndex[] = [];
+    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
+    indexPatterns.forEach((indexPattern) => {
+      indexPattern.fields.forEach((field) => {
+        if (
+          indexPattern.id &&
+          !indexPatternsUtils.isNestedField(field) &&
+          (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE)
+        ) {
+          geoFields.push({
+            geoFieldName: field.name,
+            geoFieldType: field.type,
+            indexPatternTitle: indexPattern.title,
+            indexPatternId: indexPattern.id,
+          });
+        }
       });
-    } catch (e) {
-      // swallow errors.
-      // the Layer-TOC will indicate which layers are disfunctional on a per-layer basis
-    }
+    });
 
     if (!this._isMounted) {
       return;
@@ -115,33 +145,34 @@ export class GisMap extends Component {
   _setRefreshTimer = () => {
     const { isPaused, interval } = this.props.refreshConfig;
 
-    if (this.isPaused === isPaused && this.interval === interval) {
+    if (this._prevIsPaused === isPaused && this._prevInterval === interval) {
       // refreshConfig is the same, nothing to do
       return;
     }
 
-    this.isPaused = isPaused;
-    this.interval = interval;
+    this._prevIsPaused = isPaused;
+    this._prevInterval = interval;
 
     this._clearRefreshTimer();
 
     if (!isPaused && interval > 0) {
-      this.refreshTimerId = setInterval(() => {
+      this._refreshTimerId = window.setInterval(() => {
         this.props.triggerRefreshTimer();
       }, interval);
     }
   };
 
   _clearRefreshTimer = () => {
-    if (this.refreshTimerId) {
-      clearInterval(this.refreshTimerId);
+    if (this._refreshTimerId) {
+      window.clearInterval(this._refreshTimerId);
+      this._refreshTimerId = null;
     }
   };
 
   // Mapbox does not provide any feedback when rendering is complete.
   // Temporary solution is just to wait set period of time after data has loaded.
   _startInitialLoadRenderTimer = () => {
-    setTimeout(() => {
+    window.setTimeout(() => {
       if (this._isMounted) {
         this.setState({ isInitialLoadRenderTimeoutComplete: true });
         this._onInitialLoadRenderComplete();
@@ -158,8 +189,6 @@ export class GisMap extends Component {
       mapInitError,
       renderTooltipContent,
     } = this.props;
-
-    const { domId } = this.state;
 
     if (mapInitError) {
       return (
@@ -194,12 +223,12 @@ export class GisMap extends Component {
       <EuiFlexGroup
         gutterSize="none"
         responsive={false}
-        data-dom-id={domId}
+        data-dom-id={this.state.domId}
         data-render-complete={this.state.isInitialLoadRenderTimeoutComplete}
         data-shared-item
       >
         <EuiFlexItem className="mapMapWrapper">
-          <MBMapContainer
+          <MBMap
             addFilters={addFilters}
             geoFields={this.state.geoFields}
             renderTooltipContent={renderTooltipContent}

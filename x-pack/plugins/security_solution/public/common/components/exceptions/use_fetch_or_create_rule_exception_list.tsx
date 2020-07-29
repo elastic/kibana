@@ -102,6 +102,7 @@ export const useFetchOrCreateRuleExceptionList = ({
 
       const newExceptionListReference = {
         id: newExceptionList.id,
+        list_id: newExceptionList.list_id,
         type: newExceptionList.type,
         namespace_type: newExceptionList.namespace_type,
       };

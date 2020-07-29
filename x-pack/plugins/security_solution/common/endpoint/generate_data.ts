@@ -1041,7 +1041,7 @@ export class EndpointDocGenerator {
           config: {
             artifact_manifest: {
               value: {
-                manifest_version: 'WzAsMF0=',
+                manifest_version: '1.0.0',
                 schema_version: 'v1',
                 artifacts: {},
               },
