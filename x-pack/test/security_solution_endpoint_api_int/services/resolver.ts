@@ -58,7 +58,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
         array.push({ create: { _index: eventsIndex } }, doc);
         return array;
       }, []);
-      await client.bulk({ body, refresh: true });
+      await client.bulk({ body, refresh: 'true' });
       return { events, indices: [eventsIndex] };
     },
     async createTrees(
