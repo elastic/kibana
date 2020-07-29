@@ -48,3 +48,5 @@ export const ENDPOINT_LIST_NAME = 'Elastic Endpoint Security Exception List';
 
 /** The description of the single global space agnostic endpoint list */
 export const ENDPOINT_LIST_DESCRIPTION = 'Elastic Endpoint Security Exception List';
+
+export const MAX_EXCEPTION_LIST_SIZE = 10000;
