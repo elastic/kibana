@@ -96,6 +96,7 @@ describe('useVisualizeAppState', () => {
     );
     expect(connectToQueryState).toHaveBeenCalledWith(mockServices.data.query, expect.any(Object), {
       filters: 'appState',
+      query: true,
     });
     expect(result.current).toEqual({
       appState: stateContainer,
