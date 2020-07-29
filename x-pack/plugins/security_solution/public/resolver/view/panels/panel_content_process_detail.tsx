@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { memo, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
   htmlIdGenerator,
@@ -15,6 +16,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from 'react-intl';
+import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import {
@@ -37,20 +39,18 @@ const StyledDescriptionList = styled(EuiDescriptionList)`
 
 /**
  * A description list view of all the Metadata that goes with a particular process event, like:
- * Created, Pid, User/Domain, etc.
+ * Created, PID, User/Domain, etc.
  */
 export const ProcessDetails = memo(function ProcessDetails({
   processEvent,
-  isProcessTerminated,
-  isProcessOrigin,
   pushToQueryParams,
 }: {
   processEvent: ResolverEvent;
-  isProcessTerminated: boolean;
-  isProcessOrigin: boolean;
   pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
 }) {
   const processName = event.eventName(processEvent);
+  const entityId = event.entityId(processEvent);
+  const isProcessTerminated = useSelector(selectors.isProcessTerminated)(entityId);
   const processInfoEntry = useMemo(() => {
     const eventTime = event.eventTimestamp(processEvent);
     const dateTime = eventTime ? formatDate(eventTime) : '';
@@ -72,12 +72,12 @@ export const ProcessDetails = memo(function ProcessDetails({
 
     const userEntry = {
       title: 'user.name',
-      description: (userInfoForProcess(processEvent) as { name: string }).name,
+      description: userInfoForProcess(processEvent)?.name,
     };
 
     const domainEntry = {
       title: 'user.domain',
-      description: (userInfoForProcess(processEvent) as { domain: string }).domain,
+      description: userInfoForProcess(processEvent)?.domain,
     };
 
     const parentPidEntry = {
@@ -151,8 +151,8 @@ export const ProcessDetails = memo(function ProcessDetails({
     if (!processEvent) {
       return { descriptionText: '' };
     }
-    return cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
-  }, [processEvent, cubeAssetsForNode, isProcessTerminated, isProcessOrigin]);
+    return cubeAssetsForNode(isProcessTerminated, false);
+  }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
 
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
@@ -161,10 +161,7 @@ export const ProcessDetails = memo(function ProcessDetails({
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h4 aria-describedby={titleId}>
-          <CubeForProcess
-            isProcessTerminated={isProcessTerminated}
-            isProcessOrigin={isProcessOrigin}
-          />
+          <CubeForProcess isProcessTerminated={isProcessTerminated} />
           {processName}
         </h4>
       </EuiTitle>
