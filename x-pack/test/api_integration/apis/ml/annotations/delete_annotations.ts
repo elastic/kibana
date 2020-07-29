@@ -8,50 +8,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { ANNOTATION_TYPE } from '../../../../../plugins/ml/common/constants/annotations';
+import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
-
-  const testSetupJobConfigs = [1, 2, 3].map((num) => ({
-    job_id: `job_annotation_${num}_${Date.now()}`,
-    description: `Test annotation ${num}`,
-    groups: ['farequote', 'automated', 'single-metric'],
-    analysis_config: {
-      bucket_span: '15m',
-      influencers: [],
-      detectors: [
-        {
-          function: 'mean',
-          field_name: 'responsetime',
-        },
-      ],
-    },
-    data_description: { time_field: '@timestamp' },
-    analysis_limits: { model_memory_limit: '10mb' },
-  }));
-  const jobIds = testSetupJobConfigs.map((j) => j.job_id);
-
-  const createAnnotationRequestBody = (jobId: string) => {
-    return {
-      timestamp: Date.now(),
-      end_timestamp: Date.now(),
-      annotation: 'Test annotation',
-      job_id: jobId,
-      type: ANNOTATION_TYPE.ANNOTATION,
-      event: 'user',
-      detector_index: 1,
-      partition_field_name: 'airline',
-      partition_field_value: 'AAL',
-    };
-  };
-
-  const testSetupAnnotations = testSetupJobConfigs.map((job) =>
-    createAnnotationRequestBody(job.job_id)
-  );
 
   describe('delete_annotations', function () {
     before(async () => {

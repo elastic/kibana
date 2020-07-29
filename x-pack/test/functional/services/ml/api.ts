@@ -657,7 +657,6 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       const results = await es.search<Annotation>({
         index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
         body: {
-          size: 1,
           query: {
             match: {
               job_id: jobId,

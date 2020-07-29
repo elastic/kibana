@@ -9,6 +9,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { ANNOTATION_TYPE } from '../../../../../plugins/ml/common/constants/annotations';
+import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
+import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -16,46 +18,16 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
-  const testSetupJobConfigs = [1, 2, 3].map((num) => ({
-    job_id: `job_annotation_${num}_${Date.now()}`,
-    description: `Test annotation ${num}`,
-    groups: ['farequote', 'automated', 'single-metric'],
-    analysis_config: {
-      bucket_span: '15m',
-      influencers: [],
-      detectors: [
-        {
-          function: 'mean',
-          field_name: 'responsetime',
-        },
-        {
-          function: 'sum',
-          field_name: 'responsetime',
-        },
-      ],
-    },
-    data_description: { time_field: '@timestamp' },
-    analysis_limits: { model_memory_limit: '10mb' },
-  }));
-  const jobIds = testSetupJobConfigs.map((j) => j.job_id);
-
-  const createAnnotationRequestBody = (jobId: string) => {
-    return {
-      timestamp: Date.now(),
-      end_timestamp: Date.now(),
-      annotation: 'Test annotation',
-      job_id: jobId,
-      type: ANNOTATION_TYPE.ANNOTATION,
-      event: 'user',
-      detector_index: 1,
-      partition_field_name: 'airline',
-      partition_field_value: 'AAL',
-    };
+  const commonAnnotationUpdateRequestBody: Partial<Annotation> = {
+    timestamp: Date.now(),
+    end_timestamp: Date.now(),
+    annotation: 'Updated annotation',
+    type: ANNOTATION_TYPE.ANNOTATION,
+    event: 'model_change',
+    detector_index: 2,
+    partition_field_name: 'airline',
+    partition_field_value: 'ANA',
   };
-
-  const testSetupAnnotations = testSetupJobConfigs.map((job) =>
-    createAnnotationRequestBody(job.job_id)
-  );
 
   describe('update_annotations', function () {
     before(async () => {
@@ -81,17 +53,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       const originalAnnotation = annotationsForJob[0];
       const annotationUpdateRequestBody = {
-        timestamp: Date.now(),
-        end_timestamp: Date.now(),
-        annotation: 'Updated annotation #0',
+        ...commonAnnotationUpdateRequestBody,
         job_id: originalAnnotation._source.job_id,
-        type: ANNOTATION_TYPE.ANNOTATION,
-        event: 'model_change',
-        detector_index: 2,
-        partition_field_name: 'airline',
-        partition_field_value: 'ANA',
         _id: originalAnnotation._id,
       };
+
       const { body } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
@@ -103,9 +69,13 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.result).to.eql('updated');
 
       const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
-      expect(updatedAnnotation?.annotation).to.eql(annotationUpdateRequestBody.annotation);
-      expect(updatedAnnotation?.detector_index).to.eql(annotationUpdateRequestBody.detector_index);
-      expect(updatedAnnotation?.event).to.eql(annotationUpdateRequestBody.event);
+
+      if (updatedAnnotation) {
+        Object.keys(commonAnnotationUpdateRequestBody).forEach((key) => {
+          const field = key as keyof Annotation;
+          expect(updatedAnnotation[field]).to.eql(annotationUpdateRequestBody[field]);
+        });
+      }
     });
 
     it('should correctly update annotation for user with viewer permission', async () => {
@@ -114,15 +84,16 @@ export default ({ getService }: FtrProviderContext) => {
 
       const originalAnnotation = annotationsForJob[0];
       const annotationUpdateRequestBody = {
-        timestamp: Date.now(),
-        end_timestamp: Date.now(),
-        annotation: 'Updated annotation #1',
+        ...commonAnnotationUpdateRequestBody,
         job_id: originalAnnotation._source.job_id,
         type: ANNOTATION_TYPE.ANNOTATION,
         event: 'model_change',
         detector_index: 2,
+        partition_field_name: 'airline',
+        partition_field_value: 'ANA',
         _id: originalAnnotation._id,
       };
+
       const { body } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
@@ -134,9 +105,12 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.result).to.eql('updated');
 
       const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
-      expect(updatedAnnotation?.annotation).to.eql(annotationUpdateRequestBody.annotation);
-      expect(updatedAnnotation?.detector_index).to.eql(annotationUpdateRequestBody.detector_index);
-      expect(updatedAnnotation?.event).to.eql(annotationUpdateRequestBody.event);
+      if (updatedAnnotation) {
+        Object.keys(commonAnnotationUpdateRequestBody).forEach((key) => {
+          const field = key as keyof Annotation;
+          expect(updatedAnnotation[field]).to.eql(annotationUpdateRequestBody[field]);
+        });
+      }
     });
 
     it('should not update annotation for unauthorized user', async () => {
@@ -144,7 +118,10 @@ export default ({ getService }: FtrProviderContext) => {
       expect(annotationsForJob).to.have.length(1);
 
       const originalAnnotation = annotationsForJob[0];
+
       const annotationUpdateRequestBody = {
+        timestamp: Date.now(),
+        end_timestamp: Date.now(),
         annotation: 'Updated annotation',
         job_id: originalAnnotation._source.job_id,
         type: ANNOTATION_TYPE.ANNOTATION,
@@ -154,6 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
         partition_field_value: 'ANA',
         _id: originalAnnotation._id,
       };
+
       const { body } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
@@ -166,6 +144,44 @@ export default ({ getService }: FtrProviderContext) => {
 
       const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
       expect(updatedAnnotation).to.eql(originalAnnotation._source);
+    });
+
+    it('should override fields correctly', async () => {
+      const annotationsForJob = await ml.api.getAnnotations(jobIds[3]);
+      expect(annotationsForJob).to.have.length(1);
+
+      const originalAnnotation = annotationsForJob[0];
+      const annotationUpdateRequestBodyWithMissingFields: Partial<Annotation> = {
+        timestamp: Date.now(),
+        end_timestamp: Date.now(),
+        annotation: 'Updated annotation',
+        job_id: originalAnnotation._source.job_id,
+        type: ANNOTATION_TYPE.ANNOTATION,
+        event: 'model_change',
+        detector_index: 2,
+        _id: originalAnnotation._id,
+      };
+      await supertest
+        .put('/api/ml/annotations/index')
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .send(annotationUpdateRequestBodyWithMissingFields)
+        .expect(200);
+
+      const updatedAnnotation = await ml.api.getAnnotationById(originalAnnotation._id);
+      if (updatedAnnotation) {
+        Object.keys(annotationUpdateRequestBodyWithMissingFields).forEach((key) => {
+          if (key !== '_id') {
+            const field = key as keyof Annotation;
+            expect(updatedAnnotation[field]).to.eql(
+              annotationUpdateRequestBodyWithMissingFields[field]
+            );
+          }
+        });
+      }
+      // validate missing fields in the annotationUpdateRequestBody
+      expect(updatedAnnotation?.partition_field_name).to.be(undefined);
+      expect(updatedAnnotation?.partition_field_value).to.be(undefined);
     });
   });
 };

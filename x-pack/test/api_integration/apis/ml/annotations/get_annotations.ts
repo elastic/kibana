@@ -5,54 +5,17 @@
  */
 
 import expect from '@kbn/expect';
-import _ from 'lodash';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { ANNOTATION_TYPE } from '../../../../../plugins/ml/common/constants/annotations';
+import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
-
-  const testSetupJobConfigs = [1, 2, 3].map((num) => ({
-    job_id: `job_annotation_${num}_${Date.now()}`,
-    description: `Test annotation ${num}`,
-    groups: ['farequote', 'automated', 'single-metric'],
-    analysis_config: {
-      bucket_span: '15m',
-      influencers: [],
-      detectors: [
-        {
-          function: 'mean',
-          field_name: 'responsetime',
-        },
-      ],
-    },
-    data_description: { time_field: '@timestamp' },
-    analysis_limits: { model_memory_limit: '10mb' },
-  }));
-  const jobIds = testSetupJobConfigs.map((j) => j.job_id);
-
-  const createAnnotationRequestBody = (jobId: string) => {
-    return {
-      timestamp: Date.now(),
-      end_timestamp: Date.now(),
-      annotation: 'Test annotation',
-      job_id: jobId,
-      type: ANNOTATION_TYPE.ANNOTATION,
-      event: 'user',
-      detector_index: 1,
-      partition_field_name: 'airline',
-      partition_field_value: 'AAL',
-    };
-  };
-
-  const testSetupAnnotations = testSetupJobConfigs.map((job) =>
-    createAnnotationRequestBody(job.job_id)
-  );
 
   describe('get_annotations', function () {
     before(async () => {
@@ -92,14 +55,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.annotations).to.have.property(jobId);
         expect(body.annotations[jobId]).to.have.length(1);
 
-        const indexedAnnotation = _.omit(body.annotations[jobId][0], '_id');
+        const indexedAnnotation = omit(body.annotations[jobId][0], '_id');
         expect(indexedAnnotation).to.eql(testSetupAnnotations[idx]);
       });
     });
 
     it('should fetch all annotations for multiple jobs', async () => {
       const requestBody = {
-        jobIds: testSetupJobConfigs.map((j) => j.job_id),
+        jobIds,
         earliestMs: 1454804100000,
         latestMs: Date.now(),
         maxAnnotations: 500,
@@ -117,12 +80,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.annotations).to.have.property(jobId);
         expect(body.annotations[jobId]).to.have.length(1);
 
-        const indexedAnnotation = _.omit(body.annotations[jobId][0], '_id');
+        const indexedAnnotation = omit(body.annotations[jobId][0], '_id');
         expect(indexedAnnotation).to.eql(testSetupAnnotations[idx]);
       });
     });
 
-    it('should fetch all annotations for user with viewer permissions', async () => {
+    it('should fetch all annotations for user with ML read permissions', async () => {
       const requestBody = {
         jobIds: testSetupJobConfigs.map((j) => j.job_id),
         earliestMs: 1454804100000,
@@ -141,12 +104,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.annotations).to.have.property(jobId);
         expect(body.annotations[jobId]).to.have.length(1);
 
-        const indexedAnnotation = _.omit(body.annotations[jobId][0], '_id');
+        const indexedAnnotation = omit(body.annotations[jobId][0], '_id');
         expect(indexedAnnotation).to.eql(testSetupAnnotations[idx]);
       });
     });
 
-    it('should not allow to fetch annotation for user with viewer permissions', async () => {
+    it('should not allow to fetch annotation for unauthorized user', async () => {
       const requestBody = {
         jobIds: testSetupJobConfigs.map((j) => j.job_id),
         earliestMs: 1454804100000,

@@ -10,7 +10,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { ANNOTATION_TYPE } from '../../../../../plugins/ml/common/constants/annotations';
-
+import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
+import { createJobConfig } from './common_jobs';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -18,28 +19,8 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   const jobId = `job_annotation_${Date.now()}`;
-  const testJobConfig = {
-    job_id: jobId,
-    description: 'test_job_annotation',
-    groups: ['farequote', 'automated', 'single-metric'],
-    analysis_config: {
-      bucket_span: '15m',
-      influencers: [],
-      detectors: [
-        {
-          function: 'mean',
-          field_name: 'responsetime',
-        },
-        {
-          function: 'min',
-          field_name: 'responsetime',
-        },
-      ],
-    },
-    data_description: { time_field: '@timestamp' },
-    analysis_limits: { model_memory_limit: '10mb' },
-  };
-  const annotationRequestBody = {
+  const testJobConfig = createJobConfig(jobId);
+  const annotationRequestBody: Partial<Annotation> = {
     timestamp: Date.now(),
     end_timestamp: Date.now(),
     annotation: 'Test annotation',
@@ -72,10 +53,15 @@ export default ({ getService }: FtrProviderContext) => {
       const annotationId = body._id;
 
       const fetchedAnnotation = await ml.api.getAnnotationById(annotationId);
+
       expect(fetchedAnnotation).to.not.be(undefined);
-      expect(fetchedAnnotation?.annotation).to.eql(annotationRequestBody.annotation);
-      expect(fetchedAnnotation?.job_id).to.eql(annotationRequestBody.job_id);
-      expect(fetchedAnnotation?.event).to.eql(annotationRequestBody.event);
+
+      if (fetchedAnnotation) {
+        Object.keys(annotationRequestBody).forEach((key) => {
+          const field = key as keyof Annotation;
+          expect(fetchedAnnotation[field]).to.eql(annotationRequestBody[field]);
+        });
+      }
       expect(fetchedAnnotation?.create_username).to.eql(USER.ML_POWERUSER);
     });
 
@@ -84,14 +70,18 @@ export default ({ getService }: FtrProviderContext) => {
         .put('/api/ml/annotations/index')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(annotationRequestBody);
+        .send(annotationRequestBody)
+        .expect(200);
 
       const annotationId = body._id;
       const fetchedAnnotation = await ml.api.getAnnotationById(annotationId);
       expect(fetchedAnnotation).to.not.be(undefined);
-      expect(fetchedAnnotation?.annotation).to.eql(annotationRequestBody.annotation);
-      expect(fetchedAnnotation?.job_id).to.eql(annotationRequestBody.job_id);
-      expect(fetchedAnnotation?.event).to.eql(annotationRequestBody.event);
+      if (fetchedAnnotation) {
+        Object.keys(annotationRequestBody).forEach((key) => {
+          const field = key as keyof Annotation;
+          expect(fetchedAnnotation[field]).to.eql(annotationRequestBody[field]);
+        });
+      }
       expect(fetchedAnnotation?.create_username).to.eql(USER.ML_VIEWER);
     });
 
