@@ -308,6 +308,7 @@ export class EditPolicy extends Component {
               <DeletePhase
                 errors={errors[PHASE_DELETE]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_DELETE], false)}
+                getUrlForApp={this.props.getUrlForApp}
               />
 
               <EuiHorizontalRule />

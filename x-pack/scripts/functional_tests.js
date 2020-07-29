@@ -53,6 +53,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/licensing_plugin/config.legacy.ts'),
   require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
   require.resolve('../test/reporting_api_integration/config.js'),
+  require.resolve('../test/security_solution_endpoint_api_int/config.ts'),
   require.resolve('../test/ingest_manager_api_integration/config.ts'),
 ];
 

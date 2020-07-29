@@ -24,6 +24,7 @@ class AppContextService {
   private savedObjects: SavedObjectsServiceStart | undefined;
   private isProductionMode: boolean = false;
   private kibanaVersion: string | undefined;
+  private kibanaBranch: string | undefined;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
@@ -38,6 +39,7 @@ class AppContextService {
     this.cloud = appContext.cloud;
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
+    this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
 
     if (appContext.config$) {
@@ -123,6 +125,13 @@ class AppContextService {
       throw new Error('Kibana version is not set.');
     }
     return this.kibanaVersion;
+  }
+
+  public getKibanaBranch() {
+    if (!this.kibanaBranch) {
+      throw new Error('Kibana branch is not set.');
+    }
+    return this.kibanaBranch;
   }
 
   public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
