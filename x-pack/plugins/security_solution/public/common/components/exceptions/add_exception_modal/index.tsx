@@ -234,7 +234,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const retrieveAlertOsTypes = useCallback(() => {
-    const osDefaults = ['windows', 'macos', 'linux'];
+    const osDefaults = ['windows', 'macos'];
     if (alertData) {
       const osTypes = getMappedNonEcsValue({
         data: alertData.nonEcsData,
