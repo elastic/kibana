@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiButton, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiButton, EuiPopover, EuiPopoverTitle, EuiKeyboardAccessible } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton, FieldButtonProps } from '../../../../../kibana_react/public';
@@ -177,24 +177,26 @@ export function DiscoverField({
       <EuiPopover
         display="block"
         button={
-          <FieldButton
-            size="s"
-            className="dscSidebarItem"
-            isOpen={showDetails}
-            tabIndex={0}
-            onClick={() => {
-              togglePopover();
-            }}
-            onKeyPress={(event: any) => {
-              if (event.key === 'ENTER') {
+          <EuiKeyboardAccessible>
+            <FieldButton
+              size="s"
+              className="dscSidebarItem"
+              isOpen={showDetails}
+              tabIndex={0}
+              onClick={() => {
                 togglePopover();
-              }
-            }}
-            data-test-subj={`field-${field.name}-showDetails`}
-            fieldIcon={dscFieldIcon}
-            fieldAction={actionButton}
-            fieldName={fieldName}
-          />
+              }}
+              onKeyPress={(event: any) => {
+                if (event.key === 'ENTER') {
+                  togglePopover();
+                }
+              }}
+              data-test-subj={`field-${field.name}-showDetails`}
+              fieldIcon={dscFieldIcon}
+              fieldAction={actionButton}
+              fieldName={fieldName}
+            />
+          </EuiKeyboardAccessible>
         }
         isOpen={infoIsOpen}
         closePopover={() => setOpen(false)}
