@@ -34,10 +34,7 @@ import {
   alignmentDistributionHandlerCreators,
 } from '../../../lib/element_handler_creators';
 import { EditMenu as Component, Props as ComponentProps } from './edit_menu';
-
-type LayoutState = any;
-
-type CommitFn = (type: string, payload: any) => LayoutState;
+import { CommitFn, LayoutState } from '../../../../types';
 
 interface OwnProps {
   commit: CommitFn;
