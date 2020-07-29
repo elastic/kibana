@@ -3,7 +3,6 @@ set -e
 
 export KBN_PATH_CONF=${KBN_PATH_CONF:-<%= configDir %>}
 
-=======
 set_chmod() {
   chmod -f 660 ${KBN_PATH_CONF}/kibana.yml || true
   chmod -f 2750 <%= dataDir %> || true
