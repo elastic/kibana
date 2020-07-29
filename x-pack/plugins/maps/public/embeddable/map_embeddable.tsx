@@ -5,12 +5,11 @@
  */
 
 import _ from 'lodash';
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 import {
@@ -50,11 +49,11 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n } from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
+import { MapContainer } from '../connected_components/map_container';
 
 import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from './types';
 export { MapEmbeddableInput, MapEmbeddableConfig };
 
-const GisMap = lazy(() => import('../connected_components/gis_map'));
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
@@ -223,12 +222,10 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     render(
       <Provider store={this._store}>
         <I18nContext>
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <GisMap
-              addFilters={this.input.hideFilterActions ? null : this.addFilters}
-              renderTooltipContent={this._renderTooltipContent}
-            />
-          </Suspense>
+          <MapContainer
+            addFilters={this.input.hideFilterActions ? null : this.addFilters}
+            renderTooltipContent={this._renderTooltipContent}
+          />
         </I18nContext>
       </Provider>,
       this._domNode

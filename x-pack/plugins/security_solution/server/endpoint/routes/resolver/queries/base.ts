@@ -37,7 +37,8 @@ export abstract class ResolverQuery<T, R = ResolverEvent> implements MSearchQuer
   }
 
   private buildQuery(ids: string | string[]): { query: JsonObject; index: string | string[] } {
-    const idsArray = ResolverQuery.createIdsArray(ids);
+    // only accept queries for entity_ids that are not an empty string
+    const idsArray = ResolverQuery.createIdsArray(ids).filter((id) => id !== '');
     if (this.endpointID) {
       return { query: this.legacyQuery(this.endpointID, idsArray), index: legacyEventIndexPattern };
     }
