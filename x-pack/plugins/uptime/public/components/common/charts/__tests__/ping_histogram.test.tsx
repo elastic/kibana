@@ -5,13 +5,42 @@
  */
 
 import React from 'react';
+import DateMath from '@elastic/datemath';
 import { PingHistogramComponent, PingHistogramComponentProps } from '../ping_histogram';
 import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
-import moment from 'moment';
+
+jest.mock('moment-timezone', () => {
+  return function () {
+    return { tz: { guess: () => 'America/New_York' } };
+  };
+});
+
+jest.mock('moment', () => {
+  return function () {
+    return { fromNow: () => 'a year ago' };
+  };
+});
+
+jest.mock('../../../../../../../../src/plugins/data/public', () => {
+  return function () {
+    return {
+      esKuery: {
+        fromKueryExpression: () => 'an ast',
+        toElasticsearchQuery: () => 'an es query',
+      },
+    };
+  };
+});
 
 describe('PingHistogram component', () => {
+  let dateMathSpy: any;
   beforeAll(() => {
-    moment.prototype.fromNow = jest.fn(() => 'a year ago');
+    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy.mockReturnValue(20);
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
   });
 
   const props: PingHistogramComponentProps = {
