@@ -150,12 +150,7 @@ export class MapsAppView extends React.Component {
     }
   }
 
-  _onQueryChange = ({
-    filters,
-    query = this.props.query,
-    time = this.props.timeFilters,
-    refresh = false,
-  }) => {
+  _onQueryChange = ({ filters, query, time, refresh = false }) => {
     const { filterManager } = getData().query;
 
     if (filters) {
@@ -171,18 +166,16 @@ export class MapsAppView extends React.Component {
 
     // sync appState
     this._appStateManager.setQueryAndFilters({
-      query,
       filters: filterManager.getAppFilters(),
+      query,
     });
 
     // sync globalState
-    updateGlobalState(
-      {
-        time,
-        filters: filterManager.getGlobalFilters(),
-      },
-      !this.state.initialized
-    );
+    const updatedGlobalState = { filters: filterManager.getGlobalFilters() };
+    if (time) {
+      updatedGlobalState.time = time;
+    }
+    updateGlobalState(updatedGlobalState, !this.state.initialized);
   };
 
   _initMapAndLayerSettings() {
