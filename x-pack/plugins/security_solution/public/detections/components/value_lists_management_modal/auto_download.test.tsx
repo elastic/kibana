@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { globalNode } from '../../../common/mock';
 import { AutoDownload } from './auto_download';
 
-describe('AutoDownload', () => {
+describe.skip('AutoDownload', () => {
   beforeEach(() => {
     // our DOM environment lacks this function that our component needs
     Object.defineProperty(globalNode.window.URL, 'revokeObjectURL', {
