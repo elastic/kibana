@@ -5,6 +5,7 @@
  */
 
 import { ANNOTATION_TYPE } from '../../../../../plugins/ml/common/constants/annotations';
+import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
 
 export const commonJobConfig = {
   description: 'test_job_annotation',
@@ -38,7 +39,7 @@ export const testSetupJobConfigs = [1, 2, 3, 4].map((num) => ({
 }));
 export const jobIds = testSetupJobConfigs.map((j) => j.job_id);
 
-const createAnnotationRequestBody = (jobId: string) => {
+export const createAnnotationRequestBody = (jobId: string): Partial<Annotation> => {
   return {
     timestamp: Date.now(),
     end_timestamp: Date.now(),

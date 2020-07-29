@@ -690,10 +690,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return undefined;
     },
 
-    async indexAnnotation(annotationRequestBody: Annotation) {
+    async indexAnnotation(annotationRequestBody: Partial<Annotation>) {
       log.debug(`Indexing annotation '${JSON.stringify(annotationRequestBody)}'...`);
       // @ts-ignore due to outdated type for IndexDocumentParams.type
-      const params: IndexDocumentParams<Annotation> = {
+      const params: IndexDocumentParams<Partial<Annotation>> = {
         index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
         body: annotationRequestBody,
         refresh: 'wait_for',

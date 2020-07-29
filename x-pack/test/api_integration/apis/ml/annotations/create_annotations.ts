@@ -9,9 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { ANNOTATION_TYPE } from '../../../../../plugins/ml/common/constants/annotations';
 import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
-import { createJobConfig } from './common_jobs';
+import { createJobConfig, createAnnotationRequestBody } from './common_jobs';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -20,17 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const jobId = `job_annotation_${Date.now()}`;
   const testJobConfig = createJobConfig(jobId);
-  const annotationRequestBody: Partial<Annotation> = {
-    timestamp: Date.now(),
-    end_timestamp: Date.now(),
-    annotation: 'Test annotation',
-    job_id: jobId,
-    type: ANNOTATION_TYPE.ANNOTATION,
-    event: 'user',
-    detector_index: 1,
-    partition_field_name: 'airline',
-    partition_field_value: 'AAL',
-  };
+  const annotationRequestBody = createAnnotationRequestBody(jobId);
 
   describe('create_annotations', function () {
     before(async () => {
