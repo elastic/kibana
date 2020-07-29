@@ -14,46 +14,48 @@ import {
 import { i18n } from '@kbn/i18n';
 import { APMLink } from '../../Links/apm/APMLink';
 
-export const ManageCustomLink = ({
+export function ManageCustomLink({
   onCreateCustomLinkClick,
   showCreateCustomLinkButton = true,
 }: {
   onCreateCustomLinkClick: () => void;
   showCreateCustomLinkButton?: boolean;
-}) => (
-  <EuiFlexGroup>
-    <EuiFlexItem>
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.apm.customLink.buttom.manage', {
-              defaultMessage: 'Manage custom links',
-            })}
-          >
-            <APMLink path={`/settings/customize-ui`}>
-              <EuiIcon
-                type="gear"
-                color="text"
-                aria-label="Custom links settings page"
-              />
-            </APMLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-        {showCreateCustomLinkButton && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="plusInCircle"
-              size="xs"
-              onClick={onCreateCustomLinkClick}
-            >
-              {i18n.translate('xpack.apm.customLink.buttom.create.title', {
-                defaultMessage: 'Create',
+}) {
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+          <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('xpack.apm.customLink.buttom.manage', {
+                defaultMessage: 'Manage custom links',
               })}
-            </EuiButtonEmpty>
+            >
+              <APMLink path={`/settings/customize-ui`}>
+                <EuiIcon
+                  type="gear"
+                  color="text"
+                  aria-label="Custom links settings page"
+                />
+              </APMLink>
+            </EuiToolTip>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+          {showCreateCustomLinkButton && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="plusInCircle"
+                size="xs"
+                onClick={onCreateCustomLinkClick}
+              >
+                {i18n.translate('xpack.apm.customLink.buttom.create.title', {
+                  defaultMessage: 'Create',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
