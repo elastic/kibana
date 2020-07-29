@@ -6,6 +6,26 @@
 
 import { DurationDetails, DurationTypes } from '../types';
 
+/**
+ * Given a time, it will convert it to a unix timestamp if not one already. If it is unable to do so, it will return NaN
+ */
+export const getUnixTime = (time: number | string): number | typeof NaN => {
+  if (!time) {
+    return NaN;
+  }
+  if (typeof time === 'number') {
+    return time;
+  }
+  // If it's a date string just get the time in MS
+  let unixTime = Date.parse(time);
+  if (Number.isNaN(unixTime)) {
+    // If not an ISO date string, last check will be if it's a unix timestamp string
+    unixTime = parseInt(time, 10);
+  }
+
+  return unixTime;
+};
+
 /*
  * Given two unix timestamps, it will return an object containing the time difference and properly pluralized friendly version of the time difference.
  * i.e. a time difference of 1000ms will yield => { duration: 1, durationType: 'second' } and 10000ms will yield => { duration: 10, durationType: 'seconds' }
@@ -15,12 +35,13 @@ export const getFriendlyElapsedTime = (
   from: number | string,
   to: number | string
 ): DurationDetails | null => {
-  const startTime = typeof from === 'number' ? from : parseInt(from, 10);
-  const endTime = typeof to === 'number' ? to : parseInt(to, 10);
-  const elapsedTimeInMs = endTime - startTime;
-  if (Number.isNaN(elapsedTimeInMs)) {
+  const startTime = getUnixTime(from);
+  const endTime = getUnixTime(to);
+
+  if (Number.isNaN(startTime) || Number.isNaN(endTime)) {
     return null;
   }
+  const elapsedTimeInMs = endTime - startTime;
 
   const second = 1000;
   const minute = second * 60;
