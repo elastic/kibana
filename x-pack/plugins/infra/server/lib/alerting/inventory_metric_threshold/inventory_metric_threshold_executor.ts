@@ -79,6 +79,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           const resultWithVerboseMetricName = {
             ...result[item],
             metric: toMetricOpt(result[item].metric)?.text || result[item].metric,
+            currentValue: formatMetric(result[item].metric, result[item].currentValue),
           };
           return buildFiredAlertReason(resultWithVerboseMetricName);
         })
