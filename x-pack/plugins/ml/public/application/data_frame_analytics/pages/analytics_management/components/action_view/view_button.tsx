@@ -48,7 +48,7 @@ export const ViewButton: FC<ViewButtonProps> = ({ item, isManagementTable }) => 
       iconType="visTable"
       isDisabled={disabled}
       onClick={navigator}
-      size="s"
+      size="xs"
     >
       {buttonText}
     </EuiButtonEmpty>
