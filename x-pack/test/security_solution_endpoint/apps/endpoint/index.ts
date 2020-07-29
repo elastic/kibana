@@ -7,7 +7,7 @@ import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../../plugins/
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isRegistryEnabled,
-  getRegistryUrl,
+  getRegistryUrlFromTestEnv,
 } from '../../../security_solution_endpoint_api_int/registry';
 
 export default function (providerContext: FtrProviderContext) {
@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
       log.warning('These tests are being run with an external package registry');
     }
 
-    const registryUrl = getRegistryUrl() ?? getRegistryUrlFromIngest();
+    const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     before(async () => {

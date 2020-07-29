@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../ftr_provider_context';
-import { isRegistryEnabled, getRegistryUrl } from '../registry';
+import { isRegistryEnabled, getRegistryUrlFromTestEnv } from '../registry';
 import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../plugins/ingest_manager/server';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
@@ -20,7 +20,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
       log.warning('These tests are being run with an external package registry');
     }
 
-    const registryUrl = getRegistryUrl() ?? getRegistryUrlFromIngest();
+    const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     before(async () => {
