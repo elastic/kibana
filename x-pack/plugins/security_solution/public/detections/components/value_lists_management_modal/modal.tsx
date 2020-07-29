@@ -28,10 +28,10 @@ import {
 } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { GenericDownloader } from '../../../common/components/generic_downloader';
 import * as i18n from './translations';
 import { buildColumns } from './table_helpers';
 import { ValueListsForm } from './form';
+import { AutoDownload } from './auto_download';
 
 interface ValueListsModalProps {
   onClose: () => void;
@@ -169,15 +169,11 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
-      {exportDownload.name && exportDownload.blob && (
-        <GenericDownloader
-          filename={exportDownload.name}
-          ids={[exportDownload.name]}
-          onExportSuccess={() => setExportDownload({})}
-          onExportFailure={() => setExportDownload({})}
-          exportSelectedData={async () => exportDownload.blob!}
-        />
-      )}
+      <AutoDownload
+        blob={exportDownload.blob}
+        name={exportDownload.name}
+        onDownload={() => setExportDownload({})}
+      />
     </EuiOverlayMask>
   );
 };
