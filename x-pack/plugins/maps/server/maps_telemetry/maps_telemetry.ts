@@ -184,25 +184,24 @@ function getGeoShapeAggCount(
       return isGeoShapeAggLayer(indexPatterns, layerDescriptor);
     });
     return geoShapeAggLayers.length;
-});
+  });
 
-return _.sum(countsPerMap);
+  return _.sum(countsPerMap);
 }
 
 export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
-return mapSavedObjects.map((savedMapObject) => {
-  const layerList =
-    savedMapObject.attributes && savedMapObject.attributes.layerListJSON
-      ? JSON.parse(savedMapObject.attributes.layerListJSON)
-      : [];
-  return layerList as LayerDescriptor[];
-});
+  return mapSavedObjects.map((savedMapObject) => {
+    const layerList =
+      savedMapObject.attributes && savedMapObject.attributes.layerListJSON
+        ? JSON.parse(savedMapObject.attributes.layerListJSON)
+        : [];
+    return layerList as LayerDescriptor[];
+  });
 }
 
-
-export function buildMapIndexPatternTelemetry(
+export function buildMapsIndexPatternsTelemetry(
   indexPatternSavedObjects: IIndexPattern[],
-  layerLists: LayerDescriptor[][],
+  layerLists: LayerDescriptor[][]
 ): any {
   const {
     indexPatternsWithGeoFieldCount,
@@ -221,9 +220,9 @@ export function buildMapIndexPatternTelemetry(
   };
 }
 
-export function buildMapSavedObjectTelemetry(
+export function buildMapsSavedObjectsTelemetry(
   mapSavedObjects: MapSavedObject[],
-  layerLists: LayerDescriptor[][],
+  layerLists: LayerDescriptor[][]
 ): SavedObjectAttributes {
   const mapsCount = layerLists.length;
 
@@ -273,57 +272,55 @@ export function buildMapSavedObjectTelemetry(
   };
 }
 
-async function getSavedObjects(savedObjectsClient: SavedObjectsClientContract, type: string) {
-  return await savedObjectsClient.find({ type, perPage: 3 });
+async function getTransformedSavedObjects(savedObjectType, savedObjectsTransform) {
+  const savedObjectsClient = getInternalRepository();
+
+  let page = 1;
+  let perPage = 1;
+  let total = 3;
+  let savedObjects = [];
+  const transformedResults = {};
+  while (page * perPage <= total) {
+    ({
+      page,
+      per_page: perPage,
+      saved_objects: savedObjects,
+      total,
+    } = await savedObjectsClient.find({
+      type: savedObjectType,
+    }));
+
+    _.mergeWith(transformedResults, savedObjectsTransform(savedObjects), (prevValue, newValue) => {
+      if (isNaN(newValue)) {
+        return prevValue;
+      } else if (isNaN(prevValue)) {
+        return newValue;
+      } else {
+        return prevValue + newValue;
+      }
+    });
+  }
+  return transformedResults;
 }
 
 export async function getMapsTelemetry(config: MapsConfigType) {
-  const savedObjectsClient = getInternalRepository();
-  const settings: SavedObjectAttribute = {
-    showMapVisualizationTypes: config.showMapVisualizationTypes,
+  // The only overlap between saved objects telemetry & index patterns
+  // telemetry is in the use of layer lists. The telemetry builders
+  // are wrapped to build layers lists when saved objects telemetry
+  // is harvested and then use those lists when harvesting index
+  // patterns telemetry
+  const layerLists: LayerDescriptor[][] = [];
+  const savedObjectsTelemetryWrapper = (savedObjects) => {
+    const currentLayerLists = getLayerLists(savedObjects);
+    layerLists.concat(currentLayerLists);
+    return buildMapsSavedObjectsTelemetry(savedObjects, currentLayerLists);
   };
-  let page = 1;
-  let per_page = 1;
-  let total = 3;
-  let saved_objects = [];
-  let savedObjectTelemetry = {};
-  let cumulativeLayerLists = [];
-  while (page * per_page < total) {
-    ({ page, per_page, saved_objects, total } = await savedObjectsClient.find({ type: MAP_SAVED_OBJECT_TYPE }));
-
-    const layerLists: LayerDescriptor[][] = getLayerLists(saved_objects);
-    cumulativeLayerLists.concat(layerLists);
-    _.mergeWith(savedObjectTelemetry, buildMapSavedObjectTelemetry(saved_objects, layerLists), (objValue, srcValue) => {
-      if (isNaN(srcValue)) {
-        return objValue;
-      } else if (isNaN(objValue)) {
-        return srcValue;
-      } else {
-        return objValue + srcValue;
-      }
-    });
-  }
-
-  page = 1;
-  per_page = 1;
-  total = 3;
-  let indexPatternTelemetry = {};
-  while (page * per_page < total) {
-    ({ page, per_page, saved_objects, total } = await savedObjectsClient.find({ type: 'index-pattern' }));
-    _.mergeWith(indexPatternTelemetry, buildMapIndexPatternTelemetry(saved_objects, cumulativeLayerLists), (objValue, srcValue) => {
-      if (isNaN(srcValue)) {
-        return objValue;
-      } else if (isNaN(objValue)) {
-        return srcValue;
-      } else {
-        return objValue + srcValue;
-      }
-    });
-  }
+  const indexPatternsTelemetryWrapper = (savedObjects) =>
+    buildMapsIndexPatternsTelemetry(savedObjects, layerLists);
 
   return {
-    settings,
-    ...savedObjectTelemetry,
-    ...indexPatternTelemetry,
-  }
+    showMapVisualizationTypes: config.showMapVisualizationTypes,
+    ...(await getTransformedSavedObjects(MAP_SAVED_OBJECT_TYPE, savedObjectsTelemetryWrapper)),
+    ...(await getTransformedSavedObjects('index-pattern', indexPatternsTelemetryWrapper)),
+  };
 }
