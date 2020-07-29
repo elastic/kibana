@@ -1521,7 +1521,6 @@ image::visualize/images/vega_tutorial_inspect_requests.png[]
 
 ===== Vega debugging
 
-In most cases to debug Vega, we recommend use the *Inspector > Vega debug*. 
 Currently using this view you can inspect the following runtime data: *Data Sets* and *Signal Values*. 
  
 The data that we visualize on these tabs we read from the 
