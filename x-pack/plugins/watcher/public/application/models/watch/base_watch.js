@@ -79,17 +79,12 @@ export class BaseWatch {
   };
 
   get displayName() {
-    const saveName = this.name;
-
     if (this.isNew) {
-      return i18n.translate('xpack.watcher.models.baseWatch.displayName', {
-        defaultMessage: '{saveName}',
-        values: { saveName },
-      });
-    } else if (this.name) {
-      return this.name;
-    } else {
-      return this.id;
+      if (this.name) {
+        return this.name;
+      } else {
+        return this.id;
+      }
     }
   }
 
