@@ -44,6 +44,7 @@ import {
   ILegacyScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
+  IClusterClient,
 } from './elasticsearch';
 
 import { HttpServiceSetup, HttpServiceStart } from './http';
@@ -110,6 +111,10 @@ export {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  IClusterClient,
+  ICustomClusterClient,
+  ElasticsearchClientConfig,
+  IScopedClusterClient,
   SearchResponse,
   CountResponse,
   ShardsInfo,
@@ -381,6 +386,7 @@ export interface RequestHandlerContext {
       typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
+      client: IClusterClient;
       legacy: {
         client: ILegacyScopedClusterClient;
       };
