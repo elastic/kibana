@@ -106,13 +106,13 @@ describe('Exception viewer helpers', () => {
           value: undefined,
         },
         {
-          fieldName: 'host.name.host.name',
+          fieldName: 'host.name',
           isNested: true,
           operator: 'is',
           value: 'some host name',
         },
         {
-          fieldName: 'host.name.host.name',
+          fieldName: 'host.name',
           isNested: true,
           operator: 'is one of',
           value: ['some host name'],
@@ -129,19 +129,6 @@ describe('Exception viewer helpers', () => {
       const expected: FormattedEntry = {
         fieldName: 'host.name',
         isNested: false,
-        operator: 'is',
-        value: 'some host name',
-      };
-
-      expect(formattedEntry).toEqual(expected);
-    });
-
-    test('it formats as expected when "isNested" is "true"', () => {
-      const payload = getEntryMatchMock();
-      const formattedEntry = formatEntry({ isNested: true, parent: 'parent', item: payload });
-      const expected: FormattedEntry = {
-        fieldName: 'parent.host.name',
-        isNested: true,
         operator: 'is',
         value: 'some host name',
       };
