@@ -10,24 +10,21 @@ $kbnTypeaheadTypes: (
   position: relative;
 
   .kbnTypeahead__popover {
-    max-height: 20vh;
+    max-height: inherit;
     @include euiBottomShadow($adjustBorders: true);
     border: 1px solid;
     border-color: $euiBorderColor;
     color: $euiTextColor;
     background-color: $euiColorEmptyShade;
     position: relative;
-    top: -2px;
     z-index: $euiZContentMenu;
     width: 100%;
     border-bottom-left-radius: $euiBorderRadius;
     border-bottom-right-radius: $euiBorderRadius;
+    overflow-y: auto;
 
     .kbnTypeahead__items {
       @include euiScrollBar;
-
-      max-height: inherit;
-      overflow-y: auto;
     }
 
     .kbnTypeahead__item {
