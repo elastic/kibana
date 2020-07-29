@@ -172,6 +172,10 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
+    const incomingEmbeddable = embeddable
+      .getStateTransfer(scopedHistory())
+      .getIncomingEmbeddablePackage();
+
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
@@ -444,21 +448,24 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            const incomingState = embeddable
-              .getStateTransfer(scopedHistory())
-              .getIncomingEmbeddablePackage();
-            if (incomingState) {
-              if ('id' in incomingState) {
-                container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
-                  savedObjectId: incomingState.id,
-                });
-              } else if ('input' in incomingState) {
-                const input = incomingState.input;
+            if (incomingEmbeddable) {
+              if ('id' in incomingEmbeddable) {
+                container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(
+                  incomingEmbeddable.type,
+                  {
+                    savedObjectId: incomingEmbeddable.id,
+                  }
+                );
+              } else if ('input' in incomingEmbeddable) {
+                const input = incomingEmbeddable.input;
                 delete input.id;
                 const explicitInput = {
                   savedVis: input,
                 };
-                container.addOrUpdateEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
+                container.addOrUpdateEmbeddable<EmbeddableInput>(
+                  incomingEmbeddable.type,
+                  explicitInput
+                );
               }
             }
           }
