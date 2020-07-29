@@ -1519,7 +1519,7 @@ In case your specification has more than one request, you can switch between the
 [role="screenshot"]
 image::visualize/images/vega_tutorial_inspect_requests.png[]
 
-===== Vega Debugging
+===== Vega debugging
 
 In most cases to debug Vega, we recommend use the *Inspector > Vega debug*. 
 Currently using this view you can inspect the following runtime data: *Data Sets* and *Signal Values*. 
