@@ -18,7 +18,7 @@ import { MlStartDependencies } from '../../plugin';
 
 import { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
 
-export function initManagementSection(
+export function registerManagementSection(
   management: ManagementSetup | undefined,
   core: CoreSetup<MlStartDependencies>
 ) {

@@ -24,7 +24,7 @@ import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { AppStatus, AppUpdater } from '../../../../src/core/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { initManagementSection } from './application/management';
+import { registerManagementSection } from './application/management';
 import { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import { setDependencyCache } from './application/util/dependency_cache';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
@@ -118,7 +118,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
         // register various ML plugin features which require a full license
         if (isFullLicense(license)) {
-          initManagementSection(pluginsSetup.management, core);
+          registerManagementSection(pluginsSetup.management, core);
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
           registerUrlGenerator(pluginsSetup.share, core);
