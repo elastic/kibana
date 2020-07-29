@@ -50,6 +50,9 @@ const ExceptionsViewerHeaderComponent = ({
   useEffect((): void => {
     onFilterChange({
       filter: { filter, tags },
+      pagination: {
+        pageIndex: 0,
+      },
       showDetectionsListsOnly,
       showEndpointListsOnly,
     });

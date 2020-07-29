@@ -157,11 +157,61 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
+  const handleGetTotals = useCallback(async (): Promise<void> => {
+    await getExceptionListsItems({
+      lists: exceptionListsMeta,
+      filterOptions: [],
+      pagination: {
+        page: 0,
+        perPage: 1,
+        total: 0,
+      },
+      showDetectionsListsOnly: true,
+      showEndpointListsOnly: false,
+      onSuccess: ({ pagination: detectionPagination }) => {
+        setExceptionItemTotals(null, detectionPagination.total ?? 0);
+      },
+      onError: () => {
+        const dispatchToasterError = onDispatchToaster({
+          color: 'danger',
+          title: i18n.TOTAL_ITEMS_FETCH_ERROR,
+          iconType: 'alert',
+        });
+
+        dispatchToasterError();
+      },
+    });
+    await getExceptionListsItems({
+      lists: exceptionListsMeta,
+      filterOptions: [],
+      pagination: {
+        page: 0,
+        perPage: 1,
+        total: 0,
+      },
+      showDetectionsListsOnly: false,
+      showEndpointListsOnly: true,
+      onSuccess: ({ pagination: endpointPagination }) => {
+        setExceptionItemTotals(endpointPagination.total ?? 0, null);
+      },
+      onError: () => {
+        const dispatchToasterError = onDispatchToaster({
+          color: 'danger',
+          title: i18n.TOTAL_ITEMS_FETCH_ERROR,
+          iconType: 'alert',
+        });
+
+        dispatchToasterError();
+      },
+    });
+  }, [setExceptionItemTotals, exceptionListsMeta, getExceptionListsItems, onDispatchToaster]);
+
   const handleFetchList = useCallback((): void => {
     if (fetchListItems != null) {
       fetchListItems();
+      handleGetTotals();
     }
-  }, [fetchListItems]);
+  }, [fetchListItems, handleGetTotals]);
 
   const handleFilterChange = useCallback(
     (filters: Partial<Filter>): void => {
@@ -246,67 +296,13 @@ const ExceptionsViewerComponent = ({
   // Logic for initial render
   useEffect((): void => {
     if (isInitLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
+      handleGetTotals();
       dispatch({
         type: 'updateIsInitLoading',
         loading: false,
       });
     }
-  }, [isInitLoading, exceptions, loadingList, dispatch]);
-
-  // TO-DO - update exception list routes to return item totals, this will
-  // avoid doing these fetches of all items for totals
-  useEffect((): void => {
-    const fetchData = async () => {
-      await getExceptionListsItems({
-        lists: exceptionListsMeta,
-        filterOptions: [],
-        pagination: {
-          page: 0,
-          perPage: 1,
-          total: 0,
-        },
-        showDetectionsListsOnly: true,
-        showEndpointListsOnly: false,
-        onSuccess: ({ pagination: detectionPagination }) => {
-          setExceptionItemTotals(null, detectionPagination.total ?? 0);
-        },
-        onError: () => {
-          const dispatchToasterError = onDispatchToaster({
-            color: 'danger',
-            title: i18n.TOTAL_ITEMS_FETCH_ERROR,
-            iconType: 'alert',
-          });
-
-          dispatchToasterError();
-        },
-      });
-      await getExceptionListsItems({
-        lists: exceptionListsMeta,
-        filterOptions: [],
-        pagination: {
-          page: 0,
-          perPage: 1,
-          total: 0,
-        },
-        showDetectionsListsOnly: false,
-        showEndpointListsOnly: true,
-        onSuccess: ({ pagination: endpointPagination }) => {
-          setExceptionItemTotals(endpointPagination.total ?? 0, null);
-        },
-        onError: () => {
-          const dispatchToasterError = onDispatchToaster({
-            color: 'danger',
-            title: i18n.TOTAL_ITEMS_FETCH_ERROR,
-            iconType: 'alert',
-          });
-
-          dispatchToasterError();
-        },
-      });
-    };
-
-    fetchData();
-  }, [setExceptionItemTotals, exceptionListsMeta, getExceptionListsItems, onDispatchToaster]);
+  }, [handleGetTotals, isInitLoading, exceptions, loadingList, dispatch]);
 
   // Used in utility bar info text
   const ruleSettingsUrl = useMemo((): string => {

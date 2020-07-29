@@ -57,7 +57,7 @@ const ExceptionsViewerPaginationComponent = ({
         onClick={() => {
           onPaginationChange({
             pagination: {
-              pageIndex: pagination.pageIndex,
+              pageIndex: 0,
               pageSize: rows,
               totalItemCount: pagination.totalItemCount,
             },
