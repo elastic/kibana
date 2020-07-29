@@ -336,6 +336,36 @@ export const enrichExceptionItemsWithOS = (
 };
 
 /**
+ * Returns given exceptionItems with all hash-related entries lowercased
+ */
+export const lowercaseHashValues = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item) => {
+    const newEntries = item.entries.map((itemEntry) => {
+      if (itemEntry.field.includes('.hash')) {
+        if (itemEntry.type === 'match') {
+          return {
+            ...itemEntry,
+            value: itemEntry.value.toLowerCase(),
+          };
+        } else if (itemEntry.type === 'match_any') {
+          return {
+            ...itemEntry,
+            value: itemEntry.value.map((val) => val.toLowerCase()),
+          };
+        }
+      }
+      return itemEntry;
+    });
+    return {
+      ...item,
+      entries: newEntries,
+    };
+  });
+};
+
+/**
  * Returns the value for the given fieldname within TimelineNonEcsData if it exists
  */
 export const getMappedNonEcsValue = ({
