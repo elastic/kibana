@@ -76,15 +76,20 @@ export function getUrlForRecord(
 // Opens the specified URL in a new window. The behaviour (for example whether
 // it opens in a new tab or window) is determined from the original configuration
 // object which indicates whether it is opening a Kibana page running on the same server.
-// fullUrl is the complete URL, including the base path, with any dollar delimited tokens
-// from the urlConfig having been substituted with values from an anomaly record.
-export function openCustomUrlWindow(fullUrl: string, urlConfig: UrlConfig) {
+// `url` is the URL with any dollar delimited tokens from the urlConfig
+// having been substituted with values from an anomaly record.
+export function openCustomUrlWindow(url: string, urlConfig: UrlConfig, basePath: string) {
   // Run through a regex to test whether the url_value starts with a protocol scheme.
   if (/^(?:[a-z]+:)?\/\//i.test(urlConfig.url_value) === false) {
-    window.open(fullUrl, '_blank');
+    // If `url` is a relative path, we need to prefix the base path.
+    if (url.charAt(0) !== '/') {
+      url = `${basePath}${isKibanaUrl(urlConfig) ? '/app/' : ''}${url}`;
+    }
+
+    window.open(url, '_blank');
   } else {
     // Add noopener and noreferrr properties for external URLs.
-    const newWindow = window.open(fullUrl, '_blank', 'noopener,noreferrer');
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
 
     // Expect newWindow to be null, but just in case if not, reset the opener link.
     if (newWindow !== undefined && newWindow !== null) {
