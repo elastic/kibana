@@ -259,7 +259,7 @@ describe('Policy Details', () => {
         expect(toastAddMock.calls).toHaveLength(1);
         expect(toastAddMock.calls[0][0]).toMatchObject({
           title: 'Success!',
-          text: expect.any(Object),
+          text: expect.any(Function),
         });
       });
       it('should show an error notification toast if update fails', async () => {
@@ -274,7 +274,7 @@ describe('Policy Details', () => {
         expect(toastAddMock.calls).toHaveLength(1);
         expect(toastAddMock.calls[0][0]).toMatchObject({
           title: 'Failed!',
-          text: expect.any(Object),
+          text: expect.any(String),
         });
       });
     });
