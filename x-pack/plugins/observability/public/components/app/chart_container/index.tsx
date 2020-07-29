@@ -18,12 +18,12 @@ interface Props {
 
 const CHART_HEIGHT = 170;
 
-export const ChartContainer = ({
+export function ChartContainer({
   isInitialLoad,
   children,
   iconSize = 'xl',
   height = CHART_HEIGHT,
-}: Props) => {
+}: Props) {
   if (isInitialLoad) {
     return (
       <div
@@ -40,4 +40,4 @@ export const ChartContainer = ({
     );
   }
   return <Chart size={{ height }}>{children}</Chart>;
-};
+}

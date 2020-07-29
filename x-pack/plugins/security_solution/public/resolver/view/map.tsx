@@ -69,6 +69,7 @@ export const ResolverMap = React.memo(function ({
   const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
   const { colorMap } = useResolverTheme();
   const { cleanUpQueryParams } = useResolverQueryParams();
+
   useEffectOnce(() => {
     return () => cleanUpQueryParams();
   });
