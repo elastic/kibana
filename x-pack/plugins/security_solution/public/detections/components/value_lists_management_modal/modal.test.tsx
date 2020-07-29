@@ -96,9 +96,8 @@ describe('ValueListsModal', () => {
 
       act(() => {
         container
-          .find('tbody tr')
-          .first()
           .find('button[data-test-subj="action-export-value-list"]')
+          .first()
           .simulate('click');
         container.unmount();
       });
@@ -120,9 +119,8 @@ describe('ValueListsModal', () => {
 
       act(() => {
         container
-          .find('tbody tr')
-          .first()
           .find('button[data-test-subj="action-delete-value-list"]')
+          .first()
           .simulate('click');
         container.unmount();
       });
