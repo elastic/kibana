@@ -47,7 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
             '/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/visualization/sample_visualization.json'
           )
           .set('kbn-xsrf', 'xxx')
-          .expect('Content-Type', 'text/plain; charset=utf-8')
           .expect(200);
       } else {
         warnAndSkipTest(this, log);
@@ -61,7 +60,6 @@ export default function ({ getService }: FtrProviderContext) {
             '/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/dashboard/sample_dashboard.json'
           )
           .set('kbn-xsrf', 'xxx')
-          .expect('Content-Type', 'text/plain; charset=utf-8')
           .expect(200);
       } else {
         warnAndSkipTest(this, log);
@@ -73,7 +71,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .get('/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/search/sample_search.json')
           .set('kbn-xsrf', 'xxx')
-          .expect('Content-Type', 'text/plain; charset=utf-8')
           .expect(200);
       } else {
         warnAndSkipTest(this, log);
