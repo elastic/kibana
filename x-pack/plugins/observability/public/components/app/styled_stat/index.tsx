@@ -21,7 +21,7 @@ interface Props extends Partial<EuiStatProps> {
 
 const EMPTY_VALUE = '--';
 
-export const StyledStat = (props: Props) => {
+export function StyledStat(props: Props) {
   const { description = EMPTY_VALUE, title = EMPTY_VALUE, ...rest } = props;
   return <Stat description={description} title={title} titleSize="s" {...rest} />;
-};
+}
