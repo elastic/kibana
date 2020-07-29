@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { ResolverTree } from '../../../../plugins/security_solution/common/endpoint/types';
+import { SearchResponse } from 'elasticsearch';
+import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
+import {
+  ResolverTree,
+  ResolverEntityIndex,
+} from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   EndpointDocGenerator,
@@ -15,9 +20,49 @@ import { GeneratedEvents } from '../../services/resolver';
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const resolver = getService('resolverGenerator');
+  const es = getService('es');
   const generator = new EndpointDocGenerator('resolver');
 
   describe('Resolver handling of entity ids', () => {
+    describe('entity api', () => {
+      let origin: Event;
+      let genData: GeneratedEvents;
+      before(async () => {
+        origin = generator.generateEvent({ parentEntityID: 'a' });
+        origin.process.entity_id = '';
+        genData = await resolver.insertEvents([origin]);
+      });
+
+      after(async () => {
+        await resolver.deleteData(genData);
+      });
+
+      it('excludes events that have an empty entity_id field', async () => {
+        // first lets get the _id of the document using the parent.process.entity_id
+        // then we'll use the API to search for that specific document
+        const res = await es.search<SearchResponse<Event>>({
+          index: genData.indices[0],
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    term: { 'process.parent.entity_id': origin.process.parent!.entity_id },
+                  },
+                ],
+              },
+            },
+          },
+        });
+        const { body }: { body: ResolverEntityIndex } = await supertest.get(
+          // using the same indices value here twice to force the query parameter to be an array
+          // for some reason using supertest's query() function doesn't construct a parsable array
+          `/api/endpoint/resolver/entity?_id=${res.body.hits.hits[0]._id}&indices=${eventsIndexPattern}&indices=${eventsIndexPattern}`
+        );
+        expect(body).to.be.empty();
+      });
+    });
+
     describe('children', () => {
       let origin: Event;
       let childNoEntityID: Event;
