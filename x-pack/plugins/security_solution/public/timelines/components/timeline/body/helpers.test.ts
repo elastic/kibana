@@ -268,12 +268,6 @@ describe('helpers', () => {
       expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
     });
 
-    it('returns false if process.entity_id is an empty array', () => {
-      const data: Ecs = { _id: '1', agent: { type: ['endpoint'] } };
-
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
-    });
-
     it('returns true if agent.type has endpoint in first array index', () => {
       const data: Ecs = {
         _id: '1',
