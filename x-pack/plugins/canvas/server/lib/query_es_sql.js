@@ -26,7 +26,11 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter, timezone
   })
     .then((res) => {
       const columns = res.columns.map(({ name, type }) => {
-        return { name: sanitizeName(name), type: normalizeType(type) };
+        return {
+          id: sanitizeName(name),
+          name: sanitizeName(name),
+          meta: { type: normalizeType(type) },
+        };
       });
       const columnNames = map(columns, 'name');
       const rows = res.rows.map((row) => zipObject(columnNames, row));
@@ -45,6 +49,9 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter, timezone
 
       return {
         type: 'datatable',
+        meta: {
+          type: 'essql',
+        },
         columns,
         rows,
       };
