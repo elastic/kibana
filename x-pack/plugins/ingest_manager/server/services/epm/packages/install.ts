@@ -5,7 +5,6 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import Boom from 'boom';
 import semver from 'semver';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
@@ -33,6 +32,7 @@ import {
 } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets } from './remove';
+import { PackageOutdated } from '../../../errors';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -102,8 +102,7 @@ export async function installPackage(options: {
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-  if (semver.lt(pkgVersion, latestPackage.version))
-    throw Boom.badRequest('Cannot install or update to an out-of-date package');
+  if (semver.lt(pkgVersion, latestPackage.version)) throw new PackageOutdated(pkgkey);
 
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
@@ -190,9 +189,7 @@ export async function installPackage(options: {
     id: template.templateName,
     type: ElasticsearchAssetType.indexTemplate,
   }));
-
   await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
-
   // update to newly installed version when all assets are successfully installed
   if (isUpdate) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
   return [...installedKibanaAssetsRefs, ...installedPipelines, ...installedTemplateRefs];

@@ -32,6 +32,7 @@ import {
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
+import { PackageNotFound, PackageOutdated } from '../../errors';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -165,23 +166,29 @@ export const installPackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
+    if (e instanceof PackageNotFound) {
+      return response.notFound({
+        body: { message: `${e.message} not found` },
+      });
+    }
+
+    if (e instanceof PackageOutdated) {
+      return response.badRequest({
+        body: { message: `${e.message} is out-of-date and cannot be installed or updated` },
+      });
+    }
+
+    // if there is an unknown server error, uninstall any package assets
     try {
       const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
       const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
-      // if this is a failed install, remove any assets installed
       if (!isUpdate) {
         await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
       }
     } catch (error) {
-      logger.error(`could not remove assets from failed installation attempt for ${pkgkey}`);
+      logger.error(`could not remove failed installation ${error}`);
     }
-
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.output.payload.message },
-      });
-    }
+    logger.error(e);
     return response.customError({
       statusCode: 500,
       body: { message: e.message },
