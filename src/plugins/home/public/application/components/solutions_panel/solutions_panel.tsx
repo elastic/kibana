@@ -21,13 +21,12 @@ import React, { Fragment, FC } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  // EuiImage,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { SolutionsTitle } from './solutions_title';
+import { SolutionTitle } from './solution_title';
 import { FeatureCatalogueEntry } from '../../../';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { FeatureCatalogueCategory, FeatureCatalogueHomePageSection } from '../../../services';
@@ -108,27 +107,13 @@ export const SolutionsPanel: FC<Props> = ({ addBasePath, directories }) => {
               grow={1}
               className={`homSolutionsPanel__header homSolutionsPanel__${solution.id}Header`}
             >
-              {/* <EuiImage
-                    className="homSolutionsPanel__${solution.id}TopLeftImage"
-                    url={addBasePath(
-                      '/plugins/home/assets/background_enterprise_search_top_left_2x.png'
-                    )}
-                    alt="Enterprise search top left background graphic"
-                  /> */}
-              <SolutionsTitle
+              <SolutionTitle
                 iconType={solution.icon}
                 title={solution.title}
                 subtitle={solution.description}
               />
-              {/* <EuiImage
-                className={`homSolutionsPanel__${solution.id}BottomRightImage`}
-                url={addBasePath(
-                  '/plugins/home/assets/background_enterprise_search_bottom_right_2x.png'
-                )}
-                alt="Enterprise search bottom right background graphic"
-              /> */}
             </EuiFlexItem>
-            <EuiFlexItem grow={1} className="homSolutionsPanel__CTA">
+            <EuiFlexItem grow={1} className="homSolutionsPanel__appDescriptions">
               {getAppDescriptions(solutionApps)}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -147,9 +132,7 @@ export const SolutionsPanel: FC<Props> = ({ addBasePath, directories }) => {
             <EuiFlexGroup direction="column">{solutions.map(renderSolutionCard)}</EuiFlexGroup>
           </EuiFlexItem>
         ) : null}
-        {kibana ? (
-          <EuiFlexItem className={halfWidthClass}>{renderSolutionCard(kibana)}</EuiFlexItem>
-        ) : null}
+        {kibana ? renderSolutionCard(kibana) : null}
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="xl" />
