@@ -105,7 +105,6 @@ export async function deleteKibanaSavedObjectsAssets(
   installedRefs: AssetReference[]
 ) {
   if (!installedRefs.length) return;
-  await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedRefs);
 
   const logger = appContextService.getLogger();
   const deletePromises = installedRefs.map(({ id, type }) => {
