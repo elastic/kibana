@@ -132,4 +132,6 @@ export const elasticsearchServiceMock = {
   createLegacyCustomClusterClient: legacyClientMock.createCustomClusterClient,
   createLegacyScopedClusterClient: legacyClientMock.createScopedClusterClient,
   createLegacyElasticsearchClient: legacyClientMock.createElasticsearchClient,
+
+  ...elasticsearchClientMock,
 };
